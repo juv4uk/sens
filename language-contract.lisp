@@ -39,7 +39,7 @@
       (surface-non-authority
        . "Human-language and symbolic surfaces are optional source/UI routing metadata. A surface may resolve mechanically to an already-admitted domain-qualified identity or an explicitly legacy compatibility projection; it never creates semantic identity, owns meaning, or becomes semantic authority.")
       (predicate-one-bit
-       . "Core.D1 PredicateBit answers are exactly one contextual bit: 1 means YES and 0 means NO. PredicateBit is not Number, host Bool, T/NIL, Symbol, structural (), or any wider-domain value. No third predicate answer and no graded-width truth value is active.")
+       . "Core.D1 PredicateBit answers are exactly one contextual bit: 1 means YES and 0 means NO. Total predicates return only D1. An explicitly partial predicate may instead return Core.D3 000 structural () as EMPTY/no-witness; this is absence, not a third D1 truth value and never equals PredicateBit 0. PredicateBit is not Number, host Bool, T/NIL, Symbol, structural (), or any wider-domain value. No graded-width truth value is active.")
       (structure-two-bit
        . "Core.D2 racana2 is exact two-bit structural syntax under its ratified law: 00 separator, 01 close, 10 open, 11 dot. These are structure-domain objects, not numeric or callable identities merely because they are binary.")
       (d3-foundation
@@ -59,7 +59,7 @@
       (eq-one-bit-core1-4
        . "Core.D3 111 EQ has one law across Core1/Core2/Core3/Core4: the same admitted atom answers PredicateBit 1; distinct admitted atoms answer PredicateBit 0; pair/out-of-domain input raises the named domain/type failure. EQ is not deep structural equality. Historical Function8 00000011 is compatibility projection only.")
       (cond-two-part-core1-4
-       . "Core.D3 011 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
+       . "Core.D3 011 COND has one canonical law. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and admit exactly D1:1 YES, D1:0 NO, or Core.D3 000 structural () EMPTY/no-witness. D1:1 selects and evaluates the expression; D1:0 and structural () both continue, but 0 != (). Any other test value is a named type/contract failure. If no clause selects, COND returns structural (). Historical Function8 00000111 may remain only as an explicit compatibility mechanism during migration.")
       (core-profile-law
        . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D8 semantic domains or the D1/D3 predicate-control foundation.")
       (kernel-archipelago
