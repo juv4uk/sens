@@ -18,12 +18,15 @@ class Form:
     items:tuple
     line:int
 
+def decode_tracked_paths(root, data):
+    return [root/pathlib.Path(x.decode("utf-8")) for x in data.split(b"\0") if x]
+
 def tracked(root):
     p=subprocess.run(
         ["git","-c","core.quotepath=false","ls-files","-z","--","*.lisp"],
         cwd=root,check=True,capture_output=True
     )
-    return [root/pathlib.Path(x.decode("utf-8")) for x in p.stdout.split(b"\\0") if x]
+    return decode_tracked_paths(root, p.stdout)
 
 def tokens(text):
     out=[]; i=0; line=1
@@ -168,6 +171,8 @@ def self_test():
     got=[classify(c.items[0],c.items[1],"active")[0] for c in clauses]
     assert got==["predicate-polarity","structural-state","ordinary-data-equality"]
     assert parse(tokens("(cond ((eq 'x 'x) t 'ok))"))
+    paths=decode_tracked_paths(pathlib.Path("."), "lib/core.lisp\0lib/українська.lisp\0".encode("utf-8"))
+    assert [p.as_posix() for p in paths]==["lib/core.lisp","lib/українська.lisp"]
     print("cond-three-part-inventory self-test: PASS")
 
 def main():
