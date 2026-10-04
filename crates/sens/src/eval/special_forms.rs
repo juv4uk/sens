@@ -13,8 +13,8 @@ mod strings;
 pub use core::{exact_arity, exact_sens_arity};
 pub(super) use codepoint::{codepoint_to_string_values, string_to_codepoint_values};
 pub(super) use core::{
-    atom_value, car_value, cdr_value, cons_values, eq_values, evaluate_cond, evaluate_definition,
-    evaluate_domain_cond, quoted,
+    atom_value, car_value, cdr_value, cons_values, eq_domain_values, eq_values, evaluate_cond,
+    evaluate_definition, evaluate_domain_cond, quoted,
 };
 pub(super) use digest::sha256_hex_values;
 pub(super) use io::{
