@@ -165,6 +165,28 @@ contract-version                       claim-task / release-task
 
 Не створювати третій журнал. Формат: `kind` / `claim` / `evidence` / `status` / `action`. Журнал не є семантичною владою.
 
+## Закріплені архітектурні правила після аудиту агента (2026-10-04)
+
+Цей блок не створює нову семантичну владу. Він фіксує речі, які агент не має права припускати всупереч уже чинним файлам.
+
+1. SENS не є «SENS-7». Канонічна модель — exact-width драбина D1…D8, де відповідні домени мають 1…8 бітів.
+2. Кожен домен має власну бітність і власний закон. D7 = 7 біт — лише властивість D7, а не загальна бітність мови.
+3. Bits<N> і DomainIdentity вже існують як точні носії ширини та доменної ідентичності. Не створювати паралельний semantic/type layer лише для зручності backend-а.
+4. Не прирівнювати u8 до semantic width. Host storage, регістр, BRAM, байтова шина або enum — фізичні механізми; вони не змінюють exact domain identity.
+5. Не робити u8-per-cell новою канонічною моделлю. Перш ніж оптимізувати physical representation, прочитати чинні exact-width carriers, domain laws і packing mechanisms.
+6. #3185 — не benchmark усієї SENS. Він вимірює конкретний universal SENS wire AST decoder проти serde_json; результат не переноситься автоматично на D1…D8 або інші SENS paths.
+7. Не змішувати size evidence, codec evidence та language-performance evidence. Кожне твердження має мати власний workload і власний вимір.
+8. Перед новою реалізацією спочатку знайти вже існуючий domain/carrier/law. Якщо потрібний механізм уже є, працювати поверх нього, а не винаходити дубль.
+9. Семантична authority залишається у language-contract.lisp та ратифікованих domain laws. Цей блок — пам’ятка для агента, не новий контракт.
+
+Ключове правило:
+
+спочатку існуюча семантична модель
+        ↓
+потім існуючий exact-width carrier/domain mechanism
+        ↓
+і лише потім нова оптимізація
+
 ## Role
 
 Semantic source of truth for the four-repository ecosystem (`my-lisp`, `fpga-lisp`, `cml`, `my-idea`). Defines what a my-lisp program means; every other repository must match this, not the reverse.
