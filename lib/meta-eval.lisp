@@ -411,13 +411,31 @@
        (my-compare-chain operator (00000110 values)))
       (t (00000001 ())))))
 
+; Contract 11.3 / #3161 projection for the metacircular witness.
+; The meta evaluator keeps its private historical one-element carrier internally,
+; but models the current exact D3 laws: EMPTY is an ATOM-yes subject, and EQ is
+; partial with structural EMPTY/no-witness outside the atom domain.
+(00001001 my-d3-atom
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (1) (00000001 (1)))
+      ((00000010 value) (0) (00000001 (0)))
+      ((00000010 value) () (00000001 (1))))))
+
+(00001001 my-d3-eq
+  (00001000 (left right)
+    (00000111
+      ((my-d3-atom left) (0) (00000001 ()))
+      ((my-d3-atom right) (0) (00000001 ()))
+      (t (00000011 left right)))))
+
 ; Primitive *identity* is a Lisp value. This function is the narrow bridge
 ; from that identity to the admitted native operation mechanism.
 (00001001 my-apply-primitive
   (00001000 (name args)
     (00000111
-      ((00000011 name (00000001 atom)) (00000010 (00000101 args)))
-      ((00000011 name (00000001 eq))   (00000011 (00000101 args) (00101111 args)))
+      ((00000011 name (00000001 atom)) (my-d3-atom (00000101 args)))
+      ((00000011 name (00000001 eq))   (my-d3-eq (00000101 args) (00101111 args)))
       ((00000011 name (00000001 car))  (00000101 (00000101 args)))
       ((00000011 name (00000001 cdr))  (00000110 (00000101 args)))
       ((00000011 name (00000001 cons)) (00000100 (00000101 args) (00101111 args)))
@@ -648,45 +666,40 @@
 (00001001 my-eval-cond-result-mode
   (00001000 (clauses env-ref migration-compatibility?)
     (00000111
-      ((00000010 clauses) () (00000111
-         (migration-compatibility? (my-result-ok (00000001 ())))
-         (t
-          (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
-      ((00000010 clauses) (1) (00000111
-         (migration-compatibility? (my-result-ok (00000001 ())))
-         (t
-          (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
+      ; Contract 11.3: exhaustion is structural EMPTY/no-witness regardless of
+      ; historical migration mode. The third parameter remains only as a
+      ; compatibility ABI slot while callers are converged.
+      ((00000010 clauses) () (my-result-ok (00000001 ())))
+      ((00000010 clauses) (1) (my-result-ok (00000001 ())))
       (t
        (10011100 ((clause (00000101 clauses)))
          (00000111
-           ; #217 canonical path: evaluate only the query. The expected result
-           ; is already Lisp data in the interpreted program and must never be
-           ; executed as code. Match it structurally, then evaluate the branch.
-           ((00000011 (00101000 clause) 3) (1)
-            (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
-              (00000111
-                ((my-result-fail? test-result) test-result)
-                ((00100010 (my-result-value test-result) (00101111 clause))
-                 (1)
-                 (my-eval-result (00110000 clause) env-ref))
-                ((00100010 (my-result-value test-result) (00101111 clause))
-                 (0)
-                 (my-eval-cond-result-mode
-                   (00000110 clauses) env-ref migration-compatibility?)))))
-           ; Historical two-part clauses remain migration-only, mirroring the
-           ; native evaluator until their callers are moved to explicit result
-           ; matching. This path intentionally retains old truthiness.
+           ; Current D3:110 admits exactly two fields: (test expression).
            ((00000011 (00101000 clause) 2) (1)
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
                 ((my-result-fail? test-result) test-result)
-                ((my-result-value test-result)
+                ; Private meta carrier for exact D1 YES.
+                ((00100010 (my-result-value test-result) (00000001 (1)))
+                 (1)
                  (my-eval-result (00101111 clause) env-ref))
-                (t
+                ; D1 NO and structural EMPTY remain distinct but both continue.
+                ((00100010 (my-result-value test-result) (00000001 (0)))
+                 (1)
                  (my-eval-cond-result-mode
-                   (00000110 clauses) env-ref migration-compatibility?)))))
+                   (00000110 clauses) env-ref migration-compatibility?))
+                ((00100010 (my-result-value test-result) (00000001 ()))
+                 (1)
+                 (my-eval-cond-result-mode
+                   (00000110 clauses) env-ref migration-compatibility?))
+                (t
+                 (my-result-fail
+                   (my-error
+                     (00000001 type)
+                     (00100111
+                       (00000001 cond-test)
+                       (my-result-value test-result))))))))
+           ; Three-part result matching is historical Contract 8/10 only.
            (t
             (my-result-fail
               (my-error
