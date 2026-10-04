@@ -1,15 +1,14 @@
-//! Exact domain-qualified identity for the ratified D1→D8 ladder.
+//! Exact width-qualified identity carrier for the W1→W8 ladder.
 //!
-//! Domain identity and callable Core-operation identity are deliberately
+//! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - `DomainIdentity` represents every ratified domain D1..D8.
-//! - `CoreDomainIdentity` represents only callable/Core-operation domains
-//!   D3/D4/D5/D6/D8 where a separate law admits callability.
-//! - D7 is Sound7/local-ordinal identity and never enters callable routing
-//!   merely because it is seven bits.
-//! - Core.D8 and historical Sens8/Sid8 compatibility bytes are distinct
-//!   identities even though both occupy eight physical bits.
+//! - D1-D4 and D7 retain current semantic authority.
+//! - D5/D6/D8 variants are transitional research carriers after #3278.
+//! - `CoreDomainIdentity` retains historical/research variants for migration,
+//!   but canonical source projection currently admits callable D3/D4 only.
+//! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
+//! - Eight-bit research carriers and historical Sens8/Sid8 remain distinct.
 
 use crate::{
     Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, PredicateBit, Racana2, SoundD7,
@@ -84,17 +83,15 @@ impl DomainIdentity {
 
     /// Explicit callable/Core-operation projection.
     ///
-    /// D1 predicate results, D2 structure and D7 Sound7 identity fail closed.
-    /// D8 is admitted to this key only as a domain identity; actual execution
-    /// still requires an occupied coordinate with a ratified callable law.
+    /// Current owner authority admits D3/D4 only. D1/D2/D7 are non-callable
+    /// by their domain laws; D5/D6/D8 fail closed while their ratification is
+    /// revoked under #3278. Transitional enum variants remain for migration
+    /// and research but are not minted from source as callable operations.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
-            Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
-            Self::D6(value) => Some(CoreDomainIdentity::D6(value)),
-            Self::D8(value) => Some(CoreDomainIdentity::D8(value)),
-            Self::D1(_) | Self::D2(_) | Self::D7(_) => None,
+            Self::D1(_) | Self::D2(_) | Self::D5(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
 }
@@ -285,21 +282,27 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_skips_d1_d2_d7_but_keeps_d8() {
-        assert!(DomainIdentity::from_source_word(
-            BinarySourceWord::W1(Bit1::new(1).unwrap())
-        ).core_operation().is_none());
-        assert!(DomainIdentity::from_source_word(
-            BinarySourceWord::W2(Bit2::new(1).unwrap())
-        ).core_operation().is_none());
-        assert!(DomainIdentity::from_source_word(
-            BinarySourceWord::W7(Bit7::new(1).unwrap())
-        ).core_operation().is_none());
+    fn callable_projection_admits_d3_d4_and_fails_closed_for_unratified_d5_d6_d8() {
+        for source in [
+            BinarySourceWord::W1(Bit1::new(1).unwrap()),
+            BinarySourceWord::W2(Bit2::new(1).unwrap()),
+            BinarySourceWord::W5(Bit5::new(1).unwrap()),
+            BinarySourceWord::W6(Bit6::new(1).unwrap()),
+            BinarySourceWord::W7(Bit7::new(1).unwrap()),
+            BinarySourceWord::W8(Bit8::new(1).unwrap()),
+        ] {
+            assert!(DomainIdentity::from_source_word(source).core_operation().is_none());
+        }
 
-        let d8 = DomainIdentity::from_source_word(
-            BinarySourceWord::W8(Bit8::new(1).unwrap())
+        let d3 = DomainIdentity::from_source_word(
+            BinarySourceWord::W3(Bit3::new(1).unwrap())
         ).core_operation().unwrap();
-        assert_eq!((d8.width(), d8.packed_bits()), (8, 1));
+        assert_eq!((d3.width(), d3.packed_bits()), (3, 1));
+
+        let d4 = DomainIdentity::from_source_word(
+            BinarySourceWord::W4(Bit4::new(1).unwrap())
+        ).core_operation().unwrap();
+        assert_eq!((d4.width(), d4.packed_bits()), (4, 1));
     }
 
     #[test]
