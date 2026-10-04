@@ -450,7 +450,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         // Keep only its historical closure alias for old Core callers; the
         // exact D5 path must continue to select the direct mechanism first.
         if domain_primitive(identity).is_none()
-            && super::d5_arithmetic::invoke(identity, &[], environment, Span::default()).is_none()
+            && !super::d5_arithmetic::has_mechanism(identity)
         {
             environment.bind_domain_code_slot_once(identity, value.clone());
         }
