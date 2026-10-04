@@ -59,7 +59,7 @@
       (eq-one-bit-core1-4
        . "Core.D3 111 EQ has one law across Core1/Core2/Core3/Core4: the same admitted atom answers PredicateBit 1; distinct admitted atoms answer PredicateBit 0; pair/out-of-domain input raises the named domain/type failure. EQ is not deep structural equality. Historical Function8 00000011 is compatibility projection only.")
       (cond-two-part-core1-4
-       . "Core.D3 011 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
+       . "Core.D3 011 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and may return exact PredicateBit or structural EMPTY (). PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips as explicit NO; structural () skips as NO-WITNESS. 0 and () remain distinct language values even though both project to the same control action. Any other test result is a named type/contract failure. If no clause selects, COND returns structural (). Historical Function8 00000111 is compatibility projection only.")
       (core-profile-law
        . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D8 semantic domains or the D1/D3 predicate-control foundation.")
       (kernel-archipelago
