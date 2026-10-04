@@ -1,7 +1,7 @@
 {
   "schema": "d5-ratified/v1",
-  "status": "owner-ratified",
-  "authority": "#3305",
+  "status": "revoked-research-evidence",
+  "authority": "#3327",
   "date": "2026-10-04",
   "domain": "D5",
   "width": 5,
@@ -9,7 +9,7 @@
   "occupancy": 32,
   "distinct_residents": 32,
   "lower_domain_duplicates": 0,
-  "runtime_rule": "semantic residency is ratified; callability is per-resident mechanism and fails closed when unavailable",
+  "runtime_rule": "D5 is unratified under #3327; exact W5 remains a research carrier and semantic admission must fail closed",
   "residents": {
     "10000": "CAAAR",
     "10001": "CAADR",
@@ -405,5 +405,8 @@
     "no lower-domain semantic duplication merely to fill capacity",
     "selector suffix law applies only to proved selector family",
     "historical pairing is not promoted to semantic law without evidence"
-  ]
+  ],
+  "former_authority": "#3305",
+  "revoked_by": "#3327",
+  "note": "Former 32/32 D5 map preserved only as research/provenance evidence."
 }
