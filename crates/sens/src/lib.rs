@@ -13,6 +13,11 @@ mod bits;
 mod canonical_reader;
 mod domain_words;
 mod domain_identity;
+// #2958/#3029: generated full D1-D8 occupancy identity is a conformance
+// artifact until the canonical registry consumer lands. It carries no
+// role/callability/mechanism authority.
+#[cfg(test)]
+mod domain_owner_generated;
 mod packed_bits;
 mod binary_framing;
 mod environment;
