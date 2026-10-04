@@ -51,9 +51,13 @@ Current exact accounting:
 ## Surface boundary
 
 `station-checkin-v1.surfaces.tsv` contains Ukrainian, Polish and English
-operator labels for the same positional fields/states. These strings are
-projection metadata only. They do not occur as semantic keys in the canonical
-wire and changing them must never change `station-checkin-v1.wire`.
+operator labels for the same positional fields/states. Its first column is a
+**numeric projection coordinate**, never an English field name: `2` means tuple
+slot 2, while `4/0` means state code 0 inside slot 4. `1/0` names the display
+projection for form-kind value 0 in slot 1. These coordinates and localized
+strings are projection metadata only; no human word becomes semantic identity.
+They do not occur as semantic keys in the canonical wire and changing labels
+must never change `station-checkin-v1.wire`.
 
 Parser/renderer mechanics belong to sens#3110. This fixture intentionally gives
 that lane one stable object to target without pre-deciding the remaining EMRG
