@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""OD-006 D6 runtime-admission audit (#2766).
+"""OD-006 historical-donor / W6 mechanism-boundary audit (#2766 / #3290).
 
-Owner residency is already ratified 64/64. This audit asks a different question:
-which exact D6 identities are mechanically representable and which are actually
-admitted into the current semantic/runtime path?
+D6 semantics are UNRATIFIED / RESEARCH under #3278. The old 64-row OD-006 map
+is preserved only as donor/provenance input. This audit verifies exact W6
+mechanics and the fail-closed semantic boundary.
 
-It performs no semantic implementation and no name-based identity inference.
+It performs no semantic implementation and never infers admission from width,
+historical occupancy, selector ancestry, or human names.
 """
 
 from __future__ import annotations
@@ -112,9 +113,11 @@ def build() -> dict:
         rows.append({
             "coordinate": coordinate,
             "name": item["name"],
-            "parent_d5": item["parent_d5"],
-            "owner_residency": "YES",
-            "owner_authority": owner["authority"],
+            "historical_parent_d5": item["parent_d5"],
+            "historical_donor_residency": "YES",
+            "historical_donor_authority": owner["authority"],
+            "current_semantic_status": "UNRATIFIED-RESEARCH",
+            "current_semantic_admission": "NO",
             "source_exact_w6": "YES",
             "source_print_exact_w6": "YES",
             "packed_roundtrip_w6": "YES",
@@ -125,28 +128,33 @@ def build() -> dict:
             "native_evaluator_d6_identity": "NO",
             "compiler_d6_identity": "NOT-AUDITED",
             "semantic_identity_test": "NO",
-            "selector_generator_evidence": "YES" if selector else "NO",
+            "historical_selector_donor_evidence": "YES" if selector else "NO",
             "implementation_status": (
-                "TYPED-D6+GENERATOR-EVIDENCE"
+                "W6-MECHANISM+HISTORICAL-SELECTOR-DONOR"
                 if selector else
-                "TYPED-D6-CARRIER-ONLY"
+                "W6-MECHANISM-ONLY"
             ),
         })
 
-    assert sum(r["selector_generator_evidence"] == "YES" for r in rows) == 16
-    assert all(r["owner_residency"] == "YES" for r in rows)
+    assert sum(r["historical_selector_donor_evidence"] == "YES" for r in rows) == 16
+    assert all(r["historical_donor_residency"] == "YES" for r in rows)
+    assert all(r["current_semantic_admission"] == "NO" for r in rows)
     assert all(r["source_exact_w6"] == "YES" for r in rows)
     assert all(r["typed_d6_carrier"] == "YES" for r in rows)
     assert all(r["native_evaluator_d6_identity"] == "NO" for r in rows)
 
     return {
-        "schema": "d6-runtime-admission-audit/v1",
-        "issue": "#2766",
-        "principle": "typed Core.D6 representation is not runtime/evaluator D6 admission",
-        "owner_map": "knowledge/d6-historical-full-map.json",
+        "schema": "d6-research-boundary-audit/v2",
+        "issue": "#3290",
+        "donor_issue": "#2766",
+        "authority_reset": "#3278",
+        "current_semantic_status": "UNRATIFIED-RESEARCH",
+        "principle": "exact W6 mechanics and historical donor maps do not admit current D6 semantics",
+        "historical_donor_map": "knowledge/d6-historical-full-map.json",
         "mechanism_facts": facts,
         "summary": {
-            "owner_resident": 64,
+            "historical_donor_rows": 64,
+            "current_semantic_admission": 0,
             "source_exact_w6": 64,
             "packed_roundtrip_w6": 64,
             "typed_d6_carrier": 64,
@@ -154,7 +162,7 @@ def build() -> dict:
             "semantic_registry_d6_identity": 0,
             "lowering_d6_identity": 0,
             "native_evaluator_d6_identity": 0,
-            "selector_generator_evidence": 16,
+            "historical_selector_donor_evidence": 16,
             "compiler_d6_identity": "NOT-AUDITED",
         },
         "rows": rows,
