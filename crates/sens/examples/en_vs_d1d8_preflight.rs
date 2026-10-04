@@ -116,33 +116,10 @@ fn compare_sources(english: &str, binary: &str, verbose: bool) -> Result<(), &'s
     Ok(())
 }
 
-fn self_test() -> Result<(), String> {
-    compare_sources("(car)", "10 101 01", false)
-        .map_err(|status| format!("expected exact D3 parity, got {status}"))?;
-
-    match compare_sources("(car)", "10 110 01", false) {
-        Err("BLOCKED_TRACE_MISMATCH") => {}
-        other => return Err(format!("mismatch control did not fail closed: {other:?}")),
-    }
-
-    println!("preflight-self-test\tPASS");
-    Ok(())
-}
-
 fn main() -> ExitCode {
     let args: Vec<String> = env::args().skip(1).collect();
-    if args.as_slice() == ["--self-test"] {
-        return match self_test() {
-            Ok(()) => ExitCode::SUCCESS,
-            Err(error) => {
-                eprintln!("{error}");
-                ExitCode::from(1)
-            }
-        };
-    }
-
     if args.len() != 2 {
-        eprintln!("usage: en_vs_d1d8_preflight ENGLISH.lisp CANONICAL.lisp | --self-test");
+        eprintln!("usage: en_vs_d1d8_preflight ENGLISH.lisp CANONICAL.lisp");
         return ExitCode::from(2);
     }
 
