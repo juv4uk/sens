@@ -561,7 +561,7 @@ fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
         assert_same(&format!("{prelude} (d6-integerp {x})"), "(quote ())");
     }
 
-    for x in ["(quote alpha)", "\\"text\\"", "(quote (a b))"] {
+    for x in ["(quote alpha)", "\"text\"", "(quote (a b))"] {
         assert_same(&format!("{prelude} (d6-rationalp {x})"), "(quote ())");
         assert_same(&format!("{prelude} (d6-integerp {x})"), "(quote ())");
     }
