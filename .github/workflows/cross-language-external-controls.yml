@@ -1,0 +1,50 @@
+name: Cross-language external controls (CPython/Lua/Racket)
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/cross-language/external_controls.py"
+      - "benchmarks/cross-language/manifest.scm"
+      - "benchmarks/cross-language/README.md"
+      - ".github/workflows/cross-language-external-controls.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: cross-language-external-controls-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  external-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix
+          guix --version
+
+      - name: Correctness + reproducible measurements
+        run: |
+          rm -rf /tmp/sens-external-controls
+          guix time-machine -C channels.scm -- shell \
+            -m manifest.scm \
+            -m benchmarks/cross-language/manifest.scm -- \
+            python3 benchmarks/cross-language/external_controls.py \
+              --reps 3 \
+              --out /tmp/sens-external-controls
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/sens-external-controls/report.md; then
+            cat /tmp/sens-external-controls/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-language-external-controls
+          path: /tmp/sens-external-controls

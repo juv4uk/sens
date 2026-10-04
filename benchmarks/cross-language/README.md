@@ -4,20 +4,51 @@
 Перший зовнішній орієнтир — CPython (#1546). Lua (#1547), Racket CS
 (#1548) і стандартний binary-trees (#1549) додаються окремими slices.
 
-## Current D1-D4 boundary
+## Current D1–D8 boundary
 
-The historical shared harness still uses the old Function8 FASL SENS lane.
-It is preserved for provenance but must not be relabeled as current D1-D4
-whole-program evidence. #1668 owns the replay onto ratified exact-width D1-D4.
+Fresh cross-language SENS evidence is now governed by the current D1–D8 model:
 
-For load-format evidence, `load_formats.py` adds a fairer CPython cached lane:
+- canonical identity = exact domain + exact bits;
+- current SENS rows must be tagged `d1-d8-current`;
+- historical flat-byte function identity is archive-only and may not appear in a fresh measured path;
+- English is a surface/control, never semantic authority;
+- #1668 is the replay/correctness gate;
+- #3088/#3113 own paired English-surface vs canonical-D1–D8 evidence.
 
-- CPython source: UTF-8 read + `compile()`;
-- CPython `.pyc`: direct magic/header validation + marshal code-object decode;
-- SENS: prebuilt historical Function8 FASL decode.
+The historical `run.py` and `load_formats.py` lanes are preserved for provenance.
+They must not be relabeled as current D1–D8 results.
 
-The `.pyc` artifact is generated before timing by the same CPython version.
-Raw repetitions and binary/runtime provenance are emitted next to the summary.
+### External controls available now
+
+`external_controls.py` provides an independent, current-era control slice for
+CPython, Lua 5.4 and Racket CS on the same five workloads:
+
+```text
+fib loop ackermann closures evenodd
+```
+
+Every runtime must produce the same expected result before timing. The first slice
+records full-process Cachegrind I refs and wall time only. It deliberately emits
+**no SENS row** until #1668/#3088/#3113 are GREEN.
+
+Run only correctness:
+
+    guix time-machine -C channels.scm -- shell \
+      -m manifest.scm \
+      -m benchmarks/cross-language/manifest.scm -- \
+      python3 benchmarks/cross-language/external_controls.py --check-only
+
+Run measurements:
+
+    guix time-machine -C channels.scm -- shell \
+      -m manifest.scm \
+      -m benchmarks/cross-language/manifest.scm -- \
+      python3 benchmarks/cross-language/external_controls.py \
+        --reps 3 \
+        --out /tmp/sens-external-controls
+
+This gives a clean external baseline while the current canonical SENS runtime
+finishes its replay/preflight spine. It is not an abstract-language ranking.
 
 ## Правила чесності
 
@@ -25,8 +56,9 @@ Raw repetitions and binary/runtime provenance are emitted next to the summary.
 2. Однакові алгоритм, параметри і очікувана відповідь.
 3. У першому корпусі немає workload, де Python list міг би нечесно
    замінити Lisp pair/cons: лише fib, loop, ackermann, closures, evenodd.
-4. SENS виконується з FASL, де функція SENS — один байт. CPython виконує
-   звичайний source/bytecode шлях своєї реалізації.
+4. **Лише історичний `run.py`:** його SENS lane використовує архівний
+   flat-byte FASL і не є поточним D1–D8 доказом. Новий
+   `external_controls.py` навмисно не має SENS-рядка до GREEN #1668/#3088/#3113.
 5. Фази не змішуються:
    - startup — порожній процес/сесія;
    - load — прочитати й декодувати/скомпілювати програму без виконання;
