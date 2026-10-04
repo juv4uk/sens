@@ -1,0 +1,20 @@
+name: D5 V2 dedup audit
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-v2-dedup-audit.json"
+      - "knowledge/d5-v2-generator-shadow.json"
+      - "scripts/check-d5-v2-dedup-audit.py"
+      - ".github/workflows/d5-v2-dedup-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d5-v2-dedup-audit.py
