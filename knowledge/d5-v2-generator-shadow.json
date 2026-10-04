@@ -620,5 +620,7 @@
         "#3054"
       ]
     }
-  ]
+  ],
+  "superseded_by": "#3305",
+  "note": "Research witness retained for reproducibility. Current D5 authority is knowledge/d5-ratified.json / contracts/d5-ratification.lisp."
 }

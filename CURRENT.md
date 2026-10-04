@@ -7,10 +7,10 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.2 domain-qualified observable language contract.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.3 domain-qualified observable language contract.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1-D4 and D7, while D5/D6/D8 are UNRATIFIED/RESEARCH under #3278. Historical Sens8/Sid8 is compatibility/provenance only.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1-D5 and D7. D5 is re-ratified by #3305 after the #3278 reset; D6/D8 remain UNRATIFIED/RESEARCH under #3278. Historical Sens8/Sid8 is compatibility/provenance only.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
    - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
@@ -37,7 +37,7 @@ D1  PredicateBit
 D2  racana2 structure
 D3  bīja3 foundation — 000 (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS
 D4  full compact bootstrap — 0000 APPLY, 0001 EVAL, 0010 LAMBDA, 0011 DEFINE, 0100 NOT, 0101 NULL, 0110 CDAR, 0111 CDDR, 1000 CAAR, 1001 CADR, 1010 LOOKUP, 1011 BIND, 1100 EVCON, 1101 EVLIS, 1110 LIST, 1111 APPEND
-D5  UNRATIFIED / RESEARCH — clean-room rebuild #3279
+D5  full compact 32/32 — owner-ratified #3305; canonical map in knowledge/d5-ratified.json
 D6  UNRATIFIED / RESEARCH — clean-room rebuild #3280
 D7  Sound7 + local śloka/sūtra ordinal domain
 D8  UNRATIFIED / RESEARCH — clean-room rebuild #3281

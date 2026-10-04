@@ -1,0 +1,409 @@
+{
+  "schema": "d5-ratified/v1",
+  "status": "owner-ratified",
+  "authority": "#3305",
+  "date": "2026-10-04",
+  "domain": "D5",
+  "width": 5,
+  "capacity": 32,
+  "occupancy": 32,
+  "distinct_residents": 32,
+  "lower_domain_duplicates": 0,
+  "runtime_rule": "semantic residency is ratified; callability is per-resident mechanism and fails closed when unavailable",
+  "residents": {
+    "10000": "CAAAR",
+    "10001": "CAADR",
+    "10010": "CADAR",
+    "10011": "CADDR",
+    "10100": "REVERSE",
+    "10101": "REVERSE-ONTO",
+    "10110": "TIMES",
+    "10111": "QUOTIENT",
+    "11000": "GO",
+    "11001": "RETURN",
+    "11010": "LESSP",
+    "11011": "GREATERP",
+    "11100": "ASSOC",
+    "11101": "MEMBER",
+    "11110": "PAIRLIS",
+    "11111": "SUBST",
+    "00000": "EVALQUOTE",
+    "00001": "FUNCTION",
+    "00010": "FEXPR",
+    "00011": "MACRO",
+    "00100": "LABEL",
+    "00101": "PROG",
+    "00110": "SET",
+    "00111": "SETQ",
+    "01000": "ZEROP",
+    "01001": "NUMBERP",
+    "01010": "PLUS",
+    "01011": "DIFFERENCE",
+    "01100": "CDAAR",
+    "01101": "CDADR",
+    "01110": "CDDAR",
+    "01111": "CDDDR"
+  },
+  "relation_classes": {
+    "COORDINATE-HISTORICAL": 4,
+    "MULTI-DELTA-FAMILY": 2,
+    "LOCAL-ALGEBRA": 5,
+    "SEMANTIC-GENERATOR": 5
+  },
+  "pairs": [
+    {
+      "prefix4": "0000",
+      "members": [
+        {
+          "coordinate": "00000",
+          "name": "EVALQUOTE"
+        },
+        {
+          "coordinate": "00001",
+          "name": "FUNCTION"
+        }
+      ],
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "prefix4": "0001",
+      "members": [
+        {
+          "coordinate": "00010",
+          "name": "FEXPR"
+        },
+        {
+          "coordinate": "00011",
+          "name": "MACRO"
+        }
+      ],
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "protocol-product",
+      "semantic_family": true,
+      "evidence": [
+        "#2522",
+        "#2528",
+        "#3025",
+        "#3027"
+      ]
+    },
+    {
+      "prefix4": "0010",
+      "members": [
+        {
+          "coordinate": "00100",
+          "name": "LABEL"
+        },
+        {
+          "coordinate": "00101",
+          "name": "PROG"
+        }
+      ],
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "prefix4": "0011",
+      "members": [
+        {
+          "coordinate": "00110",
+          "name": "SET"
+        },
+        {
+          "coordinate": "00111",
+          "name": "SETQ"
+        }
+      ],
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "target-acquisition-axis",
+      "semantic_family": true,
+      "evidence": [
+        "#3005",
+        "#3016"
+      ]
+    },
+    {
+      "prefix4": "0100",
+      "members": [
+        {
+          "coordinate": "01000",
+          "name": "ZEROP"
+        },
+        {
+          "coordinate": "01001",
+          "name": "NUMBERP"
+        }
+      ],
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "entailment",
+      "semantic_family": true,
+      "evidence": [
+        "#3032",
+        "#3035"
+      ]
+    },
+    {
+      "prefix4": "0101",
+      "members": [
+        {
+          "coordinate": "01010",
+          "name": "PLUS"
+        },
+        {
+          "coordinate": "01011",
+          "name": "DIFFERENCE"
+        }
+      ],
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "additive-inverse-orientation",
+      "semantic_family": true,
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "prefix4": "0110",
+      "members": [
+        {
+          "coordinate": "01100",
+          "name": "CDAAR"
+        },
+        {
+          "coordinate": "01101",
+          "name": "CDADR"
+        }
+      ],
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "0111",
+      "members": [
+        {
+          "coordinate": "01110",
+          "name": "CDDAR"
+        },
+        {
+          "coordinate": "01111",
+          "name": "CDDDR"
+        }
+      ],
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "1000",
+      "members": [
+        {
+          "coordinate": "10000",
+          "name": "CAAAR"
+        },
+        {
+          "coordinate": "10001",
+          "name": "CAADR"
+        }
+      ],
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "1001",
+      "members": [
+        {
+          "coordinate": "10010",
+          "name": "CADAR"
+        },
+        {
+          "coordinate": "10011",
+          "name": "CADDR"
+        }
+      ],
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "1010",
+      "members": [
+        {
+          "coordinate": "10100",
+          "name": "REVERSE"
+        },
+        {
+          "coordinate": "10101",
+          "name": "REVERSE-ONTO"
+        }
+      ],
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "closed/generalized accumulator law",
+      "law": [
+        "REVERSE(x) = REVERSE-ONTO(x, EMPTY)",
+        "REVERSE-ONTO(x,y) = APPEND(REVERSE(x), y)",
+        "APPEND(x,y) = REVERSE-ONTO(REVERSE(x), y)"
+      ],
+      "evidence": [
+        "#3293",
+        "#3294",
+        "crates/sens/tests/d5_reverse_onto_law.rs"
+      ]
+    },
+    {
+      "prefix4": "1011",
+      "members": [
+        {
+          "coordinate": "10110",
+          "name": "TIMES"
+        },
+        {
+          "coordinate": "10111",
+          "name": "QUOTIENT"
+        }
+      ],
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "multiplicative-inverse-orientation",
+      "semantic_family": true,
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "prefix4": "1100",
+      "members": [
+        {
+          "coordinate": "11000",
+          "name": "GO"
+        },
+        {
+          "coordinate": "11001",
+          "name": "RETURN"
+        }
+      ],
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "evidence": [
+        "#3040",
+        "#3042"
+      ]
+    },
+    {
+      "prefix4": "1101",
+      "members": [
+        {
+          "coordinate": "11010",
+          "name": "LESSP"
+        },
+        {
+          "coordinate": "11011",
+          "name": "GREATERP"
+        }
+      ],
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "operand-swap-duality",
+      "semantic_family": true,
+      "evidence": [
+        "#3004",
+        "#3008"
+      ]
+    },
+    {
+      "prefix4": "1110",
+      "members": [
+        {
+          "coordinate": "11100",
+          "name": "ASSOC"
+        },
+        {
+          "coordinate": "11101",
+          "name": "MEMBER"
+        }
+      ],
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "search-family",
+      "semantic_family": true,
+      "evidence": [
+        "#3053",
+        "#3059",
+        "#3060"
+      ]
+    },
+    {
+      "prefix4": "1111",
+      "members": [
+        {
+          "coordinate": "11110",
+          "name": "PAIRLIS"
+        },
+        {
+          "coordinate": "11111",
+          "name": "SUBST"
+        }
+      ],
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "evidence": [
+        "#3054"
+      ]
+    }
+  ],
+  "list_family": {
+    "prefix4": "1010",
+    "bit0": "REVERSE",
+    "bit1": "REVERSE-ONTO",
+    "local_suffix_reading": {
+      "0": "closed unary form",
+      "1": "accumulator-generalized form"
+    },
+    "law": [
+      "REVERSE(x) = REVERSE-ONTO(x, EMPTY)",
+      "REVERSE-ONTO(x,y) = APPEND(REVERSE(x), y)",
+      "APPEND(x,y) = REVERSE-ONTO(REVERSE(x), y)"
+    ],
+    "note": "D4:1111 owns APPEND; D5 spends no coordinate on duplicate APPEND."
+  },
+  "supersedes": [
+    "#3278 D5 revocation",
+    "OD-005 pre-reset coordinate map",
+    "#3297 research-shadow status"
+  ],
+  "preserves": [
+    "#3278 D6 revocation",
+    "#3278 D8 revocation"
+  ],
+  "laws": [
+    "exact D5 coordinate is semantic identity only under this ratified map",
+    "no universal fifth-bit meaning",
+    "no lower-domain semantic duplication merely to fill capacity",
+    "selector suffix law applies only to proved selector family",
+    "historical pairing is not promoted to semantic law without evidence"
+  ]
+}

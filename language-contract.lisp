@@ -1,6 +1,6 @@
 ; language-contract.lisp — current machine-readable Level 1/2 contract.
 ;
-; Contract 11.2 — domain-qualified identity authority + owner-ratified D3/D4.
+; Contract 11.3 — domain-qualified identity authority + owner-ratified D3/D4/D5.
 ; Owner paradigm: #2490. Implementation cutover: #2817 / #2822.
 ;
 ; Contract 11 preserves the observable PredicateBit / ATOM / EQ / COND law
@@ -19,11 +19,11 @@
 ; bounded compatibility / transport / backend projection during migration.
 ; It cannot mint or redefine canonical semantic identity.
 
-((major . #d11) (minor . 2)
+((major . #d11) (minor . 3)
  (status . current-domain-qualified-authority)
  (supersedes . "Contract 10.0 flat Function8 identity authority")
  (historical-snapshot . "docs/archive/historical/language-contract-10.0.lisp")
- (note . "Contract 11.2 preserves the domain-qualified identity law, owner-ratifies D3/bīja3 A in #3202, and owner-ratifies the full compact D4 bootstrap map in #3272. Historical flat Function8/Sens8 remains compatibility/history only; old D4 coordinates and clean-room intermediate maps are provenance, never alternate current authority.")
+ (note . "Contract 11.3 preserves the exact-domain identity law, D3 ratification #3202 and D4 ratification #3272, and owner-ratifies the full compact D5 v2 map in #3305. D5 semantic residency is current authority; callable mechanisms remain separately fail-closed. D6 and D8 remain unratified research under #3278.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-domain-identity
@@ -54,12 +54,18 @@
        . "D4 0100 NOT and 0101 NULL are distinct because D1 PredicateBit 0 is not D3 structural empty (). NOT complements exact PredicateBit; NULL recognizes structural empty as a derived compact resident.")
       (d4-list-append-distinction
        . "D4 1110 LIST and 1111 APPEND are CONS-family derived residents: LIST collects supplied values into one proper list; APPEND combines admitted lists into one list. Their four-bit residency is for compact identity, not extra primitive power.")
-      (d5-d6-residency
-       . "Core.D5 and Core.D6 use exact five-bit and six-bit typed domains governed by their owner-ratified maps/laws. Residency, derivability, callability and runtime implementation are distinct facts: carrier existence alone grants neither occupancy nor callability.")
+      (d5-full-compact
+       . "Core.D5 is the owner-ratified full compact five-bit domain (#3305), dense 32/32 with 32 distinct residents and zero lower-domain semantic duplicates. Its exact resident map is normative in contracts/d5-ratification.lisp and knowledge/d5-ratified.json.")
+      (d5-local-law-federation
+       . "D5 has no universal fifth-bit meaning. Its resident pairs are governed locally: five SEMANTIC-GENERATOR families, five LOCAL-ALGEBRA families, two MULTI-DELTA-FAMILY pairs, and four COORDINATE-HISTORICAL pairs. Historical adjacency is not promoted into a semantic law without evidence.")
+      (d5-runtime-separation
+       . "D5 semantic residency and callable mechanism are separate facts. Every exact W5 coordinate has ratified D5 identity; invocation succeeds only where a resident mechanism is admitted and otherwise fails closed.")
+      (d6-research-status
+       . "Core.D6 remains UNRATIFIED / RESEARCH under #3278. Bit6/W6 carrier existence does not grant D6 occupancy or callability.")
       (d7-sound-local-ordinal
        . "Core.D7 is the exact seven-bit Sound7 / Sanskrit sound-related domain with local sloka/sutra ordinal coordinates where admitted. D7 is not general arithmetic Number, and seven-bit width never grants selector geometry or callable Core-operation identity. Occupancy remains law/witness-specific.")
-      (d8-exact-core-domain
-       . "Core.D8 is the ratified exact eight-bit Core domain. Core.D8 identity is domain-qualified and is never historical Sens8/Sid8/Function8 merely because both use eight physical bits. D8 occupancy and callability remain separately law/witness-governed; admitted selector descendants may execute from the selector root+suffix law without legacy-byte authority.")
+      (d8-research-status
+       . "Core.D8 remains UNRATIFIED / RESEARCH under #3278. Exact W8 carrier identity is width-preserving but does not grant Core.D8 semantic occupancy or callability, and never collapses into historical Sens8/Sid8/Function8.")
       (cross-domain-non-collapse
        . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8 or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
       (atom-one-bit-core1-4

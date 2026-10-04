@@ -1,52 +1,36 @@
-name: D5 ratified baseline guard
+name: D5 current authority
 
 on:
   pull_request:
     paths:
-      - "scripts/research-2689-d5-ratified-baseline.py"
-      - "benchmarks/d5-closure-map/**"
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d5-d6-semantic-ledger.json"
-      - "scripts/research-2322-generative-domain-forecast.py"
-      - "benchmarks/generator-economy/semantic-fact-ledger.json"
-      - "knowledge/repo-tooling-inventory.lisp"
+      - "knowledge/d5-ratified.json"
+      - "contracts/d5-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "docs/language-core.md"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "scripts/check-d5-current-authority.py"
       - ".github/workflows/d5-ratified-baseline.yml"
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d5-ratified.json"
+      - "contracts/d5-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "docs/language-core.md"
+      - "crates/sens/src/domain_identity.rs"
+      - "scripts/check-d5-current-authority.py"
 
 permissions:
   contents: read
 
 jobs:
-  verify:
+  authority:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Verify owner-ratified OD-005 D5 baseline
-        run: |
-          python3 scripts/research-2689-d5-ratified-baseline.py             --json-out /tmp/d5-ratified-baseline.json
-          cat /tmp/d5-ratified-baseline.json
-
-      - name: Publish invariant summary
-        run: |
-          {
-            echo "## Core D5 OD-005 baseline"
-            echo
-            echo "- width: 5"
-            echo "- capacity: 32"
-            echo "- owner residents: 32"
-            echo "- selector-generated residents: 8"
-            echo "- owner-historical nonselector residents: 24"
-            echo "- UNKNOWN current occupancy: 0"
-            echo "- residency and semantic derivability are independent axes"
-            echo "- any remap requires explicit owner-map revision"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload machine-readable result
-        uses: actions/upload-artifact@v4
-        with:
-          name: d5-ratified-baseline
-          path: /tmp/d5-ratified-baseline.json
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d5-current-authority.py
+      - run: cargo test -p sens domain_identity -- --nocapture
+      - run: cargo test -p sens --test d5_reverse_onto_law -- --nocapture
