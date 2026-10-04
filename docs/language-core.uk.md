@@ -30,17 +30,19 @@ Zero-padding, truncation, low-bit extraction чи integer equality не можу
 ## Поточні Core-домени
 
 ```text
-D1  точні однобітні predicate answers
-D2  точна двобітна структура
-D3  точна трибітна foundation
-D4  точна чотирибітна bootstrap
-D5  точний п'ятибітний typed domain
-D6  точний шестибітний typed domain
+D1  точні однобітні predicate answers — RATIFIED
+D2  точна двобітна структура — RATIFIED
+D3  точна трибітна foundation — RATIFIED
+D4  точна чотирибітна bootstrap — RATIFIED
+D5  exact five-bit carrier — UNRATIFIED / RESEARCH (#3278/#3279)
+D6  exact six-bit carrier — UNRATIFIED / RESEARCH (#3278/#3280)
+D7  sound/text provenance domain — RATIFIED
+D8  exact eight-bit carrier — UNRATIFIED / RESEARCH (#3278/#3281)
 ```
 
-Для D5/D6 існування носія, residency, derivability, callability та runtime
-implementation — різні факти. Вільна координата не має значення, доки її не
-допустить закон домену.
+D5/D6/D8 carrier existence не дає residency, semantic membership або
+callability. Їхні попередні full-map/occupancy твердження — donor/provenance
+після owner reset #3278.
 
 D7 sound/text — окремий напрям і не є callable лише через двійковість.
 
@@ -80,13 +82,32 @@ PredicateBit — не Number, не host Bool, не T/NIL і не structural empt
 Назви ролей — лише документаційні проєкції. Канонічна identity — exact D3
 coordinate під D3 law.
 
+### Predicate/control law
+
+- `ATOM` — total predicate: результат тільки D1 `0|1`.
+- `EQ` — typed partial predicate: admitted atoms дають D1 `0|1`; поза atom-domain — D3 `000 ()` як EMPTY/no-witness.
+- `COND` має рівно `(test expression)` clauses і приймає як test тільки D1 `1`, D1 `0` або D3 `()`.
+- D1 `1` вибирає; D1 `0` продовжує як explicit NO; D3 `()` продовжує як EMPTY/no-witness.
+- інші test values — type/contract failure; exhaustion повертає D3 `()`.
+- D1 `0` і D3 `()` мають однакову control-action «continue», але різну semantic identity.
+
 ## D4 — bootstrap
 
-D4 — точний чотирибітний bootstrap domain, ратифікований своїм законом.
+D4 — owner-ratified full compact domain (#3272), усі 16/16 координат зайняті.
 Його координати не реконструюються з історичних восьмибітних Function8.
 
-LAMBDA і DEFINE — поточні D4 bootstrap identity. Нерозміщені координати
-лишаються нерозміщеними.
+```text
+0000 APPLY    0001 EVAL
+0010 LAMBDA   0011 DEFINE
+0100 NOT      0101 NULL
+0110 CDAR     0111 CDDR
+1000 CAAR     1001 CADR
+1010 LOOKUP   1011 BIND
+1100 EVCON    1101 EVLIS
+1110 LIST     1111 APPEND
+```
+
+`NOT` і `NULL` різні, бо D1:0 ≠ D3:000 (). Старі D4/SID8 coordinates не мають placement authority. D5+ selector continuation fail-closed (#3209), а #3278 окремо відкликав semantic admission D5/D6/D8.
 
 ## Reader
 
