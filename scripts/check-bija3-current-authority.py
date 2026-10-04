@@ -27,6 +27,11 @@ contract_sentence = (
 assert contract_sentence in contract
 assert "(minor . 3)" in contract
 assert "#3202" in contract
+assert "#3161" in contract
+assert "#3278" in contract
+assert "D5/D6 are UNRATIFIED/RESEARCH" in contract
+assert "D8 is UNRATIFIED/RESEARCH" in contract
+assert "EMPTY/no-witness" in contract
 
 for line in EXPECTED:
     assert line in core, line
