@@ -1,0 +1,36 @@
+name: D6 macro expansion closure research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-macro-expansion-closure/**"
+      - ".github/workflows/d6-macro-expansion-closure.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-macro-expansion-closure/**"
+      - ".github/workflows/d6-macro-expansion-closure.yml"
+  workflow_dispatch:
+
+jobs:
+  closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run macro expansion step/closure witness
+        run: |
+          rm -rf /tmp/d6-macro-expansion-closure
+          python3 benchmarks/d6-macro-expansion-closure/run.py             --out /tmp/d6-macro-expansion-closure
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-macro-expansion-closure/report.md; then
+            cat /tmp/d6-macro-expansion-closure/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-macro-expansion-closure
+          path: /tmp/d6-macro-expansion-closure/
+          retention-days: 14
