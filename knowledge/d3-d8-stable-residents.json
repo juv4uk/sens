@@ -1453,7 +1453,7 @@
       "human_labels_optional": [
         "MEMBER"
       ],
-      "canonical_result_domain": "D1.PredicateBit",
+      "canonical_result_domain": "D1",
       "canonical_result_values": {
         "NO": "0",
         "YES": "1"
@@ -12289,6 +12289,6 @@
       "human_labels_optional": []
     }
   ],
-  "corpus_hash": "sha256:436981b11ab0c528900cc638e48ce20dae8ef7981669e6284150f88c81dabd1c",
+  "corpus_hash": "sha256:4cb258dbe135e2de93c49916a5b68b192cc6c04e625c87c72675891cfaf035bc",
   "hash_contract": "SHA-256 over UTF-8 compact JSON serialization of rows in committed order"
 }
