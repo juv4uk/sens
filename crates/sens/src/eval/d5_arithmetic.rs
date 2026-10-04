@@ -6,6 +6,15 @@
 use super::arithmetic;
 use crate::{CoreDomainIdentity, Environment, LanguageError, Span, Value};
 
+pub(super) fn has_mechanism(identity: CoreDomainIdentity) -> bool {
+    let CoreDomainIdentity::D5(word) = identity else {
+        return false;
+    };
+    matches!(
+        word.word().packed_bits(),
+        0b01010 | 0b01011 | 0b01110 | 0b01111 | 0b10010 | 0b10011
+    )
+}
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
