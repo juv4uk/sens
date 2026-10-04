@@ -33,13 +33,13 @@
 + допущений / доведений закон
 ```
 
-Поточні Core-приклади — exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap та owner-ратифіковані D5/D6. Однаковий packed numeric payload у двох доменах не означає однакової семантичної ідентичності, а сама ширина не надає occupancy чи callability.
+Після owner reset #3327 чинними semantic domains є лише exact-width D1 PredicateBit і D2 racanā2. D3–D8 — UNRATIFIED / RESEARCH. Однаковий packed numeric payload у двох ширинах не означає однакової семантичної ідентичності, а сама ширина не надає occupancy чи callability.
 
 Історичні exact-eight-bit Sens8/Sid8/Function8 лишаються обмеженими compatibility, transport, backend і provenance-проєкціями, поки #2817 мігрує runtime-споживачів. Вони більше не є універсальною чинною онтологією.
 
 Українські, англійські, санскритські, символьні та compatibility-написання — лише **source/UI routing metadata**. Написання може маршрутизувати до вже допущеного domain-qualified semantic object, але не володіє його ідентичністю чи значенням.
 
-Конкретний порожній список `()` — Core.D3 `000`. Він відмінний від історичного exact-eight-bit `00000000`, PredicateBit `0` і Number zero, навіть коли їхні packed numeric payloads виглядають споріднено.
+Former Core.D3 `000 = ()` лишається research hypothesis/evidence після #3327, а не чинним resident. PredicateBit `0`, Number zero та width-3 research carrier не колапсують лише через однаковий packed payload.
 
 ## Історичний Lisp і Core1
 
@@ -47,7 +47,7 @@ Lisp був початковим синтаксичним носієм та ек
 
 Тому історичні Lisp-назви можуть залишатися в Core1, архівних дослідженнях, provenance-нотатках, історичному контексті ADR і compatibility-witnesses. Там це історичні описи або поверхні, а не чинна онтологія функцій СЕНС.
 
-Різні Core можуть вибирати механізми й окремо ратифіковану profile-поведінку, але не можуть mint/renumber доменні residents і не можуть перевизначати спільний D1/D3 predicate-control foundation.
+Різні Core можуть вибирати механізми, але після #3327 не можуть mint/renumber D3–D8 residents. Єдина чинна semantic foundation зараз — D1 + D2.
 
 ## Bootstrap і механізми реалізації
 
