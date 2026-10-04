@@ -86,22 +86,49 @@ def show(x,limit=120):
 def empty(x): return isinstance(x,Form) and not x.items
 def singleton(x): return atom(x.items[0]) if isinstance(x,Form) and len(x.items)==1 else None
 
-def state(rel):
-    if rel.startswith(("docs/archive/","experiments/","external/")): return "historical-experiment"
+def source_role(rel):
+    if rel.startswith("benchmarks/") and "/results/" in rel: return "benchmark-provenance"
+    if rel.startswith("benchmarks/"): return "benchmark-source"
+    if rel.startswith(("evidence/","docs/archive/","docs/research/","experiments/","external/","prototype/")):
+        return "research-provenance"
+    if rel.startswith("racket/"): return "external-runtime"
     if rel.startswith("lib/generated/") or "/generated/" in rel: return "generated"
-    return "active"
+    if rel.endswith("-experiment.lisp") or "/experiment" in rel: return "research-provenance"
+    if rel=="mylisp-cml-export.lisp": return "generated-export"
+    if rel.startswith("tests/") or (rel.startswith("crates/") and "/tests/" in rel): return "test-witness"
+    if rel.startswith("contracts/") or rel=="language-contract.lisp" or "contract" in pathlib.PurePosixPath(rel).name:
+        return "contract-data"
+    if rel.startswith("knowledge/"): return "knowledge-data"
+    if rel.startswith("lib/"): return "active-library"
+    if rel.startswith("scripts/"): return "active-tooling"
+    if rel.startswith("examples/"): return "example"
+    return "repository-data"
+
+def migration_active(rel):
+    return source_role(rel) in {"active-library","active-tooling"}
+
+def state(rel):
+    role=source_role(rel)
+    if role in {"research-provenance","benchmark-provenance","generated-export"}: return "historical-provenance"
+    if role=="generated": return "generated"
+    if migration_active(rel): return "active"
+    return "support"
 
 def batch(rel):
+    role=source_role(rel)
+    if role=="test-witness": return "T-test-witness"
+    if role in {"research-provenance","benchmark-provenance","generated-export"}: return "P-provenance"
+    if role in {"benchmark-source","contract-data","knowledge-data","external-runtime","example","repository-data","generated"}:
+        return "S-support"
     if rel in {"lib/core.lisp","lib/core4.lisp","lib/macro.lisp"}: return "A-core-bootstrap"
     if rel=="lib/meta-eval.lisp": return "D-meta-evaluator"
     if rel.startswith("lib/bridge/") or rel=="lib/life-1-scheduler.lisp": return "C-life-bridges"
     low=rel.lower()
     if rel=="lib/time.lisp" or any(k in low for k in ("utf","tcp","filesystem","/fs","protocol")): return "B-protocol-time"
-    if state(rel)=="historical-experiment": return "H-historical-experiment"
     return "E-remaining"
 
 def classify(test,expected,src_state):
-    if src_state=="historical-experiment": return "historical-experiment","high","archive/experiment/external path"
+    if src_state=="historical-provenance": return "historical-experiment","high","provenance-only path"
     th=(head(test) or "").lower(); ea=(atom(expected) or "").lower(); es=(singleton(expected) or "").lower()
     if th in PREDICATE_HEADS and (empty(expected) or es in {"0","1"}):
         return "structural-state","medium","predicate query with structural ()/(0)/(1)"
@@ -116,7 +143,8 @@ def scan_file(root,path):
     rel=path.relative_to(root).as_posix()
     try: forms=parse(tokens(path.read_text(encoding="utf-8",errors="replace")))
     except ValueError as e:
-        return [{"kind":"parse-error","file":rel,"error":str(e),"batch":batch(rel),"source_state":state(rel)}]
+        return [{"kind":"parse-error","file":rel,"error":str(e),"batch":batch(rel),"source_state":state(rel),
+            "source_role":source_role(rel),"migration_active":migration_active(rel)}]
     rows=[]
     for top in forms:
         for node in walk(top):
@@ -127,7 +155,8 @@ def scan_file(root,path):
                 test,expected,expr=clause.items
                 cls,conf,reason=classify(test,expected,state(rel))
                 rows.append({"file":rel,"cond_line":node.line,"clause_line":clause.line,"clause_index":idx,
-                    "cond_head":h,"batch":batch(rel),"source_state":state(rel),"candidate_class":cls,
+                    "cond_head":h,"batch":batch(rel),"source_state":state(rel),"source_role":source_role(rel),
+                    "migration_active":migration_active(rel),"candidate_class":cls,
                     "confidence":conf,"reason":reason,"test":show(test),"expected":show(expected),"expression":show(expr)})
     return rows
 
@@ -144,15 +173,21 @@ def markdown(meta):
         "Generated mechanically. Candidate classes are hints, not semantic authority.",
         "Ambiguous rows stay blocked until their producer/result law is identified.","",
         f"- tracked Lisp files scanned: {meta['tracked_lisp_files']}",
-        f"- three-field clauses found: {len(rows)}",f"- parse errors: {len(errs)}","","## Ownership batches",""]
+        f"- three-field clauses found (all roles): {len(rows)}",
+        f"- migration-active clauses: {meta['summary']['active_site_count']}",
+        f"- parse errors (all roles): {len(errs)}",
+        f"- migration-active parse errors: {meta['summary']['active_parse_error_count']}",
+        "","## Source roles",""]
+    for k,v in meta["summary"]["by_source_role"].items(): lines.append(f"- {k}: {v}")
+    lines+=["","## Ownership batches",""]
     for k,v in meta["summary"]["by_batch"].items(): lines.append(f"- {k}: {v}")
-    lines+=["","## Candidate classes",""]
+    lines+=["","## Candidate classes (all roles)",""]
     for k,v in meta["summary"]["by_candidate_class"].items(): lines.append(f"- {k}: {v}")
-    lines+=["","## Sites","","| file:line | batch | state | candidate | conf | head | test | expected |",
-        "|---|---|---|---|---|---|---|---|"]
+    lines+=["","## Sites","","| file:line | role | active? | batch | candidate | conf | head | test | expected |",
+        "|---|---|---|---|---|---|---|---|---|"]
     esc=lambda s:str(s).replace("|","\\|").replace("\n"," ")
     for r in rows:
-        lines.append(f"| {r['file']}:{r['clause_line']} | {r['batch']} | {r['source_state']} | {r['candidate_class']} | {r['confidence']} | {esc(r['cond_head'])} | {esc(r['test'])} | {esc(r['expected'])} |")
+        lines.append(f"| {r['file']}:{r['clause_line']} | {r['source_role']} | {str(r['migration_active']).lower()} | {r['batch']} | {r['candidate_class']} | {r['confidence']} | {esc(r['cond_head'])} | {esc(r['test'])} | {esc(r['expected'])} |")
     if errs:
         lines+=["","## Parse errors",""]
         for r in errs: lines.append(f"- {r['file']}: {r['error']}")
@@ -185,8 +220,11 @@ def main():
     rows.sort(key=lambda r:(r["file"],r.get("clause_line",0),r.get("clause_index",0)))
     meta={"schema":"cond-three-part-inventory/1","issue":3170,"tracked_lisp_files":len(files),
         "summary":{"site_count":sum(r.get("kind")!="parse-error" for r in rows),
-            "parse_error_count":sum(r.get("kind")=="parse-error" for r in rows),"by_batch":count(rows,"batch"),
-            "by_source_state":count(rows,"source_state"),"by_candidate_class":count(rows,"candidate_class"),
+            "active_site_count":sum(r.get("kind")!="parse-error" and r.get("migration_active") for r in rows),
+            "parse_error_count":sum(r.get("kind")=="parse-error" for r in rows),
+            "active_parse_error_count":sum(r.get("kind")=="parse-error" and r.get("migration_active") for r in rows),
+            "by_batch":count(rows,"batch"),"by_source_state":count(rows,"source_state"),
+            "by_source_role":count(rows,"source_role"),"by_candidate_class":count(rows,"candidate_class"),
             "by_confidence":count(rows,"confidence")},"rows":rows}
     if args.json_out:
         args.json_out.parent.mkdir(parents=True,exist_ok=True)
