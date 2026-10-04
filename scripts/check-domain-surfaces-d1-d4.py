@@ -14,8 +14,8 @@ SOURCES = (SOURCE_D14, SOURCE_D5)
 GENERATED = ROOT / "crates/sens/src/domain_surface_registry_generated.rs"
 
 ROW = re.compile(
-    r'^\\s*\\(row\\s+(D[1-5])\\s+"([01]+)"\\s+(\\S+)\\s+'
-    r'"([^"]+)"\\s+"([^"]+)"\\s+"([^"]+)"\\s+(\\S+)\\s+(\\S+)\\)\\s*$'
+    r'^\s*\(row\s+(D[1-5])\s+"([01]+)"\s+(\S+)\s+'
+    r'"([^"]+)"\s+"([^"]+)"\s+"([^"]+)"\s+(\S+)\s+(\S+)\)\s*$'
 )
 
 EXPECTED_COUNTS = {"D1": 2, "D2": 4, "D3": 8, "D4": 16, "D5": 32}
