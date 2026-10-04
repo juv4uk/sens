@@ -129,17 +129,13 @@ fn structural_car_profile_reaches_bytes_only_through_closed_admission() {
 }
 
 #[test]
-fn bounded_cond_profile_is_projected_from_lisp_runtime_decision_need() {
+fn bounded_cond_profile_matches_lisp_owned_machine_lowering() {
     let mut session = profile_session();
 
-    assert_eq!(
-        eval_value("(cond ((eq? 2 2) 111) (t 222))", &mut session),
-        "111"
-    );
-    assert_eq!(
-        eval_value("(cond ((eq? 2 3) 111) (t 222))", &mut session),
-        "222"
-    );
+    // Language-level EQ/COND meaning is owned by the current SENS/Lisp
+    // contracts and witnesses, not by this Rust machine-profile test.
+    // This test starts at the already-selected two-arm machine decision and
+    // checks only lowering/profile mechanics below that semantic boundary.
 
     let semantic_forms = eval_value(
         "(x86-lower-eq-cond-u64-forms 2 3 111 222)",
