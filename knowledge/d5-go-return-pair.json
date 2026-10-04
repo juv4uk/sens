@@ -1,0 +1,40 @@
+{
+  "schema": "d5-go-return-pair/1",
+  "domain": "Core.D5",
+  "owner_map_authority": "owner-directive-2026-10-03",
+  "owner_map_mutation": "NONE",
+  "pair": {
+    "prefix_d4": "0110",
+    "child0": {
+      "coordinate": "01100",
+      "historical_name": "GO"
+    },
+    "child1": {
+      "coordinate": "01101",
+      "historical_name": "RETURN"
+    }
+  },
+  "semantic_classes": {
+    "GO": "derived",
+    "RETURN": "root"
+  },
+  "same_base_object": false,
+  "observable_mismatches": [
+    "payload-kind",
+    "control-extent",
+    "stack-effect"
+  ],
+  "classification": "HISTORICAL-PAIRING",
+  "relation_class": "COORDINATE-LAW",
+  "local_one_bit_sibling_law": false,
+  "d4_parenthood": "NOT-INFERRED",
+  "global_d5_suffix_theorem": "NOT-PROVED",
+  "donor_replay": "PASS",
+  "evidence": [
+    "#2590/#2606",
+    "#2765/#2772",
+    "#3019",
+    "#2508"
+  ],
+  "falsifier": "a replayable same-base law reducing GO and RETURN to one independent delta while preserving payload, control extent, and stack observations"
+}
