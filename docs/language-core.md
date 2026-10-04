@@ -35,11 +35,11 @@ D3  exact three-bit Core foundation — RATIFIED
 D4  exact four-bit bootstrap — RATIFIED
 D5  exact five-bit full compact domain — RATIFIED #3305
 D6  exact six-bit research carrier — UNRATIFIED
-D7  exact seven-bit sound/text provenance domain — RATIFIED
+D7  exact seven-bit sound/text provenance carrier — UNRATIFIED / RESEARCH
 D8  exact eight-bit research carrier — UNRATIFIED
 ```
 
-General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6/D8 remain revoked/unratified under #3278.
+General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. Contract 11.4 / #3331 makes exactly D1–D5 current; D6–D8 remain UNRATIFIED / RESEARCH.
 
 При цьому:
 
