@@ -131,11 +131,13 @@ L1–L4 звужують повний простір перестановок д
 
 ### Predicate/control law
 
-- `ATOM` повертає тільки D1 PredicateBit.
-- `EQ` повертає тільки D1 PredicateBit у своїй admissible області.
+- `ATOM` — total predicate і повертає тільки D1 PredicateBit `0|1`.
+- `EQ` — typed partial predicate: у своїй admissible atom-domain повертає D1 `0|1`, а поза нею — D3 `000 ()` як EMPTY/no-witness.
 - `COND` має двопольові clauses `(test expression)`.
 - D1 `1` вибирає clause.
-- D1 `0` переходить до наступного.
+- D1 `0` переходить до наступного як explicit NO.
+- D3 `()` переходить до наступного як EMPTY/no-witness, не стаючи D1 `0`.
+- будь-яке інше значення test — typed contract failure.
 - exhaustion повертає D3 structural `()`, а не predicate false.
 
 ---
