@@ -12,9 +12,22 @@
 
 Джерело машинної проєкції: `lib/surface/domain-surfaces-d1-d4.lisp`.
 Guard: `python3 scripts/check-domain-surfaces-d1-d4.py`.
+Перекладач: `scripts/translate-domain-program.py`.
 
 Стара плоска 8-бітна surface-таблиця не є джерелом адрес. Із неї дозволено
 брати лише вже перевірені слова як лексичний донор.
+
+## Використання перекладача
+
+```bash
+python3 scripts/translate-domain-program.py --from en --to uk program.lisp
+python3 scripts/translate-domain-program.py --from uk --to sa program.lisp
+python3 scripts/translate-domain-program.py --from sa --to en program.lisp
+python3 scripts/translate-domain-program.py --self-test
+```
+
+Перекладач змінює лише зареєстровані D1/D3/D4 source-слова. Коментарі,
+рядки, користувацькі імена та D2 display-labels не перекладаються як код.
 
 ## D1
 
