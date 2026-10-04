@@ -127,6 +127,16 @@ def batch(rel):
     if rel=="lib/time.lisp" or any(k in low for k in ("utf","tcp","filesystem","/fs","protocol")): return "B-protocol-time"
     return "E-remaining"
 
+def owner_lane(rel):
+    b=batch(rel)
+    if b=="A-core-bootstrap": return "blocked-overlap:#3130/#3146"
+    if b=="D-meta-evaluator": return "exclusive:#3167"
+    if b=="B-protocol-time": return "unclaimed:#3170-B"
+    if b=="C-life-bridges": return "unclaimed:#3170-C"
+    if b=="E-remaining": return "unclaimed:#3170-E-split-before-coding"
+    if b=="T-test-witness": return "test-authority:#1708-review"
+    return "not-active-migration"
+
 def classify(test,expected,src_state):
     if src_state=="historical-provenance": return "historical-experiment","high","provenance-only path"
     th=(head(test) or "").lower(); ea=(atom(expected) or "").lower(); es=(singleton(expected) or "").lower()
@@ -144,7 +154,7 @@ def scan_file(root,path):
     try: forms=parse(tokens(path.read_text(encoding="utf-8",errors="replace")))
     except ValueError as e:
         return [{"kind":"parse-error","file":rel,"error":str(e),"batch":batch(rel),"source_state":state(rel),
-            "source_role":source_role(rel),"migration_active":migration_active(rel)}]
+            "source_role":source_role(rel),"migration_active":migration_active(rel),"owner_lane":owner_lane(rel)}]
     rows=[]
     for top in forms:
         for node in walk(top):
@@ -156,7 +166,7 @@ def scan_file(root,path):
                 cls,conf,reason=classify(test,expected,state(rel))
                 rows.append({"file":rel,"cond_line":node.line,"clause_line":clause.line,"clause_index":idx,
                     "cond_head":h,"batch":batch(rel),"source_state":state(rel),"source_role":source_role(rel),
-                    "migration_active":migration_active(rel),"candidate_class":cls,
+                    "migration_active":migration_active(rel),"owner_lane":owner_lane(rel),"candidate_class":cls,
                     "confidence":conf,"reason":reason,"test":show(test),"expected":show(expected),"expression":show(expr)})
     return rows
 
@@ -166,6 +176,13 @@ def count(rows,key):
         if r.get("kind")=="parse-error": continue
         v=str(r[key]); out[v]=out.get(v,0)+1
     return dict(sorted(out.items()))
+
+def top_files(rows,limit=30):
+    totals={}
+    for r in rows:
+        if r.get("kind")=="parse-error": continue
+        totals[r["file"]]=totals.get(r["file"],0)+1
+    return [{"file":k,"sites":v} for k,v in sorted(totals.items(),key=lambda kv:(-kv[1],kv[0]))[:limit]]
 
 def markdown(meta):
     rows=[r for r in meta["rows"] if r.get("kind")!="parse-error"]; errs=[r for r in meta["rows"] if r.get("kind")=="parse-error"]
@@ -177,20 +194,24 @@ def markdown(meta):
         f"- migration-active clauses: {meta['summary']['active_site_count']}",
         f"- parse errors (all roles): {len(errs)}",
         f"- migration-active parse errors: {meta['summary']['active_parse_error_count']}",
-        "","## Source roles",""]
+        "","## Active candidate classes",""]
+    for k,v in meta["summary"]["active_by_candidate_class"].items(): lines.append(f"- {k}: {v}")
+    lines+=["","## Source roles",""]
     for k,v in meta["summary"]["by_source_role"].items(): lines.append(f"- {k}: {v}")
     lines+=["","## Ownership batches",""]
     for k,v in meta["summary"]["by_batch"].items(): lines.append(f"- {k}: {v}")
     lines+=["","## Candidate classes (all roles)",""]
     for k,v in meta["summary"]["by_candidate_class"].items(): lines.append(f"- {k}: {v}")
-    lines+=["","## Sites","","| file:line | role | active? | batch | candidate | conf | head | test | expected |",
-        "|---|---|---|---|---|---|---|---|---|"]
+    lines+=["","## Top migration-active files",""]
+    for row in meta["summary"]["top_active_files"]: lines.append(f"- {row['file']}: {row['sites']}")
+    lines+=["","## Sites","","| file:line | role | active? | batch | owner | candidate | conf | head | test | expected |",
+        "|---|---|---|---|---|---|---|---|---|---|"]
     esc=lambda s:str(s).replace("|","\\|").replace("\n"," ")
     for r in rows:
-        lines.append(f"| {r['file']}:{r['clause_line']} | {r['source_role']} | {str(r['migration_active']).lower()} | {r['batch']} | {r['candidate_class']} | {r['confidence']} | {esc(r['cond_head'])} | {esc(r['test'])} | {esc(r['expected'])} |")
+        lines.append(f"| {r['file']}:{r['clause_line']} | {r['source_role']} | {str(r['migration_active']).lower()} | {r['batch']} | {r['owner_lane']} | {r['candidate_class']} | {r['confidence']} | {esc(r['cond_head'])} | {esc(r['test'])} | {esc(r['expected'])} |")
     if errs:
         lines+=["","## Parse errors",""]
-        for r in errs: lines.append(f"- {r['file']}: {r['error']}")
+        for r in errs: lines.append(f"- {r['file']} [{r['source_role']}; active={str(r['migration_active']).lower()}]: {r['error']}")
     lines+=["","## Migration rule","","- Never delete the middle field blindly.",
         "- predicate-polarity still requires an exact D1/EMPTY producer.",
         "- structural-state must be rewritten from the current producer law.",
@@ -223,14 +244,16 @@ def main():
     root=args.root.resolve(); files=tracked(root); rows=[]
     for path in files: rows.extend(scan_file(root,path))
     rows.sort(key=lambda r:(r["file"],r.get("clause_line",0),r.get("clause_index",0)))
-    meta={"schema":"cond-three-part-inventory/1","issue":3170,"tracked_lisp_files":len(files),
+    active=[r for r in rows if r.get("kind")!="parse-error" and r.get("migration_active")]
+    meta={"schema":"cond-three-part-inventory/2","issue":3170,"tracked_lisp_files":len(files),
         "summary":{"site_count":sum(r.get("kind")!="parse-error" for r in rows),
             "active_site_count":sum(r.get("kind")!="parse-error" and r.get("migration_active") for r in rows),
             "parse_error_count":sum(r.get("kind")=="parse-error" for r in rows),
             "active_parse_error_count":sum(r.get("kind")=="parse-error" and r.get("migration_active") for r in rows),
-            "by_batch":count(rows,"batch"),"by_source_state":count(rows,"source_state"),
-            "by_source_role":count(rows,"source_role"),"by_candidate_class":count(rows,"candidate_class"),
-            "by_confidence":count(rows,"confidence")},"rows":rows}
+            "by_batch":count(rows,"batch"),"active_by_batch":count(active,"batch"),
+            "by_source_state":count(rows,"source_state"),"by_source_role":count(rows,"source_role"),
+            "by_candidate_class":count(rows,"candidate_class"),"active_by_candidate_class":count(active,"candidate_class"),
+            "by_confidence":count(rows,"confidence"),"top_active_files":top_files(active)},"rows":rows}
     if args.json_out:
         args.json_out.parent.mkdir(parents=True,exist_ok=True)
         args.json_out.write_text(json.dumps(meta,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
