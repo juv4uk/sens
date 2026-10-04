@@ -27,7 +27,7 @@ program uses the legacy byte-identity path.
   - executable parity gate;
   - fails closed on legacy byte identity/calls;
   - fails closed on trace mismatch;
-  - has a built-in D3 positive and mismatch control.
+  - contains no tracked human-surface corpus; CI materializes controls at runtime.
 - `raw-row.schema.json`
   - future shared raw-row shape for preflight and phase measurements.
 - `run.py`
@@ -46,18 +46,18 @@ canonical_path
 oracle
 ```
 
-Every English source path is hashed. Canonical self-test data may be inline in
-the manifest; the runner materializes it as a temporary `.lisp` file so the
-repository does not add observational numeric-source debt merely to test the
-canonical reader. Real corpus rows may instead use `canonical_path`. The whole
-paired corpus receives one deterministic `corpus_sha`.
+Either lane may use a real source path or inline manifest data. Inline data is
+materialized as a temporary `.lisp` file by the runner. This keeps benchmark
+inputs out of the repository's semantic-name/numeric-source debt inventories
+without changing how the actual readers see them. Real corpus rows should use
+tracked source paths when those sources already belong to the canonical corpus.
+Every source payload is hashed and the whole paired corpus receives one
+deterministic `corpus_sha`.
 
 ## Run
 
 ```bash
 cargo build -p sens --example en_vs_d1d8_preflight
-target/debug/examples/en_vs_d1d8_preflight --self-test
-
 python3 benchmarks/en-vs-d1d8-cpu/run.py \
   --preflight-bin target/debug/examples/en_vs_d1d8_preflight \
   --manifest benchmarks/en-vs-d1d8-cpu/selftest-manifest.tsv \
