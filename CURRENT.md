@@ -7,7 +7,7 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.2 domain-qualified observable language contract.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.3 domain-qualified observable language contract.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
    - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`; current Core domains D1-D8 are width-qualified, while historical Sens8/Sid8 is compatibility/provenance only.
@@ -42,6 +42,16 @@ D6  owner-ratified six-bit domain
 D7  Sound7 + local śloka/sūtra ordinal domain
 D8  owner-ratified exact eight-bit Core domain
 ```
+
+Current occupancy is closed by owner ratification #3029:
+
+```text
+D1 2/2   D2 4/4   D3 8/8   D4 16/16
+D5 32/32 D6 64/64 D7 128/128 D8 256/256
+```
+
+"free", "unallocated", "reserved/unfilled", or candidate-only occupancy in current D1-D8 projections is stale debt, not an alternate current state.
+
 
 Owner ratification #3202 fixes the D3/bīja3 A map above under laws L1–L5. Owner ratification #3272 fixes the full compact D4 16/16 map above; intermediate clean-room D4 maps are research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
