@@ -9,9 +9,9 @@ on:
       - 'crates/sens/Cargo.toml'
       - 'crates/sens-literate/**'
       - 'crates/sens-lsp/**'
-      - 'lib/core4.lisp'      # current Core4 profile (#1135)
-      - 'lib/core4.lisp.fasl' # current Core4 compiled snapshot
-      # legacy aliases kept for reference: lib/core.my, lib/core.my.fasl
+      - 'lib/core.lisp'       # one active Core source (#2367)
+      - 'lib/core.lisp.fasl'  # one active Core compiled snapshot
+      # numbered Core sources are historical/laboratory evidence, not the active WASM bootstrap
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/wasm-browser-test.yml'
