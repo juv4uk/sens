@@ -211,7 +211,7 @@ def hypercube_edges(bits: list[str]) -> list[tuple[str, str]]:
     return out
 
 
-def n5_fixed_hamming(
+def n5_any_fixed_hamming(
     solver, fixture: dict[str, Any], rng: random.Random
 ) -> dict[str, str]:
     current = solver.current_map(fixture)
@@ -226,6 +226,62 @@ def n5_fixed_hamming(
         ra, rb = reverse[a], reverse[b]
         mapping[ra], mapping[rb] = b, a
 
+    assert map_bit_hamming(current, mapping) == 4
+    return mapping
+
+
+def _swap_edge(mapping: dict[str, str], reverse: dict[str, str], edge: tuple[str, str]) -> None:
+    a, b = edge
+    ra, rb = reverse[a], reverse[b]
+    mapping[ra], mapping[rb] = b, a
+
+
+def n5_selector_targeted_fixed_hamming(
+    solver, fixture: dict[str, Any], rng: random.Random
+) -> dict[str, str]:
+    """Distance-4 perturbation forced to touch selector roots and children."""
+    current = solver.current_map(fixture)
+    mapping = dict(current)
+    reverse = {bits: rid for rid, bits in current.items()}
+    _, roots, children, _ = selector_classes(solver, fixture)
+    root_set = set(roots)
+    child_set = set(children)
+
+    d3_edges = [
+        edge for edge in hypercube_edges(solver.coords(3))
+        if any(reverse[x] in root_set for x in edge)
+    ]
+    d4_edges = [
+        edge for edge in hypercube_edges(solver.coords(4))
+        if any(reverse[x] in child_set for x in edge)
+    ]
+    _swap_edge(mapping, reverse, rng.choice(d3_edges))
+    _swap_edge(mapping, reverse, rng.choice(d4_edges))
+    assert map_bit_hamming(current, mapping) == 4
+    return mapping
+
+
+def n5_residue_only_fixed_hamming(
+    solver, fixture: dict[str, Any], rng: random.Random
+) -> dict[str, str]:
+    """Distance-4 perturbation guaranteed not to touch selector-family residents."""
+    current = solver.current_map(fixture)
+    mapping = dict(current)
+    reverse = {bits: rid for rid, bits in current.items()}
+    _, roots, children, residue = selector_classes(solver, fixture)
+    residue_set = set(residue)
+
+    d3_edges = [
+        edge for edge in hypercube_edges(solver.coords(3))
+        if all(reverse[x] in residue_set for x in edge)
+    ]
+    d4_edges = [
+        edge for edge in hypercube_edges(solver.coords(4))
+        if all(reverse[x] in residue_set for x in edge)
+    ]
+    assert d3_edges and d4_edges
+    _swap_edge(mapping, reverse, rng.choice(d3_edges))
+    _swap_edge(mapping, reverse, rng.choice(d4_edges))
     assert map_bit_hamming(current, mapping) == 4
     return mapping
 
@@ -335,7 +391,9 @@ def main() -> int:
         ("N2-family-preserving", n2_family_preserving),
         ("N3-root-preserving-suffix-scramble", n3_root_preserving_suffix_scramble),
         ("N4-degree-preserving-graph-relabel", n4_degree_preserving_graph_relabel),
-        ("N5-fixed-bit-hamming-4", n5_fixed_hamming),
+        ("N5a-fixed-bit-hamming-4-any", n5_any_fixed_hamming),
+        ("N5b-fixed-bit-hamming-4-selector-targeted", n5_selector_targeted_fixed_hamming),
+        ("N5c-fixed-bit-hamming-4-residue-only", n5_residue_only_fixed_hamming),
     ]
 
     ensembles = []
@@ -351,9 +409,21 @@ def main() -> int:
             )
         )
 
-    # N5 is a strict construction invariant.
-    n5 = next(x for x in ensembles if x["ensemble"] == "N5-fixed-bit-hamming-4")
-    assert n5["map_bit_hamming"] == {"min": 4, "median": 4.0, "max": 4}
+    # All N5 variants are strict distance-4 constructions.
+    for name in [
+        "N5a-fixed-bit-hamming-4-any",
+        "N5b-fixed-bit-hamming-4-selector-targeted",
+        "N5c-fixed-bit-hamming-4-residue-only",
+    ]:
+        n5 = next(x for x in ensembles if x["ensemble"] == name)
+        assert n5["map_bit_hamming"] == {"min": 4, "median": 4.0, "max": 4}
+
+    # Residue-only perturbation must leave the selector law untouched.
+    n5c = next(
+        x for x in ensembles
+        if x["ensemble"] == "N5c-fixed-bit-hamming-4-residue-only"
+    )
+    assert n5c["selector_hit_histogram"] == {"4": args.samples}
 
     # Family-preserving null intentionally preserves the abstract selector
     # family. Depending on global role polarity, raw append-bit orientation may
@@ -456,7 +526,7 @@ def main() -> int:
         "",
         "Controls:",
         "- intentionally false semantic prefix law receives 0 accepted hits in every null map;",
-        "- N5 maps are exactly bit-Hamming distance 4 from CURRENT;",
+        "- all N5 variants are exactly bit-Hamming distance 4 from CURRENT;\n- N5b forces the perturbation to touch selector-family residents; N5c perturbs residue only;",
         "- #2508 domain firewall remains mandatory;",
         "- #3042 GO/RETURN anti-law is explicitly deferred until the full semantic corpus includes those residents; it is not fabricated into D3/D4.",
         "",
