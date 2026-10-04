@@ -1,4 +1,4 @@
-name: D6 runtime admission audit
+name: D6 research W6 boundary audit
 
 on:
   pull_request:
@@ -20,8 +20,9 @@ permissions:
 
 jobs:
   audit:
+    name: D6 historical donor and W6 mechanism boundary
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify D6 admission matrix
+      - name: Verify D6 research boundary matrix
         run: python3 scripts/research-2766-d6-runtime-admission-audit.py --check
