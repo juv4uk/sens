@@ -11,7 +11,7 @@ use sens::{
     ExprKind, Session, Span,
 };
 
-fn run_d5(bits: u8, arguments_source: &str) -> String {
+fn run_d5_value(bits: u8, arguments_source: &str) -> sens::Value {
     let mut session = Session::default();
     load_core_library(&mut session).expect("active Core should load");
 
@@ -45,7 +45,10 @@ fn run_d5(bits: u8, arguments_source: &str) -> String {
     eval_parsed_expressions(&[form], &mut session)
         .unwrap_or_else(|error| panic!("D5:{bits:05b} {arguments_source}: {error:?}"))
         .value
-        .to_string()
+}
+
+fn run_d5(bits: u8, arguments_source: &str) -> String {
+    run_d5_value(bits, arguments_source).to_string()
 }
 
 #[test]
@@ -117,13 +120,21 @@ fn exact_d5_assoc_member_share_traversal_but_not_result_semantics() {
         "((a b) . first)"
     );
 
-    // MEMBER exposes predicate-like hit/miss rather than the matching pair.
-    assert_eq!(run_d5(0b11101, "'b '(a b c)"), "t");
-    assert_eq!(run_d5(0b11101, "'z '(a b c)"), "()");
+    // MEMBER is a D5 operation whose canonical result belongs to D1.
+    // Type-check the value so printed 1/0 cannot be confused with Number 1/0.
+    let hit = run_d5_value(0b11101, "'b '(a b c)");
+    let miss = run_d5_value(0b11101, "'z '(a b c)");
+    assert_eq!(hit.as_predicate_bit(), Some(true));
+    assert_eq!(miss.as_predicate_bit(), Some(false));
+    assert_eq!(hit.to_string(), "1");
+    assert_eq!(miss.to_string(), "0");
 
-    // MEMBER also uses structural equality for list elements.
-    assert_eq!(
-        run_d5(0b11101, "'(a b) '((x y) (a b) (c d))"),
-        "t"
-    );
+    // MEMBER also uses structural equality for list elements while keeping
+    // the exact D1 result carrier.
+    let structural_hit = run_d5_value(0b11101, "'(a b) '((x y) (a b) (c d))");
+    assert_eq!(structural_hit.as_predicate_bit(), Some(true));
+
+    // ASSOC remains value-returning; the MEMBER migration must not spill.
+    let assoc = run_d5_value(0b11100, "'x '((x . first) (y . second))");
+    assert_eq!(assoc.as_predicate_bit(), None);
 }

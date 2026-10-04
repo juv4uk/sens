@@ -419,6 +419,6 @@ optimized
 6. generated docs;
 7. explanatory docs.
 
-Канонічне source extension — `.lisp`.
+The current canonical source extension is **`.lisp`**. **`.wsm`** and **`.my`** remain supported legacy aliases. File suffixes do not create semantic identity.
 
 Authority precedence: [`semantic-authority-map.md`](semantic-authority-map.md).
