@@ -1,0 +1,44 @@
+name: D5 SET SETQ sibling law research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d5-set-setq-sibling-law/**"
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - "knowledge/d5-historical-full-map.json"
+      - ".github/workflows/d5-set-setq-sibling-law.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d5-set-setq-sibling-law/**"
+      - "crates/sens/tests/post_d4_set_setq_factor.rs"
+      - "knowledge/d5-historical-full-map.json"
+      - ".github/workflows/d5-set-setq-sibling-law.yml"
+  workflow_dispatch:
+
+jobs:
+  sibling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Replay donor and classify D5 sibling law
+        run: |
+          rm -rf /tmp/d5-set-setq-sibling-law
+          python3 benchmarks/d5-set-setq-sibling-law/run.py             --out /tmp/d5-set-setq-sibling-law
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d5-set-setq-sibling-law/report.md; then
+            cat /tmp/d5-set-setq-sibling-law/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d5-set-setq-sibling-law
+          path: /tmp/d5-set-setq-sibling-law/
+          retention-days: 14
