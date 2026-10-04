@@ -59,12 +59,6 @@ def rust_string(value: str) -> str:
 
 
 def render_generated(rows: list[dict[str, str]]) -> str:
-    runtime_rows = [
-        row
-        for row in rows
-        if row["domain"] in {"D3", "D4"} and row["role"] != "display"
-    ]
-
     lines = [
         "// GENERATED — DO NOT EDIT BY HAND.",
         "// Authority: lib/surface/domain-surfaces-d1-d4.lisp",
@@ -80,14 +74,18 @@ def render_generated(rows: list[dict[str, str]]) -> str:
         "pub(super) struct DomainSurfaceRow {",
         "    pub(super) width: u8,",
         "    pub(super) bits: u8,",
-        "    pub(super) surfaces: &'static [DomainSurfaceName],",
+        "    pub(super) source_routable: bool,",
+        "    pub(super) surfaces: &'static [DomainSurfaceName],"
         "}",
         "",
         "pub(super) const DOMAIN_SURFACE_ROWS: &[DomainSurfaceRow] = &[",
     ]
 
-    for row in runtime_rows:
+    for row in rows:
         width = int(row["domain"][1:])
+        source_routable = (
+            row["domain"] in {"D3", "D4"} and row["role"] != "display"
+        )
         surfaces = ", ".join(
             [
                 "DomainSurfaceName { namespace: "
@@ -104,6 +102,7 @@ def render_generated(rows: list[dict[str, str]]) -> str:
         )
         lines.append(
             f"    DomainSurfaceRow {{ width: {width}, bits: 0b{row['bits']}, "
+            f"source_routable: {str(source_routable).lower()}, "
             f"surfaces: &[{surfaces}] }},"
         )
 
@@ -181,7 +180,7 @@ def main() -> int:
 
     print("D1-D4-SURFACE-GUARD: PASS")
     print("rows=30 d1=2 d2=4 d3=8 d4=16")
-    print("runtime-projection=d3+d4 uk+sa exact-domain")
+    print("projection=d1-d4 uk+sa exact-domain; source-routing=d3+d4 non-display")
     print("uk=unique sa=unique exact-width=preserved legacy-byte=absent")
     return 0
 
