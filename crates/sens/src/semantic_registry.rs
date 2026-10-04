@@ -32,14 +32,15 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
     match width {
         3 => Some(CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(bits)?))),
         4 => Some(CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(bits)?))),
+        5 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(bits)?))),
         _ => None,
     }
 }
 
-/// Direct D3/D4 human-surface projection.
+/// Direct D3/D4/D5 human-surface projection.
 ///
 /// This path consumes the exact-domain projection generated from
-/// lib/surface/domain-surfaces-d1-d4.lisp. It never consults a historical
+/// lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp. It never consults a historical
 /// packed byte to recover domain identity.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
@@ -88,8 +89,8 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 ) -> Option<CoreDomainIdentity> {
     let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
     match byte {
-        0b0010_1010 => Some(d5(0b10001)), // REVERSE
-        0b0001_0100 => Some(d5(0b10011)), // QUOTIENT
+        0b0010_1010 => Some(d5(0b10100)), // REVERSE
+        0b0001_0100 => Some(d5(0b10111)), // QUOTIENT
         0b0010_1101 => Some(d5(0b11100)), // ASSOC
         0b0010_1100 => Some(d5(0b11101)), // MEMBER
         0b1010_1100 => Some(d5(0b11111)), // SUBST
@@ -98,7 +99,7 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 }
 /// Current staged surface lookup.
 ///
-/// Ukrainian and Sanskrit D3/D4 spellings resolve directly through the
+/// Ukrainian and Sanskrit D3/D4/D5 spellings resolve directly through the
 /// exact-domain projection. The byte-backed lookup remains only as a bounded
 /// compatibility fallback for still-unmigrated spellings.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
@@ -271,8 +272,8 @@ mod tests {
     #[test]
     fn lisp_owned_d5_binding_projection_is_explicit_but_not_global_legacy_meaning() {
         for (legacy_byte, bits) in [
-            (0b0010_1010, 0b10001),
-            (0b0001_0100, 0b10011),
+            (0b0010_1010, 0b10100),
+            (0b0001_0100, 0b10111),
             (0b0010_1101, 0b11100),
             (0b0010_1100, 0b11101),
             (0b1010_1100, 0b11111),
@@ -296,6 +297,18 @@ mod tests {
             None,
             "APPEND must not retain a transitional D5 binding"
         );
+    }
+
+    #[test]
+    fn transitional_d5_binding_never_targets_ratified_selector_slots() {
+        for legacy_byte in [0b0010_1010, 0b0001_0100] {
+            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
+                .expect("compatibility binding should resolve");
+            assert!(
+                !matches!(identity.packed_bits(), 0b10001 | 0b10011),
+                "REVERSE/QUOTIENT compatibility binding must not target D5 selector coordinates"
+            );
+        }
     }
 
     #[test]
@@ -328,6 +341,27 @@ mod tests {
                 .and_then(legacy_domain_identity_from_registry_byte),
             None,
             "CDAR must be admitted by D4 projection even without a legacy byte mapping"
+        );
+    }
+
+    #[test]
+    fn d5_surfaces_resolve_directly_to_exact_domain_identity() {
+        for (surface, bits) in [
+            ("додати", 0b01010),
+            ("зворот", 0b10100),
+            ("перше-від-решти-від-першого", 0b10010),
+        ] {
+            let identity = direct_domain_identity_for_surface(surface)
+                .unwrap_or_else(|| panic!("D5 surface must resolve directly: {surface}"));
+            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
+            assert_eq!(domain_identity_for_surface(surface), Some(identity));
+        }
+
+        assert_eq!(
+            registry_byte_for_surface("перше-від-решти-від-першого")
+                .and_then(legacy_domain_identity_from_registry_byte),
+            None,
+            "D5 selector surface must not require the legacy byte registry"
         );
     }
 
