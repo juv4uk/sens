@@ -108,7 +108,7 @@ PredicateBit не є Number, host Bool, T/NIL або structural empty.
 
 Назви — documentation/surface projections. Canonical identity — точна D3 coordinate під D3 law.
 
-### Ратифікована конституція L1–L5 (#3202)
+### Former D3 L1–L5 candidate (#3202) — RESEARCH after #3327
 
 ```text
 L1  000 = ()
@@ -154,7 +154,7 @@ L1–L4 звужують повний простір перестановок д
 
 ## D4 — bootstrap
 
-D4 — owner-ratified full compact four-bit bootstrap domain (#3272).
+D4 — former compact four-bit candidate (#3272), now UNRATIFIED / RESEARCH under #3327.
 
 ```text
 0000  APPLY
@@ -200,13 +200,13 @@ D4 fibres пам'ятають семантичного D3-батька:
 
 `LIST` і `APPEND` — CONS-family residents: перший збирає значення у список, другий з'єднує списки.
 
-Старі D4/SID8/Sens8/Function8 координати не мають placement authority. Історія може бути донором capability, але координата визначається чинним D3/D4 law та owner-ratification #3272.
+Старі D4/SID8/Sens8/Function8 координати не мають placement authority. Former #3272 map is research evidence only under #3327.
 
 ---
 
 ## D5 — full compact five-bit domain
 
-D5 **OWNER-RATIFIED #3305**, 32/32 occupied, 32 distinct residents, zero lower-domain duplicates.
+D5 former #3305 32/32 candidate — **UNRATIFIED / RESEARCH** under #3327.
 
 ```text
 00000 EVALQUOTE    00001 FUNCTION
@@ -309,7 +309,7 @@ suffix 1 = compose CDR / D
 Звідси:
 
 ```text
-D4 selector slice inside the ratified #3272 map:
+D4 selector slice from former #3272 research map:
 1000 CAAR
 1001 CADR
 0110 CDAR
@@ -430,7 +430,7 @@ Compatibility adapters дозволені лише як явно обмежен�
 
 Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
 
-Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D5 і D7; D5 re-ratified #3305 після reset #3278, а D6/D8 лишаються research.
+Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification під #3327 охоплює лише D1 і D2; D3–D8 є research carriers.
 
 Profile може вибирати mechanism, але не може:
 
