@@ -58,11 +58,11 @@ def git_sha(repo: Path) -> str:
 def read_manifest(path: Path):
     with path.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter="\t")
-        required = {"case", "english_path", "canonical_path", "oracle"}
+        required = {"case", "english_path", "oracle"}
         if reader.fieldnames is None or not required.issubset(reader.fieldnames):
-            raise SystemExit(
-                "manifest must contain: case, english_path, canonical_path, oracle"
-            )
+            raise SystemExit("manifest must contain: case, english_path, oracle")
+        if "canonical_path" not in reader.fieldnames and "canonical_source" not in reader.fieldnames:
+            raise SystemExit("manifest needs canonical_path or canonical_source")
         rows = list(reader)
     if not rows:
         raise SystemExit("manifest is empty")
@@ -76,10 +76,15 @@ def corpus_sha(rows, repo: Path) -> str:
         digest.update(b"\0")
         digest.update(row["oracle"].encode())
         digest.update(b"\0")
-        for key in ("english_path", "canonical_path"):
-            path = (repo / row[key]).resolve()
-            digest.update(path.read_bytes())
-            digest.update(b"\0")
+        english = (repo / row["english_path"]).resolve()
+        digest.update(english.read_bytes())
+        digest.update(b"\0")
+        if row.get("canonical_source"):
+            digest.update(row["canonical_source"].encode())
+        else:
+            canonical = (repo / row["canonical_path"]).resolve()
+            digest.update(canonical.read_bytes())
+        digest.update(b"\0")
     return digest.hexdigest()
 
 
@@ -111,9 +116,17 @@ def main() -> int:
 
     output = []
     blocked = 0
+    temp_sources = args.out / "_canonical_sources"
+    temp_sources.mkdir(parents=True, exist_ok=True)
     for item in rows:
         english = repo / item["english_path"]
-        canonical = repo / item["canonical_path"]
+        if item.get("canonical_source"):
+            canonical = temp_sources / f"{item['case']}.lisp"
+            canonical.write_text(item["canonical_source"] + "\n", encoding="utf-8")
+            canonical_bytes = item["canonical_source"].encode()
+        else:
+            canonical = repo / item["canonical_path"]
+            canonical_bytes = canonical.read_bytes()
         proc = subprocess.run(
             [str(args.preflight_bin), str(english), str(canonical)],
             capture_output=True,
@@ -131,7 +144,7 @@ def main() -> int:
             "binary_sha": binary_hash,
             "corpus_sha": corpus,
             "english_sha": sha256_file(english),
-            "canonical_sha": sha256_file(canonical),
+            "canonical_sha": sha256_bytes(canonical_bytes),
             "oracle": item["oracle"],
             "rep": None,
             "i_refs": None,
