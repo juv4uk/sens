@@ -6,6 +6,7 @@ on:
       - "lib/surface/domain-surfaces-d1-d4.lisp"
       - "docs/domain-surfaces-d1-d4.md"
       - "scripts/check-domain-surfaces-d1-d4.py"
+      - "scripts/translate-domain-program.py"
       - ".github/workflows/d1-d4-surfaces.yml"
   push:
     branches: [main]
@@ -13,6 +14,7 @@ on:
       - "lib/surface/domain-surfaces-d1-d4.lisp"
       - "docs/domain-surfaces-d1-d4.md"
       - "scripts/check-domain-surfaces-d1-d4.py"
+      - "scripts/translate-domain-program.py"
       - ".github/workflows/d1-d4-surfaces.yml"
 
 jobs:
@@ -25,3 +27,5 @@ jobs:
           python-version: "3.13"
       - name: Check D1-D4 uk/sa projection
         run: python3 scripts/check-domain-surfaces-d1-d4.py
+      - name: Check D1-D4 program translation
+        run: python3 scripts/translate-domain-program.py --self-test
