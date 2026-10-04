@@ -379,17 +379,10 @@ impl Parser<'_> {
         }
 
         if let Some(payload) = explicit_radix_payload(token, "#b") {
-            let Some(rational) =
-                crate::value::Rational::from_binary_wire_parts(payload, "1")
-            else {
-                return Err(self.error("invalid #b exact-integer projection", start, self.cursor));
-            };
-            let kind = match rational.as_precise_i64() {
-                Some(value) => ExprKind::Number(value as f64, Exactness::Exact),
-                None => ExprKind::Rational(rational),
-            };
+            let number = crate::BinaryNumber::parse(payload)
+                .map_err(|_| self.error("invalid canonical binary Number", start, self.cursor))?;
             return Ok(Expr {
-                kind,
+                kind: ExprKind::BinaryNumber(number),
                 span: Span { start, end: self.cursor },
             });
         }
@@ -551,27 +544,28 @@ mod tests {
     }
 
     #[test]
-    fn explicit_radix_integer_projections_share_the_exact_numeric_domain() {
+    fn binary_number_is_distinct_from_decimal_exact_projection() {
         assert!(matches!(
             parse_one("#d10").kind,
             ExprKind::Number(value, Exactness::Exact) if value == 10.0
         ));
-        assert!(matches!(
-            parse_one("#b1010").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 10.0
-        ));
-        assert!(matches!(
-            parse_one("#b00001100").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 12.0
-        ));
+
+        let ExprKind::BinaryNumber(number) = parse_one("#b1010").kind else {
+            panic!("#b must lower to canonical BinaryNumber");
+        };
+        assert_eq!(number.bits(), "1010");
+
+        let ExprKind::BinaryNumber(number) = parse_one("#b00001100").kind else {
+            panic!("#b must remain Number even at eight payload bits");
+        };
+        assert_eq!(number.bits(), "1100");
+
         assert!(matches!(
             parse_one("00001100").kind,
             ExprKind::Sid(sid) if sid == crate::sens!(00001100)
         ));
-        assert!(matches!(
-            parse_one("#b-1010").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == -10.0
-        ));
+
+        assert!(parse("#b-1010").is_err(), "signed canonical Number is not admitted by #3022");
         assert!(matches!(
             parse_one("#d-10").kind,
             ExprKind::Number(value, Exactness::Exact) if value == -10.0
@@ -579,16 +573,14 @@ mod tests {
     }
 
     #[test]
-    fn binary_projection_is_arbitrary_precision() {
-        let ExprKind::Rational(value) =
-            parse_one("#b100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").kind
-        else {
-            panic!("2^128 must use the arbitrary-precision exact path");
+    fn binary_number_is_arbitrary_width() {
+        let payload = format!("1{}", "0".repeat(128));
+        let source = format!("#b{payload}");
+        let ExprKind::BinaryNumber(number) = parse_one(&source).kind else {
+            panic!("arbitrary-width #b must remain BinaryNumber");
         };
-        assert_eq!(
-            value.to_string(),
-            "340282366920938463463374607431768211456"
-        );
+        assert_eq!(number.bits(), payload);
+        assert_eq!(number.width(), 129);
     }
 
     #[test]

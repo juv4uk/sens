@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, CoreD4, CoreDomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -45,6 +45,26 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
     }
 }
 
+/// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
+///
+/// This MUST NOT be used to reinterpret historical Sens8 calls. Its only
+/// consumer is `bind_language_definition`: a definition discovered through
+/// the compatibility surface registry is bound once into an already-ratified
+/// exact D5 slot. #3062 removes this bootstrap detour.
+pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
+    match byte {
+        0b0010_1001 => Some(d5(0b10000)), // APPEND
+        0b0010_1010 => Some(d5(0b10001)), // REVERSE
+        0b0001_0100 => Some(d5(0b10011)), // QUOTIENT
+        0b0010_1101 => Some(d5(0b11100)), // ASSOC
+        0b0010_1100 => Some(d5(0b11101)), // MEMBER
+        0b1010_1100 => Some(d5(0b11111)), // SUBST
+        _ => None,
+    }
+}
 /// Transitional canonical lookup. #2947 removes this legacy-byte detour and
 /// replaces it with the exact-domain surface registry.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
@@ -194,6 +214,25 @@ mod tests {
         assert_eq!(domain_identity_for_surface("решта-від-першого"), None);
     }
 
+    #[test]
+    fn lisp_owned_d5_binding_projection_is_explicit_but_not_global_legacy_meaning() {
+        for (legacy_byte, bits) in [
+            (0b0010_1001, 0b10000),
+            (0b0010_1010, 0b10001),
+            (0b0001_0100, 0b10011),
+            (0b0010_1101, 0b11100),
+            (0b0010_1100, 0b11101),
+            (0b1010_1100, 0b11111),
+        ] {
+            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
+                .expect("ratified D5 bootstrap binding projection");
+            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
+
+            // A historical byte remains a historical byte during invocation.
+            // Only definition binding is allowed to consult the D5 bootstrap map.
+            assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
+        }
+    }
     #[test]
     fn unmigrated_registry_rows_have_no_fake_domain_identity() {
         assert_eq!(domain_identity_for_surface("+"), None);

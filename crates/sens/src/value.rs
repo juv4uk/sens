@@ -1,4 +1,5 @@
 use crate::bignum::BigInt;
+use crate::BinaryNumber;
 use crate::{CoreDomainIdentity, Environment, Exactness, Expr, Sens8, Text7};
 use crate::DomainIdentity;
 use std::{
@@ -502,6 +503,8 @@ pub enum Value {
     Bool(bool),
     Number(f64, Exactness),
     Rational(Rational),
+    /// Canonical natural Number: semantic identity is its normalized binary bitstring.
+    BinaryNumber(BinaryNumber),
     /// Legacy exact-eight compatibility identity. Canonical Core values use
     /// `DomainIdentity` during the #2817 migration.
     Sid(Sens8),
@@ -580,6 +583,7 @@ impl PartialEq for Value {
                 left == right && left_exactness == right_exactness
             }
             (Value::Rational(left), Value::Rational(right)) => left == right,
+            (Value::BinaryNumber(left), Value::BinaryNumber(right)) => left == right,
             (Value::Sid(left), Value::Sid(right)) => left == right,
             (Value::DomainIdentity(left), Value::DomainIdentity(right)) => left == right,
             (Value::String(left), Value::String(right)) => left == right,
@@ -847,6 +851,8 @@ fn render(value: &Value, quote_strings: bool) -> String {
             }
         }
         Value::Rational(number) => number.to_string(),
+        // Human presentation remains ordinary decimal; canonical machine identity stays bits.
+        Value::BinaryNumber(number) => number.to_decimal_string(),
         Value::Sid(sid) => sid.to_string(),
         Value::DomainIdentity(identity) => identity.to_string(),
         Value::String(text) => {
@@ -886,6 +892,7 @@ fn render_canonical_wire(value: &Value) -> String {
             Rational::integer(*number as i64).to_binary_wire_token()
         }
         Value::Rational(number) => number.to_binary_wire_token(),
+        Value::BinaryNumber(number) => format!("#b{}", number.bits()),
         Value::Pair(_, _) => render_pair_canonical_wire(value),
         Value::Vector(values) => {
             let items = values.borrow().iter().map(render_canonical_wire).collect::<Vec<_>>();

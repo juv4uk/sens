@@ -432,6 +432,32 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
+    // #3070 transitional bootstrap.
+    //
+    // Canonical storage/routing is the exact D5 slot. The historical code slot
+    // is only a mechanism alias to the SAME Value/Rc so recursive legacy Core
+    // bodies keep their old shallow dispatch path while source migration is
+    // incomplete. It does not mint a second semantic identity, and #3062
+    // removes this alias when exact-domain source/registry routing is complete.
+    if let Some(identity) =
+        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
+    {
+        if super::necessary_forms::identity_for_domain_identity(identity).is_some() {
+            return;
+        }
+
+        // QUOTIENT already has an admitted direct D5 arithmetic mechanism.
+        // Keep only its historical closure alias for old Core callers; the
+        // exact D5 path must continue to select the direct mechanism first.
+        if domain_primitive(identity).is_none()
+            && !super::d5_arithmetic::has_mechanism(identity)
+        {
+            environment.bind_domain_code_slot_once(identity, value.clone());
+        }
+        environment.bind_code_slot_once(sid, value.clone());
+        return;
+    }
+
     if has_primitive(sid) || super::necessary_forms::identity_for_semantic_id(sid).is_some() {
         return;
     }

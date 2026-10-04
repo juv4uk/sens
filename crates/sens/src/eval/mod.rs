@@ -154,6 +154,7 @@ pub(crate) fn evaluate_step(
     match &expression.kind {
         ExprKind::Number(number, exactness) => Ok(EvalStep::Value(Value::Number(*number, *exactness))),
         ExprKind::Rational(rational) => Ok(EvalStep::Value(Value::Rational(rational.clone()))),
+        ExprKind::BinaryNumber(number) => Ok(EvalStep::Value(Value::BinaryNumber(number.clone()))),
         ExprKind::Sid(sid) => Ok(EvalStep::Value(Value::Sid(*sid))),
         ExprKind::DomainIdentity(identity) => {
             Ok(EvalStep::Value(Value::DomainIdentity(*identity)))

@@ -601,44 +601,44 @@
      ; base+disp8 because that is the addressing mechanism already proved here.
      ((encode pclmulqdq-xmm-xmm-imm8)
       (x86-encode-pclmulqdq-xmm-xmm-imm8
-        'xmm0 'xmm1 #b10001)
-      (#b1100110 #b1111 #b111010 #b1000100 #b11000001 #b10001))
+        'xmm0 'xmm1 #d17)
+      (#d102 #d15 #d58 #d68 #d193 #d17))
      ((encode pclmulqdq-xmm-xmm-imm8-rex)
       (x86-encode-pclmulqdq-xmm-xmm-imm8
-        'xmm8 'xmm9 1)
-      (#b1100110 #b1000101 #b1111 #b111010 #b1000100 #b11000001 1))
+        'xmm8 'xmm9 #d1)
+      (#d102 #d69 #d15 #d58 #d68 #d193 #d1))
      ((encode pclmulqdq-xmm-mem-disp8-imm8)
       (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
-        'xmm2 'rsp 0 #b10000)
-      (#b1100110 #b1111 #b111010 #b1000100 #b1010100 #b100100 0 #b10000))
+        'xmm2 'rsp #d0 #d16)
+      (#d102 #d15 #d58 #d68 #d84 #d36 #d0 #d16))
      ((encode pclmulqdq-xmm-mem-disp8-imm8-rex)
       (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
-        'xmm8 'r12 #b-10000 1)
-      (#b1100110 #b1000101 #b1111 #b111010 #b1000100 #b1000100
-       #b100100 #b11110000 1))
+        'xmm8 'r12 #d-16 #d1)
+      (#d102 #d69 #d15 #d58 #d68 #d68
+       #d36 #d240 #d1))
      ((admission pclmulqdq-register-valid)
       (x86-admitted-instruction?
-        '(pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #b10001))
+        '(pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #d17))
       t)
      ((admission pclmulqdq-memory-valid)
       (x86-admitted-instruction?
-        '(pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #b-10000 1))
+        '(pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-16 #d1))
       t)
      ((admission pclmulqdq-uimm8-overflow)
       (x86-admitted-instruction?
-        '(pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #b100000000))
+        '(pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #d256))
       ())
      ((admission pclmulqdq-disp8-overflow)
       (x86-admitted-instruction?
-        '(pclmulqdq-xmm-mem-disp8-imm8 xmm0 rax #b10000000 1))
+        '(pclmulqdq-xmm-mem-disp8-imm8 xmm0 rax #d128 #d1))
       ())
      ((encode pclmulqdq-admitted-program)
       (x86-encode-admitted-program
-        '((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #b10001)
-          (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #b-10000 1)))
-      (#b1100110 #b1111 #b111010 #b1000100 #b11000001 #b10001
-       #b1100110 #b1000101 #b1111 #b111010 #b1000100 #b1000100
-       #b100100 #b11110000 1))
+        '((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #d17)
+          (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-16 #d1)))
+      (#d102 #d15 #d58 #d68 #d193 #d17
+       #d102 #d69 #d15 #d58 #d68 #d68
+       #d36 #d240 #d1))
      ((admission rdtsc-valid)
       (x86-admitted-instruction? (quote (rdtsc)))
       t)
