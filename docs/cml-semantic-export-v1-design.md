@@ -105,13 +105,15 @@ is exactly this shape and is already contract-ratified evidence, not a
 new example invented for this export:
 
 ```lisp
-(def count-down (lambda (n) (cond ((eq n 0) (quote done)) (t (count-down (- n 1))))))
+(def count-down
+  (lambda (n)
+    (за-умовою
+      ((тотожне? n 0) (як-є done))
+      ((тотожне? n n) (count-down (- n 1))))))
 (count-down 100000)
 ```
 
-Forms this exercises, and therefore the v1 `forms` allow-list: `define`
-(0011), `lambda` (0010), `cond` (0007), `eq` (0003), `quote` (0001),
-subtraction (1001). Nothing else is in v1's export — a second vertical
+Forms this exercises are derived from current language authority, not a flat byte table: `define` and `lambda` remain the binding forms; `як-є`, `за-умовою`, and `тотожне?` lower respectively to exact D3:001 QUOTE, D3:011 COND, and D3:111 EQ; subtraction remains the admitted arithmetic operation. The historical `(0007)/(0003)/(0001)` flat IDs are not authority for this export. Nothing else is in v1's export — a second vertical
 slice adds more forms only once this one is proven end-to-end, per
 `docs/agent-doctrine.md` rule 7 (minimize change surface).
 
