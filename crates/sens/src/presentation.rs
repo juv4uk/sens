@@ -77,7 +77,8 @@ fn render_uk(value: &Value) -> String {
         Value::Bool(true) => "істина".to_string(),
         Value::Number(number, Exactness::Exact) => number.to_string(),
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
-        Value::Rational(number) => number.to_string(),\n        Value::BinaryNumber(number) => number.to_decimal_string(),
+        Value::Rational(number) => number.to_string(),
+        Value::BinaryNumber(number) => number.to_decimal_string(),
         Value::Sid(sid) => {
             format!("#<вбудована {}>", uk_semantic_name(*sid))
         }
