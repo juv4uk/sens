@@ -613,7 +613,7 @@
       (#d102 #d15 #d58 #d68 #d84 #d36 #d0 #d16))
      ((encode pclmulqdq-xmm-mem-disp8-imm8-rex)
       (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
-        'xmm8 'r12 #d-#d16 #d1)
+        'xmm8 'r12 #d-16 #d1)
       (#d102 #d69 #d15 #d58 #d68 #d68
        #d36 #d240 #d1))
      ((admission pclmulqdq-register-valid)
@@ -622,7 +622,7 @@
       t)
      ((admission pclmulqdq-memory-valid)
       (x86-admitted-instruction?
-        '(pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-#d16 #d1))
+        '(pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-16 #d1))
       t)
      ((admission pclmulqdq-uimm8-overflow)
       (x86-admitted-instruction?
@@ -635,7 +635,7 @@
      ((encode pclmulqdq-admitted-program)
       (x86-encode-admitted-program
         '((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 #d17)
-          (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-#d16 #d1)))
+          (pclmulqdq-xmm-mem-disp8-imm8 xmm8 r12 #d-16 #d1)))
       (#d102 #d15 #d58 #d68 #d193 #d17
        #d102 #d69 #d15 #d58 #d68 #d68
        #d36 #d240 #d1))
@@ -657,124 +657,124 @@
      ((native float-arithmetic-int-conversion)
       (x86-call-admitted-u64
         (quote
-          ((mov-r64-imm64 rax #d5)
-           (mov-r64-imm64 rbx #d9)
+          ((mov-r64-imm64 rax 5)
+           (mov-r64-imm64 rbx 9)
            (cvtsi2sd-xmm-r64 xmm0 rax)
            (cvtsi2sd-xmm-r64 xmm1 rbx)
            (mulsd-xmm-xmm xmm0 xmm1)
            (cvttsd2si-r64-xmm rax xmm0)
            (ret)))
-        #d0)
-      #d45)
+        0)
+      45)
      ((native float-sqrt)
       (x86-call-admitted-u64
         (quote
-          ((mov-r64-imm64 rax #d144)
+          ((mov-r64-imm64 rax 144)
            (cvtsi2sd-xmm-r64 xmm0 rax)
            (sqrtsd-xmm-xmm xmm0 xmm0)
            (cvttsd2si-r64-xmm rax xmm0)
            (ret)))
-        #d0)
-      #d12)
+        0)
+      12)
      ((native float-max)
       (x86-call-admitted-u64
         (quote
-          ((mov-r64-imm64 rax #d10)
-           (mov-r64-imm64 rbx #d25)
+          ((mov-r64-imm64 rax 10)
+           (mov-r64-imm64 rbx 25)
            (cvtsi2sd-xmm-r64 xmm0 rax)
            (cvtsi2sd-xmm-r64 xmm1 rbx)
            (maxsd-xmm-xmm xmm0 xmm1)
            (cvttsd2si-r64-xmm rax xmm0)
            (ret)))
-        #d0)
-      #d25)
+        0)
+      25)
      ((native float-ucomisd-compare)
       (x86-call-admitted-u64
         (quote
-          ((mov-r64-imm64 rax #d10)
-           (mov-r64-imm64 rbx #d20)
+          ((mov-r64-imm64 rax 10)
+           (mov-r64-imm64 rbx 20)
            (cvtsi2sd-xmm-r64 xmm0 rax)
            (cvtsi2sd-xmm-r64 xmm1 rbx)
            (ucomisd-xmm-xmm xmm0 xmm1)
            (setb-r8 al)
            (movzx-r64-r8 rax al)
            (ret)))
-        #d0)
-      #d1)
+        0)
+      1)
      ((native float-movq-bitcast-add)
       (x86-call-admitted-u64
         (quote
-          ((mov-r64-imm64 rax #d1073741824)
-           (shl-r64-imm8 rax #d32)
+          ((mov-r64-imm64 rax 1073741824)
+           (shl-r64-imm8 rax 32)
            (movq-xmm-r64 xmm0 rax)
            (addsd-xmm-xmm xmm0 xmm0)
            (movq-r64-xmm rax xmm0)
-           (shr-r64-imm8 rax #d32)
+           (shr-r64-imm8 rax 32)
            (ret)))
-        #d0)
-      #d1074790400)
+        0)
+      1074790400)
      ((native cmpxchg-success)
       (x86-call-admitted-u64
         (quote
-          ((mov-r64-imm64 rax #d10)
-           (mov-r64-imm64 rbx #d10)
-           (mov-r64-imm64 rcx #d99)
+          ((mov-r64-imm64 rax 10)
+           (mov-r64-imm64 rbx 10)
+           (mov-r64-imm64 rcx 99)
            (cmpxchg-r64-r64 rbx rcx)
            (mov-r64-r64 rax rbx)
            (ret)))
-        #d0)
-      #d99)
+        0)
+      99)
      ((native cmpxchg-failure)
       (x86-call-admitted-u64
         (quote
-          ((mov-r64-imm64 rax #d5)
-           (mov-r64-imm64 rbx #d10)
-           (mov-r64-imm64 rcx #d99)
+          ((mov-r64-imm64 rax 5)
+           (mov-r64-imm64 rbx 10)
+           (mov-r64-imm64 rcx 99)
            (cmpxchg-r64-r64 rbx rcx)
            (ret)))
-        #d0)
-      #d10)
+        0)
+      10)
      ((native rdtsc-monotonic)
       (x86-call-admitted-u64
         (quote
           ((rdtsc)
-           (shl-r64-imm8 rdx #d32)
+           (shl-r64-imm8 rdx 32)
            (or-r64-r64 rax rdx)
-           (cmp-r64-imm32 rax #d0)
+           (cmp-r64-imm32 rax 0)
            (seta-r8 al)
            (movzx-r64-r8 rax al)
            (ret)))
-        #d0)
-      #d1))))
+        0)
+      1))))
 
-(#d00001001 x86-instruction-eval-row
-  (#d00001000 (row)
-    (#d10011100 ((name (#d00000101 row))
-          (expr (#d00101111 row))
-          (expected (#d00110000 row)))
-      (#d10011100 ((actual (#d01001101 expr)))
-        (#d00000111
-          ((#d00100010 actual expected) (#d1)
-           (#d00000001 pass))
+(00001001 x86-instruction-eval-row
+  (00001000 (row)
+    (10011100 ((name (00000101 row))
+          (expr (00101111 row))
+          (expected (00110000 row)))
+      (10011100 ((actual (01001101 expr)))
+        (00000111
+          ((00100010 actual expected) (1)
+           (00000001 pass))
           (t
-           (#d00100111 (#d00000001 fail) name expected actual)))))))
+           (00100111 (00000001 fail) name expected actual)))))))
 
-(#d00001001 x86-instruction-run-all
-  (#d00001000 (rows)
-    (#d00000111
-      ((#d00000010 rows) () (#d00000001 (x86-#d64-instruction-set-witness (status pass))))
-      ((#d00000010 rows) (#d1) (#d00000001 (x86-#d64-instruction-set-witness (status pass))))
+(00001001 x86-instruction-run-all
+  (00001000 (rows)
+    (00000111
+      ((00000010 rows) () (00000001 (x86-64-instruction-set-witness (status pass))))
+      ((00000010 rows) (1) (00000001 (x86-64-instruction-set-witness (status pass))))
       (t
-       (#d10011100 ((result (x86-instruction-eval-row (#d00000101 rows))))
-         (#d00000111
-           ((#d00100010 result (#d00000001 pass))
-            (x86-instruction-run-all (#d00000110 rows)))
+       (10011100 ((result (x86-instruction-eval-row (00000101 rows))))
+         (00000111
+           ((00100010 result (00000001 pass))
+            (x86-instruction-run-all (00000110 rows)))
            (t
-            (#d00100111
-              (#d00000001 x86-#d64-instruction-set-witness)
-              (#d00000001 (status fail))
-              (#d00100111 (#d00000001 check) (#d00101111 result))
-              (#d00100111 (#d00000001 expected) (#d00110000 result))
-              (#d00100111 (#d00000001 actual) (#d00110001 result))))))))))
+            (00100111
+              (00000001 x86-64-instruction-set-witness)
+              (00000001 (status fail))
+              (00100111 (00000001 check) (00101111 result))
+              (00100111 (00000001 expected) (00110000 result))
+              (00100111 (00000001 actual) (00110001 result))))))))))
 
 (x86-instruction-run-all x86-instruction-witness-tests)
