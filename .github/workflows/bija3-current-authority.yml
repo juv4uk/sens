@@ -1,4 +1,4 @@
-name: bīja3 current authority
+name: D3 revoked evidence guard
 
 on:
   pull_request:
@@ -18,7 +18,7 @@ on:
       - "contracts/bija3-l1-l5-ratification.lisp"
 
 jobs:
-  authority:
+  revoked-evidence:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
