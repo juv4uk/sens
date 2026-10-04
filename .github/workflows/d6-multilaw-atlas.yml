@@ -1,0 +1,43 @@
+name: D6 multilaw atlas research
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-multilaw-atlas.json"
+      - "knowledge/d3-d8-stable-residents.json"
+      - "scripts/check-3077-d6-multilaw-atlas.py"
+      - ".github/workflows/d6-multilaw-atlas.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d6-multilaw-atlas.json"
+      - "scripts/check-3077-d6-multilaw-atlas.py"
+      - ".github/workflows/d6-multilaw-atlas.yml"
+  workflow_dispatch:
+
+jobs:
+  atlas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate D6 stable-ID multilaw atlas
+        run: |
+          rm -rf /tmp/d6-multilaw-atlas
+          python3 scripts/check-3077-d6-multilaw-atlas.py \
+            --out /tmp/d6-multilaw-atlas
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d6-multilaw-atlas/report.md; then
+            cat /tmp/d6-multilaw-atlas/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-multilaw-atlas
+          path: /tmp/d6-multilaw-atlas/
+          retention-days: 14
