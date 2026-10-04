@@ -96,21 +96,6 @@ pub(crate) fn ensure_bindable_sid(sid: Sens8, span: Span) -> Result<(), Language
     ))
 }
 
-pub(crate) fn immutable_domain_binding_error(
-    identity: crate::DomainIdentity,
-    span: Span,
-) -> LanguageError {
-    LanguageError::new(
-        ErrorKind::InvalidForm,
-        format!(
-            "canonical name is immutable after exact-domain lowering · канонічне ім'я незмінне після exact-domain lowering · kanonischer Name ist nach Exact-Domain-Lowering unveränderlich: D{} {}",
-            identity.width(),
-            identity
-        ),
-        span,
-    )
-}
-
 fn exact_args(
     sid: crate::Sens8,
     args: &[Value],
@@ -369,7 +354,10 @@ pub(crate) fn invoke_semantic_ref(
     if let Some(identity) =
         semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
     {
-        if environment.domain_code_slot(identity).is_some() || domain_primitive(identity).is_some() {
+        if super::selector_law::supports(identity)
+            || environment.domain_code_slot(identity).is_some()
+            || domain_primitive(identity).is_some()
+        {
             return invoke_domain_identity(identity, args, environment, span);
         }
     }
