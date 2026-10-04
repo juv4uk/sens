@@ -7,6 +7,7 @@ on:
       - "docs/domain-surfaces-d1-d4.md"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/translate-domain-program.py"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
       - ".github/workflows/d1-d4-surfaces.yml"
   push:
     branches: [main]
@@ -15,6 +16,7 @@ on:
       - "docs/domain-surfaces-d1-d4.md"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/translate-domain-program.py"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
       - ".github/workflows/d1-d4-surfaces.yml"
 
 jobs:
@@ -25,7 +27,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - name: Check D1-D4 uk/sa projection
+      - name: Check D1-D4 uk/sa projection and generated runtime table
         run: python3 scripts/check-domain-surfaces-d1-d4.py
       - name: Check D1-D4 program translation
         run: python3 scripts/translate-domain-program.py --self-test
