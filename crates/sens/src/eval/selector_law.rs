@@ -1,22 +1,22 @@
 //! Production mechanism for the ratified CAR/CDR selector generator law.
 //!
-//! Semantic authority: #1961/#1975/#2055.
+//! Semantic authority: #3202 / #2055.
 //!
-//! A selector descendant is not looked up in a flat function table.
-//! Its exact Core identity is decoded as:
+//! Current proved family:
+//! - D3 root 100 -> CAR
+//! - D3 root 011 -> CDR
+//! - D4 suffix 0 -> compose CAR
+//! - D4 suffix 1 -> compose CDR
 //!
-//! - D3 root 101 -> CAR
-//! - D3 root 110 -> CDR
-//! - every suffix bit 0 -> compose CAR
-//! - every suffix bit 1 -> compose CDR
-//!
-//! The operation sequence is encoded outer-to-inner, so execution applies it
-//! in reverse order to the argument value.
+//! This implementation is deliberately bounded to D3/D4. Extending the new
+//! roots mechanically into D5 would collide with owner-ratified OD-005
+//! (for example D5:10000 = APPEND). #3209 owns re-derivation beyond D4.
+//! D5/D6/D7/D8 therefore fail closed here.
 
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 6;
+const MAX_SELECTOR_DEPTH: usize = 2;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
@@ -32,17 +32,15 @@ struct SelectorProgram {
 
 fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let width = identity.width();
-    // D7 is the ratified Sound7/Text7 domain, not selector geometry.
-    // D8 re-enters the selector lineage only under the admitted root+suffix law.
-    if !((3..=6).contains(&width) || width == 8) {
+    if !(3..=4).contains(&width) {
         return None;
     }
 
     let payload = identity.packed_bits();
     let prefix = payload >> (width - 3);
     let root = match prefix {
-        0b101 => Step::Car,
-        0b110 => Step::Cdr,
+        0b100 => Step::Car,
+        0b011 => Step::Cdr,
         _ => return None,
     };
 
@@ -50,21 +48,22 @@ fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let mut steps = [Step::Car; MAX_SELECTOR_DEPTH];
     steps[0] = root;
 
-    let mut index = 0usize;
-    while index < suffix_len {
-        let shift = suffix_len - 1 - index;
-        steps[index + 1] = if ((payload >> shift) & 1) == 0 {
+    if suffix_len == 1 {
+        steps[1] = if (payload & 1) == 0 {
             Step::Car
         } else {
             Step::Cdr
         };
-        index += 1;
     }
 
     Some(SelectorProgram {
         steps,
         len: 1 + suffix_len,
     })
+}
+
+pub(super) fn supports(identity: CoreDomainIdentity) -> bool {
+    decode(identity).is_some()
 }
 
 pub(super) fn invoke(
@@ -138,109 +137,81 @@ mod tests {
     }
 
     #[test]
-    fn selector_family_is_decoded_from_root_plus_suffix_only() {
-        assert_eq!(decode(d3(0b101)).unwrap().len, 1);
-        assert_eq!(decode(d3(0b110)).unwrap().len, 1);
+    fn selector_family_is_decoded_from_new_root_plus_one_d4_suffix() {
+        assert_eq!(decode(d3(0b100)).unwrap().steps[..1], [Step::Car]);
+        assert_eq!(decode(d3(0b011)).unwrap().steps[..1], [Step::Cdr]);
 
-        assert_eq!(
-            decode(d4(0b1011)).unwrap().steps[..2],
-            [Step::Car, Step::Cdr]
-        );
-        assert_eq!(
-            decode(d5(0b11010)).unwrap().steps[..3],
-            [Step::Cdr, Step::Cdr, Step::Car]
-        );
-        assert_eq!(
-            decode(d6(0b101101)).unwrap().steps[..4],
-            [Step::Car, Step::Cdr, Step::Car, Step::Cdr]
-        );
-        assert_eq!(
-            decode(d8(0b10110101)).unwrap().steps[..6],
-            [Step::Car, Step::Cdr, Step::Car, Step::Cdr, Step::Car, Step::Cdr]
-        );
+        assert_eq!(decode(d4(0b1000)).unwrap().steps[..2], [Step::Car, Step::Car]);
+        assert_eq!(decode(d4(0b1001)).unwrap().steps[..2], [Step::Car, Step::Cdr]);
+        assert_eq!(decode(d4(0b0110)).unwrap().steps[..2], [Step::Cdr, Step::Car]);
+        assert_eq!(decode(d4(0b0111)).unwrap().steps[..2], [Step::Cdr, Step::Cdr]);
     }
 
     #[test]
-    fn non_selector_words_are_not_minted_by_geometry() {
+    fn old_roots_and_higher_width_prefix_collisions_fail_closed() {
         for identity in [
-            d3(0b001),
-            d3(0b100),
-            d4(0b0010),
-            d5(0b01010),
-            d6(0b011111),
+            d3(0b101),
+            d3(0b110),
+            d4(0b1010),
+            d4(0b1011),
+            d4(0b1100),
+            d4(0b1101),
+            d5(0b10000), // OD-005 APPEND, never CAAAR
+            d5(0b11101), // OD-005 MEMBER
+            d6(0b100000),
+            d8(0b10000000),
         ] {
             assert_eq!(decode(identity), None);
         }
     }
 
     #[test]
-    fn d3_through_d6_selectors_execute_without_descendant_rows() {
+    fn d3_and_d4_selectors_execute_without_descendant_rows() {
         let leaf = |n| Value::Number(n, crate::Exactness::Exact);
-
-        // x = (((1 . 2) . (3 . 4)) . ((5 . 6) . (7 . 8)))
         let x = pair(
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0))),
             pair(pair(leaf(5.0), leaf(6.0)), pair(leaf(7.0), leaf(8.0))),
         );
         let span = Span { start: 0, end: 0 };
 
-        // CAR
         assert_eq!(
-            invoke(d3(0b101), std::slice::from_ref(&x), span).unwrap().unwrap(),
+            invoke(d3(0b100), std::slice::from_ref(&x), span).unwrap().unwrap(),
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0)))
         );
-        // CADR = CAR(CDR(x))
         assert_eq!(
-            invoke(d4(0b1011), &[proper([leaf(10.0), leaf(20.0)])], span)
+            invoke(d3(0b011), std::slice::from_ref(&x), span).unwrap().unwrap(),
+            pair(pair(leaf(5.0), leaf(6.0)), pair(leaf(7.0), leaf(8.0)))
+        );
+        assert_eq!(
+            invoke(d4(0b1001), &[proper([leaf(10.0), leaf(20.0)])], span)
                 .unwrap()
                 .unwrap(),
             leaf(20.0)
         );
-        // CAAAR = CAR(CAR(CAR(x)))
-        assert_eq!(
-            invoke(d5(0b10100), std::slice::from_ref(&x), span).unwrap().unwrap(),
-            leaf(1.0)
-        );
-        // CAAAAR = CAR(CAR(CAR(CAR(x2))))
-        let x2 = pair(x.clone(), Value::Nil);
-        assert_eq!(
-            invoke(d6(0b101000), &[x2], span).unwrap().unwrap(),
-            leaf(1.0)
-        );
-
-        // D8 10100000 = six CAR applications under the same admitted law.
-        let mut x8 = leaf(9.0);
-        for _ in 0..6 {
-            x8 = pair(x8, Value::Nil);
-        }
-        assert_eq!(
-            invoke(d8(0b10100000), &[x8], span).unwrap().unwrap(),
-            leaf(9.0)
-        );
     }
 
     #[test]
-    fn one_root_law_generates_the_complete_bounded_selector_family() {
-        let mut generated = 0usize;
+    fn complement_pairs_flip_every_selector_step_inside_the_proved_d4_family() {
+        for (left, right) in [(0b1000, 0b0111), (0b1001, 0b0110)] {
+            let a = decode(d4(left)).unwrap();
+            let b = decode(d4(right)).unwrap();
+            assert_eq!(a.len, b.len);
+            for index in 0..a.len {
+                assert_ne!(a.steps[index], b.steps[index]);
+            }
+            assert_eq!(left ^ 0b1111, right);
+        }
+    }
 
+    #[test]
+    fn exactly_two_d3_roots_and_four_d4_descendants_are_admitted() {
+        let mut generated = 0usize;
         for raw in 0u8..8 {
             generated += usize::from(decode(d3(raw)).is_some());
         }
         for raw in 0u8..16 {
             generated += usize::from(decode(d4(raw)).is_some());
         }
-        for raw in 0u8..32 {
-            generated += usize::from(decode(d5(raw)).is_some());
-        }
-        for raw in 0u8..64 {
-            generated += usize::from(decode(d6(raw)).is_some());
-        }
-        for raw in 0u8..=255 {
-            generated += usize::from(decode(d8(raw)).is_some());
-        }
-
-        // 2 roots + 4 D4 + 8 D5 + 16 D6 + 64 D8 descendants.
-        // D7 contributes zero: it is governed by Sound7/Text7 law.
-        assert_eq!(generated, 94);
+        assert_eq!(generated, 6);
     }
 }
