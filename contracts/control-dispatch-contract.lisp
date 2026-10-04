@@ -1,10 +1,13 @@
 ; #1810 — minimal shared COND control law.
 ;
 ; COND does not understand arbitrary answer algebras.
-; It consumes exactly the contextual one-bit predicate result:
+; Canonical D3:011 consumes exactly:
 ;
-;   1 -> select/evaluate expression
-;   0 -> continue
+;   D1:1   -> select/evaluate expression
+;   D1:0   -> continue with explicit NO
+;   D3:000 -> continue with EMPTY/no-witness
+;
+; 0 and () project to the same control action but remain distinct values.
 ;
 ; A clause is exactly:
 ;   (test expression)
@@ -15,9 +18,11 @@
   ((identity . 00000111)
    (domain-owner . control)
    (canonical-clause-shape . (test expression))
-   (test-domain . predicate-one-bit)
+   (test-domain . (predicate-one-bit structural-empty-no-witness))
    (select-on . one)
-   (skip-on . zero)
+   (skip-on . (zero structural-empty))
+   (zero-equals-empty . forbidden)
+   (partial-predicate-empty-witness . admitted)
    (no-match . structural-empty)
    (three-part-clause . forbidden)
    (expected-result-field . forbidden)
@@ -25,4 +30,5 @@
    (generic-truth-coercion . forbidden)
    (host-bool-coercion . forbidden)
    (empty-list-as-false . forbidden)
+   (structural-empty-as-no-witness . admitted)
    (arbitrary-nonempty-as-true . forbidden)))
