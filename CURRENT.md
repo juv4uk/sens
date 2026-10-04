@@ -7,7 +7,7 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.2 domain-qualified observable language contract.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.3 domain-qualified observable language contract.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
    - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1-D4 and D7, while D5/D6/D8 are UNRATIFIED/RESEARCH under #3278. Historical Sens8/Sid8 is compatibility/provenance only.
@@ -50,6 +50,8 @@ Equal packed bits in two domains do not imply equal identity. In particular an e
 Historical exact-eight-bit Sens8/Sid8/Function8 forms remain bounded compatibility, transport, backend and provenance mechanisms while #2817 migrates runtime consumers. They are not current universal semantic authority.
 
 Structural `()` is the admitted Core.D3 `000` object. It is not historical exact-eight-bit `00000000`, PredicateBit `0`, or Number zero; those equal-looking numeric payloads remain distinct across domains.
+
+Contract 11.3 / #3161 fixes the current D3 control boundary: `ATOM` is total D1; `EQ` is partial and returns D3 `()` as EMPTY/no-witness outside its atom domain; `COND` is exactly `(test expression)` and accepts only D1 `1`, D1 `0`, or D3 `()`. This does not reopen D5/D6/D8 after owner reset #3278.
 
 Historical McCarthy names remain useful when discussing the 1960 evaluator, Core1, migration evidence, or provenance. They do not create a second current identity ontology.
 
