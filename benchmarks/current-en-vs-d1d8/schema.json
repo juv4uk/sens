@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sens-current-en-vs-d1d8/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "pair_id",
+    "case_id",
+    "lane",
+    "candidate",
+    "workload",
+    "phase",
+    "rep",
+    "language_model",
+    "legacy_identity_used",
+    "oracle_ok",
+    "git_sha",
+    "binary_sha256",
+    "corpus_sha256",
+    "provenance",
+    "metrics"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sens-current-en-vs-d1d8/v1"
+    },
+    "pair_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "enum": [
+        "cpu",
+        "transport",
+        "memory"
+      ]
+    },
+    "candidate": {
+      "enum": [
+        "english-surface",
+        "canonical-d1d8"
+      ]
+    },
+    "workload": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "enum": [
+        "session",
+        "ingest",
+        "lower",
+        "execute",
+        "full",
+        "repeated",
+        "representation",
+        "memory"
+      ]
+    },
+    "rep": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "language_model": {
+      "const": "D1-D8"
+    },
+    "legacy_identity_used": {
+      "const": false
+    },
+    "oracle_ok": {
+      "const": true
+    },
+    "git_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "binary_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "corpus_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "metrics": {
+      "type": "object"
+    }
+  }
+}
