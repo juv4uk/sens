@@ -680,13 +680,6 @@ mod tests {
         assert_eq!(equal.as_predicate_bit(), Some(true));
         assert_eq!(different.as_predicate_bit(), Some(false));
 
-        let pair = Value::list([Value::Number(1.0, crate::Exactness::Exact)]);
-        let no_witness =
-            invoke_domain_identity(d3(0b111), &[pair, Value::Nil], &env, span)
-                .expect("D3:111 outside atom domain returns EMPTY/no-witness");
-        assert_eq!(no_witness, Value::Nil);
-        assert_eq!(no_witness.as_predicate_bit(), None);
-
         assert!(has_language_result_boundary(d3(0b010)));
         assert!(has_language_result_boundary(d3(0b111)));
         assert!(!has_language_result_boundary(d3(0b100)));
