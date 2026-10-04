@@ -75,3 +75,184 @@ fn print_representative_results() {
         println!("D6-PURE-LAW source={source:?} result={:?}", run(source));
     }
 }
+
+
+#[test]
+fn nth_obeys_indexed_projection_recurrence() {
+    for value in ["(a)", "(a b)", "(a b c d)"] {
+        assert_same(
+            &format!("(nth 0 (quote {value}))"),
+            &format!("(car (quote {value}))"),
+        );
+    }
+
+    let value = "(a b c d)";
+    for n in 0..3 {
+        assert_same(
+            &format!("(nth {} (quote {value}))", n + 1),
+            &format!("(nth {n} (cdr (quote {value})))"),
+        );
+    }
+}
+
+#[test]
+fn maplist_observes_successive_tails() {
+    for value in ["()", "(a)", "(a b c)", "(1 2 3 4)"] {
+        assert_same(
+            &format!("(maplist (quote {value}) (lambda (tail) (car tail)))"),
+            &format!("(quote {value})"),
+        );
+    }
+
+    assert_same(
+        "(maplist (quote (a b c)) (lambda (tail) (length tail)))",
+        "(quote (3 2 1))",
+    );
+    assert_same(
+        "(maplist (quote (a b c d)) (lambda (tail) (length tail)))",
+        "(quote (4 3 2 1))",
+    );
+}
+
+#[test]
+fn sublis_singleton_generalizes_subst_and_multi_key_is_distinct() {
+    for tree in ["a", "(a b a)", "((a) b (c a))"] {
+        assert_same(
+            &format!("(sublis (quote ((a z))) (quote {tree}))"),
+            &format!("(subst (quote z) (quote a) (quote {tree}))"),
+        );
+    }
+
+    assert_same(
+        "(sublis (quote ((a x) (b y))) (quote (a (b c) a)))",
+        "(quote (x (y c) x))",
+    );
+}
+
+#[test]
+fn rassoc_is_assoc_under_pair_transposition() {
+    let prelude = r#"
+        (define d6-transpose-pair
+          (lambda (p) (cons (cdr p) (car p))))
+        (define d6-transpose-alist
+          (lambda (alist) (map d6-transpose-pair alist)))
+        (define d6-rassoc
+          (lambda (value alist)
+            ((lambda (hit) (d6-transpose-pair hit))
+             (assoc value (d6-transpose-alist alist)))))
+    "#;
+
+    for (value, expected) in [("1", "(a . 1)"), ("2", "(b . 2)"), ("3", "(c . 3)")] {
+        assert_same(
+            &format!(
+                "{prelude} (d6-rassoc {value} (quote ((a . 1) (b . 2) (c . 3))))"
+            ),
+            &format!("(quote {expected})"),
+        );
+    }
+
+    assert_same(
+        &format!(
+            "{prelude} (d6-transpose-alist (d6-transpose-alist (quote ((a . 1) (b . 2)))))"
+        ),
+        "(quote ((a . 1) (b . 2)))",
+    );
+}
+
+#[test]
+fn acons_is_pair_construction_over_cons() {
+    assert_same(
+        "(cons (cons (quote k) (quote v)) (quote ((old . 0))))",
+        "(quote ((k . v) (old . 0)))",
+    );
+    assert_same(
+        "(assoc (quote k) (cons (cons (quote k) (quote v)) (quote ((old . 0)))))",
+        "(quote (k . v))",
+    );
+}
+
+#[test]
+fn add1_sub1_neg_abs_and_remainder_obey_lower_domain_laws() {
+    for x in ["-9", "-1", "0", "1", "7", "42"] {
+        assert_same(&format!("(- (+ {x} 1) 1)"), x);
+        assert_same(&format!("(+ (- {x} 1) 1)"), x);
+        assert_same(&format!("(- 0 (- 0 {x}))"), x);
+        assert_same(&format!("(abs (- 0 {x}))"), &format!("(abs {x})"));
+        assert_same(&format!("(abs (abs {x}))"), &format!("(abs {x})"));
+    }
+
+    for (a, b) in [("17", "5"), ("42", "8"), ("100", "9"), ("7", "7")] {
+        assert_same(
+            &format!("(mod {a} {b})"),
+            &format!("(- {a} (* {b} (quotient {a} {b})))"),
+        );
+    }
+}
+
+#[test]
+fn expt_is_repeated_multiplication_over_nonnegative_integers() {
+    let prelude = r#"
+        (define d6-expt
+          (lambda (base exponent)
+            (cond
+              ((= exponent 0) 1)
+              (t (* base (d6-expt base (- exponent 1)))))))
+    "#;
+
+    for x in ["-3", "0", "2", "7"] {
+        assert_same(&format!("{prelude} (d6-expt {x} 0)"), "1");
+        assert_same(&format!("{prelude} (d6-expt {x} 1)"), x);
+    }
+
+    for (x, m, n) in [("2", "2", "3"), ("3", "1", "4"), ("-2", "2", "2")] {
+        assert_same(
+            &format!("{prelude} (d6-expt {x} (+ {m} {n}))"),
+            &format!("{prelude} (* (d6-expt {x} {m}) (d6-expt {x} {n}))"),
+        );
+    }
+}
+
+#[test]
+fn gcd_is_euclidean_fold_over_remainder() {
+    let prelude = r#"
+        (define d6-gcd
+          (lambda (a b)
+            (cond
+              ((= b 0) (abs a))
+              (t (d6-gcd b (mod a b))))))
+    "#;
+
+    for (a, b, expected) in [
+        ("54", "24", "6"),
+        ("24", "54", "6"),
+        ("17", "5", "1"),
+        ("42", "14", "14"),
+    ] {
+        assert_same(&format!("{prelude} (d6-gcd {a} {b})"), expected);
+    }
+
+    for (a, b) in [("54", "24"), ("17", "5"), ("42", "14")] {
+        assert_same(
+            &format!("{prelude} (d6-gcd {a} {b})"),
+            &format!("{prelude} (d6-gcd {b} (mod {a} {b}))"),
+        );
+    }
+}
+
+#[test]
+fn curry2_is_prefix_application_via_lexical_closure() {
+    let prelude = r#"
+        (define d6-curry2
+          (lambda (f a)
+            (lambda (b) (f a b))))
+    "#;
+
+    assert_same(
+        &format!("{prelude} ((d6-curry2 (lambda (x y) (+ x y)) 7) 5)"),
+        "12",
+    );
+    assert_same(
+        &format!("{prelude} ((d6-curry2 (lambda (x y) (* x y)) 6) 7)"),
+        "42",
+    );
+}
