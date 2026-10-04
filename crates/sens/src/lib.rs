@@ -14,6 +14,11 @@ mod bits;
 mod canonical_reader;
 mod domain_words;
 mod domain_identity;
+// #2958/#3029: full D1-D8 exact identity coordinate space.
+// Conformance-only until a canonical registry consumer lands. This carries no
+// role/law/callability/mechanism authority, including under clean-room D4.
+#[cfg(test)]
+mod domain_owner_generated;
 mod packed_bits;
 mod binary_framing;
 mod environment;
