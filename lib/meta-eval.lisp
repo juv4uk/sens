@@ -411,13 +411,31 @@
        (my-compare-chain operator (00000110 values)))
       (t (00000001 ())))))
 
+; Contract 11.3 / #3161 projection for the metacircular witness.
+; The meta evaluator keeps its private historical one-element carrier internally,
+; but models the current exact D3 laws: EMPTY is an ATOM-yes subject, and EQ is
+; partial with structural EMPTY/no-witness outside the atom domain.
+(00001001 my-d3-atom
+  (00001000 (value)
+    (00000111
+      ((00000010 value) (1) (00000001 (1)))
+      ((00000010 value) (0) (00000001 (0)))
+      ((00000010 value) () (00000001 (1))))))
+
+(00001001 my-d3-eq
+  (00001000 (left right)
+    (00000111
+      ((my-d3-atom left) (0) (00000001 ()))
+      ((my-d3-atom right) (0) (00000001 ()))
+      (t (00000011 left right)))))
+
 ; Primitive *identity* is a Lisp value. This function is the narrow bridge
 ; from that identity to the admitted native operation mechanism.
 (00001001 my-apply-primitive
   (00001000 (name args)
     (00000111
-      ((00000011 name (00000001 atom)) (00000010 (00000101 args)))
-      ((00000011 name (00000001 eq))   (00000011 (00000101 args) (00101111 args)))
+      ((00000011 name (00000001 atom)) (my-d3-atom (00000101 args)))
+      ((00000011 name (00000001 eq))   (my-d3-eq (00000101 args) (00101111 args)))
       ((00000011 name (00000001 car))  (00000101 (00000101 args)))
       ((00000011 name (00000001 cdr))  (00000110 (00000101 args)))
       ((00000011 name (00000001 cons)) (00000100 (00000101 args) (00101111 args)))
