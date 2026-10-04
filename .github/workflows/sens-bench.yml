@@ -1,8 +1,7 @@
-name: Ratified domains D1-D4 benchmark
+name: Ratified domains D1-D8 benchmark
 
-# Active benchmark lane after D1-D4 owner ratification (#2151/#2162).
-# The retired English-Lisp-vs-Function8 comparison remains historical evidence
-# under benchmarks/sens-surface, but it is no longer an automatic CI baseline.
+# Current exact-domain carrier/runtime benchmark after the D1-D8 production
+# cutover. Historical D1-D4 results remain archived under benchmarks/domain1234.
 
 on:
   workflow_dispatch:
@@ -11,58 +10,58 @@ on:
       - ".github/workflows/sens-bench.yml"
       - "crates/sens/src/bits.rs"
       - "crates/sens/src/domain_words.rs"
-      - "crates/sens/examples/domain1234_bench.rs"
-      - "benchmarks/domain1234/**"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/examples/domain12345678_bench.rs"
+      - "benchmarks/domain12345678/**"
   push:
     branches: [main]
     paths:
       - ".github/workflows/sens-bench.yml"
       - "crates/sens/src/bits.rs"
       - "crates/sens/src/domain_words.rs"
-      - "crates/sens/examples/domain1234_bench.rs"
-      - "benchmarks/domain1234/**"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/examples/domain12345678_bench.rs"
+      - "benchmarks/domain12345678/**"
 
-# A newer head supersedes older benchmark evidence on the same ref, including
-# main. This prevents stale benchmark queues from consuming runner capacity.
 concurrency:
-  group: domain1234-bench-${{ github.ref }}
+  group: domain12345678-bench-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   bench:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-
       - uses: dtolnay/rust-toolchain@stable
-
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: domain1234-bench
+          shared-key: domain12345678-bench
 
       - name: Install Valgrind
         run: |
           sudo apt-get update
           sudo apt-get install -y valgrind
           valgrind --version
+          rustc --version
 
-      - name: Build ratified-foundation benchmark
-        run: cargo build --release -p sens --example domain1234_bench
+      - name: Build D1-D8 benchmark
+        run: cargo build --release -p sens --example domain12345678_bench
 
-      - name: Measure D1-D4 exact-width foundation
+      - name: Measure D1-D8 exact-domain carrier/runtime
         run: |
-          mkdir -p /tmp/domain1234
-          python3 benchmarks/domain1234/run.py \
-            --binary target/release/examples/domain1234_bench \
-            --out /tmp/domain1234/results.tsv \
+          rm -rf /tmp/domain12345678
+          python3 benchmarks/domain12345678/run.py \
+            --binary target/release/examples/domain12345678_bench \
+            --out-dir /tmp/domain12345678 \
             --iterations 200000 \
             --reps 3
 
-      - name: Upload D1-D4 benchmark evidence
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: domain1234-cachegrind
-          path: /tmp/domain1234/results.tsv
+          name: domain12345678-cachegrind
+          path: /tmp/domain12345678
           retention-days: 7
