@@ -398,6 +398,20 @@ pub(crate) fn invoke_domain_identity(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    // #3161 owner override: exact D3:111 EQ is partial over its atom domain.
+    // Keep the compatibility Function8 mechanism unchanged; only the canonical
+    // exact-domain path gets EMPTY/no-witness outside the admitted atom domain.
+    if matches!(
+        identity,
+        CoreDomainIdentity::D3(word) if word.word().packed_bits() == 0b111
+    ) {
+        exact_args(crate::sens!(00000011), args, 2, span)?;
+        if !args[0].is_atom() || !args[1].is_atom() {
+            return Ok(Value::Nil);
+        }
+        return Ok(Value::predicate_bit(args[0] == args[1]));
+    }
+
     if let Some(result) = super::selector_law::invoke(identity, args, span) {
         return result;
     }
@@ -649,6 +663,13 @@ mod tests {
             .expect("D3:111 distinct atoms");
         assert_eq!(equal.as_predicate_bit(), Some(true));
         assert_eq!(different.as_predicate_bit(), Some(false));
+
+        let pair = Value::list([Value::Number(1.0, crate::Exactness::Exact)]);
+        let no_witness =
+            invoke_domain_identity(d3(0b111), &[pair, Value::Nil], &env, span)
+                .expect("D3:111 outside atom domain returns EMPTY/no-witness");
+        assert_eq!(no_witness, Value::Nil);
+        assert_eq!(no_witness.as_predicate_bit(), None);
 
         assert!(has_language_result_boundary(d3(0b010)));
         assert!(has_language_result_boundary(d3(0b111)));
