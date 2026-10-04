@@ -17,3 +17,4 @@ path = "src/lib.rs"
 # Тести можуть явно підключати host-capability crate, тоді як сама бібліотека
 # sens лишається без runtime-залежностей і прямого доступу до ОС.
 sens-host = { path = "../sens-host" }
+serde_json = "1"
