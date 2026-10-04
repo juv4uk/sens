@@ -21,7 +21,7 @@
 
   (laws
     . ((svarupa . "exact bits + exact domain + admitted/proved law")
-       (legacy-non-authority . "SID8/Sens8/Function8 coordinates have zero current placement authority")
+       (legacy-non-authority . "legacy flat 8-bit coordinates have zero current placement authority")
        (d5-no-duplicate . "D5 has 32 distinct residents and zero lower-domain semantic duplicates")
        (d5-no-global-suffix . "The fifth bit has local family meaning only")
        (d6-boundary . "D6-D8 are research; W6-W8 carrier existence does not grant semantic admission")))
