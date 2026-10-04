@@ -39,6 +39,35 @@ fn expr(identity: DomainIdentity) -> Expr {
 }
 
 #[test]
+fn predicate_value_bridge_uses_only_exact_d1_domain_identity() {
+    let yes = Value::predicate_bit(true);
+    let no = Value::predicate_bit(false);
+
+    assert_eq!(yes, Value::DomainIdentity(d1(1)));
+    assert_eq!(no, Value::DomainIdentity(d1(0)));
+    assert_eq!(yes.as_predicate_bit(), Some(true));
+    assert_eq!(no.as_predicate_bit(), Some(false));
+
+    assert_eq!(
+        Value::Number(1.0, Exactness::Exact).as_predicate_bit(),
+        None
+    );
+    assert_eq!(
+        Value::Number(0.0, Exactness::Exact).as_predicate_bit(),
+        None
+    );
+    assert_eq!(Value::Bool(true).as_predicate_bit(), None);
+    assert_eq!(Value::Bool(false).as_predicate_bit(), None);
+    assert_eq!(Value::Nil.as_predicate_bit(), None);
+    assert_eq!(Value::DomainIdentity(d2(1)).as_predicate_bit(), None);
+    assert_eq!(Value::DomainIdentity(d3(1)).as_predicate_bit(), None);
+
+    assert_ne!(yes, Value::Number(1.0, Exactness::Exact));
+    assert_ne!(no, Value::Number(0.0, Exactness::Exact));
+    assert_ne!(yes, Value::DomainIdentity(d2(1)));
+}
+
+#[test]
 fn same_payload_across_all_d1_d8_remains_distinct_in_ast_and_value() {
     let identities = [d1(1), d2(1), d3(1), d4(1), d5(1), d6(1), d7(1), d8(1)];
 
