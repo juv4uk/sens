@@ -34,6 +34,10 @@ is_protected_path() {
 is_exact_width_file() {
   local path="$1"
 
+  # The quarantine module itself is historical compatibility metadata, not
+  # canonical exact-domain code. Its callers are guarded separately below.
+  [[ "$path" == "crates/sens/src/legacy_registry.rs" ]] && return 1
+
   is_protected_path "$path" && return 0
   case "$path" in
     crates/sens/src/*.rs|crates/sens/examples/*.rs|crates/sens/tests/*.rs) ;;
@@ -61,6 +65,23 @@ is_surface_projection_boundary() {
   [[ "$path" == "crates/sens/src/eval/lower.rs" ]]
 }
 
+is_legacy_boundary_path() {
+  local path="$1"
+  case "$path" in
+    crates/sens/src/lib.rs|\
+    crates/sens/src/presentation.rs|\
+    crates/sens/src/language_items.rs|\
+    crates/sens/src/eval/canon.rs|\
+    crates/sens/src/eval/necessary_forms.rs|\
+    crates/sens/src/eval/lower.rs)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 is_executable_line() {
   local line="$1"
   local trimmed
@@ -74,6 +95,7 @@ is_executable_line() {
 }
 
 legacy_pattern='(^|[^[:alnum:]_])(Sid8|Sens8|Function8)([^[:alnum:]_]|$)|Value::Sid|sens!\([01]{8}\)'
+legacy_registry_pattern='legacy_registry::|use[[:space:]]+crate::legacy_registry'
 byte_scatter_pattern='TAG_DOMAIN_IDENTITY|TAG_CALLABLE_DOMAIN|out\.push\([^)]*\.width\(\)[^)]*\)|out\.push\([^)]*\.packed_(bits|byte)\(\)[^)]*\)'
 name_dispatch_pattern='semantic_id_for_surface|admitted_semantic_id_for_surface|registry_byte_for_surface|legacy_domain_identity_from_registry_byte|routed_sid_for_surface|surface_has_sid'
 exact_domain_projection_pattern='domain_identity_for_surface|domain_identity_for_symbol'
@@ -87,6 +109,13 @@ while IFS= read -r path; do
     is_executable_line "$added" || continue
     if printf '%s\n' "$added" | grep -Eq "$legacy_pattern"; then
       echo "PARADIGM-ONE-WAY violation: exact-width code adds legacy identity dependency" >&2
+      echo "  file: $path" >&2
+      echo "  line: $added" >&2
+      failed=1
+    fi
+    if printf '%s\n' "$added" | grep -Eq "$legacy_registry_pattern" \
+      && ! is_legacy_boundary_path "$path"; then
+      echo "PARADIGM-ONE-WAY violation: legacy registry boundary is not admitted here" >&2
       echo "  file: $path" >&2
       echo "  line: $added" >&2
       failed=1
