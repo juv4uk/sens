@@ -142,7 +142,13 @@ def check(corpus: Path,target: Path):
     expected={"function-status-census.json":j,"function-status-census.tsv":t}
     for name,content in expected.items():
         p=target/name
-        if not p.exists() or p.read_text(encoding="utf-8")!=content:
+        actual = p.read_text(encoding="utf-8") if p.exists() else ""
+        if actual != content:
+            import difflib
+            print("".join(difflib.unified_diff(
+                actual.splitlines(True), content.splitlines(True),
+                fromfile=str(p), tofile=f"generated/{name}", n=3,
+            )))
             raise SystemExit(f"STALE-CENSUS={p}")
 
 def main():
