@@ -411,7 +411,10 @@ pub(crate) fn invoke_semantic_ref(
     if let Some(identity) =
         semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
     {
-        if environment.domain_code_slot(identity).is_some() || domain_primitive(identity).is_some() {
+        if super::selector_law::supports(identity)
+            || environment.domain_code_slot(identity).is_some()
+            || domain_primitive(identity).is_some()
+        {
             return invoke_domain_identity(identity, args, environment, span);
         }
     }
