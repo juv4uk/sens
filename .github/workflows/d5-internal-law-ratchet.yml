@@ -1,0 +1,46 @@
+name: D5 internal-law ratchet
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d5-internal-law-atlas.json"
+      - "scripts/check-d5-internal-law-atlas.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d5-internal-law-ratchet.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "knowledge/d5-internal-law-atlas.json"
+      - "scripts/check-d5-internal-law-atlas.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/d5-internal-law-ratchet.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ratchet:
+    name: D5 16-pair local-law doctrine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate atlas boundary
+        run: python3 scripts/check-d5-internal-law-atlas.py
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D5 internal-law ratchet"
+            echo
+            echo "~~~text"
+            python3 scripts/check-d5-internal-law-atlas.py
+            echo "~~~"
+            echo
+            echo "- Evidence guard only; no owner ratification is inferred."
+            echo "- CURRENT occupancy/coordinates are not changed."
+            echo "- SHADOW remap remains open."
+          } >> "$GITHUB_STEP_SUMMARY"
