@@ -470,6 +470,7 @@ impl Default for Session {
         let mut session = Self {
             environment: Environment::root(),
         };
+        crate::eval::install_selector_domain_values(&session.environment);
         crate::load_macro_library(&mut session)
             .expect("embedded lib/macro.lisp must bootstrap a default Session");
         session
