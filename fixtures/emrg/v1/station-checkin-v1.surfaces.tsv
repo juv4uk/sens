@@ -1,0 +1,8 @@
+path	uk	pl	en
+form.title	Реєстрація станції	Zgłoszenie stacji	Station check-in
+field.message-id	Ідентифікатор повідомлення	Identyfikator wiadomości	Message ID
+field.timestamp	Час UTC	Czas UTC	UTC time
+field.location	Місцезнаходження	Lokalizacja	Location
+state.location.0	Невідомо	Nieznana	Unknown
+field.note	Примітка	Notatka	Note
+state.note.0	Відсутня	Brak	Absent
