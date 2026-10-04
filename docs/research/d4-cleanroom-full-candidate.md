@@ -1,40 +1,37 @@
-# D4 clean-room full candidate — #3225
+# D4 minimal historical bootstrap candidate — #3225
 
-Full 16/16 research candidate derived from ratified D1-D3 plus local D4 fibre laws.
+History may propose capabilities, but old coordinates have zero authority.
 
-**Not ratified.** Historical D4/SID8/Sens8 names are forbidden as premises.
+Filter: keep only capabilities required by the historical/self-host bootstrap or useful stable derived residents; remove historical mechanisms and derivable conveniences that do not need their own identity.
 
 ```text
-0000  GROUND?
-0001  COALESCE
-0010  ABSTRACT
-0011  ENTER
-0100  COMPOSITE?
-0101  EXECUTABLE?
-0110  CDAR
-0111  CDDR
-1000  CAAR
-1001  CADR
-1010  ASSOC-READ
-1011  ASSOC-WRITE
-1100  DISPATCH
-1101  REENTER
-1110  COLLECT
-1111  MAP-BUILD
+0000 APPLY
+0001 EVAL
+0010 LAMBDA
+0011 DEFINE
+0100 NOT
+0101 UNALLOCATED
+0110 CDAR
+0111 CDDR
+1000 CAAR
+1001 CADR
+1010 LOOKUP
+1011 BIND
+1100 EVCON
+1101 EVLIS
+1110 LIST
+1111 UNALLOCATED
 ```
 
-Local fibre laws:
-- EMPTY -> ground observation / fallback recovery;
-- QUOTE -> construct delayed executable / enter represented executable;
-- ATOM -> close current kind partition / observe new executable carrier;
-- CDR/CAR -> selector composition;
-- EQ -> identity-keyed association read/write;
-- COND -> finite dispatch / unbounded re-entry;
-- CONS -> finite collection / recursive transform-and-build.
+Why these fibres under the ratified D3:
+- EMPTY -> APPLY/EVAL: resolved execution vs contextual interpretation;
+- QUOTE -> LAMBDA/DEFINE: executable abstraction vs persistent named binding;
+- ATOM -> NOT + hole: predicate convenience; no second necessary capability;
+- CDR/CAR -> selector composition theorem;
+- EQ -> LOOKUP/BIND: identity-keyed environment read/write;
+- COND -> EVCON/EVLIS: conditional/list evaluator helpers;
+- CONS -> LIST + hole: repeated construction; no second necessary capability.
 
-Status discipline:
-- selectors are already generated;
-- REENTER has a clean-room lower-bound witness (#3230/#3233);
-- ABSTRACT is under independent clean-room attack (#3229);
-- all other rows remain candidates until their fibre witness passes;
-- no posterior historical match changes semantic authority.
+Only LAMBDA and DEFINE are treated as new irreducible bootstrap capabilities. The others are generated/derived residents. Holes are intentional.
+
+Historical functions such as LABEL, FUNCTION/FUNARG, EVALQUOTE, PAIRLIS, ASSOC and APPEND do not receive D4 identities because the existing research classified them as derived or mechanism-only.
