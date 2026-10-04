@@ -13,6 +13,10 @@ mod bits;
 mod canonical_reader;
 mod domain_words;
 mod domain_identity;
+// #2958: generated owner-residency projection is a conformance artifact
+// until the canonical registry consumer lands.
+#[cfg(test)]
+mod domain_owner_generated;
 mod packed_bits;
 mod binary_framing;
 mod environment;
