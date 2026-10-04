@@ -46,8 +46,11 @@ canonical_path
 oracle
 ```
 
-Every source path is hashed. The whole paired corpus receives one deterministic
-`corpus_sha`.
+Every English source path is hashed. Canonical self-test data may be inline in
+the manifest; the runner materializes it as a temporary `.lisp` file so the
+repository does not add observational numeric-source debt merely to test the
+canonical reader. Real corpus rows may instead use `canonical_path`. The whole
+paired corpus receives one deterministic `corpus_sha`.
 
 ## Run
 
