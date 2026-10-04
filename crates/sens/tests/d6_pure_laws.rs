@@ -524,7 +524,7 @@ fn any_all_form_a_predicate_dual_pair() {
 
 #[test]
 fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
-    let prelude = r#"
+    let prelude = r##"
         (define d6-wire-denominator-one?
           (lambda (text)
             (cond
@@ -549,7 +549,7 @@ fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
               ((d6-rationalp value)
                (d6-wire-denominator-one? (write-to-string value)))
               (t (quote ())))))
-    "#;
+    "##;
 
     for x in ["0", "1", "-7", "42", "3.00"] {
         assert_same(&format!("{prelude} (d6-rationalp {x})"), "t");
