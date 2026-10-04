@@ -37,7 +37,8 @@ fn head_domain_identity(head: &Expr) -> Option<CoreDomainIdentity> {
 }
 
 fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
-    necessary_forms::domain_identity_for_symbol(name)
+    crate::resolve_human_surface(name)
+        .or_else(|| necessary_forms::domain_identity_for_symbol(name))
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
 
