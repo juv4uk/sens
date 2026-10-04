@@ -585,3 +585,86 @@ fn integerp_rationalp_derive_from_canonical_exact_q_wire() {
         assert_same(&format!("{prelude} (d6-integerp {x})"), "0");
     }
 }
+
+
+#[test]
+fn nth_and_maplist_share_successive_tail_geometry() {
+    let prelude = r#"
+        (define d6-tail-identity (lambda (tail) tail))
+    "#;
+    for (n, expected) in [(0, "a"), (1, "b"), (2, "c"), (3, "d")] {
+        assert_same(
+            &format!(
+                "{prelude} (car (nth {n} (maplist (quote (a b c d)) d6-tail-identity)))"
+            ),
+            &format!("(quote {expected})"),
+        );
+        assert_same(
+            &format!("(nth {n} (quote (a b c d)))"),
+            &format!("(quote {expected})"),
+        );
+    }
+}
+
+#[test]
+fn rassoc_and_acons_share_association_extension_law() {
+    let prelude = r#"
+        (define d6-transpose-pair-2
+          (lambda (p) (cons (cdr p) (car p))))
+        (define d6-transpose-alist-2
+          (lambda (alist) (map d6-transpose-pair-2 alist)))
+        (define d6-rassoc-2
+          (lambda (value alist)
+            ((lambda (hit) (d6-transpose-pair-2 hit))
+             (assoc value (d6-transpose-alist-2 alist)))))
+        (define d6-acons
+          (lambda (key value alist)
+            (cons (cons key value) alist)))
+    "#;
+    assert_same(
+        &format!(
+            "{prelude} (d6-rassoc-2 9 (d6-acons (quote k) 9 (quote ((old . 1)))))"
+        ),
+        "(quote (k . 9))",
+    );
+}
+
+#[test]
+fn curry_and_flip_share_binary_argument_geometry() {
+    let prelude = r#"
+        (define d6-curry-pair
+          (lambda (f a) (lambda (b) (f a b))))
+        (define d6-flip-pair
+          (lambda (f) (lambda (a b) (f b a))))
+    "#;
+    for (a,b) in [("2","5"),("7","3"),("-1","4")] {
+        assert_same(
+            &format!(
+                "{prelude} ((d6-curry-pair (d6-flip-pair (lambda (x y) (- x y))) {b}) {a})"
+            ),
+            &format!("(- {a} {b})"),
+        );
+    }
+}
+
+#[test]
+fn sublis_induces_composable_tree_transformers() {
+    let prelude = r#"
+        (define d6-compose-subst
+          (lambda (f g) (lambda (x) (f (g x)))))
+        (define d6-subst-a
+          (lambda (tree) (sublis (quote ((a x))) tree)))
+        (define d6-subst-b
+          (lambda (tree) (sublis (quote ((b y))) tree)))
+    "#;
+    for tree in ["(a b c)", "((a) b (c a))", "(b (a b))"] {
+        assert_same(
+            &format!(
+                "{prelude} ((d6-compose-subst d6-subst-a d6-subst-b) (quote {tree}))"
+            ),
+            &format!(
+                "{prelude} (d6-subst-a (d6-subst-b (quote {tree})))"
+            ),
+        );
+    }
+}
