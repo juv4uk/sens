@@ -2,11 +2,16 @@ use crate::{Rational, Sens8, Text7};
 use crate::DomainIdentity;
 use std::fmt;
 
-/// Host-side view of one canonical SENS binary frame.
+/// Host-side view of one self-describing SENS framing record.
 ///
-/// The enum is a decoder mechanism only. Its variants do not create a new
-/// language ontology. Exact domain identity has its own tagged frame; the
-/// historical Function8 frame is compatibility-only and never aliases Core.D8.
+/// This is a standalone framing/decoder mechanism, **not** the canonical
+/// semantic payload representation. Canonical exact-width domain payloads are
+/// packed continuously by `BitPacker` / `PackedBitstream`; any tag/type/width
+/// bits used here are framing metadata and must be accounted separately.
+///
+/// The variants do not create a new language ontology. Exact domain identity
+/// has its own framed representation; the historical Function8 frame is
+/// compatibility-only and never aliases Core.D8.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BinaryFrame {
     Space,
@@ -476,6 +481,21 @@ mod tests {
     }
 
     #[test]
+    fn standalone_domain_frame_is_not_the_canonical_packed_payload() {
+        let tokens = crate::parse_binary_source_words("001").unwrap();
+        let packed = crate::pack_binary_source_tokens(&tokens);
+        let identity = tokens[0].word.domain_identity();
+        let framed = encode_binary_frame(&BinaryFrame::Domain(identity)).unwrap();
+
+        assert_eq!(packed.bit_len(), 3);
+        assert_eq!(packed.bytes(), &[0b0010_0000]);
+        assert!(
+            framed.len() > packed.bit_len(),
+            "standalone framing metadata must not masquerade as semantic payload"
+        );
+    }
+
+    #[test]
     fn all_d1_d8_domain_widths_round_trip_without_function8_aliasing() {
         let identities = [
             crate::BinarySourceWord::W1(crate::Bit1::new(1).unwrap()).domain_identity(),
@@ -597,7 +617,7 @@ mod tests {
     #[test]
     fn malformed_or_noncanonical_payloads_fail_closed() {
         assert!(matches!(
-            decode_binary_frame(&[1, 1, 1, 1]),
+            decode_binary_frame(&[1, 1, 1, 1, 1, 1]),
             Err(BinaryFrameError::ReservedExtension { .. })
         ));
         assert!(matches!(
