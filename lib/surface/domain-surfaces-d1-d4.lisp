@@ -1,7 +1,7 @@
 ; D1-D4 human surface projection.
 ; Projection only: semantic authority remains exact domain + exact bits + domain law.
 ; Authority: language-contract.lisp, #3202 (D3), #3272 (D4), #3020 (binary-only).
-; Legacy SID8/Sens8/Function8 coordinates MUST NOT be added here.
+; Historical flat-byte coordinates are not valid keys here.
 ;
 ; Row format:
 ; (row DOMAIN "BITS" ROLE "EN" "UK" "SA" UK_STATUS SA_STATUS)
