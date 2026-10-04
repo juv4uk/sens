@@ -2,7 +2,7 @@
 
 use sens::{
     eval_parsed_expressions, eval_program, load_core_library, parse, Bit5, CoreD5, DomainIdentity,
-    Expr, ExprKind, Session, Span,
+    ErrorKind, Expr, ExprKind, Session, Span,
 };
 
 fn exact_d5_call(bits: u8, args: &str, session: &mut Session) -> String {
@@ -45,4 +45,23 @@ fn reverse_surface_legacy_code_and_exact_d5_share_one_bootstrapped_mechanism() {
     );
 
     assert_eq!(exact_d5_call(0b10001, "'(a b c)", &mut session), "(c b a)");
+}
+
+#[test]
+fn legacy_quotient_never_borrows_the_exact_d5_direct_primitive() {
+    let mut bare = Session::default();
+    let error = eval_program("(00010100 6 3)", &mut bare)
+        .expect_err("legacy QUOTIENT must require its Lisp bootstrap binding");
+    assert_eq!(error.kind, ErrorKind::Type);
+
+    let mut loaded = Session::default();
+    load_core_library(&mut loaded).expect("core bootstrap");
+    assert_eq!(
+        eval_program("(00010100 6 3)", &mut loaded)
+            .expect("legacy QUOTIENT should borrow only the bound Lisp closure")
+            .value
+            .to_string(),
+        "2"
+    );
+    assert_eq!(exact_d5_call(0b10011, "6 3", &mut loaded), "2");
 }
