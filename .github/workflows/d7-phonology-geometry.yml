@@ -25,8 +25,7 @@ jobs:
       - name: Validate stable resident donor
         run: |
           rm -rf /tmp/d7-stable-resident-audit
-          python3 scripts/check-3051-stable-resident-corpus.py \\
-            --out /tmp/d7-stable-resident-audit
+          python3 scripts/check-3051-stable-resident-corpus.py --out /tmp/d7-stable-resident-audit
       - name: Run D7 varga product geometry S1
         run: |
           rm -rf /tmp/d7-phonology-geometry
