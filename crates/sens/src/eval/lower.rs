@@ -89,7 +89,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                 return Expr {
                     kind: if is_d3(identity, 0b001) {
                         ExprKind::DomainCall(identity, arguments.into())
-                    } else if is_d3(identity, 0b011) {
+                    } else if is_d3(identity, 0b110) {
                         ExprKind::DomainCall(
                             identity,
                             arguments
@@ -197,11 +197,11 @@ mod tests {
         // domain routing without reinstalling an English spelling as identity.
         assert_domain_call("(як-є x)", 3, 0b001);
         assert_domain_call("(атом? x)", 3, 0b010);
-        assert_domain_call("(за-умовою (x y))", 3, 0b011);
-        assert_domain_call("(сполучити 1 2)", 3, 0b100);
-        assert_domain_call("(перше x)", 3, 0b101);
-        assert_domain_call("(решта x)", 3, 0b110);
-        assert_domain_call("(тотожне? x y)", 3, 0b111);
+        assert_domain_call("(решта x)", 3, 0b011);
+        assert_domain_call("(перше x)", 3, 0b100);
+        assert_domain_call("(тотожне? x y)", 3, 0b101);
+        assert_domain_call("(за-умовою (x y))", 3, 0b110);
+        assert_domain_call("(сполучити 1 2)", 3, 0b111);
     }
 
     #[test]

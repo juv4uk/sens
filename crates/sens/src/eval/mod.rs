@@ -265,7 +265,7 @@ fn dispatch_domain_call(
         None => {}
     }
 
-    if is_d3(identity, 0b011) {
+    if is_d3(identity, 0b110) {
         return special_forms::evaluate_cond(arguments, environment, span);
     }
 

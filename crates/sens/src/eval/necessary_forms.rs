@@ -113,7 +113,7 @@ mod tests {
             crate::Bit3::new(0b010).unwrap(),
         ));
         let d3_cond = crate::CoreDomainIdentity::D3(crate::Bija3::from_word(
-            crate::Bit3::new(0b011).unwrap(),
+            crate::Bit3::new(0b110).unwrap(),
         ));
         assert_eq!(identity_for_domain_identity(d3_atom), None);
         assert_eq!(identity_for_domain_identity(d3_cond), None);
