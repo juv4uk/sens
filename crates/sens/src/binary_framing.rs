@@ -1,4 +1,4 @@
-use crate::{Rational, Sens8, Text7};
+use crate::{BinaryNumber, Rational, Sens8, Text7};
 use crate::DomainIdentity;
 use std::fmt;
 
@@ -15,6 +15,8 @@ pub enum BinaryFrame {
     Function(Sens8),
     Domain(DomainIdentity),
     Number(Rational),
+    /// Canonical #3022 natural Number. The Rational frame remains compatibility-only.
+    BinaryNumber(BinaryNumber),
     Text(Text7),
 }
 
@@ -41,6 +43,7 @@ const TYPE_TEXT: [u8; 2] = [1, 0];
 const TYPE_EXTENSION: [u8; 2] = [1, 1];
 
 const EXT_DOMAIN: [u8; 2] = [0, 0];
+const EXT_BINARY_NUMBER: [u8; 2] = [0, 1];
 
 /// Encode one non-negative length as Elias-gamma(n+1).
 ///
@@ -98,6 +101,13 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             out.extend_from_slice(&EXT_DOMAIN);
             append_fixed_bits((identity.width() - 1) as u8, 3, &mut out);
             append_fixed_bits(identity.packed_bits(), identity.width(), &mut out);
+        }
+        BinaryFrame::BinaryNumber(number) => {
+            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&TYPE_EXTENSION);
+            out.extend_from_slice(&EXT_BINARY_NUMBER);
+            encode_len_into(number.width(), &mut out)?;
+            out.extend_from_slice(number.as_bits());
         }
         BinaryFrame::Text(text) => {
             out.extend_from_slice(&CONTROL_ESCAPE);
@@ -220,6 +230,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
                     let e1 = reader.read_bit()?;
                     match [e0, e1] {
                         EXT_DOMAIN => decode_domain_identity(reader),
+                        EXT_BINARY_NUMBER => decode_binary_number(reader, frame_start),
                         _ => Err(BinaryFrameError::ReservedExtension { index: type_start }),
                     }
                 },
@@ -228,6 +239,23 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
         }
         _ => unreachable!("read_bit returns only 0 or 1"),
     }
+}
+
+fn decode_binary_number(
+    reader: &mut BitReader<'_>,
+    frame_start: usize,
+) -> Result<BinaryFrame, BinaryFrameError> {
+    let count = reader.read_len()?;
+    if count == 0 {
+        return Err(BinaryFrameError::NonCanonicalNumber { index: frame_start });
+    }
+    let bits = reader.read_bit_string(count)?;
+    if bits.len() > 1 && bits.starts_with('0') {
+        return Err(BinaryFrameError::NonCanonicalNumber { index: frame_start });
+    }
+    let number = BinaryNumber::parse(&bits)
+        .map_err(|_| BinaryFrameError::InvalidNumber { index: frame_start })?;
+    Ok(BinaryFrame::BinaryNumber(number))
 }
 
 fn decode_domain_identity(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFrameError> {
