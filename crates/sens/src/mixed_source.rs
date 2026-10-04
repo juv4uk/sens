@@ -11,7 +11,7 @@
 //! teaching the compatibility parser to infer domains from historical bytes.
 
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
-use crate::{parse_binary_source_words, DomainIdentity, ErrorKind, LanguageError, Span};
+use crate::{parse_binary_source_words, DomainIdentity, ErrorKind, LanguageError};
 use std::rc::Rc;
 
 /// Parse ordinary mixed Lisp source, then lift only exact-width callable heads
@@ -34,15 +34,16 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
         ));
     }
 
-    let span = expression.span;
-    match expression.kind {
+    let Expr { kind, span } = expression;
+    match kind {
         ExprKind::List(items) if !items.is_empty() => {
             let mut lifted = items.to_vec();
             lifted[0] = lift_head(source, lifted[0].clone())?;
 
             // Exact D3 QUOTE keeps its argument as reader data. Apostrophe
             // sugar also stays data-owned without naming legacy byte identity.
-            let quote_data = is_exact_quote(&lifted[0]) || source_spelling(source, &lifted[0]) == Some("'");
+            let quote_data =
+                is_exact_quote(&lifted[0]) || source_spelling(source, &lifted[0]) == Some("'");
 
             if !quote_data {
                 for item in lifted.iter_mut().skip(1) {
@@ -55,9 +56,7 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
                 span,
             })
         }
-        // Reader-level dotted pairs are data, not executable call structure.
-        ExprKind::Pair(_, _) => Ok(expression),
-        _ => Ok(expression),
+        other => Ok(Expr { kind: other, span }),
     }
 }
 
@@ -191,6 +190,7 @@ mod tests {
     fn historical_exact8_head_remains_legacy_compatibility() {
         let expression =
             only(parse_mixed_exact_domain("(00000001 x)").expect("mixed parse"));
+        let span = expression.span;
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
         };
@@ -198,7 +198,7 @@ mod tests {
 
         let lowered = only(lower_program(&[Expr {
             kind: ExprKind::List(items),
-            span: expression.span,
+            span,
         }]));
         assert!(matches!(lowered.kind, ExprKind::Call(_, _)));
     }
