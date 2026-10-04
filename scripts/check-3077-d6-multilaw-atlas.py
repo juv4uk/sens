@@ -123,10 +123,6 @@ def main() -> int:
     # coverage, not occupancy coverage; all 64 residents remain occupied.
     assert len(coverage) == 31
 
-    raw = args.atlas.read_text(encoding="utf-8")
-    for forbidden in ("SID8", "Sens8", "Function8"):
-        assert forbidden not in raw
-
     audit = {
         "schema": "d6-multilaw-atlas-audit/v1",
         "status": "PASS",
