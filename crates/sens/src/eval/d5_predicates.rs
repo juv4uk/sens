@@ -9,13 +9,6 @@ use crate::{
 
 const HISTORICAL_ZERO_EPSILON: f64 = 3.0e-6;
 
-pub(super) fn has_mechanism(identity: CoreDomainIdentity) -> bool {
-    let CoreDomainIdentity::D5(word) = identity else {
-        return false;
-    };
-    matches!(word.word().packed_bits(), 0b01000 | 0b01001)
-}
-
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
