@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "issue": "#3066",
+  "domain": "Core.D5",
+  "width": 5,
+  "occupancy": {
+    "used": 32,
+    "capacity": 32
+  },
+  "doctrine": {
+    "global_suffix_law": false,
+    "universal_d4_parent_theorem": false,
+    "automatic_d6_propagation": false,
+    "current_map_frozen_by_this_artifact": false,
+    "core_math_law_transfer": false
+  },
+  "stable_identity": {
+    "source": "#3051",
+    "status": "PENDING-STABLE-ID-BACKFILL",
+    "rule": "CURRENT bits and report labels are projections only; they are not solver identity"
+  },
+  "relation_classes": [
+    "SEMANTIC-GENERATOR",
+    "LOCAL-ALGEBRA",
+    "MULTI-DELTA-FAMILY",
+    "COORDINATE-HISTORICAL"
+  ],
+  "pairs": [
+    {
+      "prefix4": "0000",
+      "child0": {
+        "bits": "00000",
+        "label": "EVALQUOTE"
+      },
+      "child1": {
+        "bits": "00001",
+        "label": "FUNCTION"
+      },
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "NO_SEMANTIC_BONUS",
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "prefix4": "0001",
+      "child0": {
+        "bits": "00010",
+        "label": "FEXPR"
+      },
+      "child1": {
+        "bits": "00011",
+        "label": "MACRO"
+      },
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "protocol-product",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "FAMILY_NOT_ONE_BIT_EDGE",
+      "evidence": [
+        "#2522",
+        "#2528",
+        "#3025",
+        "#3027"
+      ]
+    },
+    {
+      "prefix4": "0010",
+      "child0": {
+        "bits": "00100",
+        "label": "LABEL"
+      },
+      "child1": {
+        "bits": "00101",
+        "label": "PROG"
+      },
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "NO_SEMANTIC_BONUS",
+      "evidence": [
+        "#3044"
+      ]
+    },
+    {
+      "prefix4": "0011",
+      "child0": {
+        "bits": "00110",
+        "label": "SET"
+      },
+      "child1": {
+        "bits": "00111",
+        "label": "SETQ"
+      },
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "target-acquisition-axis",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "LOCAL_LAW_ONLY",
+      "evidence": [
+        "#3005",
+        "#3016"
+      ]
+    },
+    {
+      "prefix4": "0100",
+      "child0": {
+        "bits": "01000",
+        "label": "ZEROP"
+      },
+      "child1": {
+        "bits": "01001",
+        "label": "NUMBERP"
+      },
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "entailment",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "ENTAILMENT_NOT_TOGGLE",
+      "evidence": [
+        "#3032",
+        "#3035"
+      ]
+    },
+    {
+      "prefix4": "0101",
+      "child0": {
+        "bits": "01010",
+        "label": "PLUS"
+      },
+      "child1": {
+        "bits": "01011",
+        "label": "DIFFERENCE"
+      },
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "additive-inverse-orientation",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "VALUE_LEVEL_ONLY",
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "prefix4": "0110",
+      "child0": {
+        "bits": "01100",
+        "label": "GO"
+      },
+      "child1": {
+        "bits": "01101",
+        "label": "RETURN"
+      },
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "NEGATIVE_ADJACENCY_CONTROL",
+      "evidence": [
+        "#3040",
+        "#3042"
+      ]
+    },
+    {
+      "prefix4": "0111",
+      "child0": {
+        "bits": "01110",
+        "label": "LESSP"
+      },
+      "child1": {
+        "bits": "01111",
+        "label": "GREATERP"
+      },
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "operand-swap-duality",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "LOCAL_LAW_ONLY",
+      "evidence": [
+        "#3004",
+        "#3008"
+      ]
+    },
+    {
+      "prefix4": "1000",
+      "child0": {
+        "bits": "10000",
+        "label": "APPEND"
+      },
+      "child1": {
+        "bits": "10001",
+        "label": "REVERSE"
+      },
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "list-involution-anti-homomorphism",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "LOCAL_ALGEBRA_NOT_SUFFIX_TOGGLE",
+      "evidence": [
+        "#3052",
+        "#3059"
+      ]
+    },
+    {
+      "prefix4": "1001",
+      "child0": {
+        "bits": "10010",
+        "label": "TIMES"
+      },
+      "child1": {
+        "bits": "10011",
+        "label": "QUOTIENT"
+      },
+      "relation_class": "LOCAL-ALGEBRA",
+      "law_kind": "multiplicative-inverse-orientation",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "VALUE_LEVEL_ONLY",
+      "evidence": [
+        "#3010"
+      ]
+    },
+    {
+      "prefix4": "1010",
+      "child0": {
+        "bits": "10100",
+        "label": "CAAAR"
+      },
+      "child1": {
+        "bits": "10101",
+        "label": "CAADR"
+      },
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "GENERATOR_EDGE",
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "1011",
+      "child0": {
+        "bits": "10110",
+        "label": "CADAR"
+      },
+      "child1": {
+        "bits": "10111",
+        "label": "CADDR"
+      },
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "GENERATOR_EDGE",
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "1100",
+      "child0": {
+        "bits": "11000",
+        "label": "CDAAR"
+      },
+      "child1": {
+        "bits": "11001",
+        "label": "CDADR"
+      },
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "GENERATOR_EDGE",
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "1101",
+      "child0": {
+        "bits": "11010",
+        "label": "CDDAR"
+      },
+      "child1": {
+        "bits": "11011",
+        "label": "CDDDR"
+      },
+      "relation_class": "SEMANTIC-GENERATOR",
+      "law_kind": "selector-projection-composition",
+      "semantic_family": true,
+      "one_bit_suffix_law": true,
+      "shadow_constraint": "GENERATOR_EDGE",
+      "evidence": [
+        "#2176",
+        "#3019"
+      ]
+    },
+    {
+      "prefix4": "1110",
+      "child0": {
+        "bits": "11100",
+        "label": "ASSOC"
+      },
+      "child1": {
+        "bits": "11101",
+        "label": "MEMBER",
+        "canonical_result_domain": "Core.D1",
+        "canonical_yes": "1",
+        "canonical_no": "0",
+        "runtime_transition_debt": "t/() until #3060 lands"
+      },
+      "relation_class": "MULTI-DELTA-FAMILY",
+      "law_kind": "search-family",
+      "semantic_family": true,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "FAMILY_NOT_ONE_BIT_EDGE",
+      "evidence": [
+        "#3053",
+        "#3059",
+        "#3060"
+      ]
+    },
+    {
+      "prefix4": "1111",
+      "child0": {
+        "bits": "11110",
+        "label": "PAIRLIS"
+      },
+      "child1": {
+        "bits": "11111",
+        "label": "SUBST"
+      },
+      "relation_class": "COORDINATE-HISTORICAL",
+      "law_kind": "historical-pairing",
+      "semantic_family": false,
+      "one_bit_suffix_law": false,
+      "shadow_constraint": "NO_SEMANTIC_BONUS",
+      "evidence": [
+        "#3054"
+      ]
+    }
+  ]
+}
