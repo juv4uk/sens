@@ -1,0 +1,42 @@
+name: Current English vs D1-D8 CPU harness
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/examples/current_en_vs_d1d8_cpu.rs'
+      - 'benchmarks/current-en-vs-d1d8/**'
+      - '.github/workflows/current-en-vs-d1d8-cpu.yml'
+
+jobs:
+  cpu-harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s benchmarks/current-en-vs-d1d8/tests -p 'test_*.py'
+
+      - name: Build one current helper binary
+        run: cargo build --release -p sens --example current_en_vs_d1d8_cpu
+
+      - name: Exercise paired D3 smoke evidence
+        run: |
+          python3 benchmarks/current-en-vs-d1d8/cpu_runner.py             --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json             --helper target/release/examples/current_en_vs_d1d8_cpu             --out /tmp/current-en-vs-d1d8.cpu.jsonl             --reps 1             --phases ingest,lower,execute,full
+          python3 benchmarks/current-en-vs-d1d8/validate.py             /tmp/current-en-vs-d1d8.cpu.jsonl
+
+      - name: Prove headline corpus is fail-closed while blocked
+        run: |
+          rm -f /tmp/current-headline.jsonl /tmp/current-headline.blocked.json
+          python3 benchmarks/current-en-vs-d1d8/cpu_runner.py             --manifest benchmarks/current-en-vs-d1d8/workloads.json             --helper target/release/examples/current_en_vs_d1d8_cpu             --out /tmp/current-headline.jsonl             --blocked-out /tmp/current-headline.blocked.json             --reps 1
+          test ! -e /tmp/current-headline.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('/tmp/current-headline.blocked.json').read_text())
+          assert data['schema']=='sens-current-en-vs-d1d8-blocked/v1'
+          assert len(data['blocked'])==11
+          PY

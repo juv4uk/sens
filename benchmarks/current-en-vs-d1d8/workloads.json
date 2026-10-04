@@ -1,0 +1,72 @@
+{
+  "schema": "sens-current-en-vs-d1d8-workloads/v1",
+  "purpose": "Headline #3088 CPU corpus. BLOCKED entries emit readiness evidence only; they are never silently dropped.",
+  "workloads": [
+    {
+      "id": "ackermann",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#1696", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number, numeric lexical locals, canonical symbol boundary, and completed current runtime spine."
+    },
+    {
+      "id": "assoc",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#1696", "#3102/#3103/current-registry"],
+      "reason": "Needs numbers, locals, symbols/list data, and the completed current runtime spine."
+    },
+    {
+      "id": "closures",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#1696", "#3102/#3103/current-registry"],
+      "reason": "Needs numbers, lexical coordinates for captured locals, and the completed current runtime spine."
+    },
+    {
+      "id": "evenodd",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number and lexical locals before both surfaces can represent the same current program."
+    },
+    {
+      "id": "fib",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number and lexical locals before paired timing is honest."
+    },
+    {
+      "id": "flatten",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#1696", "#3102/#3103/current-registry"],
+      "reason": "Needs numbers, locals, quoted symbol/list data, and the completed current runtime spine."
+    },
+    {
+      "id": "lists",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number, lexical locals, and the completed current runtime spine."
+    },
+    {
+      "id": "loop",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number and lexical locals before paired timing is honest."
+    },
+    {
+      "id": "mapfold",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number, lexical locals/higher-order closures, and the completed current runtime spine."
+    },
+    {
+      "id": "member",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#3109", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number/locals plus the current D5 MEMBER-to-D1 result boundary and completed runtime spine."
+    },
+    {
+      "id": "tree",
+      "status": "blocked",
+      "blockers": ["#3022", "#1697", "#1696", "#3102/#3103/current-registry"],
+      "reason": "Needs canonical Number, locals, quoted symbol data, and the completed current runtime spine."
+    }
+  ]
+}
