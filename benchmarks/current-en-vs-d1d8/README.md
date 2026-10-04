@@ -1,6 +1,6 @@
-# Current English surface vs canonical D1-D8 — CPU lane
+# Current English surface vs exact-domain lane — CPU evidence
 
-This directory is the CPU evidence lane for #3088 / #3113.
+This directory is the CPU evidence lane for #3088 / #3113. Current semantic authority is D1-D4 + D7; any W5/W6/W8 rows are research/mechanical evidence only under #3278.
 
 Its job is deliberately narrow:
 
@@ -11,7 +11,7 @@ English surface
   -> DomainIdentity
   -> execute
 
-canonical D1-D8
+exact-domain binary lane
   -> decode
   -> lower
   -> DomainIdentity
@@ -20,6 +20,8 @@ canonical D1-D8
 
 Both lanes must use the **same compiled helper binary**, the same workload pair,
 the same oracle and the same current commit.
+
+The directory/schema identifier `current-en-vs-d1d8` is retained for evidence compatibility only. It does **not** mean D5/D6/D8 are currently ratified semantic domains.
 
 ## Fail-closed rule
 
