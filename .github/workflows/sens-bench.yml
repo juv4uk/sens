@@ -1,7 +1,7 @@
-name: Ratified domains D1-D8 benchmark
+name: Exact-width W1-W8 mechanism benchmark
 
-# Current exact-domain carrier/runtime benchmark after the D1-D8 production
-# cutover. Historical D1-D4 results remain archived under benchmarks/domain1234.
+# Exact-width carrier/runtime mechanism benchmark. Current semantic authority is
+# D1-D4 + D7; W5/W6/W8 remain mechanical/research carriers under #3278.
 
 on:
   workflow_dispatch:
@@ -47,10 +47,10 @@ jobs:
           valgrind --version
           rustc --version
 
-      - name: Build D1-D8 benchmark
+      - name: Build W1-W8 mechanism benchmark
         run: cargo build --release -p sens --example domain12345678_bench
 
-      - name: Measure D1-D8 exact-domain carrier/runtime
+      - name: Measure W1-W8 exact-width carrier/runtime mechanics
         run: |
           rm -rf /tmp/domain12345678
           python3 benchmarks/domain12345678/run.py \
@@ -62,6 +62,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: domain12345678-cachegrind
+          name: w1-w8-mechanism-cachegrind
           path: /tmp/domain12345678
           retention-days: 7
