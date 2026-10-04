@@ -295,10 +295,10 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
     };
     match word.word().packed_bits() {
         0b010 => Some(prim_00000010), // ATOM
-        0b111 => Some(prim_00000011), // EQ
-        0b100 => Some(prim_00000100), // CONS
+        0b101 => Some(prim_00000011), // EQ
+        0b111 => Some(prim_00000100), // CONS
         // CAR/CDR and all proven descendants are executed by selector_law.
-        0b101 | 0b110 => None,
+        0b100 | 0b011 => None,
         _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
     }
 }
@@ -309,7 +309,7 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
 /// numeric projection to the historical Function8 byte axis.
 pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool {
     match identity {
-        CoreDomainIdentity::D3(word) => matches!(word.word().packed_bits(), 0b010 | 0b111),
+        CoreDomainIdentity::D3(word) => matches!(word.word().packed_bits(), 0b010 | 0b101),
         CoreDomainIdentity::D5(word) => word.word().packed_bits() == 0b11101,
         _ => false,
     }
@@ -605,12 +605,12 @@ mod tests {
         };
 
         assert!(domain_primitive(d3(0b010)).is_some()); // ATOM
-        assert!(domain_primitive(d3(0b111)).is_some()); // EQ
-        assert!(domain_primitive(d3(0b100)).is_some()); // CONS
-        assert!(domain_primitive(d3(0b101)).is_none()); // CAR -> selector law
-        assert!(domain_primitive(d3(0b110)).is_none()); // CDR -> selector law
+        assert!(domain_primitive(d3(0b101)).is_some()); // EQ
+        assert!(domain_primitive(d3(0b111)).is_some()); // CONS
+        assert!(domain_primitive(d3(0b100)).is_none()); // CAR -> selector law
+        assert!(domain_primitive(d3(0b011)).is_none()); // CDR -> selector law
         assert!(domain_primitive(d3(0b001)).is_none()); // QUOTE syntax
-        assert!(domain_primitive(d3(0b011)).is_none()); // COND syntax
+        assert!(domain_primitive(d3(0b110)).is_none()); // COND syntax
 
         let d4_same_payload = CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(0b0010).unwrap(),
@@ -643,19 +643,19 @@ mod tests {
         let same = Value::Symbol(std::rc::Rc::from("x"));
         let other = Value::Symbol(std::rc::Rc::from("y"));
 
-        let equal = invoke_domain_identity(d3(0b111), &[left.clone(), same], &env, span)
-            .expect("D3:111 equal atoms");
-        let different = invoke_domain_identity(d3(0b111), &[left, other], &env, span)
-            .expect("D3:111 distinct atoms");
+        let equal = invoke_domain_identity(d3(0b101), &[left.clone(), same], &env, span)
+            .expect("D3:101 equal atoms");
+        let different = invoke_domain_identity(d3(0b101), &[left, other], &env, span)
+            .expect("D3:101 distinct atoms");
         assert_eq!(equal.as_predicate_bit(), Some(true));
         assert_eq!(different.as_predicate_bit(), Some(false));
 
         assert!(has_language_result_boundary(d3(0b010)));
-        assert!(has_language_result_boundary(d3(0b111)));
-        assert!(!has_language_result_boundary(d3(0b100)));
+        assert!(has_language_result_boundary(d3(0b101)));
+        assert!(!has_language_result_boundary(d3(0b111)));
 
         let number = Value::Number(1.0, crate::Exactness::Exact);
-        let error = canonicalize_domain_result(d3(0b111), number, span)
+        let error = canonicalize_domain_result(d3(0b101), number, span)
             .expect_err("bare Number 1 must not collapse into D1");
         assert_eq!(error.kind, ErrorKind::Type);
     }
