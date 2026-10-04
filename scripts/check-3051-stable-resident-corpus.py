@@ -128,8 +128,9 @@ def main() -> int:
     )
     assert member["semantic_status"] == "RECOVERED"
     assert member["semantic_role"] == "predicate"
-    assert member["canonical_result_domain"] == "D1"
+    assert member["canonical_result_domain"] == "D1.PredicateBit"
     assert member["canonical_result_values"] == {"NO": "0", "YES": "1"}
+    assert member["canonical_result_law"] == {"no": "0", "yes": "1", "authority_refs": ["#3020", "#3029", "#3060"]}
     assert member["implementation_status"] == "TRANSITION-DEBT:#3060"
     assert "#3059" in member["map_independent_witness_refs"]
     assert "#3060" in member["semantic_law_refs"]
