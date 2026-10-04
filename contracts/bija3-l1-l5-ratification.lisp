@@ -40,7 +40,7 @@
        (L5 . "suffix-0 is the evaluator/metalinguistic spine: EMPTY -> ATOM -> CAR -> COND")))
 
   (evidence . (#3194 #3196 #3200))
-  (implementation-cutover . (#3203 #3204 #3205 #3206))
+  (implementation-cutover . (#3203 #2055 #3205 #3206))
   (superseded-current-order
     . ((011 COND)
        (100 CONS)
