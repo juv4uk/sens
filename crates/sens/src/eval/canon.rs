@@ -307,16 +307,19 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
 ///
 /// The D3 role mapping is explicit and law-shaped; it is intentionally not a
 /// numeric projection to the historical Function8 byte axis.
+pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D5(word) if word.word().packed_bits() == 0b11101
+    )
+}
+
 fn canonicalize_domain_result(
     identity: CoreDomainIdentity,
     value: Value,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    let is_member = matches!(
-        identity,
-        CoreDomainIdentity::D5(word) if word.word().packed_bits() == 0b11101
-    );
-    if !is_member {
+    if !has_language_result_boundary(identity) {
         return Ok(value);
     }
 
