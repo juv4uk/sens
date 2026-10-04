@@ -20,7 +20,7 @@
        (D5 #3305 #3330 "contracts/d5-ratification.lisp" "knowledge/d5-ratified.json")))
 
   (laws
-    . ((identity . "exact bits + exact domain + admitted/proved law")
+    . ((svarupa . "exact bits + exact domain + admitted/proved law")
        (legacy-non-authority . "SID8/Sens8/Function8 coordinates have zero current placement authority")
        (d5-no-duplicate . "D5 has 32 distinct residents and zero lower-domain semantic duplicates")
        (d5-no-global-suffix . "The fifth bit has local family meaning only")
