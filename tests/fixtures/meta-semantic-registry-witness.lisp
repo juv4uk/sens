@@ -2,8 +2,9 @@
 ; is retired.  This preserves three laws from meta_eval_semantic_registry.rs:
 ;   1. admitted surfaces project to their numeric semantic identities and an
 ;      unadmitted spelling fails closed;
-;   2. peer spellings of Canon ATOM execute as one semantic identity in both
-;      the native evaluator and the metacircular evaluator;
+;   2. compatibility ATOM routing stays stable in the metacircular evaluator;
+;      exact native D3 predicate results are covered by a separate typed
+;      boundary witness whose cases remain Lisp-owned data;
 ;   3. LAMBDA/DEFINE plus compatibility DEF route through their numeric
 ;      semantic identities in both evaluators.
 ;
@@ -27,13 +28,6 @@
 (00001001 registry-meta-program-result
   (00001000 (source)
     (00000110 (my-eval-program (01001011 source) (00000001 ())))))
-
-; Independent exact-D1 YES witness. D5:11101 MEMBER is already ratified and
-; merged with a canonical D1 result boundary (#3060), so this does not define
-; D3 predicate semantics by self-comparison.
-(00001001 registry-d1-yes
-  (00001000 ()
-    (значення-у-списку? (00000001 x) (00000001 (x)))))
 
 (00001001 registry-witness-failure
   (00001000 (case actual expected)
@@ -97,26 +91,15 @@
             (00000010 (my-semantic-id-for-surface (00000001 unmapped-surface)))
             (00000001 ()))
 
-      ; Canon ATOM native routes.
-      ;
-      ; The explicit historical byte remains a compatibility witness and still
-      ; exposes its historical one-element answer carrier. Admitted human
-      ; surfaces lower to exact D3:010; those results must be exact D1. Their
-      ; expected YES is generated independently by ratified D5 MEMBER (#3060).
+      ; Historical explicit-byte ATOM remains a compatibility witness.
+      ; Current exact-D3 predicate surfaces are verified by the typed,
+      ; Lisp-data-owned boundary corpus in witness_authority.rs; this older
+      ; meta-registry witness cannot manufacture free-standing D1 literals.
       (00100111 (00000001 atom-native-legacy-byte)
             (registry-native-value "(00000010 (quote x))")
             (00000001 (1)))
-      (00100111 (00000001 atom-native-uk)
-            (registry-native-value "(атом? (як-є x))")
-            (registry-d1-yes))
-      (00100111 (00000001 atom-native-sa)
-            (registry-native-value "(aṇu (svarūpa x))")
-            (registry-d1-yes))
-      (00100111 (00000001 atom-native-symbolic)
-            (registry-native-value "(.? (quote x))")
-            (registry-d1-yes))
 
-      ; The metacircular evaluator still exercises the explicit compatibility
+      ; The metacircular evaluator still exercises the compatibility
       ; mechanism in my-apply-primitive. Its D1 cutover remains #2184 follow-up,
       ; so these rows deliberately retain the historical carrier until that
       ; evaluator can consume exact D1 false without generic truth coercion.

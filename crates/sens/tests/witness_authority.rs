@@ -19,6 +19,13 @@ struct WitnessRow {
     compiler_corpus: bool,
 }
 
+#[derive(Clone)]
+struct D3PredicateBoundaryRow {
+    case: String,
+    expr: String,
+    expected_bit: bool,
+}
+
 fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     entries.iter().find_map(|entry| {
         let ExprKind::Pair(k, v) = &entry.kind else {
@@ -126,6 +133,42 @@ fn witness_rows() -> Vec<WitnessRow> {
 
     rows.extend(transitions.into_iter().map(|(_, row)| row));
     rows
+}
+
+fn d3_predicate_boundary_rows() -> Vec<D3PredicateBoundaryRow> {
+    let source = include_str!("../../../tests/fixtures/d3-predicate-boundary-cases.lisp");
+    let forms = parse(source).expect("D3 predicate boundary corpus must parse as Lisp data");
+    assert_eq!(forms.len(), 1, "D3 predicate boundary corpus must be one data form");
+
+    let ExprKind::List(rows) = &forms[0].kind else {
+        panic!("D3 predicate boundary corpus root must be a list");
+    };
+
+    rows.iter()
+        .map(|row| {
+            let ExprKind::List(entries) = &row.kind else {
+                panic!("each D3 predicate boundary row must be an alist");
+            };
+            let case = alist_str(entries, "випадок")
+                .expect("predicate boundary row needs випадок")
+                .to_string();
+            let expr = alist_str(entries, "вираз")
+                .expect("predicate boundary row needs вираз")
+                .to_string();
+            let expected_bit = match alist_str(entries, "очікуваний-біт")
+                .expect("predicate boundary row needs очікуваний-біт")
+            {
+                "1" => true,
+                "0" => false,
+                other => panic!("predicate boundary bit must be 0/1, got {other:?}"),
+            };
+            D3PredicateBoundaryRow {
+                case,
+                expr,
+                expected_bit,
+            }
+        })
+        .collect()
 }
 
 fn canon_zero_rows() -> Vec<WitnessRow> {
@@ -346,6 +389,30 @@ fn compiler_corpus_native_actuals_are_judged_only_by_lisp_owned_witness_logic() 
         rows.iter().any(|row| row.expr.contains("defmacro")),
         "#113 compiler slice must retain macro evidence"
     );
+}
+
+#[test]
+fn exact_d3_predicate_boundaries_follow_lisp_owned_bit_cases() {
+    let rows = d3_predicate_boundary_rows();
+    assert!(
+        rows.len() >= 8,
+        "typed D3 predicate boundary corpus must keep both polarities and peer surfaces"
+    );
+
+    for row in rows {
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("core library");
+        let value = eval_program(&row.expr, &mut session)
+            .unwrap_or_else(|error| panic!("{} failed to evaluate: {error}", row.case))
+            .value;
+
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(row.expected_bit),
+            "Lisp-owned case {} must cross the exact D3 -> D1 boundary without Number/list/T/NIL coercion; value={value}",
+            row.case
+        );
+    }
 }
 
 #[test]
