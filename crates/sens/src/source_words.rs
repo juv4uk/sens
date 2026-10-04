@@ -78,8 +78,8 @@ impl BinarySourceWord {
 
     /// Lift an exact three-bit source word into the typed D3 carrier.
     ///
-    /// Primitive roles remain language-owned; no legacy Function8 mapping is
-    /// performed at this boundary.
+    /// D3 is unratified under #3327. This is an exact-width research lift only;
+    /// no semantic residency or legacy Function8 mapping is performed here.
     pub const fn d3(self) -> Option<crate::Bija3> {
         match self {
             Self::W3(word) => Some(crate::Bija3::from_word(word)),
@@ -90,7 +90,7 @@ impl BinarySourceWord {
 
     /// Lift an exact four-bit source word into the typed Core.D4 carrier.
     ///
-    /// Occupancy and operation meaning remain owned by the D4 contract.
+    /// D4 is unratified under #3327. This lift preserves exact width only.
     pub const fn d4(self) -> Option<crate::CoreD4> {
         match self {
             Self::W4(word) => Some(crate::CoreD4::from_word(word)),
@@ -98,7 +98,7 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact five-bit source word into the owner-ratified D5 carrier (#3305).
+    /// Lift an exact five-bit source word into the unratified D5 research carrier (#3327).
     pub const fn d5(self) -> Option<crate::CoreD5> {
         match self {
             Self::W5(word) => Some(crate::CoreD5::from_word(word)),
@@ -106,7 +106,7 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact six-bit source word into the transitional D6 research carrier.
+    /// Lift an exact six-bit source word into the unratified D6 research carrier.
     pub const fn d6(self) -> Option<crate::CoreD6> {
         match self {
             Self::W6(word) => Some(crate::CoreD6::from_word(word)),
@@ -114,8 +114,8 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact seven-bit source word into the ratified Core.D7 carrier.
-    /// This establishes domain membership only; Sound7/Text7 law owns meaning.
+    /// Lift an exact seven-bit source word into the unratified D7 research carrier.
+    /// This preserves width only; it does not establish Sound7 semantic membership.
     pub const fn d7(self) -> Option<crate::SoundD7> {
         match self {
             Self::W7(word) => Some(crate::SoundD7::from_word(word)),
@@ -123,9 +123,9 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact eight-bit source word into the transitional D8 research carrier.
+    /// Lift an exact eight-bit source word into the unratified D8 research carrier.
     /// This never converts through the historical Sens8 compatibility type and
-    /// does not admit D8 semantics while #3278 is active.
+    /// does not admit D8 semantics under #3327.
     pub const fn d8(self) -> Option<crate::CoreD8> {
         match self {
             Self::W8(word) => Some(crate::CoreD8::from_word(word)),
@@ -135,8 +135,8 @@ impl BinarySourceWord {
 
     /// Total exact-width qualified lift for the W1→W8 carrier ladder.
     ///
-    /// D1-D4/D7 have current semantic authority; D5/D6/D8 variants are
-    /// transitional research carriers under #3278. Callability is separate.
+    /// Only D1/D2 have current semantic authority under #3327. W3-W8 lifts are
+    /// exact-width research carriers only. Callability is separate and fail-closed.
     pub const fn domain_identity(self) -> crate::DomainIdentity {
         crate::DomainIdentity::from_source_word(self)
     }
