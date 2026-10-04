@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
-const CORE_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
+const CORE_FASL: &[u8] = include_bytes!("../../../lib/core.lisp.fasl");
 
 const SURFACE_PREREQUISITES: &[(&str, &str)] = &[
     ("unify.lisp", include_str!("../../../lib/unify.lisp")),
@@ -166,7 +166,7 @@ fn init_if_needed() -> Result<(), String> {
 fn session_with_core_fasl(fasl_bytes: &[u8]) -> Result<Session, String> {
     let mut session = Session::default();
     let (expressions, _) = sens::fasl_decode_program(fasl_bytes)
-        .ok_or_else(|| "failed to decode core4.lisp.fasl (format or hash mismatch)".to_string())?;
+        .ok_or_else(|| "failed to decode core.lisp.fasl (format or hash mismatch)".to_string())?;
     sens::eval_parsed_expressions(&expressions, &mut session)
         .map_err(|error| format!("failed to preload core.lisp: {error}"))?;
     Ok(session)
