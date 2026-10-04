@@ -47,7 +47,7 @@
       (d3-l1-l5-constitution
        . "The D3 map is fixed by the owner-ratified L1-L5 stack: L1 000 is structural empty; L2 D3 preserves exact D2 prefix fibres 00→()/QUOTE, 01→ATOM/CDR, 10→CAR/EQ, 11→COND/CONS; L3 one uniform semantic duality covers ()↔CONS, QUOTE↔COND, ATOM↔EQ, CDR↔CAR; L4 that D3 dual is XOR 111, recursively matching D1 XOR 1 and D2 XOR 11; L5 orients suffix-0 as the evaluator/metalinguistic spine ()→ATOM→CAR→COND. This law supersedes every previous current D3 coordinate ordering; old orderings survive only as historical/provenance evidence.")
       (d4-bootstrap
-       . "Core.D4 is the exact four-bit bootstrap domain ratified by #2169. Its resident coordinates execute only under D4 law; 0101 and 1001 remain unallocated. No historical Function8 identity may be reconstructed from a D4 word by bit-shape coincidence.")
+       . "Core.D4 is under clean-room re-derivation from the owner-ratified D1-D3 foundation (#3225/#3202). Current law-certified residents are exactly 0110, 0111, 1000 and 1001; the other twelve exact four-bit coordinates are UNKNOWN until a complete two-child fibre certificate is admitted under #3244/#3257. Pre-clean-room #2169 and historical D4 maps are posterior evidence only and cannot seed placement.")
       (d5-d6-residency
        . "Core.D5 and Core.D6 use exact five-bit and six-bit typed domains governed by their owner-ratified maps/laws. Residency, derivability, callability and runtime implementation are distinct facts: carrier existence alone grants neither occupancy nor callability.")
       (d7-sound-local-ordinal
