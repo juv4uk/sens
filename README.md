@@ -23,7 +23,7 @@
 
 ## Що таке SENS
 
-SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **ратифікована драбина точних доменів D1–D8**.
+SENS — експериментальна мова програмування і лабораторія формальної семантики. Після owner reset #3327 чинними семантичними доменами є **лише D1 і D2**; W3–W8 зберігаються як exact-width research carriers.
 
 Історично проєкт розвивався під робочою назвою `my-lisp`. Старі матеріали зберігаються як provenance розвитку ідей, але не визначають чинну семантичну модель.
 
@@ -110,7 +110,7 @@ suffix 1 → compose CDR
 0111  CDDR
 ```
 
-Цей закон **не продовжується автоматично у D5+**: новий префікс CAR уже перетинається з ратифікованими D5-резидентами (зокрема `D5:10000 = APPEND`). Глибші селектори потребують окремо доведеного, безконфліктного закону.
+Цей закон **не продовжується автоматично у D5+**. Після #3327 усі D3–D8 placement-и є research evidence; будь-який глибший selector має бути заново виведений після повторного прийняття нижчого домену.
 
 Це і є бажаний тип росту SENS: **корені + доведений закон → відтворювана родина**, але лише в межах, де закон пройшов falsifier і не суперечить іншим ратифікованим доменам.
 
@@ -332,7 +332,7 @@ Common Lisp, Prolog, Datalog, CLIPS, C, WASM, FPGA чи інший substrate м�
 ## Що вже є в репозиторії
 
 - Contract 11 з domain-qualified identity;
-- ратифікована драбина D1–D8;
+- ратифіковані D1 PredicateBit і D2 racanā2; D3–D8 — research після #3327;
 - exact-width carrier/packing механізми;
 - D1 PredicateBit;
 - D2 structural grammar;
@@ -451,7 +451,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · short summary
 
-SENS is an experimental language whose current constitution is the exact-width domain ladder D1–D8.
+SENS is an experimental language. After owner reset #3327, only D1 and D2 are current semantic authority; W3–W8 remain exact-width research carriers.
 
 Its central idea is not “smaller opcodes”. A canonical semantic object is:
 
@@ -467,7 +467,7 @@ Start with [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) and [`lang
 
 ## Deutsch · Kurzfassung
 
-SENS ist eine experimentelle Sprache mit einer ratifizierten Exact-Width-Domänenleiter D1–D8.
+SENS ist eine experimentelle Sprache. Nach Owner-Reset #3327 sind nur D1 und D2 aktuelle semantische Autorität; W3–W8 bleiben Exact-Width-Forschungsträger.
 
 Ein kanonisches semantisches Objekt besteht aus:
 
