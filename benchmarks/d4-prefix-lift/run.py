@@ -102,8 +102,9 @@ def main() -> int:
     report = {
         "schema": "d4-prefix-lift/v1",
         "issue": 3212,
-        "status": "mechanically-verified-canonical-representative",
-        "semantic_note": "prefix lift is a gauge tie-break, not a new semantic law",
+        "status": "QUARANTINED-HISTORICAL-MECHANICAL-EXPERIMENT",
+        "semantic_authority": False,
+        "semantic_note": "legacy-derived 16-row inventory; forbidden as a premise for clean-room D4 semantics under #3225",
         "prefix_permutation": prefix_perm,
         "candidate": candidate,
         "moved": len(migration),

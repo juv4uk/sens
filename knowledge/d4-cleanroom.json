@@ -1,0 +1,30 @@
+{
+  "schema": "d4-cleanroom/v1",
+  "authority": "#3225",
+  "premises": [
+    "ratified D1",
+    "ratified D2",
+    "ratified D3/bija3 A",
+    "D4 geometry = D3 || one bit",
+    "selector composition law"
+  ],
+  "admitted": {
+    "0110": "CDAR",
+    "0111": "CDDR",
+    "1000": "CAAR",
+    "1001": "CADR"
+  },
+  "unknown": [
+    "0000","0001","0010","0011","0100","0101",
+    "1010","1011","1100","1101","1110","1111"
+  ],
+  "forbidden_premise_classes": [
+    "SID8",
+    "Sens8",
+    "Function8",
+    "pre-3225 D4 resident inventory",
+    "historical Lisp order",
+    "D5 parentage",
+    "migration-cost tie-break"
+  ]
+}
