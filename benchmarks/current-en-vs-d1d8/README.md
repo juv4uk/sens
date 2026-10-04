@@ -111,3 +111,41 @@ estimated.
 
 Principle: **prove that both surfaces are the same current language first; only
 then measure and compare them.**
+
+
+## Memory / working-set preflight
+
+`memory_runner.py` reuses the same helper and the same semantic preflight; it
+does not introduce a second benchmark oracle.
+
+On POSIX CI it records `ru_maxrss` from `wait4/rusage` for each **separate
+helper process**. Therefore `peak_rss_kb` means:
+
+> maximum resident set size reached by the complete helper process executing
+> that phase command.
+
+It is **not** a subtractive phase-memory delta. Process startup, Rust runtime,
+the prepared session and any work required by the selected command may
+contribute to the peak.
+
+Every ready pair is sampled at least three times. Raw rows retain each sample;
+the sidecar summary reports median, min, max and spread separately for each
+candidate and phase.
+
+Allocation count and allocated bytes are deliberately `null` in this first
+slice. They will remain unavailable until one instrumentation mechanism can
+measure both candidates under the same binary/tool image without changing
+their semantics.
+
+Run the bounded D3 preflight with:
+
+```bash
+python3 benchmarks/current-en-vs-d1d8/memory_runner.py \
+  --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
+  --out /tmp/current-en-vs-d1d8.memory.jsonl \
+  --summary-out /tmp/current-en-vs-d1d8.memory-summary.json \
+  --reps 3
+```
+
+This is still a mechanics preflight, not a whole-language memory comparison.
+No ratio or winner is computed.
