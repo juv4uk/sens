@@ -92,12 +92,12 @@ fn same_payload_across_all_d1_d8_remains_distinct_in_ast_and_value() {
 }
 
 #[test]
-fn callable_projection_fails_closed_for_unratified_d5_d6_d8() {
-    for identity in [d1(1), d2(1), d5(1), d6(1), d7(1), d8(1)] {
+fn callable_projection_admits_current_d3_d4_d5_and_fails_closed_elsewhere() {
+    for identity in [d1(1), d2(1), d6(1), d7(1), d8(1)] {
         assert_eq!(Value::DomainIdentity(identity).as_core_domain_identity(), None);
     }
 
-    for identity in [d3(1), d4(1)] {
+    for identity in [d3(1), d4(1), d5(1)] {
         assert!(Value::DomainIdentity(identity).as_core_domain_identity().is_some());
     }
 
