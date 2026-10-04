@@ -1,4 +1,4 @@
-name: D5 runtime admission audit
+name: Historical D5 admission-path donor audit
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   audit:
-    name: D5 canonical identity path
+    name: Historical D5 path against current implementation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -29,7 +29,7 @@ jobs:
       - name: Prove all 32 exact W5 source words
         run: cargo test -p sens --test d5_source_boundary
 
-      - name: Emit D5 runtime admission matrix
+      - name: Emit historical D5 path matrix
         run: |
           python3 scripts/research-2766-d5-runtime-admission.py --json d5-runtime-admission.json
           cat d5-runtime-admission.json
@@ -37,19 +37,19 @@ jobs:
       - name: Upload matrix
         uses: actions/upload-artifact@v4
         with:
-          name: d5-runtime-admission
+          name: historical-d5-admission-path
           path: d5-runtime-admission.json
 
       - name: Publish summary
         run: |
           {
-            echo "## D5 runtime admission audit"
+            echo "## Historical D5 admission-path donor audit"
             echo
             echo "~~~text"
             python3 scripts/research-2766-d5-runtime-admission.py
             echo "~~~"
             echo
-            echo "- Occupancy authority: OD-005 owner map."
-            echo "- Semantic residency is not inferred by this audit."
-            echo "- Human names are projection only; no D5 -> Sens8 alias is admitted."
+            echo "- Historical map: knowledge/d5-historical-full-map.json (donor/provenance only)."
+            echo "- Current D5 semantic authority: #3305 / Contract 11.3 / knowledge/d5-ratified.json."
+            echo "- This historical audit does not define current D5 coordinates or residency; human names remain projection only."
           } >> "$GITHUB_STEP_SUMMARY"
