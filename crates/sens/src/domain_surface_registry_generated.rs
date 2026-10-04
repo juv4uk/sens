@@ -1,5 +1,5 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Authority: lib/surface/domain-surfaces-d1-d4.lisp
+// Authority: lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp
 // Checked by: scripts/check-domain-surfaces-d1-d4.py
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -47,4 +47,36 @@ pub(super) const DOMAIN_SURFACE_ROWS: &[DomainSurfaceRow] = &[
     DomainSurfaceRow { width: 4, bits: 0b1101, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "обчислити-список" }, DomainSurfaceName { namespace: "sa", name: "śreṇī-vicāraṇa" }] },
     DomainSurfaceRow { width: 4, bits: 0b1110, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "список" }, DomainSurfaceName { namespace: "sa", name: "śreṇī" }] },
     DomainSurfaceRow { width: 4, bits: 0b1111, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "приєднати" }, DomainSurfaceName { namespace: "sa", name: "saṅkalana" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00000, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "обчислити-як-є" }, DomainSurfaceName { namespace: "sa", name: "svarūpa-vicāraṇa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00001, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "функція-значення" }, DomainSurfaceName { namespace: "sa", name: "phalana-rūpa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00010, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "необчислений-вираз" }, DomainSurfaceName { namespace: "sa", name: "avicārita-rūpa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00011, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "макрос" }, DomainSurfaceName { namespace: "sa", name: "vistāra-rūpa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00100, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "мітка" }, DomainSurfaceName { namespace: "sa", name: "cihna" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00101, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "програма" }, DomainSurfaceName { namespace: "sa", name: "kāryakrama" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00110, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "встановити" }, DomainSurfaceName { namespace: "sa", name: "sthāpana" }] },
+    DomainSurfaceRow { width: 5, bits: 0b00111, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "встановити-ім'я" }, DomainSurfaceName { namespace: "sa", name: "nāma-sthāpana" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01000, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "нуль?" }, DomainSurfaceName { namespace: "sa", name: "saṅkhyā-śūnya?" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01001, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "число?" }, DomainSurfaceName { namespace: "sa", name: "saṅkhyā?" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01010, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "додати" }, DomainSurfaceName { namespace: "sa", name: "yoga" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01011, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "відняти" }, DomainSurfaceName { namespace: "sa", name: "viyoga" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01100, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "решта-від-першого-від-першого" }, DomainSurfaceName { namespace: "sa", name: "śeṣa-ādi-ādi" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01101, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "решта-від-першого-від-решти" }, DomainSurfaceName { namespace: "sa", name: "śeṣa-ādi-śeṣa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01110, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "решта-від-решти-від-першого" }, DomainSurfaceName { namespace: "sa", name: "śeṣa-śeṣa-ādi" }] },
+    DomainSurfaceRow { width: 5, bits: 0b01111, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "решта-від-решти-від-решти" }, DomainSurfaceName { namespace: "sa", name: "śeṣa-śeṣa-śeṣa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10000, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "перше-від-першого-від-першого" }, DomainSurfaceName { namespace: "sa", name: "ādi-ādi-ādi" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10001, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "перше-від-першого-від-решти" }, DomainSurfaceName { namespace: "sa", name: "ādi-ādi-śeṣa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10010, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "перше-від-решти-від-першого" }, DomainSurfaceName { namespace: "sa", name: "ādi-śeṣa-ādi" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10011, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "перше-від-решти-від-решти" }, DomainSurfaceName { namespace: "sa", name: "ādi-śeṣa-śeṣa" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10100, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "зворот" }, DomainSurfaceName { namespace: "sa", name: "viloma" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10101, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "зворот-до" }, DomainSurfaceName { namespace: "sa", name: "viloma-saṅkalana" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10110, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "помножити" }, DomainSurfaceName { namespace: "sa", name: "guṇana" }] },
+    DomainSurfaceRow { width: 5, bits: 0b10111, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "частка" }, DomainSurfaceName { namespace: "sa", name: "bhāga" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11000, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "перейти" }, DomainSurfaceName { namespace: "sa", name: "gamana" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11001, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "повернути" }, DomainSurfaceName { namespace: "sa", name: "nivartana" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11010, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "менше?" }, DomainSurfaceName { namespace: "sa", name: "hīna?" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11011, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "більше?" }, DomainSurfaceName { namespace: "sa", name: "adhika?" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11100, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "знайти-за-ключем" }, DomainSurfaceName { namespace: "sa", name: "saṃbandha" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11101, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "значення-у-списку?" }, DomainSurfaceName { namespace: "sa", name: "sambaddha?" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11110, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "спарувати" }, DomainSurfaceName { namespace: "sa", name: "yugma-bandha" }] },
+    DomainSurfaceRow { width: 5, bits: 0b11111, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "замінити" }, DomainSurfaceName { namespace: "sa", name: "ādeśa" }] },
 ];
