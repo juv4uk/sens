@@ -48,7 +48,10 @@ def main() -> None:
     d5_map = load(D5_MAP)
     d5_atlas = load(D5_ATLAS)
 
-    require(d4.get("authority") == "#3225", "D4 clean-room authority drift")
+    require(
+        d4.get("schema") in {"d4-cleanroom/v1", "d4-ratified/v2"},
+        f"unsupported D4 authority schema: {d4.get('schema')}",
+    )
     require(d5_map.get("domain") == "Core.D5", "D5 projection domain drift")
     require(d5_map.get("width") == 5, "D5 projection width drift")
     require(d5_map.get("capacity") == 32, "D5 projection capacity drift")
@@ -68,12 +71,22 @@ def main() -> None:
         "D5 internal-law atlas occupancy drift",
     )
 
-    admitted = d4.get("admitted", {})
-    selectors = {
-        bits: label
-        for bits, label in admitted.items()
-        if D4_SELECTOR_RE.fullmatch(label)
-    }
+    if d4.get("schema") == "d4-ratified/v2":
+        residents = d4.get("residents", {})
+        generated = set(d4.get("classification", {}).get("generated_selectors", []))
+        require(generated, "ratified D4 generated-selector classification missing")
+        selectors = {
+            bits: label
+            for bits, label in residents.items()
+            if label in generated
+        }
+    else:
+        admitted = d4.get("admitted", {})
+        selectors = {
+            bits: label
+            for bits, label in admitted.items()
+            if D4_SELECTOR_RE.fullmatch(label)
+        }
     require(selectors, "no admitted clean-room D4 selectors found")
     require(
         all(len(bits) == 4 and set(bits) <= {"0", "1"} for bits in selectors),
@@ -141,7 +154,8 @@ def main() -> None:
     report = {
         "schema": "d4-d5-selector-boundary/v1",
         "issue": "#3263",
-        "d4_authority": d4["authority"],
+        "d4_schema": d4["schema"],
+        "d4_authority": d4.get("authority"),
         "d5_projection_authority": d5_map.get("authority"),
         "d5_internal_law_authority": "OD-D5-LAW-001/#3055",
         "selector_parent_count": len(selectors),
