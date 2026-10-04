@@ -1,0 +1,29 @@
+name: D6 order reversal research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-3105-d6-order-reversal.py"
+      - "knowledge/d6-order-reversal-law.json"
+      - "knowledge/d3-d8-stable-residents.json"
+      - ".github/workflows/d6-order-reversal-research.yml"
+  workflow_dispatch:
+
+jobs:
+  order-reversal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Replay NEG order-reversal witness
+        run: python3 scripts/research-3105-d6-order-reversal.py
+      - name: Show concise result
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("knowledge/d6-order-reversal-law.json").read_text())
+          print("D6 order-reversal:", d["semantic_transform"]["law_id"])
+          print("values:", d["oracle"]["value_count"], "pairs:", d["oracle"]["pair_count"])
+          print("geometry:", d["geometry"]["status"], "credit:", d["geometry"]["solver_credit"])
+          PY
