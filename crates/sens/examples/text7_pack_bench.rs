@@ -3,8 +3,8 @@
 //! Run from the repository root:
 //!   cargo run --release -p sens --example text7_pack_bench
 //!
-//! The benchmark intentionally excludes UTF-8->Text7 projection. Both paths
-//! receive the same already-admitted 7-bit cells, isolating packing/unpacking.
+//! The benchmark excludes UTF-8->Text7 projection. Both paths receive the
+//! same already-admitted 7-bit cells, isolating packing/unpacking.
 
 use sens::{pack7_cells, unpack7_cells, Bit7, BitPacker, PackedBitstream};
 use std::{fs, hint::black_box, time::Instant};
@@ -15,7 +15,7 @@ const ROUNDS: usize = 10_000;
 
 fn load_cells() -> Vec<Vec<u8>> {
     let text = fs::read_to_string(CORPUS).expect("read 1700-uk-literals-vs-upc7.tsv");
-    let mut rows = Vec::new();
+    let mut rows = Vec::with_capacity(TARGET_ROWS);
 
     for line in text.lines().skip(1) {
         let mut cols = line.split('\t');
@@ -40,7 +40,7 @@ fn load_cells() -> Vec<Vec<u8>> {
     rows
 }
 
-fn generic_pack(corpus: &[Vec<u8>]) -> Vec<(Vec<u8>, usize)> {
+fn generic_pack(corpus: &[Vec<u8>]) -> Vec<PackedBitstream> {
     corpus
         .iter()
         .map(|cells| {
@@ -48,20 +48,20 @@ fn generic_pack(corpus: &[Vec<u8>]) -> Vec<(Vec<u8>, usize)> {
             for &cell in cells {
                 packer.push(Bit7::new(cell).expect("canonical seven-bit cell"));
             }
-            let packed = packer.finish();
-            (packed.bytes().to_vec(), packed.bit_len())
+            packer.finish()
         })
         .collect()
 }
 
-fn generic_unpack(packed: &[(Vec<u8>, usize)]) -> usize {
+fn generic_unpack(packed: &[PackedBitstream]) -> usize {
     let mut checksum = 0usize;
-    for (bytes, bit_len) in packed {
-        let packed = PackedBitstream::from_parts(bytes.clone(), *bit_len).expect("valid packed stream");
-        for index in (0..*bit_len).step_by(7) {
-            checksum ^= usize::from(packed.read::<7>(index).expect("cell"));
+    for stream in packed {
+        for index in (0..stream.bit_len()).step_by(7) {
+            checksum = checksum.wrapping_mul(131)
+                ^ usize::from(stream.read::<7>(index).expect("cell").packed_bits());
         }
     }
+    black_box(checksum);
     checksum
 }
 
@@ -76,9 +76,10 @@ fn bulk_unpack(packed: &[(Vec<u8>, usize)]) -> usize {
     let mut checksum = 0usize;
     for (bytes, bit_len) in packed {
         for cell in unpack7_cells(bytes, *bit_len).expect("valid packed stream") {
-            checksum ^= usize::from(cell);
+            checksum = checksum.wrapping_mul(131) ^ usize::from(cell);
         }
     }
+    black_box(checksum);
     checksum
 }
 
@@ -87,26 +88,22 @@ fn median(values: &mut [f64]) -> f64 {
     values[values.len() / 2]
 }
 
-fn bench<F: Fn() -> usize>(mut f: F) -> (f64, usize) {
-    let warmup = f();
+fn bench<F: Fn() -> usize>(f: F) -> f64 {
+    let warmup = black_box(f());
+    black_box(warmup);
     let mut samples = Vec::with_capacity(7);
 
-    for sample in 0..7 {
+    for _ in 0..7 {
         let start = Instant::now();
         let mut checksum = 0usize;
         for _ in 0..ROUNDS {
             checksum ^= black_box(f());
         }
-        let elapsed_ns = start.elapsed().as_secs_f64() * 1e9 / ROUNDS as f64;
-        samples.push(elapsed_ns);
-        assert_eq!(checksum & !0usize, checksum);
-        if sample == 0 {
-            assert_eq!(checksum, warmup ^ (if ROUNDS % 2 == 0 { 0 } else { warmup }));
-        }
+        black_box(checksum);
+        samples.push(start.elapsed().as_secs_f64() * 1e9 / ROUNDS as f64);
     }
 
-    let med = median(&mut samples);
-    (med, warmup)
+    median(&mut samples)
 }
 
 fn main() {
@@ -114,21 +111,25 @@ fn main() {
 
     let generic = generic_pack(&corpus);
     let bulk = bulk_pack(&corpus);
-    assert_eq!(generic, bulk);
 
-    let generic_ns = bench(|| generic_unpack(black_box(&generic))).0;
-    let bulk_ns = bench(|| bulk_unpack(black_box(&bulk))).0;
+    for (g, (bytes, bit_len)) in generic.iter().zip(&bulk) {
+        assert_eq!(g.bytes(), bytes);
+        assert_eq!(g.bit_len(), *bit_len);
+    }
 
     let generic_pack_ns = bench(|| {
         let out = generic_pack(black_box(&corpus));
-        out.iter().map(|(b, _)| b.len()).sum()
-    }).0;
+        black_box(out.iter().map(PackedBitstream::byte_len).sum())
+    });
     let bulk_pack_ns = bench(|| {
         let out = bulk_pack(black_box(&corpus));
-        out.iter().map(|(b, _)| b.len()).sum()
-    }).0;
+        black_box(out.iter().map(|(bytes, _)| bytes.len()).sum::<usize>())
+    });
 
-    let total_bytes: usize = bulk.iter().map(|(b, _)| b.len()).sum();
+    let generic_unpack_ns = bench(|| generic_unpack(black_box(&generic)));
+    let bulk_unpack_ns = bench(|| bulk_unpack(black_box(&bulk)));
+
+    let total_bytes: usize = bulk.iter().map(|(bytes, _)| bytes.len()).sum();
     let total_cells: usize = corpus.iter().map(Vec::len).sum();
 
     println!("corpus_rows={TARGET_ROWS}");
@@ -138,7 +139,7 @@ fn main() {
     println!("generic_pack_ns_per_round={generic_pack_ns:.1}");
     println!("bulk_pack_ns_per_round={bulk_pack_ns:.1}");
     println!("pack_speedup={:.3}", generic_pack_ns / bulk_pack_ns);
-    println!("generic_unpack_ns_per_round={generic_ns:.1}");
-    println!("bulk_unpack_ns_per_round={bulk_ns:.1}");
-    println!("unpack_speedup={:.3}", generic_ns / bulk_ns);
+    println!("generic_unpack_ns_per_round={generic_unpack_ns:.1}");
+    println!("bulk_unpack_ns_per_round={bulk_unpack_ns:.1}");
+    println!("unpack_speedup={:.3}", generic_unpack_ns / bulk_unpack_ns);
 }
