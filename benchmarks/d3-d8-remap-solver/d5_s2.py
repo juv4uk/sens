@@ -34,9 +34,9 @@ def hamming(a: str, b: str) -> int:
     return sum(x != y for x, y in zip(a, b, strict=True))
 
 
-def load_inputs():
-    atlas = json.loads(ATLAS_PATH.read_text(encoding="utf-8"))
-    corpus = json.loads(CORPUS_PATH.read_text(encoding="utf-8"))
+def load_inputs(atlas_path: Path, corpus_path: Path):
+    atlas = json.loads(atlas_path.read_text(encoding="utf-8"))
+    corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
     rows = {row["stable_resident_id"]: row for row in corpus["rows"]}
     return atlas, rows
 
@@ -279,11 +279,13 @@ def write_map(path: Path, mapping: dict[str, str], score: dict[str, Any], mig: d
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--atlas", type=Path, default=ATLAS_PATH)
+    ap.add_argument("--corpus", type=Path, default=CORPUS_PATH)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
-    atlas, corpus_rows = load_inputs()
+    atlas, corpus_rows = load_inputs(args.atlas, args.corpus)
     current = current_map(atlas)
     generators = generator_constraints(atlas, corpus_rows)
     axes = local_axis_pairs(atlas)
