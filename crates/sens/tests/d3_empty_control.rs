@@ -55,6 +55,16 @@ fn cond(clauses: Vec<Expr>) -> Expr {
     }
 }
 
+fn eq(left: Expr, right: Expr) -> Expr {
+    Expr {
+        kind: ExprKind::DomainCall(
+            CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(0b101).expect("D3:101"))),
+            Rc::from(vec![left, right].into_boxed_slice()),
+        ),
+        span: span(),
+    }
+}
+
 fn run(expr: Expr) -> Result<Value, sens::LanguageError> {
     let mut session = Session::default();
     eval_parsed_expressions(&[expr], &mut session).map(|result| result.value)
@@ -100,6 +110,27 @@ fn only_exact_d1_or_empty_are_admitted_as_cond_tests() {
         .expect_err("Number 1 is not PredicateBit 1");
 
     assert_eq!(error.kind, ErrorKind::Type);
+}
+
+#[test]
+fn exact_eq_empty_witness_feeds_cond_without_becoming_false() {
+    let pair = Expr {
+        kind: ExprKind::List(Rc::from(vec![number(1.0)].into_boxed_slice())),
+        span: span(),
+    };
+
+    let direct = run(eq(pair.clone(), number(1.0)))
+        .expect("partial D3 EQ returns EMPTY/no-witness");
+    assert!(matches!(direct, Value::Nil));
+    assert_eq!(direct.as_predicate_bit(), None);
+
+    let projected = run(cond(vec![
+        clause(eq(pair, number(1.0)), d1(1)),
+        clause(d1(1), d1(0)),
+    ]))
+    .expect("COND admits EQ EMPTY as no-witness and continues");
+
+    assert_eq!(projected.as_predicate_bit(), Some(false));
 }
 
 #[test]
