@@ -1,17 +1,19 @@
 use crate::{Rational, Sens8, Text7};
+use crate::DomainIdentity;
 use std::fmt;
 
 /// Host-side view of one canonical SENS binary frame.
 ///
 /// The enum is a decoder mechanism only. Its variants do not create a new
-/// language ontology: they project the already-ratified Control2, Function8,
-/// exact Number and Text7 domains.
+/// language ontology. Exact domain identity has its own tagged frame; the
+/// historical Function8 frame is compatibility-only and never aliases Core.D8.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BinaryFrame {
     Space,
     Close,
     Open,
     Function(Sens8),
+    Domain(DomainIdentity),
     Number(Rational),
     Text(Text7),
 }
@@ -37,6 +39,8 @@ const TYPE_FUNCTION: [u8; 2] = [0, 0];
 const TYPE_NUMBER: [u8; 2] = [0, 1];
 const TYPE_TEXT: [u8; 2] = [1, 0];
 const TYPE_EXTENSION: [u8; 2] = [1, 1];
+
+const EXT_DOMAIN: [u8; 2] = [0, 0];
 
 /// Encode one non-negative length as Elias-gamma(n+1).
 ///
@@ -87,6 +91,13 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             out.extend_from_slice(&CONTROL_ESCAPE);
             out.extend_from_slice(&TYPE_FUNCTION);
             append_fixed_bits(sens.packed_byte(), 8, &mut out);
+        }
+        BinaryFrame::Domain(identity) => {
+            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&TYPE_EXTENSION);
+            out.extend_from_slice(&EXT_DOMAIN);
+            append_fixed_bits((identity.width() - 1) as u8, 3, &mut out);
+            append_fixed_bits(identity.packed_bits(), identity.width(), &mut out);
         }
         BinaryFrame::Text(text) => {
             out.extend_from_slice(&CONTROL_ESCAPE);
@@ -204,12 +215,36 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
                 }
                 TYPE_NUMBER => decode_number(reader, frame_start),
                 TYPE_TEXT => decode_text(reader),
-                TYPE_EXTENSION => Err(BinaryFrameError::ReservedExtension { index: type_start }),
+                TYPE_EXTENSION => {
+                    let e0 = reader.read_bit()?;
+                    let e1 = reader.read_bit()?;
+                    match [e0, e1] {
+                        EXT_DOMAIN => decode_domain_identity(reader),
+                        _ => Err(BinaryFrameError::ReservedExtension { index: type_start }),
+                    }
+                },
                 _ => unreachable!("read_bit returns only 0 or 1"),
             }
         }
         _ => unreachable!("read_bit returns only 0 or 1"),
     }
+}
+
+fn decode_domain_identity(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFrameError> {
+    let width = usize::from(reader.read_fixed_u8(3)?) + 1;
+    let payload = reader.read_fixed_u8(width)?;
+    let source = match width {
+        1 => crate::BinarySourceWord::W1(crate::Bit1::new(payload).unwrap()),
+        2 => crate::BinarySourceWord::W2(crate::Bit2::new(payload).unwrap()),
+        3 => crate::BinarySourceWord::W3(crate::Bit3::new(payload).unwrap()),
+        4 => crate::BinarySourceWord::W4(crate::Bit4::new(payload).unwrap()),
+        5 => crate::BinarySourceWord::W5(crate::Bit5::new(payload).unwrap()),
+        6 => crate::BinarySourceWord::W6(crate::Bit6::new(payload).unwrap()),
+        7 => crate::BinarySourceWord::W7(crate::Bit7::new(payload).unwrap()),
+        8 => crate::BinarySourceWord::W8(crate::Bit8::new(payload).unwrap()),
+        _ => unreachable!("three-bit width tag + 1 is always 1..=8"),
+    };
+    Ok(BinaryFrame::Domain(source.domain_identity()))
 }
 
 fn decode_text(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFrameError> {
@@ -438,6 +473,38 @@ mod tests {
             assert_eq!(reader.read_len().unwrap(), length);
             assert_eq!(reader.position(), encoded.len());
         }
+    }
+
+    #[test]
+    fn all_d1_d8_domain_widths_round_trip_without_function8_aliasing() {
+        let identities = [
+            crate::BinarySourceWord::W1(crate::Bit1::new(1).unwrap()).domain_identity(),
+            crate::BinarySourceWord::W2(crate::Bit2::new(1).unwrap()).domain_identity(),
+            crate::BinarySourceWord::W3(crate::Bit3::new(1).unwrap()).domain_identity(),
+            crate::BinarySourceWord::W4(crate::Bit4::new(1).unwrap()).domain_identity(),
+            crate::BinarySourceWord::W5(crate::Bit5::new(1).unwrap()).domain_identity(),
+            crate::BinarySourceWord::W6(crate::Bit6::new(1).unwrap()).domain_identity(),
+            crate::BinarySourceWord::W7(crate::Bit7::new(1).unwrap()).domain_identity(),
+            crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()).domain_identity(),
+        ];
+
+        for identity in identities {
+            let frame = BinaryFrame::Domain(identity);
+            let encoded = encode_binary_frame(&frame).unwrap();
+            assert_eq!(&encoded[..6], &[1, 1, 1, 1, 0, 0]);
+            let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
+            assert_eq!(decoded, frame);
+            assert_eq!(consumed, encoded.len());
+        }
+
+        let d8 = BinaryFrame::Domain(
+            crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()).domain_identity(),
+        );
+        // Historical Function8(00000001) wire is 11 00 + eight payload bits.
+        // Compare wire shapes without importing legacy identity into this new
+        // exact-domain witness.
+        let legacy_wire = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+        assert_ne!(encode_binary_frame(&d8).unwrap().as_slice(), legacy_wire);
     }
 
     #[test]

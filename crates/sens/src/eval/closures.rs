@@ -279,7 +279,10 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
 
 fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Head {
     match &head.kind {
-        ExprKind::DomainIdentity(identity) => domain_head(*identity, environment),
+        ExprKind::DomainIdentity(identity) => identity
+            .core_operation()
+            .map(|core| domain_head(core, environment))
+            .unwrap_or(Head::Opaque),
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
             if let Some(sid) = canon::routed_sid_for_surface(name) {
@@ -298,7 +301,10 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
             }
             match environment.get(name) {
                 Some(Value::Macro(_) | Value::Builtin(_)) => Head::Opaque,
-                Some(Value::DomainIdentity(identity)) => domain_head(identity, environment),
+                Some(Value::DomainIdentity(identity)) => identity
+                    .core_operation()
+                    .map(|core| domain_head(core, environment))
+                    .unwrap_or(Head::Opaque),
                 Some(Value::Sid(sid)) => sid_head(sid, environment),
                 _ => Head::Call,
             }
@@ -509,11 +515,22 @@ pub(super) fn apply(
 ) -> Result<EvalStep, LanguageError> {
     match function {
         Value::DomainIdentity(identity) => {
+            let Some(core_identity) = identity.core_operation() else {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "domain identity is not callable under its ratified law: D{} {}",
+                        identity.width(),
+                        identity
+                    ),
+                    span,
+                ));
+            };
             let mut values = Vec::with_capacity(arguments.len());
             for argument in arguments {
                 values.push(evaluate(argument, calling_environment)?);
             }
-            canon::invoke_domain_identity(identity, &values, calling_environment, span)
+            canon::invoke_domain_identity(core_identity, &values, calling_environment, span)
                 .map(EvalStep::Value)
         }
         Value::Sid(sid) => {

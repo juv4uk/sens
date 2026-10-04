@@ -30,7 +30,7 @@ pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
 
 fn head_domain_identity(head: &Expr) -> Option<CoreDomainIdentity> {
     match &head.kind {
-        ExprKind::DomainIdentity(identity) => Some(*identity),
+        ExprKind::DomainIdentity(identity) => identity.core_operation(),
         ExprKind::Symbol(name) => immutable_surface_domain_identity(name),
         _ => None,
     }

@@ -10,6 +10,7 @@
 
 mod bignum;
 mod bits;
+mod canonical_reader;
 mod domain_words;
 mod domain_identity;
 mod packed_bits;
@@ -120,8 +121,9 @@ mod text7_projection_generated;
 mod value;
 
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
-pub use domain_identity::CoreDomainIdentity;
-pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, PredicateBit, Racana2};
+pub use canonical_reader::parse_canonical_binary;
+pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
+pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
@@ -185,16 +187,13 @@ pub const CORE2_LIBRARY_SOURCE: &str = include_str!("../../../lib/core2.lisp");
 /// therefore does not belong in this capability-free core crate.
 pub const CORE3_LIBRARY_SOURCE: &str = include_str!("../../../lib/core3.lisp");
 
-/// The one active SENS Core bootstrap library, evaluated after the macro layer.
-///
-/// Historical Core1/Core2/Core3/Core4 sources remain provenance/laboratory
-/// artifacts only. Runtime language authority enters through lib/core.lisp.
-pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core.lisp");
+/// The current Core4 sens bootstrap library, evaluated after the macro layer.
+pub const CORE_LIBRARY_SOURCE: &str = include_str!("../../../lib/core4.lisp");
 
-/// Parse-output cache for the exact embedded active Core source. This is only a
-/// bootstrap optimization: the source hash is checked before use and a stale or
-/// invalid snapshot falls back to parsing CORE_LIBRARY_SOURCE.
-const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core.lisp.fasl");
+/// Parse-output кеш для точного вбудованого Core4 source. Це лише bootstrap-
+/// оптимізація: hash source перевіряється перед використанням, а stale/invalid
+/// bytes переходять на parsing CORE_LIBRARY_SOURCE.
+const CORE_LIBRARY_FASL: &[u8] = include_bytes!("../../../lib/core4.lisp.fasl");
 
 /// Generated runtime projection of admitted surface spellings to opaque Sens8
 /// identities. semantic-registry.lisp remains the only spelling authority.
