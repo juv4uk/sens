@@ -10,21 +10,21 @@
   (domain . D3)
   (name . bīja3)
 
-  (map
-    . ((000 EMPTY)
-       (001 QUOTE)
-       (010 ATOM)
-       (011 CDR)
-       (100 CAR)
-       (101 EQ)
-       (110 COND)
-       (111 CONS)))
+  (bīja3
+    . ((D3:000 EMPTY)
+       (D3:001 QUOTE)
+       (D3:010 ATOM)
+       (D3:011 CDR)
+       (D3:100 CAR)
+       (D3:101 EQ)
+       (D3:110 COND)
+       (D3:111 CONS)))
 
   (d2-prefix-fibres
-    . ((00 EMPTY QUOTE)
-       (01 ATOM CDR)
-       (10 CAR EQ)
-       (11 COND CONS)))
+    . ((D2:00 EMPTY QUOTE)
+       (D2:01 ATOM CDR)
+       (D2:10 CAR EQ)
+       (D2:11 COND CONS)))
 
   (semantic-duals
     . ((EMPTY CONS)
@@ -42,9 +42,9 @@
   (evidence . (#3194 #3196 #3200))
   (implementation-cutover . (#3203 #2055 #3205 #3206))
   (superseded-current-order
-    . ((011 COND)
-       (100 CONS)
-       (101 CAR)
-       (110 CDR)
-       (111 EQ)))
+    . ((D3:011 COND)
+       (D3:100 CONS)
+       (D3:101 CAR)
+       (D3:110 CDR)
+       (D3:111 EQ)))
 )

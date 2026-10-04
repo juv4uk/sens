@@ -38,6 +38,14 @@ for word, name in [
     ("000", "EMPTY"), ("001", "QUOTE"), ("010", "ATOM"), ("011", "CDR"),
     ("100", "CAR"), ("101", "EQ"), ("110", "COND"), ("111", "CONS"),
 ]:
-    assert f"({word} {name})" in ratified
+    assert f"(D3:{word} {name})" in ratified
+
+for prefix, left, right in [
+    ("00", "EMPTY", "QUOTE"),
+    ("01", "ATOM", "CDR"),
+    ("10", "CAR", "EQ"),
+    ("11", "COND", "CONS"),
+]:
+    assert f"(D2:{prefix} {left} {right})" in ratified
 
 print("BIJA3-CURRENT-AUTHORITY: PASS")
