@@ -403,8 +403,8 @@ fn canonicalize_domain_result(
                 let legacy_bit = match &value {
                     Value::Number(number, crate::Exactness::Exact) if *number == 0.0 => Some(false),
                     Value::Number(number, crate::Exactness::Exact) if *number == 1.0 => Some(true),
-                    Value::Rational(number) if *number == crate::Rational::integer(0) => Some(false),
-                    Value::Rational(number) if *number == crate::Rational::integer(1) => Some(true),
+                    Value::Rational(number) if number == &crate::Rational::integer(0) => Some(false),
+                    Value::Rational(number) if number == &crate::Rational::integer(1) => Some(true),
                     _ => None,
                 };
                 if let Some(bit) = legacy_bit {
