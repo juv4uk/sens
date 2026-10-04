@@ -34,11 +34,11 @@ pub(crate) use macro_substrate::install as install_macro_substrate;
 /// family membership and callability.
 pub(crate) fn install_selector_domain_values(environment: &Environment) {
     for (surface, identity) in crate::semantic_registry::domain_surface_bindings() {
-        if selector_law::supports(identity) && environment.get(surface).is_none() {
-            environment.define(
-                surface,
-                Value::DomainIdentity(crate::DomainIdentity::from(identity)),
-            );
+        let Some(core_identity) = identity.core_operation() else {
+            continue;
+        };
+        if selector_law::supports(core_identity) && environment.get(surface).is_none() {
+            environment.define(surface, Value::DomainIdentity(identity));
         }
     }
 }
