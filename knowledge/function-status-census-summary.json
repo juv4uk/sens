@@ -1,0 +1,36 @@
+{
+  "schema": "function-status-census/v2",
+  "authority": "research-only",
+  "input_schema": "exact-width-admitted-corpus/v2",
+  "input_authority_refs": [
+    "#3029",
+    "#3202",
+    "#3272",
+    "#2538/OD-005",
+    "#2762"
+  ],
+  "active_function_rows": 56,
+  "counts": {
+    "root": 0,
+    "generated": 4,
+    "residue": 0,
+    "UNKNOWN": 52
+  },
+  "generated_fraction_of_active_rows": 0.07142857142857142,
+  "registry_rows_potentially_derivable": 4,
+  "unclassified_upper_bound": 52,
+  "proven_independent_root_count": 0,
+  "bounded_residue_count": 0,
+  "status_law": {
+    "generated": "merged executable law + replayable certificate",
+    "root": "requires independence evidence; placement is insufficient",
+    "residue": "requires explicit bounded failure plus admitted necessity",
+    "UNKNOWN": "default when derivation/independence evidence is insufficient"
+  },
+  "non_conclusions": [
+    "generated fraction counts certified current D4 selector residents only",
+    "D5 selector-looking residents are not classified generated while #3209 is unresolved",
+    "UNKNOWN does not mean unoccupied or independent root",
+    "no current D1-D8 coordinate is freed by this census"
+  ]
+}
