@@ -100,7 +100,7 @@
 (00001001 understand-is
   (00001000 (words)
     (10011100 ((subject (00000101 words))
-          (after-is (strip-article (00110101 words))))
+          (after-is (strip-article (1101 words))))
       (00100111 (00100111 (00000101 after-is) subject)))))
 
 (00001001 understand-relation
@@ -152,7 +152,7 @@
 (00001001 understand-query-is
   (00001000 (words)
     (10011100 ((subject (00101111 words))
-          (after (00110101 words)))
+          (after (1101 words)))
       (00100111 (00000101 (strip-article after)) subject))))
 
 (00001001 understand-query-relation
