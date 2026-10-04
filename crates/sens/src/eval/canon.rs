@@ -205,6 +205,24 @@ fn prim_00000011(
     special_forms::eq_values(args[0].clone(), args[1].clone(), span)
 }
 
+fn prim_d3_101_eq(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if args.len() != 2 {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            format!(
+                "D3:101 EQ expects exactly 2 arguments; received {}",
+                args.len()
+            ),
+            span,
+        ));
+    }
+    Ok(special_forms::eq_domain_values(&args[0], &args[1]))
+}
+
 fn prim_00000100(
     args: &[Value],
     env: &Environment,
@@ -295,7 +313,7 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
     };
     match word.word().packed_bits() {
         0b010 => Some(prim_00000010), // ATOM
-        0b101 => Some(prim_00000011), // EQ
+        0b101 => Some(prim_d3_101_eq), // exact partial EQ
         0b111 => Some(prim_00000100), // CONS
         // CAR/CDR and their proved D4 descendants are executed by selector_law.
         0b100 | 0b011 => None,
@@ -356,10 +374,17 @@ fn canonicalize_domain_result(
                 return Ok(Value::predicate_bit(bit));
             }
 
-            // Exact D3:010 ATOM classifies structural empty as an atom.  The
+            // Exact D3:010 ATOM classifies structural empty as an atom. The
             // old active mechanism represented that case as NIL/unknown.
             if bits == 0b010 && matches!(value, Value::Nil) {
                 return Ok(Value::predicate_bit(true));
+            }
+
+            // Exact D3:101 EQ is explicitly partial. Structural EMPTY is its
+            // no-witness result outside the admitted atom domain and must pass
+            // through unchanged rather than collapse into D1:0.
+            if bits == 0b101 && matches!(value, Value::Nil) {
+                return Ok(Value::Nil);
             }
 
             Err(LanguageError::new(
@@ -647,8 +672,20 @@ mod tests {
             .expect("D3:101 equal atoms");
         let different = invoke_domain_identity(d3(0b101), &[left, other], &env, span)
             .expect("D3:101 distinct atoms");
+        let no_witness = invoke_domain_identity(
+            d3(0b101),
+            &[
+                Value::list([Value::Symbol(std::rc::Rc::from("x"))]),
+                Value::Symbol(std::rc::Rc::from("x")),
+            ],
+            &env,
+            span,
+        )
+        .expect("D3:101 pair input returns EMPTY/no-witness");
         assert_eq!(equal.as_predicate_bit(), Some(true));
         assert_eq!(different.as_predicate_bit(), Some(false));
+        assert!(matches!(no_witness, Value::Nil));
+        assert_eq!(no_witness.as_predicate_bit(), None);
 
         assert!(has_language_result_boundary(d3(0b010)));
         assert!(has_language_result_boundary(d3(0b101)));
