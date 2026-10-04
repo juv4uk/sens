@@ -703,7 +703,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Bool(true) => ExprKind::Symbol("t".into()),
         Value::Bool(false) => ExprKind::List(Rc::new([])),
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
-        Value::Rational(rational) => ExprKind::Rational(rational.clone()),
+        Value::Rational(rational) => ExprKind::Rational(rational.clone()),\n        Value::BinaryNumber(number) => ExprKind::BinaryNumber(number.clone()),
         Value::Sid(sid) => ExprKind::Sid(*sid),
         Value::DomainIdentity(identity) => ExprKind::DomainIdentity(*identity),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
