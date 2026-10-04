@@ -666,45 +666,40 @@
 (00001001 my-eval-cond-result-mode
   (00001000 (clauses env-ref migration-compatibility?)
     (00000111
-      ((00000010 clauses) () (00000111
-         (migration-compatibility? (my-result-ok (00000001 ())))
-         (t
-          (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
-      ((00000010 clauses) (1) (00000111
-         (migration-compatibility? (my-result-ok (00000001 ())))
-         (t
-          (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
+      ; Contract 11.3: exhaustion is structural EMPTY/no-witness regardless of
+      ; historical migration mode. The third parameter remains only as a
+      ; compatibility ABI slot while callers are converged.
+      ((00000010 clauses) () (my-result-ok (00000001 ())))
+      ((00000010 clauses) (1) (my-result-ok (00000001 ())))
       (t
        (10011100 ((clause (00000101 clauses)))
          (00000111
-           ; #217 canonical path: evaluate only the query. The expected result
-           ; is already Lisp data in the interpreted program and must never be
-           ; executed as code. Match it structurally, then evaluate the branch.
-           ((00000011 (00101000 clause) 3) (1)
-            (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
-              (00000111
-                ((my-result-fail? test-result) test-result)
-                ((00100010 (my-result-value test-result) (00101111 clause))
-                 (1)
-                 (my-eval-result (00110000 clause) env-ref))
-                ((00100010 (my-result-value test-result) (00101111 clause))
-                 (0)
-                 (my-eval-cond-result-mode
-                   (00000110 clauses) env-ref migration-compatibility?)))))
-           ; Historical two-part clauses remain migration-only, mirroring the
-           ; native evaluator until their callers are moved to explicit result
-           ; matching. This path intentionally retains old truthiness.
+           ; Current D3:110 admits exactly two fields: (test expression).
            ((00000011 (00101000 clause) 2) (1)
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
                 ((my-result-fail? test-result) test-result)
-                ((my-result-value test-result)
+                ; Private meta carrier for exact D1 YES.
+                ((00100010 (my-result-value test-result) (00000001 (1)))
+                 (1)
                  (my-eval-result (00101111 clause) env-ref))
-                (t
+                ; D1 NO and structural EMPTY remain distinct but both continue.
+                ((00100010 (my-result-value test-result) (00000001 (0)))
+                 (1)
                  (my-eval-cond-result-mode
-                   (00000110 clauses) env-ref migration-compatibility?)))))
+                   (00000110 clauses) env-ref migration-compatibility?))
+                ((00100010 (my-result-value test-result) (00000001 ()))
+                 (1)
+                 (my-eval-cond-result-mode
+                   (00000110 clauses) env-ref migration-compatibility?))
+                (t
+                 (my-result-fail
+                   (my-error
+                     (00000001 type)
+                     (00100111
+                       (00000001 cond-test)
+                       (my-result-value test-result))))))))
+           ; Three-part result matching is historical Contract 8/10 only.
            (t
             (my-result-fail
               (my-error
