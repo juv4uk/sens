@@ -141,8 +141,18 @@ fn every_stable_uk_surface_entry_lowers_to_one_canonical_identity() {
                     "unmigrated compatibility surface must retain its declared legacy identity: {english}"
                 );
             }
+            (ExprKind::Call(english_sens, _), ExprKind::DomainCall(_, _)) => {
+                assert_eq!(
+                    *english_sens, declared,
+                    "English compatibility projection must retain its declared legacy identity while UK migrates: {english}"
+                );
+            }
+            (ExprKind::DomainCall(_, _), ExprKind::Call(_, _)) => panic!(
+                "canonical migration must not regress UK back to the legacy path: \
+                 {english} -> {english_kind:?}; {ukrainian} -> {ukrainian_kind:?}"
+            ),
             _ => panic!(
-                "EN/UK surfaces must not split canonical and legacy identity paths: \
+                "EN/UK surface pair has an unsupported lowering split: \
                  {english} -> {english_kind:?}; {ukrainian} -> {ukrainian_kind:?}"
             ),
         }
