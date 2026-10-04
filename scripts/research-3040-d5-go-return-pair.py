@@ -79,8 +79,9 @@ def render() -> dict[str, Any]:
 
     # The donor's SemanticShape table makes all three differences explicit.
     axes = ["payload-kind", "control-extent", "stack-effect"]
-    assert "GO", "tag-symbol", "jump-to-label", "intra-frame-ip-change"" in DONOR.read_text(encoding="utf-8")
-    assert "RETURN", "value", "nonlocal-exit-transfer", "unwinds-to-enclosing-prog"" in DONOR.read_text(encoding="utf-8")
+    donor_source = DONOR.read_text(encoding="utf-8")
+    assert 'SemanticShape("GO", "tag-symbol", "jump-to-label", "intra-frame-ip-change")' in donor_source
+    assert 'SemanticShape("RETURN", "value", "nonlocal-exit-transfer", "unwinds-to-enclosing-prog")' in donor_source
     assert "PARENT-GO=REJECT-base-operation-mismatch" in donor_out
 
     return {
