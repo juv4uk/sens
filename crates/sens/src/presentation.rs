@@ -82,7 +82,9 @@ fn render_uk(value: &Value) -> String {
         Value::Sid(sid) => {
             format!("#<вбудована {}>", uk_semantic_name(*sid))
         }
-        Value::DomainIdentity(identity) => format!("#<домен {identity}>"),
+        Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "uk")
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("#<домен {identity}>")),
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');
@@ -137,12 +139,55 @@ fn render_pair_uk(value: &Value) -> String {
     }
 }
 
+fn unchanged_non_domain_presentation(value: &Value) -> String {
+    value.to_string()
+}
+
+fn render_sa(value: &Value) -> String {
+    match value {
+        Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "sa")
+            .map(str::to_string)
+            .unwrap_or_else(|| value.to_string()),
+        Value::Pair(_, _) => {
+            let mut output = String::from("(");
+            let mut current = value;
+            let mut first = true;
+            loop {
+                match current {
+                    Value::Pair(head, tail) => {
+                        if !first {
+                            output.push(' ');
+                        }
+                        output.push_str(&render_sa(head));
+                        current = tail;
+                        first = false;
+                    }
+                    Value::Nil => {
+                        output.push(')');
+                        return output;
+                    }
+                    tail => {
+                        output.push_str(" . ");
+                        output.push_str(&render_sa(tail));
+                        output.push(')');
+                        return output;
+                    }
+                }
+            }
+        }
+        Value::Vector(vector) => {
+            let items = vector.borrow().iter().map(render_sa).collect::<Vec<_>>();
+            format!("#({})", items.join(" "))
+        }
+        _ => unchanged_non_domain_presentation(value),
+    }
+}
+
 pub fn render_value_for_presentation(value: &Value, language: PresentationLanguage) -> String {
     match language {
         PresentationLanguage::Ukrainian => render_uk(value),
-        PresentationLanguage::Canonical
-        | PresentationLanguage::English
-        | PresentationLanguage::Sanskrit => value.to_string(),
+        PresentationLanguage::Sanskrit => render_sa(value),
+        PresentationLanguage::Canonical | PresentationLanguage::English => value.to_string(),
     }
 }
 
@@ -310,6 +355,47 @@ pub fn render_error_for_presentation(
 mod tests {
     use super::*;
     use crate::{eval_program, parse, Rational, Session, Span};
+
+    #[test]
+    fn exact_domain_human_presentation_round_trips_d1_d4_surfaces() {
+        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(
+            crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()),
+        ));
+        let open = Value::DomainIdentity(crate::DomainIdentity::D2(
+            crate::Racana2::from_word(crate::Bit2::new(0b10).unwrap()),
+        ));
+        let empty = Value::DomainIdentity(crate::DomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b000).unwrap()),
+        ));
+        let lambda = Value::DomainIdentity(crate::DomainIdentity::D4(
+            crate::CoreD4::from_word(crate::Bit4::new(0b0010).unwrap()),
+        ));
+
+        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Ukrainian), "так");
+        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Sanskrit), "ām");
+        assert_eq!(render_value_for_presentation(&open, PresentationLanguage::Ukrainian), "відкрити");
+        assert_eq!(render_value_for_presentation(&empty, PresentationLanguage::Sanskrit), "śūnya");
+        assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Ukrainian), "функція");
+        assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Sanskrit), "phalana");
+
+        assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Canonical), "0010");
+        assert_eq!(lambda.to_string(), "0010");
+    }
+
+    #[test]
+    fn sanskrit_presentation_projects_domain_identities_inside_lists() {
+        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(
+            crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()),
+        ));
+        let lambda = Value::DomainIdentity(crate::DomainIdentity::D4(
+            crate::CoreD4::from_word(crate::Bit4::new(0b0010).unwrap()),
+        ));
+        let value = Value::list([lambda, yes]);
+        assert_eq!(
+            render_value_for_presentation(&value, PresentationLanguage::Sanskrit),
+            "(phalana ām)"
+        );
+    }
 
     #[test]
     fn ukrainian_value_presentation_changes_only_the_human_view() {

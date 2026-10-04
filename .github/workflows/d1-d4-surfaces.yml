@@ -9,6 +9,7 @@ on:
       - "scripts/translate-domain-program.py"
       - "crates/sens/src/domain_surface_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
       - ".github/workflows/d1-d4-surfaces.yml"
   push:
@@ -20,6 +21,7 @@ on:
       - "scripts/translate-domain-program.py"
       - "crates/sens/src/domain_surface_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
       - ".github/workflows/d1-d4-surfaces.yml"
 
@@ -41,3 +43,5 @@ jobs:
         run: |
           cargo test -p sens uk_sa_
           cargo test -p sens necessary_forms_lower_to_exact_d4_calls
+          cargo test -p sens exact_domain_human_presentation_round_trips_d1_d4_surfaces
+          cargo test -p sens sanskrit_presentation_projects_domain_identities_inside_lists

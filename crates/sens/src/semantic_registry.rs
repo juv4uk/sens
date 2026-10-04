@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -43,10 +43,11 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
 /// packed byte to recover domain identity.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
-        let matches_human_surface = row
-            .surfaces
-            .iter()
-            .any(|surface| matches!(surface.namespace, "uk" | "sa") && surface.name == name);
+        let matches_human_surface = row.source_routable
+            && row
+                .surfaces
+                .iter()
+                .any(|surface| matches!(surface.namespace, "uk" | "sa") && surface.name == name);
         matches_human_surface
             .then(|| exact_domain_identity_from_projection(row.width, row.bits))
             .flatten()
@@ -104,6 +105,20 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     direct_domain_identity_for_surface(name).or_else(|| {
         registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
     })
+}
+
+pub(crate) fn surface_for_domain_identity(
+    identity: DomainIdentity,
+    namespace: &str,
+) -> Option<&'static str> {
+    DOMAIN_SURFACE_ROWS
+        .iter()
+        .find(|row| {
+            usize::from(row.width) == identity.width() && row.bits == identity.packed_bits()
+        })?
+        .surfaces
+        .iter()
+        .find_map(|surface| (surface.namespace == namespace).then_some(surface.name))
 }
 pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
     semantic_id.to_string()
@@ -324,6 +339,25 @@ mod tests {
         }
         assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
         assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
+    }
+
+    #[test]
+    fn reverse_projection_covers_d1_d4_without_making_structure_callable() {
+        let yes = DomainIdentity::D1(crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()));
+        let open = DomainIdentity::D2(crate::Racana2::from_word(crate::Bit2::new(0b10).unwrap()));
+        let empty = DomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b000).unwrap()));
+        let lambda = DomainIdentity::D4(crate::CoreD4::from_word(crate::Bit4::new(0b0010).unwrap()));
+
+        assert_eq!(surface_for_domain_identity(yes, "uk"), Some("так"));
+        assert_eq!(surface_for_domain_identity(yes, "sa"), Some("ām"));
+        assert_eq!(surface_for_domain_identity(open, "uk"), Some("відкрити"));
+        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("śūnya"));
+        assert_eq!(surface_for_domain_identity(lambda, "uk"), Some("функція"));
+        assert_eq!(surface_for_domain_identity(lambda, "sa"), Some("phalana"));
+
+        assert_eq!(direct_domain_identity_for_surface("так"), None);
+        assert_eq!(direct_domain_identity_for_surface("відкрити"), None);
+        assert_eq!(direct_domain_identity_for_surface("порожнє"), None);
     }
 
     #[test]
