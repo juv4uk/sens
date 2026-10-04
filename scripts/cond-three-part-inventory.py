@@ -208,6 +208,11 @@ def self_test():
     assert parse(tokens("(cond ((eq 'x 'x) t 'ok))"))
     paths=decode_tracked_paths(pathlib.Path("."), "lib/core.lisp\0lib/українська.lisp\0".encode("utf-8"))
     assert [p.as_posix() for p in paths]==["lib/core.lisp","lib/українська.lisp"]
+    assert migration_active("lib/core.lisp")
+    assert migration_active("scripts/generate-function-table.lisp")
+    assert not migration_active("benchmarks/sens-surface/results/old/program.lisp")
+    assert source_role("tests/fixtures/conformance.lisp")=="test-witness"
+    assert source_role("knowledge/agent-discoveries.lisp")=="knowledge-data"
     print("cond-three-part-inventory self-test: PASS")
 
 def main():
