@@ -66,17 +66,9 @@ pub enum CoreProfile {
     Core4,
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub(crate) enum CondClauseMode {
-    #[default]
-    CurrentMigration,
-    Core2LegacyTwoPart,
-}
-
 #[derive(Debug, Default)]
 struct Limits {
     selected_core_profile: Option<CoreProfile>,
-    cond_clause_mode: CondClauseMode,
     cons_limit: Option<usize>,
     cons_count: usize,
     numeric_bit_limit: Option<usize>,
@@ -217,14 +209,6 @@ impl Environment {
     /// Mechanism-only selector. Core meaning remains owned by SENS contracts.
     pub(crate) fn select_core_profile(&self, profile: CoreProfile) {
         self.2.borrow_mut().selected_core_profile = Some(profile);
-    }
-
-    pub(crate) fn set_cond_clause_mode(&self, mode: CondClauseMode) {
-        self.2.borrow_mut().cond_clause_mode = mode;
-    }
-
-    pub(crate) fn cond_clause_mode(&self) -> CondClauseMode {
-        self.2.borrow().cond_clause_mode
     }
 
     /// Native root sessions are unrestricted (`None`). An embedding can set
