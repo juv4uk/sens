@@ -47,9 +47,9 @@ jobs:
           assert a["fixed_novel_coordinate_candidates_full"] == 2
           assert a["fixed_novel_coordinate_candidates_protocol_bounded"] == 1
           assert a["fixed_novel_coordinate_candidates_typed"] == 1
-          assert a["merged_product_families"] == 2
-          assert a["green_unmerged_product_families"] == 2
-          assert a["gauge_unresolved_novel_semantics"] == 3
+          assert a["merged_product_families"] == 4
+          assert a["green_unmerged_product_families"] == 0
+          assert a["gauge_unresolved_novel_semantics"] == 4
           assert a["falsified_axis_hypotheses"] == 5
           PY
 
