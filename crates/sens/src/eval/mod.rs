@@ -243,6 +243,62 @@ fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
     )
 }
 
+fn is_d5(identity: CoreDomainIdentity, bits: u8) -> bool {
+    matches!(
+        identity,
+        CoreDomainIdentity::D5(word) if word.word().packed_bits() == bits
+    )
+}
+
+fn evaluate_d5_set_family(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
+    let is_set = is_d5(identity, 0b00110);
+    let is_setq = is_d5(identity, 0b00111);
+    debug_assert!(is_set || is_setq);
+
+    let label = if is_set { "D5:00110" } else { "D5:00111" };
+    special_forms::exact_arity(label, arguments, 2, span)?;
+
+    let target = if is_set {
+        match evaluate(&arguments[0], environment)? {
+            Value::Symbol(ref name) => name.clone(),
+            _ => {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!("{label} target must evaluate to a symbol"),
+                    arguments[0].span,
+                ));
+            }
+        }
+    } else {
+        match &arguments[0].kind {
+            ExprKind::Symbol(name) => name.clone(),
+            _ => {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!("{label} target must be a literal symbol"),
+                    arguments[0].span,
+                ));
+            }
+        }
+    };
+
+    let value = evaluate(&arguments[1], environment)?;
+    if !environment.update_nearest_existing(&target, value.clone()) {
+        return Err(LanguageError::new(
+            ErrorKind::UnknownSymbol,
+            format!("{label} target is not an existing binding: {target}"),
+            arguments[0].span,
+        ));
+    }
+
+    Ok(EvalStep::Value(value))
+}
+
 fn dispatch_domain_call(
     identity: CoreDomainIdentity,
     arguments: &[Expr],
@@ -267,6 +323,10 @@ fn dispatch_domain_call(
 
     if is_d3(identity, 0b110) {
         return special_forms::evaluate_domain_cond(arguments, environment, span);
+    }
+
+    if is_d5(identity, 0b00110) || is_d5(identity, 0b00111) {
+        return evaluate_d5_set_family(identity, arguments, environment, span);
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
