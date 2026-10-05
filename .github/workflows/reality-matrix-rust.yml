@@ -1,0 +1,40 @@
+name: Reality Matrix Rust smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "benchmarks/cross-language/reality-matrix/**"
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "crates/sens/**"
+      - "language-contract.lisp"
+      - ".github/workflows/reality-matrix-rust.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  rust-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run D3 Rust reality smoke
+        run: |
+          python3 benchmarks/cross-language/reality-matrix/rust/run.py             --out-dir "$RUNNER_TEMP/reality-rust"             --outer-reps 2             --inner-repeats 100
+
+      - name: Check machine-readable output
+        run: |
+          python3 -m json.tool "$RUNNER_TEMP/reality-rust/comparison.json" >/dev/null
+          test -s "$RUNNER_TEMP/reality-rust/raw/runs.tsv"
+          test -s "$RUNNER_TEMP/reality-rust/report.md"
+
+      - name: Upload smoke evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: reality-matrix-rust-smoke
+          path: |
+            ${{ runner.temp }}/reality-rust/comparison.json
+            ${{ runner.temp }}/reality-rust/environment.json
+            ${{ runner.temp }}/reality-rust/raw/runs.tsv
+            ${{ runner.temp }}/reality-rust/report.md
