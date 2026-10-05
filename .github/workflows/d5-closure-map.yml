@@ -1,14 +1,11 @@
-name: D5 closure map
+name: Historical D5 OD-005 closure provenance
 
 on:
   pull_request:
     paths:
       - "benchmarks/d5-closure-map/**"
-      - "knowledge/d5-historical-full-map.json"
-      - "knowledge/d5-d6-semantic-ledger.json"
       - ".github/workflows/d5-closure-map.yml"
       - "scripts/research-2322-generative-domain-forecast.py"
-      - "benchmarks/generator-economy/semantic-fact-ledger.json"
   workflow_dispatch:
 
 permissions:
@@ -18,13 +15,9 @@ jobs:
   closure-map:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Build current OD-005 D5 map
+      - name: Historical provenance notice
         run: |
-          rm -rf /tmp/d5-map
-          python3 benchmarks/d5-closure-map/run.py --out /tmp/d5-map
-          python3 -c 'import json; p=json.load(open("/tmp/d5-map/d5-closure-map.json")); assert p["counts"]["resident"]==32 and p["counts"]["generated"]==8 and p["counts"]["owner-historical"]==24 and p["counts"]["UNKNOWN/free"]==0 and p["domain_ratified"] is True'
-          cat /tmp/d5-map/report.md
+          echo "OD-005 D5 closure-map is historical provenance only."
+          echo "Current D5 authority is #3305 / knowledge/d5-ratified.json."
+          echo "Current selector geometry must not be checked against the frozen OD-005 map."
+          echo "Use .github/workflows/d5-ratified-baseline.yml for current D5 authority."

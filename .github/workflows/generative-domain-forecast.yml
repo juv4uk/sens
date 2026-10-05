@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/research-2322-generative-domain-forecast.py"
       - "docs/research/2322-generative-domain-forecast.md"
+      - "docs/research/2322-generative-domain-forecast.uk.md"
       - ".github/workflows/generative-domain-forecast.yml"
       - "knowledge/repo-tooling-inventory.lisp"
   push:
@@ -13,6 +14,7 @@ on:
     paths:
       - "scripts/research-2322-generative-domain-forecast.py"
       - "docs/research/2322-generative-domain-forecast.md"
+      - "docs/research/2322-generative-domain-forecast.uk.md"
       - ".github/workflows/generative-domain-forecast.yml"
       - "knowledge/repo-tooling-inventory.lisp"
   workflow_dispatch:
@@ -24,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Run D3-D8 generative forecast
+      - name: Run Contract 11.6 selector boundary witness
         run: |
           rm -rf /tmp/generative-domain-forecast
           python3 scripts/research-2322-generative-domain-forecast.py \
