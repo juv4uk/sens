@@ -25,7 +25,10 @@ from validate import (
     validate,
 )
 
+GRAMMAR_PROFILE = "d1-d3-structural-predicate-v1"
+
 BOUND = {
+    "grammar_profile": GRAMMAR_PROFILE,
     "domain_set": [1, 2, 3],
     "max_ast_depth": 3,
     "max_nodes": 11,
