@@ -115,12 +115,17 @@ def main():
     bounded = copy.deepcopy(base)
     bounded["evidence_scope"] = "bounded-exhaustive"
     bounded["exhaustive_bound"] = {
+        "grammar_profile": "schema-selftest-v1",
         "domain_set": [1, 2, 3],
         "max_ast_depth": 2,
         "max_nodes": 7,
         "argument_value_bound": 2,
     }
     validate(bounded)
+
+    missing_profile = copy.deepcopy(bounded)
+    del missing_profile["exhaustive_bound"]["grammar_profile"]
+    must_fail(missing_profile, "grammar_profile")
 
     missing_bound = copy.deepcopy(base)
     missing_bound["evidence_scope"] = "bounded-exhaustive"
