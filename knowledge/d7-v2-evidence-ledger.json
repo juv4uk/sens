@@ -1730,5 +1730,23 @@
     ],
     "bridge_candidate": "Text7(h) -> D14(h1|h2) chosen by grammatical/pratyahara context",
     "d7_coordinate_effect": "NONE"
+  },
+  "completion_policy": {
+    "candidate_D_capacity": 128,
+    "candidate_D_occupied": 124,
+    "intentionally_free": [
+      "0101111",
+      "0110100",
+      "1010001",
+      "1010011"
+    ],
+    "status": "COMPLETE-WITH-RESERVE-CANDIDATE",
+    "rule": "Do not fill remaining cells merely to reach 128/128. A new resident requires an independent sound/text law or an explicit owner assignment with migration semantics.",
+    "rationale": [
+      "Ukrainian а/е/о/и, ц/ч/дз/дж and ь already have owner-ratified Text7 placements in the Shiva donor history",
+      "є/ї/ю/я, щ and palatalized consonants are intentional sequences rather than new cells",
+      "0101111 and 0110100 are vacated by candidate-D l/h migration",
+      "1010001 and 1010011 are absent because candidate D rejects the ḹ line"
+    ]
   }
 }
