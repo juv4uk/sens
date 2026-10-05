@@ -47,7 +47,7 @@ fn data_tree() -> Expr {
         .collect();
     while level.len() > 1 {
         let mut next = Vec::with_capacity(level.len() / 2);
-        for chunk in level.chunks_exact(2) {
+        for chunk in level.as_chunks::<2>().0 {
             next.push(pair(chunk[0].clone(), chunk[1].clone()));
         }
         level = next;
