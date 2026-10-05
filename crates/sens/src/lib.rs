@@ -25,6 +25,8 @@ mod presentation;
 mod semantic_registry;
 mod source_words;
 mod source_packing;
+#[cfg(test)]
+mod bootstrap_measurement;
 pub mod sens;
 mod sid;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
