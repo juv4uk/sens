@@ -6,6 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 stable=json.loads((ROOT/"knowledge/d7-v2-stable-residents.json").read_text(encoding="utf-8"))
 ledger=json.loads((ROOT/"knowledge/d7-v2-evidence-ledger.json").read_text(encoding="utf-8"))
 geometry=json.loads((ROOT/"knowledge/d7-v2-geometry-ledger.json").read_text(encoding="utf-8"))
+candidate=json.loads((ROOT/"knowledge/d7-v2-candidate-d.json").read_text(encoding="utf-8"))
 
 assert stable["status"]=="research-only"
 assert stable["foundation"].startswith("#3393")
@@ -144,6 +145,23 @@ assert completion["status"]=="COMPLETE-WITH-RESERVE-CANDIDATE"
 gcompletion=geometry["completion_policy"]
 assert gcompletion["candidate_D_occupied"]==124
 assert gcompletion["status"]=="COMPLETE-WITH-RESERVE-CANDIDATE"
+
+assert candidate["status"]=="research-candidate-not-ratified"
+assert candidate["capacity"]==128
+assert candidate["occupancy"]==124
+assert candidate["free_count"]==4
+assert candidate["free_coordinates"]==["0101111","0110100","1010001","1010011"]
+assert len(candidate["rows"])==128
+assert len({row["coordinate"] for row in candidate["rows"]})==128
+assert {row["coordinate"] for row in candidate["rows"]}=={f"{i:07b}" for i in range(128)}
+assert sum(row["status"]=="OCCUPIED-CANDIDATE" for row in candidate["rows"])==124
+assert sum(row["status"]=="FREE-CANDIDATE" for row in candidate["rows"])==4
+assert candidate["source"]["blob_sha"]=="1270a85616957646f18971133fe4f20c8de0fcde"
+assert candidate["moved_rows"]==[
+    {"coordinate":"0100001","sound":"h","change":"moved from 0110100"},
+    {"coordinate":"0101010","sound":"r","change":"moved from 0101110"},
+    {"coordinate":"0101110","sound":"l","change":"moved from 0101111"},
+]
 
 print("D7-V2-CONSOLIDATION: PASS")
 print("baseline=107+21 overlay=19 migration-targets=2")
