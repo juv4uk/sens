@@ -426,21 +426,28 @@ fn supporting_evidence_is_nil_when_claim_ref_does_not_match() {
 }
 
 #[test]
-fn supporting_evidence_still_works_as_a_cond_truthiness_check() {
-    // The exact case the audit's own next step asked to verify: a
-    // caller who only wants flow control, not the evidence itself,
-    // needs no change at all -- `cond` already treats any non-Nil
-    // value (including a full evidence record) as truthy.
-    assert_eq!(
-        eval_epistemic(
-            r#"(cond
-                 ((supporting-evidence
-                    (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
-                    (quote (claim-ref cml-build-available)))
-                  (quote flows-through))
-                 (t (quote unreachable)))"#
-        ),
-        "flows-through"
+fn supporting_evidence_record_is_not_implicit_cond_truth() {
+    // #3170/#220: supporting-evidence is a retrieval function. A matched
+    // evidence record is ordinary data, not a PredicateBit. Canonical D3 COND
+    // accepts only exact D1:1 / D1:0 / structural EMPTY (), so callers that
+    // want flow control must first ask an explicit predicate question.
+    let source = r#"(cond
+         ((supporting-evidence
+            (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
+            (quote (claim-ref cml-build-available)))
+          (quote flows-through))
+         (t (quote unreachable)))"#;
+
+    let mut session = Session::default();
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    eval_program(include_str!("../../../lib/epistemic.lisp"), &mut session).unwrap();
+    let error = eval_program(source, &mut session)
+        .expect_err("ordinary evidence data must not become implicit COND truth");
+
+    assert_eq!(error.kind, sens::ErrorKind::Type);
+    assert!(
+        error.message.contains("COND expects exact D1"),
+        "unexpected canonical COND error: {error:?}"
     );
 }
 
