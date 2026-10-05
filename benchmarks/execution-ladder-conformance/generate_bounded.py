@@ -330,17 +330,21 @@ def main() -> int:
         for row in rows
         if row["producer_layer"] == "L0" and row["observable"]["result_kind"] == "ERROR"
     )
-    d1_values = sum(
-        1
+    d1_values = {
+        row["observable"]["value"]
         for row in rows
         if row["producer_layer"] == "L0"
         and isinstance(row["observable"]["value"], str)
         and row["observable"]["value"].startswith("D1:")
-    )
+    }
+    if d1_values != {"D1:0", "D1:1"}:
+        raise AssertionError(
+            f"bounded D1-D3 slice must observe both exact predicate results, got {sorted(d1_values)}"
+        )
 
     print(
         f"bounded D1-D3 cases={len(programs)} rows={len(rows)} "
-        f"errors={error_cases} d1_values={d1_values} bound={json.dumps(BOUND, sort_keys=True)}"
+        f"errors={error_cases} d1_values={sorted(d1_values)} bound={json.dumps(BOUND, sort_keys=True)}"
     )
     return 0
 
