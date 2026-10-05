@@ -129,11 +129,18 @@ jobs:
           set -euo pipefail
           cargo test -p sens --test postcore_build_definitions_debug -- --nocapture
 
-      - name: Asymmetric semantic firewall (host -> Lisp)
+      - name: Core4 FASL freshness + asymmetric semantic firewall
         shell: bash
         run: |
           set -euo pipefail
+
+          # Check the committed snapshot BEFORE any regeneration can mask drift.
+          cargo test -p sens --test core_fasl_freshness -- --nocapture
+
+          # Deterministic regeneration must reproduce the committed bytes exactly.
           cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          git diff --exit-code -- lib/core4.lisp.fasl
+
           cargo build -p sens-cli --bin sens
           : > tests/semantic-authority-changes.lisp
           while IFS= read -r path; do
@@ -173,6 +180,7 @@ jobs:
         run: |
           set -euo pipefail
           test -s lib/core4.lisp.fasl
+          git diff --exit-code -- lib/core4.lisp.fasl
           git diff --check
         
 
