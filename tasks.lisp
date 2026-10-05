@@ -1071,7 +1071,7 @@
     (done . ())))
 
   ("SI-DEFINING-CONSTANTS-EXACT-RATIONAL" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (physics mathematics rationals constants world-knowledge axioms provenance))
     (origin . sens)
     (context . "OWNER CUTOVER 2026-10-05, authority #3374/#3386: the seven BIPM SI defining constants already implemented exactly in lib/si.lisp are initial WORLD-KNOWLEDGE AXIOMS / PRIMITIVES. This supersedes the old library-only/prelude-only interpretation. Primitive taxonomy is explicit: world-knowledge primitive != evaluator/function primitive; no function opcode is minted merely by axiom status.")
@@ -1079,7 +1079,7 @@
     (done . nil)))
 
   ("WORLD-MODEL-LAWS-AXIOM-OBSERVATION-BRIDGE" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (physics mathematics world-knowledge axioms model-laws observations derivation provenance quantities))
     (origin . sens)
     (depends-on . (SI-DEFINING-CONSTANTS-EXACT-RATIONAL))
