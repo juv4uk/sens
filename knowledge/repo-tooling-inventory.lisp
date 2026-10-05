@@ -187,3 +187,5 @@
 (tool (path "scripts/research-2764-d6-pre-od006-archival-guard.py") (kind check) (language python) (role d6-cross-era-authority-guard) (lifecycle active) (callers (".github/workflows/d6-od006-cross-era-authority.yml" "#2764" "#2762")) (authority-source (issue #b101011001100)) (migration-issue #b101011001100) (replacement ()) (removal-condition never-while-od006-and-pre-od006-evidence-coexist))
 
 (tool (path "scripts/check-d6-current-authority.py") (kind check) (language python) (role d6-current-authority-guard) (lifecycle active) (callers (".github/workflows/d6-ratified-authority.yml" "#3393")) (authority-source "contracts/d6-ratification.lisp") (migration-issue #b110101000001) (replacement ()) (removal-condition explicit-owner-supersession))
+
+(tool (path "scripts/check-d6-mechanism-ledger.py") (kind check) (language python) (role d6-mechanism-ledger-guard) (lifecycle active) (callers (".github/workflows/d6-mechanism-ledger.yml" "#3394")) (authority-source "knowledge/d6-mechanism-ledger.json") (migration-issue #b110101000010) (replacement ()) (removal-condition explicit-owner-supersession))
