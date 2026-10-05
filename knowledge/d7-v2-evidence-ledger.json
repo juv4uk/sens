@@ -1,0 +1,1610 @@
+{
+  "schema": "d7-v2-evidence-ledger/v1",
+  "status": "research-consolidated-not-ratified",
+  "issue": "#3419",
+  "foundation": "#3393 / Contract 11.5",
+  "authority_boundary": "D7 remains UNRATIFIED / RESEARCH",
+  "accounting": {
+    "capacity": 128,
+    "baseline_recovered": 107,
+    "baseline_provenance_missing": 21,
+    "phonology_eligible": 75,
+    "convention_recovered": 32,
+    "shiva_same_coordinate_overlays_on_missing": 19,
+    "baseline_missing_without_same_coordinate_overlay": 2
+  },
+  "shiva_overlay_classes": {
+    "text_digits": 10,
+    "text_modifiers": 2,
+    "text_punctuation": 7,
+    "same_coordinate_total": 19
+  },
+  "baseline_missing_without_same_coordinate_overlay": [
+    "0100001",
+    "0101010"
+  ],
+  "migration_candidate": {
+    "id": "shiva-derived-v3-hrl",
+    "status": "TEXT-IDENTITY-MIGRATION-CANDIDATE",
+    "source": [
+      "shiva-sutras PR #65",
+      "prototype/upc7-table-v3.tsv",
+      "sens #1981"
+    ],
+    "moves": [
+      {
+        "semantic": "h",
+        "from": "0110100",
+        "to": "0100001"
+      },
+      {
+        "semantic": "r",
+        "from": "0101110",
+        "to": "0101010"
+      },
+      {
+        "semantic": "l",
+        "from": "0101111",
+        "to": "0101110"
+      }
+    ],
+    "rule": "not provenance recovery; requires explicit owner migration decision because UPC7 cell number is part of Text7 identity"
+  },
+  "guardrails": [
+    "same-coordinate Shiva overlay is evidence, not current SENS D7 admission",
+    "reserved/provenance-missing is not a free slot under #3029",
+    "h/r/l derived-v3 moves are identity migration, not recovery",
+    "digits are Text and never arithmetic Number",
+    "layouts/glyphs receive zero coordinate authority",
+    "D6 parent/prefix laws do not transfer into D7"
+  ],
+  "rows": [
+    {
+      "coordinate": "0000000",
+      "stable_resident_id": "sr-azmugvsttngf",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.K.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0000001",
+      "stable_resident_id": "sr-ruqvnwarpdkv",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.K.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0000010",
+      "stable_resident_id": "sr-xngyyfuwfyrd",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.K.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0000011",
+      "stable_resident_id": "sr-exkcmbqhcfds",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.K.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0000100",
+      "stable_resident_id": "sr-tvjkjkysppuq",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.K.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0000101",
+      "stable_resident_id": "sr-prjcnkxczgwu",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.C.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0000110",
+      "stable_resident_id": "sr-asqbbpqqqzxb",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.C.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0000111",
+      "stable_resident_id": "sr-vakydvbwupnz",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.C.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001000",
+      "stable_resident_id": "sr-uwyvpthvxhpa",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.C.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001001",
+      "stable_resident_id": "sr-afdzujtyqssr",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.C.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001010",
+      "stable_resident_id": "sr-jzaxcczeezym",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-retroflex.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001011",
+      "stable_resident_id": "sr-pscvcwdzcbnk",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-retroflex.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001100",
+      "stable_resident_id": "sr-satmtfzmyzbs",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-retroflex.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001101",
+      "stable_resident_id": "sr-cfrmhnucqvfx",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-retroflex.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001110",
+      "stable_resident_id": "sr-ugwtmmvvectn",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-retroflex.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0001111",
+      "stable_resident_id": "sr-bqgtujbyppda",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-dental.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010000",
+      "stable_resident_id": "sr-zjbrthvztawd",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-dental.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010001",
+      "stable_resident_id": "sr-rtdvnngphhre",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-dental.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010010",
+      "stable_resident_id": "sr-eqfmgsasnqdx",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-dental.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010011",
+      "stable_resident_id": "sr-haheuzetkueu",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.T-dental.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010100",
+      "stable_resident_id": "sr-pgfdftcpqdhn",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.P.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010101",
+      "stable_resident_id": "sr-xmuhaadntyfp",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.P.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010110",
+      "stable_resident_id": "sr-wkrafxxuztks",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.P.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0010111",
+      "stable_resident_id": "sr-njyagbqjsyvj",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.P.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011000",
+      "stable_resident_id": "sr-bcykhjhwbaau",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "varga",
+      "baseline_name": "varga.P.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011001",
+      "stable_resident_id": "sr-jzkheenjakeb",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "varga",
+      "baseline_name": "reserved.varga.11001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "8",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011010",
+      "stable_resident_id": "sr-cgahtdvnbaut",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "varga",
+      "baseline_name": "reserved.varga.11010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "9",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011011",
+      "stable_resident_id": "sr-gwrejptmsber",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "varga",
+      "baseline_name": "reserved.varga.11011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-punctuation",
+        "label": "…",
+        "semantics": "text sign",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011100",
+      "stable_resident_id": "sr-neyupqvrfwjn",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "varga",
+      "baseline_name": "reserved.varga.11100",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "0",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011101",
+      "stable_resident_id": "sr-jqrygzupvqtc",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "varga",
+      "baseline_name": "reserved.varga.11101",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "2",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011110",
+      "stable_resident_id": "sr-qutcrfvhnhpp",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "varga",
+      "baseline_name": "reserved.varga.11110",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "3",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0011111",
+      "stable_resident_id": "sr-nrbykzxyxauz",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "varga",
+      "baseline_name": "reserved.varga.11111",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "1",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100000",
+      "stable_resident_id": "sr-afnajtxbsvez",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.K.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100001",
+      "stable_resident_id": "sr-tdyxcfvwrqzs",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.00001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": {
+        "role": "TARGET",
+        "semantic": "h",
+        "from": "0110100",
+        "to": "0100001"
+      },
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100010",
+      "stable_resident_id": "sr-ggmgzgecmcsd",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.00010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-modifier",
+        "label": "uk-capital-next-letter",
+        "semantics": "layout/text modifier",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #83/#95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100011",
+      "stable_resident_id": "sr-xwejyjhcasjn",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.00011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-modifier",
+        "label": "uk-combining-acute-stress",
+        "semantics": "layout/text modifier",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #83/#95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100100",
+      "stable_resident_id": "sr-btjrbzxmakwj",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.C.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100101",
+      "stable_resident_id": "sr-txwrvhyhrrcy",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.C.voiced-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100110",
+      "stable_resident_id": "sr-vwgspdausxfs",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.C.primary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0100111",
+      "stable_resident_id": "sr-xyxqmtwkcxed",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.uk-ext.softness",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101000",
+      "stable_resident_id": "sr-ufgbkcqnrevq",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.T-retroflex.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101001",
+      "stable_resident_id": "sr-qupjktqjgffu",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.01001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-punctuation",
+        "label": "«",
+        "semantics": "text sign",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101010",
+      "stable_resident_id": "sr-tmmckyqkgsfv",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.01010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": {
+        "role": "TARGET",
+        "semantic": "r",
+        "from": "0101110",
+        "to": "0101010"
+      },
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101011",
+      "stable_resident_id": "sr-msspnvcnrkkm",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.01011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-punctuation",
+        "label": "»",
+        "semantics": "text sign",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101100",
+      "stable_resident_id": "sr-vtbhjtgzajhe",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.T-dental.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101101",
+      "stable_resident_id": "sr-sgwbcpwukked",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.T-dental.voiced-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101110",
+      "stable_resident_id": "sr-fhxavysnpnqa",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.T-dental.primary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": {
+        "role": "TARGET",
+        "semantic": "l",
+        "from": "0101111",
+        "to": "0101110"
+      },
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0101111",
+      "stable_resident_id": "sr-fwqpvcwrghyx",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.T-dental.lateral-or-secondary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": {
+        "role": "SOURCE",
+        "semantic": "l",
+        "from": "0101111",
+        "to": "0101110"
+      },
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110000",
+      "stable_resident_id": "sr-nxyzvaxndrdr",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.P.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110001",
+      "stable_resident_id": "sr-ykedppyvyjnx",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.10001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-punctuation",
+        "label": "—",
+        "semantics": "text sign",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110010",
+      "stable_resident_id": "sr-ewvuxzqaebrh",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.P.primary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110011",
+      "stable_resident_id": "sr-kajzmbngagby",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.10011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-punctuation",
+        "label": "–",
+        "semantics": "text sign",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110100",
+      "stable_resident_id": "sr-eyzaxkgwukpx",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.G-glottal.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": {
+        "role": "SOURCE",
+        "semantic": "h",
+        "from": "0110100",
+        "to": "0100001"
+      },
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110101",
+      "stable_resident_id": "sr-atuecmqfskzr",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.G-glottal.voiced-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110110",
+      "stable_resident_id": "sr-abrmarajgnxv",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.10110",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-punctuation",
+        "label": "“",
+        "semantics": "text sign",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0110111",
+      "stable_resident_id": "sr-jpvgxmhqsrcz",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.10111",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-punctuation",
+        "label": "”",
+        "semantics": "text sign",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111000",
+      "stable_resident_id": "sr-ztshemgqdjgf",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.11000",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "4",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111001",
+      "stable_resident_id": "sr-rgrkejdndsya",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.11001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "6",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111010",
+      "stable_resident_id": "sr-wwksnkftfrgm",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.11010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "7",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111011",
+      "stable_resident_id": "sr-yvkhejgbgpdk",
+      "baseline_status": "PROVENANCE-MISSING",
+      "baseline_class": "non-varga",
+      "baseline_name": "reserved.non-varga.11011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY",
+      "shiva_same_coordinate_overlay": {
+        "kind": "text-digit",
+        "label": "5",
+        "semantics": "Text, NOT Number",
+        "source": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+        "status": "MERGED-SHIVA-RESEARCH-WITNESSED-NOT-CURRENT-SENS-IDENTITY"
+      },
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111100",
+      "stable_resident_id": "sr-penvwmbrmzqt",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.uk-ext.ts",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111101",
+      "stable_resident_id": "sr-ppbutwaqfysv",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.uk-ext.tsh",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111110",
+      "stable_resident_id": "sr-rqwdbgkpmxpa",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.uk-ext.dz",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "0111111",
+      "stable_resident_id": "sr-ecamcpnymanz",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "non-varga",
+      "baseline_name": "non-varga.uk-ext.dzh",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000000",
+      "stable_resident_id": "sr-vdejqjxpakux",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.a.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000001",
+      "stable_resident_id": "sr-feawnxucubgs",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.a.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000010",
+      "stable_resident_id": "sr-vyusykjqbene",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.a.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000011",
+      "stable_resident_id": "sr-kbxkggkkzjmq",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.a.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000100",
+      "stable_resident_id": "sr-xvtmvgnrtahp",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.i.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000101",
+      "stable_resident_id": "sr-skgxmdecjkjb",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.i.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000110",
+      "stable_resident_id": "sr-hburjesrweqe",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.i.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1000111",
+      "stable_resident_id": "sr-nzkrrkfsmysv",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.i.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001000",
+      "stable_resident_id": "sr-rucspuxspqak",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.u.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001001",
+      "stable_resident_id": "sr-feedxyvjezub",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.u.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001010",
+      "stable_resident_id": "sr-eveyjjbamcyw",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.u.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001011",
+      "stable_resident_id": "sr-asugaymgxubg",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.u.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001100",
+      "stable_resident_id": "sr-nvaqtktychsg",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.r-vocalic.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001101",
+      "stable_resident_id": "sr-shpvewafmcap",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.r-vocalic.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001110",
+      "stable_resident_id": "sr-cmxmpkfqseqg",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.r-vocalic.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1001111",
+      "stable_resident_id": "sr-nwpdamrvbrhr",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.r-vocalic.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010000",
+      "stable_resident_id": "sr-bwctbsbrddkm",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.l-vocalic.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010001",
+      "stable_resident_id": "sr-zetvmfwrddbx",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.l-vocalic.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010010",
+      "stable_resident_id": "sr-mfcwmgjtunyb",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.l-vocalic.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010011",
+      "stable_resident_id": "sr-pxvebsvnrdvg",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.l-vocalic.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010100",
+      "stable_resident_id": "sr-sgcxraypsxyu",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.e.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010101",
+      "stable_resident_id": "sr-jvtvmenhrmgy",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.e.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010110",
+      "stable_resident_id": "sr-sgqpxvaamcuh",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.e.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1010111",
+      "stable_resident_id": "sr-gmgeyufsbjep",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.e.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011000",
+      "stable_resident_id": "sr-rzcasdqhrtkc",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.o.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011001",
+      "stable_resident_id": "sr-rcgtmkwjgqsz",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.o.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011010",
+      "stable_resident_id": "sr-rzaczerztwhj",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.o.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011011",
+      "stable_resident_id": "sr-hzrxyardsred",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.o.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011100",
+      "stable_resident_id": "sr-gpfnhskbgzcu",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.uk-ext.a",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011101",
+      "stable_resident_id": "sr-wxykdbqpmcnd",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.uk-ext.e",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011110",
+      "stable_resident_id": "sr-wjyrrfcxxjgk",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.uk-ext.o",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1011111",
+      "stable_resident_id": "sr-qwbeftswyman",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "vowel",
+      "baseline_name": "vowel.uk-ext.y",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100000",
+      "stable_resident_id": "sr-qsvturxcjsdz",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.space",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100001",
+      "stable_resident_id": "sr-aafjfgjyfanr",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.newline",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100010",
+      "stable_resident_id": "sr-zxnnzrpfgyxv",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.tab",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100011",
+      "stable_resident_id": "sr-sjxuxdfbfgbe",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.left-paren",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100100",
+      "stable_resident_id": "sr-dspnkvpvnxvd",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.right-paren",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100101",
+      "stable_resident_id": "sr-rvfbqwfcemsr",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.double-quote",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100110",
+      "stable_resident_id": "sr-bwxtncrkbunh",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.backslash",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1100111",
+      "stable_resident_id": "sr-dwatgagsncrt",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.underscore",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101000",
+      "stable_resident_id": "sr-ryrsghvhpzda",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.anusvara",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101001",
+      "stable_resident_id": "sr-amgachqvebmm",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.visarga",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101010",
+      "stable_resident_id": "sr-zsyjpuxgkvag",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.avagraha",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101011",
+      "stable_resident_id": "sr-brrdzmxbrksa",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.danda",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101100",
+      "stable_resident_id": "sr-exsnrerwrmcb",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.double-danda",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101101",
+      "stable_resident_id": "sr-tkyxhbqmgxmq",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.ampersand",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101110",
+      "stable_resident_id": "sr-vjjxjpbwgunk",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.pipe",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1101111",
+      "stable_resident_id": "sr-mmyzhuvawfrb",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.backquote",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110000",
+      "stable_resident_id": "sr-gzphxtgxwtzb",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.plus",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110001",
+      "stable_resident_id": "sr-tvpqysnzjnxm",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.minus",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110010",
+      "stable_resident_id": "sr-nmjpvpbjbhvd",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.star",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110011",
+      "stable_resident_id": "sr-cjmhrwkbfvaf",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.slash",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110100",
+      "stable_resident_id": "sr-kcnjsshgvhnp",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.equals",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110101",
+      "stable_resident_id": "sr-pdyskndgdttj",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.less",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110110",
+      "stable_resident_id": "sr-vvczuupdsfyp",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.greater",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1110111",
+      "stable_resident_id": "sr-qypgjpkvsnae",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.question",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111000",
+      "stable_resident_id": "sr-mgnpcxzaaggr",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.bang",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111001",
+      "stable_resident_id": "sr-bpfxjedtgkeg",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.apostrophe",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111010",
+      "stable_resident_id": "sr-ddndzrngtsbs",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.dot",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111011",
+      "stable_resident_id": "sr-cxtzjnwqfjts",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.comma",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111100",
+      "stable_resident_id": "sr-vxwgjybkywgq",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.colon",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111101",
+      "stable_resident_id": "sr-qyuwcftdbutd",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.semicolon",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111110",
+      "stable_resident_id": "sr-chnfmmnbdnhx",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.hash",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    },
+    {
+      "coordinate": "1111111",
+      "stable_resident_id": "sr-jnwxehjmkrmf",
+      "baseline_status": "RECOVERED",
+      "baseline_class": "sign/operator",
+      "baseline_name": "sign.at",
+      "geometry_eligibility": "NON-PHONOLOGICAL",
+      "shiva_same_coordinate_overlay": null,
+      "shiva_identity_migration": null,
+      "authority_status": "D7-RESEARCH"
+    }
+  ]
+}
