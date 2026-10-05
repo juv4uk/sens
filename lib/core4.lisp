@@ -242,7 +242,7 @@
          (00000111
            (decision
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((00000010 (00000001 ()))
+           ((тотожне? 0 0)
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
