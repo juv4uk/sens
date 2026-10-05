@@ -18,7 +18,7 @@ fn d5_label_recurses_locally() {
            (функція (xs)
              (за-умовою
                ((атом? xs) (як-є done))
-               ((тотожне? xs xs) (self (решта xs))))))
+               ((атом? (як-є recur)) (self (решта xs))))))
          (як-є (a b c d)))
     "#;
     let mut session = Session::default();
