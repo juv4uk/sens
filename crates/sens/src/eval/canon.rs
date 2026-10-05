@@ -752,6 +752,19 @@ mod tests {
             CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(bits).unwrap()))
         };
 
+        assert_eq!(
+            domain_primitive_kind(d3(0b010)),
+            Some(DomainPrimitiveKind::AtomPredicate)
+        );
+        assert_eq!(
+            domain_primitive_kind(d3(0b101)),
+            Some(DomainPrimitiveKind::AtomEquality)
+        );
+        assert_eq!(
+            domain_primitive_kind(d3(0b111)),
+            Some(DomainPrimitiveKind::PairConstruct)
+        );
+
         assert!(domain_primitive(d3(0b010)).is_some()); // ATOM
         assert!(domain_primitive(d3(0b101)).is_some()); // EQ
         assert!(domain_primitive(d3(0b111)).is_some()); // CONS
@@ -763,6 +776,7 @@ mod tests {
         let d4_same_payload = CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(0b0010).unwrap(),
         ));
+        assert_eq!(domain_primitive_kind(d4_same_payload), None);
         assert!(domain_primitive(d4_same_payload).is_none());
     }
 
