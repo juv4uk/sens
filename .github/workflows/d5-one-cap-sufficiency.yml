@@ -21,7 +21,7 @@ on:
 jobs:
   d5-one-cap:
     name: D5 one transformer capability
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v5
       - name: Run one-capability sufficiency witnesses
