@@ -239,10 +239,13 @@
       ((00000010 values) (1) (00101010 acc))
       (t t
        (10011100 ((decision (predicate (00000101 values))))
-         (00000111
-           ((truthy? decision) t
+         ; Predicate contract is exact D1.  D1:1 includes, D1:0 skips.
+         ; Structural EMPTY selects neither clause and propagates as EMPTY
+         ; instead of being silently collapsed into NO by generic truthiness.
+         (за-умовою
+           (decision
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((truthy? decision) ()
+           ((тотожне? decision (тотожне? 0 1))
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
