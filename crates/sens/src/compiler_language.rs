@@ -97,10 +97,6 @@ fn authority_sha256_from(projection: &str) -> Result<String, LanguageError> {
     quoted_json_string(&projection[authority..], "sha256")
 }
 
-fn authority_sha256() -> Result<String, LanguageError> {
-    authority_sha256_from(LAW_PROJECTION)
-}
-
 fn verify_projection_authority(
     projection: &str,
     authority: &str,
