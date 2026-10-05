@@ -46,8 +46,14 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
                 is_exact_quote(&lifted[0]) || source_spelling(source, &lifted[0]) == Some("'");
 
             if !quote_data {
-                for item in lifted.iter_mut().skip(1) {
-                    *item = lift_expression(source, item.clone(), depth + 1)?;
+                if is_exact_cond(&lifted[0]) {
+                    for clause in lifted.iter_mut().skip(1) {
+                        *clause = lift_cond_clause(source, clause.clone(), depth + 1)?;
+                    }
+                } else {
+                    for item in lifted.iter_mut().skip(1) {
+                        *item = lift_expression(source, item.clone(), depth + 1)?;
+                    }
                 }
             }
 
@@ -94,6 +100,27 @@ fn lift_head(source: &str, head: Expr) -> Result<Expr, LanguageError> {
     }
 }
 
+fn lift_cond_clause(
+    source: &str,
+    clause: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    let Expr { kind, span } = clause;
+    match kind {
+        ExprKind::List(items) => {
+            let mut lifted = items.to_vec();
+            for item in &mut lifted {
+                *item = lift_expression(source, item.clone(), depth + 1)?;
+            }
+            Ok(Expr {
+                kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+                span,
+            })
+        }
+        other => Ok(Expr { kind: other, span }),
+    }
+}
+
 fn source_spelling<'a>(source: &'a str, expression: &Expr) -> Option<&'a str> {
     source.get(expression.span.start..expression.span.end)
 }
@@ -103,6 +130,14 @@ fn is_exact_quote(expression: &Expr) -> bool {
         &expression.kind,
         ExprKind::DomainIdentity(identity)
             if identity.width() == 3 && identity.packed_bits() == 0b001
+    )
+}
+
+fn is_exact_cond(expression: &Expr) -> bool {
+    matches!(
+        &expression.kind,
+        ExprKind::DomainIdentity(identity)
+            if identity.width() == 3 && identity.packed_bits() == 0b110
     )
 }
 
@@ -160,6 +195,38 @@ mod tests {
             panic!("expected nested D3 DomainCall");
         };
         assert_eq!(word.word().packed_bits(), 0b100);
+    }
+
+    #[test]
+    fn exact_cond_lifts_test_and_branch_heads_inside_clause_structure() {
+        let expression = only(
+            parse_mixed_exact_domain(
+                "(110 ((101 x 0) (01010 x 1)) ((101 0 0) 0))",
+            )
+            .expect("mixed COND parse"),
+        );
+        let ExprKind::List(items) = expression.kind else {
+            panic!("expected COND list");
+        };
+        let ExprKind::List(first_clause) = &items[1].kind else {
+            panic!("expected first COND clause");
+        };
+        let ExprKind::List(test) = &first_clause[0].kind else {
+            panic!("expected test expression");
+        };
+        assert!(matches!(
+            &test[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b101
+        ));
+        let ExprKind::List(branch) = &first_clause[1].kind else {
+            panic!("expected branch expression");
+        };
+        assert!(matches!(
+            &branch[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 5 && identity.packed_bits() == 0b01010
+        ));
     }
 
     #[test]
