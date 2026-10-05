@@ -138,6 +138,7 @@ def main() -> int:
                 "rss_bytes": rss,
                 "program_source_bytes": program,
                 "semantic_axis": "N/A",
+                "semantic_completeness": "N/A",
             }
         )
 
@@ -149,9 +150,17 @@ def main() -> int:
                 "semantic accounting must declare source_issue=#1973; "
                 "do not inject benchmark-local semantic authority"
             )
+        scope = semantic.get("scope")
+        completeness = semantic.get("completeness")
+        if not scope or completeness not in {"family-only", "whole-language"}:
+            raise RuntimeError(
+                "semantic accounting must declare scope and completeness="
+                "family-only|whole-language"
+            )
         for row in joined:
             if row["runtime"] == "sens-exact":
-                row["semantic_axis"] = "#1973-vector"
+                row["semantic_axis"] = f"#1973-vector:{scope}"
+                row["semantic_completeness"] = completeness
 
     dominance_rows: list[dict[str, object]] = []
     report: list[str] = [
@@ -221,7 +230,8 @@ def main() -> int:
         report += [
             "## SENS semantic-authority vector",
             "",
-            "Source: #1973. Preserved as a vector; not collapsed into a weighted score.",
+            f"Source: #1973. Scope: {semantic['scope']}. Completeness: {semantic['completeness']}.",
+            "Preserved as a vector; not collapsed into a weighted score.",
             "",
             "```json",
             json.dumps(semantic, ensure_ascii=False, indent=2),
@@ -242,6 +252,7 @@ def main() -> int:
         "rss_bytes",
         "program_source_bytes",
         "semantic_axis",
+        "semantic_completeness",
     ]
     write_tsv(args.out / "joined.tsv", joined, joined_fields)
     write_tsv(
