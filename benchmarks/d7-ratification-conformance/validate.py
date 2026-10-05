@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#2517 historical D7 conformance witness, replayed as research under Contract 11.5.
+"""#2517 historical D7 conformance witness, replayed under ratified Contract 11.6.
 
 Owner authority:
   D7 = Sound7/Sanskrit sound-related objects
@@ -219,8 +219,8 @@ def main() -> None:
     print("D14-LINK=PROVENANCE-ONLY")
     print(f"WIDTH-VALID-COORDINATES={width_valid_coordinate_count}")
     print("OCCUPANCY-CLAIM=NONE")
-    print("STATUS=PASS-D7-RESEARCH-ROLE-CONFORMANCE")
-    print("AUTHORITY=HISTORICAL-OWNER-EVIDENCE;CURRENT=RESEARCH")
+    print("STATUS=PASS-D7-RATIFIED-ROLE-CONFORMANCE")
+    print("AUTHORITY=#3572;WITNESS=ROLE-BOUNDARY;OCCUPANCY=SEPARATE")
 
 
 if __name__ == "__main__":
