@@ -56,6 +56,26 @@ def main() -> None:
 
     require(data["schema"] == "cross-width-law-atlas/v1", "schema drift")
     require(data["parent_theorem"] == "#3499", "parent theorem drift")
+    require(
+        data["law_set_id"] == "sens-cross-width-lawset-2026-10-05-a",
+        "law-set identity drift",
+    )
+    require(
+        data["positive_witness_ids"] == [
+            "SELECTOR-COMPLEMENT-D3",
+            "SELECTOR-LIFT-D3-D4",
+            "SELECTOR-LIFT-D4-D5",
+        ],
+        "positive witness-set drift",
+    )
+    require(
+        data["negative_or_boundary_witness_ids"] == [
+            "GLOBAL-D4-COMPLEMENT:NO-SEMANTIC-J",
+            "DOMAIN-FIREWALL:SELECTORPATH-VS-QGROUPFACTOR",
+            "AUTOMATIC-D6:FALSE",
+        ],
+        "negative/boundary witness-set drift",
+    )
     require(data["axes"] == ["exact_width", "semantic_family"], "atlas axes must remain width × family")
     require(set(data["allowed_statuses"]) == ALLOWED_STATUSES, "status vocabulary drift")
 
@@ -132,6 +152,9 @@ def main() -> None:
     )
 
     print("CROSS-WIDTH-LAW-ATLAS=PASS")
+    print(f"LAW-SET-ID={data['law_set_id']}")
+    print("POSITIVE-WITNESSES=3")
+    print("NEGATIVE-OR-BOUNDARY-WITNESSES=3")
     print("AXES=exact_width×semantic_family")
     print("PROVED-FAMILY=core-selector-path")
     print("PROVED-WIDTHS=D3,D4,D5")
