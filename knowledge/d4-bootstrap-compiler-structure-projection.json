@@ -1,0 +1,30 @@
+{
+  "domain": {
+    "name": "D4",
+    "width": 4
+  },
+  "irreducible_bootstrap_fibre": {
+    "children": [
+      "0010",
+      "0011"
+    ],
+    "parent_bits": "001",
+    "parent_domain": "D3"
+  },
+  "non_authority": {
+    "backend_mechanism_table": false,
+    "compiler_role_table": false,
+    "d8_admission": false,
+    "human_name_routing": false
+  },
+  "projection_sha256": "fd63f6378b29f3040eda4f38c4eb0f8e1a45617a173e73091322397feb5f8f08",
+  "schema": "d4-bootstrap-compiler-structure-projection/1",
+  "semantic_authority": {
+    "git_blob_sha1": "9f398d9b5fff4c724603f5339bbb248109ec3c34",
+    "owner_ratification": "#3272",
+    "path": "contracts/d4-bootstrap-ratification.lisp",
+    "schema": "d4-bootstrap-ratification/1",
+    "sha256": "73e682c8fdcd1345a51d2c32fbcebadb91922c6011cc7ce2be29592ecd534ee3"
+  },
+  "status": "generated-projection-only"
+}
