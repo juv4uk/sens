@@ -13,7 +13,8 @@
 
 use crate::{
     domain_identity_shape_mechanism, eval_parsed_expressions, eval_program, load_core_library,
-    sha256_source, CompilerExecutionRole, CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness,
+    sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
+    ErrorKind, Exactness,
     Expr, ExprKind, LanguageError, Session, Span, Value,
 };
 use std::rc::Rc;
@@ -22,9 +23,13 @@ const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleu
 const LAW_PROJECTION: &str =
     include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
 const LAW_AUTHORITY: &str = include_str!("../../../contracts/bija3-l1-l5-ratification.lisp");
+const D4_LAW_PROJECTION: &str =
+    include_str!("../../../knowledge/d4-bootstrap-compiler-structure-projection.json");
+const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-ratification.lisp");
 
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
+const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 
 fn invalid_projection(message: impl Into<String>) -> LanguageError {
     LanguageError::new(ErrorKind::InvalidForm, message, Span::default())
@@ -63,6 +68,46 @@ fn projection_width() -> Result<usize, LanguageError> {
     digits
         .parse()
         .map_err(|_| invalid_projection("generated law domain width is invalid"))
+}
+
+fn projection_width_from(source: &str) -> Result<usize, LanguageError> {
+    let domain = source
+        .find("\"domain\"")
+        .ok_or_else(|| invalid_projection("generated law projection has no domain block"))?;
+    let rest = &source[domain..];
+    let marker = "\"width\": ";
+    let start = rest
+        .find(marker)
+        .ok_or_else(|| invalid_projection("generated law projection has no domain width"))?
+        + marker.len();
+    let digits = rest[start..]
+        .chars()
+        .take_while(|ch| ch.is_ascii_digit())
+        .collect::<String>();
+    if digits.is_empty() {
+        return Err(invalid_projection("generated law domain width is not numeric"));
+    }
+    digits
+        .parse()
+        .map_err(|_| invalid_projection("generated law domain width is invalid"))
+}
+
+fn projection_string_array(source: &str, key: &str) -> Result<Vec<String>, LanguageError> {
+    let marker = format!("\"{key}\": [");
+    let start = source
+        .find(&marker)
+        .ok_or_else(|| invalid_projection(format!("generated law projection has no {key} array")))?
+        + marker.len();
+    let tail = &source[start..];
+    let end = tail
+        .find(']')
+        .ok_or_else(|| invalid_projection(format!("generated {key} array is unterminated")))?;
+    Ok(tail[..end]
+        .split(',')
+        .map(str::trim)
+        .filter(|item| !item.is_empty())
+        .map(|item| item.trim_matches('"').to_string())
+        .collect())
 }
 
 fn projection_spine() -> Result<Vec<String>, LanguageError> {
@@ -105,7 +150,7 @@ fn verify_projection_authority(
     let actual_authority_sha = sha256_hex(authority.as_bytes());
     if expected_authority_sha != actual_authority_sha {
         return Err(invalid_projection(
-            "generated L1-L5 projection is stale against its ratified authority",
+            "generated structural projection is stale against its ratified authority",
         ));
     }
     Ok(())
