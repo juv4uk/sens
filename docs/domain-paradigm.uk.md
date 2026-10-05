@@ -86,8 +86,8 @@ implemented resident
 Наприклад, selector-family має два D3-корені:
 
 ```text
-101  CAR
-110  CDR
+011  CDR
+100  CAR
 ```
 
 і закон продовження:
