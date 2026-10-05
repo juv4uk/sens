@@ -3,7 +3,7 @@ name: Current exact-domain corpus
 on:
   pull_request:
     paths:
-      - "scripts/generate-current-exact-domain-corpus.py"
+      - "benchmarks/current-exact-domain-corpus/run.py"
       - "knowledge/current-exact-domain-corpus.json"
       - "knowledge/current-exact-domain-corpus.tsv"
       - "knowledge/d1-d7-foundation.json"
@@ -15,7 +15,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "scripts/generate-current-exact-domain-corpus.py"
+      - "benchmarks/current-exact-domain-corpus/run.py"
       - "knowledge/current-exact-domain-corpus.json"
       - "knowledge/current-exact-domain-corpus.tsv"
       - "knowledge/d1-d7-foundation.json"
@@ -36,4 +36,4 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Verify current D1-D7 projection
-        run: python3 scripts/generate-current-exact-domain-corpus.py --check
+        run: python3 benchmarks/current-exact-domain-corpus/run.py --check
