@@ -64,6 +64,10 @@ fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     })
 }
 
+pub(super) fn has_mechanism(identity: CoreDomainIdentity) -> bool {
+    decode(identity).is_some()
+}
+
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
