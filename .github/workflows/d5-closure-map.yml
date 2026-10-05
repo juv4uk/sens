@@ -1,4 +1,4 @@
-name: D5 closure map
+name: Historical D5 OD-005 closure provenance
 
 on:
   pull_request:
@@ -7,7 +7,6 @@ on:
       - "knowledge/d5-historical-full-map.json"
       - "knowledge/d5-d6-semantic-ledger.json"
       - ".github/workflows/d5-closure-map.yml"
-      - "scripts/research-2322-generative-domain-forecast.py"
       - "benchmarks/generator-economy/semantic-fact-ledger.json"
   workflow_dispatch:
 
@@ -22,7 +21,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build current OD-005 D5 map
+      - name: Replay historical OD-005 D5 map
         run: |
           rm -rf /tmp/d5-map
           python3 benchmarks/d5-closure-map/run.py --out /tmp/d5-map
