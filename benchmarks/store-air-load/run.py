@@ -266,6 +266,8 @@ def make_row(
     expected_semantic_bits: int,
     semantic_payload_bits: int,
     framing_bits: int,
+    integrity_bits: int,
+    profile_overhead_bits: int,
     tail_unused_bits: int,
     carrier_mode: str,
     carrier_payload_bits: int,
@@ -276,7 +278,12 @@ def make_row(
     bitrate_bps: float,
     provenance: dict[str, object],
 ) -> dict[str, object]:
-    total_wire_bits = carrier_payload_bits + framing_bits
+    total_wire_bits = (
+        carrier_payload_bits
+        + framing_bits
+        + integrity_bits
+        + profile_overhead_bits
+    )
     return {
         "schema": SCHEMA,
         "fixture_id": fixture_id,
@@ -291,6 +298,8 @@ def make_row(
         "expected_semantic_bits": expected_semantic_bits,
         "semantic_payload_bits": semantic_payload_bits,
         "framing_bits": framing_bits,
+        "integrity_bits": integrity_bits,
+        "profile_overhead_bits": profile_overhead_bits,
         "tail_unused_bits": tail_unused_bits,
         "carrier_mode": carrier_mode,
         "carrier_payload_bits": carrier_payload_bits,
@@ -346,7 +355,10 @@ def main() -> int:
         "packing_helper_sha256": sha256_file(packing_helper),
         "semantic_helper_sha256": sha256_file(semantic_helper),
         "fixtures_sha256": sha256_file(args.fixtures.resolve()),
-        "airtime_model": "carrier_payload_bits + framing_bits",
+        "airtime_model": (
+            "carrier_payload_bits + framing_bits + integrity_bits + "
+            "profile_overhead_bits"
+        ),
         "load_metrics_status": "deferred-to-#3513",
     }
 
@@ -358,8 +370,15 @@ def main() -> int:
             fixture_kind = str(fixture["kind"])
             canonical_source = str(fixture["canonical_source"])
             framing_bits = int(fixture.get("framing_bits", 0))
-            if framing_bits < 0:
-                raise ValueError(f"{fixture_id}: framing_bits must be >= 0")
+            integrity_bits = int(fixture.get("integrity_bits", 0))
+            profile_overhead_bits = int(fixture.get("profile_overhead_bits", 0))
+            for field_name, value in (
+                ("framing_bits", framing_bits),
+                ("integrity_bits", integrity_bits),
+                ("profile_overhead_bits", profile_overhead_bits),
+            ):
+                if value < 0:
+                    raise ValueError(f"{fixture_id}: {field_name} must be >= 0")
 
             canonical_path = write_source(
                 tmp, fixture_id, "canonical", canonical_source
@@ -440,6 +459,8 @@ def main() -> int:
                     expected_semantic_bits=expected_semantic_bits,
                     semantic_payload_bits=semantic_bits,
                     framing_bits=framing_bits,
+                    integrity_bits=integrity_bits,
+                    profile_overhead_bits=profile_overhead_bits,
                     tail_unused_bits=int(facts["tail_unused_bits"]),
                     carrier_mode="exact-bitstream",
                     carrier_payload_bits=semantic_bits,
@@ -466,6 +487,8 @@ def main() -> int:
                         expected_semantic_bits=expected_semantic_bits,
                         semantic_payload_bits=semantic_bits,
                         framing_bits=0,
+                        integrity_bits=0,
+                        profile_overhead_bits=0,
                         tail_unused_bits=0,
                         carrier_mode="text-bytes",
                         carrier_payload_bits=text_bytes * 8,
