@@ -1,7 +1,7 @@
 //! #3394 — exact D6 selector runtime admission after Contract 11.5.
 //!
 //! Residency is not callability: only the proved selector family is admitted
-//! by this slice. Other D6 residents and equal payloads in D7/D8 fail closed.
+//! by this slice. Other D6 residents, current non-callable D7, and research D8 fail closed.
 
 use sens::{
     eval_parsed_expressions, parse, Bit6, Bit7, Bit8, CoreD6, CoreD8, DomainIdentity, Expr,
@@ -59,7 +59,7 @@ fn equal_numeric_payload_in_d7_or_d8_never_inherits_d6_selector_meaning() {
 
     for identity in [d7, d8] {
         let error = run_identity(identity, "'((((a))))")
-            .expect_err("research/non-callable domain must not enter the D6 selector decoder");
+            .expect_err("non-callable D7 or research D8 must not enter the D6 selector decoder");
         assert!(
             error.message.contains("not callable") || error.message.contains("no admitted"),
             "unexpected cross-domain firewall error: {error:?}"
