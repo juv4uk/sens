@@ -19,16 +19,37 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
 from itertools import product
 from pathlib import Path
 
-D6_PARENT = "110000"   # current D6 TAKE identity under #3393
-D6_SIBLING = "110001"  # current D6 DROP identity under #3393
+REPO = Path(__file__).resolve().parents[1]
+D6_AUTHORITY_PATH = REPO / "knowledge" / "d6-ratified.json"
 D3_SELECTOR_ROOTS = ("011", "100")
 
 ALPHABET = (0, 1)
 MAX_LENGTH = 5
 N_SLACK = 2
+
+
+def load_d6_authority() -> dict[str, object]:
+    raw = D6_AUTHORITY_PATH.read_bytes()
+    doc = json.loads(raw)
+    assert doc["schema"] == "d6-ratified/v1"
+    assert doc["status"] == "owner-ratified"
+    assert doc["authority"] == "#3393"
+    residents = doc["residents"]
+    by_name = {name: coordinate for coordinate, name in residents.items()}
+    assert len(residents) == 64
+    assert by_name["TAKE"] == "110000"
+    assert by_name["DROP"] == "110001"
+    return {
+        "path": str(D6_AUTHORITY_PATH.relative_to(REPO)),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "authority": doc["authority"],
+        "take": by_name["TAKE"],
+        "drop": by_name["DROP"],
+    }
 
 
 def reverse(xs: tuple[int, ...]) -> tuple[int, ...]:
@@ -98,8 +119,10 @@ def selector_d8_candidates() -> set[str]:
     return out
 
 
-def coordinate_gauge() -> dict[str, object]:
-    family = {D6_PARENT + suffix for suffix in ("00", "01", "10", "11")}
+def coordinate_gauge(d6: dict[str, object]) -> dict[str, object]:
+    parent = str(d6["take"])
+    sibling = str(d6["drop"])
+    family = {parent + suffix for suffix in ("00", "01", "10", "11")}
     selectors = selector_d8_candidates()
     assert family.isdisjoint(selectors)
 
@@ -124,8 +147,8 @@ def coordinate_gauge() -> dict[str, object]:
     } == {"take_right", "drop_left"}
 
     return {
-        "d6_parent": D6_PARENT,
-        "d6_known_sibling": D6_SIBLING,
+        "d6_parent": parent,
+        "d6_known_sibling": sibling,
         "d8_family_coordinates": sorted(family),
         "selector_collision": False,
         "axis_order_a": {
@@ -137,11 +160,11 @@ def coordinate_gauge() -> dict[str, object]:
             "corners": edge_then_mode,
         },
         "invariants": {
-            D6_PARENT + "00": "take_left / lower-domain duplicate",
-            D6_PARENT + "11": "drop_right / novel semantic candidate",
+            parent + "00": "take_left / lower-domain duplicate",
+            parent + "11": "drop_right / novel semantic candidate",
         },
         "orientation_gauge_orbit": {
-            "coordinates": [D6_PARENT + "01", D6_PARENT + "10"],
+            "coordinates": [parent + "01", parent + "10"],
             "meanings": ["take_right / novel semantic candidate", "drop_left / lower-domain duplicate"],
             "rule": "axis order swaps these two middle corners",
         },
@@ -149,6 +172,8 @@ def coordinate_gauge() -> dict[str, object]:
 
 
 def run() -> dict[str, object]:
+    d6 = load_d6_authority()
+    parent = str(d6["take"])
     cases = corpus()
 
     # Base algebraic witnesses.
@@ -249,7 +274,7 @@ def run() -> dict[str, object]:
     assert bad_suffix_drop_failures > 0
     assert commutativity_checks == 4
 
-    gauge = coordinate_gauge()
+    gauge = coordinate_gauge(d6)
 
     return {
         "schema": "d8-take-drop-edge/v1",
@@ -257,6 +282,7 @@ def run() -> dict[str, object]:
         "authority": {
             "d5_reverse": "#3305 / #3293 / #3379",
             "d6_take_drop": "#3393 / #3368",
+            "d6_source": d6,
             "d8": "#3281 research",
             "task": "#3622",
         },
@@ -295,9 +321,9 @@ def run() -> dict[str, object]:
         "coordinate_gauge": gauge,
         "result": {
             "novel_semantic_candidates": 2,
-            "invariant_coordinate_candidate": D6_PARENT + "11",
+            "invariant_coordinate_candidate": parent + "11",
             "invariant_coordinate_meaning": "drop_right",
-            "gauge_orbit_for_take_right": [D6_PARENT + "01", D6_PARENT + "10"],
+            "gauge_orbit_for_take_right": [parent + "01", parent + "10"],
             "orientation_theorem_missing": True,
         },
         "non_conclusions": [
