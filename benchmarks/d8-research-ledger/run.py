@@ -32,6 +32,8 @@ def load_d6_authority():
         "ALL": "111101",
         "REDUCE": "101110",
         "SCAN": "101111",
+        "ZIP": "111000",
+        "UNZIP": "111001",
     }
     for name, coordinate in required.items():
         assert by_name[name] == coordinate
@@ -53,11 +55,12 @@ def selector_candidates():
     return out
 
 
-def family(anchor, sibling, name, novel_middle, fixed_novel, evidence, status):
+def family(anchor, sibling, name, novel_middle, fixed_novel, evidence, evidence_state, status):
     footprint = [anchor + suffix for suffix in ("00", "01", "10", "11")]
     return {
         "name": name,
         "evidence": evidence,
+        "evidence_state": evidence_state,
         "status": status,
         "anchor_d6": anchor,
         "sibling_d6": sibling,
@@ -95,6 +98,7 @@ def run():
             "TAKE-right",
             "DROP-right",
             "#3667 / #3622",
+            "MERGED-MAIN",
             "PRODUCT-CANDIDATE",
         ),
         family(
@@ -104,6 +108,7 @@ def run():
             "ANY(NOT p)",
             "ALL(NOT p)",
             "#3668 / #3663",
+            "MERGED-MAIN",
             "PRODUCT-CANDIDATE",
         ),
         family(
@@ -113,7 +118,18 @@ def run():
             "REDUCE-right",
             "SCAN-right",
             "#3704 / #3674",
+            "GREEN-UNMERGED",
             "PRODUCT-CANDIDATE-NONEMPTY",
+        ),
+        family(
+            "111000",
+            "111001",
+            "ZIP/UNZIP × orientation",
+            "ZIP-swapped",
+            "UNZIP-swapped",
+            "#3712 / #3710",
+            "GREEN-UNMERGED",
+            "PRODUCT-CANDIDATE-TYPED",
         ),
     ]
 
@@ -126,15 +142,15 @@ def run():
         footprints |= current
 
     analyzed = selectors | footprints
-    assert len(footprints) == 12
-    assert len(analyzed) == 76
+    assert len(footprints) == 16
+    assert len(analyzed) == 80
 
     untouched = {
         f"{value:08b}"
         for value in range(CAPACITY)
         if f"{value:08b}" not in analyzed
     }
-    assert len(untouched) == 180
+    assert len(untouched) == 176
 
     fixed_novel = [item["fixed_novel"] for item in families]
     full_fixed = [
@@ -144,6 +160,16 @@ def run():
     boundary_fixed = [
         row for row, item in zip(fixed_novel, families)
         if item["status"] == "PRODUCT-CANDIDATE-NONEMPTY"
+    ]
+    typed_fixed = [
+        row for row, item in zip(fixed_novel, families)
+        if item["status"] == "PRODUCT-CANDIDATE-TYPED"
+    ]
+    merged_families = [
+        item for item in families if item["evidence_state"] == "MERGED-MAIN"
+    ]
+    green_unmerged_families = [
+        item for item in families if item["evidence_state"] == "GREEN-UNMERGED"
     ]
 
     return {
@@ -164,6 +190,9 @@ def run():
             "untouched_coordinates": len(untouched),
             "fixed_novel_coordinate_candidates_full": len(full_fixed),
             "fixed_novel_coordinate_candidates_protocol_bounded": len(boundary_fixed),
+            "fixed_novel_coordinate_candidates_typed": len(typed_fixed),
+            "merged_product_families": len(merged_families),
+            "green_unmerged_product_families": len(green_unmerged_families),
             "gauge_unresolved_novel_semantics": len(families),
             "fixed_lower_domain_duplicate_coordinates": len(families),
             "gauge_orbits": len(families),
@@ -191,10 +220,12 @@ def run():
             ],
         },
         "non_conclusions": [
-            "76 analyzed coordinates do not mean 76 D8 residents.",
+            "80 analyzed coordinates do not mean 80 D8 residents.",
             "Generated meanings need not become primitives.",
             "Gauge-orbit meanings do not have fixed absolute middle coordinates.",
             "The REDUCE/SCAN fixed candidate is restricted to the nonempty protocol.",
+            "The ZIP/UNZIP family is a typed product witness over its admitted equal-length lane.",
+            "GREEN-UNMERGED evidence is counted as analyzed research, not merged authority.",
             "D8 remains unratified and fail-closed.",
         ],
     }
@@ -214,6 +245,9 @@ def render(report):
         f"- untouched coordinates: {a['untouched_coordinates']}",
         f"- fixed novel candidates (full): {a['fixed_novel_coordinate_candidates_full']}",
         f"- fixed novel candidates (protocol-bounded): {a['fixed_novel_coordinate_candidates_protocol_bounded']}",
+        f"- fixed novel candidates (typed): {a['fixed_novel_coordinate_candidates_typed']}",
+        f"- merged product families: {a['merged_product_families']}",
+        f"- green-unmerged product families: {a['green_unmerged_product_families']}",
         f"- gauge-unresolved novel semantics: {a['gauge_unresolved_novel_semantics']}",
         f"- falsified second-axis hypotheses: {a['falsified_axis_hypotheses']}",
         "",
