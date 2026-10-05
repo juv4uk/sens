@@ -1,0 +1,28 @@
+name: D6 ratified authority
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-ratified.json"
+      - "knowledge/d6-v2-gauge-fixed-candidate.json"
+      - "contracts/d6-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d6-current-authority.py"
+      - ".github/workflows/d6-ratified-authority.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d6-ratified.json"
+      - "knowledge/d6-v2-gauge-fixed-candidate.json"
+      - "contracts/d6-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d6-current-authority.py"
+
+jobs:
+  authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d6-current-authority.py
