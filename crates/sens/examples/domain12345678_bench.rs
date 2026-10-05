@@ -51,8 +51,8 @@ fn verify_invariants() {
 
     assert!(same_payload[0].core_operation().is_none());
     assert!(same_payload[1].core_operation().is_none());
-    assert!(same_payload[4].core_operation().is_none());
-    assert!(same_payload[5].core_operation().is_none());
+    assert!(same_payload[4].core_operation().is_some());
+    assert!(same_payload[5].core_operation().is_some());
     assert!(same_payload[6].core_operation().is_none());
     assert!(same_payload[7].core_operation().is_none());
     assert!(same_payload[2].core_operation().is_some());
