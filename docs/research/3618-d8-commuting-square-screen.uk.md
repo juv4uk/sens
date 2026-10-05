@@ -54,7 +54,7 @@ machine-readable corpus: другої осі в ньому ще немає, то
 ## Відтворення
 
 ```sh
-python3 scripts/research-3618-d8-commuting-square-screen.py \
+python3 benchmarks/d8-commuting-square-screen/run.py \
   --out /tmp/d8-commuting-square-screen
 ```
 
