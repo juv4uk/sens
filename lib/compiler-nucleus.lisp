@@ -137,6 +137,29 @@
 (визначити compiler-role-from-l1-l5-bits
   (функція (seed bits law)
     (за-умовою
+      ((compiler-bits-equal seed bits (compiler-law-l5-head-bits law))
+       (як-є selector-head))
+      ((compiler-bits-equal
+         seed bits
+         (compiler-xor-bits
+           seed
+           (compiler-law-l5-head-bits law)
+           (compiler-law-xor-mask law)))
+       (як-є selector-tail))
+      ((compiler-bits-equal
+         seed bits
+         (compiler-xor-bits
+           seed
+           (compiler-law-empty-bits law)
+           (compiler-law-xor-mask law)))
+       (як-є pair-construct))
+      ((compiler-true seed) ()))))
+
+; Full D3 lowering closure for self-hosting.  It deliberately has a separate
+; name so the already-merged three-role execution API remains stable.
+(визначити compiler-lowering-role-from-l1-l5-bits
+  (функція (seed bits law)
+    (за-умовою
       ((compiler-bits-equal
          seed bits
          (compiler-xor-bits
@@ -232,13 +255,25 @@
 ; One production role query for the whole current compiler nucleus.  Domain
 ; width selects which already-ratified structural law is applicable; neither
 ; the host nor this function infers meaning from an equal packed payload.
+(визначити compiler-lowering-role-from-l1-l5
+  (функція (decompose identity law)
+    (за-умовою
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-law-width law))
+       (compiler-lowering-role-from-l1-l5-bits
+         identity
+         (compiler-shape-bits (decompose identity))
+         law))
+      ((compiler-true identity) ()))))
+
 (визначити compiler-lowering-role-from-laws
   (функція (decompose identity d3-law d4-law)
     (за-умовою
       ((тотожне?
          (compiler-shape-width (decompose identity))
          (compiler-law-width d3-law))
-       (compiler-role-from-l1-l5 decompose identity d3-law))
+       (compiler-lowering-role-from-l1-l5 decompose identity d3-law))
       ((тотожне?
          (compiler-shape-width (decompose identity))
          (compiler-d4-law-width d4-law))
