@@ -481,7 +481,7 @@
   ))
 
   ("VOVA-DREAM-UKRAINIAN-LISP-WITH-UNDERSTANDING" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (ukrainian-surface documentation semantics pedagogy cross-repo))
     (origin . owner)
     (claimed-by . nil)
@@ -491,7 +491,7 @@
   ))
 
   ("VOLNOST-ECOSYSTEM-TRANSITION" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (governance licensing policy audit))
     (origin . ecosystem)
     (context . "done: 2026-09-05 owner directive executed. Adopted VOLNOST in my-lisp (commit ea66daf) and across all 20 owned ecosystem repos. Guard bureau updated in knowledge/guard-reference.wsm (commit 1f45c53).")
@@ -523,35 +523,35 @@
     (context . "done 2026-08-25: Contract 3.0 ratified + implemented. Conformance fixtures pass 77/77 on panini machine. Cross-language boundary documented vs CPython. Remaining: LANGUAGE-STABLE-GATE deferred to 1.0.0 by design (axioms explicitly draft during 0.x).")
   ))
   ("MIGRATE-QUOTE-CML" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (cml))
     (description . "URGENT: language-contract bumped to 2.0. The apostrophe (') reader macro has been entirely removed from MyLisp. You must replace all instances of 'expr with (quote expr) across all your .my files, tests, and documentation.")
     (done . nil)
     (context . "done: verified 2026-08-24 by Vyasa - grep across cml *.my shows zero reader-sugar sites (prose matches only); macros.my documents .my-hosted pipeline; swarm registry 4/4 nodes gen1 completed=t; cml plan-of-record holds no counter-evidence.")
   ))
   ("MIGRATE-QUOTE-FPGA" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (fpga-lisp))
     (description . "URGENT: language-contract bumped to 2.0. The apostrophe (') reader macro has been entirely removed from MyLisp. You must replace all instances of 'expr with (quote expr) across all your .my files, tests, and documentation.")
     (done . nil)
     (context . "done: all 9 fpga-lisp .my files with reader-sugar migrated to explicit (quote ...) per language-contract 2.0 — assembler.my (8), docs/reference/conformance.my (91, incl. fixture strings read via read), docs/reference/my-lisp-lib/core.my (17), docs/reference/my-lisp-lib/meta-eval.my (22), docs/equal-oracle-checklist.my (34), 4 evidence/G5/G8 fixtures (5). fixture_coverage.py's substring table updated in lockstep. Mid-token apostrophes (don't, JF's, з'явились, невід'ємних) and prose comments/strings untouched — verified 0 sugar sites remaining. Equivalence proven against the real my-lisp oracle: fixture_coverage classification identical; core.my+meta-eval.my 18/18 test exprs byte-identical output; assembler.my usage/call_demo assembly identical, bootstrap_length_demo stack-overflow identical (pre-existing documented non-functionality, unchanged); conformance.my 121/121 fixture forms structurally equal (read-all + equal? walk); evidence fixtures 4/4 PASS. CRLF endings preserved byte-for-byte.")
   ))
   ("MIGRATE-QUOTE-IDE" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (my-idea))
     (description . "URGENT: language-contract bumped to 2.0. The apostrophe (') reader macro has been entirely removed from MyLisp. You must replace all instances of 'expr with (quote expr) across all your .my files, tests, and documentation.")
     (done . nil)
     (context . "done: 8 files in external/my-lisp/lib/ migrated (unify, understand, knowledge, reason, narrate, meta-eval, forward, core). knowledge/physics.my and astronomy.my already clean. README.md apostrophe reference updated. 0 sugar sites remaining.")
   ))
   ("MIGRATE-QUOTE-PANINI" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (my-lisp-panini))
     (description . "URGENT: language-contract bumped to 2.0. The apostrophe (') reader macro has been entirely removed from MyLisp. You must replace all instances of 'expr with (quote expr) across all your .my files, tests, and documentation.")
     (done . nil)
     (context . "done: verified 2026-08-25 by Vyasa - grep across my-lisp-panini *.my shows zero reader-sugar sites (prose/scratch-status matches only); swarm registry 4/4 nodes gen1 completed=t")
   ))
   ("MIGRATE-QUOTE-SIVA" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (shiva-sutras))
     (description . "URGENT: language-contract bumped to 2.0. The apostrophe (') reader macro has been entirely removed from MyLisp. You must replace all instances of 'expr with (quote expr) across all your .my files, tests, and documentation.")
     (done . nil)
@@ -1217,7 +1217,7 @@
     (done . t)))
 
   ("MYLISP-CML-SEMANTIC-EXPORT-V1" . (
-    (priority . 10.0)
+    (priority . #b1010)
     (capabilities . (my-lisp semantics registry contract compiler export testing))
     (origin . owner)
     (claimed-by . my-lisp-1)
