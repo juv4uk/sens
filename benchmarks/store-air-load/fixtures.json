@@ -1,6 +1,6 @@
 {
   "schema": "sens-store-air-load-fixtures/v1",
-  "purpose": "STORE -> AIR -> LOAD fixtures: механічні exact-width controls плюс семантично звірені English/canonical пари.",
+  "purpose": "Фікстури STORE -> AIR -> LOAD: механічні exact-width controls та семантично звірені English/canonical пари.",
   "fixtures": [
     {
       "id": "seven-bit-mechanical",
