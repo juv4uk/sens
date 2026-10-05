@@ -5,8 +5,11 @@ on:
     paths:
       - "language-contract.lisp"
       - "CURRENT.md"
+      - "README.md"
       - "docs/language-core.md"
+      - "docs/domain-paradigm.uk.md"
       - "contracts/bija3-l1-l5-ratification.lisp"
+      - "benchmarks/domain1234-dispatch/**"
       - "scripts/check-bija3-current-authority.py"
       - ".github/workflows/bija3-current-authority.yml"
   push:
@@ -14,12 +17,17 @@ on:
     paths:
       - "language-contract.lisp"
       - "CURRENT.md"
+      - "README.md"
       - "docs/language-core.md"
+      - "docs/domain-paradigm.uk.md"
       - "contracts/bija3-l1-l5-ratification.lisp"
+      - "benchmarks/domain1234-dispatch/**"
+      - "scripts/check-bija3-current-authority.py"
+      - ".github/workflows/bija3-current-authority.yml"
 
 jobs:
   authority:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v5
       - run: python3 scripts/check-bija3-current-authority.py
