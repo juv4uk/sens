@@ -1,4 +1,15 @@
-use sens::{eval_program, ErrorKind, Session};
+
+#[test]
+fn label_surface_lowers_to_exact_d5_00100() {
+    let parsed = parse("(мітка self (функція (x) x))").expect("parse LABEL");
+    let lowered = lower_program(&parsed);
+    let ExprKind::DomainCall(CoreDomainIdentity::D5(word), _) = &lowered[0].kind else {
+        panic!("LABEL surface must lower to exact D5 DomainCall");
+    };
+    assert_eq!(word.word().packed_bits(), 0b00100);
+}
+
+use sens::{eval_program, lower_program, parse, CoreDomainIdentity, ErrorKind, ExprKind, Session};
 
 #[test]
 fn d5_label_recurses_locally() {
