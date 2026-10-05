@@ -1,0 +1,39 @@
+name: execution-ladder first oracle cases
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+      - ".github/workflows/execution-ladder-first-oracle.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+      - ".github/workflows/execution-ladder-first-oracle.yml"
+
+jobs:
+  d3-oracle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build current exact-domain helper
+        run: cargo build --release -p sens --example current_en_vs_d1d8_cpu
+      - name: Emit real L0 oracle rows
+        run: |
+          python3 benchmarks/execution-ladder-conformance/emit_oracle.py \
+            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
+            --helper target/release/examples/current_en_vs_d1d8_cpu \
+            --out /tmp/d3-oracle.jsonl
+      - name: Validate shared conformance envelope
+        run: |
+          python3 benchmarks/execution-ladder-conformance/validate.py \
+            /tmp/d3-oracle.jsonl
+          test "$(wc -l < /tmp/d3-oracle.jsonl)" -eq 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sens-d3-oracle-jsonl
+          path: /tmp/d3-oracle.jsonl
