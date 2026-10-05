@@ -16,6 +16,9 @@
     "semantic_payload_bits",
     "framing_bits",
     "tail_unused_bits",
+    "carrier_mode",
+    "carrier_payload_bits",
+    "storage_container_bits",
     "total_wire_bits",
     "physical_container_bytes",
     "text_surface_bytes",
@@ -39,10 +42,16 @@
       "minLength": 1
     },
     "fixture_kind": {
-      "enum": ["mechanical", "paired-program"]
+      "enum": [
+        "mechanical",
+        "paired-program"
+      ]
     },
     "representation": {
-      "enum": ["canonical-packed", "text-surface"]
+      "enum": [
+        "canonical-packed",
+        "text-surface"
+      ]
     },
     "repo": {
       "const": "juv4uk/sens"
@@ -60,7 +69,10 @@
       "pattern": "^[0-9a-f]{64}$"
     },
     "identity_proof": {
-      "enum": ["mechanical-exact-word-sequence", "paired-lowered-trace"]
+      "enum": [
+        "mechanical-exact-word-sequence",
+        "paired-lowered-trace"
+      ]
     },
     "semantic_payload_bits": {
       "type": "integer",
@@ -84,11 +96,17 @@
       "minimum": 1
     },
     "text_surface_bytes": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 1
     },
     "packed_vs_text_ratio": {
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "exclusiveMinimum": 0
     },
     "bitrate_bps": {
@@ -100,31 +118,64 @@
       "exclusiveMinimum": 0
     },
     "decode_i_refs": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 0
     },
     "parse_i_refs": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 0
     },
     "lower_i_refs": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 0
     },
     "ready_i_refs": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 0
     },
     "cold_total_i_refs": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 0
     },
     "warm_incremental_i_refs": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 0
     },
     "provenance": {
       "type": "object"
+    },
+    "carrier_mode": {
+      "enum": [
+        "exact-bitstream",
+        "byte-container",
+        "text-bytes"
+      ]
+    },
+    "carrier_payload_bits": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "storage_container_bits": {
+      "type": "integer",
+      "minimum": 8
     }
   }
 }
