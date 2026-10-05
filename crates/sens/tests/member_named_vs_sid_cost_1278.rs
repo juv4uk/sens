@@ -34,26 +34,21 @@ const MEMBER_NAMED: &str = r#"
 (def member-named?
   (lambda (item lst)
     (cond
-      ((atom? lst) () (quote ()))
-      ((atom? lst) (0)
-       (cond
-         ((eq? item (car lst)) (1) t)
-         ((eq? item (car lst)) (0)
-          (member-named? item (cdr lst))))))))
+      ((atom? lst) (quote ()))
+      ((eq? item (car lst)) 1)
+      ((eq? item item)
+       (member-named? item (cdr lst))))))
 "#;
 
-// Byte-identical except every `eq` call site is replaced by its own
-// bare SID `00000011`.
+// Byte-identical except every eq call site is replaced by the bare SID 00000011.
 const MEMBER_SID: &str = r#"
 (def member-sid?
   (lambda (item lst)
     (cond
-      ((atom? lst) () (quote ()))
-      ((atom? lst) (0)
-       (cond
-         ((00000011 item (car lst)) (1) t)
-         ((00000011 item (car lst)) (0)
-          (member-sid? item (cdr lst))))))))
+      ((atom? lst) (quote ()))
+      ((00000011 item (car lst)) 1)
+      ((00000011 item item)
+       (member-sid? item (cdr lst))))))
 "#;
 
 fn bench(def_source: &str, call_expr: &str, session: &mut Session) -> u128 {
