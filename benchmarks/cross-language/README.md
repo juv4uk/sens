@@ -4,7 +4,7 @@
 Порівняння виконуються лише на однакових workload, параметрах і очікуваних
 відповідях.
 
-## Поточна межа — Contract 11.5
+## Поточна межа — Contract 11-5
 
 Чинна семантична основа SENS:
 
@@ -86,7 +86,7 @@ guix time-machine -C channels.scm -- shell \
 6. Raw rows завжди несуть provenance: SHA, runtime/compiler versions, параметри.
 7. Таблиці показують реалізації workload-by-workload; не проголошують
    універсального "переможця мови".
-8. Historical Function8/Sens8 результати не входять у fresh Contract 11.5 ratios.
+8. Historical Function8/Sens8 результати не входять у fresh Contract 11-5 ratios.
 
 ## Історична точка
 
