@@ -17,7 +17,7 @@ fn historical_ukrainian_and_sanskrit_surfaces_are_observationally_equal() {
         ("(cons 1 2)", "(сполучити 1 2)", "(saṃyuj 1 2)"),
         ("(car (cons 1 2))", "(перше (сполучити 1 2))", "(ādi (saṃyuj 1 2))"),
         ("(cdr (quote (1 2 3)))", "(решта (як-є (1 2 3)))", "(śeṣa (svarūpa (1 2 3)))"),
-        ("(cond (() (quote ні)) (t (quote так)))", "(за-умовою (() (як-є ні)) (t (як-є так)))", "(anukrama (() (svarūpa na)) (t (svarūpa так)))"),
+        ("(cond (() (quote ні)) ((eq? (quote так) (quote так)) (quote так)))", "(за-умовою (() (як-є ні)) ((тотожне? (як-є так) (як-є так)) (як-є так)))", "(anukrama (() (svarūpa na)) ((abheda (svarūpa так) (svarūpa так)) (svarūpa так)))"),
     ];
 
     for (historical, ukrainian, sanskrit) in cases {

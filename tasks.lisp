@@ -1071,12 +1071,22 @@
     (done . ())))
 
   ("SI-DEFINING-CONSTANTS-EXACT-RATIONAL" . (
-    (priority . 8.5)
-    (capabilities . (my-lisp physics mathematics rationals constants prelude))
-    (origin . my-lisp)
-    (context . "Owner architectural synthesis 2026-09-05: McCarthy's 7 axiomatic language primitives (quote atom eq car cdr cons cond) complemented by BIPM SI 2019's 7 defining physical constants (delta-nu-cs, c, h, e, k, n-a, k-cd). SI defines these values as exact terminating decimals with zero experimental uncertainty, making them representable as exact normalized rationals without floating point.")
-    (description . "Define the 7 BIPM SI defining constants as exact rational constants in a dedicated prelude/physics module: c (299792458), delta-nu-cs (9192631770), k-cd (683), n-a (602214076000000000000000), e (801088317/5000000000000000000000000000), k (1380649/100000000000000000000000000000), h (132521403/200000000000000000000000000000000000000000). Keep them strictly as predefined library/prelude bindings, not core language primitives.")
-    (done . t)))
+    (priority . #b1010)
+    (capabilities . (physics mathematics rationals constants world-knowledge axioms))
+    (origin . sens)
+    (context . "OWNER CUTOVER 2026-10-05, authority #3374/#3386: the seven BIPM SI defining constants already implemented exactly in lib/si.lisp are initial WORLD-KNOWLEDGE AXIOMS / PRIMITIVES. This supersedes the old library-only/prelude-only interpretation. Primitive taxonomy is explicit: world-knowledge primitive != evaluator/function primitive; no function opcode is minted merely by axiom status.")
+    (description . "Promote delta-nu-cs, c, h, e, k, n-a and k-cd from exact scientific library data to canonical initial world axioms. Preserve exact rational/integer value, dimension/unit, exact-by-definition status, BIPM provenance and stable axiom identity; zero floats. Create/consume one machine-readable authority and make docs/tests/library projections validate against it. Distinguish AXIOM from DERIVED, OBSERVED and UNKNOWN. Feed #3387 exact derivation and #3388 observation-boundary work.")
+    (done . nil)))
+
+  ("WORLD-MODEL-LAWS-AXIOM-OBSERVATION-BRIDGE" . (
+    (priority . #b1010)
+    (capabilities . (physics mathematics world-knowledge axioms model-laws observations derivation quantities))
+    (origin . sens)
+    (depends-on . (SI-DEFINING-CONSTANTS-EXACT-RATIONAL))
+    (context . "OWNER DIRECTION 2026-10-05, authority #3374/#3386/#3402: world axioms alone do not make the language know physics. SENS needs an explicit MODEL_LAW layer between WORLD_DEFINITION_AXIOM and OBSERVATION. A law is neither an axiom nor an observation and must carry equation, validity assumptions/domain, source/provenance and exact/empirical/approximate status.")
+    (description . "Implement the first world-model-law bridge. Preferred witness: E = h * nu, where h is a SI world-definition axiom, nu is observed or independently derived, E=h*nu is an admitted MODEL_LAW, and the result is a DERIVED_FACT. Also retain d=c*t as a second witness with explicit propagation assumptions. Every derivation certificate must include axiom ids, law id, observation ids, binary function numbers, operation tree, units/dimensions, assumptions, uncertainty/exactness and provenance.")
+    (acceptance . "One machine-readable MODEL_LAW authority; E=h*nu end-to-end witness; #3387 derivation DAG includes law nodes; #3397 world reasoning includes at least one explicit law node; removing a law invalidates dependent facts even when bare arithmetic remains possible; no physical meaning inferred merely from dimensionally valid arithmetic.")
+    (done . nil)))
 
   ("UKRAINIAN-SURFACE-INVENTORY" . (
     (priority . 9.2)
@@ -1225,4 +1235,24 @@
     (out-of-scope . "Зміна самого evaluator/runtime-семантики; зміна CI workflow структури (fast-PR vs deep-nightly) -- це окреме рішення власника, не частина цієї задачі, якщо явно не підтверджено окремо.")
     (evidence-expected . "Список тестів з класифікацією (крок 1) як окремий документ або коментар у tasks.my; для кожного наступного кроку -- конкретний перелік видалених/об'єднаних тестів і підтвердження що покриття мутацій не впало (напр. через навмисне зіпсовану мутацію, яку старий набір ловив).")
     (done . "All 4 planned steps shipped 2026-09-12, each via an isolated worktree agent then merged sequentially into main with fresh build+clippy+full-workspace-test verification at every merge (commits bf785442, 4e66771c, f757c3c5, fc3c7430). STEP 1 (inventory): docs/TEST-ARCHITECTURE-1-INVENTORY-2026-09-12.md (+ .uk.md), classifying surface/UK, meta-eval, and policy/docs/CI clusters against 'what mutation does this test kill that no cheaper test also kills'. STEP 2 (surface compression): uk_surface_equivalence.rs migrated off the legacy uk-sa-coverage.wsm onto semantic-registry.wsm directly (fixed the live inconsistency step 1 found); uk_sa_surface.rs 30->8 tests, uk_sa_batch2.rs 17->5, each deletion mapped to its surviving test; hardcoded counts (140/161/21/136/42/98/30/1) replaced with derived/floor checks; cyrillic_extension_witness.rs deleted (crates/my-lisp-cli/tests/cli.rs already covers the generic fact). STEP 3 (meta-eval unification): new positive (meta-eval . t) corpus tag mirroring the existing meta-eval-gap; meta_eval_parity.rs (and its IN_SCOPE_EXPRS hand-copy-then-verify bureaucracy) replaced by meta_eval_corpus.rs, a single runner checking native and my-eval independently against each tagged fixture's expected field, never against each other; same oracle-direction fix applied across meta_eval.rs, meta_eval_closure_parity.rs, meta_eval_error_provenance.rs, meta_eval_semantic_registry.rs, meta_eval_mutual.rs, meta_eval_evidence.rs, meta_eval_advice_taker.rs. STEP 4 (policy extraction): new crates/xtask crate (`cargo xtask verify`, `cargo xtask gen-functions-md`) as home for docs-drift/governance checks; meta_eval_evidence_matrix.rs and semantic_ownership.rs (python3 shell-outs) deleted from cargo test and ported into xtask; pure markdown/doc-text tests split out of documentation_contract.rs, swarm_deprecation.rs, meta_eval_error_detail_boundary.rs, ukrainian_api_docs.rs; fixed the real live bug step 1 found (README.md said .wsm canonical, contradicting docs/language-core.md's correct .lisp claim per issue #81); wired `cargo xtask verify` into CI. Three cross-agent coordination gaps were found and fixed during merge (agents working in parallel isolated worktrees do not see each other's renames): stale meta_eval_parity.rs path references in knowledge/meta-eval-evidence.wsm and knowledge/semantic-ownership.wsm repointed at meta_eval_corpus.rs; step 4's ported ukrainian_api_docs.rs checks were rewritten to keep step 2's derived-count fix (not reverted to hardcoded 140/30/1/42/98) when merged into xtask; one agent's claimed deletion of cyrillic_extension_witness.rs was not actually committed and had to be redone. Final state: cargo xtask verify 17/17 checks pass, cargo clippy --workspace --all-targets -D warnings clean, cargo test --workspace --no-fail-fast passes except 4 pre-existing targets unrelated to any of the 3 branches (tracked separately as WIN-FLAKY-NETWORK-TIMING-TESTS-4-TARGETS). Not pushed to origin yet as of this write.")))
+  ("WORLD-AXIOM-CANONICAL-NAME-ERASED" . (
+    (priority . "10.0")
+    (capabilities . (world-knowledge axioms constants rationals "provenance" "binary" "identity" testing))
+    (origin . sens)
+    (depends-on . (SI-DEFINING-CONSTANTS-EXACT-RATIONAL))
+    (context . "OWNER DIRECTION 2026-10-05, authority #3374/#3386/#3434: the seven exact SI defining constants are active initial WORLD_DEFINITION_AXIOM primitives. Their canonical identity must survive erasing English names, symbols and compatibility aliases. Function primitive != world-knowledge primitive; no evaluator opcode is minted merely by axiom status.")
+    (description . "Create one canonical name-erased axiom representation for delta-nu-cs, c, h, e, k, n-a and k-cd. Preserve stable axiom id, exact rational/integer Number, dimension/unit, exact-by-definition status and BIPM provenance. Human names are surface projections only. Strip names and prove is-axiom?, value/dimension/source queries and at least one binary-function derivation still replay identically. Zero floats.")
+    (acceptance . "Seven canonical name-erased WORLD_DEFINITION_AXIOM objects; exact values/dimensions/provenance unchanged; human rename does not change identity; one #3396 derivation works with names stripped; removing an axiom invalidates dependent facts; feeds #3386/#3396/#3387/#3397.")
+    (done . nil)))
+
+  ("CORE-MATH-AXIOM-CLOSURE-METRIC" . (
+    (priority . 8.5)
+    (capabilities . (mathematics rationals axioms core-math world-knowledge derivation benchmarking "provenance"))
+    (origin . sens)
+    (depends-on . (SI-DEFINING-CONSTANTS-EXACT-RATIONAL))
+    (context . "OWNER DIRECTION 2026-10-05, authority #3374/#3389/#3420/#3435: mathematics is not a bootstrap priority in a vacuum. Score Core-Math by how much certified language/world structure grows from primitive axioms, binary function numbers, explicit MODEL_LAW nodes and observations.")
+    (description . "Build a deterministic closure benchmark rooted in the candidate/minimal mathematical basis and seven SI world axioms. Report primitive counts, function numbers, model laws, observations, derived numbers/quantities/world facts, derivation depth, duplicate proofs, undefined branches, invalid-dimension branches, independent facts removed and table rows removed. Compare axioms-only, +MODEL_LAW and +OBSERVATION runs so arithmetic cannot masquerade as physics.")
+    (acceptance . "Machine-readable closure-by-depth report; compare {-1,0,1} vs #3420 minimal basis; world axioms alone cannot manufacture contingent facts; MODEL_LAW and OBSERVATION enlarge meaningful closure; every derived node traces to primitive roots; feed #2304 semantic accounting and #3389 priority ranking.")
+    (done . nil)))
+
   )))
