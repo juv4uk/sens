@@ -20,21 +20,27 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install Guix
+      - name: Install benchmark runtimes
         run: |
           sudo apt-get update
-          sudo apt-get install -y guix
-          guix --version
+          sudo apt-get install -y lua5.4 racket sbcl valgrind rustc
+          python3 --version
+          lua5.4 -v
+          racket --version
+          sbcl --version
+          rustc --version
+          valgrind --version
 
-      - name: Correctness and reproducible measurements
+      - name: Correctness and same-machine measurements
         run: |
           rm -rf /tmp/sens-external-controls-v2
-          guix time-machine -C channels.scm -- shell \
-            -m manifest.scm \
-            -m benchmarks/cross-language/manifest.scm -- \
-            python3 benchmarks/cross-language/external_controls.py \
-              --reps 3 \
-              --out /tmp/sens-external-controls-v2
+          python3 benchmarks/cross-language/external_controls.py \
+            --lua lua5.4 \
+            --racket racket \
+            --sbcl sbcl \
+            --rustc rustc \
+            --reps 3 \
+            --out /tmp/sens-external-controls-v2
 
       - name: Publish report
         if: always()
