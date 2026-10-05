@@ -34,43 +34,106 @@
         {
           "width": 3,
           "members": [
-            {"bits": "100", "path": "A"},
-            {"bits": "011", "path": "D"}
+            {
+              "bits": "100",
+              "path": "A"
+            },
+            {
+              "bits": "011",
+              "path": "D"
+            }
           ],
           "complement_pairs": [
-            ["100", "011"]
+            [
+              "100",
+              "011"
+            ]
           ]
         },
         {
           "width": 4,
           "members": [
-            {"bits": "1000", "path": "AA"},
-            {"bits": "1001", "path": "AD"},
-            {"bits": "0110", "path": "DA"},
-            {"bits": "0111", "path": "DD"}
+            {
+              "bits": "1000",
+              "path": "AA"
+            },
+            {
+              "bits": "1001",
+              "path": "AD"
+            },
+            {
+              "bits": "0110",
+              "path": "DA"
+            },
+            {
+              "bits": "0111",
+              "path": "DD"
+            }
           ],
           "complement_pairs": [
-            ["1000", "0111"],
-            ["1001", "0110"]
+            [
+              "1000",
+              "0111"
+            ],
+            [
+              "1001",
+              "0110"
+            ]
           ]
         },
         {
           "width": 5,
           "members": [
-            {"bits": "10000", "path": "AAA"},
-            {"bits": "10001", "path": "AAD"},
-            {"bits": "10010", "path": "ADA"},
-            {"bits": "10011", "path": "ADD"},
-            {"bits": "01100", "path": "DAA"},
-            {"bits": "01101", "path": "DAD"},
-            {"bits": "01110", "path": "DDA"},
-            {"bits": "01111", "path": "DDD"}
+            {
+              "bits": "10000",
+              "path": "AAA"
+            },
+            {
+              "bits": "10001",
+              "path": "AAD"
+            },
+            {
+              "bits": "10010",
+              "path": "ADA"
+            },
+            {
+              "bits": "10011",
+              "path": "ADD"
+            },
+            {
+              "bits": "01100",
+              "path": "DAA"
+            },
+            {
+              "bits": "01101",
+              "path": "DAD"
+            },
+            {
+              "bits": "01110",
+              "path": "DDA"
+            },
+            {
+              "bits": "01111",
+              "path": "DDD"
+            }
           ],
           "complement_pairs": [
-            ["10000", "01111"],
-            ["10001", "01110"],
-            ["10010", "01101"],
-            ["10011", "01100"]
+            [
+              "10000",
+              "01111"
+            ],
+            [
+              "10001",
+              "01110"
+            ],
+            [
+              "10010",
+              "01101"
+            ],
+            [
+              "10011",
+              "01100"
+            ]
           ]
         }
       ],
@@ -119,5 +182,16 @@
     "a cross-width lift does not imply a domain-global law",
     "the same bit mechanism in another declared domain does not transfer semantic authority",
     "D5 selector evidence does not automatically admit D6 runtime semantics"
+  ],
+  "law_set_id": "sens-cross-width-lawset-2026-10-05-a",
+  "positive_witness_ids": [
+    "SELECTOR-COMPLEMENT-D3",
+    "SELECTOR-LIFT-D3-D4",
+    "SELECTOR-LIFT-D4-D5"
+  ],
+  "negative_or_boundary_witness_ids": [
+    "GLOBAL-D4-COMPLEMENT:NO-SEMANTIC-J",
+    "DOMAIN-FIREWALL:SELECTORPATH-VS-QGROUPFACTOR",
+    "AUTOMATIC-D6:FALSE"
   ]
 }
