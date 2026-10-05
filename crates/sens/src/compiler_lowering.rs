@@ -8,8 +8,8 @@ use crate::CoreDomainIdentity;
 
 /// Semantic shape a compiler may lower before target-specific mechanism choice.
 ///
-/// These roles stop at the language/compiler boundary. They are not CML IR
-/// variants, opcodes, register operations, or backend mechanism names.
+/// These roles stop at the language/compiler boundary. They are not target IR
+/// variants, opcodes, register operations, or mechanism identifiers.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum CompilerLoweringRole {
     QuoteForm,
