@@ -8,9 +8,9 @@
   (owner-ratification . #3393)
   (date . "2026-10-05")
   (domain . D6)
-  (width . 6)
-  (capacity . 64)
-  (occupancy . 64)
+  (width-binary . "0b110")
+  (capacity-binary . "0b1000000")
+  (occupancy-binary . "0b1000000")
 
   (residents
     . (
@@ -80,9 +80,9 @@
        (D6:111111 RATIONALP)))
 
   (coordinate-basis
-    . ((proved-selector-generator . 16)
-       (owner-ratified-law-anchored-coordinate . 16)
-       (owner-ratified-s4-gauge-choice . 32)))
+    . ((proved-selector-generator . "0b10000")
+       (owner-ratified-law-anchored-coordinate . "0b10000")
+       (owner-ratified-s4-gauge-choice . "0b100000")))
 
   (laws
     . ((dense-map . "D6 is owner-ratified dense 64/64 under #3393.")
