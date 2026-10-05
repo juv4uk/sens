@@ -265,7 +265,7 @@ fn evaluate_d5_set_family(
 
     let target = if is_set {
         match evaluate(&arguments[0], environment)? {
-            Value::Symbol(name) => name,
+            Value::Symbol(ref name) => name.clone(),
             _ => {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
