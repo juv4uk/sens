@@ -35,8 +35,8 @@ comparison evidence, but are not the current CI baseline.
 At the current production API boundary:
 
 - D1/D2 are exact non-callable structural/predicate domains;
-- D3/D4/D5 project through `DomainIdentity::core_operation()`;
-- D6 is owner-ratified semantic residency, but generic callable projection is still absent;
+- D3/D4/D5/D6 project through `DomainIdentity::core_operation()`;
+- D6 callable identity is separate from per-resident executable mechanism coverage;
 - D7 is ratified but not generic-callable; D8 is the remaining research carrier;
 - all W1..W8 remain valid exact-width transport/carrier cases for this benchmark.
 
