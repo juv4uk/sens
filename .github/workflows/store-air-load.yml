@@ -1,0 +1,190 @@
+name: STORE → AIR → LOAD evidence / доказ
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/examples/store_air_load_repr.rs'
+      - 'crates/sens/examples/current_en_vs_d1d8_cpu.rs'
+      - 'benchmarks/store-air-load/**'
+      - '.github/workflows/store-air-load.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: store-air-load-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: store-air-load
+
+      - name: Встановити Valgrind / Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Зібрати exact-width і LOAD helpers / Build helpers
+        run: |
+          cargo build --release -p sens \
+            --example store_air_load_repr \
+            --example current_en_vs_d1d8_cpu \
+            --example startup_bench
+
+      - name: Згенерувати STORE AIR evidence / Generate evidence
+        run: |
+          python3 benchmarks/store-air-load/run.py \
+            --packing-helper target/release/examples/store_air_load_repr \
+            --semantic-helper target/release/examples/current_en_vs_d1d8_cpu \
+            --out /tmp/store-air-load.jsonl \
+            --bitrate-bps 2
+
+      - name: Заповнити LOAD evidence / Enrich one paired fixture
+        run: |
+          python3 benchmarks/store-air-load/load.py \
+            --in /tmp/store-air-load.jsonl \
+            --out /tmp/store-air-load.load.jsonl \
+            --helper target/release/examples/current_en_vs_d1d8_cpu \
+            --startup-helper target/release/examples/startup_bench \
+            --fasl lib/core.lisp.fasl \
+            --only d3-quote-empty \
+            --reps 1
+          mv /tmp/store-air-load.load.jsonl /tmp/store-air-load.jsonl
+
+      - name: Перевірити accounting invariants / Validate evidence
+        run: python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl
+
+      - name: Довести фазово заповнений LOAD / Validate LOAD fields
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line)
+              for line in Path('/tmp/store-air-load.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          pair = {
+              row['representation']: row
+              for row in rows
+              if row['fixture_id'] == 'd3-quote-empty'
+          }
+          packed = pair['canonical-packed']
+          text = pair['text-surface']
+
+          assert packed['decode_i_refs'] is not None
+          assert packed['parse_i_refs'] is None
+          assert text['decode_i_refs'] is None
+          assert text['parse_i_refs'] is not None
+
+          for row in (packed, text):
+              assert row['lower_i_refs'] is not None
+              assert row['ready_i_refs'] is not None
+              assert row['cold_total_i_refs'] is not None
+              assert row['warm_incremental_i_refs'] is not None
+              assert row['provenance']['load_measurement']['tool'] == 'valgrind-cachegrind'
+              assert 'core_bootstrap' in row['provenance']
+          PY
+
+      - name: Довести класи exact-width ratchet / Exact-width length classes
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line)
+              for line in Path('/tmp/store-air-load.jsonl').read_text().splitlines()
+              if line.strip() and '"canonical-packed"' in line
+          ]
+          by_id = {row['fixture_id']: row for row in rows}
+          expected = {
+              'zero-suffix-mechanical': 6,
+              'seven-bit-mechanical': 7,
+              'eight-bit-mechanical': 8,
+              'twelve-bit-mechanical': 12,
+              'mixed-28-bit-mechanical': 28,
+          }
+          for fixture_id, bits in expected.items():
+              row = by_id[fixture_id]
+              assert row['expected_semantic_bits'] == bits
+              assert row['semantic_payload_bits'] == bits
+              assert row['physical_container_bytes'] == (bits + 7) // 8
+              assert row['storage_container_bits'] == ((bits + 7) // 8) * 8
+              assert row['carrier_mode'] == 'exact-bitstream'
+              assert row['carrier_payload_bits'] == bits
+              assert row['integrity_bits'] == 0
+              assert row['profile_overhead_bits'] == 0
+              assert row['total_wire_bits'] == bits
+              assert row['payload_utilization'] == 1.0
+
+          seven = by_id['seven-bit-mechanical']
+          assert seven['storage_container_bits'] == 8
+          assert seven['tail_unused_bits'] == 1
+          assert seven['ideal_airtime_seconds'] == 3.5
+
+          zero_suffix = by_id['zero-suffix-mechanical']
+          assert zero_suffix['tail_unused_bits'] == 2
+
+          overhead = by_id['seven-bit-overhead-mechanical']
+          assert overhead['semantic_payload_bits'] == 7
+          assert overhead['framing_bits'] == 5
+          assert overhead['integrity_bits'] == 3
+          assert overhead['profile_overhead_bits'] == 2
+          assert overhead['carrier_payload_bits'] == 7
+          assert overhead['total_wire_bits'] == 17
+          assert overhead['payload_utilization'] == 7 / 17
+          assert overhead['ideal_airtime_seconds'] == 8.5
+          PY
+
+      - name: Негативний контроль per-word byte inflation / Reject inflated reference encoder
+        run: |
+          cp /tmp/store-air-load.jsonl /tmp/store-air-load.bad.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('/tmp/store-air-load.bad.jsonl')
+          rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+          for row in rows:
+              if (
+                  row['fixture_id'] == 'seven-bit-mechanical'
+                  and row['representation'] == 'canonical-packed'
+              ):
+                  # Deliberately wrong reference encoder:
+                  # 3 exact-width words -> 3 separate bytes instead of 7 packed bits.
+                  row['physical_container_bytes'] = row['semantic_word_count']
+                  row['storage_container_bits'] = row['semantic_word_count'] * 8
+                  break
+          path.write_text(
+              ''.join(json.dumps(row, sort_keys=True) + '\n' for row in rows),
+              encoding='utf-8'
+          )
+          PY
+          set +e
+          output=$(python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.bad.jsonl 2>&1)
+          rc=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$rc" -eq 2
+          printf '%s\n' "$output" | grep -F 'fixture=seven-bit-mechanical'
+          printf '%s\n' "$output" | grep -F 'expected_semantic_bits=7'
+          printf '%s\n' "$output" | grep -F 'actual_semantic_bits=7'
+          printf '%s\n' "$output" | grep -F 'artifact_bytes=3'
+
+      - name: Опублікувати evidence artifact / Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-air-load-evidence
+          path: /tmp/store-air-load.jsonl
+          if-no-files-found: error
