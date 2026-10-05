@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 40
-- top-level функцій: 890
+- top-level функцій: 893
 - top-level макросів: 34
-- усього визначень: 924
+- усього визначень: 927
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -96,6 +96,7 @@
 | `lib/core4.lisp` | function | `cddr` | unreviewed |
 | `lib/core4.lisp` | function | `length-onto` | unreviewed |
 | `lib/core4.lisp` | function | `length` | unreviewed |
+| `lib/core4.lisp` | function | `зворот-до` | unreviewed |
 | `lib/core4.lisp` | function | `reverse-onto` | unreviewed |
 | `lib/core4.lisp` | function | `reverse` | unreviewed |
 | `lib/core4.lisp` | function | `append` | unreviewed |
@@ -111,6 +112,8 @@
 | `lib/core4.lisp` | function | `nth` | unreviewed |
 | `lib/core4.lisp` | function | `member?` | unreviewed |
 | `lib/core4.lisp` | function | `assoc` | unreviewed |
+| `lib/core4.lisp` | function | `спарувати` | unreviewed |
+| `lib/core4.lisp` | function | `pairlis` | unreviewed |
 | `lib/core4.lisp` | macro | `let*` | unreviewed |
 | `lib/core4.lisp` | function | `string-membership-helper` | unreviewed |
 | `lib/core4.lisp` | function | `string-order-helper` | unreviewed |
