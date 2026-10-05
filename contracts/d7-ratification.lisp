@@ -29,7 +29,7 @@
        (text-punctuation . #d7)))
 
   (laws
-    . ((identity . "exact seven-bit coordinate + D7 role/law admitted by #3572")
+    . ((d7-coordinate-law . "exact seven-bit coordinate + D7 role/law admitted by #3572")
        (report-labels . "human names, glyphs and report labels are projections/provenance only")
        (digits . "D7 text digits are Text and never arithmetic Number")
        (local-ordinal . "LocalOrdinal is a separate W7 role and does not consume Sound/Text occupancy")
