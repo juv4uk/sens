@@ -23,9 +23,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: current-authority-docs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   current-authority-docs:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
