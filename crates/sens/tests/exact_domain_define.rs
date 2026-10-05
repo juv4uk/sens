@@ -1,9 +1,18 @@
 //! #3655 — exact-domain DEFINE installs language-owned mechanisms without surfaces.
 
 use sens::{
-    eval_parsed_expressions, eval_program, parse, Bit4, Bit6, Bit7, Bit8, CoreD4, CoreD6,
-    CoreD8, DomainIdentity, ErrorKind, Expr, ExprKind, Session, SoundD7, Span,
+    eval_parsed_expressions, eval_program, parse, Bit1, Bit2, Bit4, Bit6, Bit7, Bit8, CoreD4,
+    CoreD6, CoreD8, DomainIdentity, ErrorKind, Expr, ExprKind, PredicateBit, Racana2, Session,
+    SoundD7, Span,
 };
+
+fn d1(raw: u8) -> DomainIdentity {
+    PredicateBit::from_word(Bit1::new(raw).unwrap()).into()
+}
+
+fn d2(raw: u8) -> DomainIdentity {
+    Racana2::from_word(Bit2::new(raw).unwrap()).into()
+}
 
 fn d4(raw: u8) -> DomainIdentity {
     CoreD4::from_word(Bit4::new(raw).unwrap()).into()
@@ -100,13 +109,13 @@ fn exact_define_is_single_assignment_and_rejects_before_replacement_evaluation()
 }
 
 #[test]
-fn same_payload_d7_and_d8_targets_fail_closed_before_value_evaluation() {
-    for target in [d7(0b0101101), d8(0b00101101)] {
+fn non_callable_d1_d2_d7_and_d8_targets_fail_closed_before_value_evaluation() {
+    for target in [d1(1), d2(1), d7(0b0101101), d8(0b00101101)] {
         let error = eval_parsed_expressions(
             &[exact_define(target, "this-symbol-must-not-be-evaluated")],
             &mut Session::default(),
         )
-        .expect_err("D7/D8 must not become callable DEFINE targets by width");
+        .expect_err("D1/D2/D7/D8 must not become callable DEFINE targets by width");
 
         assert_eq!(error.kind, ErrorKind::InvalidForm);
         assert!(
