@@ -147,6 +147,7 @@ Declared bound:
 
 ```json
 {
+  "grammar_profile": "d1-d3-structural-predicate-v1",
   "domain_set": [1, 2, 3],
   "max_ast_depth": 3,
   "max_nodes": 11,
@@ -154,7 +155,7 @@ Declared bound:
 }
 ```
 
-The finite grammar has exactly two seed value expressions:
+Grammar profile: `d1-d3-structural-predicate-v1`. The finite grammar has exactly two seed value expressions:
 
 ```text
 V0 = D3:000 EMPTY
