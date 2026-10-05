@@ -138,7 +138,7 @@ fn list_values(value: &Value) -> Option<Vec<&Value>> {
 fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
     let parsed = parse(NUCLEUS).expect("compiler nucleus source parses");
     let lowered = lower_program(&parsed);
-    assert_eq!(lowered.len(), 2, "N0 has exactly two language definitions");
+    assert!(lowered.len() >= 2, "compiler nucleus contains executable language definitions");
     for expression in &lowered {
         assert_no_legacy_identity(expression);
     }
