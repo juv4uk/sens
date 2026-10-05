@@ -312,7 +312,7 @@ pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool
         CoreDomainIdentity::D3(word) => matches!(word.word().packed_bits(), 0b010 | 0b101),
         CoreDomainIdentity::D5(word) => matches!(
             word.word().packed_bits(),
-            0b11010 | 0b11011 | 0b11101
+            0b01000 | 0b01001 | 0b11010 | 0b11011 | 0b11101
         ),
         _ => false,
     }
