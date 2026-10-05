@@ -41,7 +41,8 @@ def expected_selector_bits(width: int) -> set[str]:
     out = set()
     for root in ("100", "011"):
         for suffix in range(1 << suffix_len):
-            out.add(root + f"{suffix:0{suffix_len}b}")
+            suffix_bits = "" if suffix_len == 0 else f"{suffix:0{suffix_len}b}"
+            out.add(root + suffix_bits)
     return out
 
 
