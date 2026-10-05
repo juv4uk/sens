@@ -205,6 +205,54 @@ fn prim_00000011(
     special_forms::eq_values(args[0].clone(), args[1].clone(), span)
 }
 
+/// Exact D3:010 ATOM mechanism.
+///
+/// Legacy SID ATOM keeps its historical compatibility carrier in
+/// `prim_00000010`; exact-domain execution never needs to recover truth from
+/// that carrier. Structural EMPTY `()` is an atom/non-pair and therefore
+/// produces exact D1:1.
+fn prim_d3_atom_exact(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if args.len() != 1 {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            format!("D3:010 ATOM expects 1 argument; received {}", args.len()),
+            span,
+        ));
+    }
+    Ok(Value::predicate_bit(args[0].is_atom()))
+}
+
+/// Exact D3:101 EQ mechanism.
+///
+/// EQ is deliberately partial on the atom domain:
+/// - equal admitted atoms -> D1:1
+/// - distinct admitted atoms -> D1:0
+/// - any pair operand -> structural EMPTY `()` / no-witness
+///
+/// EMPTY is not FALSE and is intentionally left as Value::Nil so exact
+/// D3:110 COND can distinguish SkipEmpty from explicit D1:0.
+fn prim_d3_eq_exact(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if args.len() != 2 {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            format!("D3:101 EQ expects 2 arguments; received {}", args.len()),
+            span,
+        ));
+    }
+    if !args[0].is_atom() || !args[1].is_atom() {
+        return Ok(Value::Nil);
+    }
+    Ok(Value::predicate_bit(args[0] == args[1]))
+}
+
 fn prim_00000100(
     args: &[Value],
     env: &Environment,
@@ -294,8 +342,8 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
         return None;
     };
     match word.word().packed_bits() {
-        0b010 => Some(prim_00000010), // ATOM
-        0b101 => Some(prim_00000011), // EQ
+        0b010 => Some(prim_d3_atom_exact), // ATOM
+        0b101 => Some(prim_d3_eq_exact), // EQ
         0b111 => Some(prim_00000100), // CONS
         // CAR/CDR and their proved D4 descendants are executed by selector_law.
         0b100 | 0b011 => None,
@@ -359,8 +407,16 @@ fn canonicalize_domain_result(
                 return Ok(Value::predicate_bit(bit));
             }
 
-            // Exact D3:010 ATOM classifies structural empty as an atom.  The
-            // old active mechanism represented that case as NIL/unknown.
+            // D3:101 EQ is an explicitly partial predicate. Structural EMPTY
+            // is its no-witness result for operands outside the admitted atom
+            // domain. It must pass through unchanged and must never become D1:0.
+            if bits == 0b101 && matches!(value, Value::Nil) {
+                return Ok(Value::Nil);
+            }
+
+            // Transitional safety for an older exact-D3 ATOM mechanism that
+            // could still surface NIL as its legacy unknown carrier. The new
+            // exact mechanism above already returns D1 directly.
             if bits == 0b010 && matches!(value, Value::Nil) {
                 return Ok(Value::predicate_bit(true));
             }
@@ -616,6 +672,40 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn exact_d3(bits: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(bits).expect("test D3 bits"),
+        ))
+    }
+
+    #[test]
+    fn exact_d3_atom_and_eq_preserve_empty_no_witness_distinction() {
+        let env = Environment::root();
+        let span = Span { start: 0, end: 0 };
+
+        let atom_empty =
+            invoke_domain_identity(exact_d3(0b010), &[Value::Nil], &env, span).unwrap();
+        assert_eq!(atom_empty.as_predicate_bit(), Some(true));
+
+        let a = Value::Symbol(std::rc::Rc::from("a"));
+        let b = Value::Symbol(std::rc::Rc::from("b"));
+
+        let eq_same =
+            invoke_domain_identity(exact_d3(0b101), &[a.clone(), a.clone()], &env, span).unwrap();
+        assert_eq!(eq_same.as_predicate_bit(), Some(true));
+
+        let eq_distinct =
+            invoke_domain_identity(exact_d3(0b101), &[a.clone(), b.clone()], &env, span).unwrap();
+        assert_eq!(eq_distinct.as_predicate_bit(), Some(false));
+
+        let pair = Value::list([a.clone()]);
+        let no_witness =
+            invoke_domain_identity(exact_d3(0b101), &[pair, a], &env, span).unwrap();
+        assert!(matches!(no_witness, Value::Nil));
+
+        assert_ne!(Value::predicate_bit(false), Value::Nil);
+    }
 
     #[test]
     fn d5_member_result_boundary_accepts_only_predicate_semantics() {
