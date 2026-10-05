@@ -284,6 +284,9 @@ def make_row(
         + integrity_bits
         + profile_overhead_bits
     )
+    payload_utilization = (
+        semantic_payload_bits / total_wire_bits if total_wire_bits else None
+    )
     return {
         "schema": SCHEMA,
         "fixture_id": fixture_id,
@@ -306,6 +309,7 @@ def make_row(
         "storage_container_bits": storage_container_bits,
         "total_wire_bits": total_wire_bits,
         "physical_container_bytes": physical_container_bytes,
+        "payload_utilization": payload_utilization,
         "text_surface_bytes": text_surface_bytes,
         "packed_vs_text_ratio": packed_vs_text_ratio,
         "bitrate_bps": bitrate_bps,
