@@ -3,7 +3,7 @@
 //! The ordinary Lisp parser remains unchanged. This bridge is intentionally
 //! bounded to executable list heads:
 //! - exact 3/4/5/6-bit binary heads become DomainIdentity;
-//! - exact 7-bit heads fail closed (research/non-callable);
+//! - exact 7-bit heads fail closed because current D7 is Sound/Text/local-ordinal, not callable;
 //! - exact 8-bit heads remain the ordinary parser's exact-eight compatibility path;
 //! - non-head data keeps the ordinary parser's interpretation.
 //!
@@ -90,7 +90,7 @@ fn lift_head(source: &str, head: Expr) -> Result<Expr, LanguageError> {
         }
         7 => Err(LanguageError::new(
             ErrorKind::Parse,
-            "D7 exact-domain call heads are research-only in mixed source",
+            "D7 exact-domain call heads are current but non-callable in mixed source",
             head.span,
         )),
         // The ordinary parser intentionally owns exact-eight compatibility.
@@ -291,10 +291,10 @@ mod tests {
     }
 
     #[test]
-    fn d7_exact_head_fails_closed() {
+    fn current_noncallable_d7_exact_head_fails_closed() {
         let error = parse_mixed_exact_domain("(0000001 x)").expect_err("D7 must reject");
         assert_eq!(error.kind, ErrorKind::Parse);
-        assert!(error.message.contains("research-only"));
+        assert!(error.message.contains("non-callable"));
     }
 
     #[test]
