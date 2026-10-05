@@ -118,18 +118,26 @@ def main() -> int:
     execution = read_tsv(args.external) + read_tsv(args.sens)
     medians = median_rows(execution)
     footprint_rows = read_tsv(args.footprint)
-    footprint = {row["runtime"]: row for row in footprint_rows}
+    footprint_by_runtime = {row["runtime"]: row for row in footprint_rows}
+    footprint_by_runtime_workload = {
+        (row["runtime"], row.get("workload", "")): row for row in footprint_rows
+    }
 
     joined: list[dict[str, object]] = []
     for row in medians:
-        fp = footprint.get(str(row["runtime"]))
-        if fp is None:
-            artifact = text = rss = program = None
+        runtime = str(row["runtime"])
+        workload = str(row["workload"])
+        fp_runtime = footprint_by_runtime.get(runtime)
+        fp_workload = footprint_by_runtime_workload.get((runtime, workload))
+        if fp_runtime is None:
+            artifact = text = program = None
         else:
-            artifact = as_int(fp.get("artifact_bytes"))
-            text = as_int(fp.get("text_section_bytes"))
-            rss = as_int(fp.get("rss_bytes"))
-            program = as_int(fp.get("program_source_bytes"))
+            artifact = as_int(fp_runtime.get("artifact_bytes"))
+            text = as_int(fp_runtime.get("text_section_bytes"))
+            program = as_int(fp_runtime.get("program_source_bytes"))
+        # RSS is workload-specific. Never project a fib RSS measurement onto
+        # ackermann/closures/etc just because the runtime name matches.
+        rss = as_int(fp_workload.get("rss_bytes")) if fp_workload else None
         joined.append(
             {
                 **row,
@@ -169,6 +177,8 @@ def main() -> int:
         "Lower is better on every dominance axis. Missing axes are N/A, never zero.",
         "Semantic authority is not inferred from binaries and is not part of",
         "cross-language dominance unless comparable evidence exists for every runtime.",
+        "RSS is workload-specific; a footprint row is joined to RSS only when runtime",
+        "and workload both match. Executable artifact bytes remain runtime-scoped.",
         "",
     ]
 
