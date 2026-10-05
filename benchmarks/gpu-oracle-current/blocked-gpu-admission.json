@@ -1,0 +1,120 @@
+{
+  "schema": "sens-gpu-oracle-admission/v1",
+  "contract": "11.6",
+  "status": "BLOCKED-MECHANISM",
+  "issue": 3766,
+  "authority_sha": "6ea0cb911b8c855a25d3b42cb8b7984fc99f759f",
+  "current_semantic_residency": "D1-D7",
+  "consumer": {
+    "repository": "juv4uk/cml",
+    "issues": [450, 488],
+    "required_path": "current SENS L0 oracle -> CML L3 CUDA parity"
+  },
+  "finding": {
+    "claim": "No already-ratified current D1-D7 operation presently provides a semantic law for contiguous NumericBuffer element-wise map suitable as a parallel CUDA workload.",
+    "missing_law": "exact-domain batched/buffer map semantics",
+    "reason": [
+      "Current exact-domain callability is present for admitted D3-D5 operations, but these operations are scalar/list-structure mechanisms rather than a current-domain NumericBufferMap law.",
+      "A batch of independent scalar calls would be a benchmark composition, not a semantic definition of buffer mapping, and therefore cannot authorize CML NumericBufferMap.",
+      "D6 is ratified semantic residency but currently has 0/64 admitted exact-domain runtime mechanisms.",
+      "D7 is current semantic residency but has no callable Core-operation projection and must not be inferred callable from width."
+    ]
+  },
+  "current_candidates_reviewed": [
+    {
+      "domain": "D3",
+      "status": "CALLABLE",
+      "families": ["QUOTE", "ATOM", "CDR", "CAR", "EQ", "COND", "CONS"],
+      "result": "not a natural contiguous-buffer batch law"
+    },
+    {
+      "domain": "D4",
+      "status": "CALLABLE",
+      "families": ["necessary forms", "selector descendants"],
+      "result": "not a natural contiguous-buffer batch law"
+    },
+    {
+      "domain": "D5",
+      "status": "CALLABLE",
+      "families": ["arithmetic", "numeric predicates", "selector descendants"],
+      "result": "scalar/list-structure mechanisms; no admitted buffer-map law"
+    },
+    {
+      "domain": "D6",
+      "status": "RATIFIED_WITHOUT_CURRENT_MECHANISM",
+      "mechanism_coverage": {"executable": 0, "total": 64},
+      "result": "blocked"
+    },
+    {
+      "domain": "D7",
+      "status": "CURRENT_RESIDENCY_NO_CALLABLE_PROJECTION",
+      "result": "blocked; width alone must not grant callability"
+    }
+  ],
+  "forbidden_legacy_candidate": {
+    "operation": "numeric-buffer-map",
+    "historical_identity": "01011001",
+    "status": "REJECTED-AS-CURRENT-ORACLE",
+    "reason": "historical flat 8-bit identity must not be relabeled as a fresh Contract 11.6 exact-domain semantic identity"
+  },
+  "evidence": [
+    {
+      "repository": "juv4uk/sens",
+      "commit": "6ea0cb911b8c855a25d3b42cb8b7984fc99f759f",
+      "path": "crates/sens/src/domain_identity.rs",
+      "fact": "DomainIdentity::core_operation admits D3-D5; D6/D7 do not acquire callability by width."
+    },
+    {
+      "repository": "juv4uk/sens",
+      "commit": "b6c369e6fe698975af15bac2ff6c777ce30b7c6a",
+      "path": "crates/sens/src/eval/lower.rs",
+      "fact": "Current semantic heads lower to exact DomainCall; legacy byte heads remain separate compatibility calls."
+    },
+    {
+      "repository": "juv4uk/sens",
+      "commit": "b6c369e6fe698975af15bac2ff6c777ce30b7c6a",
+      "path": "crates/sens/src/eval/d5_arithmetic.rs",
+      "fact": "The current admitted D5 arithmetic mechanisms are scalar numeric operations."
+    },
+    {
+      "repository": "juv4uk/sens",
+      "commit": "b6c369e6fe698975af15bac2ff6c777ce30b7c6a",
+      "path": "scripts/check-d6-mechanism-ledger.py",
+      "fact": "Current D6 mechanism ledger is 0/64 executable and 64/64 missing."
+    },
+    {
+      "repository": "juv4uk/sens",
+      "commit": "b6c369e6fe698975af15bac2ff6c777ce30b7c6a",
+      "path": "benchmarks/execution-ladder-conformance/validate.py",
+      "fact": "The shared conformance schema explicitly supports BLOCKED-MECHANISM plus parity NOT-RUN for blocked/research observables."
+    },
+    {
+      "repository": "juv4uk/sens",
+      "commit": "b6c369e6fe698975af15bac2ff6c777ce30b7c6a",
+      "path": "benchmarks/execution-ladder-conformance/README.md",
+      "fact": "Missing substrate mechanisms are represented as BLOCKED-MECHANISM rather than legacy fallback."
+    },
+    {
+      "repository": "juv4uk/sens",
+      "commit": "b6c369e6fe698975af15bac2ff6c777ce30b7c6a",
+      "path": "benchmarks/sens-surface/numeric_buffer_map.py",
+      "fact": "The existing numeric-buffer-map benchmark is tied to historical 8-bit identity 01011001 and is therefore benchmark/mechanism evidence, not a fresh current-domain oracle."
+    }
+  ],
+  "unblock_rule": {
+    "required_before_cml_consumption": "SENS owner-ratifies or otherwise exposes a current exact-domain law that semantically defines the batched/buffer workload.",
+    "must_include": [
+      "exact (domain,bits) identity trace",
+      "Contract 11.6 provenance",
+      "L0 ORACLE observable",
+      "upstream SHA and deterministic digests",
+      "no legacy identity"
+    ],
+    "forbidden": [
+      "relabel 01011001 as a current D3-D7 identity",
+      "infer semantics from host names",
+      "infer callability from width",
+      "copy an expected CUDA result into CML"
+    ]
+  }
+}
