@@ -29,14 +29,27 @@ fn length_is_zero_accumulator_specialization() {
 
 #[test]
 fn map_and_filter_are_empty_accumulator_specializations() {
-    for value in ["()", "(1)", "(1 2 3 4)", "(5 -1 0 8)"] {
+    for (value, expected_filter) in [
+        ("()", "()"),
+        ("(1)", "(1)"),
+        ("(1 2)", "(1 2)"),
+        ("(1 2 3 4)", "(1 2)"),
+        ("(5 -1 0 8)", "(-1 0)"),
+        ("(5 8)", "()"),
+    ] {
         assert_same(
             &format!("(map (lambda (x) (+ x 1)) (quote {value}))"),
             &format!("(map-onto (lambda (x) (+ x 1)) (quote {value}) (quote ()))"),
         );
-        assert_same(
-            &format!("(filter (lambda (x) (< x 3)) (quote {value}))"),
-            &format!("(filter-onto (lambda (x) (< x 3)) (quote {value}) (quote ()))"),
+
+        let filter = format!("(filter (lambda (x) (< x 3)) (quote {value}))");
+        let filter_onto =
+            format!("(filter-onto (lambda (x) (< x 3)) (quote {value}) (quote ()))");
+        assert_same(&filter, &filter_onto);
+        assert_eq!(
+            run(&filter).unwrap_or_else(|e| panic!("{filter}: {e}")),
+            expected_filter,
+            "FILTER must consume exact predicate control for {value}"
         );
     }
 }
