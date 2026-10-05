@@ -691,6 +691,14 @@ mod tests {
         assert_eq!(less_no.as_predicate_bit(), Some(false));
         assert_eq!(greater_yes.as_predicate_bit(), Some(true));
 
+        let legacy_numeric_yes = canonicalize_domain_result(
+            d5(0b11010),
+            Value::Number(1.0, crate::Exactness::Exact),
+            span,
+        )
+        .expect_err("D5 LESSP boundary must reject legacy numeric truth after producer cutover");
+        assert_eq!(legacy_numeric_yes.kind, ErrorKind::Type);
+
         let inexact = invoke_domain_identity(
             d5(0b11010),
             &[
