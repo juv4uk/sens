@@ -1,12 +1,16 @@
-name: D1 D6 foundation authority
+name: D1 D7 foundation authority
 
 on:
   pull_request:
     paths:
       - "knowledge/d1-d5-foundation.json"
       - "knowledge/d1-d6-foundation.json"
+      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d7-ratified.json"
       - "contracts/d1-d5-foundation-ratification.lisp"
       - "contracts/d1-d6-foundation-ratification.lisp"
+      - "contracts/d1-d7-foundation-ratification.lisp"
+      - "contracts/d7-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d1-d5-foundation.py"
@@ -16,8 +20,12 @@ on:
     paths:
       - "knowledge/d1-d5-foundation.json"
       - "knowledge/d1-d6-foundation.json"
+      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d7-ratified.json"
       - "contracts/d1-d5-foundation-ratification.lisp"
       - "contracts/d1-d6-foundation-ratification.lisp"
+      - "contracts/d1-d7-foundation-ratification.lisp"
+      - "contracts/d7-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d1-d5-foundation.py"

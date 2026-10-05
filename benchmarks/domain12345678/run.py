@@ -119,7 +119,7 @@ def main() -> int:
     )
 
     lines = [
-        "# D1-D8 exact-width carrier benchmark — Contract 11.5 boundary",
+        "# D1-D8 exact-width carrier benchmark — Contract 11.6 boundary",
         "",
         f"Cachegrind I refs, paired empty-loop subtraction, median of {args.reps} runs, "
         f"{args.iterations:,} iterations.",
@@ -145,7 +145,7 @@ def main() -> int:
         "- D1/D2/D6/D7/D8 fail the generic callable-Core projection;",
         "- D3/D4/D5 project through the current generic callable boundary;",
         "- D6 is current semantic residency but generic callability remains separate;",
-        "- D7/D8 are research carriers; measuring W7/W8 does not ratify them;",
+        "- D7 is owner-ratified but remains outside generic callable-Core projection; D8 remains research;",
         "",
         "Deferred lanes:",
         "- packed/framing accounting follows #3026/#2833;",

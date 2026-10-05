@@ -1,0 +1,1930 @@
+{
+  "schema": "d7-ratification/v1",
+  "status": "owner-ratified",
+  "authority": "#3572",
+  "date": "2026-10-05",
+  "domain": "D7",
+  "width": 7,
+  "capacity": 128,
+  "occupancy": 126,
+  "owner_reserved_pinned": 2,
+  "reserved_coordinates": [
+    "0100001",
+    "0101010"
+  ],
+  "identity_rule": "exact seven-bit coordinate + D7 role/law admitted by #3572; report names and glyphs are projections, not identity",
+  "source_evidence": [
+    "#3419 / PR #3423 D7-v2 consolidation",
+    "knowledge/d7-v2-stable-residents.json",
+    "knowledge/d7-v2-evidence-ledger.json",
+    "knowledge/d7-v2-geometry-ledger.json",
+    "shiva-sutras merged donor evidence"
+  ],
+  "occupancy_basis": {
+    "baseline_recovered": 107,
+    "owner_admitted_same_coordinate_shiva_overlays": 19,
+    "total_owner_ratified_residents": 126,
+    "owner_reserved_pinned": 2
+  },
+  "role_counts": {
+    "phonology_eligible_recovered": 75,
+    "baseline_non_phonological_recovered": 32,
+    "admitted_text_digits": 10,
+    "admitted_text_modifiers": 2,
+    "admitted_text_punctuation": 7
+  },
+  "residents": {
+    "1000000": "vowel.a.oral.short",
+    "1000001": "vowel.a.oral.long",
+    "1000010": "vowel.a.nasal.short",
+    "1000011": "vowel.a.nasal.long",
+    "1000100": "vowel.i.oral.short",
+    "1000101": "vowel.i.oral.long",
+    "1000110": "vowel.i.nasal.short",
+    "1000111": "vowel.i.nasal.long",
+    "1001000": "vowel.u.oral.short",
+    "1001001": "vowel.u.oral.long",
+    "1001010": "vowel.u.nasal.short",
+    "1001011": "vowel.u.nasal.long",
+    "1001100": "vowel.r-vocalic.oral.short",
+    "1001101": "vowel.r-vocalic.oral.long",
+    "1001110": "vowel.r-vocalic.nasal.short",
+    "1001111": "vowel.r-vocalic.nasal.long",
+    "1010000": "vowel.l-vocalic.oral.short",
+    "1010001": "vowel.l-vocalic.oral.long",
+    "1010010": "vowel.l-vocalic.nasal.short",
+    "1010011": "vowel.l-vocalic.nasal.long",
+    "1010100": "vowel.e.oral.short",
+    "1010101": "vowel.e.oral.long",
+    "1010110": "vowel.e.nasal.short",
+    "1010111": "vowel.e.nasal.long",
+    "1011000": "vowel.o.oral.short",
+    "1011001": "vowel.o.oral.long",
+    "1011010": "vowel.o.nasal.short",
+    "1011011": "vowel.o.nasal.long",
+    "1011100": "vowel.uk-ext.a",
+    "1011101": "vowel.uk-ext.e",
+    "1011110": "vowel.uk-ext.o",
+    "1011111": "vowel.uk-ext.y",
+    "1100000": "sign.space",
+    "1100001": "sign.newline",
+    "1100010": "sign.tab",
+    "1100011": "sign.left-paren",
+    "1100100": "sign.right-paren",
+    "1100101": "sign.double-quote",
+    "1100110": "sign.backslash",
+    "1100111": "sign.underscore",
+    "1101000": "sign.anusvara",
+    "1101001": "sign.visarga",
+    "1101010": "sign.avagraha",
+    "1101011": "sign.danda",
+    "1101100": "sign.double-danda",
+    "1101101": "sign.ampersand",
+    "1101110": "sign.pipe",
+    "1101111": "sign.backquote",
+    "1110000": "sign.plus",
+    "1110001": "sign.minus",
+    "1110010": "sign.star",
+    "1110011": "sign.slash",
+    "1110100": "sign.equals",
+    "1110101": "sign.less",
+    "1110110": "sign.greater",
+    "1110111": "sign.question",
+    "1111000": "sign.bang",
+    "1111001": "sign.apostrophe",
+    "1111010": "sign.dot",
+    "1111011": "sign.comma",
+    "1111100": "sign.colon",
+    "1111101": "sign.semicolon",
+    "1111110": "sign.hash",
+    "1111111": "sign.at",
+    "0000000": "varga.K.voiceless",
+    "0000001": "varga.K.voiceless-aspirated",
+    "0000010": "varga.K.voiced",
+    "0000011": "varga.K.voiced-aspirated",
+    "0000100": "varga.K.nasal",
+    "0000101": "varga.C.voiceless",
+    "0000110": "varga.C.voiceless-aspirated",
+    "0000111": "varga.C.voiced",
+    "0001000": "varga.C.voiced-aspirated",
+    "0001001": "varga.C.nasal",
+    "0001010": "varga.T-retroflex.voiceless",
+    "0001011": "varga.T-retroflex.voiceless-aspirated",
+    "0001100": "varga.T-retroflex.voiced",
+    "0001101": "varga.T-retroflex.voiced-aspirated",
+    "0001110": "varga.T-retroflex.nasal",
+    "0001111": "varga.T-dental.voiceless",
+    "0010000": "varga.T-dental.voiceless-aspirated",
+    "0010001": "varga.T-dental.voiced",
+    "0010010": "varga.T-dental.voiced-aspirated",
+    "0010011": "varga.T-dental.nasal",
+    "0010100": "varga.P.voiceless",
+    "0010101": "varga.P.voiceless-aspirated",
+    "0010110": "varga.P.voiced",
+    "0010111": "varga.P.voiced-aspirated",
+    "0011000": "varga.P.nasal",
+    "0011001": "text.digit.8",
+    "0011010": "text.digit.9",
+    "0011011": "text.punctuation.ellipsis",
+    "0011100": "text.digit.0",
+    "0011101": "text.digit.2",
+    "0011110": "text.digit.3",
+    "0011111": "text.digit.1",
+    "0100000": "non-varga.K.primary-voiceless-fricative",
+    "0100010": "text.modifier.uk-capital-next-letter",
+    "0100011": "text.modifier.uk-combining-acute-stress",
+    "0100100": "non-varga.C.primary-voiceless-fricative",
+    "0100101": "non-varga.C.voiced-fricative",
+    "0100110": "non-varga.C.primary-sonorant",
+    "0100111": "non-varga.uk-ext.softness",
+    "0101000": "non-varga.T-retroflex.primary-voiceless-fricative",
+    "0101001": "text.punctuation.left-guillemet",
+    "0101011": "text.punctuation.right-guillemet",
+    "0101100": "non-varga.T-dental.primary-voiceless-fricative",
+    "0101101": "non-varga.T-dental.voiced-fricative",
+    "0101110": "non-varga.T-dental.primary-sonorant",
+    "0101111": "non-varga.T-dental.lateral-or-secondary-sonorant",
+    "0110000": "non-varga.P.primary-voiceless-fricative",
+    "0110001": "text.punctuation.em-dash",
+    "0110010": "non-varga.P.primary-sonorant",
+    "0110011": "text.punctuation.en-dash",
+    "0110100": "non-varga.G-glottal.primary-voiceless-fricative",
+    "0110101": "non-varga.G-glottal.voiced-fricative",
+    "0110110": "text.punctuation.left-double-quotation-mark",
+    "0110111": "text.punctuation.right-double-quotation-mark",
+    "0111000": "text.digit.4",
+    "0111001": "text.digit.6",
+    "0111010": "text.digit.7",
+    "0111011": "text.digit.5",
+    "0111100": "non-varga.uk-ext.ts",
+    "0111101": "non-varga.uk-ext.tsh",
+    "0111110": "non-varga.uk-ext.dz",
+    "0111111": "non-varga.uk-ext.dzh"
+  },
+  "rows": [
+    {
+      "coordinate": "0000000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.K.voiceless",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "k",
+        "iast": "k",
+        "deva": "क",
+        "uk": "к"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0000001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.K.voiceless-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "K",
+        "iast": "kh",
+        "deva": "ख",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0000010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.K.voiced",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "g",
+        "iast": "g",
+        "deva": "ग",
+        "uk": "ґ"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0000011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.K.voiced-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "G",
+        "iast": "gh",
+        "deva": "घ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0000100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.K.nasal",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "N",
+        "iast": "ṅ",
+        "deva": "ङ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0000101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.C.voiceless",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "c",
+        "iast": "c",
+        "deva": "च",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0000110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.C.voiceless-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "C",
+        "iast": "ch",
+        "deva": "छ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0000111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.C.voiced",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "j",
+        "iast": "j",
+        "deva": "ज",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.C.voiced-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "J",
+        "iast": "jh",
+        "deva": "झ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.C.nasal",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "Y",
+        "iast": "ñ",
+        "deva": "ञ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-retroflex.voiceless",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "w",
+        "iast": "ṭ",
+        "deva": "ट",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-retroflex.voiceless-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "W",
+        "iast": "ṭh",
+        "deva": "ठ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-retroflex.voiced",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "q",
+        "iast": "ḍ",
+        "deva": "ड",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-retroflex.voiced-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "Q",
+        "iast": "ḍh",
+        "deva": "ढ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-retroflex.nasal",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "R",
+        "iast": "ṇ",
+        "deva": "ण",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0001111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-dental.voiceless",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "t",
+        "iast": "t",
+        "deva": "त",
+        "uk": "т"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-dental.voiceless-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "T",
+        "iast": "th",
+        "deva": "थ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-dental.voiced",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "d",
+        "iast": "d",
+        "deva": "द",
+        "uk": "д"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-dental.voiced-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "D",
+        "iast": "dh",
+        "deva": "ध",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.T-dental.nasal",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "n",
+        "iast": "n",
+        "deva": "न",
+        "uk": "н"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.P.voiceless",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "p",
+        "iast": "p",
+        "deva": "प",
+        "uk": "п"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.P.voiceless-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "P",
+        "iast": "ph",
+        "deva": "फ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.P.voiced",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "b",
+        "iast": "b",
+        "deva": "ब",
+        "uk": "б"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0010111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.P.voiced-aspirated",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "B",
+        "iast": "bh",
+        "deva": "भ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0011000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "varga.P.nasal",
+      "baseline_class": "varga",
+      "projection": {
+        "slp1": "m",
+        "iast": "m",
+        "deva": "म",
+        "uk": "м"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0011001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.8",
+      "surface_label": "8",
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0011010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.9",
+      "surface_label": "9",
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0011011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-punctuation",
+      "report_name": "text.punctuation.ellipsis",
+      "surface_label": "…",
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+      "law_note": "text sign"
+    },
+    {
+      "coordinate": "0011100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.0",
+      "surface_label": "0",
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0011101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.2",
+      "surface_label": "2",
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0011110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.3",
+      "surface_label": "3",
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0011111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.1",
+      "surface_label": "1",
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0100000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.K.primary-voiceless-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "х"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0100001",
+      "status": "OWNER-RESERVED-PINNED",
+      "semantic_role": "unresolved",
+      "report_name": null,
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "D7-v2 unresolved pinned coordinate",
+      "allocation_rule": "not free; requires a new explicit owner decision"
+    },
+    {
+      "coordinate": "0100010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-modifier",
+      "report_name": "text.modifier.uk-capital-next-letter",
+      "surface_label": "uk-capital-next-letter",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #83/#95",
+      "law_note": "layout/text modifier"
+    },
+    {
+      "coordinate": "0100011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-modifier",
+      "report_name": "text.modifier.uk-combining-acute-stress",
+      "surface_label": "uk-combining-acute-stress",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #83/#95",
+      "law_note": "layout/text modifier"
+    },
+    {
+      "coordinate": "0100100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.C.primary-voiceless-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "S",
+        "iast": "ś",
+        "deva": "श",
+        "uk": "ш"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0100101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.C.voiced-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "ж"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0100110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.C.primary-sonorant",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "y",
+        "iast": "y",
+        "deva": "य",
+        "uk": "й"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0100111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.uk-ext.softness",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "ь"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0101000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.T-retroflex.primary-voiceless-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "z",
+        "iast": "ṣ",
+        "deva": "ष",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0101001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-punctuation",
+      "report_name": "text.punctuation.left-guillemet",
+      "surface_label": "«",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+      "law_note": "text sign"
+    },
+    {
+      "coordinate": "0101010",
+      "status": "OWNER-RESERVED-PINNED",
+      "semantic_role": "unresolved",
+      "report_name": null,
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "D7-v2 unresolved pinned coordinate",
+      "allocation_rule": "not free; requires a new explicit owner decision"
+    },
+    {
+      "coordinate": "0101011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-punctuation",
+      "report_name": "text.punctuation.right-guillemet",
+      "surface_label": "»",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+      "law_note": "text sign"
+    },
+    {
+      "coordinate": "0101100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.T-dental.primary-voiceless-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "s",
+        "iast": "s",
+        "deva": "स",
+        "uk": "с"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0101101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.T-dental.voiced-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "з"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0101110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.T-dental.primary-sonorant",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "r",
+        "iast": "r",
+        "deva": "र",
+        "uk": "р"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0101111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.T-dental.lateral-or-secondary-sonorant",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "l",
+        "iast": "l",
+        "deva": "ल",
+        "uk": "л"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0110000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.P.primary-voiceless-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "ф"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0110001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-punctuation",
+      "report_name": "text.punctuation.em-dash",
+      "surface_label": "—",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+      "law_note": "text sign"
+    },
+    {
+      "coordinate": "0110010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.P.primary-sonorant",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "v",
+        "iast": "v",
+        "deva": "व",
+        "uk": "в"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0110011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-punctuation",
+      "report_name": "text.punctuation.en-dash",
+      "surface_label": "–",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+      "law_note": "text sign"
+    },
+    {
+      "coordinate": "0110100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.G-glottal.primary-voiceless-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "h",
+        "iast": "h",
+        "deva": "ह",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0110101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.G-glottal.voiced-fricative",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "г"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0110110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-punctuation",
+      "report_name": "text.punctuation.left-double-quotation-mark",
+      "surface_label": "“",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+      "law_note": "text sign"
+    },
+    {
+      "coordinate": "0110111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-punctuation",
+      "report_name": "text.punctuation.right-double-quotation-mark",
+      "surface_label": "”",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #105",
+      "law_note": "text sign"
+    },
+    {
+      "coordinate": "0111000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.4",
+      "surface_label": "4",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0111001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.6",
+      "surface_label": "6",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0111010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.7",
+      "surface_label": "7",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0111011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-digit",
+      "report_name": "text.digit.5",
+      "surface_label": "5",
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "provenance": "shiva-sutras master prototype/upc7_lang.py / PR #95",
+      "law_note": "Text, NOT Number"
+    },
+    {
+      "coordinate": "0111100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.uk-ext.ts",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "ц"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0111101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.uk-ext.tsh",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "ч"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0111110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.uk-ext.dz",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "дз"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "0111111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "non-varga.uk-ext.dzh",
+      "baseline_class": "non-varga",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "дж"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.a.oral.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "a",
+        "iast": "a",
+        "deva": "अ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.a.oral.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "A",
+        "iast": "ā",
+        "deva": "आ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.a.nasal.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.a.nasal.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.i.oral.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "i",
+        "iast": "i",
+        "deva": "इ",
+        "uk": "і"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.i.oral.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "I",
+        "iast": "ī",
+        "deva": "ई",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.i.nasal.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1000111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.i.nasal.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.u.oral.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "u",
+        "iast": "u",
+        "deva": "उ",
+        "uk": "у"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.u.oral.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "U",
+        "iast": "ū",
+        "deva": "ऊ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.u.nasal.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.u.nasal.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.r-vocalic.oral.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "f",
+        "iast": "ṛ",
+        "deva": "ऋ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.r-vocalic.oral.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "F",
+        "iast": "ṝ",
+        "deva": "ॠ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.r-vocalic.nasal.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1001111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.r-vocalic.nasal.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.l-vocalic.oral.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "x",
+        "iast": "ḷ",
+        "deva": "ऌ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.l-vocalic.oral.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "X",
+        "iast": "ḹ",
+        "deva": "ॡ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.l-vocalic.nasal.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.l-vocalic.nasal.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.e.oral.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "e",
+        "iast": "e",
+        "deva": "ए",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.e.oral.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "E",
+        "iast": "ai",
+        "deva": "ऐ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.e.nasal.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1010111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.e.nasal.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.o.oral.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "o",
+        "iast": "o",
+        "deva": "ओ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.o.oral.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "O",
+        "iast": "au",
+        "deva": "औ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.o.nasal.short",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.o.nasal.long",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.uk-ext.a",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "а"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.uk-ext.e",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "е"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.uk-ext.o",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "о"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1011111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "sound/text",
+      "report_name": "vowel.uk-ext.y",
+      "baseline_class": "vowel",
+      "projection": {
+        "slp1": "",
+        "iast": "",
+        "deva": "",
+        "uk": "и"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.space",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "\\x20",
+        "iast": "\\x20",
+        "deva": "\\x20",
+        "uk": "\\x20"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.newline",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "\\x0a",
+        "iast": "\\x0a",
+        "deva": "\\x0a",
+        "uk": "\\x0a"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.tab",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "\\x09",
+        "iast": "\\x09",
+        "deva": "\\x09",
+        "uk": "\\x09"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.left-paren",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "(",
+        "iast": "(",
+        "deva": "(",
+        "uk": "("
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.right-paren",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": ")",
+        "iast": ")",
+        "deva": ")",
+        "uk": ")"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.double-quote",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "\t",
+        "iast": "\t",
+        "deva": null,
+        "uk": null
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.backslash",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "\\\\",
+        "iast": "\\\\",
+        "deva": "\\\\",
+        "uk": "\\\\"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1100111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.underscore",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "_",
+        "iast": "_",
+        "deva": "_",
+        "uk": "_"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.anusvara",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "M",
+        "iast": "ṃ",
+        "deva": "ं",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.visarga",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "H",
+        "iast": "ḥ",
+        "deva": "ः",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.avagraha",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "'",
+        "iast": "’",
+        "deva": "ऽ",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.danda",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": ".",
+        "iast": "।",
+        "deva": "।",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.double-danda",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "..",
+        "iast": "॥",
+        "deva": "॥",
+        "uk": ""
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.ampersand",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "&",
+        "iast": "&",
+        "deva": "&",
+        "uk": "&"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.pipe",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "|",
+        "iast": "|",
+        "deva": "|",
+        "uk": "|"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1101111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.backquote",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "`",
+        "iast": "`",
+        "deva": "`",
+        "uk": "`"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.plus",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "+",
+        "iast": "+",
+        "deva": "+",
+        "uk": "+"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.minus",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "-",
+        "iast": "-",
+        "deva": "-",
+        "uk": "-"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.star",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "*",
+        "iast": "*",
+        "deva": "*",
+        "uk": "*"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.slash",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "/",
+        "iast": "/",
+        "deva": "/",
+        "uk": "/"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.equals",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "=",
+        "iast": "=",
+        "deva": "=",
+        "uk": "="
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.less",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "<",
+        "iast": "<",
+        "deva": "<",
+        "uk": "<"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.greater",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": ">",
+        "iast": ">",
+        "deva": ">",
+        "uk": ">"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1110111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.question",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "?",
+        "iast": "?",
+        "deva": "?",
+        "uk": "?"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111000",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.bang",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "!",
+        "iast": "!",
+        "deva": "!",
+        "uk": "!"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111001",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.apostrophe",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "",
+        "iast": "'",
+        "deva": "'",
+        "uk": "'"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111010",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.dot",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "",
+        "iast": ".",
+        "deva": ".",
+        "uk": "."
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111011",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.comma",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": ",",
+        "iast": ",",
+        "deva": ",",
+        "uk": ","
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111100",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.colon",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": ":",
+        "iast": ":",
+        "deva": ":",
+        "uk": ":"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111101",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.semicolon",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": ";",
+        "iast": ";",
+        "deva": ";",
+        "uk": ";"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111110",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.hash",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "#",
+        "iast": "#",
+        "deva": "#",
+        "uk": "#"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    },
+    {
+      "coordinate": "1111111",
+      "status": "OWNER-RATIFIED",
+      "semantic_role": "text-convention",
+      "report_name": "sign.at",
+      "baseline_class": "sign/operator",
+      "projection": {
+        "slp1": "@",
+        "iast": "@",
+        "deva": "@",
+        "uk": "@"
+      },
+      "provenance": "baseline-recovered / D7-v2"
+    }
+  ],
+  "laws": {
+    "text_digits_are_not_number": true,
+    "local_ordinal_is_separate_role": true,
+    "width_alone_never_grants_callability": true,
+    "automatic_d6_prefix_inheritance": false,
+    "candidate_d_migration_ratified": false,
+    "d14_pratyahara_boundary": {
+      "d7_coordinate_effect": "NONE",
+      "unique_sound_ceiling": "39/43",
+      "dual_h_grammar_path": "43/43",
+      "dual_h_not_two_phonemes": true
+    }
+  },
+  "future_migration_boundary": {
+    "issue": "#3432",
+    "status": "NOT-RATIFIED",
+    "candidate": "Shiva candidate D",
+    "moves": [
+      {
+        "semantic": "h",
+        "from": "0110100",
+        "to": "0100001"
+      },
+      {
+        "semantic": "r",
+        "from": "0101110",
+        "to": "0101010"
+      },
+      {
+        "semantic": "l",
+        "from": "0101111",
+        "to": "0101110"
+      }
+    ],
+    "candidate_occupancy": 124,
+    "note": "Any adoption changes Text7 identity and needs a separate owner decision."
+  }
+}
