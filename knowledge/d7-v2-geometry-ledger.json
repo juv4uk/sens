@@ -268,5 +268,13 @@
       "0101111 and 0110100 are vacated by candidate-D l/h migration",
       "1010001 and 1010011 are absent because candidate D rejects the ḹ line"
     ]
+  },
+  "candidate_map": {
+    "path": "knowledge/d7-v2-candidate-d.json",
+    "status": "research-candidate-not-ratified",
+    "capacity": 128,
+    "occupancy": 124,
+    "free": 4,
+    "coordinate_authority": "candidate-only; owner ratification still required"
   }
 }
