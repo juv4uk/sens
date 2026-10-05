@@ -1,5 +1,5 @@
-//! #3287 — D4 APPEND vs revoked D5 APPEND differential probe.
-//! Research-only: prints exact outcomes; changes no semantic authority.
+//! #3468 — current D4 APPEND / D5 CAAAR coordinate witness.
+//! Test-only: verifies current exact-domain placement; changes no semantic authority.
 
 use sens::{
     eval_parsed_expressions, eval_program, load_core_library, parse, Bit4, Bit5, CoreD4, CoreD5,
@@ -34,9 +34,9 @@ fn run_surface(source: &str) -> Result<String, String> {
 }
 
 #[test]
-fn ratified_d4_append_owns_the_one_live_semantics() {
-    let d4 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1111).unwrap()));
-    let d5 = DomainIdentity::D5(CoreD5::from_word(Bit5::new(0b10000).unwrap()));
+fn current_d4_append_and_d5_caar_coordinates_do_not_alias() {
+    let d4_append = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1111).unwrap()));
+    let d5_caaar = DomainIdentity::D5(CoreD5::from_word(Bit5::new(0b10000).unwrap()));
 
     let cases = [
         ("empty-empty", "'() '()", "(append (quote ()) (quote ()))"),
@@ -47,21 +47,28 @@ fn ratified_d4_append_owns_the_one_live_semantics() {
         ("dotted-right", "'(a b) '(c . d)", "(append (quote (a b)) (quote (c . d)))"),
     ];
 
-    for (name,args,surface_source) in cases {
-        let exact = run_exact(d4, args).unwrap_or_else(|e| panic!("{name}: D4 failed: {e}"));
+    for (name, args, surface_source) in cases {
+        let exact =
+            run_exact(d4_append, args).unwrap_or_else(|e| panic!("{name}: D4 failed: {e}"));
         let surface = run_surface(surface_source)
             .unwrap_or_else(|e| panic!("{name}: surface failed: {e}"));
         assert_eq!(exact, surface, "{name}: D4 and surface APPEND diverged");
-
-        let revoked = run_exact(d5, args).expect_err("revoked D5 APPEND must fail closed");
-        assert!(
-            revoked.contains("not callable") || revoked.contains("no admitted"),
-            "{name}: unexpected revoked-D5 error: {revoked}"
-        );
-        println!("APPEND-DEDUP case={name} result={exact}");
+        println!("APPEND-CURRENT case={name} result={exact}");
     }
 
-    let d4_bad = run_exact(d4, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
+    let caaar = run_exact(d5_caaar, "'(((a) b) c)")
+        .unwrap_or_else(|e| panic!("D5:10000 CAAAR failed: {e}"));
+    assert_eq!(caaar, "a", "D5:10000 must execute current CAAAR semantics");
+
+    let not_append = run_exact(d5_caaar, "'(a b) '(c d)")
+        .expect_err("D5:10000 must not accept APPEND's two-argument call shape");
+    assert!(
+        not_append.contains("expects 1 argument") && not_append.contains("received 2"),
+        "unexpected D5:10000 non-alias error: {not_append}"
+    );
+
+    let d4_bad =
+        run_exact(d4_append, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
     let surface_bad = run_surface("(append (quote (a . b)) (quote (c)))")
         .expect_err("surface must reject improper left spine");
     assert!(
@@ -72,10 +79,6 @@ fn ratified_d4_append_owns_the_one_live_semantics() {
         surface_bad.contains("UnsatisfiedConditional"),
         "unexpected surface improper-left error: {surface_bad}"
     );
-
-    let d5_bad = run_exact(d5, "'(a . b) '(c)")
-        .expect_err("revoked D5 APPEND must remain uncallable even on error boundary");
-    assert!(d5_bad.contains("not callable") || d5_bad.contains("no admitted"));
 }
 
 #[test]
