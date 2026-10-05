@@ -171,9 +171,15 @@ def main() -> int:
     ap.add_argument("--out-dir", required=True, type=Path)
     ap.add_argument("--outer-reps", type=int, default=10)
     ap.add_argument("--inner-repeats", type=int, default=10000)
+    ap.add_argument("--evidence-mode", choices=("smoke", "performance"), default="smoke")
+    ap.add_argument("--load-context", choices=("idle", "high", "unknown"), default="unknown")
     args = ap.parse_args()
     if args.outer_reps <= 0 or args.inner_repeats <= 0:
         raise SystemExit("repeat counts must be positive")
+    if args.evidence_mode == "performance" and args.outer_reps < 10:
+        raise SystemExit("performance mode requires at least 10 outer repetitions")
+    if args.evidence_mode == "performance" and args.load_context == "unknown":
+        raise SystemExit("performance mode requires an explicit idle/high load context")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     raw_dir = args.out_dir / "raw"
@@ -253,11 +259,21 @@ def main() -> int:
                     "notes": "SENS eval of already-lowered exact-domain expression vs direct native Rust mechanism control.",
                 }
             ]
+            perf_verdict = (
+                verdict_lower(s_med, r_med)
+                if args.evidence_mode == "performance"
+                else "inconclusive"
+            )
+            perf_note = (
+                f"median SENS={s_med:.3f} ns/op; Rust={r_med:.3f} ns/op"
+                if args.evidence_mode == "performance"
+                else f"smoke observation only: median SENS={s_med:.3f} ns/op; Rust={r_med:.3f} ns/op"
+            )
             verdicts.append(
                 {
                     "axis": f"{case}:warm_ready_execution_ns_per_op",
-                    "verdict": verdict_lower(s_med, r_med),
-                    "evidence": f"median SENS={s_med:.3f} ns/op; Rust={r_med:.3f} ns/op",
+                    "verdict": perf_verdict,
+                    "evidence": perf_note,
                 }
             )
 
@@ -278,11 +294,21 @@ def main() -> int:
                         "notes": "Whole helper-process RSS; includes runtime footprint, not only the timed operation.",
                     }
                 )
+                rss_verdict = (
+                    verdict_lower(sr_med, rr_med)
+                    if args.evidence_mode == "performance"
+                    else "inconclusive"
+                )
+                rss_note = (
+                    f"median SENS={sr_med:.0f} KiB; Rust={rr_med:.0f} KiB"
+                    if args.evidence_mode == "performance"
+                    else f"smoke observation only: median SENS={sr_med:.0f} KiB; Rust={rr_med:.0f} KiB"
+                )
                 verdicts.append(
                     {
                         "axis": f"{case}:process_maxrss_kb",
-                        "verdict": verdict_lower(sr_med, rr_med),
-                        "evidence": f"median SENS={sr_med:.0f} KiB; Rust={rr_med:.0f} KiB",
+                        "verdict": rss_verdict,
+                        "evidence": rss_note,
                     }
                 )
 
@@ -294,6 +320,7 @@ def main() -> int:
                         "outer_reps": args.outer_reps,
                         "inner_repeats": args.inner_repeats,
                         "scope": "D3 smoke only",
+                        "evidence_mode": args.evidence_mode,
                     },
                     "measurements": measurements,
                 }
@@ -333,7 +360,8 @@ def main() -> int:
         "os": platform.platform(),
         "arch": platform.machine(),
         "cpu": platform.processor() or None,
-        "load_context": "unknown",
+        "load_context": args.load_context,
+        "evidence_mode": args.evidence_mode,
         "toolchain": {"rustc": rustc},
     }
     comparison = {
@@ -368,6 +396,7 @@ def main() -> int:
         "",
         "This is a native-mechanism control, not a whole-language ranking.",
         "The blocked headline corpus is not bypassed.",
+        f"Evidence mode: {args.evidence_mode}; load context: {args.load_context}.",
         "",
         "| axis | verdict | evidence |",
         "|---|---|---|",
