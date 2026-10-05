@@ -117,7 +117,7 @@ Parent preservation фіксує:
 ## Відтворення
 
 ```sh
-python3 scripts/research-3622-d8-take-drop-edge.py \
+python3 benchmarks/d8-take-drop-edge/run.py \
   --out /tmp/d8-take-drop-edge
 ```
 
