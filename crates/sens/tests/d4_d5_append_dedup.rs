@@ -1,5 +1,5 @@
-//! #3287 — D4 APPEND vs revoked D5 APPEND differential probe.
-//! Research-only: prints exact outcomes; changes no semantic authority.
+//! #3287/#3466 — D4 list concatenation vs exact D5 selector differential probe.
+//! Contract 11.5 witness only: changes no semantic authority.
 
 use sens::{
     eval_parsed_expressions, eval_program, load_core_library, parse, Bit4, Bit5, CoreD4, CoreD5,
@@ -53,12 +53,13 @@ fn ratified_d4_append_owns_the_one_live_semantics() {
             .unwrap_or_else(|e| panic!("{name}: surface failed: {e}"));
         assert_eq!(exact, surface, "{name}: D4 and surface APPEND diverged");
 
-        let revoked = run_exact(d5, args).expect_err("revoked D5 APPEND must fail closed");
+        let distinct = run_exact(d5, args)
+            .expect_err("D5:10000 must not accept the two-argument D4 list law shape");
         assert!(
-            revoked.contains("not callable") || revoked.contains("no admitted"),
-            "{name}: unexpected revoked-D5 error: {revoked}"
+            distinct.contains("expects 1 argument") && distinct.contains("received 2"),
+            "{name}: D5:10000 must expose selector arity, got: {distinct}"
         );
-        println!("APPEND-DEDUP case={name} result={exact}");
+        println!("D4-LIST-DEDUP case={name} result={exact}");
     }
 
     let d4_bad = run_exact(d4, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
@@ -73,9 +74,11 @@ fn ratified_d4_append_owns_the_one_live_semantics() {
         "unexpected surface improper-left error: {surface_bad}"
     );
 
-    let d5_bad = run_exact(d5, "'(a . b) '(c)")
-        .expect_err("revoked D5 APPEND must remain uncallable even on error boundary");
-    assert!(d5_bad.contains("not callable") || d5_bad.contains("no admitted"));
+    assert_eq!(
+        run_exact(d5, "'(((1) 2) 3)")
+            .expect("D5:10000 must execute its ratified one-argument selector law"),
+        "1"
+    );
 }
 
 #[test]
