@@ -250,6 +250,45 @@ fn is_d5(identity: CoreDomainIdentity, bits: u8) -> bool {
     )
 }
 
+fn evaluate_d5_label(
+    arguments: &[Expr],
+    environment: &Environment,
+    span: Span,
+) -> Result<EvalStep, LanguageError> {
+    special_forms::exact_arity("D5:00100", arguments, 2, span)?;
+
+    let name = match &arguments[0].kind {
+        ExprKind::Symbol(name) => {
+            canon::ensure_bindable(name, arguments[0].span)?;
+            name.clone()
+        }
+        _ => {
+            return Err(LanguageError::new(
+                ErrorKind::Type,
+                "D5:00100 LABEL name must be a literal symbol",
+                arguments[0].span,
+            ));
+        }
+    };
+
+    // LABEL is local self-reference, not global DEFINE.  The closure captures
+    // this child frame; replacing the temporary cell after construction makes
+    // recursive calls observe the closure itself through the same Rc-backed
+    // environment without adding a second recursion mechanism.
+    let recursive_environment = environment.child();
+    recursive_environment.define(name.clone(), Value::Nil);
+    let value = evaluate(&arguments[1], &recursive_environment)?;
+    if !matches!(value, Value::Closure(_)) {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "D5:00100 LABEL value must evaluate to a function closure",
+            arguments[1].span,
+        ));
+    }
+    recursive_environment.define(name, value.clone());
+    Ok(EvalStep::Value(value))
+}
+
 fn evaluate_d5_set_family(
     identity: CoreDomainIdentity,
     arguments: &[Expr],
@@ -323,6 +362,10 @@ fn dispatch_domain_call(
 
     if is_d3(identity, 0b110) {
         return special_forms::evaluate_domain_cond(arguments, environment, span);
+    }
+
+    if is_d5(identity, 0b00100) {
+        return evaluate_d5_label(arguments, environment, span);
     }
 
     if is_d5(identity, 0b00110) || is_d5(identity, 0b00111) {
