@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""STORE -> AIR -> LOAD: exact-width representation evidence for #3580/#3595.
+"""Доказове представлення STORE -> AIR -> LOAD для #3580/#3595.
 
-Український принцип:
+Принцип:
 - STORE рахує канонічні semantic bits і окремо фізичний byte container;
 - AIR рахує carrier bits, не виводить їх автоматично з кількості байтів;
 - LOAD-поля присутні в спільній схемі, але лишаються null, доки #3513 не
   надасть фазово ізольовані I-ref виміри.
 
-Paired English/canonical fixtures must first prove the same lowered semantic
-trace with the current exact-domain helper. Mechanical fixtures are explicitly
-marked as carrier controls and do not claim language-level semantic equality.
+Парні English/canonical fixtures спочатку мають довести однаковий lowered
+semantic trace чинним exact-domain helper-ом. Mechanical fixtures явно
+позначені як carrier controls і не претендують на мовну семантичну рівність.
 """
 
 from __future__ import annotations
