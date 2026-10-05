@@ -24,7 +24,8 @@ concurrency:
 
 jobs:
   gpu-worker:
-    runs-on: [self-hosted, gpu, gtx-1050-ti]
+    # The SENS runner orchestrates only; CUDA executes in the shared persistent worker.
+    runs-on: [self-hosted, guix]
     timeout-minutes: 15
     env:
       CML_GPU_WORKER_SOCKET: /run/cml-gpu-worker/worker.sock
