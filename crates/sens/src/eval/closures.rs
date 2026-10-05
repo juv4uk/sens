@@ -264,6 +264,7 @@ fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head 
             0b110 => Head::Cond,
             _ => Head::Call,
         },
+        CoreDomainIdentity::D5(word) if word.word().packed_bits() == 0b00100 => Head::Opaque,
         _ => Head::Call,
     };
     if matches!(routed, Head::Call)
