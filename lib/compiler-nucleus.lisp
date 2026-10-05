@@ -43,20 +43,21 @@
     (decompose identity)))
 
 
-; #3809 — bounded compiler-role derivation from the owner-ratified D3 L1-L5
-; law.  There is deliberately no D3 coordinate→role table here.
+; #3809 — bounded compiler-role derivation from generated, provenance-bound
+; D3 L1-L5 structural law data.  There is deliberately no D3 coordinate→role
+; table here.
 ;
-; Law inputs are exact authority anchors:
-;   D2-OPEN  — the D2 prefix fibre selected by L2/L5 for the head selector;
-;   D3-EMPTY — the L1 structural-empty root.
+; LAW is transported from knowledge/bija3-l1-l5-structure-projection.json:
+;   (domain-width l1-empty-bits l4-xor-mask l5-spine)
 ;
-; Derivation:
-;   head selector = D2-OPEN prefix + suffix-0        (L2 + L5)
-;   tail selector = dual3(head selector)             (L3 + L4)
-;   pair construct = dual3(D3-EMPTY)                 (L1 + L3 + L4)
+; The projection itself is mechanically generated from owner-ratified #3202.
+; It carries no compiler role names.  SENS assigns the bounded compiler roles
+; by executing the ratified structural relationships:
+;   head selector = third ordered L5 spine member
+;   tail selector = L4 dual(head selector)
+;   pair construct = L4 dual(L1 empty)
 ;
-; DECOMPOSE is the representation-only mechanism from #3808.  It exposes
-; width/bits and contains no language meaning.
+; DECOMPOSE is the representation-only mechanism from #3808.
 
 (визначити compiler-true
   (функція (seed)
@@ -65,12 +66,6 @@
 (визначити compiler-false
   (функція (seed)
     (атом? (сполучити seed ()))))
-
-(визначити compiler-bit-not
-  (функція (seed bit)
-    (за-умовою
-      (bit (compiler-false seed))
-      ((compiler-true seed) (compiler-true seed)))))
 
 (визначити compiler-bits-equal
   (функція (seed left right)
@@ -81,23 +76,24 @@
        (compiler-bits-equal seed (решта left) (решта right)))
       ((compiler-true seed) (compiler-false seed)))))
 
-(визначити compiler-dual-bits
-  (функція (seed bits)
+(визначити compiler-bit-xor
+  (функція (seed left right)
     (за-умовою
-      ((атом? bits) ())
-      ((compiler-true seed)
-       (сполучити
-         (compiler-bit-not seed (перше bits))
-         (compiler-dual-bits seed (решта bits)))))))
+      ((тотожне? left right) (compiler-false seed))
+      ((compiler-true seed) (compiler-true seed)))))
 
-(визначити compiler-append-bit
-  (функція (seed bits bit)
+(визначити compiler-xor-bits
+  (функція (seed left right)
     (за-умовою
-      ((атом? bits) (сполучити bit ()))
+      ((атом? left)
+       (за-умовою
+         ((атом? right) ())
+         ((compiler-true seed) ())))
+      ((атом? right) ())
       ((compiler-true seed)
        (сполучити
-         (перше bits)
-         (compiler-append-bit seed (решта bits) bit))))))
+         (compiler-bit-xor seed (перше left) (перше right))
+         (compiler-xor-bits seed (решта left) (решта right)))))))
 
 (визначити compiler-shape-width
   (функція (shape)
@@ -107,45 +103,60 @@
   (функція (shape)
     (перше (решта shape))))
 
+(визначити compiler-law-width
+  (функція (law)
+    (перше law)))
+
+(визначити compiler-law-empty-bits
+  (функція (law)
+    (перше (решта law))))
+
+(визначити compiler-law-xor-mask
+  (функція (law)
+    (перше (решта (решта law)))))
+
+(визначити compiler-law-l5-spine
+  (функція (law)
+    (перше (решта (решта (решта law))))))
+
+(визначити compiler-law-l5-head-bits
+  (функція (law)
+    (перше (решта (решта (compiler-law-l5-spine law))))))
+
 (визначити compiler-role-from-l1-l5-bits
-  (функція (seed bits d2-open-bits d3-empty-bits)
+  (функція (seed bits law)
     (за-умовою
       ((compiler-bits-equal
          seed
          bits
-         (compiler-append-bit seed d2-open-bits (compiler-false seed)))
+         (compiler-law-l5-head-bits law))
        (як-є selector-head))
       ((compiler-bits-equal
          seed
          bits
-         (compiler-dual-bits
+         (compiler-xor-bits
            seed
-           (compiler-append-bit seed d2-open-bits (compiler-false seed))))
+           (compiler-law-l5-head-bits law)
+           (compiler-law-xor-mask law)))
        (як-є selector-tail))
       ((compiler-bits-equal
          seed
          bits
-         (compiler-dual-bits seed d3-empty-bits))
+         (compiler-xor-bits
+           seed
+           (compiler-law-empty-bits law)
+           (compiler-law-xor-mask law)))
        (як-є pair-construct))
       ((compiler-true seed) ()))))
 
-(визначити compiler-role-from-l1-l5-shapes
-  (функція (seed shape d2-open-shape d3-empty-shape)
+(визначити compiler-role-from-l1-l5
+  (функція (decompose identity law)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width shape)
-         (compiler-shape-width d3-empty-shape))
+         (compiler-shape-width (decompose identity))
+         (compiler-law-width law))
        (compiler-role-from-l1-l5-bits
-         seed
-         (compiler-shape-bits shape)
-         (compiler-shape-bits d2-open-shape)
-         (compiler-shape-bits d3-empty-shape)))
-      ((compiler-true seed) ()))))
-
-(визначити compiler-role-from-l1-l5
-  (функція (decompose identity d2-open d3-empty)
-    (compiler-role-from-l1-l5-shapes
-      identity
-      (decompose identity)
-      (decompose d2-open)
-      (decompose d3-empty))))
+         identity
+         (compiler-shape-bits (decompose identity))
+         law))
+      ((compiler-true identity) ()))))
