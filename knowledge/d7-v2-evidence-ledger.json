@@ -95,7 +95,9 @@
     "h/r/l derived-v3 moves are identity migration, not recovery",
     "digits are Text and never arithmetic Number",
     "layouts/glyphs receive zero coordinate authority",
-    "D6 parent/prefix laws do not transfer into D7"
+    "D6 parent/prefix laws do not transfer into D7",
+    "43/43 pratyahara coverage belongs to D14 grammar topology, not D7 occupancy",
+    "dual-h grammar nodes do not imply two distinct D7 phonetic sounds without independent phonetic evidence"
   ],
   "rows": [
     {
@@ -1700,5 +1702,33 @@
     "d7_semantic_result": "NO-PROOF that Sound7/local-ordinal D7 = Core.D6 x D1",
     "rule": "do not import D6 prefix/selector continuation into D7 merely because W7 is a 7-cube",
     "selector_note": "a hypothetical selector subtree can be generated geometrically, but it is not D7 Sound/Text semantic authority"
+  },
+  "d14_pratyahara_boundary": {
+    "status": "VERIFIED-CROSS-DOMAIN-DONOR-NOT-D7-IDENTITY",
+    "donor": "juv4uk/shiva-sutras PR #113 (merged)",
+    "witness": "prototype/verify_hakardvitva_c1p.py",
+    "results": {
+      "unique_sound_world": 42,
+      "canonical_pratyahara_items": 43,
+      "minimal_tucker_obstructions": 84,
+      "exact_contiguous_ceiling": "39/43",
+      "minimum_transversal_size": 4,
+      "unique_minimum_transversal": [
+        "ral",
+        "jhal",
+        "val",
+        "śal"
+      ],
+      "dual_h_graph_nodes": 43,
+      "dual_h_contiguous": "43/43"
+    },
+    "interpretation": [
+      "43/43 measures grammatical pratyahara interval coverage, not D7 cell occupancy",
+      "the donor duplicates grammatical node h as h1/h2; it does not prove two distinct phonetic h sounds",
+      "one Text7 h identity may project contextually to two D14 grammar nodes without duplicating D7 sound identity",
+      "hakardvitva gives zero D7 coordinate-placement credit"
+    ],
+    "bridge_candidate": "Text7(h) -> D14(h1|h2) chosen by grammatical/pratyahara context",
+    "d7_coordinate_effect": "NONE"
   }
 }
