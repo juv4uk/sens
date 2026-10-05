@@ -1079,7 +1079,7 @@
     (done . nil)))
 
   ("WORLD-MODEL-LAWS-AXIOM-OBSERVATION-BRIDGE" . (
-    (priority . 10.0)
+    (priority . 10)
     (capabilities . (physics mathematics world-knowledge axioms model-laws observations derivation provenance quantities))
     (origin . sens)
     (depends-on . (SI-DEFINING-CONSTANTS-EXACT-RATIONAL))
