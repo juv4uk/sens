@@ -1,58 +1,93 @@
 //! sens#3758 — first compiler-in-language vertical witness corpus.
 //!
-//! These cases are owned by SENS and use only canonical exact-width binary
-//! source. CML/backends may consume the same programs and expected observables,
-//! but must not replace them with a backend-owned semantic fixture.
+//! The cases come from one SENS-owned machine-readable evidence corpus:
+//! `contracts/compiler-d3-selector-corpus-v1.tsv`.
 //!
-//! The positive nested-pair cases are deliberately discriminating:
-//! CAR and CDR produce different values. The empty-input cases are negative
-//! controls and must preserve the canonical Type failure.
+//! Semantic authority still remains in language-contract.lisp + the D3 law.
+//! The corpus fixes reproducible source/provenance/expected observations so
+//! downstream compilers can consume the same evidence without copying it.
 //!
 //! No historical Sid8/Sens8 identity is allowed anywhere in the lowered tree.
 
 use sens::{
     eval_lowered_expressions, load_core_library, lower_program, parse_binary_source_words,
-    parse_canonical_binary, CoreDomainIdentity, ErrorKind, Expr, ExprKind, Session,
+    parse_canonical_binary, sha256_source, CoreDomainIdentity, ErrorKind, Expr, ExprKind, Session,
 };
 
+const CORPUS: &str =
+    include_str!("../../../contracts/compiler-d3-selector-corpus-v1.tsv");
+
 struct Case {
-    name: &'static str,
+    name: String,
     head: u8,
-    source: &'static str,
+    source: String,
+    digest: String,
     expected: Expected,
 }
 
 enum Expected {
-    Value(&'static str),
+    Value(String),
     Error(ErrorKind),
 }
 
-const CASES: &[Case] = &[
-    Case {
-        name: "car-nested-pair",
-        head: 0b100,
-        source: "10 100 00 10 111 00 10 111 00 000 00 000 01 00 000 01 01",
-        expected: Expected::Value("(())"),
-    },
-    Case {
-        name: "cdr-nested-pair",
-        head: 0b011,
-        source: "10 011 00 10 111 00 10 111 00 000 00 000 01 00 000 01 01",
-        expected: Expected::Value("()"),
-    },
-    Case {
-        name: "car-empty-type-error",
-        head: 0b100,
-        source: "10 100 00 000 01",
-        expected: Expected::Error(ErrorKind::Type),
-    },
-    Case {
-        name: "cdr-empty-type-error",
-        head: 0b011,
-        source: "10 011 00 000 01",
-        expected: Expected::Error(ErrorKind::Type),
-    },
-];
+fn sha256_hex(bytes: &[u8]) -> String {
+    sha256_source(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+fn cases() -> Vec<Case> {
+    CORPUS
+        .lines()
+        .filter(|line| {
+            let trimmed = line.trim();
+            !trimmed.is_empty() && !trimmed.starts_with('#')
+        })
+        .map(|line| {
+            let fields = line.split('\t').collect::<Vec<_>>();
+            assert_eq!(
+                fields.len(),
+                6,
+                "compiler D3 corpus row must have exactly six TSV fields: {line:?}"
+            );
+
+            let head_bits = fields[1];
+            assert_eq!(
+                head_bits.len(),
+                3,
+                "{} head identity must remain exact D3",
+                fields[0]
+            );
+            assert!(
+                head_bits.bytes().all(|byte| matches!(byte, b'0' | b'1')),
+                "{} head identity must be binary",
+                fields[0]
+            );
+            let head = u8::from_str_radix(head_bits, 2)
+                .unwrap_or_else(|error| panic!("{} invalid D3 head: {error}", fields[0]));
+
+            let expected = match (fields[4], fields[5]) {
+                ("value", value) => Expected::Value(value.to_string()),
+                ("error", "Type") => Expected::Error(ErrorKind::Type),
+                (kind, value) => {
+                    panic!(
+                        "{} unsupported corpus expectation {kind:?}/{value:?}",
+                        fields[0]
+                    )
+                }
+            };
+
+            Case {
+                name: fields[0].to_string(),
+                head,
+                source: fields[2].to_string(),
+                digest: fields[3].to_string(),
+                expected,
+            }
+        })
+        .collect()
+}
 
 fn assert_no_legacy_identity(expr: &Expr) {
     match &expr.kind {
@@ -97,9 +132,24 @@ fn top_d3(expr: &Expr) -> (usize, u8) {
 }
 
 #[test]
+fn machine_readable_compiler_corpus_has_exact_source_digests() {
+    let cases = cases();
+    assert_eq!(cases.len(), 4, "first selector corpus remains four bounded cases");
+
+    for case in &cases {
+        assert_eq!(
+            sha256_hex(case.source.as_bytes()),
+            case.digest,
+            "{} source bytes drifted from recorded provenance",
+            case.name
+        );
+    }
+}
+
+#[test]
 fn compiler_vertical_corpus_is_exact_d3_and_has_no_legacy_byte_identity() {
-    for case in CASES {
-        let tokens = parse_binary_source_words(case.source)
+    for case in cases() {
+        let tokens = parse_binary_source_words(&case.source)
             .unwrap_or_else(|error| panic!("{} source-word parse failed: {error:?}", case.name));
         assert!(
             tokens.iter().all(|token| matches!(token.word.width(), 2 | 3)),
@@ -107,7 +157,7 @@ fn compiler_vertical_corpus_is_exact_d3_and_has_no_legacy_byte_identity() {
             case.name
         );
 
-        let parsed = parse_canonical_binary(case.source)
+        let parsed = parse_canonical_binary(&case.source)
             .unwrap_or_else(|error| panic!("{} canonical parse failed: {error:?}", case.name));
         let lowered = lower_program(&parsed);
 
@@ -119,8 +169,8 @@ fn compiler_vertical_corpus_is_exact_d3_and_has_no_legacy_byte_identity() {
 
 #[test]
 fn compiler_vertical_corpus_matches_current_evaluator_observables() {
-    for case in CASES {
-        let parsed = parse_canonical_binary(case.source)
+    for case in cases() {
+        let parsed = parse_canonical_binary(&case.source)
             .unwrap_or_else(|error| panic!("{} canonical parse failed: {error:?}", case.name));
         let lowered = lower_program(&parsed);
 
@@ -133,7 +183,7 @@ fn compiler_vertical_corpus_matches_current_evaluator_observables() {
             Expected::Value(expected) => {
                 let result = observed
                     .unwrap_or_else(|error| panic!("{} expected value, got {error:?}", case.name));
-                assert_eq!(result.value.to_string(), *expected, "{}", case.name);
+                assert_eq!(result.value.to_string(), expected.as_str(), "{}", case.name);
             }
             Expected::Error(expected_kind) => {
                 let error = match observed {
