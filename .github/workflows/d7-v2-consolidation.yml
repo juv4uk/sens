@@ -1,0 +1,34 @@
+name: D7 v2 consolidation
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d7-v2-stable-residents.json"
+      - "knowledge/d7-v2-evidence-ledger.json"
+      - "knowledge/d7-v2-geometry-ledger.json"
+      - "knowledge/d7-full-map.json"
+      - "benchmarks/d7-v2/**"
+      - "scripts/check-d7-v2-consolidation.py"
+      - "crates/sens/src/text7.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/d7_w7_pack.rs"
+      - ".github/workflows/d7-v2-consolidation.yml"
+  workflow_dispatch:
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check consolidated D7 evidence
+        run: python3 scripts/check-d7-v2-consolidation.py
+      - name: Replay varga product witness
+        run: python3 benchmarks/d7-v2/varga.py --out /tmp/d7-varga
+      - name: Replay convention/provenance firewall
+        run: python3 benchmarks/d7-v2/residue.py --out /tmp/d7-residue
+      - name: Replay non-varga factor witness
+        run: python3 benchmarks/d7-v2/nonvarga.py --out /tmp/d7-nonvarga
+      - name: Replay vowel product/affine witness
+        run: python3 benchmarks/d7-v2/vowel.py --out /tmp/d7-vowel
+      - name: Check exact Text7 W7 mechanism
+        run: cargo test -p sens --test d7_w7_pack
