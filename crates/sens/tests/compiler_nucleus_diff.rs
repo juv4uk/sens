@@ -447,8 +447,9 @@ fn comparator_reuses_shared_corpus_and_the_named_differential_oracle() {
     let source = include_str!("compiler_nucleus_diff.rs");
     assert!(source.contains("compiler-d3-selector-corpus-v1.tsv"));
     assert!(source.contains("compiler_execution_role"));
+    let raw_dispatch = ["match ", "raw"].concat();
     assert!(
-        !source.contains("match raw"),
+        !source.contains(&raw_dispatch),
         "differential comparator must not grow a raw coordinate dispatch"
     );
 }
