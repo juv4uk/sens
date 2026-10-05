@@ -5,17 +5,17 @@
   "domain": "D6",
   "identity_occupancy": 64,
   "executable_coverage": {
-    "count": 0,
+    "count": 16,
     "total": 64,
     "basis": "current admitted exact-domain runtime routes"
   },
   "status_counts": {
-    "DIRECT_LAW": 0,
+    "DIRECT_LAW": 16,
     "LOWER_DOMAIN_COMPOSITION": 0,
     "LISP_OWNED": 0,
-    "MISSING": 64
+    "MISSING": 48
   },
-  "rule": "Ratified residency is not callability. A row moves out of MISSING only with an admitted exact-domain mechanism and executable witness; no legacy eight-bit compatibility identity or surface spelling may select D6 meaning.",
+  "rule": "Ratified residency is not callability. D6 selectors become callable only through the proved family-local CAR/CDR generator; all other D6 residents remain fail-closed until separately witnessed.",
   "rows": [
     {
       "coordinate": "000000",
@@ -333,209 +333,193 @@
       "coordinate": "011000",
       "resident": "CDAAAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "011001",
       "resident": "CDAADR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "011010",
       "resident": "CDADAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "011011",
       "resident": "CDADDR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "011100",
       "resident": "CDDAAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "011101",
       "resident": "CDDADR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "011110",
       "resident": "CDDDAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "011111",
       "resident": "CDDDDR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100000",
       "resident": "CAAAAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100001",
       "resident": "CAAADR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100010",
       "resident": "CAADAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100011",
       "resident": "CAADDR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100100",
       "resident": "CADAAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100101",
       "resident": "CADADR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100110",
       "resident": "CADDAR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "100111",
       "resident": "CADDDR",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "DIRECT_LAW",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "#3321 proved selector composition generator",
+        "crates/sens/src/eval/selector_law.rs: D3 root plus three selector suffix bits yields a D6 depth-4 selector",
+        "#3393 ratified these 16 D6 selector coordinates"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "the same packed payload in another width/domain does not enter the D6 selector decoder"
     },
     {
       "coordinate": "101000",
