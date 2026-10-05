@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Scoped footprint collector for the paired cross-language benchmark.
+"""Scoped same-host footprint collector for the paired cross-language corpus.
 
-This measures concrete artifacts and one shared benchmark process on the same
-host as the paired Cachegrind run. It does not infer semantic size from binary
-size and does not attempt to estimate whole installed runtime closures.
+Every emitted row is keyed by (runtime, workload). This is deliberate:
+- RSS is workload-specific;
+- native Rust artifact size is workload-specific;
+- interpreter/SENS-runner artifact sizes may repeat across workloads, but are
+  still recorded against the exact execution row they accompany.
+
+The collector never infers semantic size from binary size.
 """
 
 from __future__ import annotations
@@ -24,7 +28,10 @@ import current_sens
 import external_controls
 
 ROOT = Path(__file__).resolve().parents[2]
-WORKLOAD = "fib"
+CASES = tuple(external_controls.CASES)
+
+if tuple(current_sens.CASES) != CASES:
+    raise RuntimeError("paired workload corpus drift between SENS and external controls")
 
 
 def git_fact(*args: str) -> str:
@@ -40,10 +47,15 @@ def git_fact(*args: str) -> str:
         return f"unknown ({exc})"
 
 
-def resolve_executable(command: str) -> Path:
+def find_launcher(command: str) -> str:
     found = shutil.which(command)
     if found is None:
         raise RuntimeError(f"executable not found: {command}")
+    return found
+
+
+def artifact_path(command: str) -> Path:
+    found = find_launcher(command)
     return Path(found).resolve()
 
 
@@ -66,8 +78,7 @@ def text_section_bytes(path: Path) -> int | None:
     return None
 
 
-def max_rss_kib(cmd: list[str], expected: str, scratch: Path) -> int:
-    report = scratch / "time.txt"
+def max_rss_kib(cmd: list[str], expected: str, report: Path) -> int:
     proc = subprocess.run(
         ["/usr/bin/time", "-v", "-o", str(report), *cmd],
         capture_output=True,
@@ -105,6 +116,66 @@ def source_stats(paths: list[Path]) -> tuple[int, int]:
     return total_bytes, total_loc
 
 
+def generate_programs(
+    workdir: Path,
+    rustc_command: str,
+) -> tuple[
+    dict[tuple[str, str], list[str]],
+    dict[tuple[str, str], Path],
+    dict[tuple[str, str], Path],
+]:
+    commands: dict[tuple[str, str], list[str]] = {}
+    artifacts: dict[tuple[str, str], Path] = {}
+    sources: dict[tuple[str, str], Path] = {}
+
+    python_cmd = find_launcher(sys.executable)
+
+    for workload in CASES:
+        py_src = workdir / f"{workload}.py"
+        lua_src = workdir / f"{workload}.lua"
+        racket_src = workdir / f"{workload}.rkt"
+        sbcl_src = workdir / f"{workload}.lisp"
+        rust_src = workdir / f"{workload}.rs"
+        sens_src = workdir / f"{workload}-sens.lisp"
+        rust_bin = workdir / f"{workload}-rust"
+
+        py_src.write_text(external_controls.python_source(workload), encoding="utf-8")
+        lua_src.write_text(external_controls.lua_source(workload), encoding="utf-8")
+        racket_src.write_text(external_controls.racket_source(workload), encoding="utf-8")
+        sbcl_src.write_text(external_controls.sbcl_source(workload), encoding="utf-8")
+        rust_src.write_text(external_controls.rust_source(workload), encoding="utf-8")
+        sens_src.write_text(current_sens.source(workload), encoding="utf-8")
+
+        compile_proc = subprocess.run(
+            [rustc_command, "-O", str(rust_src), "-o", str(rust_bin)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if compile_proc.returncode != 0:
+            raise RuntimeError(
+                f"rustc failed for {workload}:\n"
+                f"{compile_proc.stdout}\n{compile_proc.stderr}"
+            )
+
+        for runtime, src in [
+            ("cpython", py_src),
+            ("lua54", lua_src),
+            ("racket-cs", racket_src),
+            ("sbcl", sbcl_src),
+            ("rust-native", rust_src),
+            ("sens-exact", sens_src),
+        ]:
+            sources[(runtime, workload)] = src
+
+        artifacts[("rust-native", workload)] = rust_bin.resolve()
+        commands[("rust-native", workload)] = [str(rust_bin.resolve())]
+
+        commands[("cpython", workload)] = [python_cmd, str(py_src)]
+
+    return commands, artifacts, sources
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--sens-runner", required=True)
@@ -124,110 +195,98 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     workdir = Path(tempfile.mkdtemp(prefix="sens-footprint-"))
 
-    # Generate exactly the same fib workload through the paired harness donors.
-    py_src = workdir / "fib.py"
-    lua_src = workdir / "fib.lua"
-    racket_src = workdir / "fib.rkt"
-    sbcl_src = workdir / "fib.lisp"
-    rust_src = workdir / "fib.rs"
-    sens_src = workdir / "fib-sens.lisp"
-    rust_bin = workdir / "fib-rust"
-
-    py_src.write_text(external_controls.python_source(WORKLOAD), encoding="utf-8")
-    lua_src.write_text(external_controls.lua_source(WORKLOAD), encoding="utf-8")
-    racket_src.write_text(external_controls.racket_source(WORKLOAD), encoding="utf-8")
-    sbcl_src.write_text(external_controls.sbcl_source(WORKLOAD), encoding="utf-8")
-    rust_src.write_text(external_controls.rust_source(WORKLOAD), encoding="utf-8")
-    sens_src.write_text(current_sens.source(WORKLOAD), encoding="utf-8")
-
-    rustc_command = shutil.which(args.rustc)
-    if rustc_command is None:
-        raise RuntimeError(f"executable not found: {args.rustc}")
-    # Preserve the rustc launcher path. On rustup-managed toolchains, resolving
-    # the rustc symlink produces the rustup binary itself and breaks -O dispatch.
-    compile_proc = subprocess.run(
-        [rustc_command, "-O", str(rust_src), "-o", str(rust_bin)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if compile_proc.returncode != 0:
-        raise RuntimeError(
-            f"rustc failed:\n{compile_proc.stdout}\n{compile_proc.stderr}"
-        )
+    rustc_command = find_launcher(args.rustc)
+    # Do not resolve rustc: on rustup-managed installations argv[0] dispatch
+    # matters, and resolving the symlink turns "rustc -O" into invalid "rustup -O".
+    commands, artifacts, sources = generate_programs(workdir, rustc_command)
 
     sens_runner = Path(args.sens_runner).resolve()
     if not sens_runner.is_file():
         raise RuntimeError(f"SENS runner not found: {sens_runner}")
 
-    executables = {
-        "cpython": resolve_executable(args.python),
-        "lua54": resolve_executable(args.lua),
-        "racket-cs": resolve_executable(args.racket),
-        "sbcl": resolve_executable(args.sbcl),
-        "rust-native": rust_bin.resolve(),
-        "sens-exact": sens_runner,
-    }
-    commands = {
-        "cpython": [str(executables["cpython"]), str(py_src)],
-        "lua54": [str(executables["lua54"]), str(lua_src)],
-        "racket-cs": [str(executables["racket-cs"]), str(racket_src)],
-        "sbcl": [
-            str(executables["sbcl"]),
+    python_artifact = artifact_path(args.python)
+    lua_launcher = find_launcher(args.lua)
+    racket_launcher = find_launcher(args.racket)
+    sbcl_launcher = find_launcher(args.sbcl)
+    lua_artifact = Path(lua_launcher).resolve()
+    racket_artifact = Path(racket_launcher).resolve()
+    sbcl_artifact = Path(sbcl_launcher).resolve()
+
+    for workload in CASES:
+        commands[("lua54", workload)] = [lua_launcher, str(sources[("lua54", workload)])]
+        commands[("racket-cs", workload)] = [
+            racket_launcher,
+            str(sources[("racket-cs", workload)]),
+        ]
+        commands[("sbcl", workload)] = [
+            sbcl_launcher,
             "--noinform",
             "--disable-debugger",
             "--script",
-            str(sbcl_src),
-        ],
-        "rust-native": [str(executables["rust-native"])],
-        "sens-exact": [str(sens_runner), str(sens_src)],
-    }
-    source_paths = {
-        "cpython": py_src,
-        "lua54": lua_src,
-        "racket-cs": racket_src,
-        "sbcl": sbcl_src,
-        "rust-native": rust_src,
-        "sens-exact": sens_src,
-    }
-
-    expected = external_controls.EXPECTED[WORKLOAD]
-    if current_sens.EXPECTED[WORKLOAD] != expected:
-        raise RuntimeError("paired workload oracle drift between harnesses")
+            str(sources[("sbcl", workload)]),
+        ]
+        commands[("sens-exact", workload)] = [
+            str(sens_runner),
+            str(sources[("sens-exact", workload)]),
+        ]
+        artifacts[("cpython", workload)] = python_artifact
+        artifacts[("lua54", workload)] = lua_artifact
+        artifacts[("racket-cs", workload)] = racket_artifact
+        artifacts[("sbcl", workload)] = sbcl_artifact
+        artifacts[("sens-exact", workload)] = sens_runner
 
     rows: list[dict[str, object]] = []
-    for runtime, cmd in commands.items():
-        # Hard correctness gate before footprint evidence.
-        external_controls.run_checked(cmd, expected)
-        rss_samples = [
-            max_rss_kib(cmd, expected, workdir) for _ in range(args.rss_reps)
-        ]
-        exe = executables[runtime]
-        rows.append(
-            {
-                "runtime": runtime,
-                "workload": WORKLOAD,
-                "artifact_scope": "resolved benchmark executable only",
-                "artifact_path": str(exe),
-                "artifact_bytes": exe.stat().st_size,
-                "text_section_bytes": text_section_bytes(exe),
-                "rss_scope": f"max RSS of shared {WORKLOAD} process",
-                "rss_bytes": int(statistics.median(rss_samples)) * 1024,
-                "program_scope": f"generated shared {WORKLOAD} source",
-                "program_source_bytes": source_paths[runtime].stat().st_size,
-                "kernel_scope": "N/A",
-                "kernel_source_bytes": "",
-                "kernel_loc": "",
-                "git_sha": git_fact("rev-parse", "HEAD"),
-            }
-        )
-        print(
-            f"[footprint] {runtime}: artifact={exe.stat().st_size} B "
-            f"rss={int(statistics.median(rss_samples)) * 1024} B"
-        )
+    runtimes = (
+        "cpython",
+        "lua54",
+        "racket-cs",
+        "sbcl",
+        "rust-native",
+        "sens-exact",
+    )
 
-    # Report a deliberately narrow SENS source slice separately from kernel size,
-    # so nobody mistakes benchmark-visible glue for the full semantic core.
+    for workload in CASES:
+        expected = external_controls.EXPECTED[workload]
+        if current_sens.EXPECTED[workload] != expected:
+            raise RuntimeError(f"paired oracle drift for {workload}")
+
+        for runtime in runtimes:
+            cmd = commands[(runtime, workload)]
+            external_controls.run_checked(cmd, expected)
+            rss_samples = [
+                max_rss_kib(
+                    cmd,
+                    expected,
+                    workdir / f"time-{runtime}-{workload}-{rep}.txt",
+                )
+                for rep in range(1, args.rss_reps + 1)
+            ]
+            exe = artifacts[(runtime, workload)]
+            src = sources[(runtime, workload)]
+            rows.append(
+                {
+                    "runtime": runtime,
+                    "workload": workload,
+                    "artifact_scope": "exact executable used for this runtime/workload row",
+                    "artifact_path": str(exe),
+                    "artifact_bytes": exe.stat().st_size,
+                    "text_section_bytes": text_section_bytes(exe),
+                    "rss_scope": f"max RSS of shared {workload} process",
+                    "rss_bytes": int(statistics.median(rss_samples)) * 1024,
+                    "program_scope": f"generated shared {workload} source",
+                    "program_source_bytes": src.stat().st_size,
+                    "kernel_scope": "N/A",
+                    "kernel_source_bytes": "",
+                    "kernel_loc": "",
+                    "git_sha": git_fact("rev-parse", "HEAD"),
+                }
+            )
+            print(
+                f"[footprint] {runtime}/{workload}: "
+                f"artifact={exe.stat().st_size} B "
+                f"rss={int(statistics.median(rss_samples)) * 1024} B"
+            )
+
     sens_slice = [
         ROOT / "crates/sens/src/mixed_source.rs",
         ROOT / "crates/sens/examples/current_exact_domain_bench.rs",
@@ -259,14 +318,15 @@ def main() -> int:
         "git_sha": git_fact("rev-parse", "HEAD"),
         "benchmark_issue": "#3527",
         "paired_carrier": "#3557",
-        "workload": WORKLOAD,
+        "workloads": list(CASES),
         "rss_reps": args.rss_reps,
         "platform": platform.platform(),
         "machine": platform.machine(),
         "scope_rules": {
-            "artifact": "resolved executable file only; shared-library closure excluded",
-            "rss": "median max RSS from /usr/bin/time -v on the shared fib process",
-            "program": "generated fib benchmark source bytes",
+            "join_key": ["runtime", "workload"],
+            "artifact": "exact executable backing each runtime/workload row",
+            "rss": "median max RSS from /usr/bin/time -v for the same workload",
+            "program": "generated benchmark source bytes for the same workload",
             "semantic": "not measured here",
             "kernel": "N/A unless a separately ratified source boundary exists",
         },
@@ -283,13 +343,13 @@ def main() -> int:
     )
 
     report = [
-        "# Paired runtime footprint",
+        "# Paired runtime/workload footprint",
         "",
-        "Scope: executable file + shared-fib max RSS on the same host as #3557.",
+        "Each row uses the same (runtime, workload) key as the execution corpus.",
         "This does not infer semantic size and excludes shared-library dependency closure.",
         "",
-        "| runtime | artifact bytes | .text bytes | median max RSS bytes | fib source bytes |",
-        "|---|---:|---:|---:|---:|",
+        "| workload | runtime | artifact bytes | .text bytes | median max RSS bytes | source bytes |",
+        "|---|---|---:|---:|---:|---:|",
     ]
     for row in rows:
         text_bytes = (
@@ -298,13 +358,13 @@ def main() -> int:
             else "N/A"
         )
         report.append(
-            f"| {row['runtime']} | {row['artifact_bytes']} | {text_bytes} | "
-            f"{row['rss_bytes']} | {row['program_source_bytes']} |"
+            f"| {row['workload']} | {row['runtime']} | {row['artifact_bytes']} | "
+            f"{text_bytes} | {row['rss_bytes']} | {row['program_source_bytes']} |"
         )
     report += [
         "",
         f"SENS benchmark-visible glue slice: {visible_bytes} bytes / {visible_loc} LOC.",
-        "That glue slice is diagnostic only and is **not** reported as semantic-kernel size.",
+        "That glue slice is diagnostic only and is **not** semantic-kernel size.",
         "",
     ]
     (out / "report.md").write_text("\n".join(report), encoding="utf-8")
