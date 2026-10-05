@@ -237,12 +237,12 @@
     (00000111
       ((00000010 values) () (00101010 acc))
       ((00000010 values) (1) (00101010 acc))
-      (t t
+      ((00000010 (00000001 ()))
        (10011100 ((decision (predicate (00000101 values))))
          (00000111
-           ((truthy? decision) t
+           (decision
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((truthy? decision) ()
+           ((00000010 (00000001 ()))
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
