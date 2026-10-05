@@ -3,8 +3,8 @@
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D6 are current semantic authority under Contract 11.5 / #3393.
-//! - D7/D8 remain research carriers.
+//! - D1-D7 are current semantic authority under Contract 11.6 / #3572.
+//! - D8 remains a research carrier.
 //! - `CoreDomainIdentity` is the callable-operation coordinate type for D3-D6;
 //!   executable mechanism admission remains a separate fail-closed decision.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
@@ -84,7 +84,9 @@ impl DomainIdentity {
     /// Explicit callable/Core-operation projection.
     ///
     /// Current owner authority admits exact D3/D4/D5/D6 Core-operation identity.
-    /// D1/D2/D7 are non-callable by their domain laws; D8 remains research.
+    /// D1/D2 are non-callable structural/predicate domains; current D7 is
+    /// Sound7/Text7/local-ordinal identity and is non-callable by its domain law.
+    /// D8 remains research.
     /// D5/D6 residency is independent from executable mechanism admission, so
     /// a projected D6 identity still fails closed when no mechanism owns it.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
@@ -284,7 +286,7 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_admits_d3_d4_d5_d6_and_fails_closed_for_noncallable_or_research_domains() {
+    fn callable_projection_admits_d3_d4_d5_d6_and_fails_closed_for_noncallable_d7_and_research_d8() {
         for source in [
             BinarySourceWord::W1(Bit1::new(1).unwrap()),
             BinarySourceWord::W2(Bit2::new(1).unwrap()),
