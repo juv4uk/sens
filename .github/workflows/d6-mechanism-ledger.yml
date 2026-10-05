@@ -1,0 +1,30 @@
+name: D6 mechanism ledger
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-mechanism-ledger.json"
+      - "knowledge/d6-ratified.json"
+      - "crates/sens/src/eval/selector_law.rs"
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/necessary_forms.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "scripts/check-d6-mechanism-ledger.py"
+      - ".github/workflows/d6-mechanism-ledger.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d6-mechanism-ledger.json"
+      - "knowledge/d6-ratified.json"
+      - "crates/sens/src/eval/selector_law.rs"
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/necessary_forms.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "scripts/check-d6-mechanism-ledger.py"
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d6-mechanism-ledger.py
