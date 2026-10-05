@@ -3,13 +3,13 @@ use std::{env, hint::black_box, process, time::Instant};
 #[derive(Debug)]
 enum Value {
     Nil,
-    Pair(Box<Value>, Box<Value>),
+    C(Box<Value>, Box<Value>),
 }
 
 fn setup(case: &str) -> Result<Value, String> {
     match case {
         "d3-quote-empty" => Ok(Value::Nil),
-        "d3-car-empty" => Ok(Value::Pair(Box::new(Value::Nil), Box::new(Value::Nil))),
+        "d3-car-empty" => Ok(Value::C(Box::new(Value::Nil), Box::new(Value::Nil))),
         other => Err(format!("unknown case: {other}")),
     }
 }
@@ -18,7 +18,7 @@ fn step<'a>(case: &str, value: &'a Value) -> Result<&'a Value, String> {
     match case {
         "d3-quote-empty" => Ok(value),
         "d3-car-empty" => match value {
-            Value::Pair(head, _tail) => Ok(head),
+            Value::C(head, _tail) => Ok(head),
             Value::Nil => Err("CAR received Nil".to_owned()),
         },
         other => Err(format!("unknown case: {other}")),
@@ -28,7 +28,7 @@ fn step<'a>(case: &str, value: &'a Value) -> Result<&'a Value, String> {
 fn fingerprint(value: &Value) -> &'static str {
     match value {
         Value::Nil => "()",
-        Value::Pair(_, _) => "pair",
+        Value::C(_, _) => "c",
     }
 }
 
