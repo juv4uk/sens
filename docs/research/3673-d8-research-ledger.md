@@ -8,15 +8,16 @@ occupancy authority.
 ```text
 D8 capacity                              256
 selector candidate coordinates            64
-three product-family footprints           12
-analyzed unique coordinate positions      76
-untouched coordinate positions           180
+four product-family footprints            16
+analyzed unique coordinate positions      80
+untouched coordinate positions           176
 
 fixed novel candidates, full protocol       2
 fixed novel candidate, protocol-bounded      1
-gauge-unresolved novel semantics             3
-fixed lower-domain duplicate coordinates     3
-gauge orbits                                 3
+fixed novel candidate, typed                 1
+gauge-unresolved novel semantics             4
+fixed lower-domain duplicate coordinates     4
+gauge orbits                                 4
 falsified second-axis hypotheses             5
 ```
 
@@ -72,6 +73,22 @@ Footprint:
 This family is still limited to the nonempty-list protocol because the
 empty-list SCAN presentation is not independently pinned.
 
+### ZIP/UNZIP × orientation — #3712
+
+Footprint:
+
+```text
+11100000 11100001 11100010 11100011
+```
+
+- `11100000`: lower-domain ZIP-normal duplicate;
+- middle `01/10`: UNZIP-normal duplicate + generated ZIP-SWAPPED, gauge unresolved;
+- `11100011`: generated fixed candidate UNZIP-SWAPPED.
+
+This is a typed product witness over the equal-length ZIP/UNZIP lane.
+#3712 is GREEN but still unmerged, so the ledger counts it as analyzed
+research evidence, not merged authority.
+
 ## Falsified axes
 
 #3670 records five rejected hypotheses:
@@ -91,6 +108,6 @@ python3 benchmarks/d8-research-ledger/run.py \
   --out /tmp/d8-research-ledger
 ```
 
-The artifact contains all 64 selector candidate coordinates, all product
-footprints, all 180 untouched coordinates, gauge metadata, and the current
-falsifier list.
+The artifact contains all 64 selector candidate coordinates, four product
+footprints, all 176 untouched coordinates, gauge metadata, evidence merge
+state, and the current falsifier list.
