@@ -26,7 +26,8 @@
     "four free cells remain free absent independent law or explicit owner assignment",
     "human spellings are projections, not coordinate authority",
     "h/r/l moves are explicit identity-migration candidates, not provenance recovery",
-    "D14 h1/h2 grammar-node duplication has zero D7 coordinate effect"
+    "D14 h1/h2 grammar-node duplication has zero D7 coordinate effect",
+    "class prefixes are geometry neighborhoods, not universal runtime type tags once reserved cells carry convention overlays"
   ],
   "moved_rows": [
     {
@@ -1946,5 +1947,31 @@
       "pinned_bits": "1111111",
       "change": "same"
     }
-  ]
+  ],
+  "class_accounting": {
+    "10": {
+      "capacity": 32,
+      "occupied": 30,
+      "free": 2,
+      "interpretation": "vowel geometry plus Ukrainian extension row; two ḹ-line candidate cells remain free"
+    },
+    "11": {
+      "capacity": 32,
+      "occupied": 32,
+      "free": 0,
+      "interpretation": "sign/operator Text plane; text identity only, never function identity"
+    },
+    "00": {
+      "capacity": 32,
+      "occupied": 32,
+      "free": 0,
+      "interpretation": "25 varga phonological residents + convention overlays in formerly reserved cells; prefix is not a universal phonology type predicate"
+    },
+    "01": {
+      "capacity": 32,
+      "occupied": 30,
+      "free": 2,
+      "interpretation": "non-varga/extension geometry plus convention overlays; two candidate-D migration-vacated cells remain free"
+    }
+  }
 }
