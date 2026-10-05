@@ -10,7 +10,7 @@ Current semantic authority:
   from current D6 selector residents by appending TWO selector choices at once.
 
 This witness proves coordinate generation only. It does not ratify D8
-residency or callability and it never uses Function8/Sens8 history.
+residency or callability and it never uses legacy flat-byte history.
 """
 
 from __future__ import annotations
@@ -189,7 +189,7 @@ def report(rows: list[dict[str, object]]) -> str:
         "NON-CONCLUSIONS:",
         "- the 64 D8 coordinates are not owner-ratified D8 residents;",
         "- the remaining 192 D8 coordinates are not free invitations for allocation;",
-        "- W8 capacity does not imply Function8/Sens8 ontology;",
+        "- W8 capacity does not imply any legacy flat-byte ontology;",
         "- coordinate generation does not imply runtime callability.",
         "",
     ]
