@@ -39,7 +39,7 @@
   ; width не дублюється окремим числом: він є властивістю exact domain/bits
   ; і має бути перевірений доменним carrier/law.
   (request-shape
-    . ((identity
+    . ((ідентичність
         . ((domain . required)
            (bits . required-exact)
            (surface . optional-non-authoritative)))
@@ -51,7 +51,7 @@
         . ((execution-role . required)
            (mechanism-status . required)
            (mechanism-ref . required-when-admitted)))
-       (provenance
+       (походження
         . ((repository . required)
            (revision . required-full-sha)
            (authority-path . required)
