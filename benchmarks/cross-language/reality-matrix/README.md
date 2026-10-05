@@ -32,6 +32,26 @@ SENS vs WebAssembly, CakeML, Lean, Clash, Nock, Unison and Rust.
    numbers must come from the same device, tool version and constraints.
 10. **Negative results stay.** A losing SENS result is evidence, not a regression to hide.
 
+
+## Current SENS owner lanes to reuse
+
+Do not create benchmark-local replacements for evidence that already has an owner:
+
+- `benchmarks/domain12345678/` — current exact-width carrier/runtime baseline. It
+  exercises production `Bits<N> -> BinarySourceWord -> DomainIdentity`; D1-D7 are
+  current semantic foundation and D8 is research.
+- `benchmarks/store-air-load/` — current STORE -> AIR -> LOAD evidence contract for
+  semantic payload bits, physical container bits, wire/profile overhead, and phase-
+  isolated load/decode/ready costs.
+- `benchmarks/current-en-vs-d1d8/` — current paired English/canonical exact-domain
+  CPU lane with fail-closed semantic trace/value/output parity before timing.
+- `benchmarks/cross-language/run.py` — reusable phase/statistics discipline, but its
+  historical Function8 SENS lane must not be relabeled as current D1-D7 evidence.
+
+Competitor adapters should consume or join these owner outputs. If an owner lane lacks a
+needed metric, extend the owner or record the metric as unavailable; do not synthesize a
+parallel semantic path only to make the comparison easy.
+
 ## Shared workload classes
 
 The minimum shared corpus is:
