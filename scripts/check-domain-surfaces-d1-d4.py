@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard the exact-domain D1-D4 Ukrainian/Sanskrit surface projection."""
+"""Guard the exact-domain D1-D4 English/Ukrainian/Sanskrit surface projection."""
 
 from __future__ import annotations
 
@@ -89,6 +89,11 @@ def render_generated(rows: list[dict[str, str]]) -> str:
         surfaces = ", ".join(
             [
                 "DomainSurfaceName { namespace: "
+                + rust_string("en")
+                + ", name: "
+                + rust_string(row["en"])
+                + " }",
+                "DomainSurfaceName { namespace: "
                 + rust_string("uk")
                 + ", name: "
                 + rust_string(row["uk"])
@@ -129,7 +134,7 @@ def validate(rows: list[dict[str, str]]) -> None:
             fail(f"{domain}: projection is not complete exact-width coverage")
 
     # Every human spelling must map to exactly one exact-domain key.
-    for language in ("uk", "sa"):
+    for language in ("en", "uk", "sa"):
         seen: dict[str, tuple[str, str]] = {}
         for row in rows:
             spelling = row[language]
@@ -180,8 +185,8 @@ def main() -> int:
 
     print("D1-D4-SURFACE-GUARD: PASS")
     print("rows=30 d1=2 d2=4 d3=8 d4=16")
-    print("projection=d1-d4 uk+sa exact-domain; source-routing=d3+d4 non-display")
-    print("uk=unique sa=unique exact-width=preserved legacy-byte=absent")
+    print("projection=d1-d4 en+uk+sa exact-domain; source-routing=d3+d4 non-display")
+    print("en=unique uk=unique sa=unique exact-width=preserved legacy-byte=absent")
     return 0
 
 
