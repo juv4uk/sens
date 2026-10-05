@@ -5,7 +5,7 @@ The five workloads and parameters intentionally match external_controls.py.
 Only exact current D3/D4/D5 call heads are used. User-defined function names
 remain lexical symbols. No Sens8/Sid8/Function8 spelling participates.
 
-This first lane measures a prebuilt SENS benchmark runner. It is designed to be
+COND clause test/branch expressions are recursively lifted by the #3422 bridge.\n\nThis first lane measures a prebuilt SENS benchmark runner. It is designed to be
 joined with external controls in one same-machine workflow after the stacked
 source bridge lands.
 """
