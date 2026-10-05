@@ -7,15 +7,16 @@
 ```text
 місткість D8                             256
 selector candidate coordinates            64
-footprint трьох product-family            12
-проаналізовано унікальних координат        76
-untouched coordinates                    180
+footprint чотирьох product-family          16
+проаналізовано унікальних координат        80
+untouched coordinates                    176
 
 fixed novel candidates, full protocol       2
 fixed novel candidate, protocol-bounded      1
-gauge-unresolved novel semantics             3
-fixed lower-domain duplicate coordinates     3
-gauge orbits                                 3
+fixed novel candidate, typed                 1
+gauge-unresolved novel semantics             4
+fixed lower-domain duplicate coordinates     4
+gauge orbits                                 4
 falsified second-axis hypotheses             5
 ```
 
@@ -65,6 +66,20 @@ D7 не є їхнім предком.
 Ця сім'я поки обмежена nonempty-list protocol, бо empty-list presentation
 для SCAN ще не має незалежної влади.
 
+### ZIP/UNZIP × orientation — #3712
+
+```text
+11100000 11100001 11100010 11100011
+```
+
+- `11100000`: lower-domain ZIP-normal duplicate;
+- `01/10`: UNZIP-normal duplicate + generated ZIP-SWAPPED, gauge unresolved;
+- `11100011`: generated fixed candidate UNZIP-SWAPPED.
+
+Це typed product witness для equal-length ZIP/UNZIP lane.
+#3712 GREEN, але ще не merged, тому ledger рахує його як analyzed research
+evidence, а не merged authority.
+
 ## Відкинуті осі
 
 #3670 відкидає п'ять конкретних гіпотез:
@@ -84,5 +99,5 @@ python3 benchmarks/d8-research-ledger/run.py \
   --out /tmp/d8-research-ledger
 ```
 
-Artifact містить 64 selector candidates, три product footprints, усі 180
-untouched coordinates, gauge metadata і список falsified axes.
+Artifact містить 64 selector candidates, чотири product footprints, усі 176
+untouched coordinates, gauge metadata, evidence merge state і список falsified axes.
