@@ -119,7 +119,7 @@ def main() -> int:
     )
 
     lines = [
-        "# Ratified D1-D8 exact-domain benchmark — initial carrier/runtime slice",
+        "# D1-D8 exact-width carrier benchmark — Contract 11.5 boundary",
         "",
         f"Cachegrind I refs, paired empty-loop subtraction, median of {args.reps} runs, "
         f"{args.iterations:,} iterations.",
@@ -142,9 +142,10 @@ def main() -> int:
         "Correctness invariants checked before measurement:",
         "- D1..D8 exact source words round-trip through DomainIdentity;",
         "- equal payload=1 at widths 1..8 never collapses;",
-        "- D1/D2/D7 fail the callable-Core projection;",
-        "- D3/D4/D5/D6/D8 retain the callable projection boundary only; "
-        "this benchmark does not infer execution law from width.",
+        "- D1/D2/D6/D7/D8 fail the generic callable-Core projection;",
+        "- D3/D4/D5 project through the current generic callable boundary;",
+        "- D6 is current semantic residency but generic callability remains separate;",
+        "- D7/D8 are research carriers; measuring W7/W8 does not ratify them;",
         "",
         "Deferred lanes:",
         "- packed/framing accounting follows #3026/#2833;",
