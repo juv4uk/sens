@@ -176,10 +176,14 @@ def packing_facts(
         "BYTE_CONTAINER_TOTAL_BITS",
         "PHYSICAL_CONTAINER_BYTES",
         "PAYLOAD_UTILIZATION",
+        "ROUNDTRIP_WORDS_OK",
     }
     missing = sorted(required - fields.keys())
     if missing:
         raise ValueError(f"packing helper missing fields: {missing}")
+
+    if fields["ROUNDTRIP_WORDS_OK"] != "1":
+        raise ValueError("packing helper did not prove exact-width word round-trip")
 
     return {
         "semantic_word_count": int(fields["SEMANTIC_WORD_COUNT"]),
