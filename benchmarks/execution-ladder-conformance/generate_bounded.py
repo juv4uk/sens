@@ -296,6 +296,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--helper", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--upstream-sha",
+        help="Exact provenance SHA to record; defaults to the checked-out HEAD.",
+    )
     args = parser.parse_args()
 
     repo = Path(__file__).resolve().parents[2]
@@ -304,7 +308,9 @@ def main() -> int:
         raise FileNotFoundError(helper)
 
     programs = generate_programs()
-    sha = git_sha(repo)
+    sha = args.upstream_sha or git_sha(repo)
+    if len(sha) != 40 or any(ch not in "0123456789abcdef" for ch in sha):
+        raise ValueError(f"upstream SHA must be exact lowercase 40-hex, got {sha!r}")
 
     rows: list[dict[str, object]] = []
     seen_case_ids: set[str] = set()
@@ -324,7 +330,7 @@ def main() -> int:
         raise AssertionError(f"expected {EXPECTED_ROWS} rows, got {len(rows)}")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8") as handle:
+    with args.out.open("w", encoding="utf-8", newline="\n") as handle:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
