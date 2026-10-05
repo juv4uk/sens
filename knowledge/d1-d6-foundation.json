@@ -1,0 +1,215 @@
+{
+  "schema": "d1-d6-foundation-ratification/v1",
+  "status": "owner-ratified",
+  "authority": "#3393",
+  "date": "2026-10-05",
+  "current_domains": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6"
+  ],
+  "research_domains": [
+    "D7",
+    "D8"
+  ],
+  "identity_rule": "exact bits + exact domain + admitted/proved law",
+  "supersedes_for_current_authority": [
+    "#3331 D1-D5 foundation / D6 research boundary",
+    "#3327 D6 reset"
+  ],
+  "preserves_as_research_boundary": [
+    "D7-D8 remain research/unratified"
+  ],
+  "domains": {
+    "D1": {
+      "width": 1,
+      "authority": "#1699",
+      "residents": {
+        "0": "NO",
+        "1": "YES"
+      }
+    },
+    "D2": {
+      "width": 2,
+      "authority": "#1702",
+      "residents": {
+        "10": "OPEN",
+        "11": "DOT",
+        "00": "SEPARATOR",
+        "01": "CLOSE"
+      }
+    },
+    "D3": {
+      "width": 3,
+      "authority": "#3202",
+      "residents": {
+        "100": "CAR",
+        "101": "EQ",
+        "110": "COND",
+        "111": "CONS",
+        "000": "EMPTY",
+        "001": "QUOTE",
+        "010": "ATOM",
+        "011": "CDR"
+      }
+    },
+    "D4": {
+      "width": 4,
+      "authority": "#3272",
+      "residents": {
+        "1000": "CAAR",
+        "1001": "CADR",
+        "1010": "LOOKUP",
+        "1011": "BIND",
+        "1100": "EVCON",
+        "1101": "EVLIS",
+        "1110": "LIST",
+        "1111": "APPEND",
+        "0000": "APPLY",
+        "0001": "EVAL",
+        "0010": "LAMBDA",
+        "0011": "DEFINE",
+        "0100": "NOT",
+        "0101": "NULL",
+        "0110": "CDAR",
+        "0111": "CDDR"
+      }
+    },
+    "D5": {
+      "width": 5,
+      "authority": "#3331 via #3305/#3330",
+      "residents": {
+        "10000": "CAAAR",
+        "10001": "CAADR",
+        "10010": "CADAR",
+        "10011": "CADDR",
+        "10100": "REVERSE",
+        "10101": "REVERSE-ONTO",
+        "10110": "TIMES",
+        "10111": "QUOTIENT",
+        "11000": "GO",
+        "11001": "RETURN",
+        "11010": "LESSP",
+        "11011": "GREATERP",
+        "11100": "ASSOC",
+        "11101": "MEMBER",
+        "11110": "PAIRLIS",
+        "11111": "SUBST",
+        "00000": "EVALQUOTE",
+        "00001": "FUNCTION",
+        "00010": "FEXPR",
+        "00011": "MACRO",
+        "00100": "LABEL",
+        "00101": "PROG",
+        "00110": "SET",
+        "00111": "SETQ",
+        "01000": "ZEROP",
+        "01001": "NUMBERP",
+        "01010": "PLUS",
+        "01011": "DIFFERENCE",
+        "01100": "CDAAR",
+        "01101": "CDADR",
+        "01110": "CDDAR",
+        "01111": "CDDDR"
+      },
+      "relation_classes": {
+        "COORDINATE-HISTORICAL": 4,
+        "MULTI-DELTA-FAMILY": 2,
+        "LOCAL-ALGEBRA": 5,
+        "SEMANTIC-GENERATOR": 5
+      }
+    },
+    "D6": {
+      "width": 6,
+      "authority": "#3393",
+      "capacity": 64,
+      "occupancy": 64,
+      "residents": {
+        "100000": "CAAAAR",
+        "100001": "CAAADR",
+        "100010": "CAADAR",
+        "100011": "CAADDR",
+        "100100": "CADAAR",
+        "100101": "CADADR",
+        "100110": "CADDAR",
+        "100111": "CADDDR",
+        "101000": "MAP",
+        "101001": "FILTER",
+        "101010": "MAP-ONTO",
+        "101011": "FILTER-ONTO",
+        "101100": "CURRY",
+        "101101": "FLIP",
+        "101110": "REDUCE",
+        "101111": "SCAN",
+        "110000": "TAKE",
+        "110001": "DROP",
+        "110010": "DO",
+        "110011": "WHILE",
+        "110100": "LEQ",
+        "110101": "MIN",
+        "110110": "GEQ",
+        "110111": "MAX",
+        "111000": "ZIP",
+        "111001": "UNZIP",
+        "111010": "INTERSECTION",
+        "111011": "UNION",
+        "111100": "ANY",
+        "111101": "ALL",
+        "111110": "INTEGERP",
+        "111111": "RATIONALP",
+        "000000": "LENGTH",
+        "000001": "LENGTH-ONTO",
+        "000010": "MIN-LIST",
+        "000011": "MAX-LIST",
+        "000100": "NTH",
+        "000101": "MAPLIST",
+        "000110": "MACROEXPAND-1",
+        "000111": "MACROEXPAND",
+        "001000": "LET",
+        "001001": "LET*",
+        "001010": "SUBLIS",
+        "001011": "COMPOSE",
+        "001100": "RASSOC",
+        "001101": "ACONS",
+        "001110": "ADD1",
+        "001111": "SUB1",
+        "010000": "EVENP",
+        "010001": "ODDP",
+        "010010": "NEG",
+        "010011": "ABS",
+        "010100": "REMAINDER",
+        "010101": "GCD",
+        "010110": "RECIP",
+        "010111": "EXPT",
+        "011000": "CDAAAR",
+        "011001": "CDAADR",
+        "011010": "CDADAR",
+        "011011": "CDADDR",
+        "011100": "CDDAAR",
+        "011101": "CDDADR",
+        "011110": "CDDDAR",
+        "011111": "CDDDDR"
+      },
+      "coordinate_basis": {
+        "PROVED-SELECTOR": 16,
+        "OWNER-RATIFIED-LAW-ANCHORED": 16,
+        "OWNER-RATIFIED-S4-GAUGE": 32
+      }
+    }
+  },
+  "laws": [
+    "D1 PredicateBit 0/1 is distinct from structural EMPTY and Number zero",
+    "D2 is structural syntax only",
+    "D3 follows owner-ratified L1-L5",
+    "D4 is dense 16/16; compact residency does not imply primitive irreducibility",
+    "D5 is dense 32/32 with zero lower-domain duplicates and no universal fifth-bit meaning",
+    "D6 is dense 64/64 under owner ratification #3393; coordinate authority is contracts/d6-ratification.lisp and knowledge/d6-ratified.json",
+    "D6 gauge-selected coordinates are normative by owner decision but remain distinguished from pre-ratification semantic derivation proofs",
+    "D7-D8 remain research/unratified; width alone never grants semantic admission or callability",
+    "legacy flat 8-bit coordinates and historical D6 maps have zero current placement authority"
+  ],
+  "d7_entry_rule": "derive D7 only from this exact D1-D6 foundation plus independent D7 laws; historical D7 maps are donor/provenance only"
+}
