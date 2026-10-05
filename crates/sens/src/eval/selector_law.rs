@@ -219,6 +219,54 @@ mod tests {
     }
 
     #[test]
+    fn complement_commutes_with_selector_growth_through_d5() {
+        // #3499/#3506: for an admitted selector parent p and child bit b,
+        // C_{n+1}(p || b) = C_n(p) || (1-b).
+        //
+        // Check both the coordinate equation and the independently decoded
+        // selector-step semantics. This is family-local evidence, not a claim
+        // that complement gives semantic duals for all D4/D5 residents.
+        for parent in [0b100u8, 0b011u8] {
+            let parent_dual = parent ^ 0b111;
+            let a = decode(d3(parent)).unwrap();
+            let b = decode(d3(parent_dual)).unwrap();
+            assert_eq!(a.len, b.len);
+            for index in 0..a.len {
+                assert_ne!(a.steps[index], b.steps[index]);
+            }
+
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b1111, expected_dual);
+
+                let left = decode(d4(child)).unwrap();
+                let right = decode(d4(expected_dual)).unwrap();
+                assert_eq!(left.len, right.len);
+                for index in 0..left.len {
+                    assert_ne!(left.steps[index], right.steps[index]);
+                }
+            }
+        }
+
+        for parent in [0b1000u8, 0b1001u8, 0b0110u8, 0b0111u8] {
+            let parent_dual = parent ^ 0b1111;
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b1_1111, expected_dual);
+
+                let left = decode(d5(child)).unwrap();
+                let right = decode(d5(expected_dual)).unwrap();
+                assert_eq!(left.len, right.len);
+                for index in 0..left.len {
+                    assert_ne!(left.steps[index], right.steps[index]);
+                }
+            }
+        }
+    }
+
+    #[test]
     fn exactly_two_d3_four_d4_and_eight_d5_selectors_are_admitted() {
         let mut generated = 0usize;
         for raw in 0u8..8 {
