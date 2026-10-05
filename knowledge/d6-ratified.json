@@ -1,0 +1,980 @@
+{
+  "schema": "d6-ratified/v1",
+  "status": "owner-ratified",
+  "authority": "#3393",
+  "date": "2026-10-05",
+  "domain": "D6",
+  "width": 6,
+  "capacity": 64,
+  "occupancy": 64,
+  "distinct_residents": 64,
+  "foundation_contract": "Contract 11.5",
+  "residents": {
+    "100000": "CAAAAR",
+    "100001": "CAAADR",
+    "100010": "CAADAR",
+    "100011": "CAADDR",
+    "100100": "CADAAR",
+    "100101": "CADADR",
+    "100110": "CADDAR",
+    "100111": "CADDDR",
+    "101000": "MAP",
+    "101001": "FILTER",
+    "101010": "MAP-ONTO",
+    "101011": "FILTER-ONTO",
+    "101100": "CURRY",
+    "101101": "FLIP",
+    "101110": "REDUCE",
+    "101111": "SCAN",
+    "110000": "TAKE",
+    "110001": "DROP",
+    "110010": "DO",
+    "110011": "WHILE",
+    "110100": "LEQ",
+    "110101": "MIN",
+    "110110": "GEQ",
+    "110111": "MAX",
+    "111000": "ZIP",
+    "111001": "UNZIP",
+    "111010": "INTERSECTION",
+    "111011": "UNION",
+    "111100": "ANY",
+    "111101": "ALL",
+    "111110": "INTEGERP",
+    "111111": "RATIONALP",
+    "000000": "LENGTH",
+    "000001": "LENGTH-ONTO",
+    "000010": "MIN-LIST",
+    "000011": "MAX-LIST",
+    "000100": "NTH",
+    "000101": "MAPLIST",
+    "000110": "MACROEXPAND-1",
+    "000111": "MACROEXPAND",
+    "001000": "LET",
+    "001001": "LET*",
+    "001010": "SUBLIS",
+    "001011": "COMPOSE",
+    "001100": "RASSOC",
+    "001101": "ACONS",
+    "001110": "ADD1",
+    "001111": "SUB1",
+    "010000": "EVENP",
+    "010001": "ODDP",
+    "010010": "NEG",
+    "010011": "ABS",
+    "010100": "REMAINDER",
+    "010101": "GCD",
+    "010110": "RECIP",
+    "010111": "EXPT",
+    "011000": "CDAAAR",
+    "011001": "CDAADR",
+    "011010": "CDADAR",
+    "011011": "CDADDR",
+    "011100": "CDDAAR",
+    "011101": "CDDADR",
+    "011110": "CDDDAR",
+    "011111": "CDDDDR"
+  },
+  "rows": [
+    {
+      "coordinate": "000000",
+      "resident": "LENGTH",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "000001",
+      "resident": "LENGTH-ONTO",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "000010",
+      "resident": "MIN-LIST",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "000011",
+      "resident": "MAX-LIST",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "000100",
+      "resident": "NTH",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "000101",
+      "resident": "MAPLIST",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "000110",
+      "resident": "MACROEXPAND-1",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3083",
+        "#3094",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "000111",
+      "resident": "MACROEXPAND",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3083",
+        "#3094",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001000",
+      "resident": "LET",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "PRODUCT-AXIS-CANDIDATE",
+      "evidence": [
+        "#3081",
+        "#3091",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001001",
+      "resident": "LET*",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "PRODUCT-AXIS-CANDIDATE",
+      "evidence": [
+        "#3081",
+        "#3091",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001010",
+      "resident": "SUBLIS",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001011",
+      "resident": "COMPOSE",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001100",
+      "resident": "RASSOC",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001101",
+      "resident": "ACONS",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001110",
+      "resident": "ADD1",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "001111",
+      "resident": "SUB1",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010000",
+      "resident": "EVENP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "NEIGHBORHOOD-CANDIDATE",
+      "evidence": [
+        "#3078",
+        "#3079",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010001",
+      "resident": "ODDP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "NEIGHBORHOOD-CANDIDATE",
+      "evidence": [
+        "#3078",
+        "#3079",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010010",
+      "resident": "NEG",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010011",
+      "resident": "ABS",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010100",
+      "resident": "REMAINDER",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010101",
+      "resident": "GCD",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010110",
+      "resident": "RECIP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "010111",
+      "resident": "EXPT",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011000",
+      "resident": "CDAAAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011001",
+      "resident": "CDAADR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011010",
+      "resident": "CDADAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011011",
+      "resident": "CDADDR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011100",
+      "resident": "CDDAAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011101",
+      "resident": "CDDADR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011110",
+      "resident": "CDDDAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "011111",
+      "resident": "CDDDDR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100000",
+      "resident": "CAAAAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100001",
+      "resident": "CAAADR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100010",
+      "resident": "CAADAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100011",
+      "resident": "CAADDR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100100",
+      "resident": "CADAAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100101",
+      "resident": "CADADR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100110",
+      "resident": "CADDAR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "100111",
+      "resident": "CADDDR",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "proved-selector-generator",
+      "prior_status": "PROVED",
+      "law_status": "SELECTOR-GENERATOR",
+      "evidence": [
+        "#3321",
+        "knowledge/d6-v2-selector-rebase.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101000",
+      "resident": "MAP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101001",
+      "resident": "FILTER",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101010",
+      "resident": "MAP-ONTO",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101011",
+      "resident": "FILTER-ONTO",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "PRODUCT-SQUARE-CANDIDATE",
+      "evidence": [
+        "#3323",
+        "lib/core.lisp",
+        "crates/sens/tests/stack_safety.rs",
+        "crates/sens/tests/mccarthy.rs",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101100",
+      "resident": "CURRY",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101101",
+      "resident": "FLIP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101110",
+      "resident": "REDUCE",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "101111",
+      "resident": "SCAN",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110000",
+      "resident": "TAKE",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110001",
+      "resident": "DROP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110010",
+      "resident": "DO",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110011",
+      "resident": "WHILE",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110100",
+      "resident": "LEQ",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110101",
+      "resident": "MIN",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110110",
+      "resident": "GEQ",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "110111",
+      "resident": "MAX",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3084",
+        "#3095",
+        "#3105",
+        "#3106",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111000",
+      "resident": "ZIP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111001",
+      "resident": "UNZIP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111010",
+      "resident": "INTERSECTION",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3085",
+        "#3089",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111011",
+      "resident": "UNION",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-law-anchored-coordinate",
+      "prior_status": "CANDIDATE-WITH-LAW",
+      "law_status": "RELATION-ONLY",
+      "evidence": [
+        "#3085",
+        "#3089",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111100",
+      "resident": "ANY",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111101",
+      "resident": "ALL",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111110",
+      "resident": "INTEGERP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    },
+    {
+      "coordinate": "111111",
+      "resident": "RATIONALP",
+      "status": "OWNER-RATIFIED",
+      "coordinate_basis": "owner-ratified-s4-gauge-choice",
+      "prior_status": "GAUGE-FIXED-CANDIDATE",
+      "law_status": "S4-CANONICAL-GAUGE",
+      "evidence": [
+        "#3390",
+        "#3384",
+        "knowledge/d6-v2-binary-law-families.json",
+        "#3393"
+      ]
+    }
+  ],
+  "laws": [
+    "exact D6 coordinate is semantic identity only under this ratified map and Contract 11.5",
+    "D6 is dense 64/64; density does not imply primitive irreducibility or callable mechanism",
+    "the sixteen depth-4 selector residents retain selector-generator proof authority",
+    "the S3 common residue axis xxxxx0<->xxxxx1 is admitted as D6 geometry evidence",
+    "the S4 canonical gauge representative is owner-ratified as coordinate convention for previously gauge-free meanings",
+    "owner gauge ratification fixes coordinates but does not retroactively turn gauge choice into a semantic derivation theorem",
+    "historical D6 maps remain donor/provenance only and do not regain placement authority",
+    "runtime callability remains separate and fails closed where no mechanism is admitted",
+    "automatic D5-to-D6 prefix propagation remains false unless separately proved"
+  ],
+  "supersedes_for_current_authority": [
+    "#3331 D6 research boundary",
+    "#3278 D6 revocation/reset",
+    "OD-006 historical/full-map coordinate authority"
+  ],
+  "preserves": [
+    "legacy flat identity non-authority",
+    "D7-D8 research boundary"
+  ]
+}
