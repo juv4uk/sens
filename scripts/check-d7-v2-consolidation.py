@@ -88,7 +88,7 @@ for bits in ["0100001","0101010"]:
 
 assert ledger["role_layers"]["local_ordinal"]["count"]==14
 assert ledger["role_layers"]["local_ordinal"]["coordinate_effect"].startswith("NONE")
-assert ledger["shiva_sound_projection"]["status"]=="OPEN-DONOR-STACK"
+assert ledger["shiva_sound_projection"]["status"]=="MERGED-UPSTREAM-DONOR"
 
 evaluation=ledger["migration_candidate"]["evaluation"]
 assert evaluation["candidate"]=="D / UPC-14-derived Text7 geometry"
