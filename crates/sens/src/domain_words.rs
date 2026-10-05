@@ -123,10 +123,11 @@ impl CoreD5 {
     }
 }
 
-/// Exact six-bit mechanical/research carrier historically named CoreD6.
+/// Exact six-bit carrier for current Core.D6 semantic identity.
 ///
-/// D6 semantic ratification is revoked by #3278. This type preserves exact
-/// width only and deliberately has no implicit relationship to D5 or Sens8.
+/// Contract 11.6 / #3393 ратифікує D6 64/64. Цей тип доводить лише exact
+/// D6 membership; наявність callable mechanism лишається окремим фактом і
+/// може fail-closed. Жодного неявного зв'язку з D5 або історичним Sens8 нема.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD6(Bit6);
