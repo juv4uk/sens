@@ -17,6 +17,23 @@ pub enum CompilerExecutionRole {
     PairConstruct,
 }
 
+/// Backend-neutral compiler role for the complete current compiler-nucleus
+/// semantic closure.  This type is representation only: production meaning is
+/// derived by executing the SENS-owned structural law through
+/// `compiler_lowering_role_from_sens`.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum CompilerLoweringRole {
+    QuoteForm,
+    AtomPredicate,
+    SelectorTail,
+    SelectorHead,
+    AtomEquality,
+    CondForm,
+    PairConstruct,
+    LambdaForm,
+    DefineForm,
+}
+
 /// Differential/bootstrap oracle for the first compiler execution-role slice.\n///\n/// Production compiler consumers should use `compiler_execution_role_from_sens`,\n/// which executes the language-owned law. This Rust projection remains as an\n/// independent oracle while the cutover is being proved.\n///
 /// The projection delegates to the production selector-law decoder used by the
 /// evaluator. No second D3 bits-to-role table is maintained here. The first
