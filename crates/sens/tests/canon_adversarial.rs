@@ -37,11 +37,11 @@ fn quote_surface_suppresses_evaluation_of_unknown_code() {
 #[test]
 fn cond_surface_stops_at_the_first_true_clause() {
     assert_eq!(
-        eval("(за-умовою (t (як-є перша)) ((цієї-функції-не-існує) (як-є друга)))"),
+        eval("(за-умовою ((тотожне? (як-є перша) (як-є перша)) (як-є перша)) ((цієї-функції-не-існує) (як-є друга)))"),
         "перша"
     );
     assert_eq!(
-        eval("(anukrama (t (svarūpa prathama)) ((ayam-na-vidyate) (svarūpa dvitīya)))"),
+        eval("(anukrama ((abheda? (svarūpa prathama) (svarūpa prathama)) (svarūpa prathama)) ((ayam-na-vidyate) (svarūpa dvitīya)))"),
         "prathama"
     );
 }
