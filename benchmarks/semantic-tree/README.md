@@ -45,7 +45,7 @@ python3 benchmarks/semantic-tree/run.py \
 ```
 
 The CI smoke first runs the **real** `d6_selector_runtime` evaluator witness
-from #3624 and only then runs this isolated paired mechanism benchmark. Thus the
+from #3588 and only then runs this isolated paired mechanism benchmark. Thus the
 performance control cannot silently drift away from the admitted runtime law.
 
 ## Measurements
@@ -76,6 +76,29 @@ Every current row carries Contract 11.6 project scope plus D6-specific provenanc
 and `instructions.tsv`.
 
 A generator loss to `flat` is a valid completed negative result.
+
+## Mode-specialized code size (#3582)
+
+The shared multi-mode binary cannot answer per-lane executable footprint.
+`code_size.py` therefore compiles three separate benchmark-only binaries from
+the same 16-selector D6 corpus:
+
+```sh
+python3 benchmarks/semantic-tree/code_size.py \
+  --calls 100000 \
+  --out /tmp/sens-3582
+```
+
+It requires `rustc`, GNU `size`, and GNU `strip`. All three binaries must
+produce the same checksum before any byte result is accepted.
+
+Reported independently:
+- executable file bytes and stripped file bytes;
+- `.text`, `.rodata`, `.data`, and `.bss`;
+- prepared runtime storage.
+
+The flat16 table is a benchmark-only control. Code size has no semantic
+authority.
 
 ## General research matrix
 
