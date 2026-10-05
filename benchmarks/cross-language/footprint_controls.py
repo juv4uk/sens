@@ -270,7 +270,7 @@ def main() -> int:
                 {
                     "runtime": runtime,
                     "workload": workload,
-                    "artifact_scope": "exact executable used for this runtime/workload row",
+                    "artifact_scope": "resolved command artifact for this runtime/workload row; dependency closure excluded",
                     "artifact_path": str(exe),
                     "artifact_bytes": exe.stat().st_size,
                     "text_section_bytes": text_section_bytes(exe),
@@ -327,7 +327,7 @@ def main() -> int:
         "machine": platform.machine(),
         "scope_rules": {
             "join_key": ["runtime", "workload"],
-            "artifact": "exact executable backing each runtime/workload row",
+            "artifact": "resolved command artifact; wrappers/shared-library/dependency closure excluded",
             "rss": "median max RSS from /usr/bin/time -v for the same workload",
             "program": "generated benchmark source bytes for the same workload",
             "semantic": "not measured here",
@@ -349,7 +349,7 @@ def main() -> int:
         "# Paired runtime/workload footprint",
         "",
         "Each row uses the same (runtime, workload) key as the execution corpus.",
-        "This does not infer semantic size and excludes shared-library dependency closure.",
+        "This does not infer semantic size. Command artifacts are not full installed/runtime dependency closures.",
         "",
         "| workload | runtime | artifact bytes | .text bytes | median max RSS bytes | source bytes |",
         "|---|---|---:|---:|---:|---:|",
