@@ -3,7 +3,7 @@ name: D8 TAKE-DROP edge product research
 on:
   pull_request:
     paths:
-      - "scripts/research-3622-d8-take-drop-edge.py"
+      - "benchmarks/d8-take-drop-edge/run.py"
       - "knowledge/d6-ratified.json"
       - "docs/research/3622-d8-take-drop-edge.md"
       - "docs/research/3622-d8-take-drop-edge.uk.md"
@@ -12,7 +12,7 @@ on:
     branches:
       - main
     paths:
-      - "scripts/research-3622-d8-take-drop-edge.py"
+      - "benchmarks/d8-take-drop-edge/run.py"
       - "docs/research/3622-d8-take-drop-edge.md"
       - ".github/workflows/d8-take-drop-edge.yml"
   workflow_dispatch:
@@ -27,13 +27,13 @@ jobs:
       - name: Run bounded D8 product witness
         run: |
           rm -rf /tmp/d8-take-drop-edge
-          python3 scripts/research-3622-d8-take-drop-edge.py \
+          python3 benchmarks/d8-take-drop-edge/run.py \
             --out /tmp/d8-take-drop-edge
 
       - name: Verify deterministic replay
         run: |
           rm -rf /tmp/d8-take-drop-edge-2
-          python3 scripts/research-3622-d8-take-drop-edge.py \
+          python3 benchmarks/d8-take-drop-edge/run.py \
             --out /tmp/d8-take-drop-edge-2
           cmp /tmp/d8-take-drop-edge/witness.json \
               /tmp/d8-take-drop-edge-2/witness.json
