@@ -11,13 +11,17 @@ on:
       - ".github/workflows/historical-setq-research.yml"
   workflow_dispatch:
 
+concurrency:
+  group: historical-setq-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
 jobs:
   historical-setq:
     name: Lisp 1.5 SETQ historical classification
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     steps:
       - uses: actions/checkout@v5
       - name: Validate historical evidence record
