@@ -218,6 +218,37 @@
     "derive or explicitly gauge-fix vowel quality code only if laws justify it",
     "seek stronger varga/non-varga cross-family place law or preserve local geometries",
     "prepare candidate-D compatibility/migration package under #3432",
-    "keep W7 packing as mechanism-only evidence under #3429"
-  ]
+    "keep W7 packing as mechanism-only evidence under #3429",
+    "keep the verified 43/43 hakardvitva result in D14 grammar topology and only admit an explicit Text7↔D14 bridge"
+  ],
+  "d14_pratyahara_boundary": {
+    "evidence": [
+      "shiva-sutras PR #113",
+      "prototype/verify_hakardvitva_c1p.py"
+    ],
+    "verified": {
+      "tucker_obstructions": 84,
+      "minimum_transversal_size": 4,
+      "unique_minimum_transversal": [
+        "ral",
+        "jhal",
+        "val",
+        "śal"
+      ],
+      "ceiling_42_unique_sounds": "39/43",
+      "dual_h_43_node_path": "43/43"
+    },
+    "semantic_split": {
+      "D7": "phonetic/text geometry; no pratyahara-interval requirement",
+      "D14": "grammar graph/path; pratyaharas may be native intervals",
+      "bridge": "one Text7 h can project to D14 h1 or h2 by grammar context"
+    },
+    "law_status": "CROSS-DOMAIN-BOUNDARY-VERIFIED",
+    "d7_coordinate_status": "NO-EFFECT",
+    "anti_claims": [
+      "43/43 is not D7 occupancy",
+      "h1/h2 are grammar-node multiplicity, not proof of two phonemes",
+      "do not spend D7 free/reserved cells to encode D14 path duplication"
+    ]
+  }
 }
