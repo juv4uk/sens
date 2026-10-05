@@ -190,7 +190,7 @@ def main() -> int:
     )
     parser.add_argument("--helper", type=Path, required=True)
     parser.add_argument("--startup-helper", type=Path, required=True)
-    parser.add_argument("--fasl", type=Path, default=Path("lib/core.lisp.fasl"))
+    parser.add_argument("--fasl", type=Path, default=Path("lib/core4.lisp.fasl"))
     parser.add_argument("--reps", type=int, default=1)
     parser.add_argument(
         "--only",
