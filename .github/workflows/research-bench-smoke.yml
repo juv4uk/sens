@@ -9,6 +9,8 @@ on:
     paths:
       - ".github/workflows/research-bench-smoke.yml"
       - "benchmarks/semantic-tree/**"
+      - "benchmarks/generator-economy/**"
+      - "knowledge/d1-d6-foundation.json"
       - "crates/sens/src/eval/selector_law.rs"
       - "crates/sens/tests/d6_selector_runtime.rs"
       - "knowledge/d6-mechanism-ledger.json"
@@ -20,6 +22,8 @@ on:
     paths:
       - ".github/workflows/research-bench-smoke.yml"
       - "benchmarks/semantic-tree/**"
+      - "benchmarks/generator-economy/**"
+      - "knowledge/d1-d6-foundation.json"
       - "crates/sens/src/eval/selector_law.rs"
       - "crates/sens/tests/d6_selector_runtime.rs"
       - "knowledge/d6-mechanism-ledger.json"
@@ -60,6 +64,12 @@ jobs:
             --out /tmp/sens-self-description-check \
             --check-only
 
+      - name: Current selector closure / law-economics
+        run: |
+          rm -rf /tmp/sens-current-closure
+          python3 benchmarks/generator-economy/current_closure.py \
+            --out /tmp/sens-current-closure
+
       - name: Publish structural smoke summary
         if: always()
         run: |
@@ -76,6 +86,15 @@ jobs:
             echo '~~~'
             echo
             echo "Self-description parity is a correctness gate; no wall-clock threshold is used."
+            echo
+            echo "### Current selector closure"
+            echo '~~~text'
+            if test -s /tmp/sens-current-closure/closure.tsv; then
+              cat /tmp/sens-current-closure/closure.tsv
+            else
+              echo "closure artifact missing"
+            fi
+            echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
@@ -85,6 +104,7 @@ jobs:
           path: |
             /tmp/sens-agent-message-size/
             /tmp/sens-self-description-check/
+            /tmp/sens-current-closure/
           retention-days: 7
 
   semantic-tree-smoke:
