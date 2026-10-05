@@ -70,22 +70,22 @@ def verify_all_ones(path: Path, size: int) -> None:
             f"wrong output size: expected {expected_bytes}, got {actual_bytes}"
         )
 
-    seen = 0
+    # Verify every byte, but keep the hot loop in CPython's C-level bytes
+    # comparison instead of iterating millions of Python integers.
+    unit = struct.pack("<i", 1)
+    block_elems = (1024 * 1024) // len(unit)
+    full_block = unit * block_elems
+    remaining = size
     with path.open("rb") as source:
-        while True:
-            chunk = source.read(1024 * 1024)
-            if not chunk:
-                break
-            if len(chunk) % 4:
-                raise RuntimeError("output byte count is not divisible by i32 width")
-            for (value,) in struct.iter_unpack("<i", chunk):
-                if value != 1:
-                    raise RuntimeError(
-                        f"CUDA result mismatch at element {seen}: expected 1, got {value}"
-                    )
-                seen += 1
-    if seen != size:
-        raise RuntimeError(f"verified {seen} elements, expected {size}")
+        while remaining:
+            take = min(remaining, block_elems)
+            chunk = source.read(take * 4)
+            expected = full_block if take == block_elems else unit * take
+            if chunk != expected:
+                raise RuntimeError(
+                    f"CUDA result mismatch in block ending at element {size - remaining + take}"
+                )
+            remaining -= take
 
 
 def gpu_info(env: dict[str, str]) -> str:
