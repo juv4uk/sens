@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::env;
 use std::hint::black_box;
+use std::mem::size_of;
 
 #[derive(Clone, Copy)]
 struct Node {
@@ -10,7 +11,7 @@ struct Node {
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 struct Word {
-    root: u8,   // 0 = CAR/root 101, 1 = CDR/root 110
+    root: u8,   // abstract branch: 0 = current CAR/root 100, 1 = current CDR/root 011
     suffix: u32,
     depth: u8,
 }
@@ -219,10 +220,17 @@ fn print_metrics(mode: &str, depth: u8, calls: usize, distinct: usize, cache_ent
     let d = depth as u64;
     let n = calls as u64;
     let u = distinct as u64;
+    let family_entries = 1usize << (depth as usize + 1);
+    let flat_table_bytes = family_entries * size_of::<ExecPath>();
 
     println!("METRIC\tcalls\t{n}");
     println!("METRIC\tdistinct_words\t{u}");
     println!("METRIC\tpath_depth\t{d}");
+    println!("METRIC\tselector_family_entries\t{family_entries}");
+    println!(
+        "METRIC\tflat_table_bytes\t{}",
+        if mode == "flat" { flat_table_bytes } else { 0 }
+    );
 
     match mode {
         "flat" => {
