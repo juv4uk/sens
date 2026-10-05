@@ -409,6 +409,33 @@ impl Environment {
         }
     }
 
+    /// Updates the nearest already-existing lexical binding and never creates one.
+    ///
+    /// This is the storage mechanism used by the exact D5 SET/SETQ residents.
+    /// Semantic authority remains with the D5 domain law; this method only mutates
+    /// the selected environment cell after the evaluator has resolved the target.
+    pub(crate) fn update_nearest_existing(&self, name: &str, value: Value) -> bool {
+        let mut frame = Rc::clone(&self.0);
+        loop {
+            let parent = {
+                let mut current = frame.borrow_mut();
+                if let Some(index) = current.slot_index(name) {
+                    current.slots[index] = value;
+                    return true;
+                }
+                if let Some(slot) = current.values.get_mut(name) {
+                    *slot = value;
+                    return true;
+                }
+                current.parent.as_ref().map(|parent| Rc::clone(&parent.0))
+            };
+            let Some(next) = parent else {
+                return false;
+            };
+            frame = next;
+        }
+    }
+
     pub fn get(&self, name: &str) -> Option<Value> {
         // Walk the frames themselves: cloning an `Environment` per step would
         // run its `Drop` for every step of every lookup.
