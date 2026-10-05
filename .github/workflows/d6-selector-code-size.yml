@@ -1,0 +1,59 @@
+name: D6 selector code-size benchmark
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/d6-selector-code-size.yml"
+      - "benchmarks/semantic-tree/code_size.py"
+      - "benchmarks/semantic-tree/code_size.rs"
+      - "benchmarks/semantic-tree/README.md"
+  workflow_dispatch:
+
+concurrency:
+  group: d6-selector-code-size-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  code-size:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install binutils
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils
+          rustc --version
+          size --version | head -1
+          strip --version | head -1
+
+      - name: Build all three lanes and require checksum parity
+        run: |
+          rm -rf /tmp/sens-d6-code-size
+          python3 benchmarks/semantic-tree/code_size.py \
+            --calls 100000 \
+            --out /tmp/sens-d6-code-size
+
+      - name: Publish code-size evidence
+        if: always()
+        run: |
+          {
+            echo "## D6 selector mode-specialized footprint"
+            echo
+            echo "Same-checksum gate precedes every byte claim."
+            if test -s /tmp/sens-d6-code-size/code_size.tsv; then
+              echo '~~~text'
+              cat /tmp/sens-d6-code-size/code_size.tsv
+              echo '~~~'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-selector-code-size-evidence
+          path: /tmp/sens-d6-code-size/
+          retention-days: 14
