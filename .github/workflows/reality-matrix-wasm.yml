@@ -1,0 +1,45 @@
+name: Reality Matrix WebAssembly smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "benchmarks/cross-language/reality-matrix/**"
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "benchmarks/store-air-load/**"
+      - "crates/sens/**"
+      - "language-contract.lisp"
+      - ".github/workflows/reality-matrix-wasm.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  wasm-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Run D3 WebAssembly reality smoke
+        run: |
+          python3 benchmarks/cross-language/reality-matrix/wasm/run.py             --out-dir "$RUNNER_TEMP/reality-wasm"             --outer-reps 2             --inner-repeats 100             --evidence-mode smoke
+
+      - name: Revalidate machine-readable output
+        run: |
+          python3 benchmarks/cross-language/reality-matrix/validate.py             "$RUNNER_TEMP/reality-wasm/comparison.json"
+          test -s "$RUNNER_TEMP/reality-wasm/raw/runs.tsv"
+          test -s "$RUNNER_TEMP/reality-wasm/report.md"
+
+      - name: Upload smoke evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: reality-matrix-wasm-smoke
+          path: |
+            ${{ runner.temp }}/reality-wasm/comparison.json
+            ${{ runner.temp }}/reality-wasm/environment.json
+            ${{ runner.temp }}/reality-wasm/raw/runs.tsv
+            ${{ runner.temp }}/reality-wasm/report.md
