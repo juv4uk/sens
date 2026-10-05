@@ -25,6 +25,10 @@ on:
       - "scripts/check-bija3-current-authority.py"
       - ".github/workflows/bija3-current-authority.yml"
 
+concurrency:
+  group: bija3-current-authority-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   authority:
     runs-on: [self-hosted, guix]
