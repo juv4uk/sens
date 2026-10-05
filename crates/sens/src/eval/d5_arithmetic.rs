@@ -66,13 +66,13 @@ mod tests {
         );
         assert_eq!(
             invoke(d5(0b11010), &[n(2.0), n(3.0)], &env, span)
-                .unwrap().unwrap().to_string(),
-            "1"
+                .unwrap().unwrap().as_predicate_bit(),
+            Some(true)
         );
         assert_eq!(
             invoke(d5(0b11011), &[n(3.0), n(2.0)], &env, span)
-                .unwrap().unwrap().to_string(),
-            "1"
+                .unwrap().unwrap().as_predicate_bit(),
+            Some(true)
         );
         assert_eq!(
             invoke(d5(0b10110), &[n(2.0), n(3.0), n(4.0)], &env, span)
