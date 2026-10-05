@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[4]
 FIXTURE = ROOT / "benchmarks" / "current-en-vs-d1d8" / "fixtures" / "d3-smoke.json"
 CONTROL_JS = Path(__file__).with_name("wasm_control.js")
 MODULE_PY = Path(__file__).with_name("wasm_module.py")
+RSS_PY = Path(__file__).resolve().parents[1] / "rss.py"
 SENS_EXAMPLE = "current_en_vs_d1d8_cpu"
 PACK_EXAMPLE = "store_air_load_repr"
 CASES = ("d3-quote-empty", "d3-car-empty")
@@ -44,6 +45,15 @@ def load_module_builders():
     spec = importlib.util.spec_from_file_location("reality_wasm_module", MODULE_PY)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load {MODULE_PY}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_rss_module():
+    spec = importlib.util.spec_from_file_location("reality_matrix_rss", RSS_PY)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {RSS_PY}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -196,6 +206,8 @@ def main() -> int:
     sens, pack = build_sens_helpers()
     fixtures = load_cases()
     builders = load_module_builders()
+    rssmod = load_rss_module()
+    rss_available = bool(rssmod.GNU_TIME.is_file())
 
     raw_rows: list[dict[str, object]] = []
     workloads: list[dict[str, object]] = []
@@ -230,6 +242,8 @@ def main() -> int:
             wasm_warm: list[float] = []
             sens_cold: list[float] = []
             wasm_cold: list[float] = []
+            sens_rss: list[float] = []
+            wasm_rss: list[float] = []
 
             for rep in range(args.outer_reps):
                 s_ing = float(sens_elapsed(sens, "canonical-d1d8", "ingest", canonical))
@@ -249,6 +263,23 @@ def main() -> int:
                 wasm_warm.append(w_warm)
                 sens_cold.append(s_cold)
                 wasm_cold.append(w_cold)
+
+                s_rss = None
+                w_rss = None
+                if rss_available:
+                    sens_rss_cmd = [
+                        str(sens), "canonical-d1d8", "repeated",
+                        str(canonical), str(args.inner_repeats),
+                    ]
+                    wasm_rss_cmd = [
+                        args.node, str(CONTROL_JS), str(module_path),
+                        "call", str(args.inner_repeats),
+                    ]
+                    _s_out, _s_err, s_rss = rssmod.measure_peak_rss_kb(sens_rss_cmd)
+                    _w_out, _w_err, w_rss = rssmod.measure_peak_rss_kb(wasm_rss_cmd)
+                    sens_rss.append(float(s_rss))
+                    wasm_rss.append(float(w_rss))
+
                 raw_rows.append(
                     {
                         "workload": case,
@@ -260,6 +291,8 @@ def main() -> int:
                         "wasm_warm_ns_per_op": w_warm,
                         "sens_cold_full_ns": s_cold,
                         "wasm_cold_ns": w_cold,
+                        "sens_maxrss_kb": "" if s_rss is None else s_rss,
+                        "wasm_maxrss_kb": "" if w_rss is None else w_rss,
                     }
                 )
 
@@ -338,15 +371,20 @@ def main() -> int:
                 },
                 {
                     "axis": "process_maxrss_kb",
-                    "status": "inconclusive",
+                    "status": "measured" if rss_available else "inconclusive",
                     "unit": "KiB",
-                    "sens_samples": [],
-                    "competitor_samples": [],
-                    "sens_median": None,
-                    "competitor_median": None,
-                    "sens_p95": None,
-                    "competitor_p95": None,
-                    "notes": "Withheld until shared per-process RSS owner #3698 lands.",
+                    "sens_samples": sens_rss if rss_available else [],
+                    "competitor_samples": wasm_rss if rss_available else [],
+                    "sens_median": summary(sens_rss)[0] if rss_available else None,
+                    "competitor_median": summary(wasm_rss)[0] if rss_available else None,
+                    "sens_p95": summary(sens_rss)[1] if rss_available else None,
+                    "competitor_p95": summary(wasm_rss)[1] if rss_available else None,
+                    "notes": (
+                        "Whole helper-process peak RSS from shared #3698 fresh-process "
+                        "GNU-time owner; timing samples are collected separately."
+                        if rss_available
+                        else "Shared #3698 RSS owner unavailable on this host."
+                    ),
                 },
             ]
 
@@ -377,13 +415,32 @@ def main() -> int:
                     }
                 )
 
-            verdicts.append(
-                {
-                    "axis": f"{case}:process_maxrss_kb",
-                    "verdict": "inconclusive",
-                    "evidence": "RSS withheld pending shared owner #3698",
-                }
-            )
+            if rss_available:
+                sr_med, _sr_p95 = summary(sens_rss)
+                wr_med, _wr_p95 = summary(wasm_rss)
+                verdicts.append(
+                    {
+                        "axis": f"{case}:process_maxrss_kb",
+                        "verdict": (
+                            allowed_verdict(args, sr_med, wr_med)
+                            if args.evidence_mode == "performance"
+                            else "inconclusive"
+                        ),
+                        "evidence": (
+                            f"SENS={sr_med:.0f} KiB; Wasm={wr_med:.0f} KiB"
+                            if args.evidence_mode == "performance"
+                            else f"smoke observation only: SENS={sr_med:.0f} KiB; Wasm={wr_med:.0f} KiB"
+                        ),
+                    }
+                )
+            else:
+                verdicts.append(
+                    {
+                        "axis": f"{case}:process_maxrss_kb",
+                        "verdict": "inconclusive",
+                        "evidence": "shared #3698 RSS owner unavailable on this host",
+                    }
+                )
 
             workloads.append(
                 {
@@ -410,7 +467,7 @@ def main() -> int:
         "cpu": platform.processor() or None,
         "load_context": args.load_context,
         "evidence_mode": args.evidence_mode,
-        "rss_measurement": "withheld-until-#3698",
+        "rss_measurement": rssmod.METHOD if rss_available else "unavailable",
         "toolchain": {
             "rustc": rustc,
             "node": node_version,
