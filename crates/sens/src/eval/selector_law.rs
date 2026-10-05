@@ -102,7 +102,7 @@ pub(super) fn invoke(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, CoreD4, CoreD5, CoreD6, CoreD8, SoundD7};
+    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, CoreD4, CoreD5, CoreD6, CoreD8, DomainIdentity, SoundD7};
     use std::rc::Rc;
 
     fn pair(head: Value, tail: Value) -> Value {
@@ -129,9 +129,6 @@ mod tests {
     }
     fn d6(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()))
-    }
-    fn d7(raw: u8) -> CoreDomainIdentity {
-        CoreDomainIdentity::D7(SoundD7::from_word(Bit7::new(raw).unwrap()))
     }
     fn d8(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(raw).unwrap()))
@@ -191,12 +188,19 @@ mod tests {
             d5(0b10100), // REVERSE, not a selector
             d5(0b11101), // MEMBER, not a selector
             d6(0b101000), // MAP, not a selector
-            d7(0b011000), // same payload as D6 CDAAAR, wrong domain/width
             d8(0b011000), // same payload as D6 CDAAAR, wrong domain/width
             d8(0b10000000),
         ] {
             assert_eq!(decode(identity), None);
         }
+
+        let d7_identity: DomainIdentity =
+            SoundD7::from_word(Bit7::new(0b011000).unwrap()).into();
+        assert_eq!(
+            d7_identity.core_operation(),
+            None,
+            "same payload in research D7 must never enter the callable D6 selector decoder"
+        );
     }
 
     #[test]
