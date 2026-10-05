@@ -31,6 +31,14 @@ fn exact_d5_zerop_and_numberp_return_only_d1() {
     assert_eq!(run_exact(0b01000, "0").unwrap(), "1");
     assert_eq!(run_exact(0b01000, "1").unwrap(), "0");
 
+    // #2720/#3032: historical ZEROP is a tolerance policy over the numeric
+    // carrier, not an inexact-float-only shortcut. Exact rationals at the
+    // boundary must therefore remain accepted, and the first value beyond it
+    // must be rejected without converting through f64.
+    assert_eq!(run_exact(0b01000, "3/1000000").unwrap(), "1");
+    assert_eq!(run_exact(0b01000, "-3/1000000").unwrap(), "1");
+    assert_eq!(run_exact(0b01000, "31/10000000").unwrap(), "0");
+
     assert_eq!(run_exact(0b01001, "42").unwrap(), "1");
     assert_eq!(run_exact(0b01001, "'x").unwrap(), "0");
 
