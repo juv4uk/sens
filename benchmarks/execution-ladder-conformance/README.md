@@ -86,9 +86,13 @@ It records only:
 
 - result kind;
 - canonical value when there is one;
+- visible program output;
 - normative error/failure class;
 - order trace only where order is contract-observable;
 - mechanism status.
+
+Visible output is part of the digest. Two substrates that return the same
+value but emit different output therefore cannot pass parity.
 
 A missing mechanism is `BLOCKED-MECHANISM`, not an invitation to fall back to
 legacy execution.
