@@ -275,6 +275,62 @@ mod tests {
     }
 
     #[test]
+    fn complement_commutes_with_selector_growth_through_d6() {
+        // #3499/#3506: a proved family law lifts across width only where the
+        // same semantic child generator is admitted:
+        //
+        // C_{n+1}(G_b(p)) = G_{1-b}(C_n(p)).
+        //
+        // Check both coordinate complement and independently decoded CAR/CDR
+        // step complement. This is family-local evidence, never a global
+        // antipodal law for all residents of D4/D5/D6.
+        let assert_stepwise_complements = |left: CoreDomainIdentity, right: CoreDomainIdentity| {
+            let a = decode(left).expect("left selector");
+            let b = decode(right).expect("right selector");
+            assert_eq!(a.len, b.len);
+            for index in 0..a.len {
+                assert_ne!(a.steps[index], b.steps[index]);
+            }
+        };
+
+        for parent in [0b100u8, 0b011u8] {
+            let parent_dual = parent ^ 0b111;
+            assert_stepwise_complements(d3(parent), d3(parent_dual));
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b1111, expected_dual);
+                assert_stepwise_complements(d4(child), d4(expected_dual));
+            }
+        }
+
+        for parent in [0b1000u8, 0b1001u8, 0b0110u8, 0b0111u8] {
+            let parent_dual = parent ^ 0b1111;
+            assert_stepwise_complements(d4(parent), d4(parent_dual));
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b1_1111, expected_dual);
+                assert_stepwise_complements(d5(child), d5(expected_dual));
+            }
+        }
+
+        for parent in [
+            0b10000u8, 0b10001u8, 0b10010u8, 0b10011u8,
+            0b01100u8, 0b01101u8, 0b01110u8, 0b01111u8,
+        ] {
+            let parent_dual = parent ^ 0b1_1111;
+            assert_stepwise_complements(d5(parent), d5(parent_dual));
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b11_1111, expected_dual);
+                assert_stepwise_complements(d6(child), d6(expected_dual));
+            }
+        }
+    }
+
+    #[test]
     fn exactly_two_d3_four_d4_eight_d5_and_sixteen_d6_selectors_are_admitted() {
         let mut generated = 0usize;
         for raw in 0u8..8 {
