@@ -339,8 +339,17 @@ mod tests {
             .expect("historical LIST byte should have a bounded mechanism adapter");
         assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1110));
 
-        let current = domain_identity_for_surface("list")
-            .expect("English LIST surface is exact D4 after #3450");
+        let row = DOMAIN_SURFACE_ROWS
+            .iter()
+            .find(|row| row.width == 4 && row.bits == 0b1110)
+            .expect("ratified D4 LIST row must exist");
+        let en = row
+            .surfaces
+            .iter()
+            .find(|surface| surface.namespace == "en")
+            .expect("generated EN peer must exist");
+        let current = domain_identity_for_surface(en.name)
+            .expect("generated EN peer must route to exact D4");
         assert_eq!(identity, current);
     }
 
