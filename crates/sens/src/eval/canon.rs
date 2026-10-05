@@ -396,21 +396,9 @@ fn canonicalize_domain_result(
             }
 
             if matches!(bits, 0b11010 | 0b11011) {
-                // #3004/#3008: LESSP/GREATERP are strict D5 predicates whose
-                // observable result domain is D1.  The old exact-rational
-                // arithmetic backend still emits numeric 0/1; accept only that
-                // bounded migration carrier at these exact owning identities.
-                let legacy_bit = match &value {
-                    Value::Number(number, crate::Exactness::Exact) if *number == 0.0 => Some(false),
-                    Value::Number(number, crate::Exactness::Exact) if *number == 1.0 => Some(true),
-                    Value::Rational(number) if number == &crate::Rational::integer(0) => Some(false),
-                    Value::Rational(number) if number == &crate::Rational::integer(1) => Some(true),
-                    _ => None,
-                };
-                if let Some(bit) = legacy_bit {
-                    return Ok(Value::predicate_bit(bit));
-                }
-
+                // #1716: LESSP/GREATERP producers now return D1 directly.
+                // Any non-D1 value reaching this boundary is a producer defect;
+                // never normalize numeric 0/1 into predicate truth here.
                 return Err(LanguageError::new(
                     ErrorKind::Type,
                     format!(
@@ -702,6 +690,14 @@ mod tests {
         assert_eq!(less_yes.as_predicate_bit(), Some(true));
         assert_eq!(less_no.as_predicate_bit(), Some(false));
         assert_eq!(greater_yes.as_predicate_bit(), Some(true));
+
+        let legacy_numeric_yes = canonicalize_domain_result(
+            d5(0b11010),
+            Value::Number(1.0, crate::Exactness::Exact),
+            span,
+        )
+        .expect_err("D5 LESSP boundary must reject legacy numeric truth after producer cutover");
+        assert_eq!(legacy_numeric_yes.kind, ErrorKind::Type);
 
         let inexact = invoke_domain_identity(
             d5(0b11010),
