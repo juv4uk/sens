@@ -1,0 +1,54 @@
+name: D8 cheap second-axis collapse screen
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d8-collapse-screen/**"
+      - "docs/research/3669-d8-collapse-screen.md"
+      - "docs/research/3669-d8-collapse-screen.uk.md"
+      - "knowledge/d6-v2-binary-law-families.json"
+      - ".github/workflows/d8-collapse-screen.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "benchmarks/d8-collapse-screen/**"
+      - "docs/research/3669-d8-collapse-screen.md"
+      - "docs/research/3669-d8-collapse-screen.uk.md"
+      - "knowledge/d6-v2-binary-law-families.json"
+      - ".github/workflows/d8-collapse-screen.yml"
+  workflow_dispatch:
+
+jobs:
+  falsifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run D8 second-axis collapse screen
+        run: |
+          rm -rf /tmp/d8-collapse-screen
+          python3 benchmarks/d8-collapse-screen/run.py \
+            --out /tmp/d8-collapse-screen
+
+      - name: Verify deterministic replay
+        run: |
+          rm -rf /tmp/d8-collapse-screen-2
+          python3 benchmarks/d8-collapse-screen/run.py \
+            --out /tmp/d8-collapse-screen-2
+          cmp /tmp/d8-collapse-screen/screen.json \
+              /tmp/d8-collapse-screen-2/screen.json
+
+      - name: Publish report
+        if: always()
+        run: |
+          test ! -f /tmp/d8-collapse-screen/report.md || \
+            cat /tmp/d8-collapse-screen/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d8-collapse-screen
+          path: /tmp/d8-collapse-screen/
+          retention-days: 14
