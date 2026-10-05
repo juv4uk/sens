@@ -171,6 +171,7 @@ The committed bound carried by every row is:
 
 ```json
 {
+  "grammar_profile": "d2-d3-structural-v1",
   "domain_set": [2, 3],
   "max_ast_depth": 4,
   "max_nodes": 12,
@@ -184,7 +185,9 @@ profile.
 
 The exact claim is only:
 
-> exhaustive within the declared D2/D3 structural grammar and bound.
+> exhaustive within grammar profile `d2-d3-structural-v1` and its declared D2/D3 bound.
+
+The grammar profile is carried in every `exhaustive_bound`, so a consumer cannot silently reinterpret the 16 rows as all D2/D3 programs under the same numeric depth/node limits.
 
 ATOM/EQ/COND are intentionally excluded from this first artifact until an
 independent exact-D1 predicate oracle witness is in the same conformance lane.
