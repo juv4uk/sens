@@ -53,7 +53,11 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
             && row
                 .surfaces
                 .iter()
-                .any(|surface| matches!(surface.namespace, "en" | "uk" | "sa") && surface.name == name);
+                .any(|surface| {
+                    let namespace_is_routable = matches!(surface.namespace, "uk" | "sa")
+                        || (surface.namespace == "en" && row.width <= 4);
+                    namespace_is_routable && surface.name == name
+                });
         matches_human_surface
             .then(|| exact_domain_identity_from_projection(row.width, row.bits))
             .flatten()
@@ -115,9 +119,10 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 }
 /// Current staged surface lookup.
 ///
-/// English, Ukrainian and Sanskrit D3/D4/D5 spellings resolve directly through the
-/// exact-domain projection. The byte-backed lookup remains only as a bounded
-/// compatibility fallback for still-unmigrated spellings.
+/// English D3/D4 and Ukrainian/Sanskrit D3/D4/D5 spellings resolve directly
+/// through the exact-domain projection. English D5 definition names stay on
+/// the compatibility lane until their recursive bodies stop calling historical
+/// bytes; that lane supplies a mechanism alias, never semantic authority.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     direct_domain_identity_for_surface(name).or_else(|| {
         registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
@@ -382,6 +387,17 @@ mod tests {
             assert_eq!(
                 (en_id.width(), en_id.packed_bits()),
                 (usize::from(row.width), row.bits)
+            );
+        }
+    }
+
+    #[test]
+    fn english_d5_definition_names_keep_compatibility_mechanism_lane() {
+        for binding in D5_DEFINITION_BINDINGS {
+            assert_eq!(
+                direct_domain_identity_for_surface(binding.name),
+                None,
+                "English D5 definition stays compatibility-routed until recursive bodies are exact-domain"
             );
         }
     }
