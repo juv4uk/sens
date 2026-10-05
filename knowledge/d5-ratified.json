@@ -396,9 +396,9 @@
     "#3297 research-shadow status"
   ],
   "preserves": [
-    "#3278 D6 revocation",
     "#3278 D8 revocation"
   ],
+  "d6_successor": "#3393 owner-ratified D6",
   "laws": [
     "exact D5 coordinate is semantic identity only under this ratified map",
     "no universal fifth-bit meaning",
