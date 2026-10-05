@@ -115,6 +115,7 @@ A `bounded-exhaustive` row must carry:
 
 ```json
 {
+  "grammar_profile": "example-finite-grammar-v1",
   "domain_set": [1, 2, 3],
   "max_ast_depth": 2,
   "max_nodes": 7,
@@ -122,8 +123,7 @@ A `bounded-exhaustive` row must carry:
 }
 ```
 
-The valid claim is **exhaustive within the declared bound**. This is not a proof
-for arbitrary program depth.
+The valid claim is **exhaustive within the declared grammar profile and bound**. `grammar_profile` is part of the evidence because the same numeric depth/node limits may admit very different finite grammars. This is not a proof for arbitrary program depth or for every program over the listed domains.
 
 ## Local check
 
@@ -136,7 +136,6 @@ The first implementation slice is schema/digest plumbing only. Oracle-emitted
 real cases and the bounded generator land in subsequent slices.
 
 Principle: **one case, one oracle digest, many machines.**
-
 
 ## Lane C — bounded-exhaustive D1-D3 structural slice
 
