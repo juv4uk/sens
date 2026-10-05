@@ -1,0 +1,51 @@
+name: Current exact-domain Racket load comparison
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/cross-language/current_racket_load.py"
+      - "benchmarks/cross-language/racket_phase_driver.rkt"
+      - "benchmarks/cross-language/current_sens.py"
+      - "benchmarks/cross-language/current_sens_phases.py"
+      - "crates/sens/examples/current_exact_domain_phase_bench.rs"
+      - ".github/workflows/current-racket-load.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: current-racket-load-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  current-racket-load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install Racket CS and Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y racket valgrind
+          racket --version
+          valgrind --version
+
+      - name: Build current exact-domain phase runner
+        run: cargo build -p sens --release --example current_exact_domain_phase_bench
+
+      - name: Compare current SENS with Racket compile and ready phases
+        run: |
+          rm -rf /tmp/current-racket-load
+          python3 benchmarks/cross-language/current_racket_load.py \
+            --sens-runner target/release/examples/current_exact_domain_phase_bench \
+            --racket racket \
+            --reps 3 \
+            --out /tmp/current-racket-load
+          cat /tmp/current-racket-load/racket-load-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-exact-racket-load
+          path: /tmp/current-racket-load
