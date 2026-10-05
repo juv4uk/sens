@@ -59,7 +59,6 @@ jobs:
           --test compiler_selfhost_role_closure
       - name: Compiler semantic export CLI
         run: cargo test -p xtask --test compiler_export_cli -- --nocapture
-          -- --nocapture
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib
