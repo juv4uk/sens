@@ -1,94 +1,109 @@
 # Міжмовні бенчмарки SENS
 
 Цей каталог вимірює **конкретні реалізації**, а не абстрактні "мови".
-Перший зовнішній орієнтир — CPython (#1546). Lua (#1547), Racket CS
-(#1548) і стандартний binary-trees (#1549) додаються окремими slices.
+Порівняння виконуються лише на однакових workload, параметрах і очікуваних
+відповідях.
 
-## Current D1-D4 boundary
+## Поточна межа — Contract 11.5
 
-The historical shared harness still uses the old Function8 FASL SENS lane.
-It is preserved for provenance but must not be relabeled as current D1-D4
-whole-program evidence. #1668 owns the replay onto ratified exact-width D1-D4.
+Чинна семантична основа SENS:
 
-For load-format evidence, `load_formats.py` adds a fairer CPython cached lane:
+```text
+CURRENT:  D1 D2 D3 D4 D5 D6
+RESEARCH: D7 D8
+MECHANICS: W1-W8
+```
 
-- CPython source: UTF-8 read + `compile()`;
-- CPython `.pyc`: direct magic/header validation + marshal code-object decode;
-- SENS: prebuilt historical Function8 FASL decode.
+D6 має ратифіковану ідентичність 64/64, але не кожен resident обов'язково має
+runtime-механізм. Тому benchmark окремо фіксує semantic residency і callability.
+Жоден fresh SENS row не може проходити через Sens8/Sid8/Function8.
 
-The `.pyc` artifact is generated before timing by the same CPython version.
-Raw repetitions and binary/runtime provenance are emitted next to the summary.
+Correctness gate для нового міжмовного порівняння: #1668. D6 mechanism coverage:
+#3394. Протокол вимірювань: #1987.
+
+## Зовнішні контролі
+
+`external_controls.py` запускає однаковий п'ятизадачний корпус:
+
+```text
+fib
+loop
+ackermann
+closures
+evenodd
+```
+
+Реалізації:
+
+- CPython — динамічний mainstream baseline (#1546);
+- Lua 5.4 — компактний інтерпретатор (#1547);
+- Racket CS — Lisp-family implementation control (#1548);
+- SBCL — classic Common Lisp/native compiler control (#3410);
+- optimized Rust — native machine-code lower-bound control (#3411).
+
+Rust source компілюється через `rustc -O` **до** execution timing. Compile cost не
+змішується з runtime cost і буде окремою фазою. SBCL не є семантичним
+авторитетом для SENS — це лише близький Lisp-контроль.
+
+Поки #1668 не GREEN на current exact-domain D1-D6, цей harness навмисно не
+емітує SENS timing row. Це дозволяє отримати чисті зовнішні baseline-и без
+підміни нової мови історичними Function8 цифрами.
+
+### Correctness only
+
+```bash
+guix time-machine -C channels.scm -- shell \
+  -m manifest.scm \
+  -m benchmarks/cross-language/manifest.scm -- \
+  python3 benchmarks/cross-language/external_controls.py --check-only
+```
+
+### Measurements
+
+```bash
+guix time-machine -C channels.scm -- shell \
+  -m manifest.scm \
+  -m benchmarks/cross-language/manifest.scm -- \
+  python3 benchmarks/cross-language/external_controls.py \
+    --reps 3 \
+    --out /tmp/sens-external-controls
+```
+
+Результат містить:
+
+- `external-full.tsv` — сирі рядки;
+- `environment.json` — git SHA, версії runtime/compiler, CPU, параметри;
+- `report.md` — медіани I refs і wall time.
 
 ## Правила чесності
 
-1. Правильність перевіряється **до** вимірювання.
-2. Однакові алгоритм, параметри і очікувана відповідь.
-3. У першому корпусі немає workload, де Python list міг би нечесно
-   замінити Lisp pair/cons: лише fib, loop, ackermann, closures, evenodd.
-4. SENS виконується з FASL, де функція SENS — один байт. CPython виконує
-   звичайний source/bytecode шлях своєї реалізації.
-5. Фази не змішуються:
-   - startup — порожній процес/сесія;
-   - load — прочитати й декодувати/скомпілювати програму без виконання;
-   - ready — той самий load + setup/module initialization, без benchmark-call;
-   - repeat N — той самий ready path + N benchmark-calls;
-   - steady execution у звіті = (repeat N - ready) / N;
-   - Cachegrind використовує мале N (default 3), бо I refs детерміновані й дорогі;
-   - native wall/CPU використовує більше N (default 100), щоб process noise не домінував короткі workload.
-6. Основне відтворюване мірило — кількість інструкцій Cachegrind.
-   Wall/user time і RSS додаються окремо; вони не повинні підміняти
-   instruction-count через шум self-hosted runner.
-7. Таблиця показує workload-by-workload співвідношення реалізацій і не
-   оголошує глобального "переможця мови".
+1. Правильність перевіряється **до** будь-якого timing.
+2. Однакові алгоритм, параметри та expected result.
+3. Primary CPU metric — Valgrind Cachegrind I refs; wall time — допоміжний.
+4. Source/load/compile/setup/steady execution не можна змішувати в одному
+   висновку. Поточний external-control-v2 є лише full-process першою фазою.
+5. Precompiled/native artifacts порівнюються окремо від source compilation.
+6. Raw rows завжди несуть provenance: SHA, runtime/compiler versions, параметри.
+7. Таблиці показують реалізації workload-by-workload; не проголошують
+   універсального "переможця мови".
+8. Historical Function8/Sens8 результати не входять у fresh Contract 11.5 ratios.
 
-## Запуск
+## Історична точка
 
-Спочатку зібрати існуючий SENS benchmark binary:
+Run 36318596454 (head 320886c5, self-hosted i5-6400) — старий Function8-era
+witness. На п'яти workload геометричне CPython/SENS за Cachegrind I refs було
+0.021, тобто тодішній SENS evaluator виконував приблизно 47.6× більше
+інструкцій у steady execution, зате startup SENS був приблизно 34.5× дешевшим.
 
-    cargo build --release -p sens --example ci_bench
+Це **архівна точка**, не показник поточного D1-D6 SENS.
 
-Далі в закріпленому Guix-середовищі:
+## Standard binary-trees (#1549)
 
-    guix time-machine -C channels.scm -- shell \
-      -m manifest.scm \
-      -m benchmarks/cross-language/manifest.scm -- \
-      python3 benchmarks/cross-language/run.py \
-        --sens-bench target/release/examples/ci_bench
+CLBG-compatible `binary-trees` має окремий N=10 correctness oracle:
 
-Для швидкої перевірки лише відповідей:
+```bash
+python3 benchmarks/cross-language/binary_trees_reference.py --check-fixture
+```
 
-    python3 benchmarks/cross-language/run.py \
-      --sens-bench target/release/examples/ci_bench \
-      --check-only
-
-Результат містить instructions.tsv, runtime.tsv, environment.json і report.md.
-
-Steady execution навмисно не рахується як `full - load`: на коротких
-програмах це різниця двох великих process-level чисел і вона може потонути
-в шумі. Matched `ready` / `repeat N` ампліфікує саме виконання call,
-залишаючи однаковий load/setup шлях по обидва боки віднімання.
-
-
-## Перший steady-state witness
-
-Run 36318596454 (head 320886c5, self-hosted wsm-i5-6400) уперше дав GREEN
-matched measurement. На п'яти workload геометричне CPython/SENS за
-Cachegrind I refs = 0.021, тобто поточний SENS evaluator виконує приблизно
-47.6× більше інструкцій у steady execution. Водночас SENS startup був
-приблизно 34.5× дешевшим.
-
-Цей witness збережений як історична точка до environment optimization #1558.
-Він не повинен підміняти повторний вимір після злиття #1558.
-
-
-## Standard binary-trees scaffold (#1549)
-
-The CLBG binary-trees workload has a pinned provenance note and an N=10
-correctness oracle in this directory:
-
-    python3 benchmarks/cross-language/binary_trees_reference.py --check-fixture
-
-This is correctness infrastructure only. The SENS measured adapter is added
-after canonical 2-part COND (#1663) lands, then it must reuse the same
-cross-language phases and machine-readable result schema. No upstream timing
-number is imported as our evidence.
+Timing для SENS додається лише після current exact-domain adapter; чужі upstream
+timing numbers не імпортуються як наше evidence.
