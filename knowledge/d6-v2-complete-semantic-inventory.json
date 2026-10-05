@@ -1,0 +1,161 @@
+{
+  "schema": "d6-v2-complete-semantic-inventory/v1",
+  "status": "research-semantic-complete-coordinate-unratified",
+  "issue": "#3333",
+  "evidence": [
+    "#3366",
+    "crates/sens/tests/d6_pure_laws.rs",
+    "knowledge/d6-v2-law-anchors.json"
+  ],
+  "foundation": "#3331 / Contract 11.4",
+  "domain": "D6",
+  "width": 6,
+  "capacity": 64,
+  "accounting": {
+    "semantic_meanings": 64,
+    "proved_selector_placements": 16,
+    "coordinate_anchored_candidates": 16,
+    "unplaced_law_meanings": 32,
+    "coordinate_unknown": 32,
+    "semantic_inventory_complete": true,
+    "coordinate_inventory_complete": false
+  },
+  "rule": "This file completes the D6 meaning set only. It does not assign coordinates to UNPLACED meanings and does not ratify D6.",
+  "placed_selectors": [
+    "CAAAAR",
+    "CAAADR",
+    "CAADAR",
+    "CAADDR",
+    "CADAAR",
+    "CADADR",
+    "CADDAR",
+    "CADDDR",
+    "CDAAAR",
+    "CDAADR",
+    "CDADAR",
+    "CDADDR",
+    "CDDAAR",
+    "CDDADR",
+    "CDDDAR",
+    "CDDDDR"
+  ],
+  "coordinate_anchored_candidates": [
+    "MACROEXPAND-1",
+    "MACROEXPAND",
+    "LET",
+    "LET*",
+    "EVENP",
+    "ODDP",
+    "LEQ",
+    "MIN",
+    "GEQ",
+    "MAX",
+    "INTERSECTION",
+    "UNION",
+    "MAP",
+    "FILTER",
+    "MAP-ONTO",
+    "FILTER-ONTO"
+  ],
+  "unplaced_law_meanings": [
+    "LENGTH",
+    "LENGTH-ONTO",
+    "MIN-LIST",
+    "MAX-LIST",
+    "NTH",
+    "MAPLIST",
+    "SUBLIS",
+    "RASSOC",
+    "ACONS",
+    "ADD1",
+    "SUB1",
+    "NEG",
+    "ABS",
+    "REMAINDER",
+    "EXPT",
+    "GCD",
+    "CURRY",
+    "RECIP",
+    "REDUCE",
+    "COMPOSE",
+    "FLIP",
+    "TAKE",
+    "DROP",
+    "DO",
+    "WHILE",
+    "ZIP",
+    "UNZIP",
+    "SCAN",
+    "ANY",
+    "ALL",
+    "INTEGERP",
+    "RATIONALP"
+  ],
+  "not_admitted_from_historical_map": [
+    {
+      "names": [
+        "RPLACA",
+        "RPLACD",
+        "NCONC",
+        "NREVERSE",
+        "SETF"
+      ],
+      "reason": "mutation-only distinctions are not observable in current persistent/immutable SENS"
+    },
+    {
+      "names": [
+        "MAPCAR"
+      ],
+      "reason": "alias of current MAP semantics"
+    },
+    {
+      "names": [
+        "COPY-TREE"
+      ],
+      "reason": "allocation identity is unobservable under immutable structural semantics"
+    },
+    {
+      "names": [
+        "REPL",
+        "LOAD"
+      ],
+      "reason": "host/session or file-ingestion capabilities are not Core.D6 meaning"
+    },
+    {
+      "names": [
+        "CLOSURE"
+      ],
+      "reason": "lexical closure is already an observable result of existing LAMBDA/FUNCTION mechanism"
+    },
+    {
+      "names": [
+        "FSUBR"
+      ],
+      "reason": "implementation class; FEXPR already owns the semantic unevaluated-argument distinction"
+    },
+    {
+      "names": [
+        "LEXPR"
+      ],
+      "reason": "variadic evaluated arguments are already expressible by current variadic lambda"
+    },
+    {
+      "names": [
+        "DEFVAR"
+      ],
+      "reason": "ambient global-state distinction not required for current pure D6 core"
+    },
+    {
+      "names": [
+        "TAGBODY",
+        "BLOCK",
+        "RETURN-FROM",
+        "CATCH"
+      ],
+      "reason": "effect-heavy/non-local control is not admitted merely by historical occupancy; D5 already owns PROG/GO/RETURN"
+    }
+  ],
+  "replacement_note": "Rejected donor names do not donate their old coordinates to replacement meanings. New meanings remain UNPLACED until an independent geometry proof assigns them.",
+  "control_boundary": "All new executable witnesses use current exact D1 PredicateBit control. No generic truthiness and no dependency on the currently unavailable exact-D4 NOT mechanism are required.",
+  "next_step": "derive a collision-free geometry for the 32 UNPLACED law meanings, then seek owner ratification separately"
+}
