@@ -122,6 +122,10 @@ warm_incremental_i_refs        = OLS slope repeated(N=1,10,100)
 Тому whole-process cold-start не видається за parser/decode cost. Сирі totals,
 repeat ladder і Core-bootstrap breakdown зберігаються в `provenance`.
 
+Окремі Cachegrind process modes є діагностичними шляхами, а не вкладеними
+таймерами. Validator **не** вимагає `cold_total_i_refs >= ready_i_refs` чи
+іншого штучного монотонного порядку між незалежними modes.
+
 Приклад після базового `run.py`:
 
 ```sh
