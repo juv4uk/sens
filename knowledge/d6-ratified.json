@@ -974,7 +974,7 @@
     "OD-006 historical/full-map coordinate authority"
   ],
   "preserves": [
-    "legacy Sens8/Sid8/Function8 non-authority",
+    "legacy flat identity non-authority",
     "D7-D8 research boundary"
   ]
 }
