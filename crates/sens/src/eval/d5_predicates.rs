@@ -9,6 +9,16 @@ use crate::{
 
 const HISTORICAL_ZERO_EPSILON: f64 = 3.0e-6;
 
+fn rational_within_historical_zero_tolerance(number: &Rational) -> bool {
+    let epsilon = Rational::new(3, 1_000_000).expect("3/1_000_000 is a valid rational");
+    let magnitude = if number.is_negative() {
+        -number.clone()
+    } else {
+        number.clone()
+    };
+    magnitude <= epsilon
+}
+
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -44,9 +54,8 @@ pub(super) fn invoke(
         0b01000 => {
             let holds = match value {
                 Value::BinaryNumber(number) => number.is_zero(),
-                Value::Rational(number) => number == &Rational::integer(0),
-                Value::Number(number, Exactness::Exact) => *number == 0.0,
-                Value::Number(number, Exactness::Inexact) => {
+                Value::Rational(number) => rational_within_historical_zero_tolerance(number),
+                Value::Number(number, Exactness::Exact | Exactness::Inexact) => {
                     number.abs() <= HISTORICAL_ZERO_EPSILON
                 }
                 _ => {
@@ -106,6 +115,8 @@ mod tests {
         for value in [
             Value::Number(0.0, Exactness::Exact),
             Value::Rational(Rational::integer(0)),
+            Value::Rational(Rational::new(3, 1_000_000).unwrap()),
+            Value::Rational(Rational::new(-3, 1_000_000).unwrap()),
             Value::BinaryNumber(BinaryNumber::zero()),
             Value::Number(HISTORICAL_ZERO_EPSILON, Exactness::Inexact),
         ] {
@@ -121,6 +132,8 @@ mod tests {
         for value in [
             Value::Number(1.0, Exactness::Exact),
             Value::Rational(Rational::integer(1)),
+            Value::Rational(Rational::new(31, 10_000_000).unwrap()),
+            Value::Rational(Rational::new(-31, 10_000_000).unwrap()),
             Value::BinaryNumber(BinaryNumber::one()),
             Value::Number(
                 HISTORICAL_ZERO_EPSILON + 1.0e-7,
@@ -142,6 +155,7 @@ mod tests {
         let corpus = [
             Value::Number(0.0, Exactness::Exact),
             Value::Rational(Rational::integer(0)),
+            Value::Rational(Rational::new(1, 1_000_000).unwrap()),
             Value::BinaryNumber(BinaryNumber::zero()),
             Value::Number(HISTORICAL_ZERO_EPSILON, Exactness::Inexact),
             Value::Number(1.0, Exactness::Exact),
