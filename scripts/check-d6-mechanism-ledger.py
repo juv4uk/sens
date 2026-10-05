@@ -24,15 +24,19 @@ counts = {key: 0 for key in ("DIRECT_LAW", "LOWER_DOMAIN_COMPOSITION", "LISP_OWN
 for row in rows.values():
     counts[row["mechanism_status"]] += 1
 assert counts == ledger["status_counts"]
-assert ledger["executable_coverage"] == {"count": 0, "total": 64, "basis": "current admitted exact-domain runtime routes"}
-assert counts["MISSING"] == 64
+assert ledger["executable_coverage"] == {"count": 16, "total": 64, "basis": "current admitted exact-domain runtime routes"}
+assert counts == {"DIRECT_LAW": 16, "LOWER_DOMAIN_COMPOSITION": 0, "LISP_OWNED": 0, "MISSING": 48}
 
-# Baseline proof: D6 identity exists, but no current exact-domain mechanism owns it.
-assert "if !(3..=5).contains(&width)" in selector
+selector_coords = {f"{i:06b}" for i in range(0b011000, 0b100000)} | {f"{i:06b}" for i in range(0b100000, 0b101000)}
+assert {bits for bits, row in rows.items() if row["mechanism_status"] == "DIRECT_LAW"} == selector_coords
+assert all(rows[bits]["negative_cross_domain_control"] for bits in selector_coords)
+
+# D6 selector proof: the family-local decoder extends exactly one depth.
+assert "if !(3..=6).contains(&width)" in selector
 assert "let CoreDomainIdentity::D3(word) = identity else" in canon
 assert "let CoreDomainIdentity::D4(word) = identity else" in forms
 assert "5 => Some(CoreDomainIdentity::D5" in registry
 assert "6 => Some(CoreDomainIdentity::D6" not in registry
 
 print("D6-MECHANISM-LEDGER: PASS")
-print("identity=64/64 executable=0/64 missing=64")
+print("identity=64/64 executable=16/64 direct-selector=16 missing=48")
