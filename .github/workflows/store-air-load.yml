@@ -44,7 +44,7 @@ jobs:
       - name: Перевірити accounting invariants / Validate evidence
         run: python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl
 
-      - name: Довести відсутність byte-tail у exact-bit AIR / Exact-bit AIR witness
+      - name: Довести класи exact-width ratchet / Exact-width length classes
         run: |
           python3 - <<'PY'
           import json
@@ -53,23 +53,36 @@ jobs:
           rows = [
               json.loads(line)
               for line in Path('/tmp/store-air-load.jsonl').read_text().splitlines()
-              if line.strip()
+              if line.strip() and '"canonical-packed"' in line
           ]
-          row = next(
-              r for r in rows
-              if r['fixture_id'] == 'seven-bit-mechanical'
-              and r['representation'] == 'canonical-packed'
-          )
-          assert row['semantic_payload_bits'] == 7
-          assert row['storage_container_bits'] == 8
-          assert row['tail_unused_bits'] == 1
-          assert row['carrier_mode'] == 'exact-bitstream'
-          assert row['carrier_payload_bits'] == 7
-          assert row['total_wire_bits'] == 7
-          assert row['ideal_airtime_seconds'] == 3.5
+          by_id = {row['fixture_id']: row for row in rows}
+          expected = {
+              'zero-suffix-mechanical': 6,
+              'seven-bit-mechanical': 7,
+              'eight-bit-mechanical': 8,
+              'twelve-bit-mechanical': 12,
+              'mixed-28-bit-mechanical': 28,
+          }
+          for fixture_id, bits in expected.items():
+              row = by_id[fixture_id]
+              assert row['expected_semantic_bits'] == bits
+              assert row['semantic_payload_bits'] == bits
+              assert row['physical_container_bytes'] == (bits + 7) // 8
+              assert row['storage_container_bits'] == ((bits + 7) // 8) * 8
+              assert row['carrier_mode'] == 'exact-bitstream'
+              assert row['carrier_payload_bits'] == bits
+              assert row['total_wire_bits'] == bits
+
+          seven = by_id['seven-bit-mechanical']
+          assert seven['storage_container_bits'] == 8
+          assert seven['tail_unused_bits'] == 1
+          assert seven['ideal_airtime_seconds'] == 3.5
+
+          zero_suffix = by_id['zero-suffix-mechanical']
+          assert zero_suffix['tail_unused_bits'] == 2
           PY
 
-      - name: Негативний контроль byte inflation / Reject inflated carrier
+      - name: Негативний контроль per-word byte inflation / Reject inflated reference encoder
         run: |
           cp /tmp/store-air-load.jsonl /tmp/store-air-load.bad.jsonl
           python3 - <<'PY'
@@ -79,20 +92,30 @@ jobs:
           path = Path('/tmp/store-air-load.bad.jsonl')
           rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
           for row in rows:
-              if row['fixture_id'] == 'seven-bit-mechanical':
-                  row['carrier_payload_bits'] = 24
-                  row['total_wire_bits'] = 24
-                  row['ideal_airtime_seconds'] = 12.0
+              if (
+                  row['fixture_id'] == 'seven-bit-mechanical'
+                  and row['representation'] == 'canonical-packed'
+              ):
+                  # Deliberately wrong reference encoder:
+                  # 3 exact-width words -> 3 separate bytes instead of 7 packed bits.
+                  row['physical_container_bytes'] = row['semantic_word_count']
+                  row['storage_container_bits'] = row['semantic_word_count'] * 8
                   break
           path.write_text(
               ''.join(json.dumps(row, sort_keys=True) + '\n' for row in rows),
               encoding='utf-8'
           )
           PY
-          if python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.bad.jsonl; then
-            echo 'ERROR: validator accepted per-word byte inflation' >&2
-            exit 1
-          fi
+          set +e
+          output=$(python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.bad.jsonl 2>&1)
+          rc=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$rc" -eq 2
+          printf '%s\n' "$output" | grep -F 'fixture=seven-bit-mechanical'
+          printf '%s\n' "$output" | grep -F 'expected_semantic_bits=7'
+          printf '%s\n' "$output" | grep -F 'actual_semantic_bits=7'
+          printf '%s\n' "$output" | grep -F 'artifact_bytes=3'
 
       - name: Опублікувати evidence artifact / Upload evidence
         uses: actions/upload-artifact@v4
