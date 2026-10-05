@@ -1080,11 +1080,11 @@
 
   ("WORLD-MODEL-LAWS-AXIOM-OBSERVATION-BRIDGE" . (
     (priority . "10")
-    (capabilities . (physics mathematics world-knowledge axioms model-laws observations derivation provenance quantities))
+    (capabilities . (physics mathematics world-knowledge axioms model-laws observations derivation походження quantities))
     (origin . sens)
     (depends-on . (SI-DEFINING-CONSTANTS-EXACT-RATIONAL))
-    (context . "OWNER DIRECTION 2026-10-05, authority #3374/#3386/#3402: world axioms alone do not make the language know physics. SENS needs an explicit MODEL_LAW layer between WORLD_DEFINITION_AXIOM and OBSERVATION. A law is neither an axiom nor an observation and must carry equation, validity assumptions/domain, source/provenance and exact/empirical/approximate status.")
-    (description . "Implement the first world-model-law bridge. Preferred witness: E = h * nu, where h is a SI world-definition axiom, nu is observed or independently derived, E=h*nu is an admitted MODEL_LAW, and the result is a DERIVED_FACT. Also retain d=c*t as a second witness with explicit propagation assumptions. Every derivation certificate must include axiom ids, law id, observation ids, binary function numbers, operation tree, units/dimensions, assumptions, uncertainty/exactness and provenance.")
+    (context . "OWNER DIRECTION 2026-10-05, authority #3374/#3386/#3402: world axioms alone do not make the language know physics. SENS needs an explicit MODEL_LAW layer between WORLD_DEFINITION_AXIOM and OBSERVATION. A law is neither an axiom nor an observation and must carry equation, validity assumptions/domain, source/походження and exact/empirical/approximate status.")
+    (description . "Implement the first world-model-law bridge. Preferred witness: E = h * nu, where h is a SI world-definition axiom, nu is observed or independently derived, E=h*nu is an admitted MODEL_LAW, and the result is a DERIVED_FACT. Also retain d=c*t as a second witness with explicit propagation assumptions. Every derivation certificate must include axiom ids, law id, observation ids, binary function numbers, operation tree, units/dimensions, assumptions, uncertainty/exactness and походження.")
     (acceptance . "One machine-readable MODEL_LAW authority; E=h*nu end-to-end witness; #3387 derivation DAG includes law nodes; #3397 world reasoning includes at least one explicit law node; removing a law invalidates dependent facts even when bare arithmetic remains possible; no physical meaning inferred merely from dimensionally valid arithmetic.")
     (done . nil)))
 
