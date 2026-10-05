@@ -9,14 +9,15 @@
 //! - selector-family suffix 1 -> compose CDR
 //! - D4 admits one selector suffix bit
 //! - owner-ratified D5 v2 (#3305/#3331) admits two selector suffix bits
+//! - owner-ratified D6 (#3393) admits three selector suffix bits
 //!
-//! This law is family-local. It does not create a universal D5 suffix meaning.
-//! D6/D7/D8 remain outside this production selector decoder and fail closed.
+//! This law is family-local. It does not create a universal suffix meaning.
+//! D7/D8 remain outside this production selector decoder and fail closed.
 
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 3;
+const MAX_SELECTOR_DEPTH: usize = 4;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
@@ -32,7 +33,7 @@ struct SelectorProgram {
 
 fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let width = identity.width();
-    if !(3..=5).contains(&width) {
+    if !(3..=6).contains(&width) {
         return None;
     }
 
@@ -101,7 +102,7 @@ pub(super) fn invoke(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, Bit8, CoreD4, CoreD5, CoreD6, CoreD8};
+    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, CoreD4, CoreD5, CoreD6, CoreD8, DomainIdentity, SoundD7};
     use std::rc::Rc;
 
     fn pair(head: Value, tail: Value) -> Value {
@@ -151,6 +152,28 @@ mod tests {
         assert_eq!(decode(d5(0b01101)).unwrap().steps[..3], [Step::Cdr, Step::Car, Step::Cdr]);
         assert_eq!(decode(d5(0b01110)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Car]);
         assert_eq!(decode(d5(0b01111)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Cdr]);
+
+        let expected = [
+            (0b100000, [Step::Car, Step::Car, Step::Car, Step::Car]),
+            (0b100001, [Step::Car, Step::Car, Step::Car, Step::Cdr]),
+            (0b100010, [Step::Car, Step::Car, Step::Cdr, Step::Car]),
+            (0b100011, [Step::Car, Step::Car, Step::Cdr, Step::Cdr]),
+            (0b100100, [Step::Car, Step::Cdr, Step::Car, Step::Car]),
+            (0b100101, [Step::Car, Step::Cdr, Step::Car, Step::Cdr]),
+            (0b100110, [Step::Car, Step::Cdr, Step::Cdr, Step::Car]),
+            (0b100111, [Step::Car, Step::Cdr, Step::Cdr, Step::Cdr]),
+            (0b011000, [Step::Cdr, Step::Car, Step::Car, Step::Car]),
+            (0b011001, [Step::Cdr, Step::Car, Step::Car, Step::Cdr]),
+            (0b011010, [Step::Cdr, Step::Car, Step::Cdr, Step::Car]),
+            (0b011011, [Step::Cdr, Step::Car, Step::Cdr, Step::Cdr]),
+            (0b011100, [Step::Cdr, Step::Cdr, Step::Car, Step::Car]),
+            (0b011101, [Step::Cdr, Step::Cdr, Step::Car, Step::Cdr]),
+            (0b011110, [Step::Cdr, Step::Cdr, Step::Cdr, Step::Car]),
+            (0b011111, [Step::Cdr, Step::Cdr, Step::Cdr, Step::Cdr]),
+        ];
+        for (raw, steps) in expected {
+            assert_eq!(decode(d6(raw)).unwrap().steps[..4], steps);
+        }
     }
 
     #[test]
@@ -164,15 +187,24 @@ mod tests {
             d4(0b1101),
             d5(0b10100), // REVERSE, not a selector
             d5(0b11101), // MEMBER, not a selector
-            d6(0b100000),
+            d6(0b101000), // MAP, not a selector
+            d8(0b011000), // same payload as D6 CDAAAR, wrong domain/width
             d8(0b10000000),
         ] {
             assert_eq!(decode(identity), None);
         }
+
+        let d7_identity: DomainIdentity =
+            SoundD7::from_word(Bit7::new(0b011000).unwrap()).into();
+        assert_eq!(
+            d7_identity.core_operation(),
+            None,
+            "same payload in research D7 must never enter the callable D6 selector decoder"
+        );
     }
 
     #[test]
-    fn d3_d4_and_d5_selectors_execute_without_descendant_rows() {
+    fn d3_through_d6_selectors_execute_without_descendant_rows() {
         let leaf = |n| Value::Number(n, crate::Exactness::Exact);
         let x = pair(
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0))),
@@ -203,6 +235,30 @@ mod tests {
         assert_eq!(invoke(d5(0b01101), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(6.0)); // CDADR
         assert_eq!(invoke(d5(0b01110), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(4.0)); // CDDAR
         assert_eq!(invoke(d5(0b01111), &[x], span).unwrap().unwrap(), leaf(8.0)); // CDDDR
+
+        let y = pair(
+            pair(
+                pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0))),
+                pair(pair(leaf(5.0), leaf(6.0)), pair(leaf(7.0), leaf(8.0))),
+            ),
+            pair(
+                pair(pair(leaf(9.0), leaf(10.0)), pair(leaf(11.0), leaf(12.0))),
+                pair(pair(leaf(13.0), leaf(14.0)), pair(leaf(15.0), leaf(16.0))),
+            ),
+        );
+
+        for (raw, expected) in [
+            (0b100000, 1.0), (0b100001, 9.0), (0b100010, 5.0), (0b100011, 13.0),
+            (0b100100, 3.0), (0b100101, 11.0), (0b100110, 7.0), (0b100111, 15.0),
+            (0b011000, 2.0), (0b011001, 10.0), (0b011010, 6.0), (0b011011, 14.0),
+            (0b011100, 4.0), (0b011101, 12.0), (0b011110, 8.0), (0b011111, 16.0),
+        ] {
+            assert_eq!(
+                invoke(d6(raw), std::slice::from_ref(&y), span).unwrap().unwrap(),
+                leaf(expected),
+                "D6 selector {raw:06b}"
+            );
+        }
     }
 
     #[test]
@@ -219,7 +275,63 @@ mod tests {
     }
 
     #[test]
-    fn exactly_two_d3_four_d4_and_eight_d5_selectors_are_admitted() {
+    fn complement_commutes_with_selector_growth_through_d6() {
+        // #3499/#3506: a proved family law lifts across width only where the
+        // same semantic child generator is admitted:
+        //
+        // C_{n+1}(G_b(p)) = G_{1-b}(C_n(p)).
+        //
+        // Check both coordinate complement and independently decoded CAR/CDR
+        // step complement. This is family-local evidence, never a global
+        // antipodal law for all residents of D4/D5/D6.
+        let assert_stepwise_complements = |left: CoreDomainIdentity, right: CoreDomainIdentity| {
+            let a = decode(left).expect("left selector");
+            let b = decode(right).expect("right selector");
+            assert_eq!(a.len, b.len);
+            for index in 0..a.len {
+                assert_ne!(a.steps[index], b.steps[index]);
+            }
+        };
+
+        for parent in [0b100u8, 0b011u8] {
+            let parent_dual = parent ^ 0b111;
+            assert_stepwise_complements(d3(parent), d3(parent_dual));
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b1111, expected_dual);
+                assert_stepwise_complements(d4(child), d4(expected_dual));
+            }
+        }
+
+        for parent in [0b1000u8, 0b1001u8, 0b0110u8, 0b0111u8] {
+            let parent_dual = parent ^ 0b1111;
+            assert_stepwise_complements(d4(parent), d4(parent_dual));
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b1_1111, expected_dual);
+                assert_stepwise_complements(d5(child), d5(expected_dual));
+            }
+        }
+
+        for parent in [
+            0b10000u8, 0b10001u8, 0b10010u8, 0b10011u8,
+            0b01100u8, 0b01101u8, 0b01110u8, 0b01111u8,
+        ] {
+            let parent_dual = parent ^ 0b1_1111;
+            assert_stepwise_complements(d5(parent), d5(parent_dual));
+            for child_bit in [0u8, 1u8] {
+                let child = (parent << 1) | child_bit;
+                let expected_dual = (parent_dual << 1) | (1 - child_bit);
+                assert_eq!(child ^ 0b11_1111, expected_dual);
+                assert_stepwise_complements(d6(child), d6(expected_dual));
+            }
+        }
+    }
+
+    #[test]
+    fn exactly_two_d3_four_d4_eight_d5_and_sixteen_d6_selectors_are_admitted() {
         let mut generated = 0usize;
         for raw in 0u8..8 {
             generated += usize::from(decode(d3(raw)).is_some());
@@ -230,6 +342,9 @@ mod tests {
         for raw in 0u8..32 {
             generated += usize::from(decode(d5(raw)).is_some());
         }
-        assert_eq!(generated, 14);
+        for raw in 0u8..64 {
+            generated += usize::from(decode(d6(raw)).is_some());
+        }
+        assert_eq!(generated, 30);
     }
 }
