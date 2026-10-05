@@ -72,11 +72,10 @@ Current counters include:
 - flat table entries/bytes;
 - preparation cost and repeat-N execution cost.
 
-Every current row carries Contract 11.6 scope/provenance in `environment.json`
+Every current row carries Contract 11.6 project scope plus D6-specific provenance in `environment.json`
 and `instructions.tsv`.
 
 A generator loss to `flat` is a valid completed negative result.
-
 
 ## Mode-specialized code size (#3582)
 
