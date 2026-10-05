@@ -453,6 +453,27 @@ fn supporting_evidence_record_is_not_implicitly_truthy_in_cond() {
 // --- intent-capabilities-satisfied? -------------------------------------
 
 #[test]
+fn supporting_evidence_can_drive_cond_through_an_explicit_d1_predicate() {
+    // Positive control for the fail-closed witness above: retrieval stays data,
+    // then an explicit exact-D1 question about that data drives COND.
+    assert_eq!(
+        eval_epistemic(
+            r#"(cond
+                 ((тотожне?
+                    (evidence-outcome
+                      (supporting-evidence
+                        (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
+                        (quote (claim-ref cml-build-available))))
+                    (quote supports))
+                  (quote flows-through))
+                 ((тотожне? (quote fallback) (quote fallback))
+                  (quote unreachable)))"#,
+        ),
+        "flows-through"
+    );
+}
+
+#[test]
 fn intent_capabilities_satisfied_is_true_when_all_requirements_present() {
     assert_eq!(
         eval_epistemic(
