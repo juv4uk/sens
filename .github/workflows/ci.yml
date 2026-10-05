@@ -133,7 +133,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo run --release -p sens-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
           cargo build -p sens-cli --bin sens
           : > tests/semantic-authority-changes.lisp
           while IFS= read -r path; do
@@ -159,20 +159,20 @@ jobs:
           cat tests/semantic-authority-verdict.lisp
           ./target/debug/sens scripts/semantic-authority-guard-enforce.lisp
 
-      - name: Upload regenerated active Core FASL for #2990
+      - name: Upload regenerated active Core4 FASL for #3658
         uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
-          name: active-core-fasl-2990
-          path: lib/core.lisp.fasl
+          name: active-core4-fasl-3658
+          path: lib/core4.lisp.fasl
           if-no-files-found: error
           retention-days: 1
 
-      - name: Export regenerated active Core FASL for #2990
+      - name: Export regenerated active Core4 FASL for #3658
         shell: bash
         run: |
           set -euo pipefail
-          test -s lib/core.lisp.fasl
+          test -s lib/core4.lisp.fasl
           git diff --check
         
 
