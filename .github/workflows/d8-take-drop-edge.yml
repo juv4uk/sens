@@ -1,0 +1,52 @@
+name: D8 TAKE-DROP edge product research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d8-take-drop-edge/run.py"
+      - "knowledge/d6-ratified.json"
+      - "docs/research/3622-d8-take-drop-edge.md"
+      - "docs/research/3622-d8-take-drop-edge.uk.md"
+      - ".github/workflows/d8-take-drop-edge.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "benchmarks/d8-take-drop-edge/run.py"
+      - "docs/research/3622-d8-take-drop-edge.md"
+      - ".github/workflows/d8-take-drop-edge.yml"
+  workflow_dispatch:
+
+jobs:
+  product-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run bounded D8 product witness
+        run: |
+          rm -rf /tmp/d8-take-drop-edge
+          python3 benchmarks/d8-take-drop-edge/run.py \
+            --out /tmp/d8-take-drop-edge
+
+      - name: Verify deterministic replay
+        run: |
+          rm -rf /tmp/d8-take-drop-edge-2
+          python3 benchmarks/d8-take-drop-edge/run.py \
+            --out /tmp/d8-take-drop-edge-2
+          cmp /tmp/d8-take-drop-edge/witness.json \
+              /tmp/d8-take-drop-edge-2/witness.json
+
+      - name: Publish report
+        if: always()
+        run: |
+          test ! -f /tmp/d8-take-drop-edge/report.md || \
+            cat /tmp/d8-take-drop-edge/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d8-take-drop-edge
+          path: /tmp/d8-take-drop-edge/
+          retention-days: 14
