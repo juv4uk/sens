@@ -84,6 +84,23 @@ for bits in ["0100001","0101010"]:
     assert row["shiva_same_coordinate_overlay"] is None
     assert row["shiva_identity_migration"]["role"]=="TARGET"
 
+
+assert ledger["role_layers"]["local_ordinal"]["count"]==14
+assert ledger["role_layers"]["local_ordinal"]["coordinate_effect"].startswith("NONE")
+assert ledger["shiva_sound_projection"]["status"]=="OPEN-DONOR-STACK"
+
+evaluation=ledger["migration_candidate"]["evaluation"]
+assert evaluation["candidate"]=="D / UPC-14-derived Text7 geometry"
+assert evaluation["measured"]["shared_with_pinned_hand_map"]=="43/46"
+assert evaluation["measured"]["strict_panini_1_1_9_matrix"]=="1760/1764"
+assert evaluation["measured"]["positive_class_f1"]==0.987
+assert evaluation["measured"]["best_of_10000_permutations_f1"]==0.449
+
+post=ledger["migration_candidate"]["post_migration_candidate"]
+assert post["occupancy"]==124
+assert post["free_coordinates"]==["0101111","0110100","1010001","1010011"]
+assert [r["coordinate"] for r in post["additional_identity_retirement"]]==["1010001","1010011"]
+
 print("D7-V2-CONSOLIDATION: PASS")
 print("baseline=107+21 overlay=19 migration-targets=2")
 print("phonology=75 convention=32 pinned=21 authority=RESEARCH")
