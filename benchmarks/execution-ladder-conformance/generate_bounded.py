@@ -13,14 +13,14 @@ from pathlib import Path
 from validate import validate
 
 WORKLOAD_SCHEMA = "sens-current-en-vs-d1d8-workloads/v1"
+PROFILE = "d2-d3-structural-v1"
 BOUND = {
+    "grammar_profile": PROFILE,
     "domain_set": [2, 3],
     "max_ast_depth": 4,
     "max_nodes": 12,
     "argument_value_bound": 2,
 }
-PROFILE = "d2-d3-structural-v1"
-
 
 def list_form(items: list[str]) -> str:
     tokens = ["10"]
