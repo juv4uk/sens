@@ -1,7 +1,7 @@
 name: D1-D8 exact-width carrier benchmark
 
 # Exact-width carrier/runtime benchmark across W1..W8.
-# Contract 11.5 authority is separate: D1-D6 current; D7-D8 research.
+# Contract 11.6 authority is separate: D1-D7 current; D8 research.
 # Measuring a carrier never ratifies its semantic domain.
 
 on:

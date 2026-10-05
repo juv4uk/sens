@@ -23,7 +23,7 @@
 
 ## Що таке SENS
 
-SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **ратифікована драбина точних доменів D1–D8**.
+SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **ратифікована драбина точних доменів D1–D7; D8 лишається research**.
 
 Історично проєкт розвивався під робочою назвою `my-lisp`. Старі матеріали зберігаються як provenance розвитку ідей, але не визначають чинну семантичну модель.
 
@@ -126,8 +126,8 @@ suffix 1 → compose CDR
 | **D4** | 4 біти | bootstrap і перше розгортання законів |
 | **D5** | 5 бітів | typed domain; резиденти визначаються власними законами |
 | **D6** | 6 бітів | typed domain; ширша область для доведених незалежних факторів |
-| **D7** | 7 бітів | Sound7 / текстово-фонологічний і provenance-простір за власним законом |
-| **D8** | 8 бітів | точний Core domain, окремий від будь-якої історичної 8-бітної схеми |
+| **D7** | 7 бітів | owner-ratified #3572, 126/128: Sound7/Text7 + окремі role laws; 2 координати owner-reserved/pinned |
+| **D8** | 8 бітів | exact-width research carrier; ще не ратифікований semantic domain |
 
 Важливо розрізняти п'ять речей:
 
@@ -332,15 +332,15 @@ Common Lisp, Prolog, Datalog, CLIPS, C, WASM, FPGA чи інший substrate м�
 ## Що вже є в репозиторії
 
 - Contract 11 з domain-qualified identity;
-- ратифікована драбина D1–D8;
+- ратифікована драбина D1–D7; D8 — research;
 - exact-width carrier/packing механізми;
 - D1 PredicateBit;
 - D2 structural grammar;
 - D3 foundation;
 - D4 bootstrap;
-- D5/D6 domain-law research і executable guards;
-- D7 Sound7 / local-ordinal evidence;
-- D8 як окремий exact domain у конституції;
+- D5/D6 ratified domain laws і executable guards;
+- D7 owner-ratified 126/128 Sound7/Text7 domain + окрема LocalOrdinal role;
+- D8 як окремий exact-width research domain candidate;
 - selector generation witnesses;
 - domain graph / factor / residue / closure experiments;
 - one-way migration guard, який забороняє новому exact-width коду повертатися до старої flat-identity моделі;
@@ -451,7 +451,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · short summary
 
-SENS is an experimental language whose current constitution is the exact-width domain ladder D1–D8.
+SENS is an experimental language whose current constitution ratifies exact-width domains D1–D7; D8 remains research.
 
 Its central idea is not “smaller opcodes”. A canonical semantic object is:
 
@@ -467,7 +467,7 @@ Start with [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) and [`lang
 
 ## Deutsch · Kurzfassung
 
-SENS ist eine experimentelle Sprache mit einer ratifizierten Exact-Width-Domänenleiter D1–D8.
+SENS ist eine experimentelle Sprache mit ratifizierten Exact-Width-Domänen D1–D7; D8 bleibt Forschung.
 
 Ein kanonisches semantisches Objekt besteht aus:
 

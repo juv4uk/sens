@@ -27,11 +27,11 @@ assert basis.count("owner-ratified-s4-gauge-choice")==32
 for bits,name in d["residents"].items():
     assert f"(D6:{bits} {name})" in contract,(bits,name)
 
-assert "(minor . 5)" in lang
-assert "Contract 11.5" in lang
+assert "(minor . 6)" in lang
+assert "Contract 11.6" in lang
 assert "#3393" in lang
 assert "D6  full compact 64/64" in current
-assert "D7  UNRATIFIED / RESEARCH" in current
+assert "D7  owner-ratified 126/128" in current
 assert "D8  UNRATIFIED / RESEARCH" in current
 
 print("D6-CURRENT-AUTHORITY: PASS")

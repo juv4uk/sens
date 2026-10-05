@@ -1,0 +1,280 @@
+{
+  "schema": "d7-v2-geometry-ledger/v1",
+  "status": "research-law-first-not-ratified",
+  "issue": "#3419",
+  "foundation": "#3393 / Contract 11.5",
+  "domain": "D7",
+  "width": 7,
+  "capacity": 128,
+  "accounting": {
+    "baseline_rows": 128,
+    "recovered_phonology": 75,
+    "recovered_convention": 32,
+    "baseline_provenance_missing": 21,
+    "shiva_same_coordinate_overlays": 19,
+    "migration_targets": 2
+  },
+  "families": [
+    {
+      "id": "varga",
+      "rows": 25,
+      "semantic_structure": "5 articulation places x 5 manner classes",
+      "law_status": "PRODUCT-STRUCTURE-WITNESSED",
+      "coordinate_status": "PRODUCT-WITNESS-NOT-FORCED",
+      "current_hamming1_edges": "20/100",
+      "explicit_product_hamming1_edges": "50/100",
+      "gauge_lower_bound": 45158400,
+      "evidence": [
+        "#3117",
+        "#3101",
+        "benchmarks/d7-v2/varga.py"
+      ],
+      "unresolved": "absolute 7-bit embedding and any globally shared cross-family place axis"
+    },
+    {
+      "id": "vowel-core",
+      "rows": 28,
+      "residue_rows": 4,
+      "semantic_structure": "7 qualities x 2 orality x 2 length",
+      "law_status": "PRODUCT-AXES-WITNESSED",
+      "coordinate_status": "TWO-GLOBAL-AFFINE-AXES-WITNESSED",
+      "axes": {
+        "length_xor": "0000001",
+        "nasal_xor": "0000010",
+        "length_pairs": "14/14",
+        "nasal_pairs": "14/14",
+        "modifier_hamming1": "28/28"
+      },
+      "matched_null": {
+        "samples": 4096,
+        "full_length_axis_hits": 0,
+        "full_nasal_axis_hits": 0,
+        "two_distinct_global_axes_hits": 0
+      },
+      "absolute_quality_gauge_lower_bound": 161280,
+      "evidence": [
+        "#3136",
+        "#3121",
+        "benchmarks/d7-v2/vowel.py"
+      ],
+      "unresolved": "absolute 3-bit quality code; 4 uk-ext vowels remain local residue"
+    },
+    {
+      "id": "non-varga",
+      "rows": 18,
+      "semantic_structure": "11 shared-varga-place + 2 glottal + 5 uk-ext local",
+      "law_status": "LOCAL-FACTOR-RELATIONS-WITNESSED",
+      "coordinate_status": "INTERNAL-GEOMETRY-SIGNIFICANT / CROSS-FAMILY-AXIS-NOT-FORCED",
+      "observed": {
+        "same_place_hamming1": 8,
+        "same_manner_hamming1": 10,
+        "cross_varga_same_place_hamming1": 4
+      },
+      "matched_null": {
+        "samples": 4096,
+        "same_place_p95": 4,
+        "same_place_exceedance": 0,
+        "same_manner_p95": 7,
+        "same_manner_exceedance": 0.001,
+        "cross_varga_p95": 4,
+        "cross_varga_exceedance": 0.0842
+      },
+      "evidence": [
+        "#3133",
+        "#3122",
+        "benchmarks/d7-v2/nonvarga.py"
+      ],
+      "unresolved": "whether a stronger cross-family law can justify one shared place axis"
+    },
+    {
+      "id": "sign-operator",
+      "rows": 32,
+      "semantic_structure": "text/sign conventions",
+      "law_status": "RECOVERED-NON-PHONOLOGICAL",
+      "coordinate_status": "PHONOLOGY-SCORE-ZERO",
+      "evidence": [
+        "#3131",
+        "#3123",
+        "benchmarks/d7-v2/residue.py"
+      ],
+      "unresolved": "derive convention-local geometry separately if useful; never score as phonology"
+    },
+    {
+      "id": "baseline-provenance-missing",
+      "rows": 21,
+      "law_status": "PINNED-NO-PHONOLOGY",
+      "same_coordinate_shiva_overlay": 19,
+      "remaining_without_same_coordinate_overlay": [
+        "0100001",
+        "0101010"
+      ],
+      "evidence": [
+        "#3131",
+        "#3419",
+        "knowledge/d7-v2-evidence-ledger.json"
+      ],
+      "unresolved": "19 overlays require SENS admission decision; remaining two belong to candidate-D migration"
+    }
+  ],
+  "shiva_convention_geometry": {
+    "text_digits": {
+      "rows": 10,
+      "status": "SHIVA-MERGED-RESEARCH / SENS-NOT-ADMITTED",
+      "law": "affine embedding inside pinned reserved cells; digit value decodable from cell bits without table",
+      "cells": {
+        "0": "0011100",
+        "1": "0011111",
+        "2": "0011101",
+        "3": "0011110",
+        "4": "0111000",
+        "5": "0111011",
+        "6": "0111001",
+        "7": "0111010",
+        "8": "0011001",
+        "9": "0011010"
+      },
+      "pinned_free_affine_embeddings": 7680,
+      "semantics": "Text digit, NOT arithmetic Number",
+      "evidence": [
+        "shiva-sutras PR #95",
+        "docs/upc7-digits-comparison-2026-10-02.md"
+      ]
+    },
+    "modifiers": {
+      "rows": 2,
+      "cells": {
+        "0100010": "capital-next-letter",
+        "0100011": "stress"
+      },
+      "status": "SHIVA-MERGED-RESEARCH / SENS-NOT-ADMITTED",
+      "evidence": [
+        "shiva-sutras PR #83/#95"
+      ]
+    },
+    "punctuation": {
+      "rows": 7,
+      "cells": {
+        "0011011": "…",
+        "0101001": "«",
+        "0101011": "»",
+        "0110001": "—",
+        "0110011": "–",
+        "0110110": "“",
+        "0110111": "”"
+      },
+      "status": "SHIVA-MERGED-RESEARCH / SENS-NOT-ADMITTED",
+      "placement_basis": "measured text demand + pinned-safe free cells, not phonological law",
+      "evidence": [
+        "shiva-sutras PR #105"
+      ]
+    }
+  },
+  "candidate_D": {
+    "status": "EXPLICIT-TEXT-IDENTITY-MIGRATION-CANDIDATE",
+    "sens_issue": "#3432",
+    "shiva_evidence": [
+      "PR #65",
+      "PR #114"
+    ],
+    "measured": {
+      "pinned_agreement": "43/46 shared Sanskrit cells",
+      "independent_varna7_agreement": "41/42 shared sounds",
+      "strict_1_1_9": "1760/1764",
+      "corpus": "138/143",
+      "positive_class_f1": 0.987,
+      "permutation_best_f1": 0.449
+    },
+    "moves": {
+      "h": [
+        "0110100",
+        "0100001"
+      ],
+      "r": [
+        "0101110",
+        "0101010"
+      ],
+      "l": [
+        "0101111",
+        "0101110"
+      ]
+    },
+    "candidate_occupancy": 124,
+    "candidate_free": [
+      "0101111",
+      "0110100",
+      "1010001",
+      "1010011"
+    ],
+    "note": "not a silent lock refresh; also removes ḹ-line identities from candidate D"
+  },
+  "cross_width_negative_control": {
+    "evidence": "#3198/#3199",
+    "result": "pure Q7 hypercube exists mechanically, but no proof that D7 Sound/Text semantics = D6 x D1",
+    "rule": "no automatic parent||bit growth into D7 semantics"
+  },
+  "next_proof_targets": [
+    "replay all consolidated witnesses GREEN on #3423",
+    "decide whether 19 same-coordinate Shiva overlays are admitted as D7 Text conventions",
+    "derive or explicitly gauge-fix vowel quality code only if laws justify it",
+    "seek stronger varga/non-varga cross-family place law or preserve local geometries",
+    "prepare candidate-D compatibility/migration package under #3432",
+    "keep W7 packing as mechanism-only evidence under #3429",
+    "keep the verified 43/43 hakardvitva result in D14 grammar topology and only admit an explicit Text7↔D14 bridge"
+  ],
+  "d14_pratyahara_boundary": {
+    "evidence": [
+      "shiva-sutras PR #113",
+      "prototype/verify_hakardvitva_c1p.py"
+    ],
+    "verified": {
+      "tucker_obstructions": 84,
+      "minimum_transversal_size": 4,
+      "unique_minimum_transversal": [
+        "ral",
+        "jhal",
+        "val",
+        "śal"
+      ],
+      "ceiling_42_unique_sounds": "39/43",
+      "dual_h_43_node_path": "43/43"
+    },
+    "semantic_split": {
+      "D7": "phonetic/text geometry; no pratyahara-interval requirement",
+      "D14": "grammar graph/path; pratyaharas may be native intervals",
+      "bridge": "one Text7 h can project to D14 h1 or h2 by grammar context"
+    },
+    "law_status": "CROSS-DOMAIN-BOUNDARY-VERIFIED",
+    "d7_coordinate_status": "NO-EFFECT",
+    "anti_claims": [
+      "43/43 is not D7 occupancy",
+      "h1/h2 are grammar-node multiplicity, not proof of two phonemes",
+      "do not spend D7 free/reserved cells to encode D14 path duplication"
+    ]
+  },
+  "completion_policy": {
+    "candidate_D_capacity": 128,
+    "candidate_D_occupied": 124,
+    "intentionally_free": [
+      "0101111",
+      "0110100",
+      "1010001",
+      "1010011"
+    ],
+    "status": "COMPLETE-WITH-RESERVE-CANDIDATE",
+    "rule": "Do not fill remaining cells merely to reach 128/128. A new resident requires an independent sound/text law or an explicit owner assignment with migration semantics.",
+    "rationale": [
+      "Ukrainian а/е/о/и, ц/ч/дз/дж and ь already have owner-ratified Text7 placements in the Shiva donor history",
+      "є/ї/ю/я, щ and palatalized consonants are intentional sequences rather than new cells",
+      "0101111 and 0110100 are vacated by candidate-D l/h migration",
+      "1010001 and 1010011 are absent because candidate D rejects the ḹ line"
+    ]
+  },
+  "candidate_map": {
+    "path": "knowledge/d7-v2-candidate-d.json",
+    "status": "research-candidate-not-ratified",
+    "capacity": 128,
+    "occupancy": 124,
+    "free": 4,
+    "coordinate_authority": "candidate-only; owner ratification still required"
+  }
+}

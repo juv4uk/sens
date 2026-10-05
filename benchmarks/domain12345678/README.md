@@ -2,8 +2,8 @@
 
 This is the current exact-width carrier/runtime baseline across W1..W8.
 
-It is deliberately broader than current semantic authority. Under Contract 11.5,
-D1-D6 are the current semantic foundation while D7-D8 remain research. Carrier
+It is deliberately broader than current semantic authority. Under Contract 11.6,
+D1-D7 are the current semantic foundation while D8 remains research. Carrier
 measurement does not imply residency or callability.
 
 The benchmark consumes production APIs only:
@@ -30,14 +30,14 @@ projection -> #2992).
 Historical D1-D4 benchmark files remain in `benchmarks/domain1234/` as archived
 comparison evidence, but are not the current CI baseline.
 
-## Contract 11.5 boundary
+## Contract 11.6 boundary
 
 At the current production API boundary:
 
 - D1/D2 are exact non-callable structural/predicate domains;
 - D3/D4/D5 project through `DomainIdentity::core_operation()`;
 - D6 is owner-ratified semantic residency, but generic callable projection is still absent;
-- D7/D8 are research carriers;
+- D7 is ratified but not generic-callable; D8 is the remaining research carrier;
 - all W1..W8 remain valid exact-width transport/carrier cases for this benchmark.
 
 The benchmark records this boundary; it does not create it.

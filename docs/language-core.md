@@ -35,11 +35,11 @@ D3  exact three-bit Core foundation — RATIFIED
 D4  exact four-bit bootstrap — RATIFIED
 D5  exact five-bit full compact domain — RATIFIED #3305
 D6  exact six-bit full compact domain — RATIFIED #3393
-D7  exact seven-bit sound/text provenance carrier — UNRATIFIED / RESEARCH
+D7  exact seven-bit sound/text domain — RATIFIED #3572 (126/128)
 D8  exact eight-bit research carrier — UNRATIFIED
 ```
 
-General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7/D8 remain unratified research carriers.
+General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7 is ratified #3572; D8 remains the unratified research carrier.
 
 При цьому:
 
@@ -254,7 +254,7 @@ D5 semantic residency не дорівнює готовності всіх runtim
 
 D6 **OWNER-RATIFIED #3393**, 64/64 occupied, 64 distinct residents.
 
-Нормативні машинні джерела: `contracts/d6-ratification.lisp`, `knowledge/d6-ratified.json`, Contract 11.5.
+Нормативні машинні джерела: `contracts/d6-ratification.lisp`, `knowledge/d6-ratified.json`, Contract 11.6.
 
 Coordinate basis зберігає походження доказу:
 - 16 selector-generator coordinates — proved;
@@ -265,15 +265,19 @@ Coordinate basis зберігає походження доказу:
 
 ---
 
-## D7 — sound/text provenance domain
+## D7 — owner-ratified sound/text domain
 
-D7 має точну семибітову identity і власні sound/text/provenance laws.
+D7 **OWNER-RATIFIED #3572**, 126/128 admitted residents. Нормативні машинні джерела: `contracts/d7-ratification.lisp`, `knowledge/d7-ratified.json`, Contract 11.6.
 
-D7 може містити sound cells, local ordinals та інші об'єкти, якщо вони явно admitted своїм законом.
+Поточний cut складається з 107 baseline-recovered residents та 19 owner-admitted same-coordinate Shiva overlays. Координати `0100001` і `0101010` лишаються owner-reserved/pinned — це не вільні opcode-и.
 
-D7 не стає generic callable Core domain лише через ширину 7.
+Рольова межа лишається суворою: Text digits є Text, не Number; LocalOrdinal — окрема W7 role і не витрачає Sound/Text occupancy. D7 residency не робить домен generic callable Core.
 
-Однаковий raw pattern у різних D7 semantic types не створює type equality.
+Фонологічні witnesses зберігають свою силу без переписування provenance: varga 5×5 product, vowel 7×2×2 із `length XOR 0000001` та `nasal XOR 0000010`, а non-varga має локальні/shared-factor закони без примусового глобального place-axis.
+
+Hakāradvitva `43/43` належить D14 grammar topology: для 42 unique sounds точна interval ceiling = `39/43`, а `43/43` виникає лише на 43-node grammar path з h₁/h₂. Це має **zero D7 coordinate effect** і не доводить існування двох фонетичних h.
+
+Shiva candidate D (`h/r/l` migration + відмова від двох ḹ-line identities) **не входить** у #3572 і потребує окремого owner decision (#3432).
 
 ---
 
@@ -425,7 +429,7 @@ Compatibility adapters дозволені лише як явно обмежен�
 
 Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
 
-Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D6; D5 ratified #3305, D6 ratified #3393, а D7/D8 лишаються research.
+Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D7; D5 ratified #3305, D6 ratified #3393, D7 ratified #3572, а D8 лишається research.
 
 Profile може вибирати mechanism, але не може:
 
