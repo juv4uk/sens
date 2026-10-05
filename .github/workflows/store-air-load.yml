@@ -1,0 +1,102 @@
+name: STORE → AIR → LOAD evidence / доказ
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/examples/store_air_load_repr.rs'
+      - 'crates/sens/examples/current_en_vs_d1d8_cpu.rs'
+      - 'benchmarks/store-air-load/**'
+      - '.github/workflows/store-air-load.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: store-air-load-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: store-air-load
+
+      - name: Зібрати exact-width і semantic helpers / Build helpers
+        run: |
+          cargo build --release -p sens \
+            --example store_air_load_repr \
+            --example current_en_vs_d1d8_cpu
+
+      - name: Згенерувати STORE AIR evidence / Generate evidence
+        run: |
+          python3 benchmarks/store-air-load/run.py \
+            --packing-helper target/release/examples/store_air_load_repr \
+            --semantic-helper target/release/examples/current_en_vs_d1d8_cpu \
+            --out /tmp/store-air-load.jsonl \
+            --bitrate-bps 2
+
+      - name: Перевірити accounting invariants / Validate evidence
+        run: python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl
+
+      - name: Довести відсутність byte-tail у exact-bit AIR / Exact-bit AIR witness
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line)
+              for line in Path('/tmp/store-air-load.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          row = next(
+              r for r in rows
+              if r['fixture_id'] == 'seven-bit-mechanical'
+              and r['representation'] == 'canonical-packed'
+          )
+          assert row['semantic_payload_bits'] == 7
+          assert row['storage_container_bits'] == 8
+          assert row['tail_unused_bits'] == 1
+          assert row['carrier_mode'] == 'exact-bitstream'
+          assert row['carrier_payload_bits'] == 7
+          assert row['total_wire_bits'] == 7
+          assert row['ideal_airtime_seconds'] == 3.5
+          PY
+
+      - name: Негативний контроль byte inflation / Reject inflated carrier
+        run: |
+          cp /tmp/store-air-load.jsonl /tmp/store-air-load.bad.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('/tmp/store-air-load.bad.jsonl')
+          rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+          for row in rows:
+              if row['fixture_id'] == 'seven-bit-mechanical':
+                  row['carrier_payload_bits'] = 24
+                  row['total_wire_bits'] = 24
+                  row['ideal_airtime_seconds'] = 12.0
+                  break
+          path.write_text(
+              ''.join(json.dumps(row, sort_keys=True) + '\n' for row in rows),
+              encoding='utf-8'
+          )
+          PY
+          if python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.bad.jsonl; then
+            echo 'ERROR: validator accepted per-word byte inflation' >&2
+            exit 1
+          fi
+
+      - name: Опублікувати evidence artifact / Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-air-load-evidence
+          path: /tmp/store-air-load.jsonl
+          if-no-files-found: error
