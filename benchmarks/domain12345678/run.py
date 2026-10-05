@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#3001 initial D1-D8 exact-domain carrier/runtime benchmark."""
+"""#3001 W1-W8 carrier/runtime benchmark under Contract 11.5 authority split."""
 
 from __future__ import annotations
 
@@ -111,15 +111,15 @@ def main() -> int:
         "machine": platform.machine(),
         "iterations": args.iterations,
         "reps": args.reps,
-        "scope": "D1-D8 exact source-word -> DomainIdentity carrier/runtime",
-        "semantic_authority": "none; benchmark consumes production APIs only",
+        "scope": "W1-W8 exact source-word -> DomainIdentity carrier/runtime",
+        "semantic_authority": "D1-D6 current; D7-D8 research; W1-W8 mechanical; callability separate",
     }
     (args.out_dir / "environment.json").write_text(
         json.dumps(environment, indent=2) + "\n", encoding="utf-8"
     )
 
     lines = [
-        "# Ratified D1-D8 exact-domain benchmark — initial carrier/runtime slice",
+        "# W1-W8 exact-width carrier benchmark — D1-D6 current / D7-D8 research",
         "",
         f"Cachegrind I refs, paired empty-loop subtraction, median of {args.reps} runs, "
         f"{args.iterations:,} iterations.",
@@ -140,11 +140,11 @@ def main() -> int:
     lines += [
         "",
         "Correctness invariants checked before measurement:",
-        "- D1..D8 exact source words round-trip through DomainIdentity;",
+        "- W1..W8 exact source words round-trip through DomainIdentity;",
         "- equal payload=1 at widths 1..8 never collapses;",
-        "- D1/D2/D7 fail the callable-Core projection;",
-        "- D3/D4/D5/D6/D8 retain the callable projection boundary only; "
-        "this benchmark does not infer execution law from width.",
+        "- callable-Core projection is measured as current implementation mechanism evidence, not semantic authority;",
+        "- D1-D6 semantic residency and D7-D8 research status come from Contract 11.5, not from core_operation(); "
+        "missing projection/mechanism never revokes identity, and width never grants callability.",
         "",
         "Deferred lanes:",
         "- packed/framing accounting follows #3026/#2833;",

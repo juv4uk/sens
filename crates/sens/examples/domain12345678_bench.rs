@@ -1,7 +1,8 @@
 //! #3001 W1-W8 exact-width carrier benchmark.
 //!
 //! Measures the source-word -> width-qualified DomainIdentity carrier path only.
-//! D5/D6/D8 are research carriers under #3278, not current ratified semantics.
+//! Under Contract 11.5, D1-D6 are current semantic identities while D7-D8 remain
+//! research; W1-W8 carrier existence is mechanical and callability is separate.
 //! No registry, surface spelling, legacy Sens8/Function8, or benchmark-local
 //! semantic table participates.
 

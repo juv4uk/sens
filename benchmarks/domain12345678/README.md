@@ -1,6 +1,6 @@
-# D1-D8 exact-domain benchmark (#3001)
+# W1-W8 exact-width carrier benchmark (#3001)
 
-This is the current carrier/runtime baseline for the ratified D1-D8 binary-domain paradigm.
+This is the exact-width carrier/runtime baseline under Contract 11.5. Semantic identity authority is D1-D6 CURRENT and D7-D8 RESEARCH; W1-W8 remain mechanical carrier controls. Callability/mechanism coverage is a separate axis.
 
 The benchmark consumes production APIs only:
 
@@ -18,8 +18,8 @@ It deliberately does not contain:
 - inferred callability from occupancy;
 - registry-dependent claims.
 
-The first slice measures D1..D8 carrier/lift cost, a mixed-width path, and the
-role-specific callable projection boundary. Packed/framing and registry lanes
+The first slice measures W1..W8 carrier/lift cost, a mixed-width path, and the
+current implementation's callable-projection boundary. That projection is mechanism evidence only and never upgrades or revokes semantic authority. Packed/framing and registry lanes
 are added only from their production owners (#3026/#2833 and full-owner
 projection -> #2992).
 
