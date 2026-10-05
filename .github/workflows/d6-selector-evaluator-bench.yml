@@ -1,0 +1,74 @@
+name: D6 selector evaluator benchmark
+
+# #3583: benchmark-only real-evaluator replay.
+# Performance rows are evidence; parity/oracle failures are the hard gate.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/d6-selector-evaluator-bench.yml"
+      - "crates/sens/examples/d6_selector_eval_replay.rs"
+      - "benchmarks/d6-evaluator/**"
+      - "crates/sens/src/eval/selector_law.rs"
+  workflow_dispatch:
+
+concurrency:
+  group: d6-selector-evaluator-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  evaluator-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          rustc --version
+          valgrind --version
+
+      - name: Exact-domain parity gate
+        run: |
+          cargo build --release -p sens --example d6_selector_eval_replay
+          ./target/release/examples/d6_selector_eval_replay verify prepare repeated 1
+
+      - name: Real-evaluator replay
+        run: |
+          rm -rf /tmp/sens-d6-evaluator
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python3 benchmarks/d6-evaluator/run.py \
+              --calls 5000 --samples 3 \
+              --out /tmp/sens-d6-evaluator
+          else
+            python3 benchmarks/d6-evaluator/run.py \
+              --calls 1000 --samples 1 \
+              --out /tmp/sens-d6-evaluator
+          fi
+
+      - name: Publish evaluator summary
+        if: always()
+        run: |
+          {
+            echo "## D6 selector real-evaluator replay"
+            echo
+            echo "Phase 1: exact D6 DomainCall vs equivalent exact D3 CAR/CDR chain; quote-only is the shared-data baseline."
+            echo
+            echo "No production flat16 table is injected."
+            if test -s /tmp/sens-d6-evaluator/evaluator.tsv; then
+              echo '~~~text'
+              cat /tmp/sens-d6-evaluator/evaluator.tsv
+              echo '~~~'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-selector-evaluator-evidence
+          path: /tmp/sens-d6-evaluator/
+          retention-days: 14
