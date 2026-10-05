@@ -60,6 +60,8 @@ assert "(owner-ratification . #3572)" in contract
 assert "(width . #d7)" in contract
 assert "(capacity . #d128)" in contract
 assert "(occupancy . #d126)" in contract
+assert "(d7-coordinate-law . " in contract
+assert "(identity . " not in contract
 assert '(owner-reserved-pinned . ("0100001" "0101010"))' in contract
 assert '(candidate-occupancy . #d124)' in contract
 assert "(minor . 6)" in lang
