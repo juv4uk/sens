@@ -8,6 +8,7 @@ on:
       - "benchmarks/cross-language/footprint_controls.py"
       - "benchmarks/cross-language/join_current_ratios.py"
       - "benchmarks/cross-language/pareto_report.py"
+      - "benchmarks/cross-language/test_pareto_report.py"
       - "crates/sens/examples/current_exact_domain_bench.rs"
       - "crates/sens/src/mixed_source.rs"
       - ".github/workflows/same-machine-cross-language.yml"
@@ -23,6 +24,9 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
+
+      - name: Fast Pareto accounting smoke
+        run: python3 benchmarks/cross-language/test_pareto_report.py
 
       - uses: dtolnay/rust-toolchain@stable
 
