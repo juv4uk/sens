@@ -9,6 +9,9 @@ on:
     paths:
       - ".github/workflows/research-bench-smoke.yml"
       - "benchmarks/semantic-tree/**"
+      - "crates/sens/src/eval/selector_law.rs"
+      - "crates/sens/tests/d6_selector_runtime.rs"
+      - "knowledge/d6-mechanism-ledger.json"
       - "benchmarks/self-description/**"
       - "benchmarks/agent-messages/run.py"
       - "benchmarks/agent-messages/size_by_kind.py"
@@ -17,6 +20,9 @@ on:
     paths:
       - ".github/workflows/research-bench-smoke.yml"
       - "benchmarks/semantic-tree/**"
+      - "crates/sens/src/eval/selector_law.rs"
+      - "crates/sens/tests/d6_selector_runtime.rs"
+      - "knowledge/d6-mechanism-ledger.json"
       - "benchmarks/self-description/**"
       - "benchmarks/agent-messages/run.py"
       - "benchmarks/agent-messages/size_by_kind.py"
@@ -97,11 +103,14 @@ jobs:
           rustc --version
           valgrind --version
 
-      - name: Run semantic-tree parity + bounded instruction smoke
+      - name: Verify current D6 selector runtime witness
+        run: cargo test -p sens --test d6_selector_runtime -- --nocapture
+
+      - name: Run current D6 generator-vs-flat16 smoke
         run: |
           rm -rf /tmp/sens-semantic-tree
           python3 benchmarks/semantic-tree/run.py \
-            --smoke \
+            --current-d6 --smoke \
             --out /tmp/sens-semantic-tree
 
       - name: Publish semantic-tree smoke summary
@@ -110,7 +119,7 @@ jobs:
           {
             echo "## Semantic-tree benchmark smoke"
             echo
-            echo "Same selector corpus is checked for semantic parity before Cachegrind evidence."
+            echo "Real D6 evaluator witnesses are checked first; then the 16-selector flat-vs-generator control is measured."
             echo
             if test -s /tmp/sens-semantic-tree/instructions.tsv; then
               echo '~~~text'
