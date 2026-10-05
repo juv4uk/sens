@@ -6,6 +6,7 @@
 
 use sens::{
     pack_binary_source_tokens, packed_transport_accounting, parse_binary_source_words,
+    unpack_binary_source_words,
 };
 use std::{env, fs, process};
 
@@ -35,7 +36,14 @@ fn run() -> Result<(), String> {
         return Err("canonical source must contain at least one exact-width word".to_owned());
     }
 
+    let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
+    let expected_words: Vec<_> = tokens.iter().map(|token| token.word).collect();
     let packed = pack_binary_source_tokens(&tokens);
+    let decoded = unpack_binary_source_words(&packed, &widths)
+        .ok_or_else(|| "exact-width round-trip failed".to_owned())?;
+    if decoded != expected_words {
+        return Err("exact-width round-trip changed source words".to_owned());
+    }
     let accounting = packed_transport_accounting(&packed, framing_bits);
     let utilization = accounting
         .utilization()
@@ -48,6 +56,7 @@ fn run() -> Result<(), String> {
     println!("BYTE_CONTAINER_TOTAL_BITS={}", accounting.total_wire_bits);
     println!("PHYSICAL_CONTAINER_BYTES={}", packed.byte_len());
     println!("PAYLOAD_UTILIZATION={utilization:.17}");
+    println!("ROUNDTRIP_WORDS_OK=1");
 
     Ok(())
 }
