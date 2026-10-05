@@ -673,30 +673,35 @@
   (00001000 (a b)
     (00001101 a (00001110 b (00010100 a b)))))
 
-; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
-; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
-; exact YES -> 1/1, exact NO -> 0/1, and any inexact operand -> Canon 0 `()`.
-; Canonical three-part `cond` distinguishes exact NO (0) from no-answer `()`
-; without routing either through generic truthiness.
+; #1826: `<=` and `>=` are the Lisp-derived half of the same
+; exact-order predicate family as `<`, `>` and `=`.  They consume D1
+; directly and return D1 themselves; numeric 1/0 is ordinary data, never the
+; predicate carrier.  `equal?` is used only to recognize the structural
+; end of the variadic tail.  The final clause is an explicit D1-YES fallback
+; whose expression constructs D1-NO, keeping the predicate total.
 (00001001 nondecreasing-from?
   (00001000 (current remaining)
     (00000111
-      ((00000010 remaining) () 1)
-      ((00011010 current (00000101 remaining)) 1
+      ((00100010 remaining (00000001 ()))
+       (00011010 0 1))
+      ((00011010 current (00000101 remaining))
        (00011111 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 1
+      ((00011100 current (00000101 remaining))
        (00011111 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 0 0))))
+      ((00011010 0 1)
+       (00011010 1 0)))))
 
 (00001001 nonincreasing-from?
   (00001000 (current remaining)
     (00000111
-      ((00000010 remaining) () 1)
-      ((00011011 current (00000101 remaining)) 1
+      ((00100010 remaining (00000001 ()))
+       (00011010 0 1))
+      ((00011011 current (00000101 remaining))
        (00100000 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 1
+      ((00011100 current (00000101 remaining))
        (00100000 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 0 0))))
+      ((00011010 0 1)
+       (00011010 1 0)))))
 
 (00001001 <=
   (00001000 (first . remaining)
