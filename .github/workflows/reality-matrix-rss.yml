@@ -1,0 +1,23 @@
+name: Reality Matrix RSS owner
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/cross-language/reality-matrix/rss.py"
+      - ".github/workflows/reality-matrix-rss.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rss-self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify GNU time
+        run: /usr/bin/time --version
+
+      - name: Falsify cumulative-child RSS contamination
+        run: python3 benchmarks/cross-language/reality-matrix/rss.py --self-test
