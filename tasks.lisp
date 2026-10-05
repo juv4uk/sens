@@ -1255,4 +1255,14 @@
     (acceptance . "Machine-readable closure-by-depth report; compare {-1,0,1} vs #3420 minimal basis; world axioms alone cannot manufacture contingent facts; MODEL_LAW and OBSERVATION enlarge meaningful closure; every derived node traces to primitive roots; feed #2304 semantic accounting and #3389 priority ranking.")
     (done . nil)))
 
+  ("WORLD-QUERYABLE-KNOWLEDGE" . (
+    (priority . 10.0)
+    (capabilities . (world-knowledge axioms model-laws observations derivation provenance reasoning query binary))
+    (origin . sens)
+    (depends-on . (WORLD-AXIOM-CANONICAL-NAME-ERASED CORE-MATH-AXIOM-CLOSURE-METRIC))
+    (context . "OWNER DIRECTION 2026-10-05, authority #3374/#3386/#3402/#3442: SENS must not merely store constants or compute quantities. It must be able to state what it knows about the external world, explain why it believes the fact, expose which primitive axioms/MODEL_LAW/OBSERVATION/binary function numbers support it, and invalidate the belief when a required premise disappears. UNKNOWN is an epistemic status, never a third PredicateBit.")
+    (description . "Implement a queryable external-world knowledge object over the axiom bootstrap. First witness: WORLD_DEFINITION_AXIOM h + MODEL_LAW E=h*nu + typed OBSERVATION nu + exact binary TIMES -> DERIVED_FACT E; optional second witness d=c*t. Query must return value, dimension/unit, exactness/uncertainty, axiom ids, law ids, observation ids, exact binary function numbers, operation tree, assumptions/validity domain, provenance and derivation depth. Add counterfactual invalidation: removing axiom, law or observation makes exactly dependent physical facts UNKNOWN; human alias renaming changes no identity.")
+    (acceptance . "One end-to-end external-world fact query returns both result and why-believed proof graph; graph terminates in primitive roots; exact binary function numbers are visible; no human spelling required; UNKNOWN is not D1:0 and not (); remove/restore axiom, MODEL_LAW and observation invalidates/replays only dependent facts; feed #3435 closure metric and #2304 semantic-fact accounting.")
+    (done . nil)))
+
   )))
