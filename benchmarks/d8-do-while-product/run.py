@@ -22,6 +22,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 D6_AUTHORITY_PATH = REPO / "knowledge" / "d6-ratified.json"
+D3_SELECTOR_ROOTS = ("011", "100")
 
 STATES = (0, 1, 2)
 BITS = (0, 1)
@@ -68,6 +69,90 @@ def toggle_condition(config: tuple[int, int]) -> tuple[int, int]:
 def toggle_projection(config: tuple[int, int]) -> tuple[int, int]:
     sense, finalize = config
     return (sense, finalize ^ 1)
+
+
+def toggle_role(config: tuple[int, int]) -> tuple[int, int]:
+    """Derived D6-family axis: WHILE <-> DO toggles both primitive axes."""
+    return toggle_condition(toggle_projection(config))
+
+
+def selector_d8_candidates() -> set[str]:
+    out = {
+        root + "".join(bits)
+        for root in D3_SELECTOR_ROOTS
+        for bits in product("01", repeat=5)
+    }
+    assert len(out) == 64
+    return out
+
+
+def coordinate_gauge(authority: dict[str, object]) -> dict[str, object]:
+    parent = str(authority["while"])
+    sibling = str(authority["do"])
+    family = {parent + suffix for suffix in ("00", "01", "10", "11")}
+    selectors = selector_d8_candidates()
+    assert family.isdisjoint(selectors)
+
+    while_config = (CONTINUE_TRUE, RETURN_STATE)
+    do_config = (STOP_TRUE, APPLY_RESULT)
+    continue_result = (CONTINUE_TRUE, APPLY_RESULT)
+    stop_identity = (STOP_TRUE, RETURN_STATE)
+
+    assert toggle_role(while_config) == do_config
+    assert toggle_projection(while_config) == continue_result
+    assert toggle_projection(toggle_role(while_config)) == stop_identity
+    assert toggle_role(toggle_projection(while_config)) == stop_identity
+
+    role_then_projection = {
+        "00": "while / lower-domain duplicate",
+        "01": "continue-while-true + apply-result / novel semantic candidate",
+        "10": "do / lower-domain duplicate",
+        "11": "stop-when-true + return-state / novel semantic candidate",
+    }
+    projection_then_role = {
+        "00": "while / lower-domain duplicate",
+        "01": "do / lower-domain duplicate",
+        "10": "continue-while-true + apply-result / novel semantic candidate",
+        "11": "stop-when-true + return-state / novel semantic candidate",
+    }
+
+    return {
+        "basis": {
+            "role_axis": "condition-toggle XOR terminal-projection-toggle",
+            "projection_axis": "terminal-projection-toggle",
+            "reason": (
+                "The derived role axis maps the current D6 WHILE semantics "
+                "directly to current D6 DO semantics, while remaining an "
+                "involution commuting with the projection axis."
+            ),
+        },
+        "d6_parent": parent,
+        "d6_known_sibling": sibling,
+        "d8_family_coordinates": sorted(family),
+        "selector_collision": False,
+        "axis_order_a": {
+            "order": ["role", "projection"],
+            "corners": role_then_projection,
+        },
+        "axis_order_b": {
+            "order": ["projection", "role"],
+            "corners": projection_then_role,
+        },
+        "invariants": {
+            parent + "00": "WHILE / lower-domain duplicate",
+            parent + "11": (
+                "stop-when-true + return-state / generated fixed candidate"
+            ),
+        },
+        "orientation_gauge_orbit": {
+            "coordinates": [parent + "01", parent + "10"],
+            "meanings": [
+                "DO / lower-domain duplicate",
+                "continue-while-true + apply-result / novel semantic candidate",
+            ],
+            "rule": "axis order swaps only the two middle corners",
+        },
+    }
 
 
 def evaluate(
@@ -167,6 +252,8 @@ def run() -> dict[str, object]:
     assert all_four_distinct == 432
     assert first_four_distinct is not None
 
+    gauge = coordinate_gauge(authority)
+
     return {
         "schema": "d8-do-while-product/v1",
         "status": "PRODUCT-CANDIDATE",
@@ -207,20 +294,29 @@ def run() -> dict[str, object]:
             "schemas_all_four_tables_distinct": all_four_distinct,
             "first_all_four_distinct": first_four_distinct,
         },
+        "coordinate_gauge": gauge,
         "result": {
             "condition_axis_observable": True,
             "terminal_projection_axis_observable": True,
             "axes_commute_structurally": True,
             "nondegenerate_product_witness_exists": True,
             "candidate_dimensions": 2,
+            "novel_semantic_candidates": 2,
+            "invariant_coordinate_candidate": str(authority["while"]) + "11",
+            "invariant_coordinate_meaning": "stop-when-true + return-state",
+            "middle_gauge_orbit": [
+                str(authority["while"]) + "01",
+                str(authority["while"]) + "10",
+            ],
             "admitted_d8_coordinates": 0,
-            "candidate_footprint": [],
+            "candidate_footprint": gauge["d8_family_coordinates"],
         },
         "non_conclusions": [
             "No D8 coordinate, resident, or callability is admitted.",
-            "The two off-diagonal corners are semantic candidates only.",
+            "Generated coordinate candidates remain research-only and unadmitted.",
+            "The current D6 DO duplicate does not earn a D8 resident.",
+            "The novel middle semantic has unresolved absolute 01/10 gauge.",
             "Current D6 DO/WHILE runtime mechanisms are not inferred from residency.",
-            "Coordinate orientation and selector-collision analysis remain separate.",
             "No D7 ancestry or historical D8 donor map is used.",
         ],
     }
@@ -230,6 +326,8 @@ def render(report: dict[str, object]) -> str:
     carrier = report["carrier"]
     witness = report["witness"]
     example = witness["first_all_four_distinct"]
+    gauge = report["coordinate_gauge"]
+    result = report["result"]
     return "\n".join([
         "# D8 DO/WHILE product screen — #3770",
         "",
@@ -251,6 +349,21 @@ def render(report: dict[str, object]) -> str:
         f"- predicate: {example['predicate']}",
         f"- result: {example['result']}",
         f"- tables: {example['corner_tables']}",
+        "",
+        "Coordinate/gauge result:",
+        f"- D6 anchor: {gauge['d6_parent']} = WHILE",
+        f"- D6 sibling: {gauge['d6_known_sibling']} = DO",
+        f"- D8 family: {' '.join(gauge['d8_family_coordinates'])}",
+        f"- selector collision: {gauge['selector_collision']}",
+        (
+            "- invariant fixed candidate: "
+            f"{result['invariant_coordinate_candidate']} = "
+            f"{result['invariant_coordinate_meaning']}"
+        ),
+        (
+            "- novel middle semantic remains in gauge orbit: "
+            f"{' / '.join(result['middle_gauge_orbit'])}"
+        ),
         "",
         "D8 coordinates admitted: **0**.",
         "",
