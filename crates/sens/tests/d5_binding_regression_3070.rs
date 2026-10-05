@@ -63,5 +63,5 @@ fn legacy_quotient_never_borrows_the_exact_d5_direct_primitive() {
             .to_string(),
         "2"
     );
-    assert_eq!(exact_d5_call(0b10011, "6 3", &mut loaded), "2");
+    assert_eq!(exact_d5_call(0b10111, "6 3", &mut loaded), "2");
 }
