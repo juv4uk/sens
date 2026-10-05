@@ -52,12 +52,15 @@ fn verify_invariants() {
 
     assert!(same_payload[0].core_operation().is_none());
     assert!(same_payload[1].core_operation().is_none());
-    assert!(same_payload[5].core_operation().is_none());
+    // Contract 11.6 + #3587: D6 has a callable Core identity projection,
+    // but mechanism admission remains separate (currently 0/64 in this stack).
+    // D7 is current residency but non-callable by role; D8 remains research.
     assert!(same_payload[6].core_operation().is_none());
     assert!(same_payload[7].core_operation().is_none());
     assert!(same_payload[2].core_operation().is_some());
     assert!(same_payload[3].core_operation().is_some());
     assert!(same_payload[4].core_operation().is_some());
+    assert!(same_payload[5].core_operation().is_some());
 }
 
 #[inline(never)]
