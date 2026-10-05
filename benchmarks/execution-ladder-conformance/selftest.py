@@ -21,6 +21,7 @@ def oracle_row():
     observable = {
         "result_kind": "VALUE",
         "value": "synthetic-schema-only",
+        "output": "",
         "error_kind": None,
         "order_trace": [],
         "mechanism_status": "CALLABLE",
@@ -82,6 +83,11 @@ def main():
     wrong_width["identity_trace_digest"] = structured_digest(wrong_width["identity_trace"])
     must_fail(wrong_width, "payload width")
 
+    changed_output = copy.deepcopy(downstream)
+    changed_output["observable"]["output"] = "visible-difference"
+    changed_output["observable_digest"] = structured_digest(changed_output["observable"])
+    must_fail(changed_output, "PASS requires")
+
     legacy = copy.deepcopy(base)
     legacy["legacy_identity_used"] = True
     must_fail(legacy, "legacy identity")
@@ -97,6 +103,7 @@ def main():
     blocked["observable"] = {
         "result_kind": "BLOCKED-MECHANISM",
         "value": None,
+        "output": "",
         "error_kind": "MISSING",
         "order_trace": [],
         "mechanism_status": "BLOCKED-MECHANISM",
