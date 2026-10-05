@@ -236,12 +236,12 @@
   (00001000 (predicate values acc)
     (00000111
       ((00000010 values) () (00101010 acc))
-      ((00000010 values) (1) (00101010 acc))
-      (t t
+      ((00000010 values) (0)
        (10011100 ((decision (predicate (00000101 values))))
-         ; Predicate contract is exact D1.  D1:1 includes, D1:0 skips.
-         ; Structural EMPTY selects neither clause and propagates as EMPTY
-         ; instead of being silently collapsed into NO by generic truthiness.
+         ; FILTER consumes the predicate contract directly: exact D1:1
+         ; includes, exact D1:0 skips. Structural EMPTY selects neither
+         ; exact-D3 clause and therefore propagates as EMPTY/no-witness.
+         ; Any other carrier fails closed at the exact D3 COND boundary.
          (за-умовою
            (decision
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
