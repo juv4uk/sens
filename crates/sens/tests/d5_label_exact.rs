@@ -38,3 +38,26 @@ fn d5_label_rejects_non_closure() {
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(error.message.contains("D5:00100 LABEL"));
 }
+
+
+#[test]
+fn label_shadows_but_never_mutates_an_outer_binding() {
+    let mut session = Session::default();
+    eval_program("(визначення self (як-є outer))", &mut session)
+        .expect("outer binding");
+
+    let result = eval_program(
+        r#"((мітка self
+               (функція (xs)
+                 (за-умовою
+                   ((атом? xs) (як-є done))
+                   ((атом? (як-є recur)) (self (решта xs))))))
+             (як-є (a b c)))"#,
+        &mut session,
+    )
+    .expect("local LABEL recursion");
+    assert_eq!(result.value.to_string(), "done");
+
+    let outer = eval_program("self", &mut session).expect("outer binding survives");
+    assert_eq!(outer.value.to_string(), "outer");
+}
