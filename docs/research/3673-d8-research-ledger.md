@@ -86,8 +86,7 @@ Footprint:
 - `11100011`: generated fixed candidate UNZIP-SWAPPED.
 
 This is a typed product witness over the equal-length ZIP/UNZIP lane.
-#3712 is GREEN but still unmerged, so the ledger counts it as analyzed
-research evidence, not merged authority.
+#3712 is merged into main; this family is merged research evidence, not D8 occupancy authority.
 
 ## Falsified axes
 
