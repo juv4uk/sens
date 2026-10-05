@@ -83,16 +83,17 @@ impl DomainIdentity {
 
     /// Explicit callable/Core-operation projection.
     ///
-    /// Current owner authority admits exact D3/D4/D5 Core-operation identity.
-    /// D1/D2/D7 are non-callable by their domain laws; D6/D8 remain revoked
-    /// under #3278. D5 residency is full 32/32 under #3305, while actual
-    /// resident mechanisms remain independently fail-closed when unavailable.
+    /// Current owner authority admits exact D3/D4/D5/D6 Core-operation identity.
+    /// D1/D2/D7 are non-callable by their domain laws; D8 remains research.
+    /// D5 and D6 residency are current, while actual resident mechanisms remain
+    /// independently fail-closed when unavailable.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
             Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
+            Self::D6(value) => Some(CoreDomainIdentity::D6(value)),
+            Self::D1(_) | Self::D2(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
 }
@@ -283,11 +284,10 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_noncallable_or_unratified_domains() {
+    fn callable_projection_admits_d3_d4_d5_d6_and_fails_closed_for_noncallable_or_research_domains() {
         for source in [
             BinarySourceWord::W1(Bit1::new(1).unwrap()),
             BinarySourceWord::W2(Bit2::new(1).unwrap()),
-            BinarySourceWord::W6(Bit6::new(1).unwrap()),
             BinarySourceWord::W7(Bit7::new(1).unwrap()),
             BinarySourceWord::W8(Bit8::new(1).unwrap()),
         ] {
@@ -308,6 +308,11 @@ mod tests {
             BinarySourceWord::W5(Bit5::new(1).unwrap())
         ).core_operation().unwrap();
         assert_eq!((d5.width(), d5.packed_bits()), (5, 1));
+
+        let d6 = DomainIdentity::from_source_word(
+            BinarySourceWord::W6(Bit6::new(1).unwrap())
+        ).core_operation().unwrap();
+        assert_eq!((d6.width(), d6.packed_bits()), (6, 1));
     }
 
     #[test]
