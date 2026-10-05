@@ -43,7 +43,7 @@ fn d5_label_rejects_non_closure() {
 #[test]
 fn label_shadows_but_never_mutates_an_outer_binding() {
     let mut session = Session::default();
-    eval_program("(визначення self (як-є outer))", &mut session)
+    eval_program("(визначити self (як-є outer))", &mut session)
         .expect("outer binding");
 
     let result = eval_program(
