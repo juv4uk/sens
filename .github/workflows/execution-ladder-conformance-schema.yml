@@ -1,0 +1,20 @@
+name: execution-ladder conformance schema
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - ".github/workflows/execution-ladder-conformance-schema.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - ".github/workflows/execution-ladder-conformance-schema.yml"
+
+jobs:
+  schema-selftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate deterministic schema and negative controls
+        run: python3 benchmarks/execution-ladder-conformance/selftest.py
