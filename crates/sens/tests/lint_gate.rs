@@ -46,7 +46,7 @@ fn linter_gate() {
             (cond
               ((атом? lists) (quote ()))
               ((атом? (quote fallback))
-               (append (car lists) (append-all (cdr lists))))))))
+               (append (car lists) (append-all (cdr lists)))))))
 
         (append-all
           (list
