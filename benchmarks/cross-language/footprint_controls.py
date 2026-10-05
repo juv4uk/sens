@@ -140,9 +140,13 @@ def main() -> int:
     rust_src.write_text(external_controls.rust_source(WORKLOAD), encoding="utf-8")
     sens_src.write_text(current_sens.source(WORKLOAD), encoding="utf-8")
 
-    rustc = resolve_executable(args.rustc)
+    rustc_command = shutil.which(args.rustc)
+    if rustc_command is None:
+        raise RuntimeError(f"executable not found: {args.rustc}")
+    # Preserve the rustc launcher path instead of resolving its symlink to rustup.
+    # rustup dispatches by argv[0]; calling the resolved rustup binary with -O is invalid.
     compile_proc = subprocess.run(
-        [str(rustc), "-O", str(rust_src), "-o", str(rust_bin)],
+        [rustc_command, "-O", str(rust_src), "-o", str(rust_bin)],
         capture_output=True,
         text=True,
         check=False,
