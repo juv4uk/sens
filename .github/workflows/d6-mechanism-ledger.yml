@@ -37,4 +37,4 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: python3 scripts/check-d6-mechanism-ledger.py
       - run: cargo test -p sens --test d6_selector_runtime -- --nocapture
-      - run: cargo test -p sens --test domain_ast_value_identity callable_projection_admits_d3_d4_d5_d6 -- --nocapture
+      - run: cargo test -p sens --test domain_ast_value_identity callable_projection_admits_d3_d4_d5_d6_and_fails_closed_for_noncallable_d7_and_research_d8 -- --nocapture
