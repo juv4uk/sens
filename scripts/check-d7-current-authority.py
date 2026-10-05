@@ -58,7 +58,9 @@ assert d["future_migration_boundary"]["candidate_occupancy"]==124
 
 assert "(owner-ratification . #3572)" in contract
 assert '(owner-reserved-pinned . ("0100001" "0101010"))' in contract
-assert '(candidate-occupancy . 124)' in contract
+assert '(occupancy . "126")' in contract
+assert '(capacity . "128")' in contract
+assert '(candidate-occupancy . "124")' in contract
 assert "(minor . 6)" in lang
 assert "Contract 11.6" in lang
 assert "D7 is owner-ratified 126/128 in #3572" in lang
