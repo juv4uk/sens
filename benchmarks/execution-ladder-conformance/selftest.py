@@ -28,7 +28,7 @@ def oracle_row():
     digest = structured_digest(observable)
     return {
         "schema": SCHEMA,
-        "case_id": case_id_for(program),
+        "case_id": case_id_for("canonical-source", program),
         "contract": "11.5",
         "upstream_sha": "0" * 40,
         "producer_layer": "L0",
@@ -61,6 +61,11 @@ def must_fail(row, needle):
 def main():
     base = oracle_row()
     validate(base)
+
+    if case_id_for("canonical-source", base["program"]) == case_id_for(
+        "canonical-ast", base["program"]
+    ):
+        raise AssertionError("program encoding must participate in case identity")
 
     downstream = copy.deepcopy(base)
     downstream["producer_layer"] = "L3"
