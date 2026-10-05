@@ -1,7 +1,8 @@
-name: Ratified domains D1-D8 benchmark
+name: D1-D8 exact-width carrier benchmark
 
-# Current exact-domain carrier/runtime benchmark after the D1-D8 production
-# cutover. Historical D1-D4 results remain archived under benchmarks/domain1234.
+# Exact-width carrier/runtime benchmark across W1..W8.
+# Contract 11.5 authority is separate: D1-D6 current; D7-D8 research.
+# Measuring a carrier never ratifies its semantic domain.
 
 on:
   workflow_dispatch:
