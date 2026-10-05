@@ -419,3 +419,147 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value, 
     }
     Ok(answer(Some(u8::from(left == right))))
 }
+
+
+#[cfg(test)]
+mod exact_domain_define_tests {
+    use super::*;
+    use crate::{
+        Bija3, Bit3, Bit4, Bit6, Bit7, Bit8, CoreD4, CoreD6, CoreD8, DomainIdentity,
+        SoundD7,
+    };
+
+    fn expr(kind: ExprKind) -> Expr {
+        Expr {
+            kind,
+            span: Span::default(),
+        }
+    }
+
+    fn list(items: Vec<Expr>) -> Expr {
+        expr(ExprKind::List(items.into()))
+    }
+
+    fn domain(identity: DomainIdentity) -> Expr {
+        expr(ExprKind::DomainIdentity(identity))
+    }
+
+    fn d6(bits: u8) -> (DomainIdentity, crate::CoreDomainIdentity) {
+        let word = CoreD6::from_word(Bit6::new(bits).unwrap());
+        (
+            DomainIdentity::D6(word),
+            crate::CoreDomainIdentity::D6(word),
+        )
+    }
+
+    fn zero_arg_lambda() -> Expr {
+        list(vec![
+            domain(DomainIdentity::D4(CoreD4::from_word(
+                Bit4::new(0b0010).unwrap(),
+            ))),
+            list(vec![]),
+            domain(DomainIdentity::D3(Bija3::from_word(
+                Bit3::new(0b101).unwrap(),
+            ))),
+        ])
+    }
+
+    #[test]
+    fn exact_domain_define_installs_one_language_mechanism_without_a_surface() {
+        let environment = Environment::root();
+        let (target, core_target) = d6(0b110000); // TAKE identity; semantics are not exercised here.
+        let arguments = [domain(target), zero_arg_lambda()];
+
+        let value = evaluate_definition(&arguments, &environment, Span::default())
+            .expect("missing D6 slot may receive one language-owned mechanism");
+        assert!(matches!(value, Value::Closure(_)));
+        assert!(matches!(
+            environment.domain_code_slot(core_target),
+            Some(Value::Closure(_))
+        ));
+
+        let error = evaluate_definition(&arguments, &environment, Span::default())
+            .expect_err("exact-domain mechanism slot must be bind-once");
+        assert_eq!(error.kind, ErrorKind::InvalidForm);
+    }
+
+    #[test]
+    fn exact_domain_define_rejects_static_selector_and_non_callable_domains() {
+        let environment = Environment::root();
+
+        let (selector, _) = d6(0b100000);
+        let selector_error = evaluate_definition(
+            &[domain(selector), zero_arg_lambda()],
+            &environment,
+            Span::default(),
+        )
+        .expect_err("proved D6 selector mechanism is immutable");
+        assert_eq!(selector_error.kind, ErrorKind::InvalidForm);
+
+        let d7 = DomainIdentity::D7(SoundD7::from_word(Bit7::new(0b1100000).unwrap()));
+        let d7_error = evaluate_definition(
+            &[domain(d7), zero_arg_lambda()],
+            &environment,
+            Span::default(),
+        )
+        .expect_err("current D7 role is not a generic callable Core target");
+        assert_eq!(d7_error.kind, ErrorKind::InvalidForm);
+
+        let d8 = DomainIdentity::D8(CoreD8::from_word(Bit8::new(0b00110000).unwrap()));
+        let d8_error = evaluate_definition(
+            &[domain(d8), zero_arg_lambda()],
+            &environment,
+            Span::default(),
+        )
+        .expect_err("D8 remains research and cannot gain a mechanism through DEFINE");
+        assert_eq!(d8_error.kind, ErrorKind::InvalidForm);
+    }
+
+    #[test]
+    fn exact_domain_define_is_root_only_and_requires_a_callable_mechanism_value() {
+        let root = Environment::root();
+        let child = root.child();
+        let (target, core_target) = d6(0b110001);
+
+        let child_error = evaluate_definition(
+            &[domain(target), zero_arg_lambda()],
+            &child,
+            Span::default(),
+        )
+        .expect_err("session-wide exact mechanism slots must be installed at root");
+        assert_eq!(child_error.kind, ErrorKind::InvalidForm);
+        assert!(root.domain_code_slot(core_target).is_none());
+
+        let value_error = evaluate_definition(
+            &[
+                domain(target),
+                expr(ExprKind::Number(1.0, crate::Exactness::Exact)),
+            ],
+            &root,
+            Span::default(),
+        )
+        .expect_err("exact-domain DEFINE must bind a callable mechanism value");
+        assert_eq!(value_error.kind, ErrorKind::Type);
+        assert!(root.domain_code_slot(core_target).is_none());
+    }
+
+    #[test]
+    fn symbol_define_keeps_its_existing_binding_behavior() {
+        let environment = Environment::root();
+        let arguments = [
+            expr(ExprKind::Symbol("локальне-визначення".into())),
+            expr(ExprKind::Number(5.0, crate::Exactness::Exact)),
+        ];
+
+        let value = evaluate_definition(&arguments, &environment, Span::default())
+            .expect("ordinary Symbol DEFINE remains supported");
+        assert_eq!(value.to_string(), "5");
+
+        let observed = evaluate(
+            &expr(ExprKind::Symbol("локальне-визначення".into())),
+            &environment,
+        )
+        .expect("symbol binding must remain visible");
+        assert_eq!(observed.to_string(), "5");
+    }
+}
