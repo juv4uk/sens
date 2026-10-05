@@ -1072,7 +1072,7 @@
 
   ("SI-DEFINING-CONSTANTS-EXACT-RATIONAL" . (
     (priority . #b1010)
-    (capabilities . (physics mathematics rationals constants world-knowledge axioms provenance))
+    (capabilities . (physics mathematics rationals constants world-knowledge axioms))
     (origin . sens)
     (context . "OWNER CUTOVER 2026-10-05, authority #3374/#3386: the seven BIPM SI defining constants already implemented exactly in lib/si.lisp are initial WORLD-KNOWLEDGE AXIOMS / PRIMITIVES. This supersedes the old library-only/prelude-only interpretation. Primitive taxonomy is explicit: world-knowledge primitive != evaluator/function primitive; no function opcode is minted merely by axiom status.")
     (description . "Promote delta-nu-cs, c, h, e, k, n-a and k-cd from exact scientific library data to canonical initial world axioms. Preserve exact rational/integer value, dimension/unit, exact-by-definition status, BIPM provenance and stable axiom identity; zero floats. Create/consume one machine-readable authority and make docs/tests/library projections validate against it. Distinguish AXIOM from DERIVED, OBSERVED and UNKNOWN. Feed #3387 exact derivation and #3388 observation-boundary work.")
@@ -1080,7 +1080,7 @@
 
   ("WORLD-MODEL-LAWS-AXIOM-OBSERVATION-BRIDGE" . (
     (priority . #b1010)
-    (capabilities . (physics mathematics world-knowledge axioms model-laws observations derivation provenance quantities))
+    (capabilities . (physics mathematics world-knowledge axioms model-laws observations derivation quantities))
     (origin . sens)
     (depends-on . (SI-DEFINING-CONSTANTS-EXACT-RATIONAL))
     (context . "OWNER DIRECTION 2026-10-05, authority #3374/#3386/#3402: world axioms alone do not make the language know physics. SENS needs an explicit MODEL_LAW layer between WORLD_DEFINITION_AXIOM and OBSERVATION. A law is neither an axiom nor an observation and must carry equation, validity assumptions/domain, source/provenance and exact/empirical/approximate status.")
