@@ -1,7 +1,8 @@
-name: Ratified domains D1-D8 benchmark
+name: D1-D6 current, D7-D8 research, W1-W8 benchmark
 
-# Current exact-domain carrier/runtime benchmark after the D1-D8 production
-# cutover. Historical D1-D4 results remain archived under benchmarks/domain1234.
+# Exact-width carrier/runtime benchmark under Contract 11.5.
+# Semantic identity authority: D1-D6 current; D7-D8 research.
+# W1-W8 remain mechanical carrier controls; callability is reported separately.
 
 on:
   workflow_dispatch:
@@ -47,10 +48,10 @@ jobs:
           valgrind --version
           rustc --version
 
-      - name: Build D1-D8 benchmark
+      - name: Build W1-W8 carrier benchmark
         run: cargo build --release -p sens --example domain12345678_bench
 
-      - name: Measure D1-D8 exact-domain carrier/runtime
+      - name: Measure W1-W8 carrier cost under D1-D6 authority split
         run: |
           rm -rf /tmp/domain12345678
           python3 benchmarks/domain12345678/run.py \
