@@ -9,9 +9,10 @@
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
     compiler_execution_role, domain_identity_shape_mechanism, eval_parsed_expressions,
-    eval_program, load_core_library, parse_canonical_binary, sha256_source, Bit8,
+    eval_program, load_core_library, parse_canonical_binary, sha256_source, Bija3, Bit3, Bit8,
     CompilerExecutionRole, CoreD8, DomainIdentity, Exactness, Session, Value,
 };
+use std::fmt;
 use std::rc::Rc;
 
 const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
@@ -59,6 +60,15 @@ enum NormalizedRequest {
 enum HarnessError {
     Bootstrap(String),
     MalformedRequest(String),
+}
+
+impl fmt::Display for HarnessError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Bootstrap(message) => write!(formatter, "bootstrap/transport failure: {message}"),
+            Self::MalformedRequest(message) => write!(formatter, "malformed SENS request: {message}"),
+        }
+    }
 }
 
 fn quoted_field(text: &str, key: &str) -> String {
@@ -261,7 +271,6 @@ fn host_reference(identity: DomainIdentity, law: &LawProjection) -> NormalizedRe
 
 fn sens_request(
     identity: DomainIdentity,
-    law: &LawProjection,
     session: &mut Session,
 ) -> Result<NormalizedRequest, HarnessError> {
     let result = eval_parsed_expressions(&[request(identity)], session)
@@ -395,18 +404,18 @@ fn corpus_identities() -> Vec<DomainIdentity> {
 fn host_reference_and_sens_nucleus_emit_identical_normalized_requests() {
     let law = law_projection();
     let mut session = session(&law)
-        .unwrap_or_else(|error| panic!("bootstrap/transport failure: {error:?}"));
+        .unwrap_or_else(|error| panic!("{error}"));
 
     let identities = corpus_identities();
     assert!(
-        identities.len() >= 4,
-        "shared corpus must expose structural empty plus three bounded call roles"
+        identities.len() >= 3,
+        "shared corpus must expose the three bounded callable roles; structural empty is data"
     );
 
     for identity in identities {
         let host = host_reference(identity, &law);
-        let sens = sens_request(identity, &law, &mut session)
-            .unwrap_or_else(|error| panic!("bootstrap/transport failure: {error:?}"));
+        let sens = sens_request(identity, &mut session)
+            .unwrap_or_else(|error| panic!("{error}"));
 
         assert_eq!(
             sens, host,
@@ -419,28 +428,45 @@ fn host_reference_and_sens_nucleus_emit_identical_normalized_requests() {
 fn wrong_domain_is_a_named_rejection_not_a_transport_failure() {
     let law = law_projection();
     let mut session = session(&law)
-        .unwrap_or_else(|error| panic!("bootstrap/transport failure: {error:?}"));
+        .unwrap_or_else(|error| panic!("{error}"));
 
     let d8 = DomainIdentity::D8(CoreD8::from_word(
         Bit8::new(0b0000_0100).expect("D8 exact word"),
     ));
 
     let host = host_reference(d8, &law);
-    let sens = sens_request(d8, &law, &mut session)
-        .unwrap_or_else(|error| panic!("bootstrap/transport failure: {error:?}"));
+    let sens = sens_request(d8, &mut session)
+        .unwrap_or_else(|error| panic!("{error}"));
 
     assert_eq!(host, NormalizedRequest::Reject(RejectionCategory::WrongDomain));
     assert_eq!(sens, host, "semantic mismatch in D8 fail-closed category");
 }
 
 #[test]
-fn comparator_source_reuses_corpus_and_has_no_identity_to_role_table() {
+fn comparator_reuses_shared_corpus_and_the_named_differential_oracle() {
     let source = include_str!("compiler_nucleus_diff.rs");
     assert!(source.contains("compiler-d3-selector-corpus-v1.tsv"));
-    for forbidden in ["D3:100", "D3:011", "D3:111", "100=>", "011=>", "111=>"] {
-        assert!(
-            !source.contains(forbidden),
-            "differential harness must not become a second semantic table: {forbidden}"
-        );
-    }
+    assert!(source.contains("compiler_execution_role"));
+    assert!(
+        !source.contains("match raw"),
+        "differential comparator must not grow a raw coordinate dispatch"
+    );
+}
+
+#[test]
+fn unadmitted_d3_is_a_named_rejection_not_a_transport_failure() {
+    let law = law_projection();
+    let mut session = session(&law).unwrap_or_else(|error| panic!("{error}"));
+    let empty_identity =
+        DomainIdentity::D3(Bija3::from_word(Bit3::new(0).expect("exact D3 zero")));
+
+    let host = host_reference(empty_identity, &law);
+    let sens = sens_request(empty_identity, &mut session)
+        .unwrap_or_else(|error| panic!("{error}"));
+
+    assert_eq!(
+        host,
+        NormalizedRequest::Reject(RejectionCategory::UnadmittedRole)
+    );
+    assert_eq!(sens, host, "semantic mismatch in unadmitted D3 category");
 }
