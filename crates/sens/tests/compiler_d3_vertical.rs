@@ -56,8 +56,8 @@ const CASES: &[Case] = &[
 
 fn assert_no_legacy_identity(expr: &Expr) {
     match &expr.kind {
-        ExprKind::Sid(sid) => panic!("legacy Sid8 entered compiler witness: {sid}"),
-        ExprKind::Call(sid, _) => panic!("legacy Sid8 call entered compiler witness: {sid}"),
+        ExprKind::Sid(sid) => panic!("legacy byte identity entered compiler witness: {sid}"),
+        ExprKind::Call(sid, _) => panic!("legacy byte call entered compiler witness: {sid}"),
         ExprKind::List(items) => {
             for item in items.iter() {
                 assert_no_legacy_identity(item);
