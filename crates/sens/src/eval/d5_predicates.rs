@@ -147,7 +147,7 @@ mod tests {
             Value::Number(1.0, Exactness::Exact),
         ];
         for value in corpus {
-            let zero = invoke(d5(0b01000), &[value.clone()], Span::default())
+            let zero = invoke(d5(0b01000), std::slice::from_ref(&value), Span::default())
                 .unwrap()
                 .unwrap()
                 .as_predicate_bit()
