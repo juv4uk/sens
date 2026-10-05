@@ -134,3 +134,12 @@ python3 scripts/research-3622-d8-take-drop-edge.py \
 ```
 
 The workflow runs the witness twice and byte-compares the JSON output.
+
+## Authority freshness
+
+The executable witness does not trust hardcoded D6 TAKE/DROP coordinates. It reads
+`knowledge/d6-ratified.json`, requires owner authority `#3393`, resolves TAKE and
+DROP from that current 64-row map, and writes the source-file SHA-256 into the
+machine-readable artifact. Any future D6 authority movement therefore makes the
+witness fail or changes its recorded provenance instead of silently preserving a
+stale coordinate.
