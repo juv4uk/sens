@@ -28,12 +28,20 @@ class ParetoReportSmoke(unittest.TestCase):
         sens = root / "sens.tsv"
         footprint = root / "footprint.tsv"
 
-        exec_fields = ["runtime", "workload", "phase", "i_refs", "wall_s"]
+        exec_fields = [
+            "semantic_generation",
+            "runtime",
+            "workload",
+            "phase",
+            "i_refs",
+            "wall_s",
+        ]
         write_tsv(
             external,
             exec_fields,
             [
                 {
+                    "semantic_generation": "external-control-v2",
                     "runtime": "cpython",
                     "workload": "fib",
                     "phase": "full",
@@ -41,6 +49,7 @@ class ParetoReportSmoke(unittest.TestCase):
                     "wall_s": 1.0,
                 },
                 {
+                    "semantic_generation": "external-control-v2",
                     "runtime": "cpython",
                     "workload": "ackermann",
                     "phase": "full",
@@ -54,6 +63,7 @@ class ParetoReportSmoke(unittest.TestCase):
             exec_fields,
             [
                 {
+                    "semantic_generation": "contract-11-6-exact-d1-d7",
                     "runtime": "sens-exact",
                     "workload": "fib",
                     "phase": "full",
@@ -61,6 +71,7 @@ class ParetoReportSmoke(unittest.TestCase):
                     "wall_s": 1.1,
                 },
                 {
+                    "semantic_generation": "contract-11-6-exact-d1-d7",
                     "runtime": "sens-exact",
                     "workload": "ackermann",
                     "phase": "full",
@@ -83,6 +94,7 @@ class ParetoReportSmoke(unittest.TestCase):
             footprint_fields,
             [
                 {
+                    "semantic_generation": "external-control-v2",
                     "runtime": "cpython",
                     "workload": "fib",
                     "artifact_bytes": 1000,
@@ -91,6 +103,7 @@ class ParetoReportSmoke(unittest.TestCase):
                     "program_source_bytes": 100,
                 },
                 {
+                    "semantic_generation": "contract-11-6-exact-d1-d7",
                     "runtime": "sens-exact",
                     "workload": "fib",
                     "artifact_bytes": 800,
@@ -150,6 +163,7 @@ class ParetoReportSmoke(unittest.TestCase):
                 json.dumps(
                     {
                         "source_issue": "#1973",
+                        "contract": "11.6",
                         "completeness": "family-only",
                     }
                 ),
@@ -159,6 +173,25 @@ class ParetoReportSmoke(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("scope", proc.stderr)
 
+    def test_cross_contract_semantic_vector_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            semantic = root / "semantic.json"
+            semantic.write_text(
+                json.dumps(
+                    {
+                        "source_issue": "#1973",
+                        "contract": "11.5",
+                        "scope": "selector-family:D3-D6",
+                        "completeness": "family-only",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            proc = self.run_report(root, semantic)
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn("contract mismatch", proc.stderr)
+
     def test_family_scope_is_preserved_not_promoted(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -167,6 +200,7 @@ class ParetoReportSmoke(unittest.TestCase):
                 json.dumps(
                     {
                         "source_issue": "#1973",
+                        "contract": "11.6",
                         "scope": "selector-family:D3-D6",
                         "completeness": "family-only",
                         "metrics": {"generated_residents": 28},
