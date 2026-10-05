@@ -94,7 +94,6 @@ class ParetoReportSmoke(unittest.TestCase):
             footprint_fields,
             [
                 {
-                    "semantic_generation": "external-control-v2",
                     "runtime": "cpython",
                     "workload": "fib",
                     "artifact_bytes": 1000,
@@ -103,7 +102,6 @@ class ParetoReportSmoke(unittest.TestCase):
                     "program_source_bytes": 100,
                 },
                 {
-                    "semantic_generation": "contract-11-6-exact-d1-d7",
                     "runtime": "sens-exact",
                     "workload": "fib",
                     "artifact_bytes": 800,
