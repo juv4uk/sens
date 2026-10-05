@@ -1,0 +1,4459 @@
+{
+  "schema": "d7-v2-stable-residents/v1",
+  "status": "research-only",
+  "issue": "#3419",
+  "foundation": "#3393 / Contract 11.5",
+  "source": {
+    "stable_ids": "#3115 / knowledge/d3-d8-stable-residents.json",
+    "baseline_map": "knowledge/d7-full-map.json",
+    "note": "D7 rows only; stale D3-D6 rows from #3115 are not imported"
+  },
+  "policy": {
+    "stable_id": "opaque research handle, not language identity",
+    "baseline_bits": "report-only current donor coordinate; D7 remains unratified",
+    "provenance_missing": "pinned until recovered; never treated as free",
+    "human_labels": "projection/provenance only"
+  },
+  "summary": {
+    "total": 128,
+    "recovered": 107,
+    "provenance_missing": 21,
+    "phonology_eligible": 75,
+    "non_phonological": 32,
+    "pinned_no_geometry": 21
+  },
+  "rows": [
+    {
+      "stable_resident_id": "sr-azmugvsttngf",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.K.voiceless",
+        "k",
+        "k",
+        "क",
+        "к"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.K.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-ruqvnwarpdkv",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.K.voiceless-aspirated",
+        "K",
+        "kh",
+        "ख"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.K.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-xngyyfuwfyrd",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.K.voiced",
+        "g",
+        "g",
+        "ग",
+        "ґ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.K.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-exkcmbqhcfds",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.K.voiced-aspirated",
+        "G",
+        "gh",
+        "घ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.K.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-tvjkjkysppuq",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.K.nasal",
+        "N",
+        "ṅ",
+        "ङ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.K.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-prjcnkxczgwu",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.C.voiceless",
+        "c",
+        "c",
+        "च"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.C.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-asqbbpqqqzxb",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.C.voiceless-aspirated",
+        "C",
+        "ch",
+        "छ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.C.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-vakydvbwupnz",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0000111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.C.voiced",
+        "j",
+        "j",
+        "ज"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.C.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-uwyvpthvxhpa",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.C.voiced-aspirated",
+        "J",
+        "jh",
+        "झ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.C.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-afdzujtyqssr",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.C.nasal",
+        "Y",
+        "ñ",
+        "ञ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.C.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-jzaxcczeezym",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-retroflex.voiceless",
+        "w",
+        "ṭ",
+        "ट"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-retroflex.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-pscvcwdzcbnk",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-retroflex.voiceless-aspirated",
+        "W",
+        "ṭh",
+        "ठ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-retroflex.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-satmtfzmyzbs",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-retroflex.voiced",
+        "q",
+        "ḍ",
+        "ड"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-retroflex.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-cfrmhnucqvfx",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-retroflex.voiced-aspirated",
+        "Q",
+        "ḍh",
+        "ढ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-retroflex.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-ugwtmmvvectn",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-retroflex.nasal",
+        "R",
+        "ṇ",
+        "ण"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-retroflex.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-bqgtujbyppda",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0001111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-dental.voiceless",
+        "t",
+        "t",
+        "त",
+        "т"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-dental.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-zjbrthvztawd",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-dental.voiceless-aspirated",
+        "T",
+        "th",
+        "थ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-dental.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-rtdvnngphhre",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-dental.voiced",
+        "d",
+        "d",
+        "द",
+        "д"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-dental.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-eqfmgsasnqdx",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-dental.voiced-aspirated",
+        "D",
+        "dh",
+        "ध"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-dental.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-haheuzetkueu",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.T-dental.nasal",
+        "n",
+        "n",
+        "न",
+        "н"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.T-dental.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-pgfdftcpqdhn",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.P.voiceless",
+        "p",
+        "p",
+        "प",
+        "п"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.P.voiceless",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-xmuhaadntyfp",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.P.voiceless-aspirated",
+        "P",
+        "ph",
+        "फ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.P.voiceless-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-wkrafxxuztks",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.P.voiced",
+        "b",
+        "b",
+        "ब",
+        "б"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.P.voiced",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-njyagbqjsyvj",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0010111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.P.voiced-aspirated",
+        "B",
+        "bh",
+        "भ"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.P.voiced-aspirated",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-bcykhjhwbaau",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "varga",
+      "semantic_class": "varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0011000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "varga.P.nasal",
+        "m",
+        "m",
+        "म",
+        "м"
+      ],
+      "baseline_class": "varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "varga.P.nasal",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-jzkheenjakeb",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0011001",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.varga.11001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-cgahtdvnbaut",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0011010",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.varga.11010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-gwrejptmsber",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0011011",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.varga.11011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-neyupqvrfwjn",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0011100",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.varga.11100",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-jqrygzupvqtc",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0011101",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.varga.11101",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-qutcrfvhnhpp",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0011110",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.varga.11110",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-nrbykzxyxauz",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0011111",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.varga.11111",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-afnajtxbsvez",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0100000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.K.primary-voiceless-fricative",
+        "х"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.K.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-tdyxcfvwrqzs",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0100001",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.00001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-ggmgzgecmcsd",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0100010",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.00010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-xwejyjhcasjn",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0100011",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.00011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-btjrbzxmakwj",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0100100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.C.primary-voiceless-fricative",
+        "S",
+        "ś",
+        "श",
+        "ш"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.C.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-txwrvhyhrrcy",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0100101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.C.voiced-fricative",
+        "ж"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.C.voiced-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-vwgspdausxfs",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0100110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.C.primary-sonorant",
+        "y",
+        "y",
+        "य",
+        "й"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.C.primary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-xyxqmtwkcxed",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0100111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.uk-ext.softness",
+        "ь"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.uk-ext.softness",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-ufgbkcqnrevq",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0101000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.T-retroflex.primary-voiceless-fricative",
+        "z",
+        "ṣ",
+        "ष"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.T-retroflex.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-qupjktqjgffu",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0101001",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.01001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-tmmckyqkgsfv",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0101010",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.01010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-msspnvcnrkkm",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0101011",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.01011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-vtbhjtgzajhe",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0101100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.T-dental.primary-voiceless-fricative",
+        "s",
+        "s",
+        "स",
+        "с"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.T-dental.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-sgwbcpwukked",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0101101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.T-dental.voiced-fricative",
+        "з"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.T-dental.voiced-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-fhxavysnpnqa",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0101110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.T-dental.primary-sonorant",
+        "r",
+        "r",
+        "र",
+        "р"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.T-dental.primary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-fwqpvcwrghyx",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0101111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.T-dental.lateral-or-secondary-sonorant",
+        "l",
+        "l",
+        "ल",
+        "л"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.T-dental.lateral-or-secondary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-nxyzvaxndrdr",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0110000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.P.primary-voiceless-fricative",
+        "ф"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.P.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-ykedppyvyjnx",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0110001",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.10001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-ewvuxzqaebrh",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0110010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.P.primary-sonorant",
+        "v",
+        "v",
+        "व",
+        "в"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.P.primary-sonorant",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-kajzmbngagby",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0110011",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.10011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-eyzaxkgwukpx",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0110100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.G-glottal.primary-voiceless-fricative",
+        "h",
+        "h",
+        "ह"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.G-glottal.primary-voiceless-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-atuecmqfskzr",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0110101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.G-glottal.voiced-fricative",
+        "г"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.G-glottal.voiced-fricative",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-abrmarajgnxv",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0110110",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.10110",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-jpvgxmhqsrcz",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0110111",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.10111",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-ztshemgqdjgf",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0111000",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.11000",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-rgrkejdndsya",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0111001",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.11001",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-wwksnkftfrgm",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0111010",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.11010",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-yvkhejgbgpdk",
+      "semantic_status": "PROVENANCE-MISSING",
+      "semantic_role": null,
+      "semantic_class": null,
+      "typed_behavior": null,
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        "#3029",
+        "#3031"
+      ],
+      "map_independent_witness_refs": [],
+      "current_domain": "D7",
+      "current_bits": "0111011",
+      "placement_policy": "PINNED-UNTIL-PROVENANCE-RECOVERED",
+      "source_status": "reserved",
+      "human_labels_optional": [],
+      "baseline_class": "non-varga",
+      "baseline_residency": "reserved",
+      "baseline_name": "reserved.non-varga.11011",
+      "geometry_eligibility": "PINNED-NO-GEOMETRY"
+    },
+    {
+      "stable_resident_id": "sr-penvwmbrmzqt",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0111100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.uk-ext.ts",
+        "ц"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.uk-ext.ts",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-ppbutwaqfysv",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0111101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.uk-ext.tsh",
+        "ч"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.uk-ext.tsh",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-rqwdbgkpmxpa",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0111110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.uk-ext.dz",
+        "дз"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.uk-ext.dz",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-ecamcpnymanz",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "non-varga",
+      "semantic_class": "non-varga",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "0111111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "non-varga.uk-ext.dzh",
+        "дж"
+      ],
+      "baseline_class": "non-varga",
+      "baseline_residency": "assigned",
+      "baseline_name": "non-varga.uk-ext.dzh",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-vdejqjxpakux",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.a.oral.short",
+        "a",
+        "a",
+        "अ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.a.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-feawnxucubgs",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.a.oral.long",
+        "A",
+        "ā",
+        "आ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.a.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-vyusykjqbene",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.a.nasal.short"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.a.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-kbxkggkkzjmq",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.a.nasal.long"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.a.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-xvtmvgnrtahp",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.i.oral.short",
+        "i",
+        "i",
+        "इ",
+        "і"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.i.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-skgxmdecjkjb",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.i.oral.long",
+        "I",
+        "ī",
+        "ई"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.i.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-hburjesrweqe",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.i.nasal.short"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.i.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-nzkrrkfsmysv",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1000111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.i.nasal.long"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.i.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-rucspuxspqak",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.u.oral.short",
+        "u",
+        "u",
+        "उ",
+        "у"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.u.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-feedxyvjezub",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.u.oral.long",
+        "U",
+        "ū",
+        "ऊ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.u.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-eveyjjbamcyw",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.u.nasal.short"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.u.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-asugaymgxubg",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.u.nasal.long"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.u.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-nvaqtktychsg",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.r-vocalic.oral.short",
+        "f",
+        "ṛ",
+        "ऋ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.r-vocalic.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-shpvewafmcap",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.r-vocalic.oral.long",
+        "F",
+        "ṝ",
+        "ॠ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.r-vocalic.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-cmxmpkfqseqg",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.r-vocalic.nasal.short"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.r-vocalic.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-nwpdamrvbrhr",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1001111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.r-vocalic.nasal.long"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.r-vocalic.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-bwctbsbrddkm",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.l-vocalic.oral.short",
+        "x",
+        "ḷ",
+        "ऌ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.l-vocalic.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-zetvmfwrddbx",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.l-vocalic.oral.long",
+        "X",
+        "ḹ",
+        "ॡ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.l-vocalic.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-mfcwmgjtunyb",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.l-vocalic.nasal.short"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.l-vocalic.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-pxvebsvnrdvg",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.l-vocalic.nasal.long"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.l-vocalic.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-sgcxraypsxyu",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.e.oral.short",
+        "e",
+        "e",
+        "ए"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.e.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-jvtvmenhrmgy",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.e.oral.long",
+        "E",
+        "ai",
+        "ऐ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.e.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-sgqpxvaamcuh",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.e.nasal.short"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.e.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-gmgeyufsbjep",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1010111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.e.nasal.long"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.e.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-rzcasdqhrtkc",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.o.oral.short",
+        "o",
+        "o",
+        "ओ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.o.oral.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-rcgtmkwjgqsz",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.o.oral.long",
+        "O",
+        "au",
+        "औ"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.o.oral.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-rzaczerztwhj",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.o.nasal.short"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.o.nasal.short",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-hzrxyardsred",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.o.nasal.long"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.o.nasal.long",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-gpfnhskbgzcu",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.uk-ext.a",
+        "а"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.uk-ext.a",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-wxykdbqpmcnd",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.uk-ext.e",
+        "е"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.uk-ext.e",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-wjyrrfcxxjgk",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.uk-ext.o",
+        "о"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.uk-ext.o",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-qwbeftswyman",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "vowel",
+      "semantic_class": "vowel",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1011111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "vowel.uk-ext.y",
+        "и"
+      ],
+      "baseline_class": "vowel",
+      "baseline_residency": "assigned",
+      "baseline_name": "vowel.uk-ext.y",
+      "geometry_eligibility": "PHONOLOGY-ELIGIBLE"
+    },
+    {
+      "stable_resident_id": "sr-qsvturxcjsdz",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.space",
+        "\\x20",
+        "\\x20",
+        "\\x20",
+        "\\x20"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.space",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-aafjfgjyfanr",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.newline",
+        "\\x0a",
+        "\\x0a",
+        "\\x0a",
+        "\\x0a"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.newline",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-zxnnzrpfgyxv",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.tab",
+        "\\x09",
+        "\\x09",
+        "\\x09",
+        "\\x09"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.tab",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-sjxuxdfbfgbe",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.left-paren",
+        "(",
+        "(",
+        "(",
+        "("
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.left-paren",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-dspnkvpvnxvd",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.right-paren",
+        ")",
+        ")",
+        ")",
+        ")"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.right-paren",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-rvfbqwfcemsr",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.double-quote",
+        "\t",
+        "\t"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.double-quote",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-bwxtncrkbunh",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.backslash",
+        "\\\\",
+        "\\\\",
+        "\\\\",
+        "\\\\"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.backslash",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-dwatgagsncrt",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1100111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.underscore",
+        "_",
+        "_",
+        "_",
+        "_"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.underscore",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-ryrsghvhpzda",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.anusvara",
+        "M",
+        "ṃ",
+        "ं"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.anusvara",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-amgachqvebmm",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.visarga",
+        "H",
+        "ḥ",
+        "ः"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.visarga",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-zsyjpuxgkvag",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.avagraha",
+        "'",
+        "’",
+        "ऽ"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.avagraha",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-brrdzmxbrksa",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.danda",
+        ".",
+        "।",
+        "।"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.danda",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-exsnrerwrmcb",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.double-danda",
+        "..",
+        "॥",
+        "॥"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.double-danda",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-tkyxhbqmgxmq",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.ampersand",
+        "&",
+        "&",
+        "&",
+        "&"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.ampersand",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-vjjxjpbwgunk",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.pipe",
+        "|",
+        "|",
+        "|",
+        "|"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.pipe",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-mmyzhuvawfrb",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1101111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.backquote",
+        "`",
+        "`",
+        "`",
+        "`"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.backquote",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-gzphxtgxwtzb",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.plus",
+        "+",
+        "+",
+        "+",
+        "+"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.plus",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-tvpqysnzjnxm",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.minus",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.minus",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-nmjpvpbjbhvd",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.star",
+        "*",
+        "*",
+        "*",
+        "*"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.star",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-cjmhrwkbfvaf",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.slash",
+        "/",
+        "/",
+        "/",
+        "/"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.slash",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-kcnjsshgvhnp",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.equals",
+        "=",
+        "=",
+        "=",
+        "="
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.equals",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-pdyskndgdttj",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.less",
+        "<",
+        "<",
+        "<",
+        "<"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.less",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-vvczuupdsfyp",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.greater",
+        ">",
+        ">",
+        ">",
+        ">"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.greater",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-qypgjpkvsnae",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1110111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.question",
+        "?",
+        "?",
+        "?",
+        "?"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.question",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-mgnpcxzaaggr",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111000",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.bang",
+        "!",
+        "!",
+        "!",
+        "!"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.bang",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-bpfxjedtgkeg",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111001",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.apostrophe",
+        "'",
+        "'",
+        "'"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.apostrophe",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-ddndzrngtsbs",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111010",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.dot",
+        ".",
+        ".",
+        "."
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.dot",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-cxtzjnwqfjts",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111011",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.comma",
+        ",",
+        ",",
+        ",",
+        ","
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.comma",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-vxwgjybkywgq",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111100",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.colon",
+        ":",
+        ":",
+        ":",
+        ":"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.colon",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-qyuwcftdbutd",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111101",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.semicolon",
+        ";",
+        ";",
+        ";",
+        ";"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.semicolon",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-chnfmmnbdnhx",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111110",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.hash",
+        "#",
+        "#",
+        "#",
+        "#"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.hash",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    },
+    {
+      "stable_resident_id": "sr-jnwxehjmkrmf",
+      "semantic_status": "RECOVERED",
+      "semantic_role": "sign/operator",
+      "semantic_class": "sign/operator",
+      "typed_behavior": "Sound7/Text7 resident projection; detailed law remains source-specific",
+      "partiality": null,
+      "semantic_law_refs": [],
+      "derivation_certificate_refs": [],
+      "historical_provenance_refs": [
+        {
+          "cells": "shiva-sutras prototype/upc7-table.tsv (sha-pinned, 128 rows)",
+          "families": "shiva-sutras docs/d7-sound-map-2026-10-02.tsv",
+          "read": "2026-10-03"
+        },
+        "derived-research-not-owner-directive",
+        "#3029"
+      ],
+      "map_independent_witness_refs": [
+        "#1700",
+        "#2415"
+      ],
+      "current_domain": "D7",
+      "current_bits": "1111111",
+      "placement_policy": "SHADOW-ELIGIBLE",
+      "source_status": "assigned",
+      "human_labels_optional": [
+        "sign.at",
+        "@",
+        "@",
+        "@",
+        "@"
+      ],
+      "baseline_class": "sign/operator",
+      "baseline_residency": "assigned",
+      "baseline_name": "sign.at",
+      "geometry_eligibility": "NON-PHONOLOGICAL"
+    }
+  ]
+}
