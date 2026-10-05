@@ -15,8 +15,8 @@ from validate import validate
 WORKLOAD_SCHEMA = "sens-current-en-vs-d1d8-workloads/v1"
 BOUND = {
     "domain_set": [2, 3],
-    "max_ast_depth": 3,
-    "max_nodes": 15,
+    "max_ast_depth": 4,
+    "max_nodes": 12,
     "argument_value_bound": 2,
 }
 PROFILE = "d2-d3-structural-v1"
@@ -44,6 +44,31 @@ def data_values() -> list[str]:
         list_form([empty, empty]),
     ]
     return sorted(set(values))
+
+
+def source_shape(program: str) -> tuple[int, int]:
+    """Return (max list depth, expression-node count) for canonical source.
+
+    D2 open creates one list node; each D3 callable word creates one identity
+    node. D2 separators/closes are syntax, not AST nodes in this bounded profile.
+    """
+    depth = 0
+    max_depth = 0
+    nodes = 0
+    for token in program.split():
+        if token == "10":
+            depth += 1
+            max_depth = max(max_depth, depth)
+            nodes += 1
+        elif token == "01":
+            depth -= 1
+            if depth < 0:
+                raise ValueError(f"unbalanced canonical source: {program!r}")
+        elif token in {"001", "011", "100", "111"}:
+            nodes += 1
+    if depth != 0:
+        raise ValueError(f"unbalanced canonical source: {program!r}")
+    return max_depth, nodes
 
 
 def generated_programs() -> tuple[list[dict[str, str]], int]:
@@ -132,6 +157,13 @@ def main() -> int:
     workloads, raw_count = generated_programs()
     if len(workloads) != 16:
         raise AssertionError(f"expected 16 unique structural cases, got {len(workloads)}")
+
+    for workload in workloads:
+        depth, nodes = source_shape(workload["canonical_source"])
+        if depth > BOUND["max_ast_depth"] or nodes > BOUND["max_nodes"]:
+            raise AssertionError(
+                f"{workload['id']} exceeds declared bound: depth={depth} nodes={nodes}"
+            )
 
     pack_rows = []
 
@@ -232,6 +264,7 @@ def main() -> int:
         "transport": {
             "all_rows_round_trip": True,
             "semantic_bits_equal_packed_bits": True,
+            "rows": sorted(pack_rows, key=lambda row: row["id"]),
         },
     }
     args.summary.parent.mkdir(parents=True, exist_ok=True)
