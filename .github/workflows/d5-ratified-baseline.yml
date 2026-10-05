@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   authority:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v5
       - run: python3 scripts/check-d5-current-authority.py
