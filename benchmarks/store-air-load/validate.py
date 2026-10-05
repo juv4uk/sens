@@ -42,6 +42,9 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
     if not SHA64_RE.fullmatch(str(row.get("semantic_identity_digest", ""))):
         raise ValueError(f"line {line_no}: invalid semantic_identity_digest")
 
+    fixture_id = str(row["fixture_id"])
+    semantic_word_count = int(row["semantic_word_count"])
+    expected_semantic_bits = int(row["expected_semantic_bits"])
     semantic_bits = int(row["semantic_payload_bits"])
     framing_bits = int(row["framing_bits"])
     tail_bits = int(row["tail_unused_bits"])
@@ -52,8 +55,17 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
     bitrate = float(row["bitrate_bps"])
     airtime = float(row["ideal_airtime_seconds"])
 
-    if semantic_bits <= 0 or carrier_bits <= 0 or total_wire_bits <= 0:
+    if semantic_word_count <= 0:
+        raise ValueError(f"line {line_no}: semantic_word_count must be positive")
+    if expected_semantic_bits <= 0 or semantic_bits <= 0 or carrier_bits <= 0 or total_wire_bits <= 0:
         raise ValueError(f"line {line_no}: bit counts must be positive")
+    if semantic_bits != expected_semantic_bits:
+        raise ValueError(
+            f"line {line_no} fixture={fixture_id}: "
+            f"expected_semantic_bits={expected_semantic_bits} "
+            f"actual_semantic_bits={semantic_bits} "
+            f"artifact_bytes={physical_bytes}"
+        )
     if framing_bits < 0 or not 0 <= tail_bits <= 7:
         raise ValueError(f"line {line_no}: invalid framing/tail bits")
     if physical_bytes <= 0 or storage_bits != physical_bytes * 8:
@@ -69,7 +81,13 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
         if carrier_mode not in {"exact-bitstream", "byte-container"}:
             raise ValueError(f"line {line_no}: canonical row has invalid carrier mode")
         if storage_bits - semantic_bits != tail_bits:
-            raise ValueError(f"line {line_no}: canonical tail accounting mismatch")
+            raise ValueError(
+                f"line {line_no} fixture={fixture_id}: canonical packing mismatch "
+                f"expected_semantic_bits={expected_semantic_bits} "
+                f"actual_semantic_bits={semantic_bits} "
+                f"artifact_bytes={physical_bytes} storage_bits={storage_bits} "
+                f"tail_unused_bits={tail_bits}"
+            )
         if carrier_mode == "exact-bitstream" and carrier_bits != semantic_bits:
             raise ValueError(f"line {line_no}: exact-bitstream must carry semantic bits exactly")
         if carrier_mode == "byte-container" and carrier_bits != storage_bits:
@@ -125,6 +143,8 @@ def validate_file(path: Path) -> tuple[int, int]:
                 "git_sha",
                 "contract_version",
                 "semantic_identity_digest",
+                "semantic_word_count",
+                "expected_semantic_bits",
                 "semantic_payload_bits",
                 "text_surface_bytes",
                 "packed_vs_text_ratio",
