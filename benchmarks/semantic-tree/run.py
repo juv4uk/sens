@@ -170,7 +170,7 @@ def environment(binary: Path, source_sha: str | None, current_d6: bool) -> dict:
     if current_d6:
         env.update({
             "authority_generation": "Contract 11.5 / #3393",
-            "runtime_mechanism": "#3553 / #3394",
+            "runtime_mechanism": "#3588 / #3394",
             "benchmark_issue": "#1988",
             "semantic_scope": "D6 selector DIRECT_LAW 16/64",
             "selector_depth": 3,
