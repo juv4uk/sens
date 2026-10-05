@@ -1,0 +1,40 @@
+name: D6 mechanism ledger
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-mechanism-ledger.json"
+      - "knowledge/d6-ratified.json"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/tests/domain_ast_value_identity.rs"
+      - "crates/sens/tests/d6_selector_runtime.rs"
+      - "crates/sens/src/eval/selector_law.rs"
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/necessary_forms.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "scripts/check-d6-mechanism-ledger.py"
+      - ".github/workflows/d6-mechanism-ledger.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d6-mechanism-ledger.json"
+      - "knowledge/d6-ratified.json"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/tests/domain_ast_value_identity.rs"
+      - "crates/sens/tests/d6_selector_runtime.rs"
+      - "crates/sens/src/eval/selector_law.rs"
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/necessary_forms.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "scripts/check-d6-mechanism-ledger.py"
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: python3 scripts/check-d6-mechanism-ledger.py
+      - run: cargo test -p sens --test d6_selector_runtime -- --nocapture
+      - run: cargo test -p sens --test domain_ast_value_identity callable_projection_admits_d3_d4_d5_d6 -- --nocapture
