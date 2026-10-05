@@ -5,7 +5,7 @@ Research-only benchmark. It compiles a standalone mechanism model, checks
 semantic parity first, then measures Cachegrind counters with preparation and
 full phases separated.
 
-For the current Contract 11.5 D6 experiment use --current-d6. That profile is
+For the current Contract 11.6 D6 experiment use --current-d6. That profile is
 fixed to the 16 exact D6 selector descendants (two D3 roots × three suffix bits)
 and treats the flat table as a benchmark-only control, never semantic authority.
 
@@ -169,7 +169,7 @@ def environment(binary: Path, source_sha: str | None, current_d6: bool) -> dict:
     }
     if current_d6:
         env.update({
-            "authority_generation": "Contract 11.5 / #3393",
+            "authority_generation": "Contract 11.6 / #3572; D6 map #3393",
             "runtime_mechanism": "#3588 / #3394",
             "benchmark_issue": "#1988",
             "semantic_scope": "D6 selector DIRECT_LAW 16/64",
@@ -207,7 +207,7 @@ def main() -> None:
     ap.add_argument(
         "--current-d6",
         action="store_true",
-        help="Contract 11.5 profile: exactly the current 16 D6 selector descendants",
+        help="Contract 11.6 profile: exactly the current 16 D6 selector descendants",
     )
     args = ap.parse_args()
 
@@ -309,7 +309,7 @@ def main() -> None:
                         "prepare_i_refs_raw": ",".join(str(x["i_refs"]) for x in prepare_samples),
                         "full_i_refs_raw": ",".join(str(x["i_refs"]) for x in full_samples),
                         "execute_i_refs_raw": ",".join(str(x["i_refs"]) for x in execute_samples),
-                        "authority_generation": "contract-11.5" if args.current_d6 else "research-general",
+                        "authority_generation": "contract-11.6" if args.current_d6 else "research-general",
                         "semantic_scope": "d6-selector-16" if args.current_d6 else "research-selector-model",
                     }
                     row.update(metrics)
