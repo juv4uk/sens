@@ -3,10 +3,10 @@
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D4 and D7 retain current semantic authority.
-//! - D5 is owner-ratified again by #3305; D6/D8 remain research carriers after #3278.
-//! - `CoreDomainIdentity` retains historical/research variants for migration,
-//!   but canonical source projection currently admits callable D3/D4 only.
+//! - D1-D6 are current semantic authority under Contract 11-5 / #3393.
+//! - D7/D8 remain research carriers.
+//! - `CoreDomainIdentity` is callable identity for D3-D6; residency and
+//!   executable mechanism remain separate, so a missing D6 mechanism fails closed.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
 //! - Eight-bit research carriers and historical Sens8/Sid8 remain distinct.
 
