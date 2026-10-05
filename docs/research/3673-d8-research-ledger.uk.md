@@ -77,8 +77,7 @@ D7 не є їхнім предком.
 - `11100011`: generated fixed candidate UNZIP-SWAPPED.
 
 Це typed product witness для equal-length ZIP/UNZIP lane.
-#3712 GREEN, але ще не merged, тому ledger рахує його як analyzed research
-evidence, а не merged authority.
+#3712 уже merged у main; ця сім'я є merged research evidence, а не D8 occupancy authority.
 
 ## Відкинуті осі
 
