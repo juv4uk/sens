@@ -123,7 +123,10 @@ jobs:
               assert row['storage_container_bits'] == ((bits + 7) // 8) * 8
               assert row['carrier_mode'] == 'exact-bitstream'
               assert row['carrier_payload_bits'] == bits
+              assert row['integrity_bits'] == 0
+              assert row['profile_overhead_bits'] == 0
               assert row['total_wire_bits'] == bits
+              assert row['payload_utilization'] == 1.0
 
           seven = by_id['seven-bit-mechanical']
           assert seven['storage_container_bits'] == 8
