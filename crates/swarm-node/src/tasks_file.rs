@@ -52,6 +52,21 @@ fn atom_text(sexp: &Sexp) -> Option<String> {
     }
 }
 
+/// Parse task priority while preserving the historical decimal surface and
+/// admitting exact binary integer metadata used by current binary-first tasks.
+///
+/// A present-but-malformed priority is an error at the call site. Only an
+/// absent priority receives the historical default.
+fn parse_priority_atom(raw: &str) -> Option<f64> {
+    if let Some(bits) = raw.strip_prefix("#b") {
+        if bits.is_empty() || !bits.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+            return None;
+        }
+        return u64::from_str_radix(bits, 2).ok().map(|value| value as f64);
+    }
+    raw.parse::<f64>().ok()
+}
+
 /// A task's `done` value is `t` in two shapes actually used across this
 /// ecosystem's `tasks.lisp` files: the bare `(done . t)`, and the
 /// evidence-carrying `(done . (t . "who/when/what happened"))` -- the
@@ -105,10 +120,11 @@ pub fn parse_tasks_file(text: &str) -> Result<Vec<ParsedTask>, String> {
             return Err(format!("task `{id}` fields must be a list"));
         };
 
-        let priority = dotted_get(fields, "priority")
-            .and_then(atom_text)
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(1.0);
+        let priority = match dotted_get(fields, "priority").and_then(atom_text) {
+            Some(raw) => parse_priority_atom(&raw)
+                .ok_or_else(|| format!("task `{id}` has invalid priority `{raw}`"))?,
+            None => 1.0,
+        };
         let capabilities = dotted_get(fields, "capabilities")
             .map(atoms_of)
             .unwrap_or_default();
@@ -158,6 +174,44 @@ mod tests {
         assert_eq!(tasks[1].id, "SWARM-P2P-HEARTBEAT");
         assert_eq!(tasks[1].depends_on, vec!["SWARM-P2P-SYNC"]);
         assert!(!tasks[1].done);
+    }
+
+    #[test]
+    fn parses_binary_integer_priority_without_silent_fallback() {
+        let text = r#"
+((kind . tasks-my)
+ (tasks .
+  (("BINARY-P10" . ((priority . #b1010)))
+   ("DECIMAL-P09" . ((priority . 0.9)))
+   ("INTEGER-P5" . ((priority . 5))))))
+"#;
+        let tasks = parse_tasks_file(text).unwrap();
+        assert_eq!(tasks[0].priority, 10.0);
+        assert_eq!(tasks[1].priority, 0.9);
+        assert_eq!(tasks[2].priority, 5.0);
+    }
+
+    #[test]
+    fn rejects_malformed_binary_priority_instead_of_defaulting_to_one() {
+        let text = r#"
+((kind . tasks-my)
+ (tasks .
+  (("BROKEN" . ((priority . #b102))))))
+"#;
+        let error = parse_tasks_file(text).unwrap_err();
+        assert!(error.contains("invalid priority"));
+        assert!(error.contains("#b102"));
+    }
+
+    #[test]
+    fn absent_priority_still_uses_historical_default() {
+        let text = r#"
+((kind . tasks-my)
+ (tasks .
+  (("DEFAULT" . ((capabilities . (docs)))))))
+"#;
+        let tasks = parse_tasks_file(text).unwrap();
+        assert_eq!(tasks[0].priority, 1.0);
     }
 
     #[test]
