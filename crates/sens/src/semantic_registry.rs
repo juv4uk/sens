@@ -306,20 +306,24 @@ mod tests {
 
     #[test]
     fn en_uk_sa_d3_d4_surfaces_share_one_exact_domain_identity() {
-        for (en, uk, sa, width, bits) in [
-            ("car", "перше", "ādi", 3, 0b100),
-            ("list", "список", "śreṇī", 4, 0b1110),
-        ] {
-            let en_id = direct_domain_identity_for_surface(en)
-                .unwrap_or_else(|| panic!("English exact-domain surface must resolve: {en}"));
-            let uk_id = direct_domain_identity_for_surface(uk)
-                .unwrap_or_else(|| panic!("Ukrainian exact-domain surface must resolve: {uk}"));
-            let sa_id = direct_domain_identity_for_surface(sa)
-                .unwrap_or_else(|| panic!("Sanskrit exact-domain surface must resolve: {sa}"));
+        for row in DOMAIN_SURFACE_ROWS.iter().filter(|row| row.source_routable) {
+            let en = row.surfaces.iter().find(|surface| surface.namespace == "en").unwrap();
+            let uk = row.surfaces.iter().find(|surface| surface.namespace == "uk").unwrap();
+            let sa = row.surfaces.iter().find(|surface| surface.namespace == "sa").unwrap();
+
+            let en_id = direct_domain_identity_for_surface(en.name)
+                .expect("English exact-domain projection must resolve");
+            let uk_id = direct_domain_identity_for_surface(uk.name)
+                .expect("Ukrainian exact-domain projection must resolve");
+            let sa_id = direct_domain_identity_for_surface(sa.name)
+                .expect("Sanskrit exact-domain projection must resolve");
 
             assert_eq!(en_id, uk_id);
             assert_eq!(uk_id, sa_id);
-            assert_eq!((en_id.width(), en_id.packed_bits()), (width, bits));
+            assert_eq!(
+                (en_id.width(), en_id.packed_bits()),
+                (usize::from(row.width), row.bits)
+            );
         }
 
         assert_eq!(
