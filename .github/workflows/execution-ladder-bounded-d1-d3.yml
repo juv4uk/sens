@@ -46,6 +46,7 @@ jobs:
           assert sum(row["producer_layer"]=="L0" for row in rows)==28
           assert sum(row["producer_layer"]=="L1" for row in rows)==28
           assert all(row["exhaustive_bound"]=={
+              "grammar_profile":"d1-d3-structural-predicate-v1",
               "domain_set":[1,2,3],
               "max_ast_depth":3,
               "max_nodes":11,
