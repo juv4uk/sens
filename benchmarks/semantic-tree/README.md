@@ -2,7 +2,7 @@
 
 Research-only benchmark for the proved CAR/CDR selector family.
 
-## Current P0 profile — Contract 11.5 D6 generator vs flat16
+## Current P0 profile — Contract 11.6 D6 generator vs flat16
 
 The first current result is deliberately narrow: the **16 D6 selector residents**
 made executable by #3588/#3394 are measured two ways on the same deterministic
@@ -72,7 +72,7 @@ Current counters include:
 - flat table entries/bytes;
 - preparation cost and repeat-N execution cost.
 
-Every current row carries Contract 11.5 scope/provenance in `environment.json`
+Every current row carries Contract 11.6 scope/provenance in `environment.json`
 and `instructions.tsv`.
 
 A generator loss to `flat` is a valid completed negative result.
