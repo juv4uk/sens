@@ -1,7 +1,8 @@
 //! #3001 W1-W8 exact-width carrier benchmark.
 //!
 //! Measures the source-word -> width-qualified DomainIdentity carrier path only.
-//! D5/D6/D8 are research carriers under #3278, not current ratified semantics.
+//! Contract 11.5 separates mechanics from authority: D1-D6 are current semantic
+//! domains, D7-D8 are research, while W1-W8 carrier mechanics remain measurable.
 //! No registry, surface spelling, legacy Sens8/Function8, or benchmark-local
 //! semantic table participates.
 
@@ -51,12 +52,12 @@ fn verify_invariants() {
 
     assert!(same_payload[0].core_operation().is_none());
     assert!(same_payload[1].core_operation().is_none());
-    assert!(same_payload[4].core_operation().is_none());
-    assert!(same_payload[5].core_operation().is_none());
     assert!(same_payload[6].core_operation().is_none());
     assert!(same_payload[7].core_operation().is_none());
     assert!(same_payload[2].core_operation().is_some());
     assert!(same_payload[3].core_operation().is_some());
+    assert!(same_payload[4].core_operation().is_some());
+    assert!(same_payload[5].core_operation().is_some());
 }
 
 #[inline(never)]
