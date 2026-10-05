@@ -1,0 +1,61 @@
+name: execution-ladder bounded D1-D3 corpus
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "crates/sens/examples/execution_ladder_bounded_probe.rs"
+      - ".github/workflows/execution-ladder-bounded-d1-d3.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "crates/sens/examples/execution_ladder_bounded_probe.rs"
+      - ".github/workflows/execution-ladder-bounded-d1-d3.yml"
+
+jobs:
+  bounded-d1-d3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build isolated bounded oracle/P1 probe
+        run: cargo build --release -p sens --example execution_ladder_bounded_probe
+
+      - name: Generate bounded-exhaustive evidence twice
+        run: |
+          python3 benchmarks/execution-ladder-conformance/generate_bounded.py \
+            --helper target/release/examples/execution_ladder_bounded_probe \
+            --out /tmp/bounded-a.jsonl
+          python3 benchmarks/execution-ladder-conformance/generate_bounded.py \
+            --helper target/release/examples/execution_ladder_bounded_probe \
+            --out /tmp/bounded-b.jsonl
+
+      - name: Prove deterministic output and schema validity
+        run: |
+          cmp /tmp/bounded-a.jsonl /tmp/bounded-b.jsonl
+          python3 benchmarks/execution-ladder-conformance/validate.py /tmp/bounded-a.jsonl
+          test "$(wc -l < /tmp/bounded-a.jsonl)" -eq 56
+          python3 - <<'PY'
+          import json
+          rows=[json.loads(line) for line in open("/tmp/bounded-a.jsonl", encoding="utf-8") if line.strip()]
+          case_ids={row["case_id"] for row in rows}
+          assert len(case_ids)==28, len(case_ids)
+          assert sum(row["producer_layer"]=="L0" for row in rows)==28
+          assert sum(row["producer_layer"]=="L1" for row in rows)==28
+          assert all(row["exhaustive_bound"]=={
+              "domain_set":[1,2,3],
+              "max_ast_depth":3,
+              "max_nodes":11,
+              "argument_value_bound":2,
+          } for row in rows)
+          assert all(row["legacy_identity_used"] is False for row in rows)
+          print("bounded D1-D3 determinism/coverage: PASS")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sens-bounded-d1-d3-conformance-jsonl
+          path: /tmp/bounded-a.jsonl
