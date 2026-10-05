@@ -1,0 +1,61 @@
+name: Exact-domain SENS phase decomposition
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/current_exact_domain_phase_bench.rs"
+      - "benchmarks/cross-language/current_sens_phases.py"
+      - "benchmarks/cross-language/core_load_breakdown.py"
+      - "benchmarks/cross-language/current_sens.py"
+      - ".github/workflows/current-sens-phase-decomposition.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: current-sens-phase-decomposition-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Build phase and startup runners
+        run: |
+          cargo build -p sens --release --example current_exact_domain_phase_bench
+          cargo build -p sens --release --example startup_bench
+
+      - name: Measure cold phases, steady slope, and warm resident-Core setup
+        run: |
+          rm -rf /tmp/sens-phase-3490
+          python3 benchmarks/cross-language/current_sens_phases.py \
+            --runner target/release/examples/current_exact_domain_phase_bench \
+            --reps 3 \
+            --out /tmp/sens-phase-3490
+          cat /tmp/sens-phase-3490/phase-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Break down Core loading path
+        run: |
+          python3 benchmarks/cross-language/core_load_breakdown.py \
+            --runner target/release/examples/startup_bench \
+            --fasl lib/core.lisp.fasl \
+            --reps 3 \
+            --out /tmp/sens-phase-3490
+          cat /tmp/sens-phase-3490/core-load-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sens-phase-decomposition-3490
+          path: /tmp/sens-phase-3490
