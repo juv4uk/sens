@@ -19,15 +19,24 @@ values.
 
 ## Stable case identity
 
-A case is identified only by its exact canonical program bytes:
+A case identity includes the semantic contract, the canonical encoding kind and
+the exact program bytes. This prevents the same text from colliding when it
+denotes a canonical source form in one lane and a canonical AST serialization
+in another.
 
 ```text
 program_digest = SHA256(UTF-8(program))
-case_id         = "case-" + program_digest
+case_identity  = canonical_json({
+  "contract": contract,
+  "program_encoding": program_encoding,
+  "program": program
+})
+case_id        = "case-" + SHA256(UTF-8(case_identity))
 ```
 
-The same program therefore has the same `case_id` in SENS, CML, GraalVM,
-FPGA, CUDA and external witnesses.
+The same contract + encoding + program therefore has the same `case_id` in
+SENS, CML, GraalVM, FPGA, CUDA and external witnesses, independent of host
+language.
 
 ## Structured digests
 
