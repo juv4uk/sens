@@ -14,6 +14,19 @@ fn tagged_literals_are_self_evaluating_and_canonical() {
 }
 
 #[test]
+fn numeric_buffer_predicate_returns_exact_d1() {
+    let yes = eval_program("(numeric-buffer? #i32(1 2))", &mut Session::default())
+        .unwrap()
+        .value;
+    let no = eval_program("(numeric-buffer? 42)", &mut Session::default())
+        .unwrap()
+        .value;
+
+    assert_eq!(yes.as_predicate_bit(), Some(true));
+    assert_eq!(no.as_predicate_bit(), Some(false));
+}
+
+#[test]
 fn accessors_preserve_element_domain() {
     assert_eq!(eval("(numeric-buffer-type #f32())"), "f32");
     assert_eq!(eval("(numeric-buffer-length #i32(4 5 6))"), "3");
