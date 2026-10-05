@@ -5,15 +5,16 @@ use sens::{
     DomainIdentity, Expr, ExprKind, Session, Span,
 };
 
-fn run_exact(identity: DomainIdentity, arguments_source: &str) -> String {
+fn try_run_exact(identity: DomainIdentity, arguments_source: &str) -> Result<String, String> {
     let mut session = Session::default();
-    load_core_library(&mut session).expect("active Core should load");
+    load_core_library(&mut session)
+        .map_err(|error| format!("{:?}: {}", error.kind, error.message))?;
 
     let wrapped = format!("(__domain_witness__ {arguments_source})");
-    let mut parsed = parse(&wrapped).expect("payload parses");
+    let mut parsed = parse(&wrapped).map_err(|error| format!("parse: {error:?}"))?;
     let mut form = parsed.remove(0);
     let ExprKind::List(items) = form.kind else {
-        panic!("wrapper must parse as list");
+        return Err("wrapper must parse as list".into());
     };
     let mut items = items.to_vec();
     items[0] = Expr {
@@ -23,9 +24,12 @@ fn run_exact(identity: DomainIdentity, arguments_source: &str) -> String {
     form.kind = ExprKind::List(items.into());
 
     eval_parsed_expressions(&[form], &mut session)
-        .expect("exact domain call must execute")
-        .value
-        .to_string()
+        .map(|outcome| outcome.value.to_string())
+        .map_err(|error| format!("{:?}: {}", error.kind, error.message))
+}
+
+fn run_exact(identity: DomainIdentity, arguments_source: &str) -> String {
+    try_run_exact(identity, arguments_source).expect("exact domain call must execute")
 }
 
 fn exact_pairlis(arguments_source: &str) -> String {
@@ -75,11 +79,19 @@ fn canonical_surface_and_compatibility_alias_share_the_exact_d5_law() {
 fn same_low_payload_in_d4_does_not_inherit_pairlis_meaning() {
     let args = "'(x y) '(first second) '((z . third))";
     let d5 = exact_pairlis(args);
-    let d4 = run_exact(
+    let d4_error = try_run_exact(
         DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1110).unwrap())),
         args,
-    );
+    )
+    .expect_err("D4:1110 has no admitted mechanism and must fail closed");
 
-    assert_eq!(d4, "((x y) (first second) ((z . third)))");
-    assert_ne!(d4, d5, "D4:1110 LIST must never inherit D5:11110 PAIRLIS");
+    assert!(
+        d4_error.contains("no admitted") || d4_error.contains("not callable"),
+        "unexpected D4 firewall error: {d4_error}"
+    );
+    assert_eq!(
+        d5,
+        "((x . first) (y . second) (z . third))",
+        "D5:11110 remains the only PAIRLIS witness in this comparison"
+    );
 }
