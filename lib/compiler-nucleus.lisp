@@ -17,17 +17,18 @@
 ; SENS-owned law.  Until then this file is a real compiler component, but only
 ; a PARTIAL nucleus and not a self-host/fixed-point claim.
 ;
-; Human spellings below are source/UI projections only.  The focused guard
-; lowers this file before execution and rejects any historical Sid/Call node,
-; proving the D3/D4 operations enter the runtime as exact DomainCall identities.
+; Ukrainian spellings below are source/UI projections only.  They are chosen
+; because the current registry routes Ukrainian D3/D4 surfaces directly to
+; exact-domain identities.  The focused guard lowers this file before execution
+; and rejects any historical Sid/Call node.
 
-(define compiler-authority-find
-  (lambda (identity rows)
-    (cond
-      ((atom rows) ())
-      ((eq identity (car (car rows))) (car rows))
-      ((atom ()) (compiler-authority-find identity (cdr rows))))))
+(визначити compiler-authority-find
+  (функція (identity rows)
+    (за-умовою
+      ((атом? rows) ())
+      ((тотожне? identity (перше (перше rows))) (перше rows))
+      ((атом? ()) (compiler-authority-find identity (решта rows))))))
 
-(define compiler-nucleus
-  (lambda (identity authority)
+(визначити compiler-nucleus
+  (функція (identity authority)
     (compiler-authority-find identity authority)))
