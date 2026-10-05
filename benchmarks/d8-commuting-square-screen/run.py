@@ -27,7 +27,7 @@ import json
 from dataclasses import dataclass, replace
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 FAMILIES_PATH = REPO / "knowledge" / "d6-v2-binary-law-families.json"
 D6_PATH = REPO / "knowledge" / "d6-ratified.json"
 
