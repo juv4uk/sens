@@ -3,12 +3,12 @@
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D4 and D7 retain current semantic authority.
-//! - D5 is owner-ratified again by #3305; D6/D8 remain research carriers after #3278.
-//! - `CoreDomainIdentity` retains historical/research variants for migration,
-//!   but canonical source projection currently admits callable D3/D4 only.
-//! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
-//! - Eight-bit research carriers and historical Sens8/Sid8 remain distinct.
+//! - D1-D7 are current semantic authority under Contract 11.6 / #3572.
+//! - D8 remains a research carrier.
+//! - `CoreDomainIdentity` is the callable-operation coordinate type for D3-D6;
+//!   executable mechanism admission remains a separate fail-closed decision.
+//! - D7 is Sound7/Text7/local-ordinal identity and never enters callable routing by width.
+//! - Eight-bit compatibility identity remains distinct from exact domain identity.
 
 use crate::{
     Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, PredicateBit, Racana2, SoundD7,
@@ -83,16 +83,19 @@ impl DomainIdentity {
 
     /// Explicit callable/Core-operation projection.
     ///
-    /// Current owner authority admits exact D3/D4/D5 Core-operation identity.
-    /// D1/D2/D7 are non-callable by their domain laws; D6/D8 remain revoked
-    /// under #3278. D5 residency is full 32/32 under #3305, while actual
-    /// resident mechanisms remain independently fail-closed when unavailable.
+    /// Current owner authority admits exact D3/D4/D5/D6 Core-operation identity.
+    /// D1/D2 are non-callable structural/predicate domains; current D7 is
+    /// Sound7/Text7/local-ordinal identity and is non-callable by its domain law.
+    /// D8 remains research. D5/D6 residency is independent from executable
+    /// mechanism admission, so a projected D6 identity still fails closed when
+    /// no mechanism owns it.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
             Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
+            Self::D6(value) => Some(CoreDomainIdentity::D6(value)),
+            Self::D1(_) | Self::D2(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
 }
@@ -283,11 +286,10 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_noncallable_or_unratified_domains() {
+    fn callable_projection_admits_d3_d4_d5_d6_and_fails_closed_for_noncallable_d7_and_research_d8() {
         for source in [
             BinarySourceWord::W1(Bit1::new(1).unwrap()),
             BinarySourceWord::W2(Bit2::new(1).unwrap()),
-            BinarySourceWord::W6(Bit6::new(1).unwrap()),
             BinarySourceWord::W7(Bit7::new(1).unwrap()),
             BinarySourceWord::W8(Bit8::new(1).unwrap()),
         ] {
@@ -308,6 +310,11 @@ mod tests {
             BinarySourceWord::W5(Bit5::new(1).unwrap())
         ).core_operation().unwrap();
         assert_eq!((d5.width(), d5.packed_bits()), (5, 1));
+
+        let d6 = DomainIdentity::from_source_word(
+            BinarySourceWord::W6(Bit6::new(1).unwrap())
+        ).core_operation().unwrap();
+        assert_eq!((d6.width(), d6.packed_bits()), (6, 1));
     }
 
     #[test]
