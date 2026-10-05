@@ -1,0 +1,28 @@
+name: D7 ratified authority
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d7-ratified.json"
+      - "knowledge/d7-v2-evidence-ledger.json"
+      - "contracts/d7-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d7-current-authority.py"
+      - ".github/workflows/d7-ratified-authority.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d7-ratified.json"
+      - "knowledge/d7-v2-evidence-ledger.json"
+      - "contracts/d7-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d7-current-authority.py"
+
+jobs:
+  authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d7-current-authority.py
