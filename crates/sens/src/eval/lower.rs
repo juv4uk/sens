@@ -62,11 +62,24 @@ fn immutable_surface_sid(name: &str) -> Option<Sens8> {
     semantic_registry::admitted_semantic_id_for_surface(name)
 }
 
-fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
-    matches!(
-        identity,
-        CoreDomainIdentity::D3(word) if word.word().packed_bits() == bits
-    )
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum D3SyntaxKind {
+    Quote,
+    Cond,
+}
+
+/// Single exact-D3 syntax classifier shared by source lowering and the
+/// compiler-lowering projection. This is language-owned frontend authority,
+/// not a backend opcode table.
+pub(crate) fn d3_syntax_kind(identity: CoreDomainIdentity) -> Option<D3SyntaxKind> {
+    let CoreDomainIdentity::D3(word) = identity else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b001 => Some(D3SyntaxKind::Quote),
+        0b110 => Some(D3SyntaxKind::Cond),
+        _ => None,
+    }
 }
 
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
@@ -87,10 +100,11 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
 
             if let Some(identity) = head_domain_identity(&items[0]) {
                 return Expr {
-                    kind: if is_d3(identity, 0b001) {
-                        ExprKind::DomainCall(identity, arguments.into())
-                    } else if is_d3(identity, 0b110) {
-                        ExprKind::DomainCall(
+                    kind: match d3_syntax_kind(identity) {
+                        Some(D3SyntaxKind::Quote) => {
+                            ExprKind::DomainCall(identity, arguments.into())
+                        }
+                        Some(D3SyntaxKind::Cond) => ExprKind::DomainCall(
                             identity,
                             arguments
                                 .iter()
@@ -102,24 +116,27 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                                     _ => clause.clone(),
                                 })
                                 .collect(),
-                        )
-                    } else if necessary_forms::identity_for_domain_identity(identity).is_some() {
-                        ExprKind::DomainCall(
-                            identity,
-                            arguments
-                                .iter()
-                                .enumerate()
-                                .map(|(index, argument)| {
-                                    if index == 0 {
-                                        argument.clone()
-                                    } else {
-                                        lower(argument, depth + 1)
-                                    }
-                                })
-                                .collect(),
-                        )
-                    } else {
-                        ExprKind::DomainCall(identity, lower_all(arguments, depth))
+                        ),
+                        None
+                            if necessary_forms::identity_for_domain_identity(identity)
+                                .is_some() =>
+                        {
+                            ExprKind::DomainCall(
+                                identity,
+                                arguments
+                                    .iter()
+                                    .enumerate()
+                                    .map(|(index, argument)| {
+                                        if index == 0 {
+                                            argument.clone()
+                                        } else {
+                                            lower(argument, depth + 1)
+                                        }
+                                    })
+                                    .collect(),
+                            )
+                        }
+                        None => ExprKind::DomainCall(identity, lower_all(arguments, depth)),
                     },
                     span: expression.span,
                 };
