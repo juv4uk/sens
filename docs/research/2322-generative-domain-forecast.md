@@ -86,3 +86,21 @@ callable, and says nothing positive about the other 192 D8 coordinates.
 
 W8 capacity remains mechanical. Function8/Sens8 history is not semantic
 authority.
+
+## Historical-donor negative control
+
+Only after deriving the current candidate set independently, the witness checks
+historical donor #2934 as a holdout. That donor generated its 64 selector
+coordinates from obsolete roots `101/110`; the current set is generated from
+`011/100`.
+
+Exact result:
+
+```text
+current D8 selector candidates = 64
+old #2934 selector coordinates = 64
+overlap                       = 0
+```
+
+Therefore the old D8 selector map cannot be migrated or patched in place: its
+coordinate basis is entirely stale under the current D3 ratification.
