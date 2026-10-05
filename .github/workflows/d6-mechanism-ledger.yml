@@ -5,6 +5,9 @@ on:
     paths:
       - "knowledge/d6-mechanism-ledger.json"
       - "knowledge/d6-ratified.json"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/tests/domain_ast_value_identity.rs"
+      - "crates/sens/tests/d6_selector_runtime.rs"
       - "crates/sens/src/eval/selector_law.rs"
       - "crates/sens/src/eval/canon.rs"
       - "crates/sens/src/eval/necessary_forms.rs"
@@ -16,6 +19,9 @@ on:
     paths:
       - "knowledge/d6-mechanism-ledger.json"
       - "knowledge/d6-ratified.json"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/tests/domain_ast_value_identity.rs"
+      - "crates/sens/tests/d6_selector_runtime.rs"
       - "crates/sens/src/eval/selector_law.rs"
       - "crates/sens/src/eval/canon.rs"
       - "crates/sens/src/eval/necessary_forms.rs"
@@ -27,4 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - run: python3 scripts/check-d6-mechanism-ledger.py
+      - run: cargo test -p sens --test d6_selector_runtime -- --nocapture
+      - run: cargo test -p sens --test domain_ast_value_identity callable_projection_admits_d3_d4_d5_d6 -- --nocapture
