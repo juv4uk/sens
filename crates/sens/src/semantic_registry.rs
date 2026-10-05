@@ -77,6 +77,7 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        0b0010_0111 => Some(d4(0b1110)), // LIST — compatibility mechanism only
         0b0010_1001 => Some(d4(0b1111)), // APPEND
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
@@ -330,6 +331,17 @@ mod tests {
                 "REVERSE/QUOTIENT compatibility binding must not target D5 selector coordinates"
             );
         }
+    }
+
+    #[test]
+    fn historical_list_byte_delegates_only_to_ratified_d4_list() {
+        let identity = legacy_domain_identity_from_registry_byte(0b0010_0111)
+            .expect("historical LIST byte should have a bounded mechanism adapter");
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1110));
+
+        let current = domain_identity_for_surface("list")
+            .expect("English LIST surface is exact D4 after #3450");
+        assert_eq!(identity, current);
     }
 
     #[test]
