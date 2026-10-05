@@ -1,0 +1,210 @@
+{
+  "schema": "d6-v2-binary-law-families/v1",
+  "status": "research-executable-relations",
+  "issue": "#3384",
+  "geometry_authority": "none; relations are semantic input only",
+  "families": [
+    {
+      "id": "f00",
+      "members": [
+        "LENGTH",
+        "LENGTH-ONTO"
+      ],
+      "relation": "zero-accumulator specialization",
+      "evidence": [
+        "#3339",
+        "#3340",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f01",
+      "members": [
+        "MIN-LIST",
+        "MAX-LIST"
+      ],
+      "relation": "order-dual folds",
+      "evidence": [
+        "#3339",
+        "#3340",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f02",
+      "members": [
+        "NTH",
+        "MAPLIST"
+      ],
+      "relation": "successive-tail observation",
+      "evidence": [
+        "#3384",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ]
+    },
+    {
+      "id": "f03",
+      "members": [
+        "SUBLIS",
+        "COMPOSE"
+      ],
+      "relation": "composable tree-transformer specialization",
+      "evidence": [
+        "#3384",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ]
+    },
+    {
+      "id": "f04",
+      "members": [
+        "RASSOC",
+        "ACONS"
+      ],
+      "relation": "association extension/query",
+      "evidence": [
+        "#3384",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ]
+    },
+    {
+      "id": "f05",
+      "members": [
+        "ADD1",
+        "SUB1"
+      ],
+      "relation": "successor/predecessor inverse",
+      "evidence": [
+        "#3334",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f06",
+      "members": [
+        "NEG",
+        "ABS"
+      ],
+      "relation": "sign involution/invariant magnitude",
+      "evidence": [
+        "#3106",
+        "#3334",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f07",
+      "members": [
+        "REMAINDER",
+        "GCD"
+      ],
+      "relation": "Euclidean recursion",
+      "evidence": [
+        "#3334",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f08",
+      "members": [
+        "RECIP",
+        "EXPT"
+      ],
+      "relation": "multiplicative inverse/power compatibility",
+      "evidence": [
+        "#3356",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f09",
+      "members": [
+        "CURRY",
+        "FLIP"
+      ],
+      "relation": "binary argument geometry",
+      "evidence": [
+        "#3384",
+        "#3366",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ]
+    },
+    {
+      "id": "f10",
+      "members": [
+        "REDUCE",
+        "SCAN"
+      ],
+      "relation": "terminal fold versus prefix folds",
+      "evidence": [
+        "#3368",
+        "#3370",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f11",
+      "members": [
+        "TAKE",
+        "DROP"
+      ],
+      "relation": "lossless list split",
+      "evidence": [
+        "#3368",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f12",
+      "members": [
+        "DO",
+        "WHILE"
+      ],
+      "relation": "explicit-state tail iteration",
+      "evidence": [
+        "#3370",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f13",
+      "members": [
+        "ZIP",
+        "UNZIP"
+      ],
+      "relation": "product constructor/destructor",
+      "evidence": [
+        "#3370",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f14",
+      "members": [
+        "ANY",
+        "ALL"
+      ],
+      "relation": "quantified predicate dual",
+      "evidence": [
+        "#3370",
+        "#3366"
+      ]
+    },
+    {
+      "id": "f15",
+      "members": [
+        "INTEGERP",
+        "RATIONALP"
+      ],
+      "relation": "exact-number refinement entailment",
+      "evidence": [
+        "#3355",
+        "#3370",
+        "#3366"
+      ]
+    }
+  ],
+  "rule": "No family id, human label, or member name contributes to coordinate scoring. Geometry consumes only the fact that there are sixteen two-member executable relation families."
+}
