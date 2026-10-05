@@ -77,6 +77,30 @@ and `instructions.tsv`.
 
 A generator loss to `flat` is a valid completed negative result.
 
+
+## Mode-specialized code size (#3582)
+
+The shared multi-mode binary cannot answer per-lane executable footprint.
+`code_size.py` therefore compiles three separate benchmark-only binaries from
+the same 16-selector D6 corpus:
+
+```sh
+python3 benchmarks/semantic-tree/code_size.py \
+  --calls 100000 \
+  --out /tmp/sens-3582
+```
+
+It requires `rustc`, GNU `size`, and GNU `strip`. All three binaries must
+produce the same checksum before any byte result is accepted.
+
+Reported independently:
+- executable file bytes and stripped file bytes;
+- `.text`, `.rodata`, `.data`, and `.bss`;
+- prepared runtime storage.
+
+The flat16 table is a benchmark-only control. Code size has no semantic
+authority.
+
 ## General research matrix
 
 The older depth sweep remains available for mechanism research:
