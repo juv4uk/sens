@@ -298,8 +298,46 @@ def main():
         + "\n",
         encoding="utf-8",
     )
+
+    final = rows[-1]
+    pareto_semantic = {
+        "schema": "sens-pareto-semantic-vector/v1",
+        "source_issue": "#1973",
+        "contract": "11.6",
+        "scope": "selector-family:D3-D6",
+        "completeness": "family-only",
+        "authority": final["authority"],
+        "git_sha": final["git_sha"],
+        "family": final["family"],
+        "foundation_sha256": final["foundation_sha256"],
+        "metrics": {
+            "seed_residents": final["seed_rows"],
+            "closure_residents": final["closure_rows"],
+            "generated_residents": final["generated_rows"],
+            "law_bytes": final["law_json_bytes"],
+            "seed_bytes": final["seed_json_bytes"],
+            "model_bytes": final["model_json_bytes"],
+            "flat_equivalent_bytes": final["flat_projection_json_bytes"],
+            "frontier_selector_residents": final["frontier_selector_rows"],
+            "frontier_non_selector_unclassified": final[
+                "frontier_non_selector_rows_unclassified"
+            ],
+        },
+        "warning": (
+            "Contract 11.6 family-scoped selector accounting only. "
+            "D7 is current but non-callable and is outside this closure. "
+            "This artifact does not quantify whole-language independent facts, "
+            "residue, or semantic size."
+        ),
+    }
+    (out / "pareto-semantic.json").write_text(
+        json.dumps(pareto_semantic, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
     print(f"wrote {out / 'closure.tsv'}")
     print(f"wrote {out / 'summary.json'}")
+    print(f"wrote {out / 'pareto-semantic.json'}")
     return 0
 
 
