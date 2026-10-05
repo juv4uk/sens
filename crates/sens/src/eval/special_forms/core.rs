@@ -59,6 +59,9 @@ fn answer_direction(value: &Value) -> Option<bool> {
 /// її не обирають. Значення, що не є відповіддю шкали, лишаються за
 /// історичною істинністю (лише () і false хибні).
 fn migration_only_cond_truthy(value: &Value) -> bool {
+    if let Some(bit) = value.as_predicate_bit() {
+        return bit;
+    }
     match answer_direction(value) {
         Some(direction) => direction,
         None => value.is_truthy(),
