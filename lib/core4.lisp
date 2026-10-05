@@ -432,6 +432,20 @@
          ((00100010 key (00000101 (00000101 alist))) (0)
           (00101101 key (00000110 alist))))))))
 
+
+; D5:11110 PAIRLIS: Lisp-owned structural law. Canonical Ukrainian surface
+; owns the exact-domain binding; English spelling is compatibility-only.
+(00001001 спарувати
+  (00001000 (keys values tail)
+    (00000111
+      ((00000010 keys) () tail)
+      ((00000010 keys) (0)
+       (00000100
+         (00000100 (00000101 keys) (00000101 values))
+         (спарувати (00000110 keys) (00000110 values) tail))))))
+
+(00001001 pairlis спарувати)
+
 (00001010 let* (bindings body)
   (00000111
     ((00000010 bindings) () body)
