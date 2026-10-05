@@ -12,7 +12,7 @@
 //! - owner-ratified D6 (#3393) admits three selector suffix bits
 //!
 //! This law is family-local. It does not create a universal suffix meaning.
-//! D7/D8 remain outside this production selector decoder and fail closed.
+//! Current D7 remains outside this callable selector decoder by its Sound/Text role; D8 remains research. Both fail closed here.
 
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
@@ -199,7 +199,7 @@ mod tests {
         assert_eq!(
             d7_identity.core_operation(),
             None,
-            "same payload in research D7 must never enter the callable D6 selector decoder"
+            "same payload in current non-callable D7 must never enter the callable D6 selector decoder"
         );
     }
 
