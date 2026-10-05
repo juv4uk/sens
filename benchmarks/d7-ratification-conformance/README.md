@@ -1,6 +1,6 @@
-# Ratified D7 conformance — #2517
+# D7 role-boundary conformance — historical #2517 evidence
 
-Owner authority: #2415 / #2490.
+Historical owner evidence: #2415 / #2490. Current authority: Contract 11.5 keeps D7 UNRATIFIED / RESEARCH; this witness preserves the role firewall as research evidence.
 
 This witness keeps three concepts separate even when the raw payload looks
 identical:
