@@ -1,3 +1,53 @@
+# Current selector closure curve (#1973)
+
+This directory now also contains a **current Contract 11.5 closure/economics
+harness**:
+
+```sh
+python3 benchmarks/generator-economy/current_closure.py \
+  --out /tmp/sens-current-closure
+```
+
+It reads `knowledge/d1-d6-foundation.json` as authority, seeds only:
+
+```text
+D3:100 CAR
+D3:011 CDR
+```
+
+and then derives selector children width by width. Every generated coordinate is
+accepted into accounting only if the current foundation contains the exact
+expected selector resident.
+
+The mandatory current curve is:
+
+```text
+D3       2
+D3..D4   6   (+4)
+D3..D5  14   (+8)
+D3..D6  30  (+16)
+```
+
+Outputs include:
+- closure rows and marginal generated rows;
+- fixed-point expansion rounds;
+- deterministic seed/law/flat JSON bytes;
+- representation-specific flat/model ratio;
+- marginal generated rows per added law-description byte;
+- coordinate payload bits;
+- frontier selector vs non-selector row counts.
+
+**Compression never ratifies a law.** The byte ratio is descriptive and
+representation-specific. The semantic direction is always:
+
+```text
+current authority / proof -> admitted lift -> closure -> accounting
+```
+
+The rest of this README documents the older #2001 generic economy model.
+
+---
+
 # Generator economy benchmark (#2001)
 
 Parent benchmark gate: **#1987**. Generator research: #1968. Residue: #1972.
