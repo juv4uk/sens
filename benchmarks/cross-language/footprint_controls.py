@@ -140,9 +140,13 @@ def main() -> int:
     rust_src.write_text(external_controls.rust_source(WORKLOAD), encoding="utf-8")
     sens_src.write_text(current_sens.source(WORKLOAD), encoding="utf-8")
 
-    rustc = resolve_executable(args.rustc)
+    rustc_command = shutil.which(args.rustc)
+    if rustc_command is None:
+        raise RuntimeError(f"executable not found: {args.rustc}")
+    # Preserve the rustc launcher path. On rustup-managed toolchains, resolving
+    # the rustc symlink produces the rustup binary itself and breaks -O dispatch.
     compile_proc = subprocess.run(
-        [str(rustc), "-O", str(rust_src), "-o", str(rust_bin)],
+        [rustc_command, "-O", str(rust_src), "-o", str(rust_bin)],
         capture_output=True,
         text=True,
         check=False,
@@ -254,7 +258,7 @@ def main() -> int:
     environment = {
         "git_sha": git_fact("rev-parse", "HEAD"),
         "benchmark_issue": "#3527",
-        "paired_carrier": "#3539",
+        "paired_carrier": "#3557",
         "workload": WORKLOAD,
         "rss_reps": args.rss_reps,
         "platform": platform.platform(),
@@ -281,7 +285,7 @@ def main() -> int:
     report = [
         "# Paired runtime footprint",
         "",
-        "Scope: executable file + shared-fib max RSS on the same host as #3539.",
+        "Scope: executable file + shared-fib max RSS on the same host as #3557.",
         "This does not infer semantic size and excludes shared-library dependency closure.",
         "",
         "| runtime | artifact bytes | .text bytes | median max RSS bytes | fib source bytes |",
