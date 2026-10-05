@@ -1,4 +1,4 @@
-name: Ratified D7 conformance
+name: D7 role-boundary conformance
 
 on:
   pull_request:
@@ -20,5 +20,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Verify ratified D7 semantic boundaries
+      - name: Verify historical D7 role boundaries under research status
         run: python3 benchmarks/d7-ratification-conformance/validate.py
