@@ -119,29 +119,53 @@
   (функція (law)
     (перше (решта (решта (решта law))))))
 
+(визначити compiler-law-l5-atom-bits
+  (функція (law)
+    (перше (решта (compiler-law-l5-spine law)))))
+
 (визначити compiler-law-l5-head-bits
   (функція (law)
     (перше (решта (решта (compiler-law-l5-spine law))))))
 
+(визначити compiler-law-l5-cond-bits
+  (функція (law)
+    (перше (решта (решта (решта (compiler-law-l5-spine law)))))))
+
+; Full D3 compiler closure is derived only from the ratified L1/L4/L5
+; structure.  The three spine roles are read by ordered position; their duals
+; are obtained with the one L4 XOR law.  No raw D3 coordinate is embedded here.
 (визначити compiler-role-from-l1-l5-bits
   (функція (seed bits law)
     (за-умовою
       ((compiler-bits-equal
-         seed
-         bits
-         (compiler-law-l5-head-bits law))
-       (як-є selector-head))
+         seed bits
+         (compiler-xor-bits
+           seed
+           (compiler-law-l5-cond-bits law)
+           (compiler-law-xor-mask law)))
+       (як-є quote-form))
+      ((compiler-bits-equal seed bits (compiler-law-l5-atom-bits law))
+       (як-є atom-predicate))
       ((compiler-bits-equal
-         seed
-         bits
+         seed bits
          (compiler-xor-bits
            seed
            (compiler-law-l5-head-bits law)
            (compiler-law-xor-mask law)))
        (як-є selector-tail))
+      ((compiler-bits-equal seed bits (compiler-law-l5-head-bits law))
+       (як-є selector-head))
       ((compiler-bits-equal
-         seed
-         bits
+         seed bits
+         (compiler-xor-bits
+           seed
+           (compiler-law-l5-atom-bits law)
+           (compiler-law-xor-mask law)))
+       (як-є atom-equality))
+      ((compiler-bits-equal seed bits (compiler-law-l5-cond-bits law))
+       (як-є cond-form))
+      ((compiler-bits-equal
+         seed bits
          (compiler-xor-bits
            seed
            (compiler-law-empty-bits law)
@@ -159,6 +183,66 @@
          identity
          (compiler-shape-bits (decompose identity))
          law))
+      ((compiler-true identity) ()))))
+
+
+; #3824 — D4 bootstrap-role derivation from the ordered owner-ratified fibre.
+; D4-LAW is transported as:
+;   (domain-width parent-bits ordered-children)
+; where ordered-children is the exact two-child fibre generated from #3272.
+; The structure carries no role names.  SENS assigns the first/second
+; irreducible bootstrap child to LambdaForm/DefineForm respectively.
+(визначити compiler-d4-law-width
+  (функція (law)
+    (перше law)))
+
+(визначити compiler-d4-law-children
+  (функція (law)
+    (перше (решта (решта law)))))
+
+(визначити compiler-d4-law-first-child
+  (функція (law)
+    (перше (compiler-d4-law-children law))))
+
+(визначити compiler-d4-law-second-child
+  (функція (law)
+    (перше (решта (compiler-d4-law-children law)))))
+
+(визначити compiler-role-from-d4-bootstrap-bits
+  (функція (seed bits law)
+    (за-умовою
+      ((compiler-bits-equal seed bits (compiler-d4-law-first-child law))
+       (як-є lambda-form))
+      ((compiler-bits-equal seed bits (compiler-d4-law-second-child law))
+       (як-є define-form))
+      ((compiler-true seed) ()))))
+
+(визначити compiler-role-from-d4-bootstrap
+  (функція (decompose identity law)
+    (за-умовою
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-d4-law-width law))
+       (compiler-role-from-d4-bootstrap-bits
+         identity
+         (compiler-shape-bits (decompose identity))
+         law))
+      ((compiler-true identity) ()))))
+
+; One production role query for the whole current compiler nucleus.  Domain
+; width selects which already-ratified structural law is applicable; neither
+; the host nor this function infers meaning from an equal packed payload.
+(визначити compiler-lowering-role-from-laws
+  (функція (decompose identity d3-law d4-law)
+    (за-умовою
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-law-width d3-law))
+       (compiler-role-from-l1-l5 decompose identity d3-law))
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-d4-law-width d4-law))
+       (compiler-role-from-d4-bootstrap decompose identity d4-law))
       ((compiler-true identity) ()))))
 
 
