@@ -8,7 +8,7 @@ SENS:
   startup          process only
   core             current Core bootstrap
   load             exact-domain source read + parse + lower, no execution
-  cold-ready       Core bootstrap + setup definitions, no benchmark call
+  cold-ready       Core bootstrap + parse/lower whole program + setup definitions, no benchmark call
 
 CPython source:
   startup          process only
@@ -206,7 +206,7 @@ def main() -> int:
             "sens-exact",
             name,
             "cold-ready",
-            [runner, "setup", str(f["setup"])],
+            [runner, "ready", str(f["setup"]), str(f["call"])],
         )
         measure(
             "cpython-source",
@@ -318,7 +318,7 @@ def main() -> int:
         "",
         "Interpretation boundary:",
         "- SENS load is exact-domain source read + parse + lower for setup+call; Core bootstrap is excluded from this load row.",
-        "- SENS cold-ready includes current Core bootstrap plus exact-domain setup definition installation.",
+        "- SENS cold-ready includes current Core bootstrap, exact parse+lower of setup+call, and setup definition installation; call is prepared but not executed.",
         "- CPython source load is UTF-8 read + compile(), no module execution.",
         "- CPython .pyc load validates the header and unmarshals the code object, no module execution.",
         "- CPython ready executes definitions under a non-__main__ namespace, so bench() is not called.",
