@@ -132,21 +132,66 @@ pub(crate) fn evaluate_definition(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
-    let ExprKind::Symbol(name) = &arguments[0].kind else {
-        return Err(LanguageError::new(
+
+    match &arguments[0].kind {
+        ExprKind::Symbol(name) => {
+            canon::ensure_bindable(name, arguments[0].span)?;
+            let value = evaluate(&arguments[1], environment)?;
+            // The shared lexical frame makes recursive definitions visible to their closure after binding.
+            // Spilnyi leksychnyi freim robyt rekursyvne vyznachennia vydymym zamykanniu pislia zv’yazuvannia.
+            // Der gemeinsame lexikalische Frame macht rekursive Definitionen nach der Bindung für ihre Closure sichtbar.
+            canon::bind_language_definition(name, &value, environment);
+            environment.define(name.clone(), value.clone());
+            Ok(value)
+        }
+        ExprKind::DomainIdentity(identity) => {
+            let Some(core_identity) = identity.core_operation() else {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!(
+                        "DEFINE target is not callable under its exact-domain law: D{} {}",
+                        identity.width(),
+                        identity
+                    ),
+                    arguments[0].span,
+                ));
+            };
+
+            canon::ensure_bindable_domain_identity(
+                core_identity,
+                environment,
+                arguments[0].span,
+            )?;
+
+            let value = evaluate(&arguments[1], environment)?;
+            if !matches!(value, Value::Closure(_) | Value::Builtin(_) | Value::Macro(_)) {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "exact-domain DEFINE expects a callable language mechanism value for {core_identity}"
+                    ),
+                    arguments[1].span,
+                ));
+            }
+
+            if !environment.bind_domain_code_slot_once(core_identity, value.clone()) {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!(
+                        "exact-domain DEFINE target already has a language-owned mechanism: {core_identity}"
+                    ),
+                    arguments[0].span,
+                ));
+            }
+
+            Ok(value)
+        }
+        _ => Err(LanguageError::new(
             ErrorKind::InvalidForm,
-            "def expects a symbol name · def ochikuie nazvu-symvol · def erwartet einen Symbolnamen",
+            "DEFINE expects a symbol or exact callable DomainIdentity target",
             arguments[0].span,
-        ));
-    };
-    canon::ensure_bindable(name, arguments[0].span)?;
-    let value = evaluate(&arguments[1], environment)?;
-    // The shared lexical frame makes recursive definitions visible to their closure after binding.
-    // Spilnyi leksychnyi freim robyt rekursyvne vyznachennia vydymym zamykanniu pislia zv’yazuvannia.
-    // Der gemeinsame lexikalische Frame macht rekursive Definitionen nach der Bindung für ihre Closure sichtbar.
-    canon::bind_language_definition(name, &value, environment);
-    environment.define(name.clone(), value.clone());
-    Ok(value)
+        )),
+    }
 }
 
 pub(crate) fn evaluate_cond(
