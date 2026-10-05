@@ -136,3 +136,65 @@ The first implementation slice is schema/digest plumbing only. Oracle-emitted
 real cases and the bounded generator land in subsequent slices.
 
 Principle: **one case, one oracle digest, many machines.**
+
+
+## Lane C — bounded-exhaustive D1-D3 structural slice
+
+The first bounded generator is intentionally smaller than the current language.
+It proves one finite slice only; it does **not** claim exhaustive D1-D7 coverage.
+
+Declared bound:
+
+```json
+{
+  "domain_set": [1, 2, 3],
+  "max_ast_depth": 3,
+  "max_nodes": 11,
+  "argument_value_bound": 2
+}
+```
+
+The finite grammar has exactly two seed value expressions:
+
+```text
+V0 = D3:000 EMPTY
+V1 = (D3:111 CONS V0 V0)
+```
+
+It then generates every program in this slice:
+
+```text
+U ::= (QUOTE V) | (ATOM V) | (CDR V) | (CAR V)
+B ::= (EQ V V) | (CONS V V)
+P ::= (ATOM V) | (EQ V V)
+C ::= (COND (P V))
+E ::= U | B | C
+V ::= V0 | V1
+```
+
+All products are Cartesian over the two bounded values. After deterministic
+source deduplication this is **28 canonical programs**.
+
+D1 is not accepted as a bare expression payload by the canonical reader.
+It enters this slice only as the exact predicate result of ATOM/EQ and as the
+predicate consumed by COND. D2 owns list/clause structure. D3 owns the current
+callable primitive identities. This keeps the current reader/domain boundary
+intact.
+
+For every one of the 28 programs the probe performs both:
+
+1. **L0 ORACLE** — canonical parse, lower, exact-domain trace, evaluator result
+   or named evaluator error.
+2. **L1 P1 round-trip** — tokenize exact-width source words, densely pack with
+   zero interior byte padding, unpack with the caller-owned exact width
+   schedule, reconstruct canonical source, and re-run the same evaluator
+   observable.
+
+The L1 row is emitted only if the reconstructed source has the same exact word
+sequence **and** the same semantic trace/result/error as L0. Each case therefore
+produces one L0 `ORACLE` row and one L1 `PASS` row: 56 evidence rows total,
+28 stable `case_id` values.
+
+CI runs the generator twice and requires byte-identical JSONL, then validates
+the shared schema. No runtime mechanism, parser rule, domain placement or
+legacy identity is added by this lane.
