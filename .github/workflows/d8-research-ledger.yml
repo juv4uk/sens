@@ -41,11 +41,14 @@ jobs:
           assert p["status"] == "RESEARCH-UNRATIFIED"
           assert a["capacity"] == 256
           assert a["selector_candidate_coordinates"] == 64
-          assert a["product_family_footprint_coordinates"] == 12
-          assert a["analyzed_unique_coordinates"] == 76
-          assert a["untouched_coordinates"] == 180
+          assert a["product_family_footprint_coordinates"] == 16
+          assert a["analyzed_unique_coordinates"] == 80
+          assert a["untouched_coordinates"] == 176
           assert a["fixed_novel_coordinate_candidates_full"] == 2
           assert a["fixed_novel_coordinate_candidates_protocol_bounded"] == 1
+          assert a["fixed_novel_coordinate_candidates_typed"] == 1
+          assert a["merged_product_families"] == 2
+          assert a["green_unmerged_product_families"] == 2
           assert a["gauge_unresolved_novel_semantics"] == 3
           assert a["falsified_axis_hypotheses"] == 5
           PY
