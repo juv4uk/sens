@@ -1,0 +1,49 @@
+name: 3632 FASL regenerate
+
+on:
+  push:
+    branches:
+      - fix/3632-filter-predicatebit-r2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Regenerate tracked Core FASL
+        run: |
+          set -euo pipefail
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+
+      - name: Prove deterministic FASL bytes
+        run: |
+          set -euo pipefail
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core.lisp /tmp/core.lisp.fasl.second
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp /tmp/core4.lisp.fasl.second
+          cmp lib/core.lisp.fasl /tmp/core.lisp.fasl.second
+          cmp lib/core4.lisp.fasl /tmp/core4.lisp.fasl.second
+          sha256sum lib/core.lisp.fasl lib/core4.lisp.fasl
+
+      - name: FILTER focused evidence
+        run: |
+          set -euo pipefail
+          cargo test -p sens --test d6_pure_laws -- --nocapture
+          cargo test -p sens --test mccarthy bootstrap_library_provides_list_utilities -- --exact --nocapture
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: filter-core-fasl
+          path: |
+            lib/core.lisp.fasl
+            lib/core4.lisp.fasl
+          if-no-files-found: error
+          retention-days: 2
