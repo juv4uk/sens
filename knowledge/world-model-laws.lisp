@@ -1,43 +1,53 @@
 ; knowledge/world-model-laws.lisp
 ; Explicit physical/model laws for world reasoning.
-; Authority: #3402. These laws are distinct from axioms, observations and
-; arithmetic mechanisms.
+; Authority: #3402. World-axiom ids come from knowledge/world-axioms.lisp.
+; Human formula spellings are projections; dependency identity is name-erased.
 
 (world-model-laws
-  (schema . 1)
+  (schema . 2)
   (authority . 3402)
   (status . research-current)
 
   (laws
-    (planck-energy-frequency
+    (000
       (class . MODEL_LAW)
-      (relation . "E = h * nu")
-      (axiom-dependencies . (si:defining-planck-constant))
-      (input-roles . ((h WORLD_DEFINITION_AXIOM)
-                      (nu OBSERVATION-OR-DERIVED-FREQUENCY)))
+      (axiom-dependencies . (010))
+      (binary-function-number . (D5 10110))
+      (input-roles . ((000 WORLD_DEFINITION_AXIOM)
+                      (001 OBSERVATION-OR-DERIVED-FREQUENCY)))
       (output-role . DERIVED_FACT)
       (quantity-operation . quantity-product)
-      (binary-function-role . multiplication)
-      (assumptions . (frequency-describes-the-relevant-quantum-transition))
+      (assumptions . (000))
       (validity . conditional)
       (repo-witness . "tests/fixtures/exact-quantity-arithmetic-witness.lisp")
       (first-exact-replay
-        . ((h . si:defining-planck-constant)
-           (nu . si:defining-cesium-frequency)
-           (result-kind . energy))))
+        . ((axiom-id . 010)
+           (frequency-axiom-id . 000)
+           (result-kind-id . 000))))
 
-    (light-propagation-distance
+    (001
       (class . MODEL_LAW)
-      (relation . "d = c * t")
-      (axiom-dependencies . (si:defining-speed-of-light))
-      (input-roles . ((c WORLD_DEFINITION_AXIOM)
-                      (t OBSERVATION-OR-DERIVED-DURATION)))
+      (axiom-dependencies . (001))
+      (binary-function-number . (D5 10110))
+      (input-roles . ((000 WORLD_DEFINITION_AXIOM)
+                      (001 OBSERVATION-OR-DERIVED-DURATION)))
       (output-role . DERIVED_FACT)
       (quantity-operation . quantity-product)
-      (binary-function-role . multiplication)
-      (assumptions . (light-propagation-at-c path-length-equals-speed-times-duration))
+      (assumptions . (001 010))
       (validity . conditional)
       (repo-witness . "tests/fixtures/exact-quantity-arithmetic-witness.lisp")))
+
+  (surface-projections
+    (laws
+      (000
+        (name . planck-energy-frequency)
+        (relation . "E = h * nu")
+        (assumption-000 . frequency-describes-the-relevant-quantum-transition))
+      (001
+        (name . light-propagation-distance)
+        (relation . "d = c * t")
+        (assumption-001 . light-propagation-at-c)
+        (assumption-010 . path-length-equals-speed-times-duration))))
 
   (certificate-required
     (axiom-ids)
@@ -51,5 +61,4 @@
     (uncertainty-exactness)
     (provenance))
 
-  (rule
-    . "dimensionally valid arithmetic alone does not create physical meaning"))
+  (rule . "dimensionally valid arithmetic alone does not create physical meaning"))
