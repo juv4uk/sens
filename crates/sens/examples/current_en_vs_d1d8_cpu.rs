@@ -114,6 +114,10 @@ fn preflight(candidate: &str, source: &str) -> Result<(), String> {
 
 fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<(), String> {
     match phase {
+        "baseline" => {
+            std::hint::black_box(source.len());
+            emit(0, "", "", "");
+        }
         "session" => {
             let started = Instant::now();
             let _session = prepared_session()?;
@@ -129,6 +133,14 @@ fn measure(candidate: &str, phase: &str, source: &str, repeat: usize) -> Result<
             let started = Instant::now();
             let _lowered = lower_program(&parsed);
             emit(started.elapsed().as_nanos(), "", "", "");
+        }
+        "ready" => {
+            let parsed = parse_source(candidate, source)?;
+            let lowered = lower_program(&parsed);
+            let session = prepared_session()?;
+            std::hint::black_box(&lowered);
+            std::hint::black_box(&session);
+            emit(0, "", "", "");
         }
         "execute" => {
             let parsed = parse_source(candidate, source)?;
@@ -190,7 +202,7 @@ fn run() -> Result<(), String> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 4 || args.len() > 5 {
         return Err(format!(
-            "usage: {} <candidate> <preflight|session|ingest|lower|execute|full|repeated> <source-file> [repeat]",
+            "usage: {} <candidate> <preflight|baseline|session|ingest|lower|ready|execute|full|repeated> <source-file> [repeat]",
             args.first().map(String::as_str).unwrap_or("current_en_vs_d1d8_cpu")
         ));
     }
