@@ -135,6 +135,16 @@ assert d14g["d7_coordinate_status"]=="NO-EFFECT"
 assert d14g["semantic_split"]["D7"].startswith("phonetic/text geometry")
 assert d14g["semantic_split"]["D14"].startswith("grammar graph/path")
 
+completion=ledger["completion_policy"]
+assert completion["candidate_D_capacity"]==128
+assert completion["candidate_D_occupied"]==124
+assert completion["intentionally_free"]==["0101111","0110100","1010001","1010011"]
+assert completion["status"]=="COMPLETE-WITH-RESERVE-CANDIDATE"
+
+gcompletion=geometry["completion_policy"]
+assert gcompletion["candidate_D_occupied"]==124
+assert gcompletion["status"]=="COMPLETE-WITH-RESERVE-CANDIDATE"
+
 print("D7-V2-CONSOLIDATION: PASS")
 print("baseline=107+21 overlay=19 migration-targets=2")
 print("phonology=75 convention=32 pinned=21 authority=RESEARCH")
