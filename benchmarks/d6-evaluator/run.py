@@ -161,7 +161,7 @@ def main() -> int:
         "issue": "#3583",
         "parent": "#3597 / #1988",
         "runtime": "#3588 / #3394",
-        "authority": "#3393 / Contract 11.5",
+        "authority": "#3572 / Contract 11.6; D6 map #3393",
         "git_sha": sh(["git", "rev-parse", "HEAD"]).stdout.strip(),
         "cargo": sh(["cargo", "--version"]).stdout.strip(),
         "rustc": sh(["rustc", "--version"]).stdout.strip(),
