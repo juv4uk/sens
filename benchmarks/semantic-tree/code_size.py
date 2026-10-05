@@ -125,7 +125,7 @@ def main() -> int:
         "schema": "sens-d6-selector-code-size/v1",
         "issue": "#3582",
         "parent_benchmark": "#3597 / #1988",
-        "authority": "#3393 / Contract 11.5",
+        "authority": "#3572 / Contract 11.6; D6 map #3393",
         "runtime_mechanism": "#3588 / #3394",
         "source_sha256": hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
         "git_sha": sh(["git", "rev-parse", "HEAD"]).stdout.strip(),
