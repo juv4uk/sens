@@ -3,7 +3,7 @@
 
 The benchmark keeps process startup in every row and reports both absolute
 Cachegrind I refs and deltas from the session-only baseline. Modes are:
-session, bytes, decode, parse, macro, core.
+session, bytes, decode, decode-lower, decoded-eval, parse, macro, core.
 
 This does not change language semantics; it is diagnostic evidence for #3490.
 """
@@ -17,12 +17,12 @@ import subprocess
 import time
 from pathlib import Path
 
-MODES = ("session", "bytes", "decode", "parse", "macro", "core")
+MODES = ("session", "bytes", "decode", "decode-lower", "decoded-eval", "parse", "macro", "core")
 
 
 def cmd_for(runner: str, mode: str, fasl: str) -> list[str]:
     cmd = [runner, mode]
-    if mode in {"bytes", "decode"}:
+    if mode in {"bytes", "decode", "decode-lower", "decoded-eval"}:
         cmd.append(fasl)
     return cmd
 
@@ -134,6 +134,8 @@ def main() -> int:
         "- session: construct empty Session only;",
         "- bytes: read committed core.lisp.fasl bytes;",
         "- decode: read + decode FASL program;",
+        "- decode-lower: read + decode + lower the FASL program;",
+        "- decoded-eval: read + decode + lower + evaluate Core forms in a Core4 Session, without full loader peer-binding work;",
         "- parse: parse embedded textual Core source;",
         "- macro: load macro library into Session;",
         "- core: full load_core_library path.",
