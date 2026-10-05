@@ -1,0 +1,36 @@
+{
+  "schema": "sens-store-air-load-fixtures/v1",
+  "purpose": "STORE -> AIR -> LOAD fixtures: механічні exact-width controls плюс семантично звірені English/canonical пари.",
+  "fixtures": [
+    {
+      "id": "seven-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 01",
+      "framing_bits": 0
+    },
+    {
+      "id": "zero-suffix-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "1 01 000",
+      "framing_bits": 0
+    },
+    {
+      "id": "d3-quote-empty",
+      "kind": "paired-program",
+      "english_source": "(quote ())",
+      "canonical_source": "10 001 00 10 01 01",
+      "expected_value": "()",
+      "expected_output": "",
+      "framing_bits": 0
+    },
+    {
+      "id": "d3-car-empty",
+      "kind": "paired-program",
+      "english_source": "(car (quote (())))",
+      "canonical_source": "10 100 00 10 001 00 10 10 01 01 01 01",
+      "expected_value": "()",
+      "expected_output": "",
+      "framing_bits": 0
+    }
+  ]
+}
