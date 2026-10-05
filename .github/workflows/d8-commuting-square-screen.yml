@@ -3,7 +3,7 @@ name: D8 commuting-square research screen
 on:
   pull_request:
     paths:
-      - "scripts/research-3618-d8-commuting-square-screen.py"
+      - "benchmarks/d8-commuting-square-screen/run.py"
       - "docs/research/3618-d8-commuting-square-screen.md"
       - "docs/research/3618-d8-commuting-square-screen.uk.md"
       - "knowledge/d6-v2-binary-law-families.json"
@@ -13,7 +13,7 @@ on:
     branches:
       - main
     paths:
-      - "scripts/research-3618-d8-commuting-square-screen.py"
+      - "benchmarks/d8-commuting-square-screen/run.py"
       - "docs/research/3618-d8-commuting-square-screen.md"
       - "docs/research/3618-d8-commuting-square-screen.uk.md"
       - "knowledge/d6-v2-binary-law-families.json"
@@ -31,13 +31,13 @@ jobs:
       - name: Screen current D6 evidence for D8 two-axis products
         run: |
           rm -rf /tmp/d8-commuting-square-screen
-          python3 scripts/research-3618-d8-commuting-square-screen.py \
+          python3 benchmarks/d8-commuting-square-screen/run.py \
             --out /tmp/d8-commuting-square-screen
 
       - name: Re-run deterministically
         run: |
           rm -rf /tmp/d8-commuting-square-screen-2
-          python3 scripts/research-3618-d8-commuting-square-screen.py \
+          python3 benchmarks/d8-commuting-square-screen/run.py \
             --out /tmp/d8-commuting-square-screen-2
           cmp /tmp/d8-commuting-square-screen/screen.json \
               /tmp/d8-commuting-square-screen-2/screen.json
