@@ -13,6 +13,8 @@
     "contract_version",
     "semantic_identity_digest",
     "identity_proof",
+    "semantic_word_count",
+    "expected_semantic_bits",
     "semantic_payload_bits",
     "framing_bits",
     "tail_unused_bits",
@@ -176,6 +178,14 @@
     "storage_container_bits": {
       "type": "integer",
       "minimum": 8
+    },
+    "semantic_word_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "expected_semantic_bits": {
+      "type": "integer",
+      "minimum": 1
     }
   }
 }
