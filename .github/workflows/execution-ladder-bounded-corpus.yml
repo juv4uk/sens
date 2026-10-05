@@ -37,6 +37,16 @@ jobs:
             --out /tmp/bounded-structural.jsonl \
             --summary /tmp/bounded-structural-summary.json
 
+      - name: Prove deterministic regeneration
+        run: |
+          python3 benchmarks/execution-ladder-conformance/generate_bounded.py \
+            --oracle-helper target/release/examples/current_en_vs_d1d8_cpu \
+            --pack-helper target/release/examples/execution_ladder_pack_roundtrip \
+            --out /tmp/bounded-structural-second.jsonl \
+            --summary /tmp/bounded-structural-summary-second.json
+          cmp /tmp/bounded-structural.jsonl /tmp/bounded-structural-second.jsonl
+          cmp /tmp/bounded-structural-summary.json /tmp/bounded-structural-summary-second.json
+
       - name: Validate canonical conformance envelope
         run: |
           python3 benchmarks/execution-ladder-conformance/validate.py \
@@ -47,6 +57,7 @@ jobs:
           from pathlib import Path
 
           summary = json.loads(Path("/tmp/bounded-structural-summary.json").read_text())
+          assert summary["generated_cases"] == 16
           assert summary["raw_candidates"] == 16
           assert summary["deduplicated_cases"] == 16
           assert summary["oracle_rows"] == 16
