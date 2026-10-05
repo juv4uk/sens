@@ -1606,5 +1606,38 @@
       "shiva_identity_migration": null,
       "authority_status": "D7-RESEARCH"
     }
-  ]
+  ],
+  "role_layers": {
+    "sound_cell": {
+      "carrier": "W7 / exact 7-bit",
+      "status": "research under Contract 11.5",
+      "baseline": "knowledge/d7-full-map.json + D7-v2 stable resident spine"
+    },
+    "local_ordinal": {
+      "carrier": "W7 / exact 7-bit",
+      "count": 14,
+      "status": "historical owner-ratified witness retained as current research evidence after Contract 11.4/11.5 reset",
+      "source": [
+        "contracts/d7-local-ordinal.lock",
+        "benchmarks/d7-local-ordinal-corpus/fixtures/projection.json",
+        "#2739/#2748"
+      ],
+      "laws": [
+        "same raw bits as SoundCell remain role-distinct",
+        "same integer-looking value as Number remains domain-distinct",
+        "arithmetic operations fail DOMAIN-MISMATCH",
+        "D14 relation is provenance-only"
+      ],
+      "coordinate_effect": "NONE — LocalOrdinal role does not consume or duplicate SoundCell occupancy"
+    }
+  },
+  "shiva_sound_projection": {
+    "status": "OPEN-DONOR-STACK",
+    "source": [
+      "shiva-sutras #87 / PR #91",
+      "CI PR #106 merged into #91"
+    ],
+    "law": "UPC7 cell identity stays exact; language profile/context chooses phonetic projection; IPA/audio never identity",
+    "current_merge_state": "PR #91 not yet merged to shiva master; use as donor evidence only"
+  }
 }
