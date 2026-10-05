@@ -22,6 +22,7 @@ from itertools import product
 from pathlib import Path
 
 ROOTS = ("011", "100")  # CDR, CAR under #3202
+STALE_ROOTS_2934 = ("101", "110")  # donor-only negative control
 LAW_BITS = ("0", "1")   # compose CAR / compose CDR selector choice
 CURRENT_SELECTOR_MAX_WIDTH = 6
 D7_WIDTH = 7
@@ -63,6 +64,15 @@ def d8_direct_root_expansion() -> list[str]:
     return sorted(
         root + "".join(bits)
         for root in ROOTS
+        for bits in product(LAW_BITS, repeat=5)
+    )
+
+
+def stale_d8_selector_words_2934() -> list[str]:
+    """Historical donor negative control from obsolete roots; never authority."""
+    return sorted(
+        root + "".join(bits)
+        for root in STALE_ROOTS_2934
         for bits in product(LAW_BITS, repeat=5)
     )
 
@@ -137,6 +147,9 @@ def build(min_width: int, max_width: int):
         assert d8 == d8_direct_root_expansion()
         d6 = set(current_selector_words(6))
         assert all(word[:6] in d6 for word in d8)
+        stale = set(stale_d8_selector_words_2934())
+        assert len(stale) == 64
+        assert set(d8).isdisjoint(stale)
 
     for width in range(max(4, min_width), min(6, max_width) + 1):
         assert len(words[f"D{width}"]) == 2 * len(words[f"D{width - 1}"])
@@ -170,6 +183,8 @@ def report(rows: list[dict[str, object]]) -> str:
         "- D8 has 64 generated selector coordinate candidates from D6 × W2.",
         "- The D8 set equals direct root + five selector bits as a coordinate identity check,",
         "  but no D7 semantic ancestry is used or claimed.",
+        "- Historical donor #2934 used obsolete roots 101/110; overlap with the current",
+        "  64-coordinate D8 selector candidate set is exactly 0/64.",
         "",
         "NON-CONCLUSIONS:",
         "- the 64 D8 coordinates are not owner-ratified D8 residents;",
