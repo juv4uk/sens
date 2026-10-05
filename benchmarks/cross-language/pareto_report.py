@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import statistics
 from pathlib import Path
 from typing import Iterable
@@ -37,6 +38,13 @@ def as_float(value: str | None) -> float | None:
     if not text or text.upper() == "N/A" or text == "None":
         return None
     return float(text)
+
+
+def contract_from_generation(value: str) -> str | None:
+    match = re.match(r"^contract-(\d+)-(\d+)-", value)
+    if match is None:
+        return None
+    return f"{match.group(1)}.{match.group(2)}"
 
 
 def median_rows(rows: list[dict[str, str]]) -> list[dict[str, object]]:
@@ -115,8 +123,25 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
-    execution = read_tsv(args.external) + read_tsv(args.sens)
+    external_rows = read_tsv(args.external)
+    sens_rows = read_tsv(args.sens)
+    execution = external_rows + sens_rows
     medians = median_rows(execution)
+
+    sens_generations = {
+        row.get("semantic_generation", "") for row in sens_rows if row.get("runtime") == "sens-exact"
+    }
+    sens_generations.discard("")
+    if len(sens_generations) != 1:
+        raise RuntimeError(
+            f"SENS rows must declare exactly one semantic_generation, got {sorted(sens_generations)}"
+        )
+    sens_generation = next(iter(sens_generations))
+    expected_contract = contract_from_generation(sens_generation)
+    if expected_contract is None:
+        raise RuntimeError(
+            f"cannot derive contract from SENS semantic_generation={sens_generation!r}"
+        )
     footprint_rows = read_tsv(args.footprint)
     footprint = {
         (row["runtime"], row.get("workload", "")): row for row in footprint_rows
@@ -153,6 +178,12 @@ def main() -> int:
             raise RuntimeError(
                 "semantic accounting must declare source_issue=#1973; "
                 "do not inject benchmark-local semantic authority"
+            )
+        semantic_contract = semantic.get("contract")
+        if semantic_contract != expected_contract:
+            raise RuntimeError(
+                f"semantic contract mismatch: SENS rows={expected_contract}, "
+                f"semantic vector={semantic_contract!r}"
             )
         scope = semantic.get("scope")
         completeness = semantic.get("completeness")
@@ -269,6 +300,8 @@ def main() -> int:
 
     payload = {
         "semantic_accounting": semantic,
+        "sens_semantic_generation": sens_generation,
+        "sens_contract": expected_contract,
         "cross_language_semantic_comparable": False,
         "joined": joined,
         "dominance": dominance_rows,
