@@ -84,7 +84,8 @@ impl DomainIdentity {
     /// Explicit callable/Core-operation projection.
     ///
     /// Current owner authority admits exact D3/D4/D5 Core-operation identity.
-    /// D1/D2/D7 are non-callable by their domain laws; D6/D8 remain revoked
+    /// D1/D2 are non-callable by their domain laws. D6 callability is a separate
+    /// mechanism question under Contract 11.5; D7/D8 remain research/non-callable.
     /// under #3278. D5 residency is full 32/32 under #3305, while actual
     /// resident mechanisms remain independently fail-closed when unavailable.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
