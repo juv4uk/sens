@@ -140,7 +140,7 @@ fn exact_arithmetic_computes_factorials_past_i64_range() {
           (lambda (n acc)
             (cond
               ((eq? n 0) acc)
-              (t (fact (- n 1) (* acc n))))))
+              ((тотожне? n n) (fact (- n 1) (* acc n))))))
         (fact 30 (/ 1 1))
     "#;
     let result = eval_program(source, &mut Session::default()).unwrap();
@@ -1382,7 +1382,7 @@ fn division_respects_the_same_opt_in_numeric_bit_limit() {
 fn arithmetic_stays_unbounded_by_default_matching_every_conformance_fixture() {
     let mut session = Session::default();
     eval_program(
-        "(def big (lambda (n acc) (cond ((eq? n 0) acc) (t (big (- n 1) (* acc 2)))))) (big 100 1)",
+        "(def big (lambda (n acc) (cond ((eq? n 0) acc) ((тотожне? n n) (big (- n 1) (* acc 2)))))) (big 100 1)",
         &mut session,
     )
     .expect("unbounded session should compute a 100-bit result without a limit error");
