@@ -29,11 +29,13 @@ assert d["relation_classes"]=={
 for bits,name in d["residents"].items():
     assert f"(D5:{bits} {name})" in contract,(bits,name)
 
-assert "(minor . 5)" in lang
+assert "(minor . 6)" in lang
 assert "#3305" in lang
+assert "#3572" in lang
 assert "D5  full compact 32/32" in current
 assert "D5 **OWNER-RATIFIED #3305**" in core
 assert "D6  full compact 64/64" in current
+assert "D7  owner-ratified 126/128" in current
 assert "D8  UNRATIFIED / RESEARCH" in current
 
 print("D5-CURRENT-AUTHORITY: PASS")
