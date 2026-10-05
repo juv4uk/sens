@@ -45,9 +45,8 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
 /// Direct D3/D4/D5 human-surface projection.
 ///
 /// This path consumes the exact-domain projection generated from
-/// lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp.
-/// English, Ukrainian and Sanskrit spellings are peer projections onto one
-/// exact domain identity. It never consults a historical packed byte.
+/// lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp. It never consults a historical
+/// packed byte to recover domain identity.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
         let matches_human_surface = row.source_routable
@@ -116,9 +115,9 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 }
 /// Current staged surface lookup.
 ///
-/// English, Ukrainian and Sanskrit D3/D4/D5 spellings resolve directly
-/// through the exact-domain projection. The byte-backed lookup remains only
-/// as a bounded compatibility fallback for still-unmigrated spellings.
+/// English, Ukrainian and Sanskrit D3/D4/D5 spellings resolve directly through the
+/// exact-domain projection. The byte-backed lookup remains only as a bounded
+/// compatibility fallback for still-unmigrated spellings.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     direct_domain_identity_for_surface(name).or_else(|| {
         registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
@@ -334,29 +333,6 @@ mod tests {
     }
 
     #[test]
-    fn en_uk_sa_exact_domain_surfaces_share_one_identity() {
-        for row in DOMAIN_SURFACE_ROWS.iter().filter(|row| row.source_routable) {
-            let en = row.surfaces.iter().find(|surface| surface.namespace == "en").unwrap();
-            let uk = row.surfaces.iter().find(|surface| surface.namespace == "uk").unwrap();
-            let sa = row.surfaces.iter().find(|surface| surface.namespace == "sa").unwrap();
-
-            let en_id = direct_domain_identity_for_surface(en.name)
-                .expect("English exact-domain projection must resolve");
-            let uk_id = direct_domain_identity_for_surface(uk.name)
-                .expect("Ukrainian exact-domain projection must resolve");
-            let sa_id = direct_domain_identity_for_surface(sa.name)
-                .expect("Sanskrit exact-domain projection must resolve");
-
-            assert_eq!(en_id, uk_id);
-            assert_eq!(uk_id, sa_id);
-            assert_eq!(
-                (en_id.width(), en_id.packed_bits()),
-                (usize::from(row.width), row.bits)
-            );
-        }
-    }
-
-    #[test]
     fn uk_sa_exact_domain_projection_does_not_need_a_legacy_byte_route() {
         for (surface, width, bits) in [
             ("aṇu?", 3, 0b010),
@@ -382,6 +358,32 @@ mod tests {
             None,
             "CDAR must be admitted by D4 projection even without a legacy byte mapping"
         );
+    }
+
+    #[test]
+    fn en_uk_sa_d3_d4_surfaces_share_one_exact_domain_identity() {
+        for row in DOMAIN_SURFACE_ROWS
+            .iter()
+            .filter(|row| row.source_routable && matches!(row.width, 3 | 4))
+        {
+            let en = row.surfaces.iter().find(|surface| surface.namespace == "en").unwrap();
+            let uk = row.surfaces.iter().find(|surface| surface.namespace == "uk").unwrap();
+            let sa = row.surfaces.iter().find(|surface| surface.namespace == "sa").unwrap();
+
+            let en_id = direct_domain_identity_for_surface(en.name)
+                .expect("English exact-domain projection must resolve");
+            let uk_id = direct_domain_identity_for_surface(uk.name)
+                .expect("Ukrainian exact-domain projection must resolve");
+            let sa_id = direct_domain_identity_for_surface(sa.name)
+                .expect("Sanskrit exact-domain projection must resolve");
+
+            assert_eq!(en_id, uk_id);
+            assert_eq!(uk_id, sa_id);
+            assert_eq!(
+                (en_id.width(), en_id.packed_bits()),
+                (usize::from(row.width), row.bits)
+            );
+        }
     }
 
     #[test]
