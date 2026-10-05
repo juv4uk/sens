@@ -129,23 +129,9 @@ def rust_preflight(binary: Path, case: str) -> str:
     return fields["VALUE"]
 
 
-def run_with_usage(args: list[str]) -> tuple[str, int | None]:
-    if not hasattr(os, "wait4"):
-        proc = subprocess.run(args, check=True, capture_output=True, text=True)
-        return proc.stdout, None
-
-    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    _pid, status, usage = os.wait4(proc.pid, 0)
-    stdout = proc.stdout.read() if proc.stdout is not None else ""
-    stderr = proc.stderr.read() if proc.stderr is not None else ""
-    if proc.stdout is not None:
-        proc.stdout.close()
-    if proc.stderr is not None:
-        proc.stderr.close()
-    code = os.waitstatus_to_exitcode(status)
-    if code != 0:
-        raise RuntimeError(f"command failed ({code}): {args}\n{stderr}")
-    return stdout, int(usage.ru_maxrss)
+def run_process(args: list[str]) -> str:
+    proc = subprocess.run(args, check=True, capture_output=True, text=True)
+    return proc.stdout
 
 
 def percentile95(values: list[float]) -> float:
@@ -211,14 +197,11 @@ def main() -> int:
 
             sens_ns: list[float] = []
             rust_ns: list[float] = []
-            sens_rss: list[float] = []
-            rust_rss: list[float] = []
-
             for rep in range(args.outer_reps):
-                sens_stdout, s_rss = run_with_usage(
+                sens_stdout = run_process(
                     [str(sens), "canonical-d1d8", "repeated", str(canonical), str(args.inner_repeats)]
                 )
-                rust_stdout, r_rss = run_with_usage(
+                rust_stdout = run_process(
                     [str(rust), case, "repeated", str(args.inner_repeats)]
                 )
                 s_fields = parse_kv(sens_stdout)
@@ -227,10 +210,6 @@ def main() -> int:
                 r_per = int(r_fields["ELAPSED_NS"]) / args.inner_repeats
                 sens_ns.append(s_per)
                 rust_ns.append(r_per)
-                if s_rss is not None:
-                    sens_rss.append(float(s_rss))
-                if r_rss is not None:
-                    rust_rss.append(float(r_rss))
                 raw_rows.append(
                     {
                         "workload": case,
@@ -238,8 +217,6 @@ def main() -> int:
                         "inner_repeats": args.inner_repeats,
                         "sens_ns_per_op": s_per,
                         "rust_ns_per_op": r_per,
-                        "sens_maxrss_kb": "" if s_rss is None else s_rss,
-                        "rust_maxrss_kb": "" if r_rss is None else r_rss,
                     }
                 )
 
@@ -277,40 +254,31 @@ def main() -> int:
                 }
             )
 
-            if sens_rss and rust_rss:
-                sr_med, sr_p95 = summary(sens_rss)
-                rr_med, rr_p95 = summary(rust_rss)
-                measurements.append(
-                    {
-                        "axis": "process_maxrss_kb",
-                        "status": "measured",
-                        "unit": "KiB",
-                        "sens_samples": sens_rss,
-                        "competitor_samples": rust_rss,
-                        "sens_median": sr_med,
-                        "competitor_median": rr_med,
-                        "sens_p95": sr_p95,
-                        "competitor_p95": rr_p95,
-                        "notes": "Whole helper-process RSS; includes runtime footprint, not only the timed operation.",
-                    }
-                )
-                rss_verdict = (
-                    verdict_lower(sr_med, rr_med)
-                    if args.evidence_mode == "performance"
-                    else "inconclusive"
-                )
-                rss_note = (
-                    f"median SENS={sr_med:.0f} KiB; Rust={rr_med:.0f} KiB"
-                    if args.evidence_mode == "performance"
-                    else f"smoke observation only: median SENS={sr_med:.0f} KiB; Rust={rr_med:.0f} KiB"
-                )
-                verdicts.append(
-                    {
-                        "axis": f"{case}:process_maxrss_kb",
-                        "verdict": rss_verdict,
-                        "evidence": rss_note,
-                    }
-                )
+            measurements.append(
+                {
+                    "axis": "process_maxrss_kb",
+                    "status": "inconclusive",
+                    "unit": "KiB",
+                    "sens_samples": [],
+                    "competitor_samples": [],
+                    "sens_median": None,
+                    "competitor_median": None,
+                    "sens_p95": None,
+                    "competitor_p95": None,
+                    "notes": (
+                        "Not measured in this lane. The first smoke used os.wait4().ru_maxrss, "
+                        "which is a cumulative child-process maximum and can falsely report identical "
+                        "RSS for sequential commands. A dedicated per-process RSS owner is required."
+                    ),
+                }
+            )
+            verdicts.append(
+                {
+                    "axis": f"{case}:process_maxrss_kb",
+                    "verdict": "inconclusive",
+                    "evidence": "RSS withheld: cumulative wait4 child-max is not a valid per-process comparison",
+                }
+            )
 
             workloads.append(
                 {
@@ -349,8 +317,12 @@ def main() -> int:
     verdicts.append(
         {
             "axis": "binary_artifact_bytes",
-            "verdict": verdict_lower(float(sens.stat().st_size), float(rust.stat().st_size)),
-            "evidence": f"SENS={sens.stat().st_size} bytes; Rust={rust.stat().st_size} bytes",
+            "verdict": "inconclusive",
+            "evidence": (
+                f"observed SENS={sens.stat().st_size} bytes; Rust={rust.stat().st_size} bytes; "
+                "not ranked because the SENS benchmark helper and direct Rust control do not "
+                "have a matched dependency/runtime closure"
+            ),
         }
     )
 
@@ -362,6 +334,7 @@ def main() -> int:
         "cpu": platform.processor() or None,
         "load_context": args.load_context,
         "evidence_mode": args.evidence_mode,
+        "rss_measurement": "withheld-until-dedicated-per-process-owner",
         "toolchain": {"rustc": rustc},
     }
     comparison = {
