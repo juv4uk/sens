@@ -2,30 +2,81 @@ name: Shared CUDA worker smoke
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "benchmarks/sens-surface/gpu_numeric_buffer_map.py"
+      - ".github/workflows/gpu-worker-smoke.yml"
+      - "crates/sens/src/eval/builtins.rs"
+      - "docs/PROPOSAL-TYPED-NUMERIC-BUFFERS.md"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/sens-surface/gpu_numeric_buffer_map.py"
+      - ".github/workflows/gpu-worker-smoke.yml"
+      - "crates/sens/src/eval/builtins.rs"
 
 permissions:
   contents: read
 
+concurrency:
+  group: gpu-gtx-1050-ti
+  cancel-in-progress: false
+
 jobs:
   gpu-worker:
     runs-on: [self-hosted, gpu, gtx-1050-ti]
-    timeout-minutes: 5
+    timeout-minutes: 15
     env:
-      CML_GPU_WORKER_SOCKET: /run/user/1008/cml-gpu-worker.sock
+      CML_GPU_WORKER_SOCKET: /run/cml-gpu-worker/worker.sock
+      GPU_WORKER: /home/agents/.local/bin/cml-gpu-worker
 
     steps:
+      - uses: actions/checkout@v5
+
       - name: Probe shared GPU worker
         shell: bash
         run: |
           set -euo pipefail
-          /usr/lib/wsl/lib/nvidia-smi             --query-gpu=name,compute_cap,memory.total             --format=csv,noheader
-          test "$(cml-gpu-worker ping)" = "pong"
-          cml-gpu-worker probe
+          /usr/lib/wsl/lib/nvidia-smi \
+            --query-gpu=name,compute_cap,memory.total,utilization.gpu \
+            --format=csv,noheader
+          systemctl is-active --quiet cml-gpu-worker.service
+          test "$("$GPU_WORKER" ping)" = "pong"
+          "$GPU_WORKER" probe
 
-      - name: Execute real CUDA witness
+      - name: Execute real CUDA scalar witness
         shell: bash
         run: |
           set -euo pipefail
-          result="$(cml-gpu-worker add-i32 7 1 2 3 4)"
+          result="$("$GPU_WORKER" add-i32 7 1 2 3 4)"
           test "$result" = "8 9 10 11"
           echo "GPU_SHARED_WORKER_GREEN repo=$GITHUB_REPOSITORY result=$result"
+
+      - name: Offload SENS numeric-buffer-map to CUDA
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/sens-gpu-numeric-buffer-map
+          python3 benchmarks/sens-surface/gpu_numeric_buffer_map.py \
+            --worker "$GPU_WORKER" \
+            --socket "$CML_GPU_WORKER_SOCKET" \
+            --sizes 1000 100000 1000000 \
+            --reps 3 \
+            --out /tmp/sens-gpu-numeric-buffer-map
+          cat /tmp/sens-gpu-numeric-buffer-map/gpu.tsv
+
+      - name: GPU utilization after witness
+        if: always()
+        shell: bash
+        run: |
+          /usr/lib/wsl/lib/nvidia-smi \
+            --query-gpu=name,utilization.gpu,utilization.memory,memory.used,memory.total,temperature.gpu \
+            --format=csv,noheader || true
+
+      - name: Upload GPU evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-gpu-numeric-buffer-map
+          path: /tmp/sens-gpu-numeric-buffer-map
+          if-no-files-found: warn
