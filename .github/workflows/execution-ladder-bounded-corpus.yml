@@ -1,0 +1,65 @@
+name: execution-ladder bounded structural corpus
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "crates/sens/examples/execution_ladder_pack_roundtrip.rs"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+      - "crates/sens/src/source_packing.rs"
+      - ".github/workflows/execution-ladder-bounded-corpus.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "crates/sens/examples/execution_ladder_pack_roundtrip.rs"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+      - "crates/sens/src/source_packing.rs"
+      - ".github/workflows/execution-ladder-bounded-corpus.yml"
+
+jobs:
+  bounded-structural:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build current oracle and production transport helpers
+        run: |
+          cargo build --release -p sens \
+            --example current_en_vs_d1d8_cpu \
+            --example execution_ladder_pack_roundtrip
+
+      - name: Generate bounded oracle corpus with P1 round-trip
+        run: |
+          python3 benchmarks/execution-ladder-conformance/generate_bounded.py \
+            --oracle-helper target/release/examples/current_en_vs_d1d8_cpu \
+            --pack-helper target/release/examples/execution_ladder_pack_roundtrip \
+            --out /tmp/bounded-structural.jsonl \
+            --summary /tmp/bounded-structural-summary.json
+
+      - name: Validate canonical conformance envelope
+        run: |
+          python3 benchmarks/execution-ladder-conformance/validate.py \
+            /tmp/bounded-structural.jsonl
+          test "$(wc -l < /tmp/bounded-structural.jsonl)" -eq 16
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(Path("/tmp/bounded-structural-summary.json").read_text())
+          assert summary["raw_candidates"] == 16
+          assert summary["deduplicated_cases"] == 16
+          assert summary["oracle_rows"] == 16
+          assert summary["pack_roundtrip_rows"] == 16
+          assert summary["transport"]["all_rows_round_trip"] is True
+          assert summary["transport"]["semantic_bits_equal_packed_bits"] is True
+          assert len(summary["transport"]["rows"]) == 16
+          print("bounded structural corpus summary: PASS")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sens-bounded-structural-conformance
+          path: |
+            /tmp/bounded-structural.jsonl
+            /tmp/bounded-structural-summary.json
