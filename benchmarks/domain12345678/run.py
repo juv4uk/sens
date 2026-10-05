@@ -149,7 +149,7 @@ def main() -> int:
         "",
         "Deferred lanes:",
         "- packed/framing accounting follows #3026/#2833;",
-        "- registry/surface comparisons follow the full 510-owner projection -> #2992;",
+        "- registry/surface comparisons follow current ratified D1-D7 authority; D8 stays research until separate ratification;",
         "- domain-law execution benchmarks are separate from carrier cost.",
         "",
     ]
