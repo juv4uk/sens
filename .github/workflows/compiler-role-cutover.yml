@@ -7,7 +7,9 @@ on:
       - "knowledge/bija3-l1-l5-structure-projection.json"
       - "crates/sens/src/compiler_bootstrap.rs"
       - "crates/sens/src/compiler_role.rs"
+      - "crates/sens/src/compiler_language.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
+      - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
       - "crates/sens/tests/compiler_domain_shape.rs"
       - "crates/sens/tests/compiler_nucleus_sens.rs"
@@ -19,7 +21,9 @@ on:
       - "knowledge/bija3-l1-l5-structure-projection.json"
       - "crates/sens/src/compiler_bootstrap.rs"
       - "crates/sens/src/compiler_role.rs"
+      - "crates/sens/src/compiler_language.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
+      - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
 
 jobs:
@@ -39,4 +43,10 @@ jobs:
           --test compiler_l1_l5_role
           --test compiler_domain_shape
           --test compiler_nucleus_sens
+          --test compiler_nucleus_diff
+          -- --nocapture
+      - name: Stale projection is bootstrap failure, not semantic diff
+        run: >-
+          cargo test -p sens --lib
+          compiler_language::tests::stale_law_authority_is_a_bootstrap_failure_before_role_execution
           -- --nocapture
