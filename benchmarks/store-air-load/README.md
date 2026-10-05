@@ -18,6 +18,7 @@ AIR
   integrity_bits
   profile_overhead_bits
   total_wire_bits = carrier_payload_bits + framing_bits + integrity_bits + profile_overhead_bits
+  payload_utilization = semantic_payload_bits / total_wire_bits
   ideal_airtime_seconds = total_wire_bits / bitrate_bps
 
 LOAD
