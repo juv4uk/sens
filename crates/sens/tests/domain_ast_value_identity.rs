@@ -92,7 +92,7 @@ fn same_payload_across_all_d1_d8_remains_distinct_in_ast_and_value() {
 }
 
 #[test]
-fn callable_projection_admits_d3_d4_d5_d6_and_fails_closed_for_noncallable_or_research_domains() {
+fn callable_projection_admits_d3_d4_d5_d6_and_fails_closed_for_noncallable_d7_and_research_d8() {
     for identity in [d1(1), d2(1), d7(1), d8(1)] {
         assert_eq!(Value::DomainIdentity(identity).as_core_domain_identity(), None);
     }
