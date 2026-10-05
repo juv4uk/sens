@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sens-execution-conformance/v1",
+  "title": "SENS execution-ladder conformance row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "case_id",
+    "contract",
+    "upstream_sha",
+    "producer_layer",
+    "producer",
+    "program_encoding",
+    "program",
+    "program_digest",
+    "identity_trace",
+    "identity_trace_digest",
+    "observable",
+    "observable_digest",
+    "oracle_digest",
+    "parity_status",
+    "evidence_scope",
+    "exhaustive_bound",
+    "legacy_identity_used"
+  ],
+  "properties": {
+    "schema": {"const": "sens-execution-conformance/v1"},
+    "case_id": {"type": "string", "pattern": "^case-[0-9a-f]{64}$"},
+    "contract": {"const": "11.5"},
+    "upstream_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "producer_layer": {"type": "string", "enum": ["L0", "L1", "L2", "L3"]},
+    "producer": {"type": "string", "minLength": 1},
+    "program_encoding": {
+      "type": "string",
+      "enum": ["canonical-ast", "canonical-source"]
+    },
+    "program": {"type": "string", "minLength": 1},
+    "program_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "identity_trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["domain", "bits"],
+        "properties": {
+          "domain": {"type": "integer", "minimum": 1, "maximum": 8},
+          "bits": {"type": "string", "pattern": "^[01]+$"}
+        }
+      }
+    },
+    "identity_trace_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "observable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result_kind",
+        "value",
+        "error_kind",
+        "order_trace",
+        "mechanism_status"
+      ],
+      "properties": {
+        "result_kind": {
+          "type": "string",
+          "enum": ["VALUE", "ERROR", "BLOCKED-MECHANISM", "RESEARCH-DOMAIN"]
+        },
+        "value": {"type": ["string", "null"]},
+        "error_kind": {"type": ["string", "null"]},
+        "order_trace": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "mechanism_status": {
+          "type": "string",
+          "enum": ["CALLABLE", "BLOCKED-MECHANISM", "RESEARCH-DOMAIN", "INVALID"]
+        }
+      }
+    },
+    "observable_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "oracle_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "parity_status": {
+      "type": "string",
+      "enum": ["ORACLE", "PASS", "FAIL", "NOT-RUN"]
+    },
+    "evidence_scope": {
+      "type": "string",
+      "enum": ["fixture", "bounded-exhaustive", "sampled"]
+    },
+    "exhaustive_bound": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["domain_set", "max_ast_depth", "max_nodes", "argument_value_bound"],
+      "properties": {
+        "domain_set": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1, "maximum": 8}
+        },
+        "max_ast_depth": {"type": "integer", "minimum": 0},
+        "max_nodes": {"type": "integer", "minimum": 1},
+        "argument_value_bound": {"type": "integer", "minimum": 0}
+      }
+    },
+    "legacy_identity_used": {"const": false}
+  }
+}
