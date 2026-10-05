@@ -61,8 +61,13 @@ def program_digest(program: str) -> str:
     return sha256_text(program)
 
 
-def case_id_for(program: str) -> str:
-    return "case-" + program_digest(program)
+def case_id_for(program_encoding: str, program: str, contract: str = CONTRACT) -> str:
+    identity = {
+        "contract": contract,
+        "program_encoding": program_encoding,
+        "program": program,
+    }
+    return "case-" + sha256_text(canonical_json(identity))
 
 
 def structured_digest(value) -> str:
@@ -209,7 +214,9 @@ def validate(row, line_no=1):
     if not SHA64.fullmatch(row["program_digest"]):
         raise ValueError(f"line {line_no}: invalid program_digest")
 
-    expected_case_id = case_id_for(row["program"])
+    expected_case_id = case_id_for(
+        row["program_encoding"], row["program"], row["contract"]
+    )
     if row["case_id"] != expected_case_id or not CASE_ID.fullmatch(row["case_id"]):
         raise ValueError(f"line {line_no}: deterministic case_id mismatch")
 
