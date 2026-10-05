@@ -47,6 +47,8 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
     expected_semantic_bits = int(row["expected_semantic_bits"])
     semantic_bits = int(row["semantic_payload_bits"])
     framing_bits = int(row["framing_bits"])
+    integrity_bits = int(row["integrity_bits"])
+    profile_overhead_bits = int(row["profile_overhead_bits"])
     tail_bits = int(row["tail_unused_bits"])
     carrier_bits = int(row["carrier_payload_bits"])
     storage_bits = int(row["storage_container_bits"])
@@ -66,12 +68,23 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
             f"actual_semantic_bits={semantic_bits} "
             f"artifact_bytes={physical_bytes}"
         )
-    if framing_bits < 0 or not 0 <= tail_bits <= 7:
-        raise ValueError(f"line {line_no}: invalid framing/tail bits")
+    if (
+        framing_bits < 0
+        or integrity_bits < 0
+        or profile_overhead_bits < 0
+        or not 0 <= tail_bits <= 7
+    ):
+        raise ValueError(f"line {line_no}: invalid overhead/tail bits")
     if physical_bytes <= 0 or storage_bits != physical_bytes * 8:
         raise ValueError(f"line {line_no}: storage bits must equal physical bytes * 8")
-    if total_wire_bits != carrier_bits + framing_bits:
-        raise ValueError(f"line {line_no}: total_wire_bits must be carrier + framing")
+    expected_wire_bits = (
+        carrier_bits + framing_bits + integrity_bits + profile_overhead_bits
+    )
+    if total_wire_bits != expected_wire_bits:
+        raise ValueError(
+            f"line {line_no}: total_wire_bits must be "
+            "carrier + framing + integrity + profile_overhead"
+        )
     if bitrate <= 0 or not close(airtime, total_wire_bits / bitrate):
         raise ValueError(f"line {line_no}: invalid airtime derivation")
 
