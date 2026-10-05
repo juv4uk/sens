@@ -13,7 +13,8 @@
 
 use crate::{
     domain_identity_shape_mechanism, eval_parsed_expressions, eval_program, load_core_library,
-    sha256_source, CompilerExecutionRole, CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness,
+    sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
+    ErrorKind, Exactness,
     Expr, ExprKind, LanguageError, Session, Span, Value,
 };
 use std::rc::Rc;
@@ -22,9 +23,13 @@ const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleu
 const LAW_PROJECTION: &str =
     include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
 const LAW_AUTHORITY: &str = include_str!("../../../contracts/bija3-l1-l5-ratification.lisp");
+const D4_LAW_PROJECTION: &str =
+    include_str!("../../../knowledge/d4-bootstrap-compiler-structure-projection.json");
+const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-ratification.lisp");
 
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
+const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 
 fn invalid_projection(message: impl Into<String>) -> LanguageError {
     LanguageError::new(ErrorKind::InvalidForm, message, Span::default())
@@ -63,6 +68,46 @@ fn projection_width() -> Result<usize, LanguageError> {
     digits
         .parse()
         .map_err(|_| invalid_projection("generated law domain width is invalid"))
+}
+
+fn projection_width_from(source: &str) -> Result<usize, LanguageError> {
+    let domain = source
+        .find("\"domain\"")
+        .ok_or_else(|| invalid_projection("generated law projection has no domain block"))?;
+    let rest = &source[domain..];
+    let marker = "\"width\": ";
+    let start = rest
+        .find(marker)
+        .ok_or_else(|| invalid_projection("generated law projection has no domain width"))?
+        + marker.len();
+    let digits = rest[start..]
+        .chars()
+        .take_while(|ch| ch.is_ascii_digit())
+        .collect::<String>();
+    if digits.is_empty() {
+        return Err(invalid_projection("generated law domain width is not numeric"));
+    }
+    digits
+        .parse()
+        .map_err(|_| invalid_projection("generated law domain width is invalid"))
+}
+
+fn projection_string_array(source: &str, key: &str) -> Result<Vec<String>, LanguageError> {
+    let marker = format!("\"{key}\": [");
+    let start = source
+        .find(&marker)
+        .ok_or_else(|| invalid_projection(format!("generated law projection has no {key} array")))?
+        + marker.len();
+    let tail = &source[start..];
+    let end = tail
+        .find(']')
+        .ok_or_else(|| invalid_projection(format!("generated {key} array is unterminated")))?;
+    Ok(tail[..end]
+        .split(',')
+        .map(str::trim)
+        .filter(|item| !item.is_empty())
+        .map(|item| item.trim_matches('"').to_string())
+        .collect())
 }
 
 fn projection_spine() -> Result<Vec<String>, LanguageError> {
@@ -105,7 +150,7 @@ fn verify_projection_authority(
     let actual_authority_sha = sha256_hex(authority.as_bytes());
     if expected_authority_sha != actual_authority_sha {
         return Err(invalid_projection(
-            "generated L1-L5 projection is stale against its ratified authority",
+            "generated structural projection is stale against its ratified authority",
         ));
     }
     Ok(())
@@ -176,6 +221,81 @@ fn compiler_l1_l5_law_value() -> Result<Value, LanguageError> {
     ]))
 }
 
+fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
+    if !D4_LAW_PROJECTION.contains("\"status\": \"generated-projection-only\"") {
+        return Err(invalid_projection(
+            "D4 compiler law input is not marked generated-projection-only",
+        ));
+    }
+    for required_false in [
+        "\"compiler_role_table\": false",
+        "\"backend_mechanism_table\": false",
+        "\"human_name_routing\": false",
+        "\"d8_admission\": false",
+    ] {
+        if !D4_LAW_PROJECTION.contains(required_false) {
+            return Err(invalid_projection(format!(
+                "D4 structural projection is missing non-authority guard: {required_false}"
+            )));
+        }
+    }
+    for forbidden in [
+        "LambdaForm",
+        "DefineForm",
+        "lambda-form",
+        "define-form",
+        "CompilerLoweringRole",
+    ] {
+        if D4_LAW_PROJECTION.contains(forbidden) {
+            return Err(invalid_projection(format!(
+                "D4 structural projection precomputes compiler role {forbidden}"
+            )));
+        }
+    }
+
+    verify_projection_authority(D4_LAW_PROJECTION, D4_LAW_AUTHORITY)?;
+
+    let width = projection_width_from(D4_LAW_PROJECTION)?;
+    if width != 4 {
+        return Err(invalid_projection(format!(
+            "D4 bootstrap projection must have exact width 4, got {width}"
+        )));
+    }
+
+    let parent = quoted_json_string(D4_LAW_PROJECTION, "parent_bits")?;
+    if parent.len() + 1 != width {
+        return Err(invalid_projection(
+            "D4 bootstrap parent must be the exact one-bit-shorter fibre prefix",
+        ));
+    }
+
+    let children = projection_string_array(D4_LAW_PROJECTION, "children")?;
+    if children.len() != 2 {
+        return Err(invalid_projection(format!(
+            "D4 bootstrap fibre must have exactly two ordered children, got {}",
+            children.len()
+        )));
+    }
+    for child in &children {
+        if child.len() != width || !child.starts_with(&parent) {
+            return Err(invalid_projection(
+                "D4 bootstrap child does not preserve its exact D3 parent prefix",
+            ));
+        }
+    }
+
+    Ok(Value::list([
+        Value::Number(width as f64, Exactness::Exact),
+        bit_list(&parent, width - 1)?,
+        Value::list(
+            children
+                .iter()
+                .map(|bits| bit_list(bits, width))
+                .collect::<Result<Vec<_>, _>>()?,
+        ),
+    ]))
+}
+
 fn symbol(name: &str) -> Expr {
     Expr {
         kind: ExprKind::Symbol(Rc::from(name)),
@@ -188,13 +308,14 @@ fn language_role_call(identity: CoreDomainIdentity) -> Expr {
     Expr {
         kind: ExprKind::List(Rc::from(
             vec![
-                symbol("compiler-role-from-l1-l5"),
+                symbol("compiler-lowering-role-from-laws"),
                 symbol(SHAPE_MECHANISM_NAME),
                 Expr {
                     kind: ExprKind::DomainIdentity(exact_identity),
                     span: Span::default(),
                 },
                 symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
             ]
             .into_boxed_slice(),
         )),
@@ -202,17 +323,37 @@ fn language_role_call(identity: CoreDomainIdentity) -> Expr {
     }
 }
 
-fn decode_language_role(value: &Value) -> Result<Option<CompilerExecutionRole>, LanguageError> {
+fn decode_language_lowering_role(
+    value: &Value,
+) -> Result<Option<CompilerLoweringRole>, LanguageError> {
     match value {
         Value::Nil => Ok(None),
-        Value::Symbol(name) if name.as_ref() == "selector-head" => {
-            Ok(Some(CompilerExecutionRole::SelectorHead))
+        Value::Symbol(name) if name.as_ref() == "quote-form" => {
+            Ok(Some(CompilerLoweringRole::QuoteForm))
+        }
+        Value::Symbol(name) if name.as_ref() == "atom-predicate" => {
+            Ok(Some(CompilerLoweringRole::AtomPredicate))
         }
         Value::Symbol(name) if name.as_ref() == "selector-tail" => {
-            Ok(Some(CompilerExecutionRole::SelectorTail))
+            Ok(Some(CompilerLoweringRole::SelectorTail))
+        }
+        Value::Symbol(name) if name.as_ref() == "selector-head" => {
+            Ok(Some(CompilerLoweringRole::SelectorHead))
+        }
+        Value::Symbol(name) if name.as_ref() == "atom-equality" => {
+            Ok(Some(CompilerLoweringRole::AtomEquality))
+        }
+        Value::Symbol(name) if name.as_ref() == "cond-form" => {
+            Ok(Some(CompilerLoweringRole::CondForm))
         }
         Value::Symbol(name) if name.as_ref() == "pair-construct" => {
-            Ok(Some(CompilerExecutionRole::PairConstruct))
+            Ok(Some(CompilerLoweringRole::PairConstruct))
+        }
+        Value::Symbol(name) if name.as_ref() == "lambda-form" => {
+            Ok(Some(CompilerLoweringRole::LambdaForm))
+        }
+        Value::Symbol(name) if name.as_ref() == "define-form" => {
+            Ok(Some(CompilerLoweringRole::DefineForm))
         }
         Value::Symbol(name) => Err(LanguageError::new(
             ErrorKind::InvalidForm,
@@ -227,15 +368,11 @@ fn decode_language_role(value: &Value) -> Result<Option<CompilerExecutionRole>, 
     }
 }
 
-/// Derive the bounded compiler role by executing the SENS-owned compiler law.
-///
-/// Rust does not inspect domain coordinates here. The older
-/// `compiler_execution_role` function remains available as a differential
-/// oracle while consumers migrate, but production compiler callers should use
-/// this function.
-pub fn compiler_execution_role_from_sens(
+/// Derive the complete current compiler lowering role by executing the
+/// SENS-owned compiler law over the ratified D3 and D4 structural inputs.
+pub fn compiler_lowering_role_from_sens(
     identity: CoreDomainIdentity,
-) -> Result<Option<CompilerExecutionRole>, LanguageError> {
+) -> Result<Option<CompilerLoweringRole>, LanguageError> {
     let mut session = Session::default();
     load_core_library(&mut session)?;
 
@@ -245,17 +382,52 @@ pub fn compiler_execution_role_from_sens(
     session
         .environment
         .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
 
     eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
-    decode_language_role(&result)
+    decode_language_lowering_role(&result)
+}
+
+/// Backward-compatible three-role view used by the already-landed selector/pair
+/// compiler bridge. It delegates to the same full SENS-owned role law and never
+/// reconstructs identity-to-role meaning in Rust.
+pub fn compiler_execution_role_from_sens(
+    identity: CoreDomainIdentity,
+) -> Result<Option<CompilerExecutionRole>, LanguageError> {
+    match compiler_lowering_role_from_sens(identity)? {
+        Some(CompilerLoweringRole::SelectorHead) => {
+            Ok(Some(CompilerExecutionRole::SelectorHead))
+        }
+        Some(CompilerLoweringRole::SelectorTail) => {
+            Ok(Some(CompilerExecutionRole::SelectorTail))
+        }
+        Some(CompilerLoweringRole::PairConstruct) => {
+            Ok(Some(CompilerExecutionRole::PairConstruct))
+        }
+        Some(_) | None => Ok(None),
+    }
 }
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn d3(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(raw).expect("D3 test word")),
+        )
+    }
+
+    fn d4(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D4(
+            crate::CoreD4::from_word(crate::Bit4::new(raw).expect("D4 test word")),
+        )
+    }
 
     #[test]
     fn stale_law_authority_is_a_bootstrap_failure_before_role_execution() {
@@ -268,6 +440,52 @@ mod tests {
                 .to_string()
                 .contains("stale against its ratified authority"),
             "unexpected stale-projection error: {error}"
+        );
+    }
+
+    #[test]
+    fn d4_projection_authority_is_verified_before_role_execution() {
+        let stale_authority = format!("{D4_LAW_AUTHORITY}\n; parity-test-stale-authority");
+        let error = verify_projection_authority(D4_LAW_PROJECTION, &stale_authority)
+            .expect_err("stale D4 authority must be rejected before SENS role execution");
+
+        assert!(
+            error
+                .to_string()
+                .contains("stale against its ratified authority"),
+            "unexpected D4 stale-projection error: {error}"
+        );
+    }
+
+    #[test]
+    fn current_nucleus_roles_are_derived_by_the_single_sens_owned_law() {
+        let expected = [
+            (d3(0b001), CompilerLoweringRole::QuoteForm),
+            (d3(0b010), CompilerLoweringRole::AtomPredicate),
+            (d3(0b011), CompilerLoweringRole::SelectorTail),
+            (d3(0b100), CompilerLoweringRole::SelectorHead),
+            (d3(0b101), CompilerLoweringRole::AtomEquality),
+            (d3(0b110), CompilerLoweringRole::CondForm),
+            (d3(0b111), CompilerLoweringRole::PairConstruct),
+            (d4(0b0010), CompilerLoweringRole::LambdaForm),
+            (d4(0b0011), CompilerLoweringRole::DefineForm),
+        ];
+
+        for (identity, expected_role) in expected {
+            assert_eq!(
+                compiler_lowering_role_from_sens(identity).expect("SENS role law"),
+                Some(expected_role),
+                "unexpected role for {identity:?}"
+            );
+        }
+
+        assert_eq!(
+            compiler_lowering_role_from_sens(d3(0b000)).expect("D3 empty"),
+            None
+        );
+        assert_eq!(
+            compiler_lowering_role_from_sens(d4(0b0111)).expect("D4 non-bootstrap"),
+            None
         );
     }
 }
