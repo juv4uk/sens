@@ -15,11 +15,11 @@ use sens::{eval_program, lower_program, parse, CoreDomainIdentity, ErrorKind, Ex
 fn d5_label_recurses_locally() {
     let source = r#"
         ((мітка self
-           (функція (n)
+           (функція (xs)
              (за-умовою
-               ((нуль? n) (як-є done))
-               ((тотожне? n n) (self (відняти n 1))))))
-         12)
+               ((атом? xs) (як-є done))
+               ((тотожне? xs xs) (self (решта xs))))))
+         (як-є (a b c d)))
     "#;
     let mut session = Session::default();
     let result = eval_program(source, &mut session).expect("D5 LABEL recursion");
