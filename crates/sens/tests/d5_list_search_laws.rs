@@ -7,8 +7,8 @@
 //! the operation under test.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, parse, Bit5, CoreD5, DomainIdentity, Expr,
-    ExprKind, Session, Span,
+    eval_parsed_expressions, load_core_library, parse, Bit4, Bit5, CoreD4, CoreD5,
+    DomainIdentity, Expr, ExprKind, Session, Span,
 };
 
 fn run_d5_value(bits: u8, arguments_source: &str) -> sens::Value {
@@ -51,6 +51,37 @@ fn run_d5(bits: u8, arguments_source: &str) -> String {
     run_d5_value(bits, arguments_source).to_string()
 }
 
+fn run_d4(bits: u8, arguments_source: &str) -> String {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("active Core should load");
+
+    let wrapped = format!("(__d4_witness__ {arguments_source})");
+    let mut parsed = parse(&wrapped).expect("witness payload should parse");
+    assert_eq!(parsed.len(), 1);
+
+    let mut form = parsed.remove(0);
+    let ExprKind::List(items) = form.kind else {
+        panic!("witness wrapper must parse as one list");
+    };
+    let mut items = items.to_vec();
+    let identity = DomainIdentity::D4(CoreD4::from_word(
+        Bit4::new(bits).expect("D4 witness coordinate"),
+    ));
+    items[0] = Expr {
+        kind: ExprKind::DomainIdentity(identity),
+        span: Span {
+            start: 0,
+            end: "__d4_witness__".len(),
+        },
+    };
+    form.kind = ExprKind::List(items.into());
+
+    eval_parsed_expressions(&[form], &mut session)
+        .unwrap_or_else(|error| panic!("D4:{bits:04b} {arguments_source}: {error:?}"))
+        .value
+        .to_string()
+}
+
 #[test]
 fn compatibility_parser_does_not_mint_short_domain_words() {
     let parsed = parse("10000").expect("ordinary decimal source");
@@ -61,25 +92,25 @@ fn compatibility_parser_does_not_mint_short_domain_words() {
 }
 
 #[test]
-fn exact_d5_append_reverse_form_a_local_list_algebra() {
-    // CURRENT OD-005 identities:
-    // 10000 APPEND
-    // 10001 REVERSE
-    assert_eq!(run_d5(0b10000, "'(a b) '(c d)"), "(a b c d)");
-    assert_eq!(run_d5(0b10001, "'(a b c)"), "(c b a)");
+fn exact_d4_append_and_d5_reverse_form_a_local_list_algebra() {
+    // CURRENT Contract 11.5 identities:
+    // D4:1111  APPEND
+    // D5:10100 REVERSE
+    assert_eq!(run_d4(0b1111, "'(a b) '(c d)"), "(a b c d)");
+    assert_eq!(run_d5(0b10100, "'(a b c)"), "(c b a)");
 
     // Involution.
-    let once = run_d5(0b10001, "'(a b c d)");
-    let twice = run_d5(0b10001, &format!("'{once}"));
+    let once = run_d5(0b10100, "'(a b c d)");
+    let twice = run_d5(0b10100, &format!("'{once}"));
     assert_eq!(twice, "(a b c d)");
 
     // Anti-homomorphism:
     // reverse(append(x,y)) = append(reverse(y), reverse(x)).
-    let appended = run_d5(0b10000, "'(a b) '(c d)");
-    let left = run_d5(0b10001, &format!("'{appended}"));
+    let appended = run_d4(0b1111, "'(a b) '(c d)");
+    let left = run_d5(0b10100, &format!("'{appended}"));
 
-    let reverse_y = run_d5(0b10001, "'(c d)");
-    let reverse_x = run_d5(0b10001, "'(a b)");
+    let reverse_y = run_d5(0b10100, "'(c d)");
+    let reverse_x = run_d5(0b10100, "'(a b)");
     let right = run_d5(
         0b10000,
         &format!("'{reverse_y} '{reverse_x}"),
@@ -89,7 +120,7 @@ fn exact_d5_append_reverse_form_a_local_list_algebra() {
 
     // Nested payload is opaque list data, not flattened by either operation.
     assert_eq!(
-        run_d5(0b10001, "'((a b) c (d e))"),
+        run_d5(0b10100, "'((a b) c (d e))"),
         "((d e) c (a b))"
     );
 }
