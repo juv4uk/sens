@@ -115,7 +115,8 @@ def main() -> int:
     lines += [
         "",
         "Interpretation boundary:",
-        "- current SENS rows are Contract 11.6 / #3572 and use exact D3/D4/D5 call heads through #3589;",\n        "- D7 is current semantic residency but is non-callable here; D8 remains research;",
+        "- current SENS rows are Contract 11.6 / #3572 and use exact D3/D4/D5 call heads through #3589;",
+        "- D7 is current semantic residency but is non-callable here; D8 remains research;",
         "- external rows use the validated #3416 implementations and the same workload parameters/oracles;",
         "- all rows in this report come from the same GitHub Actions job and host;",
         "- Rust compile cost is outside the execution row; the SENS runner is likewise prebuilt;",
