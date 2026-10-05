@@ -1,8 +1,11 @@
 //! Test-only internal bootstrap decomposition for #3648.
 //!
+//! One ignored dispatch test is reused for every stage. The stage arrives via
+//! SENS_BOOTSTRAP_MEASURE_STAGE, so the Rust test-harness/filter overhead is
+//! identical across Cachegrind runs.
+//!
 //! This module deliberately lives behind cfg(test) so private bootstrap
-//! mechanisms stay private. It is measured by running the already-built
-//! lib-test executable directly under Cachegrind.
+//! mechanisms stay private.
 
 use super::*;
 use std::hint::black_box;
@@ -45,61 +48,51 @@ fn prepare_through_decode() -> (Session, Vec<Expr>) {
 
 #[test]
 #[ignore = "diagnostic benchmark for #3648"]
-fn bootstrap_measure_root() {
-    black_box(root_session());
-}
+fn bootstrap_measure_dispatch() {
+    let stage = std::env::var("SENS_BOOTSTRAP_MEASURE_STAGE")
+        .expect("SENS_BOOTSTRAP_MEASURE_STAGE must select a diagnostic stage");
 
-#[test]
-#[ignore = "diagnostic benchmark for #3648"]
-fn bootstrap_measure_profile_setup() {
-    let mut session = root_session();
-    prepare_profile(&mut session);
-    black_box(session);
-}
-
-#[test]
-#[ignore = "diagnostic benchmark for #3648"]
-fn bootstrap_measure_macro() {
-    let mut session = root_session();
-    prepare_profile(&mut session);
-    load_first_macro(&mut session);
-    black_box(session);
-}
-
-#[test]
-#[ignore = "diagnostic benchmark for #3648"]
-fn bootstrap_measure_decode() {
-    let (session, expressions) = prepare_through_decode();
-    black_box(session);
-    black_box(expressions);
-}
-
-#[test]
-#[ignore = "diagnostic benchmark for #3648"]
-fn bootstrap_measure_eval_decoded_no_peers() {
-    let (mut session, expressions) = prepare_through_decode();
-    let result =
-        eval_parsed_expressions(&expressions, &mut session).expect("decoded Core must evaluate");
-    black_box(result);
-    black_box(session);
-}
-
-#[test]
-#[ignore = "diagnostic benchmark for #3648"]
-fn bootstrap_measure_eval_decoded_with_peers() {
-    let (mut session, expressions) = prepare_through_decode();
-    let result =
-        eval_parsed_expressions(&expressions, &mut session).expect("decoded Core must evaluate");
-    bind_missing_stable_surface_peers(&session.environment);
-    black_box(result);
-    black_box(session);
-}
-
-#[test]
-#[ignore = "diagnostic benchmark for #3648"]
-fn bootstrap_measure_full_loader() {
-    let mut session = root_session();
-    let result = load_core_library(&mut session).expect("full Core loader must succeed");
-    black_box(result);
-    black_box(session);
+    match stage.as_str() {
+        "root" => {
+            black_box(root_session());
+        }
+        "profile" => {
+            let mut session = root_session();
+            prepare_profile(&mut session);
+            black_box(session);
+        }
+        "macro" => {
+            let mut session = root_session();
+            prepare_profile(&mut session);
+            load_first_macro(&mut session);
+            black_box(session);
+        }
+        "decode" => {
+            let (session, expressions) = prepare_through_decode();
+            black_box(session);
+            black_box(expressions);
+        }
+        "eval-no-peers" => {
+            let (mut session, expressions) = prepare_through_decode();
+            let result = eval_parsed_expressions(&expressions, &mut session)
+                .expect("decoded Core must evaluate");
+            black_box(result);
+            black_box(session);
+        }
+        "eval-with-peers" => {
+            let (mut session, expressions) = prepare_through_decode();
+            let result = eval_parsed_expressions(&expressions, &mut session)
+                .expect("decoded Core must evaluate");
+            bind_missing_stable_surface_peers(&session.environment);
+            black_box(result);
+            black_box(session);
+        }
+        "full-loader" => {
+            let mut session = root_session();
+            let result = load_core_library(&mut session).expect("full Core loader must succeed");
+            black_box(result);
+            black_box(session);
+        }
+        other => panic!("unknown SENS_BOOTSTRAP_MEASURE_STAGE={other}"),
+    }
 }
