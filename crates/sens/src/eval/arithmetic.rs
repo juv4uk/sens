@@ -2,7 +2,7 @@
 //! Obrobka tochnykh/netochnykh chysel dlia `+`, `-`, `*` ta `/`.
 //! Verarbeitung exakter/inexakter Zahlen für `+`, `-`, `*` und `/`.
 
-use crate::{BinaryNumber, Bit1, DomainIdentity, Environment, ErrorKind, Exactness, LanguageError, PredicateBit, Rational, Span, Value};
+use crate::{BinaryNumber, Environment, ErrorKind, Exactness, LanguageError, Rational, Span, Value};
 
 // `Rational` wraps a heap-allocated `BigRational` (arbitrary precision), so
 // it isn't `Copy` — neither is `Numeric` anymore. Both accessor methods
@@ -465,10 +465,7 @@ pub(super) fn comparison_on_values(
             "=" => pair[0] == pair[1],
             _ => unreachable!("known comparison operator"),
         });
-        let bit = Bit1::new(u8::from(holds)).expect("boolean result fits exact D1");
-        return Ok(Value::DomainIdentity(DomainIdentity::D1(
-            PredicateBit::from_word(bit),
-        )));
+        return Ok(Value::predicate_bit(holds));
     }
 
     if values.is_empty() {
@@ -487,19 +484,22 @@ pub(super) fn comparison_on_values(
         .iter()
         .any(|value| matches!(value, Numeric::Inexact(_)))
     {
-        // #216 is deliberately narrower than generic numeric comparison:
-        // this exact-Q layer has no absolute answer once any operand is
-        // inexact, so Canon 0 is returned rather than manufacturing FALSE.
-        return Ok(Value::Nil);
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "{operator} requires exact numeric inputs for a D1 predicate result; inexact input has no admitted comparison result"
+            ),
+            span,
+        ));
     }
 
     let holds = numerics
         .windows(2)
         .all(|pair| compare(operator, pair[0].to_exact(), pair[1].to_exact()));
 
-    // #216 exact-rational decisions stay mathematical data: 1/1 for YES,
-    // 0/1 for NO. `exact_value` writes those canonically as exact 1 and 0.
-    Ok(exact_value(Rational::integer(if holds { 1 } else { 0 })))
+    // #1716: comparison is a predicate role.  Exact legacy numerics and
+    // canonical BinaryNumber therefore converge on the same D1 result carrier.
+    Ok(Value::predicate_bit(holds))
 }
 
 #[cfg(test)]
