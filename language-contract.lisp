@@ -1,6 +1,6 @@
 ; language-contract.lisp — current machine-readable Level 1/2 contract.
 ;
-; Contract 11.4 — owner-ratified D1–D5 foundation; D6–D8 research.
+; Contract 11.5 — owner-ratified D1–D6 foundation; D7–D8 research.
 ; Owner paradigm: #2490. Implementation cutover: #2817 / #2822.
 ;
 ; Contract 11 preserves the observable PredicateBit / ATOM / EQ / COND law
@@ -19,11 +19,11 @@
 ; bounded compatibility / transport / backend projection during migration.
 ; It cannot mint or redefine canonical semantic identity.
 
-((major . #d11) (minor . 4)
+((major . #d11) (minor . 5)
  (status . current-domain-qualified-authority)
  (supersedes . "Contract 10.0 flat Function8 identity authority")
  (historical-snapshot . "docs/archive/historical/language-contract-10.0.lisp")
- (note . "Contract 11.4 owner-ratifies D1–D5 as one current foundation chain in #3331, restoring D3 #3202, D4 #3272 and D5 v2 #3305/#3330 after #3327. D6, D7 and D8 remain UNRATIFIED / RESEARCH. Exact carriers W1-W8 remain mechanical independently of semantic admission.")
+ (note . "Contract 11.5 owner-ratifies D1–D6 as the current foundation chain. D1–D5 retain their prior authorities; D6 is owner-ratified 64/64 in #3393 from the law-first S3/S4 research cut. D7 and D8 remain UNRATIFIED / RESEARCH. Exact carriers W1-W8 remain mechanical independently of semantic admission.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-domain-identity
@@ -60,12 +60,12 @@
        . "D5 has no universal fifth-bit meaning. Its resident pairs are governed locally: five SEMANTIC-GENERATOR families, five LOCAL-ALGEBRA families, two MULTI-DELTA-FAMILY pairs, and four COORDINATE-HISTORICAL pairs. Historical adjacency is not promoted into a semantic law without evidence.")
       (d5-runtime-separation
        . "D5 semantic residency and callable mechanism are separate facts. Every exact W5 coordinate has ratified D5 identity; invocation succeeds only where a resident mechanism is admitted and otherwise fails closed.")
-      (d6-research-status
-       . "Core.D6 is UNRATIFIED / RESEARCH under #3331/#3280. Bit6/W6 carrier existence grants neither occupancy nor callability. D6 must be derived from the exact ratified D1–D5 foundation; old D6 maps are donor/provenance only.")
+      (d6-ratified-status
+       . "Core.D6 is OWNER-RATIFIED 64/64 under #3393. Its exact resident map is normative in contracts/d6-ratification.lisp and knowledge/d6-ratified.json. The S4 gauge choice is now coordinate authority by owner decision, while remaining explicitly distinguished from pre-ratification derivation proofs. Ratified residency does not imply callable mechanism; missing mechanisms fail closed.")
       (d7-research-status
-       . "Core.D7 is UNRATIFIED / RESEARCH under #3331. Sound7 and historical D7 evidence remain research/provenance; exact seven-bit carrier existence does not grant current semantic occupancy or callability.")
+       . "Core.D7 is UNRATIFIED / RESEARCH under #3393. Sound7 and historical D7 evidence remain research/provenance; exact seven-bit carrier existence does not grant current semantic occupancy or callability.")
       (d8-research-status
-       . "Core.D8 is UNRATIFIED / RESEARCH under #3331. Exact W8 carrier identity is width-preserving but does not grant Core.D8 semantic occupancy or callability and never collapses into historical Sens8/Sid8/Function8.")
+       . "Core.D8 is UNRATIFIED / RESEARCH under #3393. Exact W8 carrier identity is width-preserving but does not grant Core.D8 semantic occupancy or callability and never collapses into historical Sens8/Sid8/Function8.")
       (cross-domain-non-collapse
        . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8 or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
       (atom-one-bit-core1-4
