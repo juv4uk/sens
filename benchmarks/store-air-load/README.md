@@ -14,7 +14,10 @@ STORE
 
 AIR
   carrier_payload_bits
-  total_wire_bits = carrier_payload_bits + framing_bits
+  framing_bits
+  integrity_bits
+  profile_overhead_bits
+  total_wire_bits = carrier_payload_bits + framing_bits + integrity_bits + profile_overhead_bits
   ideal_airtime_seconds = total_wire_bits / bitrate_bps
 
 LOAD
@@ -31,6 +34,11 @@ carrier_payload_bits = semantic_payload_bits
 бітами**. Якщо конкретний профіль справді переносить повні байти, він має
 явно використовувати `carrier_mode=byte-container`. Це transport/profile
 рішення, а не властивість семантики SENS.
+
+`integrity_bits` і `profile_overhead_bits` є окремими фізичними/profile
+осями. Вони не ховаються у `framing_bits`. За замовчуванням обидва дорівнюють
+нулю, тому чинні exact-bit fixtures зберігають ті самі результати. Це робить
+схему напряму сумісною з `juv4uk/radio-log#36/#38`.
 
 ## Semantic identity guard
 
