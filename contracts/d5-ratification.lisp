@@ -60,5 +60,6 @@
        (runtime-separation . "Ratified residency does not promise a callable mechanism. Missing resident mechanisms fail closed.")))
 
   (supersedes . (#3278-D5-revocation OD-005-pre-reset #3297-research-shadow))
-  (preserves . (#3278-D6-revocation #3278-D8-revocation))
+  (preserves . (#3278-D8-revocation))
+  (d6-successor . (#3393-owner-ratified))
 )
