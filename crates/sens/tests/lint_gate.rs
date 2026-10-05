@@ -29,12 +29,13 @@ fn linter_gate() {
         (def check-file-loop
           (lambda (path remaining all-violations)
             (cond
-              ((equal? remaining (quote ())) all-violations)
-              (t
+              ((атом? remaining) all-violations)
+              ((атом? (quote fallback))
                (let ((violations (lint-check (car remaining) thresholds)))
                  (cond
-                   ((equal? violations (quote ())) (check-file-loop path (cdr remaining) all-violations))
-                   (t (check-file-loop path (cdr remaining) (cons (list path (car remaining) violations) all-violations)))))))))
+                   ((атом? violations) (check-file-loop path (cdr remaining) all-violations))
+                   ((атом? (quote fallback))
+                    (check-file-loop path (cdr remaining) (cons (list path (car remaining) violations) all-violations)))))))))
 
         (def check-file
           (lambda (path)
@@ -43,8 +44,9 @@ fn linter_gate() {
         (def append-all
           (lambda (lists)
             (cond
-              ((equal? lists (quote ())) (quote ()))
-              (t (append (car lists) (append-all (cdr lists)))))))
+              ((атом? lists) (quote ()))
+              ((атом? (quote fallback))
+               (append (car lists) (append-all (cdr lists))))))))
 
         (append-all
           (list
