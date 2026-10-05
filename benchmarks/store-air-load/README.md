@@ -78,9 +78,56 @@ current_en_vs_d1d8_cpu
 
 ## LOAD
 
-Поля LOAD навмисно обов'язкові в schema, але поки мають `null`.
-#3513 володіє фазово ізольованими I-ref вимірами. Whole-process cold-start не
-можна записувати в `parse_i_refs` або `decode_i_refs` без фазового доказу.
+`load.py` заповнює LOAD-поля через Cachegrind, повторно використовуючи два
+чинні helpers, а не створюючи новий loader:
+
+```text
+current_en_vs_d1d8_cpu
+  baseline
+  ingest
+  lower
+  ready
+  full
+  repeated N=1,10,100
+
+startup_bench
+  session
+  bytes
+  decode
+  parse
+  macro
+  core
+```
+
+Похідні поля:
+
+```text
+canonical-packed.decode_i_refs = ingest - baseline
+text-surface.parse_i_refs      = ingest - baseline
+lower_i_refs                   = lower - ingest
+ready_i_refs                   = ready - baseline
+cold_total_i_refs              = full - baseline
+warm_incremental_i_refs        = OLS slope repeated(N=1,10,100)
+```
+
+Тому whole-process cold-start не видається за parser/decode cost. Сирі totals,
+repeat ladder і Core-bootstrap breakdown зберігаються в `provenance`.
+
+Приклад після базового `run.py`:
+
+```sh
+python3 benchmarks/store-air-load/load.py \
+  --in /tmp/store-air-load.jsonl \
+  --out /tmp/store-air-load.load.jsonl \
+  --helper target/release/examples/current_en_vs_d1d8_cpu \
+  --startup-helper target/release/examples/startup_bench \
+  --fasl lib/core.lisp.fasl \
+  --only d3-quote-empty \
+  --reps 1
+```
+
+#3513 лишається власником оптимізації Core bootstrap; цей каталог лише приєднує
+його фазові виміри до спільного STORE → AIR → LOAD evidence-контракту.
 
 ## Поточні fixtures
 
