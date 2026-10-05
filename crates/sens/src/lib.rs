@@ -21,6 +21,7 @@ mod error;
 pub(crate) mod eval;
 mod language_items;
 mod parser;
+mod mixed_source;
 mod presentation;
 mod semantic_registry;
 mod source_words;
@@ -163,6 +164,7 @@ pub use eval::{
 };
 pub use eval::lower::lower_program;
 pub use parser::parse;
+pub use mixed_source::parse_mixed_exact_domain;
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation,
     PresentationLanguage,
