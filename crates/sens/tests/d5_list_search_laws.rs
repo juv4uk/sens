@@ -1,4 +1,4 @@
-//! #3052/#3053/#3070 — exact Core.D5 list/search law witnesses.
+//! Exact Core.D5 list/search witnesses for the current #3305 map (preserved by Contract 11.5).
 //!
 //! The compatibility parser deliberately treats non-8-bit numeric tokens as
 //! ordinary decimal numbers. Therefore this witness constructs the exact D5
@@ -61,36 +61,23 @@ fn compatibility_parser_does_not_mint_short_domain_words() {
 }
 
 #[test]
-fn exact_d5_append_reverse_form_a_local_list_algebra() {
-    // CURRENT OD-005 identities:
-    // 10000 APPEND
-    // 10001 REVERSE
-    assert_eq!(run_d5(0b10000, "'(a b) '(c d)"), "(a b c d)");
-    assert_eq!(run_d5(0b10001, "'(a b c)"), "(c b a)");
+fn exact_d5_reverse_uses_current_coordinate_and_selector_slots_do_not_alias_old_map() {
+    // Current #3305 D5 map, preserved by Contract 11.5:
+    // 10100 REVERSE
+    assert_eq!(run_d5(0b10100, "'(a b c)"), "(c b a)");
 
-    // Involution.
-    let once = run_d5(0b10001, "'(a b c d)");
-    let twice = run_d5(0b10001, &format!("'{once}"));
-    assert_eq!(twice, "(a b c d)");
-
-    // Anti-homomorphism:
-    // reverse(append(x,y)) = append(reverse(y), reverse(x)).
-    let appended = run_d5(0b10000, "'(a b) '(c d)");
-    let left = run_d5(0b10001, &format!("'{appended}"));
-
-    let reverse_y = run_d5(0b10001, "'(c d)");
-    let reverse_x = run_d5(0b10001, "'(a b)");
-    let right = run_d5(
-        0b10000,
-        &format!("'{reverse_y} '{reverse_x}"),
-    );
-    assert_eq!(left, right);
-    assert_eq!(left, "(d c b a)");
-
-    // Nested payload is opaque list data, not flattened by either operation.
+    // 10000 is CAAAR, never the pre-v2 APPEND coordinate.
     assert_eq!(
-        run_d5(0b10001, "'((a b) c (d e))"),
-        "((d e) c (a b))"
+        run_d5(0b10000, "'(((a b) c) d)"),
+        "a",
+        "D5:10000 must execute CAAAR selector law, never stale APPEND"
+    );
+
+    // 10001 is CAADR, never the pre-v2 REVERSE coordinate.
+    assert_eq!(
+        run_d5(0b10001, "'(z ((a b) c))"),
+        "(a b)",
+        "D5:10001 must execute CAADR selector law, never stale REVERSE"
     );
 }
 
