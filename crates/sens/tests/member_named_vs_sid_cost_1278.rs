@@ -126,8 +126,11 @@ fn repeated_lookups_through_a_real_shaped_member_named_vs_sid_cost() {
             (def run-named
               (lambda (n)
                 (cond
-                  ((= n 0) 1 t)
-                  ((= n 0) 0 (cond ((member-named? (quote j) {list}) (run-named (- n 1))) (t (run-named (- n 1))))))))
+                  ((= n 0) 1)
+                  ((= n n)
+                   (cond
+                     ((member-named? (quote j) {list}) (run-named (- n 1)))
+                     ((= n n) (run-named (- n 1))))))))
             (run-named {ITERATIONS})
             "#
         ),
@@ -143,8 +146,11 @@ fn repeated_lookups_through_a_real_shaped_member_named_vs_sid_cost() {
             (def run-sid
               (lambda (n)
                 (cond
-                  ((= n 0) 1 t)
-                  ((= n 0) 0 (cond ((member-sid? (quote j) {list}) (run-sid (- n 1))) (t (run-sid (- n 1))))))))
+                  ((= n 0) 1)
+                  ((= n n)
+                   (cond
+                     ((member-sid? (quote j) {list}) (run-sid (- n 1)))
+                     ((= n n) (run-sid (- n 1))))))))
             (run-sid {ITERATIONS})
             "#
         ),
