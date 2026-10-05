@@ -26,18 +26,21 @@ on:
       - ".github/workflows/kernel-abi-transport-boundary.yml"
   workflow_dispatch:
 
+concurrency:
+  group: kernel-abi-transport-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
 jobs:
   boundary:
     name: Kernel ABI remains transport-only
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, guix]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
       - name: Build semantic oracle
         run: cargo build -p sens-cli --bin sens
       - name: Execute Lisp-owned kernel ABI policy
