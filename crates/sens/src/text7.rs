@@ -1,5 +1,7 @@
 use std::{fmt, rc::Rc};
 
+use crate::{BinarySourceWord, Bit7, BitPacker, PackedBitstream};
+
 /// Canonical SENS text identity: an exact sequence of UPC-7 cells.
 ///
 /// Each cell is logically seven bits wide (`0000000..1111111`). The host
@@ -120,6 +122,79 @@ impl Text7 {
     pub fn is_empty(&self) -> bool {
         self.cells.is_empty()
     }
+
+    /// Pack this exact Text7 cell sequence as one dense homogeneous W7 payload.
+    ///
+    /// This is mechanism only: it preserves seven payload bits per cell with
+    /// zero interior byte padding. Framing and semantic admission remain
+    /// separate concerns.
+    pub fn to_packed_w7(&self) -> PackedBitstream {
+        let mut packer = BitPacker::with_capacity_bits(self.cells.len() * 7);
+        for &cell in self.cells.iter() {
+            packer.push(Bit7::new(cell).expect("Text7 already enforces exact seven-bit cells"));
+        }
+        packer.finish()
+    }
+
+    /// Reconstruct Text7 from a homogeneous dense W7 payload.
+    ///
+    /// A payload whose exact bit length is not divisible by seven is rejected
+    /// rather than padded, truncated, or guessed.
+    pub fn from_packed_w7(packed: &PackedBitstream) -> Result<Self, Text7W7Error> {
+        if !packed.bit_len().is_multiple_of(7) {
+            return Err(Text7W7Error::UnalignedBitLen {
+                bit_len: packed.bit_len(),
+            });
+        }
+
+        let count = packed.bit_len() / 7;
+        let mut cells = Vec::with_capacity(count);
+        for index in 0..count {
+            let word = packed
+                .read::<7>(index * 7)
+                .expect("validated W7 offset remains inside payload");
+            cells.push(word.packed_bits());
+        }
+        Self::from_cells(cells).map_err(|_| {
+            unreachable!("Bit7 read cannot produce a value wider than seven bits")
+        })
+    }
+
+    /// Project every Text7 cell to an exact W7 source word.
+    ///
+    /// Width is explicit in the enum variant; this does not turn arbitrary W7
+    /// source words into SoundCell semantics.
+    pub fn to_source_words(&self) -> Vec<BinarySourceWord> {
+        self.cells
+            .iter()
+            .map(|&cell| {
+                BinarySourceWord::W7(
+                    Bit7::new(cell).expect("Text7 already enforces exact seven-bit cells"),
+                )
+            })
+            .collect()
+    }
+
+    /// Reconstruct Text7 only from an all-W7 source-word sequence.
+    ///
+    /// Any other exact-width word is a named failure. No width coercion occurs.
+    pub fn from_source_words(words: &[BinarySourceWord]) -> Result<Self, Text7WordError> {
+        let mut cells = Vec::with_capacity(words.len());
+        for (index, &word) in words.iter().enumerate() {
+            match word {
+                BinarySourceWord::W7(word) => cells.push(word.packed_bits()),
+                other => {
+                    return Err(Text7WordError::InvalidWordWidth {
+                        index,
+                        width: other.width(),
+                    });
+                }
+            }
+        }
+        Self::from_cells(cells).map_err(|_| {
+            unreachable!("Bit7 source word cannot contain a value wider than seven bits")
+        })
+    }
 }
 
 impl TryFrom<Vec<u8>> for Text7 {
@@ -185,6 +260,44 @@ impl fmt::Display for Text7CellError {
 }
 
 impl std::error::Error for Text7CellError {}
+
+/// Failure when decoding a homogeneous packed W7 payload as Text7.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Text7W7Error {
+    UnalignedBitLen { bit_len: usize },
+}
+
+impl fmt::Display for Text7W7Error {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnalignedBitLen { bit_len } => write!(
+                formatter,
+                "packed W7 payload length {bit_len} is not divisible by 7"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for Text7W7Error {}
+
+/// Failure when reconstructing Text7 from exact-width source words.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Text7WordError {
+    InvalidWordWidth { index: usize, width: usize },
+}
+
+impl fmt::Display for Text7WordError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InvalidWordWidth { index, width } => write!(
+                formatter,
+                "source word at index {index} has width {width}; Text7 requires exact W7"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for Text7WordError {}
 
 impl fmt::Debug for Text7 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
