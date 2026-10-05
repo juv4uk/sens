@@ -54,8 +54,31 @@ No result from this D3 smoke slice may be generalized to whole-language performa
 From repository root:
 
 ```sh
+# correctness/plumbing smoke (no performance winner)
 python3 benchmarks/cross-language/reality-matrix/rust/run.py \
-  --out-dir /tmp/sens-rust-reality
+  --out-dir /tmp/sens-rust-reality-smoke \
+  --evidence-mode smoke
+
+# publishable same-machine performance run
+python3 benchmarks/cross-language/reality-matrix/rust/run.py \
+  --out-dir /tmp/sens-rust-reality \
+  --evidence-mode performance \
+  --load-context idle \
+  --outer-reps 10
 ```
 
 Use the same machine/load context for every ratio you publish.
+
+## Fail-closed performance rule
+
+The runner defaults to `--evidence-mode smoke`. In smoke mode it still records raw
+timings/RSS so plumbing can be inspected, but time/RSS verdicts are forced to
+`inconclusive`.
+
+A performance verdict requires:
+
+- `--evidence-mode performance`;
+- at least 10 outer repetitions;
+- explicit `--load-context idle|high`.
+
+This prevents noisy CI smoke observations from becoming language-performance claims.
