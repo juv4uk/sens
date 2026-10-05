@@ -136,3 +136,73 @@ The first implementation slice is schema/digest plumbing only. Oracle-emitted
 real cases and the bounded generator land in subsequent slices.
 
 Principle: **one case, one oracle digest, many machines.**
+
+## First bounded structural slice
+
+Lane C starts with a deliberately small finite grammar instead of claiming that
+all D1-D3 programs have been exhausted.
+
+Profile: `d2-d3-structural-v1`.
+
+Data values are exactly:
+
+```text
+()
+(())
+(() ())
+```
+
+Generated programs are exactly:
+
+```text
+QUOTE(data)
+CAR(QUOTE(nonempty-data))
+CDR(QUOTE(nonempty-data))
+CONS(QUOTE(data), QUOTE(data))
+```
+
+This produces 16 raw candidates and 16 deterministic unique cases. Every case
+must pass both:
+
+1. L0 oracle execution through the current exact-domain helper;
+2. production source-token `BitPacker -> PackedBitstream -> unpack` equality.
+
+The committed bound carried by every row is:
+
+```json
+{
+  "grammar_profile": "d2-d3-structural-v1",
+  "domain_set": [2, 3],
+  "max_ast_depth": 4,
+  "max_nodes": 12,
+  "argument_value_bound": 2
+}
+```
+
+The generator mechanically rejects any case that exceeds the declared depth or
+node bound. `argument_value_bound=2` is the maximum proper-list length in this
+profile.
+
+The exact claim is only:
+
+> exhaustive within grammar profile `d2-d3-structural-v1` and its declared D2/D3 bound.
+
+The grammar profile is carried in every `exhaustive_bound`, so a consumer cannot silently reinterpret the 16 rows as all D2/D3 programs under the same numeric depth/node limits.
+
+ATOM/EQ/COND are intentionally excluded from this first artifact until an
+independent exact-D1 predicate oracle witness is in the same conformance lane.
+D4-D7 and malformed/error cases are also outside this first finite slice.
+
+Run after the schema + first-oracle stack is present:
+
+```sh
+cargo build --release -p sens \
+  --example current_en_vs_d1d8_cpu \
+  --example execution_ladder_pack_roundtrip
+
+python3 benchmarks/execution-ladder-conformance/generate_bounded.py \
+  --oracle-helper target/release/examples/current_en_vs_d1d8_cpu \
+  --pack-helper target/release/examples/execution_ladder_pack_roundtrip \
+  --out /tmp/bounded.jsonl \
+  --summary /tmp/bounded-summary.json
+```
