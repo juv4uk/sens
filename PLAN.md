@@ -307,7 +307,7 @@ Programmatic embedding enforcement уже confirmed. Залишилися окр
 
 До рішення trusted local CLI залишається backward-compatible unrestricted.
 
-## C5. Swarm two-plane migration
+## C5. Swarm two-plane migration — COMPLETE
 
 Нормативний напрям:
 
@@ -324,12 +324,19 @@ Programmatic embedding enforcement уже confirmed. Залишилися окр
 - ✅ replacement mapping + two-plane migration regression;
 - ✅ `AGENTS.md` більше не навчає legacy `:9999` coordination як first-class path.
 
-Залишок перед фізичним видаленням legacy coordination code:
+Завершено:
 
-1. довести відсутність живих callers legacy ops (`no-live-callers`);
-2. лише тоді видалити broker/claims/presence/task coordination з `:9999`;
-3. regression має довести, що `eval` / `parse` / `diagnose` semantic oracle не
-   змінилися.
+1. ✅ `no-live-callers` підтверджено ecosystem-scoped audit;
+2. ✅ legacy broker/claims/presence/task coordination фізично видалено з `:9999`
+   (recorded removal commit `32a087f`);
+3. ✅ retired coordination ops мають runtime rejection witness;
+4. ✅ `eval` / `parse` / `diagnose` semantic oracle захищені окремим preservation regression;
+5. ✅ machine-readable evidence живе в
+   `knowledge/swarm-no-live-callers-audit.lisp` і
+   `knowledge/swarm-legacy-deprecation.lisp`.
+
+C5 не є активним feature-front. Повертатися сюди лише при regression або появі
+нового executable caller старої coordination surface.
 
 ---
 
@@ -357,12 +364,14 @@ Programmatic embedding enforcement уже confirmed. Залишилися окр
 # Поточний порядок робіт
 
 ```text
-1. B4 external-provider adapter лише разом із конкретним translator і corpus proof
-2. swarm — no-live-callers proof, потім physical legacy removal
-3. CLI host-scope surface лише після explicit operational decision
-4. later-binding / deeper self-hosting proof, якщо Advice Taker його потребує
-5. CML/FPGA subset за реальною цінністю для reasoning
-6. B5 performance — повертатися лише при новому measured workload/bottleneck
+1. P0 semantic correctness + one-way exact-domain migration:
+   #220/#1717 truth/control cleanup, #2817/#2953 removal of legacy universal identity
+2. C4 user-facing host capability scope — explicit operational decision, then implementation if ratified
+3. C3 shrink Rust / grow Lisp only where duplicate semantic authority is measurably removed with parity evidence
+4. B4 external-provider adapter only when a concrete translator exists and passes the versioned corpus
+5. D8 clean-room generative research stays isolated and UNRATIFIED; no admission/callability from width alone
+6. CML/FPGA vertical: core.lisp → unify.lisp → reason.lisp on an independent backend when it advances Advice Taker
+7. B5 performance — return only for a new measured workload/bottleneck
 ```
 
 ## Стоп-умови
