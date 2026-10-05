@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 stable=json.loads((ROOT/"knowledge/d7-v2-stable-residents.json").read_text(encoding="utf-8"))
 ledger=json.loads((ROOT/"knowledge/d7-v2-evidence-ledger.json").read_text(encoding="utf-8"))
+geometry=json.loads((ROOT/"knowledge/d7-v2-geometry-ledger.json").read_text(encoding="utf-8"))
 
 assert stable["status"]=="research-only"
 assert stable["foundation"].startswith("#3393")
@@ -100,6 +101,22 @@ post=ledger["migration_candidate"]["post_migration_candidate"]
 assert post["occupancy"]==124
 assert post["free_coordinates"]==["0101111","0110100","1010001","1010011"]
 assert [r["coordinate"] for r in post["additional_identity_retirement"]]==["1010001","1010011"]
+
+assert geometry["status"]=="research-law-first-not-ratified"
+assert geometry["accounting"]["baseline_rows"]==128
+families={f["id"]:f for f in geometry["families"]}
+assert families["varga"]["rows"]==25
+assert families["varga"]["gauge_lower_bound"]==45158400
+assert families["vowel-core"]["rows"]==28
+assert families["vowel-core"]["residue_rows"]==4
+assert families["vowel-core"]["axes"]["length_xor"]=="0000001"
+assert families["vowel-core"]["axes"]["nasal_xor"]=="0000010"
+assert families["vowel-core"]["absolute_quality_gauge_lower_bound"]==161280
+assert families["non-varga"]["rows"]==18
+assert families["sign-operator"]["rows"]==32
+assert geometry["shiva_convention_geometry"]["text_digits"]["rows"]==10
+assert geometry["candidate_D"]["candidate_occupancy"]==124
+assert geometry["candidate_D"]["candidate_free"]==["0101111","0110100","1010001","1010011"]
 
 print("D7-V2-CONSOLIDATION: PASS")
 print("baseline=107+21 overlay=19 migration-targets=2")
