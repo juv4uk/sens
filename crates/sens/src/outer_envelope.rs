@@ -335,9 +335,10 @@ impl<'a> BitCursor<'a> {
 
         let mut encoded = 1usize;
         for _ in 0..zeros {
+            let bit = usize::from(self.read_bit()?);
             encoded = encoded
                 .checked_mul(2)
-                .and_then(|value| value.checked_add(usize::from(self.read_bit().ok()?)))
+                .and_then(|value| value.checked_add(bit))
                 .ok_or(OuterEnvelopeError::LengthOverflow { bit: start })?;
         }
 
@@ -439,10 +440,10 @@ mod tests {
 
     #[test]
     fn exact_meaningful_length_rejects_nonzero_physical_tail() {
-        assert_eq!(
+        assert!(matches!(
             OuterEnvelope::from_parts(vec![0b1010_0001], 4),
             Err(OuterEnvelopeError::NonCanonicalContainer)
-        );
+        ));
     }
 
     #[test]
@@ -458,7 +459,7 @@ mod tests {
 
         // N prefix + gamma0(2)=011 + payload 01: leading zero is non-canonical.
         assert!(matches!(
-            raw("11110" "011" "01").decode(),
+            raw("1111001101").decode(),
             Err(OuterEnvelopeError::InvalidNumber { .. })
         ));
     }
