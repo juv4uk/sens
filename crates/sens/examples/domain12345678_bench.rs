@@ -1,8 +1,8 @@
 //! #3001 W1-W8 exact-width carrier benchmark.
 //!
 //! Measures the source-word -> width-qualified DomainIdentity carrier path only.
-//! Contract 11.5: D1-D6 are the current semantic foundation; D7-D8 are
-//! research carriers. Carrier measurement is wider than semantic authority.
+//! Contract 11.6: D1-D7 are the current semantic foundation; D8 remains
+//! research. Carrier measurement is wider than semantic callability.
 //! No registry, surface spelling, legacy Sens8/Function8, or benchmark-local
 //! semantic table participates.
 
