@@ -160,3 +160,30 @@
          (compiler-shape-bits (decompose identity))
          law))
       ((compiler-true identity) ()))))
+
+
+; #3810 — production request cutover.
+; Role meaning comes only from compiler-role-from-l1-l5 above.  The host may
+; transport LAW/proof/provenance values, but it does not select the role.
+
+(визначити compiler-request-from-role
+  (функція (seed identity role proof-ref provenance)
+    (за-умовою
+      ((тотожне? role ()) ())
+      ((compiler-true seed)
+       (сполучити
+         identity
+         (сполучити
+           role
+           (сполучити
+             proof-ref
+             (сполучити provenance ()))))))))
+
+(визначити compiler-request-from-l1-l5
+  (функція (decompose identity law proof-ref provenance)
+    (compiler-request-from-role
+      identity
+      identity
+      (compiler-role-from-l1-l5 decompose identity law)
+      proof-ref
+      provenance)))

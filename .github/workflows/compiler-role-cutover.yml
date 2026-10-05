@@ -1,0 +1,42 @@
+name: Compiler role authority cutover
+
+on:
+  pull_request:
+    paths:
+      - "lib/compiler-nucleus.lisp"
+      - "knowledge/bija3-l1-l5-structure-projection.json"
+      - "crates/sens/src/compiler_bootstrap.rs"
+      - "crates/sens/src/compiler_role.rs"
+      - "crates/sens/tests/compiler_role_cutover.rs"
+      - "crates/sens/tests/compiler_l1_l5_role.rs"
+      - "crates/sens/tests/compiler_domain_shape.rs"
+      - "crates/sens/tests/compiler_nucleus_sens.rs"
+      - ".github/workflows/compiler-role-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/compiler-nucleus.lisp"
+      - "knowledge/bija3-l1-l5-structure-projection.json"
+      - "crates/sens/src/compiler_bootstrap.rs"
+      - "crates/sens/src/compiler_role.rs"
+      - "crates/sens/tests/compiler_role_cutover.rs"
+      - "crates/sens/tests/compiler_l1_l5_role.rs"
+
+jobs:
+  cutover:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Production path must not import Rust role oracle
+        run: |
+          if grep -nE '^[[:space:]]*compiler_execution_role[,;(]' crates/sens/tests/compiler_role_cutover.rs; then
+            echo "production cutover still depends on Rust role oracle" >&2
+            exit 1
+          fi
+      - run: >-
+          cargo test -p sens
+          --test compiler_role_cutover
+          --test compiler_l1_l5_role
+          --test compiler_domain_shape
+          --test compiler_nucleus_sens
+          -- --nocapture
