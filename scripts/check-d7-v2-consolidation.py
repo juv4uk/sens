@@ -163,6 +163,15 @@ assert candidate["moved_rows"]==[
     {"coordinate":"0101110","sound":"l","change":"moved from 0101111"},
 ]
 
+assert candidate["class_accounting"]["00"]["occupied"]==32
+assert candidate["class_accounting"]["00"]["free"]==0
+assert candidate["class_accounting"]["01"]["occupied"]==30
+assert candidate["class_accounting"]["01"]["free"]==2
+assert candidate["class_accounting"]["10"]["occupied"]==30
+assert candidate["class_accounting"]["10"]["free"]==2
+assert candidate["class_accounting"]["11"]["occupied"]==32
+assert candidate["class_accounting"]["11"]["free"]==0
+
 print("D7-V2-CONSOLIDATION: PASS")
 print("baseline=107+21 overlay=19 migration-targets=2")
 print("phonology=75 convention=32 pinned=21 authority=RESEARCH")
