@@ -289,17 +289,39 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
-fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum DomainPrimitiveKind {
+    AtomPredicate,
+    AtomEquality,
+    PairConstruct,
+}
+
+/// Backend-neutral classification of current exact-domain value primitives.
+///
+/// This is the single D3 value-primitive classification shared by evaluator
+/// mechanism routing and compiler-role projection. It is not a backend opcode
+/// table and does not project onto historical Sens8/Function8 identity.
+pub(crate) fn domain_primitive_kind(
+    identity: CoreDomainIdentity,
+) -> Option<DomainPrimitiveKind> {
     let CoreDomainIdentity::D3(word) = identity else {
         return None;
     };
     match word.word().packed_bits() {
-        0b010 => Some(prim_00000010), // ATOM
-        0b101 => Some(prim_00000011), // EQ
-        0b111 => Some(prim_00000100), // CONS
+        0b010 => Some(DomainPrimitiveKind::AtomPredicate),
+        0b101 => Some(DomainPrimitiveKind::AtomEquality),
+        0b111 => Some(DomainPrimitiveKind::PairConstruct),
         // CAR/CDR and their proved D4 descendants are executed by selector_law.
         0b100 | 0b011 => None,
         _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
+    }
+}
+
+fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
+    match domain_primitive_kind(identity)? {
+        DomainPrimitiveKind::AtomPredicate => Some(prim_00000010),
+        DomainPrimitiveKind::AtomEquality => Some(prim_00000011),
+        DomainPrimitiveKind::PairConstruct => Some(prim_00000100),
     }
 }
 
