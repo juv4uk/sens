@@ -34,12 +34,12 @@ D2  exact two-bit structural syntax — RATIFIED
 D3  exact three-bit Core foundation — RATIFIED
 D4  exact four-bit bootstrap — RATIFIED
 D5  exact five-bit full compact domain — RATIFIED #3305
-D6  exact six-bit research carrier — UNRATIFIED
-D7  exact seven-bit sound/text provenance domain — RATIFIED
+D6  exact six-bit full compact domain — RATIFIED #3393
+D7  exact seven-bit sound/text provenance carrier — UNRATIFIED / RESEARCH
 D8  exact eight-bit research carrier — UNRATIFIED
 ```
 
-General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6/D8 remain revoked/unratified under #3278.
+General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7/D8 remain unratified research carriers.
 
 При цьому:
 
@@ -250,11 +250,18 @@ D5 semantic residency не дорівнює готовності всіх runtim
 
 ---
 
-## D6 — exact six-bit research space
+## D6 — full compact six-bit domain
 
-D6 наразі **UNRATIFIED / RESEARCH** (#3278, clean-room #3280).
+D6 **OWNER-RATIFIED #3393**, 64/64 occupied, 64 distinct residents.
 
-Стара 64/64 карта, selector closure та D5-parent relations — donor evidence, не current authority. Новий D6 має заново довести resident set, parent relations і local laws. Механічний Bit6/W6 carrier не є semantic admission.
+Нормативні машинні джерела: `contracts/d6-ratification.lisp`, `knowledge/d6-ratified.json`, Contract 11.5.
+
+Coordinate basis зберігає походження доказу:
+- 16 selector-generator coordinates — proved;
+- 16 law-anchored coordinates — owner-ratified;
+- 32 S4 gauge coordinates — owner-ratified coordinate choice after the S3 theorem fixed the common LSB fibre axis.
+
+Ратифікація S4 gauge робить ці координати нормативними identity, але не переписує історію доказу: gauge choice лишається відмінним від семантичного derivation theorem. Стара історична D6 64/64 карта лишається donor/provenance only. D6 residency не гарантує runtime callability; відсутній mechanism fail-closed.
 
 ---
 
@@ -418,7 +425,7 @@ Compatibility adapters дозволені лише як явно обмежен�
 
 Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
 
-Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D5 і D7; D5 re-ratified #3305 після reset #3278, а D6/D8 лишаються research.
+Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D6; D5 ratified #3305, D6 ratified #3393, а D7/D8 лишаються research.
 
 Profile може вибирати mechanism, але не може:
 
