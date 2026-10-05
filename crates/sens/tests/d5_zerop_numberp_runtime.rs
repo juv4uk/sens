@@ -1,10 +1,11 @@
 //! #3381 — exact D5 ZEROP / NUMBERP runtime admission.
 
 use sens::{
-    eval_parsed_expressions, parse, Bit5, CoreD5, DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_parsed_expressions, parse, Bit4, Bit5, CoreD4, CoreD5, DomainIdentity, Expr, ExprKind,
+    Session, Span,
 };
 
-fn run_exact(bits: u8, args_source: &str) -> Result<String, String> {
+fn run_identity(identity: DomainIdentity, args_source: &str) -> Result<String, String> {
     let mut session = Session::default();
     let wrapped = format!("(__d5_pred__ {args_source})");
     let mut parsed = parse(&wrapped).map_err(|e| format!("parse: {e:?}"))?;
@@ -14,9 +15,7 @@ fn run_exact(bits: u8, args_source: &str) -> Result<String, String> {
     };
     let mut items = items.to_vec();
     items[0] = Expr {
-        kind: ExprKind::DomainIdentity(DomainIdentity::D5(
-            CoreD5::from_word(Bit5::new(bits).unwrap()),
-        )),
+        kind: ExprKind::DomainIdentity(identity),
         span: Span { start: 0, end: "__d5_pred__".len() },
     };
     form.kind = ExprKind::List(items.into());
@@ -24,6 +23,13 @@ fn run_exact(bits: u8, args_source: &str) -> Result<String, String> {
     eval_parsed_expressions(&[form], &mut session)
         .map(|o| o.value.to_string())
         .map_err(|e| format!("{:?}: {}", e.kind, e.message))
+}
+
+fn run_exact(bits: u8, args_source: &str) -> Result<String, String> {
+    run_identity(
+        DomainIdentity::D5(CoreD5::from_word(Bit5::new(bits).unwrap())),
+        args_source,
+    )
 }
 
 #[test]
@@ -44,4 +50,21 @@ fn exact_d5_zerop_and_numberp_return_only_d1() {
 
     let error = run_exact(0b01000, "'x").expect_err("ZEROP must reject nonnumeric carrier");
     assert!(error.contains("Type"), "{error}");
+}
+
+
+#[test]
+fn same_packed_payload_in_d4_does_not_inherit_d5_predicate_meaning() {
+    let d4_1000 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1000).unwrap()));
+    let d4_1001 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1001).unwrap()));
+
+    let zerop_collision =
+        run_identity(d4_1000, "0").expect_err("D4:1000 must remain its D4 selector law");
+    let numberp_collision =
+        run_identity(d4_1001, "42").expect_err("D4:1001 must remain its D4 selector law");
+
+    assert!(
+        !zerop_collision.is_empty() && !numberp_collision.is_empty(),
+        "cross-domain collision controls must fail by D4 law, never execute D5 predicates"
+    );
 }
