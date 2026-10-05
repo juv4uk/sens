@@ -118,6 +118,23 @@ assert geometry["shiva_convention_geometry"]["text_digits"]["rows"]==10
 assert geometry["candidate_D"]["candidate_occupancy"]==124
 assert geometry["candidate_D"]["candidate_free"]==["0101111","0110100","1010001","1010011"]
 
+d14=ledger["d14_pratyahara_boundary"]
+assert d14["results"]["unique_sound_world"]==42
+assert d14["results"]["canonical_pratyahara_items"]==43
+assert d14["results"]["minimal_tucker_obstructions"]==84
+assert d14["results"]["exact_contiguous_ceiling"]=="39/43"
+assert d14["results"]["dual_h_contiguous"]=="43/43"
+assert d14["d7_coordinate_effect"]=="NONE"
+
+d14g=geometry["d14_pratyahara_boundary"]
+assert d14g["verified"]["tucker_obstructions"]==84
+assert d14g["verified"]["minimum_transversal_size"]==4
+assert d14g["verified"]["ceiling_42_unique_sounds"]=="39/43"
+assert d14g["verified"]["dual_h_43_node_path"]=="43/43"
+assert d14g["d7_coordinate_status"]=="NO-EFFECT"
+assert d14g["semantic_split"]["D7"].startswith("phonetic/text geometry")
+assert d14g["semantic_split"]["D14"].startswith("grammar graph/path")
+
 print("D7-V2-CONSOLIDATION: PASS")
 print("baseline=107+21 overlay=19 migration-targets=2")
 print("phonology=75 convention=32 pinned=21 authority=RESEARCH")
