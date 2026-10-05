@@ -2,7 +2,8 @@
 """Current SENS exact-domain lane for the shared cross-language corpus.
 
 The five workloads and parameters intentionally match external_controls.py.
-Only exact current D3/D4/D5 call heads are used. Contract 11.6 also makes D7\ncurrent semantic residency, but D7 remains non-callable in this lane. User-defined function names
+Only exact current D3/D4/D5 call heads are used. Contract 11.6 also makes D7
+current semantic residency, but D7 remains non-callable in this lane. User-defined function names
 remain lexical symbols. No Sens8/Sid8/Function8 spelling participates.
 
 COND clause test/branch expressions are recursively lifted by the #3589 bridge.\n\nThis first lane measures a prebuilt SENS benchmark runner. It is designed to be
@@ -251,7 +252,7 @@ def main() -> int:
     env = {
         "date_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "git_sha": git_fact("rev-parse", "HEAD"),
-        "semantic_generation": "contract-11-5-exact-d1-d6",
+        "semantic_generation": "contract-11-6-exact-d1-d7",
         "authority": "#3572",
         "mixed_source": "#3589",
         "benchmark_issue": "#3417",
@@ -270,7 +271,11 @@ def main() -> int:
             "D5_PLUS": PLUS,
             "D5_DIFFERENCE": DIFFERENCE,
         },
-        "contract": "11.6",\n        "semantic_current": ["D1","D2","D3","D4","D5","D6","D7"],\n        "semantic_research": ["D8"],\n        "d7_callable": False,\n        "legacy_function8_used": False,
+        "contract": "11.6",
+        "semantic_current": ["D1", "D2", "D3", "D4", "D5", "D6", "D7"],
+        "semantic_research": ["D8"],
+        "d7_callable": False,
+        "legacy_function8_used": False,
     }
     (out / "environment.json").write_text(
         json.dumps(env, indent=2, ensure_ascii=False) + "\n",
