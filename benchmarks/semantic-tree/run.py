@@ -9,10 +9,13 @@ For the current Contract 11.5 D6 experiment use --current-d6. That profile is
 fixed to the 16 exact D6 selector descendants (two D3 roots × three suffix bits)
 and treats the flat table as a benchmark-only control, never semantic authority.
 
-Execution counters are reported as:
-    median(full counter) - median(prepare counter)
+Additive work counters (instruction references and branch count) are reported as:
+    median(full counter - prepare counter)
 
-This keeps one-time table/cache construction visible instead of hiding it.
+Cache misses and branch mispredictions are stateful/non-additive across separate
+Cachegrind processes, so they are reported as prepare/full totals only. This
+keeps one-time table/cache construction visible without pretending that miss
+deltas are an isolated execution measurement.
 """
 
 from __future__ import annotations
@@ -167,7 +170,7 @@ def environment(binary: Path, source_sha: str | None, current_d6: bool) -> dict:
     if current_d6:
         env.update({
             "authority_generation": "Contract 11.5 / #3393",
-            "runtime_mechanism": "#3500 / #3394",
+            "runtime_mechanism": "#3545 / #3394",
             "benchmark_issue": "#1988",
             "semantic_scope": "D6 selector DIRECT_LAW 16/64",
             "selector_depth": 3,
@@ -272,10 +275,14 @@ def main() -> None:
 
                     execute_samples = []
                     for prepare, full in zip(prepare_samples, full_samples, strict=True):
-                        delta = {key: full[key] - prepare[key] for key in COUNTER_PATTERNS}
+                        delta = {
+                            "i_refs": full["i_refs"] - prepare["i_refs"],
+                            "branches": full["branches"] - prepare["branches"],
+                        }
                         if any(value < 0 for value in delta.values()):
                             raise RuntimeError(
-                                f"negative differential counters: {mode=} {depth=} {pattern=} {delta=}"
+                                f"negative additive differential counters: "
+                                f"{mode=} {depth=} {pattern=} {delta=}"
                             )
                         execute_samples.append(delta)
 
@@ -291,13 +298,14 @@ def main() -> None:
                         "execute_i_refs": med(execute_samples, "i_refs"),
                         "i_refs_per_call": f"{med(execute_samples, 'i_refs') / calls:.3f}",
                         "prepare_i1_misses": med(prepare_samples, "i1_misses"),
-                        "execute_i1_misses": med(execute_samples, "i1_misses"),
+                        "full_i1_misses": med(full_samples, "i1_misses"),
                         "prepare_d1_misses": med(prepare_samples, "d1_misses"),
-                        "execute_d1_misses": med(execute_samples, "d1_misses"),
+                        "full_d1_misses": med(full_samples, "d1_misses"),
                         "prepare_branches": med(prepare_samples, "branches"),
+                        "full_branches": med(full_samples, "branches"),
                         "execute_branches": med(execute_samples, "branches"),
                         "prepare_mispredicts": med(prepare_samples, "mispredicts"),
-                        "execute_mispredicts": med(execute_samples, "mispredicts"),
+                        "full_mispredicts": med(full_samples, "mispredicts"),
                         "prepare_i_refs_raw": ",".join(str(x["i_refs"]) for x in prepare_samples),
                         "full_i_refs_raw": ",".join(str(x["i_refs"]) for x in full_samples),
                         "execute_i_refs_raw": ",".join(str(x["i_refs"]) for x in execute_samples),
@@ -310,9 +318,9 @@ def main() -> None:
                         f"depth={depth:2d} {pattern:11s} {mode:8s} "
                         f"exec-Irefs={row['execute_i_refs']:12d} "
                         f"Irefs/call={float(row['i_refs_per_call']):9.3f} "
-                        f"I1miss={row['execute_i1_misses']:7d} "
-                        f"D1miss={row['execute_d1_misses']:7d} "
-                        f"mispred={row['execute_mispredicts']:7d}"
+                        f"full-I1miss={row['full_i1_misses']:7d} "
+                        f"full-D1miss={row['full_d1_misses']:7d} "
+                        f"full-mispred={row['full_mispredicts']:7d}"
                     )
 
         keys = []
