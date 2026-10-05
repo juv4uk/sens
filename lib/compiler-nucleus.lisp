@@ -32,3 +32,12 @@
 (визначити compiler-nucleus
   (функція (identity authority)
     (compiler-authority-find identity authority)))
+
+
+; Representation-only bootstrap seam for #3808.
+; DECOMPOSE is an explicitly supplied first-class mechanism.  The language
+; chooses when to invoke it; the host function may reveal only exact width/bits
+; and has no identity->meaning authority.
+(визначити compiler-domain-shape
+  (функція (decompose identity)
+    (decompose identity)))
