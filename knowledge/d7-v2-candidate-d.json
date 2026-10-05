@@ -1,0 +1,1950 @@
+{
+  "schema": "d7-v2-candidate-d/v1",
+  "status": "research-candidate-not-ratified",
+  "domain": "D7",
+  "width": 7,
+  "capacity": 128,
+  "occupancy": 124,
+  "free_count": 4,
+  "free_coordinates": [
+    "0101111",
+    "0110100",
+    "1010001",
+    "1010011"
+  ],
+  "source": {
+    "repository": "juv4uk/shiva-sutras",
+    "path": "prototype/upc7-table-v3.tsv",
+    "blob_sha": "1270a85616957646f18971133fe4f20c8de0fcde",
+    "donor_status": "merged master research candidate D"
+  },
+  "foundation": "#3393 / Contract 11.5; D7 remains research",
+  "migration_decision": "#3432",
+  "completion_status": "COMPLETE-WITH-RESERVE-CANDIDATE",
+  "rules": [
+    "coordinate identity is exact seven-bit Text7/Sound7 candidate identity",
+    "four free cells remain free absent independent law or explicit owner assignment",
+    "human spellings are projections, not coordinate authority",
+    "h/r/l moves are explicit identity-migration candidates, not provenance recovery",
+    "D14 h1/h2 grammar-node duplication has zero D7 coordinate effect"
+  ],
+  "moved_rows": [
+    {
+      "coordinate": "0100001",
+      "sound": "h",
+      "change": "moved from 0110100"
+    },
+    {
+      "coordinate": "0101010",
+      "sound": "r",
+      "change": "moved from 0101110"
+    },
+    {
+      "coordinate": "0101110",
+      "sound": "l",
+      "change": "moved from 0101111"
+    }
+  ],
+  "rows": [
+    {
+      "coordinate": "0000000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "k",
+      "layouts": {
+        "sa_iast": "k",
+        "sa_deva": "क्",
+        "sa_cyr": "к",
+        "uk": "к"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0000000",
+      "change": "same"
+    },
+    {
+      "coordinate": "0000001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "kh",
+      "layouts": {
+        "sa_iast": "kh",
+        "sa_deva": "ख्",
+        "sa_cyr": "кг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0000001",
+      "change": "same"
+    },
+    {
+      "coordinate": "0000010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "g",
+      "layouts": {
+        "sa_iast": "g",
+        "sa_deva": "ग्",
+        "sa_cyr": "ґ",
+        "uk": "ґ"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0000010",
+      "change": "same"
+    },
+    {
+      "coordinate": "0000011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "gh",
+      "layouts": {
+        "sa_iast": "gh",
+        "sa_deva": "घ्",
+        "sa_cyr": "ґг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0000011",
+      "change": "same"
+    },
+    {
+      "coordinate": "0000100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ṅ",
+      "layouts": {
+        "sa_iast": "ṅ",
+        "sa_deva": "ङ्",
+        "sa_cyr": "н̇",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0000100",
+      "change": "same"
+    },
+    {
+      "coordinate": "0000101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "c",
+      "layouts": {
+        "sa_iast": "c",
+        "sa_deva": "च्",
+        "sa_cyr": "ч",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0000101",
+      "change": "same"
+    },
+    {
+      "coordinate": "0000110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ch",
+      "layouts": {
+        "sa_iast": "ch",
+        "sa_deva": "छ्",
+        "sa_cyr": "чг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0000110",
+      "change": "same"
+    },
+    {
+      "coordinate": "0000111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "j",
+      "layouts": {
+        "sa_iast": "j",
+        "sa_deva": "ज्",
+        "sa_cyr": "дж",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0000111",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "jh",
+      "layouts": {
+        "sa_iast": "jh",
+        "sa_deva": "झ्",
+        "sa_cyr": "джг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0001000",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ñ",
+      "layouts": {
+        "sa_iast": "ñ",
+        "sa_deva": "ञ्",
+        "sa_cyr": "н̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0001001",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ṭ",
+      "layouts": {
+        "sa_iast": "ṭ",
+        "sa_deva": "ट्",
+        "sa_cyr": "т̣",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0001010",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ṭh",
+      "layouts": {
+        "sa_iast": "ṭh",
+        "sa_deva": "ठ्",
+        "sa_cyr": "т̣г",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0001011",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ḍ",
+      "layouts": {
+        "sa_iast": "ḍ",
+        "sa_deva": "ड्",
+        "sa_cyr": "д̣",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0001100",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ḍh",
+      "layouts": {
+        "sa_iast": "ḍh",
+        "sa_deva": "ढ्",
+        "sa_cyr": "д̣г",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0001101",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ṇ",
+      "layouts": {
+        "sa_iast": "ṇ",
+        "sa_deva": "ण्",
+        "sa_cyr": "н̣",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0001110",
+      "change": "same"
+    },
+    {
+      "coordinate": "0001111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "t",
+      "layouts": {
+        "sa_iast": "t",
+        "sa_deva": "त्",
+        "sa_cyr": "т",
+        "uk": "т"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0001111",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "th",
+      "layouts": {
+        "sa_iast": "th",
+        "sa_deva": "थ्",
+        "sa_cyr": "тг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0010000",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "d",
+      "layouts": {
+        "sa_iast": "d",
+        "sa_deva": "द्",
+        "sa_cyr": "д",
+        "uk": "д"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0010001",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "dh",
+      "layouts": {
+        "sa_iast": "dh",
+        "sa_deva": "ध्",
+        "sa_cyr": "дг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0010010",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "n",
+      "layouts": {
+        "sa_iast": "n",
+        "sa_deva": "न्",
+        "sa_cyr": "н",
+        "uk": "н"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0010011",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "p",
+      "layouts": {
+        "sa_iast": "p",
+        "sa_deva": "प्",
+        "sa_cyr": "п",
+        "uk": "п"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0010100",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "ph",
+      "layouts": {
+        "sa_iast": "ph",
+        "sa_deva": "फ्",
+        "sa_cyr": "пг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0010101",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "b",
+      "layouts": {
+        "sa_iast": "b",
+        "sa_deva": "ब्",
+        "sa_cyr": "б",
+        "uk": "б"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0010110",
+      "change": "same"
+    },
+    {
+      "coordinate": "0010111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "bh",
+      "layouts": {
+        "sa_iast": "bh",
+        "sa_deva": "भ्",
+        "sa_cyr": "бг",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0010111",
+      "change": "same"
+    },
+    {
+      "coordinate": "0011000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "m",
+      "layouts": {
+        "sa_iast": "m",
+        "sa_deva": "म्",
+        "sa_cyr": "м",
+        "uk": "м"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0011000",
+      "change": "same"
+    },
+    {
+      "coordinate": "0011001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "digit-8",
+      "layouts": {
+        "sa_iast": "8",
+        "sa_deva": "८",
+        "sa_cyr": "8",
+        "uk": "8"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0011010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "digit-9",
+      "layouts": {
+        "sa_iast": "9",
+        "sa_deva": "९",
+        "sa_cyr": "9",
+        "uk": "9"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0011011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "punct-…",
+      "layouts": {
+        "sa_iast": "…",
+        "sa_deva": "…",
+        "sa_cyr": "…",
+        "uk": "…"
+      },
+      "language": "punctuation",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0011100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "digit-0",
+      "layouts": {
+        "sa_iast": "0",
+        "sa_deva": "०",
+        "sa_cyr": "0",
+        "uk": "0"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0011101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "digit-2",
+      "layouts": {
+        "sa_iast": "2",
+        "sa_deva": "२",
+        "sa_cyr": "2",
+        "uk": "2"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0011110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "digit-3",
+      "layouts": {
+        "sa_iast": "3",
+        "sa_deva": "३",
+        "sa_cyr": "3",
+        "uk": "3"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0011111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "varga",
+      "sound": "digit-1",
+      "layouts": {
+        "sa_iast": "1",
+        "sa_deva": "१",
+        "sa_cyr": "1",
+        "uk": "1"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0100000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "х",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "х"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0100000",
+      "change": "same"
+    },
+    {
+      "coordinate": "0100001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "h",
+      "layouts": {
+        "sa_iast": "h",
+        "sa_deva": "ह्",
+        "sa_cyr": "х",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0110100",
+      "change": "moved from 0110100"
+    },
+    {
+      "coordinate": "0100010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "capital",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "(next letter uppercase)"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0100011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "́",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "́"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0100100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "ś",
+      "layouts": {
+        "sa_iast": "ś",
+        "sa_deva": "श्",
+        "sa_cyr": "ш́",
+        "uk": "ш"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0100100",
+      "change": "same"
+    },
+    {
+      "coordinate": "0100101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "ж",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "ж"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0100101",
+      "change": "same"
+    },
+    {
+      "coordinate": "0100110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "y",
+      "layouts": {
+        "sa_iast": "y",
+        "sa_deva": "य्",
+        "sa_cyr": "й",
+        "uk": "й"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0100110",
+      "change": "same"
+    },
+    {
+      "coordinate": "0100111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "ь",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "ь"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0100111",
+      "change": "same"
+    },
+    {
+      "coordinate": "0101000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "ṣ",
+      "layouts": {
+        "sa_iast": "ṣ",
+        "sa_deva": "ष्",
+        "sa_cyr": "ш̣",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "0101000",
+      "change": "same"
+    },
+    {
+      "coordinate": "0101001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "punct-«",
+      "layouts": {
+        "sa_iast": "«",
+        "sa_deva": "«",
+        "sa_cyr": "«",
+        "uk": "«"
+      },
+      "language": "punctuation",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0101010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "r",
+      "layouts": {
+        "sa_iast": "r",
+        "sa_deva": "र्",
+        "sa_cyr": "р",
+        "uk": "р"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0101110",
+      "change": "moved from 0101110"
+    },
+    {
+      "coordinate": "0101011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "punct-»",
+      "layouts": {
+        "sa_iast": "»",
+        "sa_deva": "»",
+        "sa_cyr": "»",
+        "uk": "»"
+      },
+      "language": "punctuation",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0101100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "s",
+      "layouts": {
+        "sa_iast": "s",
+        "sa_deva": "स्",
+        "sa_cyr": "с",
+        "uk": "с"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0101100",
+      "change": "same"
+    },
+    {
+      "coordinate": "0101101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "з",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "з"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0101101",
+      "change": "same"
+    },
+    {
+      "coordinate": "0101110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "l",
+      "layouts": {
+        "sa_iast": "l",
+        "sa_deva": "ल्",
+        "sa_cyr": "л",
+        "uk": "л"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0101111",
+      "change": "moved from 0101111"
+    },
+    {
+      "coordinate": "0101111",
+      "status": "FREE-CANDIDATE",
+      "class": "non-varga",
+      "sound": null,
+      "layouts": null,
+      "language": null,
+      "pinned_bits": null,
+      "change": "free in Shiva candidate D/v3"
+    },
+    {
+      "coordinate": "0110000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "ф",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "ф"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0110000",
+      "change": "same"
+    },
+    {
+      "coordinate": "0110001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "punct-—",
+      "layouts": {
+        "sa_iast": "—",
+        "sa_deva": "—",
+        "sa_cyr": "—",
+        "uk": "—"
+      },
+      "language": "punctuation",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0110010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "v",
+      "layouts": {
+        "sa_iast": "v",
+        "sa_deva": "व्",
+        "sa_cyr": "в",
+        "uk": "в"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "0110010",
+      "change": "same"
+    },
+    {
+      "coordinate": "0110011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "punct-–",
+      "layouts": {
+        "sa_iast": "–",
+        "sa_deva": "–",
+        "sa_cyr": "–",
+        "uk": "–"
+      },
+      "language": "punctuation",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0110100",
+      "status": "FREE-CANDIDATE",
+      "class": "non-varga",
+      "sound": null,
+      "layouts": null,
+      "language": null,
+      "pinned_bits": null,
+      "change": "free in Shiva candidate D/v3"
+    },
+    {
+      "coordinate": "0110101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "г",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "г"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0110101",
+      "change": "same"
+    },
+    {
+      "coordinate": "0110110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "punct-“",
+      "layouts": {
+        "sa_iast": "“",
+        "sa_deva": "“",
+        "sa_cyr": "“",
+        "uk": "“"
+      },
+      "language": "punctuation",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0110111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "punct-”",
+      "layouts": {
+        "sa_iast": "”",
+        "sa_deva": "”",
+        "sa_cyr": "”",
+        "uk": "”"
+      },
+      "language": "punctuation",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0111000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "digit-4",
+      "layouts": {
+        "sa_iast": "4",
+        "sa_deva": "४",
+        "sa_cyr": "4",
+        "uk": "4"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0111001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "digit-6",
+      "layouts": {
+        "sa_iast": "6",
+        "sa_deva": "६",
+        "sa_cyr": "6",
+        "uk": "6"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0111010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "digit-7",
+      "layouts": {
+        "sa_iast": "7",
+        "sa_deva": "७",
+        "sa_cyr": "7",
+        "uk": "7"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0111011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "digit-5",
+      "layouts": {
+        "sa_iast": "5",
+        "sa_deva": "५",
+        "sa_cyr": "5",
+        "uk": "5"
+      },
+      "language": "text digit",
+      "pinned_bits": null,
+      "change": "new cell"
+    },
+    {
+      "coordinate": "0111100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "ц",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "ц"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0111100",
+      "change": "same"
+    },
+    {
+      "coordinate": "0111101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "ч",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "ч"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0111101",
+      "change": "same"
+    },
+    {
+      "coordinate": "0111110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "дз",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "дз"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0111110",
+      "change": "same"
+    },
+    {
+      "coordinate": "0111111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "non-varga",
+      "sound": "дж",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "дж"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "0111111",
+      "change": "same"
+    },
+    {
+      "coordinate": "1000000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "a",
+      "layouts": {
+        "sa_iast": "a",
+        "sa_deva": "अ",
+        "sa_cyr": "а",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1000000",
+      "change": "same"
+    },
+    {
+      "coordinate": "1000001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ā",
+      "layouts": {
+        "sa_iast": "ā",
+        "sa_deva": "आ",
+        "sa_cyr": "а̄",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1000001",
+      "change": "same"
+    },
+    {
+      "coordinate": "1000010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ã",
+      "layouts": {
+        "sa_iast": "ã",
+        "sa_deva": "अँ",
+        "sa_cyr": "а̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1000011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ā̃",
+      "layouts": {
+        "sa_iast": "ā̃",
+        "sa_deva": "आँ",
+        "sa_cyr": "а̄̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1000100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "i",
+      "layouts": {
+        "sa_iast": "i",
+        "sa_deva": "इ",
+        "sa_cyr": "і",
+        "uk": "і"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "1000100",
+      "change": "same"
+    },
+    {
+      "coordinate": "1000101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ī",
+      "layouts": {
+        "sa_iast": "ī",
+        "sa_deva": "ई",
+        "sa_cyr": "і̄",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1000101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1000110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ĩ",
+      "layouts": {
+        "sa_iast": "ĩ",
+        "sa_deva": "इँ",
+        "sa_cyr": "і̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1000111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ī̃",
+      "layouts": {
+        "sa_iast": "ī̃",
+        "sa_deva": "ईँ",
+        "sa_cyr": "і̄̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1001000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "u",
+      "layouts": {
+        "sa_iast": "u",
+        "sa_deva": "उ",
+        "sa_cyr": "у",
+        "uk": "у"
+      },
+      "language": "Sanskrit + Ukrainian",
+      "pinned_bits": "1001000",
+      "change": "same"
+    },
+    {
+      "coordinate": "1001001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ū",
+      "layouts": {
+        "sa_iast": "ū",
+        "sa_deva": "ऊ",
+        "sa_cyr": "ӯ",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1001001",
+      "change": "same"
+    },
+    {
+      "coordinate": "1001010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ũ",
+      "layouts": {
+        "sa_iast": "ũ",
+        "sa_deva": "उँ",
+        "sa_cyr": "у̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1001011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ū̃",
+      "layouts": {
+        "sa_iast": "ū̃",
+        "sa_deva": "ऊँ",
+        "sa_cyr": "ӯ̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1001100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ṛ",
+      "layouts": {
+        "sa_iast": "ṛ",
+        "sa_deva": "ऋ",
+        "sa_cyr": "р̣",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1001100",
+      "change": "same"
+    },
+    {
+      "coordinate": "1001101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ṝ",
+      "layouts": {
+        "sa_iast": "ṝ",
+        "sa_deva": "ॠ",
+        "sa_cyr": "р̣̄",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1001101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1001110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ṛ̃",
+      "layouts": {
+        "sa_iast": "ṛ̃",
+        "sa_deva": "ऋँ",
+        "sa_cyr": "р̣̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1001111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ṝ̃",
+      "layouts": {
+        "sa_iast": "ṝ̃",
+        "sa_deva": "ॠँ",
+        "sa_cyr": "р̣̄̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1010000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ḷ",
+      "layouts": {
+        "sa_iast": "ḷ",
+        "sa_deva": "ऌ",
+        "sa_cyr": "л̣",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1010000",
+      "change": "same"
+    },
+    {
+      "coordinate": "1010001",
+      "status": "FREE-CANDIDATE",
+      "class": "vowel",
+      "sound": null,
+      "layouts": null,
+      "language": null,
+      "pinned_bits": null,
+      "change": "free in Shiva candidate D/v3"
+    },
+    {
+      "coordinate": "1010010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ḷ̃",
+      "layouts": {
+        "sa_iast": "ḷ̃",
+        "sa_deva": "ऌँ",
+        "sa_cyr": "л̣̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1010011",
+      "status": "FREE-CANDIDATE",
+      "class": "vowel",
+      "sound": null,
+      "layouts": null,
+      "language": null,
+      "pinned_bits": null,
+      "change": "free in Shiva candidate D/v3"
+    },
+    {
+      "coordinate": "1010100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "e",
+      "layouts": {
+        "sa_iast": "e",
+        "sa_deva": "ए",
+        "sa_cyr": "е",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1010100",
+      "change": "same"
+    },
+    {
+      "coordinate": "1010101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ai",
+      "layouts": {
+        "sa_iast": "ai",
+        "sa_deva": "ऐ",
+        "sa_cyr": "аі",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1010101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1010110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "ẽ",
+      "layouts": {
+        "sa_iast": "ẽ",
+        "sa_deva": "एँ",
+        "sa_cyr": "е̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1010111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "aĩ",
+      "layouts": {
+        "sa_iast": "aĩ",
+        "sa_deva": "ऐँ",
+        "sa_cyr": "аі̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1011000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "o",
+      "layouts": {
+        "sa_iast": "o",
+        "sa_deva": "ओ",
+        "sa_cyr": "о",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1011000",
+      "change": "same"
+    },
+    {
+      "coordinate": "1011001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "au",
+      "layouts": {
+        "sa_iast": "au",
+        "sa_deva": "औ",
+        "sa_cyr": "ау",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": "1011001",
+      "change": "same"
+    },
+    {
+      "coordinate": "1011010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "õ",
+      "layouts": {
+        "sa_iast": "õ",
+        "sa_deva": "ओँ",
+        "sa_cyr": "о̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1011011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "aũ",
+      "layouts": {
+        "sa_iast": "aũ",
+        "sa_deva": "औँ",
+        "sa_cyr": "ау̃",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1011100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "а",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "а"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "1011100",
+      "change": "same"
+    },
+    {
+      "coordinate": "1011101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "е",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "е"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "1011101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1011110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "о",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "о"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "1011110",
+      "change": "same"
+    },
+    {
+      "coordinate": "1011111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "vowel",
+      "sound": "и",
+      "layouts": {
+        "sa_iast": "",
+        "sa_deva": "",
+        "sa_cyr": "",
+        "uk": "и"
+      },
+      "language": "Ukrainian",
+      "pinned_bits": "1011111",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "space",
+      "layouts": {
+        "sa_iast": " ",
+        "sa_deva": " ",
+        "sa_cyr": " ",
+        "uk": " "
+      },
+      "language": "signs",
+      "pinned_bits": "1100000",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "newline",
+      "layouts": {
+        "sa_iast": "\\n",
+        "sa_deva": "\\n",
+        "sa_cyr": "\\n",
+        "uk": "\\n"
+      },
+      "language": "signs",
+      "pinned_bits": "1100001",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "tab",
+      "layouts": {
+        "sa_iast": "\\t",
+        "sa_deva": "\\t",
+        "sa_cyr": "\\t",
+        "uk": "\\t"
+      },
+      "language": "signs",
+      "pinned_bits": "1100010",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "left-paren",
+      "layouts": {
+        "sa_iast": "(",
+        "sa_deva": "(",
+        "sa_cyr": "(",
+        "uk": "("
+      },
+      "language": "signs",
+      "pinned_bits": "1100011",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "right-paren",
+      "layouts": {
+        "sa_iast": ")",
+        "sa_deva": ")",
+        "sa_cyr": ")",
+        "uk": ")"
+      },
+      "language": "signs",
+      "pinned_bits": "1100100",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "double-quote",
+      "layouts": {
+        "sa_iast": "\"\"\"\"",
+        "sa_deva": "\"\"\"\"",
+        "sa_cyr": "\"\"\"\"",
+        "uk": "\"\"\"\""
+      },
+      "language": "signs",
+      "pinned_bits": "1100101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "backslash",
+      "layouts": {
+        "sa_iast": "\\",
+        "sa_deva": "\\",
+        "sa_cyr": "\\",
+        "uk": "\\"
+      },
+      "language": "signs",
+      "pinned_bits": "1100110",
+      "change": "same"
+    },
+    {
+      "coordinate": "1100111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "underscore",
+      "layouts": {
+        "sa_iast": "_",
+        "sa_deva": "_",
+        "sa_cyr": "_",
+        "uk": "_"
+      },
+      "language": "signs",
+      "pinned_bits": "1100111",
+      "change": "same"
+    },
+    {
+      "coordinate": "1101000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "anusvara",
+      "layouts": {
+        "sa_iast": "ṃ",
+        "sa_deva": "ं",
+        "sa_cyr": "м̇",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1101001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "visarga",
+      "layouts": {
+        "sa_iast": "ḥ",
+        "sa_deva": "ः",
+        "sa_cyr": "х̣",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1101010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "avagraha",
+      "layouts": {
+        "sa_iast": "’",
+        "sa_deva": "ऽ",
+        "sa_cyr": "’",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1101011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "danda",
+      "layouts": {
+        "sa_iast": "।",
+        "sa_deva": "।",
+        "sa_cyr": "।",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1101100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "double-danda",
+      "layouts": {
+        "sa_iast": "॥",
+        "sa_deva": "॥",
+        "sa_cyr": "॥",
+        "uk": ""
+      },
+      "language": "Sanskrit",
+      "pinned_bits": null,
+      "change": "same cell, no spelling in the pinned table"
+    },
+    {
+      "coordinate": "1101101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "ampersand",
+      "layouts": {
+        "sa_iast": "&",
+        "sa_deva": "&",
+        "sa_cyr": "&",
+        "uk": "&"
+      },
+      "language": "signs",
+      "pinned_bits": "1101101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1101110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "pipe",
+      "layouts": {
+        "sa_iast": "|",
+        "sa_deva": "|",
+        "sa_cyr": "|",
+        "uk": "|"
+      },
+      "language": "signs",
+      "pinned_bits": "1101110",
+      "change": "same"
+    },
+    {
+      "coordinate": "1101111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "backquote",
+      "layouts": {
+        "sa_iast": "`",
+        "sa_deva": "`",
+        "sa_cyr": "`",
+        "uk": "`"
+      },
+      "language": "signs",
+      "pinned_bits": "1101111",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "plus",
+      "layouts": {
+        "sa_iast": "+",
+        "sa_deva": "+",
+        "sa_cyr": "+",
+        "uk": "+"
+      },
+      "language": "signs",
+      "pinned_bits": "1110000",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "minus",
+      "layouts": {
+        "sa_iast": "-",
+        "sa_deva": "-",
+        "sa_cyr": "-",
+        "uk": "-"
+      },
+      "language": "signs",
+      "pinned_bits": "1110001",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "star",
+      "layouts": {
+        "sa_iast": "*",
+        "sa_deva": "*",
+        "sa_cyr": "*",
+        "uk": "*"
+      },
+      "language": "signs",
+      "pinned_bits": "1110010",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "slash",
+      "layouts": {
+        "sa_iast": "/",
+        "sa_deva": "/",
+        "sa_cyr": "/",
+        "uk": "/"
+      },
+      "language": "signs",
+      "pinned_bits": "1110011",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "equals",
+      "layouts": {
+        "sa_iast": "=",
+        "sa_deva": "=",
+        "sa_cyr": "=",
+        "uk": "="
+      },
+      "language": "signs",
+      "pinned_bits": "1110100",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "less",
+      "layouts": {
+        "sa_iast": "<",
+        "sa_deva": "<",
+        "sa_cyr": "<",
+        "uk": "<"
+      },
+      "language": "signs",
+      "pinned_bits": "1110101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "greater",
+      "layouts": {
+        "sa_iast": ">",
+        "sa_deva": ">",
+        "sa_cyr": ">",
+        "uk": ">"
+      },
+      "language": "signs",
+      "pinned_bits": "1110110",
+      "change": "same"
+    },
+    {
+      "coordinate": "1110111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "question",
+      "layouts": {
+        "sa_iast": "?",
+        "sa_deva": "?",
+        "sa_cyr": "?",
+        "uk": "?"
+      },
+      "language": "signs",
+      "pinned_bits": "1110111",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111000",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "bang",
+      "layouts": {
+        "sa_iast": "!",
+        "sa_deva": "!",
+        "sa_cyr": "!",
+        "uk": "!"
+      },
+      "language": "signs",
+      "pinned_bits": "1111000",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111001",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "apostrophe",
+      "layouts": {
+        "sa_iast": "'",
+        "sa_deva": "'",
+        "sa_cyr": "'",
+        "uk": "'"
+      },
+      "language": "signs",
+      "pinned_bits": "1111001",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111010",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "dot",
+      "layouts": {
+        "sa_iast": ".",
+        "sa_deva": ".",
+        "sa_cyr": ".",
+        "uk": "."
+      },
+      "language": "signs",
+      "pinned_bits": "1111010",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111011",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "comma",
+      "layouts": {
+        "sa_iast": ",",
+        "sa_deva": ",",
+        "sa_cyr": ",",
+        "uk": ","
+      },
+      "language": "signs",
+      "pinned_bits": "1111011",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111100",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "colon",
+      "layouts": {
+        "sa_iast": ":",
+        "sa_deva": ":",
+        "sa_cyr": ":",
+        "uk": ":"
+      },
+      "language": "signs",
+      "pinned_bits": "1111100",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111101",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "semicolon",
+      "layouts": {
+        "sa_iast": ";",
+        "sa_deva": ";",
+        "sa_cyr": ";",
+        "uk": ";"
+      },
+      "language": "signs",
+      "pinned_bits": "1111101",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111110",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "hash",
+      "layouts": {
+        "sa_iast": "#",
+        "sa_deva": "#",
+        "sa_cyr": "#",
+        "uk": "#"
+      },
+      "language": "signs",
+      "pinned_bits": "1111110",
+      "change": "same"
+    },
+    {
+      "coordinate": "1111111",
+      "status": "OCCUPIED-CANDIDATE",
+      "class": "sign",
+      "sound": "at",
+      "layouts": {
+        "sa_iast": "@",
+        "sa_deva": "@",
+        "sa_cyr": "@",
+        "uk": "@"
+      },
+      "language": "signs",
+      "pinned_bits": "1111111",
+      "change": "same"
+    }
+  ]
+}
