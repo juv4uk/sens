@@ -106,7 +106,7 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact six-bit source word into the transitional D6 research carrier.
+    /// Lift an exact six-bit source word into the current D6 carrier.
     pub const fn d6(self) -> Option<crate::CoreD6> {
         match self {
             Self::W6(word) => Some(crate::CoreD6::from_word(word)),
@@ -135,8 +135,8 @@ impl BinarySourceWord {
 
     /// Total exact-width qualified lift for the W1→W8 carrier ladder.
     ///
-    /// D1-D4/D7 have current semantic authority; D5/D6/D8 variants are
-    /// transitional research carriers under #3278. Callability is separate.
+    /// D1-D6 have current semantic authority; D7/D8 remain research.
+    /// Exact carrier existence and per-resident callability stay separate.
     pub const fn domain_identity(self) -> crate::DomainIdentity {
         crate::DomainIdentity::from_source_word(self)
     }
