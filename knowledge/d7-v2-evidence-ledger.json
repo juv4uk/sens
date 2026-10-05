@@ -1693,5 +1693,12 @@
       "contracts/d7-local-ordinal.lock",
       "#2517/#2739"
     ]
+  },
+  "cross_width_geometry": {
+    "donor": "#3198 / PR #3199",
+    "pure_mechanism": "Q(n+1)=Qn box K2 reaches 128 cells mechanically",
+    "d7_semantic_result": "NO-PROOF that Sound7/local-ordinal D7 = Core.D6 x D1",
+    "rule": "do not import D6 prefix/selector continuation into D7 merely because W7 is a 7-cube",
+    "selector_note": "a hypothetical selector subtree can be generated geometrically, but it is not D7 Sound/Text semantic authority"
   }
 }
