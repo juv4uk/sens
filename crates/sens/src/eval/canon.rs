@@ -426,6 +426,58 @@ fn canonicalize_domain_result(
     }
 }
 
+pub(crate) fn has_static_domain_mechanism(identity: CoreDomainIdentity) -> bool {
+    // Every D3 coordinate is foundational/structural/syntax/primitive/selector
+    // authority. DEFINE must never install a competing mechanism there.
+    if matches!(identity, CoreDomainIdentity::D3(_)) {
+        return true;
+    }
+
+    super::necessary_forms::identity_for_domain_identity(identity).is_some()
+        || super::selector_law::has_mechanism(identity)
+        || super::d5_arithmetic::has_mechanism(identity)
+        || super::d5_predicates::has_mechanism(identity)
+        || domain_primitive(identity).is_some()
+}
+
+pub(crate) fn ensure_bindable_domain_identity(
+    identity: CoreDomainIdentity,
+    environment: &Environment,
+    span: Span,
+) -> Result<(), LanguageError> {
+    if !environment.is_root() {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "exact-domain DEFINE target must be installed at the root mechanism frame: {identity}"
+            ),
+            span,
+        ));
+    }
+
+    if has_static_domain_mechanism(identity) {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "exact-domain DEFINE target already has an immutable admitted mechanism: {identity}"
+            ),
+            span,
+        ));
+    }
+
+    if environment.domain_code_slot(identity).is_some() {
+        return Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!(
+                "exact-domain DEFINE target already has a language-owned mechanism: {identity}"
+            ),
+            span,
+        ));
+    }
+
+    Ok(())
+}
+
 pub(crate) fn invoke_domain_identity(
     identity: CoreDomainIdentity,
     args: &[Value],
