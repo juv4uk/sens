@@ -120,3 +120,11 @@ Parent preservation фіксує:
 python3 scripts/research-3622-d8-take-drop-edge.py \
   --out /tmp/d8-take-drop-edge
 ```
+
+## Свіжість влади
+
+Executable witness не довіряє hardcoded координатам D6 TAKE/DROP. Він читає
+`knowledge/d6-ratified.json`, вимагає owner authority `#3393`, знаходить TAKE і
+DROP у чинній 64-рядковій мапі та записує SHA-256 джерела в machine-readable
+artifact. Якщо влада D6 колись зміниться, witness впаде або змінить provenance,
+а не збереже мовчки застарілу координату.
