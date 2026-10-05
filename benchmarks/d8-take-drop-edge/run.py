@@ -23,7 +23,7 @@ import hashlib
 from itertools import product
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 D6_AUTHORITY_PATH = REPO / "knowledge" / "d6-ratified.json"
 D3_SELECTOR_ROOTS = ("011", "100")
 
