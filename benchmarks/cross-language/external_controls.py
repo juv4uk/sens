@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contract 11.5 external runtime controls for SENS cross-language work.
+"""Contract 11-5 external runtime controls for SENS cross-language work.
 
 This lane intentionally contains no fresh SENS timing row. It establishes
 reproducible CPython, Lua 5.4, Racket CS, SBCL and optimized native Rust
@@ -475,7 +475,7 @@ def main() -> int:
         "git_sha": git_fact("rev-parse", "HEAD"),
         "semantic_generation": "external-control-v2",
         "sens_rows_present": False,
-        "sens_contract_target": "11.5",
+        "sens_contract_target": "11-5",
         "sens_semantic_current": ["D1", "D2", "D3", "D4", "D5", "D6"],
         "sens_semantic_research": ["D7", "D8"],
         "sens_gate": "#1668/#3394",
@@ -498,7 +498,7 @@ def main() -> int:
 
     runtimes = ("cpython", "lua54", "racket-cs", "sbcl", "rust-native")
     lines = [
-        "# External runtime controls — Contract 11.5 benchmark program",
+        "# External runtime controls — Contract 11-5 benchmark program",
         "",
         "These rows are concrete implementation controls only. There is deliberately",
         "no fresh SENS timing row until the current D1-D6 exact-domain gate is GREEN.",
@@ -523,7 +523,7 @@ def main() -> int:
         "- Rust sources are compiled with rustc -O before measurement; compile cost is not hidden inside execution rows and will be a separate phase;",
         "- SBCL is a classic Common Lisp implementation control, not SENS semantic authority;",
         "- tail-call and compiler behavior are implementation properties and are not normalized away;",
-        "- current SENS may join only through Contract 11.5 exact-domain correctness evidence;",
+        "- current SENS may join only through Contract 11-5 exact-domain correctness evidence;",
         "- historical Function8/Sens8 rows remain archive-only.",
         "",
     ]
