@@ -99,9 +99,11 @@ jobs:
       - name: Install Cachegrind
         run: |
           sudo apt-get update
-          sudo apt-get install -y valgrind
+          sudo apt-get install -y valgrind binutils
           rustc --version
           valgrind --version
+          size --version | head -1
+          strip --version | head -1
 
       - name: Verify current D6 selector runtime witness
         run: cargo test -p sens --test d6_selector_runtime -- --nocapture
@@ -112,6 +114,13 @@ jobs:
           python3 benchmarks/semantic-tree/run.py \
             --current-d6 --smoke \
             --out /tmp/sens-semantic-tree
+
+      - name: Run D6 mode-specialized code-size smoke
+        run: |
+          rm -rf /tmp/sens-d6-code-size
+          python3 benchmarks/semantic-tree/code_size.py \
+            --calls 100000 \
+            --out /tmp/sens-d6-code-size
 
       - name: Publish semantic-tree smoke summary
         if: always()
@@ -126,13 +135,22 @@ jobs:
               cat /tmp/sens-semantic-tree/instructions.tsv
               echo '~~~'
             fi
+            if test -s /tmp/sens-d6-code-size/code_size.tsv; then
+              echo
+              echo "### D6 mode-specialized code size"
+              echo '~~~text'
+              cat /tmp/sens-d6-code-size/code_size.tsv
+              echo '~~~'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: semantic-tree-smoke
-          path: /tmp/sens-semantic-tree/
+          path: |
+            /tmp/sens-semantic-tree/
+            /tmp/sens-d6-code-size/
           retention-days: 7
 
   manual-evidence:
