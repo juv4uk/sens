@@ -1673,13 +1673,15 @@
     }
   },
   "shiva_sound_projection": {
-    "status": "OPEN-DONOR-STACK",
+    "status": "MERGED-UPSTREAM-DONOR",
     "source": [
-      "shiva-sutras #87 / PR #91",
-      "CI PR #106 merged into #91"
+      "shiva-sutras issue #87",
+      "shiva-sutras PR #123",
+      "master commit b17f30df66c03564baf876cd85600fb51d7d639f"
     ],
     "law": "UPC7 cell identity stays exact; language profile/context chooses phonetic projection; IPA/audio never identity",
-    "current_merge_state": "PR #91 not yet merged to shiva master; use as donor evidence only"
+    "merge_state": "merged to shiva-sutras/master",
+    "identity_effect": "NONE"
   },
   "cross_domain_firewall": {
     "model": "typed disjoint roles over shared binary mechanics",
