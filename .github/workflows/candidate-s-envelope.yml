@@ -1,0 +1,31 @@
+name: Candidate-S outer envelope
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/outer_envelope.rs"
+      - "crates/sens/src/lib.rs"
+      - ".github/workflows/candidate-s-envelope.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          rustc --version
+          cargo --version
+
+      - name: Candidate-S focused tests
+        run: cargo test -p sens outer_envelope::tests --lib
+
+      - name: Candidate-S no-warning compile
+        env:
+          RUSTFLAGS: "-D warnings"
+        run: cargo check -p sens --lib
