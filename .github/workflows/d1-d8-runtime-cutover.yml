@@ -1,4 +1,4 @@
-name: D1 D8 runtime cutover
+name: D1-D6 current / D7-D8 research runtime identity split
 
 on:
   pull_request:
@@ -26,7 +26,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: D1 D8 carriers and identity split
+      - name: W1-W8 carriers and exact identity split
         run: |
           cargo test -p sens --lib domain_words::tests
           cargo test -p sens --lib domain_identity::tests
@@ -34,10 +34,10 @@ jobs:
       - name: Canonical D2 plus W3-W8 reader
         run: cargo test -p sens --lib canonical_reader::tests
 
-      - name: D8 selector law with D7 non-callable
+      - name: Selector mechanism boundary does not infer D6-D8 callability
         run: cargo test -p sens --lib eval::selector_law::tests
 
-      - name: D1 D8 AST value FASL wire identity
+      - name: W1-W8 AST value FASL wire identity
         run: cargo test -p sens --test domain_ast_value_identity
 
       - name: One-way domain paradigm guard
