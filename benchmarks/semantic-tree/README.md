@@ -5,7 +5,7 @@ Research-only benchmark for the proved CAR/CDR selector family.
 ## Current P0 profile — Contract 11.5 D6 generator vs flat16
 
 The first current result is deliberately narrow: the **16 D6 selector residents**
-made executable by #3553/#3394 are measured two ways on the same deterministic
+made executable by #3588/#3394 are measured two ways on the same deterministic
 workload:
 
 - `flat` — dense 16-entry predecoded table, **benchmark-only control**;
@@ -45,7 +45,7 @@ python3 benchmarks/semantic-tree/run.py \
 ```
 
 The CI smoke first runs the **real** `d6_selector_runtime` evaluator witness
-from #3553 and only then runs this isolated paired mechanism benchmark. Thus the
+from #3588 and only then runs this isolated paired mechanism benchmark. Thus the
 performance control cannot silently drift away from the admitted runtime law.
 
 ## Measurements
