@@ -17,12 +17,15 @@
     "expected_semantic_bits",
     "semantic_payload_bits",
     "framing_bits",
+    "integrity_bits",
+    "profile_overhead_bits",
     "tail_unused_bits",
     "carrier_mode",
     "carrier_payload_bits",
     "storage_container_bits",
     "total_wire_bits",
     "physical_container_bytes",
+    "payload_utilization",
     "text_surface_bytes",
     "packed_vs_text_ratio",
     "bitrate_bps",
@@ -186,6 +189,22 @@
     "expected_semantic_bits": {
       "type": "integer",
       "minimum": 1
+    },
+    "integrity_bits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "profile_overhead_bits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "payload_utilization": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   }
 }
