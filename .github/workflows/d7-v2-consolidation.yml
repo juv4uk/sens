@@ -6,6 +6,7 @@ on:
       - "knowledge/d7-v2-stable-residents.json"
       - "knowledge/d7-v2-evidence-ledger.json"
       - "knowledge/d7-v2-geometry-ledger.json"
+      - "knowledge/d7-v2-candidate-d.json"
       - "knowledge/d7-full-map.json"
       - "benchmarks/d7-v2/**"
       - "scripts/check-d7-v2-consolidation.py"
