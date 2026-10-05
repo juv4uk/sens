@@ -164,8 +164,14 @@ def _validate_bound(row, line_no):
     if bound is None:
         raise ValueError(f"line {line_no}: bounded-exhaustive requires exhaustive_bound")
 
-    keys = {"domain_set", "max_ast_depth", "max_nodes", "argument_value_bound"}
+    keys = {"grammar_profile", "domain_set", "max_ast_depth", "max_nodes", "argument_value_bound"}
     _expect_exact_keys(bound, keys, f"line {line_no}: exhaustive_bound")
+    grammar_profile = bound["grammar_profile"]
+    if not isinstance(grammar_profile, str) or not grammar_profile.strip():
+        raise ValueError(
+            f"line {line_no}: exhaustive_bound.grammar_profile must be non-empty string"
+        )
+
     domains = bound["domain_set"]
     if (
         not isinstance(domains, list)
