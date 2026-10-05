@@ -221,6 +221,81 @@ fn compiler_l1_l5_law_value() -> Result<Value, LanguageError> {
     ]))
 }
 
+fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
+    if !D4_LAW_PROJECTION.contains("\"status\": \"generated-projection-only\"") {
+        return Err(invalid_projection(
+            "D4 compiler law input is not marked generated-projection-only",
+        ));
+    }
+    for required_false in [
+        "\"compiler_role_table\": false",
+        "\"backend_mechanism_table\": false",
+        "\"human_name_routing\": false",
+        "\"d8_admission\": false",
+    ] {
+        if !D4_LAW_PROJECTION.contains(required_false) {
+            return Err(invalid_projection(format!(
+                "D4 structural projection is missing non-authority guard: {required_false}"
+            )));
+        }
+    }
+    for forbidden in [
+        "LambdaForm",
+        "DefineForm",
+        "lambda-form",
+        "define-form",
+        "CompilerLoweringRole",
+    ] {
+        if D4_LAW_PROJECTION.contains(forbidden) {
+            return Err(invalid_projection(format!(
+                "D4 structural projection precomputes compiler role {forbidden}"
+            )));
+        }
+    }
+
+    verify_projection_authority(D4_LAW_PROJECTION, D4_LAW_AUTHORITY)?;
+
+    let width = projection_width_from(D4_LAW_PROJECTION)?;
+    if width != 4 {
+        return Err(invalid_projection(format!(
+            "D4 bootstrap projection must have exact width 4, got {width}"
+        )));
+    }
+
+    let parent = quoted_json_string(D4_LAW_PROJECTION, "parent_bits")?;
+    if parent.len() + 1 != width {
+        return Err(invalid_projection(
+            "D4 bootstrap parent must be the exact one-bit-shorter fibre prefix",
+        ));
+    }
+
+    let children = projection_string_array(D4_LAW_PROJECTION, "children")?;
+    if children.len() != 2 {
+        return Err(invalid_projection(format!(
+            "D4 bootstrap fibre must have exactly two ordered children, got {}",
+            children.len()
+        )));
+    }
+    for child in &children {
+        if child.len() != width || !child.starts_with(&parent) {
+            return Err(invalid_projection(
+                "D4 bootstrap child does not preserve its exact D3 parent prefix",
+            ));
+        }
+    }
+
+    Ok(Value::list([
+        Value::Number(width as f64, Exactness::Exact),
+        bit_list(&parent, width - 1)?,
+        Value::list(
+            children
+                .iter()
+                .map(|bits| bit_list(bits, width))
+                .collect::<Result<Vec<_>, _>>()?,
+        ),
+    ]))
+}
+
 fn symbol(name: &str) -> Expr {
     Expr {
         kind: ExprKind::Symbol(Rc::from(name)),
