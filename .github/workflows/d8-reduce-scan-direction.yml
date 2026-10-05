@@ -1,0 +1,54 @@
+name: D8 REDUCE-SCAN direction research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d8-reduce-scan-direction/**"
+      - "docs/research/3674-d8-reduce-scan-direction.md"
+      - "docs/research/3674-d8-reduce-scan-direction.uk.md"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-reduce-scan-direction.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "benchmarks/d8-reduce-scan-direction/**"
+      - "docs/research/3674-d8-reduce-scan-direction.md"
+      - "docs/research/3674-d8-reduce-scan-direction.uk.md"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-reduce-scan-direction.yml"
+  workflow_dispatch:
+
+jobs:
+  product-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run exhaustive nonempty REDUCE-SCAN direction witness
+        run: |
+          rm -rf /tmp/d8-reduce-scan-direction
+          python3 benchmarks/d8-reduce-scan-direction/run.py \
+            --out /tmp/d8-reduce-scan-direction
+
+      - name: Verify deterministic replay
+        run: |
+          rm -rf /tmp/d8-reduce-scan-direction-2
+          python3 benchmarks/d8-reduce-scan-direction/run.py \
+            --out /tmp/d8-reduce-scan-direction-2
+          cmp /tmp/d8-reduce-scan-direction/witness.json \
+              /tmp/d8-reduce-scan-direction-2/witness.json
+
+      - name: Publish report
+        if: always()
+        run: |
+          test ! -f /tmp/d8-reduce-scan-direction/report.md || \
+            cat /tmp/d8-reduce-scan-direction/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d8-reduce-scan-direction
+          path: /tmp/d8-reduce-scan-direction/
+          retention-days: 14
