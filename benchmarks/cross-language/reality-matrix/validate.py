@@ -67,12 +67,17 @@ def main() -> int:
                 if not measurement.get("sens_samples") or not measurement.get("competitor_samples"):
                     fail(f"{wid}/{axis}: measured rows require raw samples")
 
-            # #3698 owns RSS. Fail closed until its dedicated per-process primitive lands.
+            # #3698 owns RSS. Only its validated fresh-process GNU-time primitive is admissible.
             if axis == "process_maxrss_kb" and measurement.get("status") == "measured":
-                fail(
-                    f"{wid}/{axis}: RSS must remain inconclusive until #3698 "
-                    "provides a validated per-process primitive"
-                )
+                if env.get("rss_measurement") != "gnu-time-per-process-v1":
+                    fail(
+                        f"{wid}/{axis}: measured RSS requires "
+                        "environment.rss_measurement=gnu-time-per-process-v1"
+                    )
+                for side in ("sens_samples", "competitor_samples"):
+                    samples = measurement.get(side, [])
+                    if any(value <= 0 for value in samples):
+                        fail(f"{wid}/{axis}: RSS samples must be positive")
 
     seen_axes: set[str] = set()
     for verdict in data["verdicts"]:
