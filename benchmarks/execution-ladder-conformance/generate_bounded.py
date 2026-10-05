@@ -239,6 +239,7 @@ def main() -> int:
         "profile": PROFILE,
         "claim": "exhaustive within the declared D2/D3 structural grammar and bound",
         "bound": BOUND,
+        "generated_cases": raw_count,
         "raw_candidates": raw_count,
         "deduplicated_cases": len(workloads),
         "oracle_rows": len(rows),
