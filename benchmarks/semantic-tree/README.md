@@ -1,28 +1,85 @@
 # #1988 semantic-tree execution benchmark
 
-Research-only benchmark for the proven CAR/CDR selector family.
+Research-only benchmark for the proved CAR/CDR selector family.
 
-It compares the same canonical selector words through:
+## Current P0 profile — Contract 11.5 D6 generator vs flat16
 
-- `flat`: dense predecoded table lookup;
-- `cold`: decode `root + suffix` on every call;
-- `compiled`: decode distinct paths during preparation and execute by compact descriptor index, with no runtime hash;
-- `cached`: decode distinct paths during preparation, then use a runtime HashMap lookup;
-- `hybrid`: direct root arm plus generated-path cache/fallback branch.
+The first current result is deliberately narrow: the **16 D6 selector residents**
+made executable by #3553/#3394 are measured two ways on the same deterministic
+workload:
 
-The harness separates one-time preparation from execution. Cachegrind execution
-cost is computed as `median(full) - median(prepare)`.
+- `flat` — dense 16-entry predecoded table, **benchmark-only control**;
+- `cold` — derive the operation from the selector generator law on every call;
+- `compiled` — derive each distinct path during preparation and execute via a
+  compact descriptor index.
 
-Correctness is checked before measurement: all four routes must return the same
-tree node for the same workload.
+Current selector geometry is:
 
-Example smoke run:
+```text
+D3 roots: CAR=100, CDR=011
+D6 selector = D3 root + 3 selector suffix bits
 
-```sh
-python3 benchmarks/semantic-tree/run.py --smoke --out /tmp/sens-1988
+011000..011111
+100000..100111
 ```
 
-Full bounded matrix:
+The flat table is never semantic authority, never a production fallback and
+never a compatibility route.
+
+Run the exact current profile:
+
+```sh
+python3 benchmarks/semantic-tree/run.py \
+  --current-d6 \
+  --calls 100000 \
+  --samples 3 \
+  --out /tmp/sens-1988-d6
+```
+
+Fast smoke:
+
+```sh
+python3 benchmarks/semantic-tree/run.py \
+  --current-d6 --smoke \
+  --out /tmp/sens-1988-d6-smoke
+```
+
+The CI smoke first runs the **real** `d6_selector_runtime` evaluator witness
+from #3553 and only then runs this isolated paired mechanism benchmark. Thus the
+performance control cannot silently drift away from the admitted runtime law.
+
+## Measurements
+
+Preparation and execution remain separate. Additive work counters use:
+
+```text
+median(full - prepare)
+```
+
+This is used for instruction references and branch counts. Cache misses and
+branch mispredictions are stateful across separate Cachegrind processes, so the
+report keeps their `prepare_*` and `full_*` totals separate and does **not**
+label a subtraction as isolated execution misses.
+
+Current counters include:
+
+- instruction references;
+- L1 instruction misses;
+- L1 data misses;
+- branches;
+- branch mispredicts;
+- selector/generator semantic counters;
+- flat table entries/bytes;
+- preparation cost and repeat-N execution cost.
+
+Every current row carries Contract 11.5 scope/provenance in `environment.json`
+and `instructions.tsv`.
+
+A generator loss to `flat` is a valid completed negative result.
+
+## General research matrix
+
+The older depth sweep remains available for mechanism research:
 
 ```sh
 python3 benchmarks/semantic-tree/run.py \
@@ -31,6 +88,11 @@ python3 benchmarks/semantic-tree/run.py \
   --calls 100000 --samples 3
 ```
 
+Other research modes remain:
+
+- `cached` — prewarmed runtime HashMap;
+- `hybrid` — root arm plus generated-path cache/fallback.
+
 The Rust binary is a mechanism model, not semantic authority. Semantic counters
 (tree/prefix/generator/cache/registry operations) are reported independently of
-CPU instruction counts.
+CPU counters.
