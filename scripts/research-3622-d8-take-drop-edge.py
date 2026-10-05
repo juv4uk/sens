@@ -216,12 +216,22 @@ def run() -> dict[str, object]:
     mode_toggle = {"take": "drop", "drop": "take"}
     edge_toggle = {"left": "right", "right": "left"}
 
+    def apply_mode(state: tuple[str, str]) -> tuple[str, str]:
+        mode, edge = state
+        return (mode_toggle[mode], edge)
+
+    def apply_edge(state: tuple[str, str]) -> tuple[str, str]:
+        mode, edge = state
+        return (mode, edge_toggle[edge])
+
     commutativity_checks = 0
     for mode in ("take", "drop"):
         for edge in ("left", "right"):
-            first = square[(mode_toggle[mode], edge_toggle[edge])]
-            second = square[(mode_toggle[mode], edge_toggle[edge])]
-            assert first == second
+            start = (mode, edge)
+            mode_then_edge = apply_edge(apply_mode(start))
+            edge_then_mode = apply_mode(apply_edge(start))
+            assert mode_then_edge == edge_then_mode
+            assert square[mode_then_edge] == square[edge_then_mode]
             commutativity_checks += 1
 
     total = len(cases)
