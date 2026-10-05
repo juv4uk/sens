@@ -54,6 +54,7 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
     storage_bits = int(row["storage_container_bits"])
     total_wire_bits = int(row["total_wire_bits"])
     physical_bytes = int(row["physical_container_bytes"])
+    utilization = row["payload_utilization"]
     bitrate = float(row["bitrate_bps"])
     airtime = float(row["ideal_airtime_seconds"])
 
@@ -85,6 +86,9 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
             f"line {line_no}: total_wire_bits must be "
             "carrier + framing + integrity + profile_overhead"
         )
+    expected_utilization = semantic_bits / total_wire_bits
+    if utilization is None or not close(float(utilization), expected_utilization):
+        raise ValueError(f"line {line_no}: invalid payload utilization")
     if bitrate <= 0 or not close(airtime, total_wire_bits / bitrate):
         raise ValueError(f"line {line_no}: invalid airtime derivation")
 
