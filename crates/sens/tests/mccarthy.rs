@@ -1085,9 +1085,12 @@ fn read_all_rejects_a_non_string() {
 
 #[test]
 fn string_predicate_distinguishes_strings_from_other_atoms() {
-    assert_eq!(eval("(string? \"hello\")").to_string(), "t");
-    assert_eq!(eval("(string? (quote hello))").to_string(), "()");
-    assert_eq!(eval("(string? 5)").to_string(), "()");
+    assert_eq!(eval("(string? \"hello\")").as_predicate_bit(), Some(true));
+    assert_eq!(
+        eval("(string? (quote hello))").as_predicate_bit(),
+        Some(false)
+    );
+    assert_eq!(eval("(string? 5)").as_predicate_bit(), Some(false));
 }
 
 #[test]
