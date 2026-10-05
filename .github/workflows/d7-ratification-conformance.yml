@@ -20,5 +20,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Verify historical D7 role boundaries under research status
+      - name: Verify ratified D7 role boundaries
         run: python3 benchmarks/d7-ratification-conformance/validate.py
