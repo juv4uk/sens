@@ -426,19 +426,45 @@ fn supporting_evidence_is_nil_when_claim_ref_does_not_match() {
 }
 
 #[test]
-fn supporting_evidence_still_works_as_a_cond_truthiness_check() {
-    // The exact case the audit's own next step asked to verify: a
-    // caller who only wants flow control, not the evidence itself,
-    // needs no change at all -- `cond` already treats any non-Nil
-    // value (including a full evidence record) as truthy.
-    assert_eq!(
-        eval_epistemic(
-            r#"(cond
+fn supporting_evidence_record_is_not_implicitly_truthy_in_cond() {
+    // Retrieval returns data, not a D1 predicate. Canonical COND must reject
+    // the record rather than resurrect generic non-empty-list truthiness.
+    let mut session = Session::default();
+    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    eval_program(include_str!("../../../lib/epistemic.lisp"), &mut session).unwrap();
+
+    let source = r#"(cond
                  ((supporting-evidence
                     (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
                     (quote (claim-ref cml-build-available)))
                   (quote flows-through))
-                 (t (quote unreachable)))"#
+                 (t (quote unreachable)))"#;
+
+    let error = eval_program(source, &mut session)
+        .expect_err("retrieved evidence record must not be accepted as a COND predicate");
+    assert_eq!(error.kind, sens::ErrorKind::Type);
+    assert!(
+        error.message.contains("COND expects exact D1"),
+        "unexpected canonical COND rejection: {error}"
+    );
+}
+
+#[test]
+fn supporting_evidence_can_drive_cond_through_an_explicit_d1_predicate() {
+    // Positive control: retrieval stays data; an explicit exact-D1 question
+    // about that data drives COND.
+    assert_eq!(
+        eval_epistemic(
+            r#"(cond
+                 ((тотожне?
+                    (evidence-outcome
+                      (supporting-evidence
+                        (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
+                        (quote (claim-ref cml-build-available))))
+                    (quote supports))
+                  (quote flows-through))
+                 ((тотожне? (quote fallback) (quote fallback))
+                  (quote unreachable)))"#,
         ),
         "flows-through"
     );
