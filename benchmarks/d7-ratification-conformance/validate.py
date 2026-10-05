@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#2517 — ratified D7 conformance witness.
+"""#2517 historical D7 conformance witness, replayed as research under Contract 11.5.
 
 Owner authority:
   D7 = Sound7/Sanskrit sound-related objects
@@ -207,7 +207,7 @@ def main() -> None:
     # There is deliberately no occupancy claim: width-valid != admitted resident.
     width_valid_coordinate_count = 128
 
-    print("OWNER-D7-RATIFICATION=PASS")
+    print("D7-ROLE-BOUNDARY=PASS")
     print("D7-WIDTH=7")
     print("D7-ROLES=sound-cell,local-ordinal")
     print("SAME-BITS-SOUND-VS-ORDINAL=DISTINCT")
@@ -219,8 +219,8 @@ def main() -> None:
     print("D14-LINK=PROVENANCE-ONLY")
     print(f"WIDTH-VALID-COORDINATES={width_valid_coordinate_count}")
     print("OCCUPANCY-CLAIM=NONE")
-    print("STATUS=PASS-RATIFIED-D7-CONFORMANCE")
-    print("AUTHORITY=OWNER-RATIFIED-DOMAIN;RESEARCH-WITNESS")
+    print("STATUS=PASS-D7-RESEARCH-ROLE-CONFORMANCE")
+    print("AUTHORITY=HISTORICAL-OWNER-EVIDENCE;CURRENT=RESEARCH")
 
 
 if __name__ == "__main__":
