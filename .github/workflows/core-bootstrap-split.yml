@@ -1,0 +1,83 @@
+name: Core bootstrap split / розклад
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/examples/startup_bench.rs'
+      - 'benchmarks/core-bootstrap-split/**'
+      - '.github/workflows/core-bootstrap-split.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: core-bootstrap-split-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: core-bootstrap-3629
+
+      - name: Встановити Valgrind / Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Зібрати startup benchmark / Build
+        run: cargo build --release -p sens --example startup_bench
+
+      - name: Виміряти bare/default split / Measure
+        run: |
+          rm -rf /tmp/core-bootstrap-3629
+          python3 benchmarks/core-bootstrap-split/run.py \
+            --runner target/release/examples/startup_bench \
+            --fasl lib/core.lisp.fasl \
+            --reps 3 \
+            --out /tmp/core-bootstrap-3629
+          cat /tmp/core-bootstrap-3629/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Перевірити machine-readable rows / Validate
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line)
+              for line in Path('/tmp/core-bootstrap-3629/rows.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          summary = json.loads(Path('/tmp/core-bootstrap-3629/summary.json').read_text())
+
+          modes = {row['mode'] for row in rows}
+          expected = {
+              'root', 'session', 'root-macro', 'macro',
+              'root-core', 'core', 'bytes', 'decode', 'parse'
+          }
+          assert modes == expected
+          for mode in expected:
+              assert sum(row['mode'] == mode for row in rows) == 3
+          assert summary['schema'] == 'sens-core-bootstrap-split-summary/v1'
+          assert summary['reps'] == 3
+          assert 'default_session_minus_root_i_refs' in summary['derived_diagnostics']
+          assert 'first_macro_minus_root_i_refs' in summary['derived_diagnostics']
+          assert 'second_macro_minus_session_i_refs' in summary['derived_diagnostics']
+          assert 'root_core_minus_root_i_refs' in summary['derived_diagnostics']
+          assert 'default_core_minus_session_i_refs' in summary['derived_diagnostics']
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-bootstrap-split-3629
+          path: /tmp/core-bootstrap-3629
+          if-no-files-found: error
