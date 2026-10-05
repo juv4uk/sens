@@ -143,16 +143,18 @@ def load_fixtures(path: Path) -> list[dict[str, object]]:
     return fixtures
 
 
-def normalized_exact_words(source: str) -> str:
+def exact_words(source: str) -> list[str]:
     words = source.split()
     if not words:
         raise ValueError("canonical source is empty")
-    normalized: list[str] = []
     for word in words:
         if not (1 <= len(word) <= 8) or any(bit not in "01" for bit in word):
             raise ValueError(f"invalid exact-width word: {word!r}")
-        normalized.append(f"{len(word)}:{word}")
-    return "|".join(normalized)
+    return words
+
+
+def normalized_exact_words(source: str) -> str:
+    return "|".join(f"{len(word)}:{word}" for word in exact_words(source))
 
 
 def write_source(tmp: Path, fixture_id: str, suffix: str, source: str) -> Path:
@@ -256,6 +258,8 @@ def make_row(
     current_contract: str,
     semantic_identity_digest: str,
     identity_proof: str,
+    semantic_word_count: int,
+    expected_semantic_bits: int,
     semantic_payload_bits: int,
     framing_bits: int,
     tail_unused_bits: int,
@@ -279,6 +283,8 @@ def make_row(
         "contract_version": current_contract,
         "semantic_identity_digest": semantic_identity_digest,
         "identity_proof": identity_proof,
+        "semantic_word_count": semantic_word_count,
+        "expected_semantic_bits": expected_semantic_bits,
         "semantic_payload_bits": semantic_payload_bits,
         "framing_bits": framing_bits,
         "tail_unused_bits": tail_unused_bits,
@@ -354,10 +360,25 @@ def main() -> int:
             canonical_path = write_source(
                 tmp, fixture_id, "canonical", canonical_source
             )
+            words = exact_words(canonical_source)
+            expected_semantic_bits = sum(len(word) for word in words)
+            expected_artifact_bytes = (expected_semantic_bits + 7) // 8
             facts = packing_facts(packing_helper, canonical_path, framing_bits)
 
             semantic_bits = int(facts["semantic_payload_bits"])
             packed_bytes = int(facts["physical_container_bytes"])
+            if semantic_bits != expected_semantic_bits:
+                raise ValueError(
+                    f"{fixture_id}: expected_semantic_bits={expected_semantic_bits} "
+                    f"actual_semantic_bits={semantic_bits} artifact_bytes={packed_bytes}"
+                )
+            if packed_bytes != expected_artifact_bytes:
+                raise ValueError(
+                    f"{fixture_id}: expected_semantic_bits={expected_semantic_bits} "
+                    f"actual_semantic_bits={semantic_bits} "
+                    f"expected_artifact_bytes={expected_artifact_bytes} "
+                    f"artifact_bytes={packed_bytes}"
+                )
             storage_bits = packed_bytes * 8
             if storage_bits - semantic_bits != int(facts["tail_unused_bits"]):
                 raise ValueError(f"{fixture_id}: tail accounting mismatch")
@@ -394,7 +415,8 @@ def main() -> int:
                 "canonical_source_sha256": sha256_bytes(
                     canonical_source.encode("utf-8")
                 ),
-                "semantic_word_count": int(facts["semantic_word_count"]),
+                "semantic_word_count": len(words),
+                "expected_semantic_bits": expected_semantic_bits,
                 "byte_container_total_bits": int(facts["byte_container_total_bits"]),
                 "byte_container_payload_utilization": float(
                     facts["payload_utilization"]
@@ -410,6 +432,8 @@ def main() -> int:
                     current_contract=current_contract,
                     semantic_identity_digest=identity_digest,
                     identity_proof=identity_proof,
+                    semantic_word_count=len(words),
+                    expected_semantic_bits=expected_semantic_bits,
                     semantic_payload_bits=semantic_bits,
                     framing_bits=framing_bits,
                     tail_unused_bits=int(facts["tail_unused_bits"]),
@@ -434,6 +458,8 @@ def main() -> int:
                         current_contract=current_contract,
                         semantic_identity_digest=identity_digest,
                         identity_proof=identity_proof,
+                        semantic_word_count=len(words),
+                        expected_semantic_bits=expected_semantic_bits,
                         semantic_payload_bits=semantic_bits,
                         framing_bits=0,
                         tail_unused_bits=0,
