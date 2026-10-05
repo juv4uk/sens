@@ -1,12 +1,12 @@
 ; contracts/d1-d5-foundation-ratification.lisp
 ; OWNER-RATIFIED 2026-10-05 — issue #3331.
-; Single current semantic foundation chain.
+; Historical owner-ratified foundation cut; superseded as current authority by #3393 / Contract 11.5.
 ; Exact resident maps are delegated to the existing per-domain current
 ; authorities to avoid creating a second copied coordinate table.
 
 (
   (schema . d1-d5-foundation-ratification/1)
-  (status . owner-ratified)
+  (status . superseded-by-#3393)
   (owner-ratification . #3331)
   (date . "2026-10-05")
   (current-domains . (D1 D2 D3 D4 D5))
