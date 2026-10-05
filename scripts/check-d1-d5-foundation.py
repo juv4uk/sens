@@ -13,7 +13,8 @@ current=(root/"CURRENT.md").read_text(encoding="utf-8")
 rat=(root/"contracts/d1-d6-foundation-ratification.lisp").read_text(encoding="utf-8")
 
 assert f["status"]=="owner-ratified"
-assert old["authority"]=="#3331"\nassert f["authority"]=="#3393"
+assert old["authority"]=="#3331"
+assert f["authority"]=="#3393"
 assert f["current_domains"]==["D1","D2","D3","D4","D5","D6"]
 assert f["research_domains"]==["D7","D8"]
 
