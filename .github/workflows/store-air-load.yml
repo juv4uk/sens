@@ -135,6 +135,16 @@ jobs:
 
           zero_suffix = by_id['zero-suffix-mechanical']
           assert zero_suffix['tail_unused_bits'] == 2
+
+          overhead = by_id['seven-bit-overhead-mechanical']
+          assert overhead['semantic_payload_bits'] == 7
+          assert overhead['framing_bits'] == 5
+          assert overhead['integrity_bits'] == 3
+          assert overhead['profile_overhead_bits'] == 2
+          assert overhead['carrier_payload_bits'] == 7
+          assert overhead['total_wire_bits'] == 17
+          assert overhead['payload_utilization'] == 7 / 17
+          assert overhead['ideal_airtime_seconds'] == 8.5
           PY
 
       - name: Негативний контроль per-word byte inflation / Reject inflated reference encoder
