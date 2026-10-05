@@ -143,6 +143,7 @@ python3 benchmarks/store-air-load/load.py \
 Ratchet покриває всі критичні довжини:
 - `zero-suffix-mechanical` — 6 біт, semantic zero suffix;
 - `seven-bit-mechanical` — 7 біт, нижче байта;
+- `seven-bit-overhead-mechanical` — ті самі 7 semantic bits плюс 5 framing, 3 integrity і 2 profile-overhead bits;
 - `eight-bit-mechanical` — рівно 8 біт;
 - `twelve-bit-mechanical` — 9..15-бітний клас;
 - `mixed-28-bit-mechanical` — довга mixed-width послідовність D1..D7;
