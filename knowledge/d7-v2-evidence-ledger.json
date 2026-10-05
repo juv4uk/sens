@@ -63,6 +63,30 @@
       },
       "status": "RESEARCH-CANDIDATE-REQUIRES-OWNER-IDENTITY-MIGRATION",
       "note": "objective evidence strengthens the candidate but does not override the pinned SENS Text7 identity"
+    },
+    "post_migration_candidate": {
+      "occupancy": 124,
+      "free_coordinates": [
+        "0101111",
+        "0110100",
+        "1010001",
+        "1010011"
+      ],
+      "additional_identity_retirement": [
+        {
+          "coordinate": "1010001",
+          "baseline": "vowel.l-vocalic.oral.long",
+          "candidate_status": "ABSENT-IN-D",
+          "note": "candidate D / Shiva #114 rejects ḹ as an admitted sound"
+        },
+        {
+          "coordinate": "1010011",
+          "baseline": "vowel.l-vocalic.nasal.long",
+          "candidate_status": "ABSENT-IN-D",
+          "note": "dependent ḹ nasal-long Text identity is absent from v3 table"
+        }
+      ],
+      "warning": "candidate D is not a three-row rewrite; existing streams containing retired cells need an explicit compatibility policy"
     }
   },
   "guardrails": [
