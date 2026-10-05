@@ -1,75 +1,72 @@
 # Nock reality lane (#3685)
 
-This lane must keep **three different questions separate**.
+This lane keeps **three different questions separate**.
+
+## Pinned authorities
+
+- Nock 4K specification / serialization docs snapshot:
+  `urbit/docs.urbit.org@72133b05e5ee3994449e335a5d314394e9a42cc9`
+- Python jam reference linked by the official serialization guide:
+  `urbit/tools@c9c91ce142cfe85edbed320138f21c7213aceaab`
+- Runtime-performance owner:
+  `urbit/vere vere-v4.6@8ddc4b786979574dbfcb655e3db1b634f658d0de`
+
+The local `jam.py` is an independent implementation of the published algorithm and
+MUST pass official examples before emitting benchmark evidence.
 
 ## A. Machine minimality
 
-Pinned source of truth: Nock 4K specification.
+The Nock spec defines the machine. Do not reduce machine size to "12 opcodes" alone.
+Future work should record instruction forms, primitive reduction rules, noun model and
+a documented spec/evaluator footprint.
 
-- Official spec: https://docs.urbit.org/nock/specification
-- Nock formulas use instruction atoms 0..11.
-- The full reduction system also contains noun/data rules and the primitive operators
-  used by the instruction definitions.
+## B. Serialized program size — first executable slice
 
-Do not reduce "machine size" to the number 12 alone. Record:
-- instruction forms;
-- primitive reduction operators/rules;
-- data model;
-- evaluator/spec text footprint under a documented counting rule.
+Two current D3 fixtures are mapped to self-contained Nock formulas with subject `0`.
 
-## B. Serialized program size
+`d3-quote-empty`:
 
-Pinned source of truth: Urbit noun serialization.
+```
+*[0 [1 0]] => 0
+formula noun = [1 0]
+```
 
-- Official serialization docs: https://docs.urbit.org/hoon/serialization
-- Nock code is a noun.
-- The canonical compact transport baseline is `jam`/ `cue`.
-- Newt is a framed transport and must be reported separately from raw jam bits.
+`d3-car-empty`:
 
-First matched controls should map the existing D3 smoke observables to explicit
-`[subject formula]` nouns and compare:
-- SENS exact semantic bits;
-- SENS production packed bytes;
-- Nock jam bit length / byte container;
-- optional Newt framed bytes as a separate transport row.
+```
+*[0 [7 [1 [0 0]] [0 2]]] => 0
+```
 
-The noun mapping itself must be published; atom 0 is only a benchmark representation of
-the fixture's empty observable, not a claim of SENS/Nock semantic identity.
+The second formula first produces literal `[0 0]`, then applies axis 2.
+
+The ranked artifact axis compares:
+- SENS production exact semantic bits / packed bytes;
+- jammed **Nock formula** bits / byte container.
+
+A separate diagnostic row records jammed `[subject formula]` capsule size, but it is
+not ranked because SENS and Nock expose different session/subject boundaries.
+
+Run:
+
+```sh
+python3 benchmarks/cross-language/reality-matrix/nock/run.py \
+  --out-dir /tmp/sens-nock-reality
+```
 
 ## C. Runtime performance
 
-Pinned implementation family: Vere.
+Runtime performance belongs to pinned Vere, not to the tiny Python correctness oracle.
+No Python/ad-hoc Nock evaluator may produce a speed verdict.
 
-- Runtime repository: https://github.com/urbit/vere
-- Vere does not simply execute the 47-line spec text; it builds/executes an internal
-  bytecode and has jets/optimized runtime mechanisms.
-
-Therefore a Python or ad-hoc evaluator in this repo may be used only as a correctness
-oracle/falsifier. It MUST NOT produce the Nock runtime performance verdict.
-
-A runtime row needs:
-- pinned Vere release/commit;
+A future Vere row must pin:
+- release/commit;
 - build flags;
 - exact noun input;
 - jet policy;
-- warm/cold distinction;
+- warm/cold mode;
 - same-machine raw evidence.
 
 ## Semantic-density rule
 
-Nock machine minimality and SENS law-generated semantic density are different axes.
-
-For SENS, keep the Reality Matrix tuple:
-`independent_roots, independent_laws, derived_residents, admitted_residents_in_scope`.
-
-For Nock, record the corresponding minimal machine/spec facts without inventing a
-"derived resident" concept that Nock itself does not have. No magic combined score.
-
-## First deliverable
-
-Before any speed claim:
-1. pin spec/serialization/runtime versions;
-2. implement or call a jam encoder with official test vectors;
-3. publish the exact matched noun mapping for the two D3 controls;
-4. compare raw artifact sizes;
-5. only then decide whether building pinned Vere is worth the runtime slice.
+Nock machine minimality and SENS law-generated semantic density remain separate axes.
+Do not invent a combined magic score or a fake Nock "derived resident" concept.
