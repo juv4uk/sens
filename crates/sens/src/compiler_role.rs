@@ -17,8 +17,7 @@ pub enum CompilerExecutionRole {
     PairConstruct,
 }
 
-/// Project one exact current identity to the first compiler execution-role slice.
-///
+/// Differential/bootstrap oracle for the first compiler execution-role slice.\n///\n/// Production compiler consumers should use `compiler_execution_role_from_sens`,\n/// which executes the language-owned law. This Rust projection remains as an\n/// independent oracle while the cutover is being proved.\n///
 /// The projection delegates to the production selector-law decoder used by the
 /// evaluator. No second D3 bits-to-role table is maintained here. The first
 /// compiler bridge is deliberately bounded to D3 selector roots; D4/D5
