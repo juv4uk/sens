@@ -50,10 +50,13 @@ fn verify_invariants() {
         }
     }
 
+    // Callability is a separate mechanism axis, not a width/identity law.
+    // D1/D2 are structural/non-callable controls; D7/D8 are research controls.
+    // D3/D4 have established callable projection. D5/D6 are intentionally not
+    // asserted here because their executable coverage evolves independently of
+    // semantic residency and is measured by the callable-projection case.
     assert!(same_payload[0].core_operation().is_none());
     assert!(same_payload[1].core_operation().is_none());
-    assert!(same_payload[4].core_operation().is_none());
-    assert!(same_payload[5].core_operation().is_none());
     assert!(same_payload[6].core_operation().is_none());
     assert!(same_payload[7].core_operation().is_none());
     assert!(same_payload[2].core_operation().is_some());
