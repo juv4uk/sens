@@ -253,7 +253,7 @@ def main() -> int:
         "git_sha": git_fact("rev-parse", "HEAD"),
         "semantic_generation": "contract-11-5-exact-d1-d6",
         "authority": "#3393",
-        "mixed_source": "#3422",
+        "mixed_source": "#3464",
         "benchmark_issue": "#3417",
         "runner": runner,
         "runner_sha256": subprocess.run(
