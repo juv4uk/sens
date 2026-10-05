@@ -7,6 +7,8 @@ on:
       - "knowledge/bija3-l1-l5-structure-projection.json"
       - "crates/sens/src/compiler_bootstrap.rs"
       - "crates/sens/src/compiler_role.rs"
+      - "crates/sens/src/compiler_lowering.rs"
+      - "crates/sens/src/compiler_lowering.rs"
       - "crates/sens/src/compiler_language.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
       - "crates/sens/tests/compiler_nucleus_diff.rs"
@@ -49,4 +51,9 @@ jobs:
         run: >-
           cargo test -p sens --lib
           compiler_language::tests::stale_law_authority_is_a_bootstrap_failure_before_role_execution
+          -- --nocapture
+      - name: Whole-nucleus compiler lowering roles
+        run: >-
+          cargo test -p sens --lib
+          compiler_lowering::tests
           -- --nocapture
