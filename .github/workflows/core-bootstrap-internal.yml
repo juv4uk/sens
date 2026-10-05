@@ -1,0 +1,130 @@
+name: Core bootstrap internal split / внутрішній розклад
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/src/lib.rs'
+      - 'crates/sens/src/bootstrap_measurement.rs'
+      - 'benchmarks/core-bootstrap-internal/**'
+      - '.github/workflows/core-bootstrap-internal.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: core-bootstrap-internal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  internal-split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: core-bootstrap-3648
+
+      - name: Встановити Valgrind / Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Зібрати release lib-test один раз / Build test binary once
+        run: |
+          cargo test --release -p sens --lib --no-run --message-format=json             | tee /tmp/sens-lib-test-build.jsonl
+          python3 - <<'PY' > /tmp/sens-lib-test-path
+          import json
+          from pathlib import Path
+
+          matches = []
+          for raw in Path('/tmp/sens-lib-test-build.jsonl').read_text().splitlines():
+              try:
+                  row = json.loads(raw)
+              except json.JSONDecodeError:
+                  continue
+              if row.get('reason') != 'compiler-artifact':
+                  continue
+              target = row.get('target', {})
+              profile = row.get('profile', {})
+              executable = row.get('executable')
+              if (
+                  target.get('name') == 'sens'
+                  and 'lib' in target.get('kind', [])
+                  and profile.get('test') is True
+                  and executable
+              ):
+                  matches.append(executable)
+
+          if len(matches) != 1:
+              raise SystemExit(f'expected one sens lib-test executable, got: {matches}')
+          print(matches[0])
+          PY
+          test -x "$(cat /tmp/sens-lib-test-path)"
+          "$(cat /tmp/sens-lib-test-path)"             bootstrap_measurement::bootstrap_measure_dispatch             --exact --ignored --list
+
+      - name: Виміряти matched-prefix stages / Measure
+        run: |
+          rm -rf /tmp/core-bootstrap-3648
+          python3 benchmarks/core-bootstrap-internal/run.py             --test-binary "$(cat /tmp/sens-lib-test-path)"             --reps 3             --git-sha "$GITHUB_SHA"             --contract-version 11.6             --out /tmp/core-bootstrap-3648
+          cat /tmp/core-bootstrap-3648/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Перевірити artifact / Validate
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line)
+              for line in Path('/tmp/core-bootstrap-3648/rows.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          summary = json.loads(
+              Path('/tmp/core-bootstrap-3648/summary.json').read_text()
+          )
+
+          expected = {
+              'root',
+              'profile',
+              'macro',
+              'decode',
+              'eval-no-peers',
+              'eval-with-peers',
+              'full-loader',
+          }
+          assert {row['stage'] for row in rows} == expected
+          for stage in expected:
+              assert sum(row['stage'] == stage for row in rows) == 3
+
+          assert summary['schema'] == 'sens-core-bootstrap-internal-summary/v1'
+          assert summary['contract_version'] == '11.6'
+          assert summary['reps'] == 3
+          assert summary['api_boundary'] == (
+              'test-only private access; no public semantic API added'
+          )
+
+          deltas = summary['stage_deltas']
+          for field in (
+              'profile_setup_i_refs',
+              'first_macro_i_refs',
+              'fasl_decode_freshness_i_refs',
+              'decoded_core_eval_i_refs',
+              'stable_peer_projection_i_refs',
+              'full_loader_delta_i_refs',
+          ):
+              assert isinstance(deltas[field], int)
+              assert deltas[field] >= 0
+
+          assert isinstance(deltas['production_loader_gap_i_refs'], int)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-bootstrap-internal-3648
+          path: /tmp/core-bootstrap-3648
+          if-no-files-found: error
