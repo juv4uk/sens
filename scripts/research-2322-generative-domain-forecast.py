@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""#2322 generative domain forecast from proved selector laws.
+"""#2322/#3281 selector-family positive control under Contract 11.6.
 
-Research-only positive control. The only semantic assumptions are the already
-admitted selector facts:
-- exact D3 roots 101 (CAR) and 110 (CDR);
-- append 0 = compose CAR;
-- append 1 = compose CDR;
-- the selector law is local to the selector family.
+Current semantic authority:
+- D3 roots: 011 (CDR), 100 (CAR), authority #3202.
+- D4-D6 continue the admitted one-bit selector generator.
+- D7 is a separate Sound7/Text7 domain (#3572), so selector ancestry does not
+  pass through D7.
+- D8 is research (#3281). Its selector candidate set is generated directly
+  from current D6 selector residents by appending TWO selector choices at once.
 
-No non-selector coordinate is allocated and the selector law is not generalized.
+This witness proves coordinate generation only. It does not ratify D8
+residency or callability and it never uses Function8/Sens8 history.
 """
 
 from __future__ import annotations
@@ -19,22 +21,26 @@ import json
 from itertools import product
 from pathlib import Path
 
-ROOTS = ("101", "110")
-LAW_BITS = ("0", "1")
-MODEL_FACTS = len(ROOTS) + len(LAW_BITS)
+ROOTS = ("011", "100")  # CDR, CAR under #3202
+LAW_BITS = ("0", "1")   # compose CAR / compose CDR selector choice
+CURRENT_SELECTOR_MAX_WIDTH = 6
+D7_WIDTH = 7
+D8_WIDTH = 8
 
-EXPECTED_D4 = {"1010", "1011", "1100", "1101"}
-EXPECTED_D5 = {
-    "10100", "10101", "10110", "10111",
-    "11000", "11001", "11010", "11011",
+EXPECTED = {
+    3: {"011", "100"},
+    4: {"0110", "0111", "1000", "1001"},
+    5: {
+        "01100", "01101", "01110", "01111",
+        "10000", "10001", "10010", "10011",
+    },
 }
 
 
-def selector_words(width: int) -> list[str]:
-    if width < 3:
-        raise ValueError("selector roots begin at D3")
-    if width == 3:
-        return list(ROOTS)
+def current_selector_words(width: int) -> list[str]:
+    """Generate the current D3-D6 selector family only."""
+    if not 3 <= width <= CURRENT_SELECTOR_MAX_WIDTH:
+        raise ValueError("current selector ladder is defined only for D3-D6")
     suffix_width = width - 3
     return sorted(
         root + "".join(bits)
@@ -43,94 +49,133 @@ def selector_words(width: int) -> list[str]:
     )
 
 
+def d8_selector_candidates_from_d6() -> list[str]:
+    """Two-step D6 -> D8 jump; D7 is not a semantic parent."""
+    return sorted(
+        parent + "".join(bits)
+        for parent in current_selector_words(6)
+        for bits in product(LAW_BITS, repeat=2)
+    )
+
+
+def d8_direct_root_expansion() -> list[str]:
+    """Independent coordinate equality witness, not a D7 semantic chain."""
+    return sorted(
+        root + "".join(bits)
+        for root in ROOTS
+        for bits in product(LAW_BITS, repeat=5)
+    )
+
+
+def selector_words(width: int) -> list[str]:
+    if 3 <= width <= CURRENT_SELECTOR_MAX_WIDTH:
+        return current_selector_words(width)
+    if width == D7_WIDTH:
+        return []
+    if width == D8_WIDTH:
+        return d8_selector_candidates_from_d6()
+    raise ValueError("this bounded witness supports D3-D8 only")
+
+
+def semantic_status(width: int) -> str:
+    if 3 <= width <= 6:
+        return "current"
+    if width == 7:
+        return "foreign-domain-no-selector-admission"
+    if width == 8:
+        return "research-candidate"
+    raise ValueError(width)
+
+
+def derivation(width: int) -> str:
+    if width == 3:
+        return "owner-ratified-roots"
+    if 4 <= width <= 6:
+        return "one-bit-selector-generator"
+    if width == 7:
+        return "D7-owned-by-Sound7/Text7"
+    if width == 8:
+        return "D6-plus-two-selector-bits"
+    raise ValueError(width)
+
+
 def row_for(width: int) -> dict[str, object]:
     words = selector_words(width)
     capacity = 1 << width
     owned = len(words)
-    descendants = 0 if width == 3 else owned
-    unexplained = capacity - owned
-    ratio = owned / capacity
-
-    assert ratio == 0.25
-    assert len(set(words)) == owned
-    assert all(len(word) == width for word in words)
-    assert all(set(word) <= {"0", "1"} for word in words)
-
     return {
         "width": width,
         "capacity": capacity,
-        "selector_roots": len(ROOTS),
-        "generator_laws": len(LAW_BITS),
-        "path_depth": width - 3,
-        "selector_owned_coordinates": owned,
-        "generated_descendants_at_width": descendants,
-        "unexplained_coordinates": unexplained,
-        "selector_fraction": ratio,
-        "model_fact_proxy": MODEL_FACTS,
-        "flat_selector_rows_proxy": owned,
-        "row_to_model_fact_ratio": owned / MODEL_FACTS,
-        "row_equivalent_savings_proxy": max(0, owned - MODEL_FACTS),
+        "selector_coordinates": owned,
+        "selector_fraction": owned / capacity,
+        "semantic_status": semantic_status(width),
+        "derivation": derivation(width),
+        "unexplained_or_other_domain": capacity - owned,
     }
 
 
 def build(min_width: int, max_width: int):
+    if min_width < 3 or max_width > 8 or max_width < min_width:
+        raise ValueError("require 3 <= min-width <= max-width <= 8")
+
     rows = [row_for(width) for width in range(min_width, max_width + 1)]
-    words = {
-        f"D{width}": selector_words(width)
-        for width in range(min_width, max_width + 1)
-    }
+    words = {f"D{width}": selector_words(width) for width in range(min_width, max_width + 1)}
 
-    if min_width <= 4 <= max_width:
-        assert set(words["D4"]) == EXPECTED_D4
-    if min_width <= 5 <= max_width:
-        assert set(words["D5"]) == EXPECTED_D5
+    for width, expected in EXPECTED.items():
+        if min_width <= width <= max_width:
+            assert set(words[f"D{width}"]) == expected
 
-    for left, right in zip(rows, rows[1:]):
-        assert int(right["selector_owned_coordinates"]) == 2 * int(left["selector_owned_coordinates"])
-        assert int(right["capacity"]) == 2 * int(left["capacity"])
-        assert right["selector_fraction"] == left["selector_fraction"] == 0.25
+    if min_width <= 6 <= max_width:
+        assert len(words["D6"]) == 16
+
+    if min_width <= 7 <= max_width:
+        assert words["D7"] == []
+
+    if min_width <= 8 <= max_width:
+        d8 = words["D8"]
+        assert len(d8) == 64
+        assert d8 == d8_direct_root_expansion()
+        d6 = set(current_selector_words(6))
+        assert all(word[:6] in d6 for word in d8)
+
+    for width in range(max(4, min_width), min(6, max_width) + 1):
+        assert len(words[f"D{width}"]) == 2 * len(words[f"D{width - 1}"])
 
     return rows, words
 
 
 def report(rows: list[dict[str, object]]) -> str:
     lines = [
-        "# Generative domain forecast — #2322",
+        "# Selector-family authority forecast — #2322 / #3281",
         "",
-        "Positive control only: CAR/CDR selector roots + two admitted suffix laws.",
+        "Contract 11.6 boundary: D3-D6 current selector ladder; D7 Sound7/Text7;",
+        "D8 research-only two-step candidate generation from D6.",
         "",
-        "| domain | capacity | selector-owned | generated-at-width | unexplained | owned share | flat/model facts | row-equivalent savings |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| domain | capacity | selector coordinates | share | semantic status | derivation |",
+        "|---|---:|---:|---:|---|---|",
     ]
     for row in rows:
         lines.append(
             f"| D{row['width']} | {row['capacity']:,} | "
-            f"{row['selector_owned_coordinates']:,} | "
-            f"{row['generated_descendants_at_width']:,} | "
-            f"{row['unexplained_coordinates']:,} | "
+            f"{row['selector_coordinates']:,} | "
             f"{float(row['selector_fraction']):.2%} | "
-            f"{float(row['row_to_model_fact_ratio']):.2f}x | "
-            f"{row['row_equivalent_savings_proxy']:,} |"
+            f"{row['semantic_status']} | {row['derivation']} |"
         )
 
     lines += [
         "",
-        "Invariant proved by the bounded sweep:",
-        "selector_owned(Dn) = 2^(n-2)",
-        "capacity(Dn) = 2^n",
-        "selector_share = 1/4",
-        "",
-        "Model-fact proxy for this positive control is constant:",
-        "2 roots + 2 suffix laws = 4 independent facts",
-        "",
-        "This is only a compression/accounting proxy. A real proof-cost ledger",
-        "must also count certificates, typing facts, law versions and witnesses.",
+        "Proved bounded facts:",
+        "- D3-D6 selector counts are 2, 4, 8, 16 under the current roots 011/100.",
+        "- D7 contributes zero selector semantic residents; its width is owned by Sound7/Text7.",
+        "- D8 has 64 generated selector coordinate candidates from D6 × W2.",
+        "- The D8 set equals direct root + five selector bits as a coordinate identity check,",
+        "  but no D7 semantic ancestry is used or claimed.",
         "",
         "NON-CONCLUSIONS:",
-        "- unexplained coordinates are not automatically residue functions;",
-        "- free coordinates are not invitations to allocate semantics;",
-        "- selector laws do not generalize to non-selector roots;",
-        "- coordinate generation is not the same as semantic admission.",
+        "- the 64 D8 coordinates are not owner-ratified D8 residents;",
+        "- the remaining 192 D8 coordinates are not free invitations for allocation;",
+        "- W8 capacity does not imply Function8/Sens8 ontology;",
+        "- coordinate generation does not imply runtime callability.",
         "",
     ]
     return "\n".join(lines)
@@ -143,10 +188,11 @@ def main() -> int:
     ap.add_argument("--out", type=Path)
     args = ap.parse_args()
 
-    if args.min_width < 3 or args.max_width < args.min_width:
-        ap.error("require 3 <= min-width <= max-width")
+    try:
+        rows, words = build(args.min_width, args.max_width)
+    except ValueError as exc:
+        ap.error(str(exc))
 
-    rows, words = build(args.min_width, args.max_width)
     text = report(rows)
 
     if args.out is not None:
