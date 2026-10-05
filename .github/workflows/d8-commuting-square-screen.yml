@@ -1,0 +1,54 @@
+name: D8 commuting-square research screen
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-3618-d8-commuting-square-screen.py"
+      - "docs/research/3618-d8-commuting-square-screen.md"
+      - "knowledge/d6-v2-binary-law-families.json"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-commuting-square-screen.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/research-3618-d8-commuting-square-screen.py"
+      - "docs/research/3618-d8-commuting-square-screen.md"
+      - "knowledge/d6-v2-binary-law-families.json"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-commuting-square-screen.yml"
+  workflow_dispatch:
+
+jobs:
+  evidence-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Screen current D6 evidence for D8 two-axis products
+        run: |
+          rm -rf /tmp/d8-commuting-square-screen
+          python3 scripts/research-3618-d8-commuting-square-screen.py \
+            --out /tmp/d8-commuting-square-screen
+
+      - name: Re-run deterministically
+        run: |
+          rm -rf /tmp/d8-commuting-square-screen-2
+          python3 scripts/research-3618-d8-commuting-square-screen.py \
+            --out /tmp/d8-commuting-square-screen-2
+          cmp /tmp/d8-commuting-square-screen/screen.json \
+              /tmp/d8-commuting-square-screen-2/screen.json
+
+      - name: Publish report
+        if: always()
+        run: |
+          test ! -f /tmp/d8-commuting-square-screen/report.md || \
+            cat /tmp/d8-commuting-square-screen/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d8-commuting-square-screen
+          path: /tmp/d8-commuting-square-screen/
+          retention-days: 14
