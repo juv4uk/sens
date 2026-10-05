@@ -376,7 +376,7 @@ pub(super) fn prim_01001011(args: &[Value], env: &Environment, span: Span) -> Re
 /// numeric-buffer?
 pub(super) fn prim_00100110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
         exact_args(crate::sens!(00100110), args, 1, span)?;
-        Ok(if matches!(args[0], Value::NumericBuffer(_)) { Value::truth(true) } else { Value::Nil })
+        Ok(Value::predicate_bit(matches!(args[0], Value::NumericBuffer(_))))
     }
 
 /// numeric-buffer-type
