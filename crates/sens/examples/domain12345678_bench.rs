@@ -1,9 +1,10 @@
 //! #3001 W1-W8 exact-width carrier benchmark.
 //!
 //! Measures the source-word -> width-qualified DomainIdentity carrier path only.
-//! D5/D6/D8 are research carriers under #3278, not current ratified semantics.
-//! No registry, surface spelling, legacy Sens8/Function8, or benchmark-local
-//! semantic table participates.
+//! Contract 11.5 separates carrier mechanics from semantic authority:
+//! D1-D6 are current domains; D7-D8 remain research. Callable-operation
+//! projection is D3-D6 and remains distinct from executable mechanism admission.
+//! No registry, surface spelling, or benchmark-local semantic table participates.
 
 use sens::{
     BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, DomainIdentity,
@@ -51,12 +52,12 @@ fn verify_invariants() {
 
     assert!(same_payload[0].core_operation().is_none());
     assert!(same_payload[1].core_operation().is_none());
-    assert!(same_payload[4].core_operation().is_none());
-    assert!(same_payload[5].core_operation().is_none());
     assert!(same_payload[6].core_operation().is_none());
     assert!(same_payload[7].core_operation().is_none());
     assert!(same_payload[2].core_operation().is_some());
     assert!(same_payload[3].core_operation().is_some());
+    assert!(same_payload[4].core_operation().is_some());
+    assert!(same_payload[5].core_operation().is_some());
 }
 
 #[inline(never)]
