@@ -90,11 +90,25 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .collect()
 }
 
-fn authority_sha256() -> Result<String, LanguageError> {
-    let authority = LAW_PROJECTION
+fn authority_sha256_from(projection: &str) -> Result<String, LanguageError> {
+    let authority = projection
         .find("\"semantic_authority\"")
         .ok_or_else(|| invalid_projection("generated law projection has no authority provenance"))?;
-    quoted_json_string(&LAW_PROJECTION[authority..], "sha256")
+    quoted_json_string(&projection[authority..], "sha256")
+}
+
+fn verify_projection_authority(
+    projection: &str,
+    authority: &str,
+) -> Result<(), LanguageError> {
+    let expected_authority_sha = authority_sha256_from(projection)?;
+    let actual_authority_sha = sha256_hex(authority.as_bytes());
+    if expected_authority_sha != actual_authority_sha {
+        return Err(invalid_projection(
+            "generated L1-L5 projection is stale against its ratified authority",
+        ));
+    }
+    Ok(())
 }
 
 fn bit_list(bits: &str, width: usize) -> Result<Value, LanguageError> {
@@ -136,13 +150,7 @@ fn compiler_l1_l5_law_value() -> Result<Value, LanguageError> {
         }
     }
 
-    let expected_authority_sha = authority_sha256()?;
-    let actual_authority_sha = sha256_hex(LAW_AUTHORITY.as_bytes());
-    if expected_authority_sha != actual_authority_sha {
-        return Err(invalid_projection(
-            "generated L1-L5 projection is stale against its ratified authority",
-        ));
-    }
+    verify_projection_authority(LAW_PROJECTION, LAW_AUTHORITY)?;
 
     let width = projection_width()?;
     let empty = quoted_json_string(LAW_PROJECTION, "L1_empty")?;
@@ -242,4 +250,24 @@ pub fn compiler_execution_role_from_sens(
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_role(&result)
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn stale_law_authority_is_a_bootstrap_failure_before_role_execution() {
+        let stale_authority = format!("{LAW_AUTHORITY}\n; parity-test-stale-authority");
+        let error = verify_projection_authority(LAW_PROJECTION, &stale_authority)
+            .expect_err("stale authority must be rejected before SENS role execution");
+
+        assert!(
+            error
+                .to_string()
+                .contains("stale against its ratified authority"),
+            "unexpected stale-projection error: {error}"
+        );
+    }
 }
