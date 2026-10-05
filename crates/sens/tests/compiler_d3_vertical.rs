@@ -183,7 +183,7 @@ fn compiler_vertical_corpus_matches_current_evaluator_observables() {
             Expected::Value(expected) => {
                 let result = observed
                     .unwrap_or_else(|error| panic!("{} expected value, got {error:?}", case.name));
-                assert_eq!(result.value.to_string(), *expected, "{}", case.name);
+                assert_eq!(result.value.to_string(), expected.as_str(), "{}", case.name);
             }
             Expected::Error(expected_kind) => {
                 let error = match observed {
