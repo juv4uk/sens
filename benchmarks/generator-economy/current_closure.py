@@ -5,7 +5,7 @@ This harness measures the *economic shape* of one already-admitted semantic
 family. It never infers or ratifies semantics from compression.
 
 Source of truth:
-  knowledge/d1-d6-foundation.json  (#3393 / Contract 11.5)
+  knowledge/d1-d6-foundation.json  (#3393 D1-D6 foundation within Contract 11.6)
 
 Seed:
   D3:100 CAR
@@ -226,7 +226,7 @@ def compute_rows():
                 "frontier_non_selector_rows_unclassified": (
                     len(frontier_residents) - frontier_selectors
                 ),
-                "authority": "#3393 / Contract 11.5",
+                "authority": "#3393 D1-D6 foundation within Contract 11.6",
                 "family": "selector",
                 "foundation_sha256": foundation_sha256,
                 "git_sha": git_sha(),
@@ -283,7 +283,7 @@ def main():
         json.dumps(
             {
                 "schema": "sens-current-selector-closure/v1",
-                "authority": "#3393 / Contract 11.5",
+                "authority": "#3393 D1-D6 foundation within Contract 11.6",
                 "benchmark_issue": "#1973",
                 "theorem_consumer": "#3499",
                 "semantic_rule": (
