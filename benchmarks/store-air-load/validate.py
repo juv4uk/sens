@@ -108,6 +108,39 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
         if value is not None and (not isinstance(value, int) or value < 0):
             raise ValueError(f"line {line_no}: invalid {field}")
 
+    load_values = {field: row.get(field) for field in LOAD_FIELDS}
+    if any(value is not None for value in load_values.values()):
+        for field in (
+            "lower_i_refs",
+            "ready_i_refs",
+            "cold_total_i_refs",
+            "warm_incremental_i_refs",
+        ):
+            if load_values[field] is None:
+                raise ValueError(
+                    f"line {line_no} fixture={fixture_id}: partial LOAD row missing {field}"
+                )
+
+        decode = load_values["decode_i_refs"]
+        parse = load_values["parse_i_refs"]
+        if representation == "canonical-packed":
+            if decode is None or parse is not None:
+                raise ValueError(
+                    f"line {line_no} fixture={fixture_id}: "
+                    "canonical LOAD row must have decode_i_refs and null parse_i_refs"
+                )
+        else:
+            if parse is None or decode is not None:
+                raise ValueError(
+                    f"line {line_no} fixture={fixture_id}: "
+                    "text LOAD row must have parse_i_refs and null decode_i_refs"
+                )
+
+        if int(load_values["cold_total_i_refs"]) < int(load_values["ready_i_refs"]):
+            raise ValueError(
+                f"line {line_no} fixture={fixture_id}: cold total is below ready cost"
+            )
+
 
 def validate_file(path: Path) -> tuple[int, int]:
     rows: list[dict[str, object]] = []
