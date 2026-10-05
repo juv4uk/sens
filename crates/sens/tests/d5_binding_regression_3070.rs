@@ -44,7 +44,7 @@ fn reverse_surface_legacy_code_and_exact_d5_share_one_bootstrapped_mechanism() {
         "(c b a)"
     );
 
-    assert_eq!(exact_d5_call(0b10001, "'(a b c)", &mut session), "(c b a)");
+    assert_eq!(exact_d5_call(0b10100, "'(a b c)", &mut session), "(c b a)");
 }
 
 #[test]
@@ -63,5 +63,5 @@ fn legacy_quotient_never_borrows_the_exact_d5_direct_primitive() {
             .to_string(),
         "2"
     );
-    assert_eq!(exact_d5_call(0b10011, "6 3", &mut loaded), "2");
+    assert_eq!(exact_d5_call(0b10111, "6 3", &mut loaded), "2");
 }

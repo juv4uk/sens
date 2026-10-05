@@ -1,5 +1,5 @@
-//! #3287 — D4 APPEND vs revoked D5 APPEND differential probe.
-//! Research-only: prints exact outcomes; changes no semantic authority.
+//! D4 APPEND ownership vs current D5:10000 CAAAR coordinate guard.
+//! Contract 11.5: APPEND remains D4:1111; D5:10000 is CAAAR, never a stale APPEND alias.
 
 use sens::{
     eval_parsed_expressions, eval_program, load_core_library, parse, Bit4, Bit5, CoreD4, CoreD5,
@@ -34,9 +34,15 @@ fn run_surface(source: &str) -> Result<String, String> {
 }
 
 #[test]
-fn ratified_d4_append_owns_the_one_live_semantics() {
+fn ratified_d4_append_owns_append_while_d5_10000_is_caaar() {
     let d4 = DomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1111).unwrap()));
     let d5 = DomainIdentity::D5(CoreD5::from_word(Bit5::new(0b10000).unwrap()));
+
+    assert_eq!(
+        run_exact(d5, "'(((a b) c) d)").unwrap(),
+        "a",
+        "D5:10000 must execute current CAAAR selector law"
+    );
 
     let cases = [
         ("empty-empty", "'() '()", "(append (quote ()) (quote ()))"),
@@ -53,10 +59,11 @@ fn ratified_d4_append_owns_the_one_live_semantics() {
             .unwrap_or_else(|e| panic!("{name}: surface failed: {e}"));
         assert_eq!(exact, surface, "{name}: D4 and surface APPEND diverged");
 
-        let revoked = run_exact(d5, args).expect_err("revoked D5 APPEND must fail closed");
+        let collision = run_exact(d5, args)
+            .expect_err("D5:10000 CAAAR must not accept APPEND's two-argument shape");
         assert!(
-            revoked.contains("not callable") || revoked.contains("no admitted"),
-            "{name}: unexpected revoked-D5 error: {revoked}"
+            collision.contains("Arity") && collision.contains("expects 1 argument"),
+            "{name}: D5:10000 must fail by CAAAR arity, never stale APPEND semantics: {collision}"
         );
         println!("APPEND-DEDUP case={name} result={exact}");
     }
@@ -73,9 +80,6 @@ fn ratified_d4_append_owns_the_one_live_semantics() {
         "unexpected surface improper-left error: {surface_bad}"
     );
 
-    let d5_bad = run_exact(d5, "'(a . b) '(c)")
-        .expect_err("revoked D5 APPEND must remain uncallable even on error boundary");
-    assert!(d5_bad.contains("not callable") || d5_bad.contains("no admitted"));
 }
 
 #[test]
