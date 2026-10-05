@@ -5,7 +5,8 @@
 //! Semantic authority remains in the language contracts and exact domains.
 
 use sens::{
-    eval_parsed_expressions, load_core_library, lower_program, parse_mixed_exact_domain, Session,
+    eval_lowered_expressions, eval_parsed_expressions, load_core_library, lower_program,
+    parse_mixed_exact_domain, Session,
 };
 use std::{env, fs, hint::black_box, process::ExitCode};
 
@@ -53,7 +54,7 @@ fn run() -> Result<(), String> {
     let args: Vec<String> = env::args().collect();
     let Some(mode) = args.get(1).map(String::as_str) else {
         return Err(
-            "usage: current_exact_domain_phase_bench <startup|load|parse|lower|setup|steady|warm-child|warm-parsed|warm-source> ..."
+            "usage: current_exact_domain_phase_bench <startup|load|parse|lower|setup|ready|steady|warm-child|warm-parsed|warm-source> ..."
                 .to_string(),
         );
     };
@@ -107,6 +108,24 @@ fn run() -> Result<(), String> {
             let outcome = eval_parsed_expressions(&setup, &mut session)
                 .map_err(|error| format!("evaluate setup: {error:?}"))?;
             black_box(&outcome.value);
+            println!("0");
+        }
+        "ready" => {
+            if args.len() != 4 {
+                return Err(
+                    "usage: current_exact_domain_phase_bench ready <setup.lisp> <call.lisp>"
+                        .to_string(),
+                );
+            }
+            let setup = parse(&args[2])?;
+            let call = parse(&args[3])?;
+            let setup_lowered = lower_program(&setup);
+            let call_lowered = lower_program(&call);
+            let mut session = load_session()?;
+            let outcome = eval_lowered_expressions(&setup_lowered, &mut session)
+                .map_err(|error| format!("evaluate ready setup: {error:?}"))?;
+            black_box(&outcome.value);
+            black_box(&call_lowered);
             println!("0");
         }
         "steady" => {
