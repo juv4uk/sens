@@ -56,6 +56,7 @@
       "required": [
         "result_kind",
         "value",
+        "output",
         "error_kind",
         "order_trace",
         "mechanism_status"
@@ -66,6 +67,7 @@
           "enum": ["VALUE", "ERROR", "BLOCKED-MECHANISM", "RESEARCH-DOMAIN"]
         },
         "value": {"type": ["string", "null"]},
+        "output": {"type": "string"},
         "error_kind": {"type": ["string", "null"]},
         "order_trace": {
           "type": "array",
