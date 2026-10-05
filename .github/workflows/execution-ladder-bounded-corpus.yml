@@ -57,6 +57,7 @@ jobs:
           from pathlib import Path
 
           summary = json.loads(Path("/tmp/bounded-structural-summary.json").read_text())
+          assert summary["bound"]["grammar_profile"] == "d2-d3-structural-v1"
           assert summary["generated_cases"] == 16
           assert summary["raw_candidates"] == 16
           assert summary["deduplicated_cases"] == 16
