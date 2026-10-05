@@ -514,11 +514,8 @@
        (string-order-helper (01000000 left) (01000000 right)))
       ((00011010 (01000101 (00111111 left))
           (01000101 (00111111 right)))
-       1
        (00000001 (text-order before)))
-      ((00011010 (01000101 (00111111 left))
-          (01000101 (00111111 right)))
-       0
+      ((00011100 0 0)
        (00000001 (text-order after))))))
 
 (00001001 nonempty-string-membership-helper
@@ -551,7 +548,7 @@
        (00101111 (00100111 (00111010 a "") (00000001 ()))))
       ((00111100 a) (1)
        (00101111 (00100111 (00111010 b "") t)))
-      ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
+      ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) t)
       ((00000011 (00111111 a) (00111111 b)) (1)
        (00100101 (01000000 a) (01000000 b)))
       (t t (00000001 ())))))
@@ -636,8 +633,8 @@
 (00001001 largest-chunk
   (00001000 (a b chunk mult)
     (00000111
-      ((00011010 a (00001100 chunk chunk)) 1 (00000100 chunk mult))
-      ((00011010 a (00001100 chunk chunk)) 0
+      ((00011010 a (00001100 chunk chunk)) (00000100 chunk mult))
+      ((00011100 0 0)
        (00011001 a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
@@ -663,8 +660,8 @@
       ((00000011 b 0) (1) (00001111 a b))
       ((00000011 b 0) (0)
        (00000111
-         ((00011010 a b) 1 0)
-         ((00011010 a b) 0
+         ((00011010 a b) 0)
+         ((00011100 0 0)
           (10011100 ((chunk+mult (00011001 a b b 1)))
             (00001100 (00000110 chunk+mult)
                (00010100 (00001101 a (00000101 chunk+mult)) b)))))))))
@@ -673,30 +670,30 @@
   (00001000 (a b)
     (00001101 a (00001110 b (00010100 a b)))))
 
-; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
-; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
-; exact YES -> 1/1, exact NO -> 0/1, and any inexact operand -> Canon 0 `()`.
-; Canonical three-part `cond` distinguishes exact NO (0) from no-answer `()`
-; without routing either through generic truthiness.
+; `<=` and `>=` stay Lisp-derived. #1716/#1826 make the numeric
+; comparison producers exact D1 predicates: YES -> D1:1, NO -> D1:0;
+; inexact inputs fail named rather than manufacturing Number/NIL truth.
+; This comparison-consumer slice therefore uses two-part predicate control
+; directly and explicit D1:YES fallbacks where the old code matched numeric NO.
 (00001001 nondecreasing-from?
   (00001000 (current remaining)
     (00000111
       ((00000010 remaining) () 1)
-      ((00011010 current (00000101 remaining)) 1
+      ((00011010 current (00000101 remaining))
        (00011111 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 1
+      ((00011100 current (00000101 remaining))
        (00011111 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 0 0))))
+      ((00011100 0 0) 0))))
 
 (00001001 nonincreasing-from?
   (00001000 (current remaining)
     (00000111
       ((00000010 remaining) () 1)
-      ((00011011 current (00000101 remaining)) 1
+      ((00011011 current (00000101 remaining))
        (00100000 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 1
+      ((00011100 current (00000101 remaining))
        (00100000 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 0 0))))
+      ((00011100 0 0) 0))))
 
 (00001001 <=
   (00001000 (first . remaining)
@@ -824,34 +821,34 @@
 (00001001 sqrt-iter
   (00001000 (guess x n)
     (00000111
-      ((00011100 n 0) 1 guess)
-      ((00011100 n 0) 0
+      ((00011100 n 0) guess)
+      ((00011100 0 0)
        (sqrt-iter (00001111 (00001100 guess (00001111 x guess)) 2) x (00001101 n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
 (00001001 isqrt
   (00001000 (n)
     (00000111
-      ((00011010 n 2) 1 n)
-      ((00011010 n 2) 0
+      ((00011010 n 2) n)
+      ((00011100 0 0)
        (isqrt-step n (00010100 n 2))))))
 
 (00001001 isqrt-step
   (00001000 (n g)
     (10011100 ((next (00010100 (00001100 g (00010100 n g)) 2)))
       (00000111
-        ((00011010 next g) 1 (isqrt-step n next))
-        ((00011010 next g) 0 g)))))
+        ((00011010 next g) (isqrt-step n next))
+        ((00011100 0 0) g)))))
 
 (00001001 sqrt
   (00001000 (x)
     (00000111
-      ((00011010 x 0) 1 (00000001 ()))
-      ((00011100 x 0) 1 0)
-      ((00011100 x (00010100 x 1)) 1
+      ((00011010 x 0) (00000001 ()))
+      ((00011100 x 0) 0)
+      ((00011100 x (00010100 x 1))
        (10011100 ((r (00010110 x)))
          (00000111
-           ((00011100 (00001110 r r) x) t r)
+           ((00011100 (00001110 r r) x) r)
            (t t (sqrt-iter (00001111 x 2) x 8)))))
       (t t (sqrt-iter (00001111 x 2.0) x 5)))))
 
@@ -881,8 +878,8 @@
 (00001001 abs
   (00001000 (x)
     (00000111
-      ((00011010 x 0) 1 (00001101 0 x))
-      ((00011010 x 0) 0 x))))
+      ((00011010 x 0) (00001101 0 x))
+      ((00011100 0 0) x))))
 
 ; Required first parameter (dotted lambda-list, same pattern as
 ; `<=`/`>=` above) keeps zero arguments an Arity error via the
@@ -920,8 +917,8 @@
             (00000101 items))
            ((00100010 rest-min (00000001 ())) (0)
             (00000111
-              ((00011010 (00000101 items) rest-min) 1 (00000101 items))
-              ((00011010 (00000101 items) rest-min) 0 rest-min)))))))))
+              ((00011010 (00000101 items) rest-min) (00000101 items))
+              ((00011100 0 0) rest-min)))))))))
 
 (00001001 max-list
   (00001000 (items)
@@ -934,8 +931,8 @@
             (00000101 items))
            ((00100010 rest-max (00000001 ())) (0)
             (00000111
-              ((00011011 (00000101 items) rest-max) 1 (00000101 items))
-              ((00011011 (00000101 items) rest-max) 0 rest-max)))))))))
+              ((00011011 (00000101 items) rest-max) (00000101 items))
+              ((00011100 0 0) rest-max)))))))))
 
 ; #469 — post-core stable peer materialization.
 ;
