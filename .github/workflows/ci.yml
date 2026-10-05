@@ -23,9 +23,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: pr-focused
 
       - name: Classify changed paths
         id: changes
@@ -380,9 +377,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: island-math-adversarial
       - name: Build Lisp checker runtime
         run: cargo build -p sens-cli --bin sens
       - name: Canon-subordinate island math adversarial matrix
@@ -440,9 +434,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: main-fast-critical
       - name: Generated authority projections
         run: |
           cargo build -p sens-cli --bin sens
@@ -501,7 +492,4 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: main-fast-clippy
       - run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
