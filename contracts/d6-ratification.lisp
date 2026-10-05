@@ -94,5 +94,5 @@
        (runtime-separation . "Ratified D6 semantic residency does not promise a callable mechanism. Missing mechanisms fail closed.")))
 
   (supersedes . (#3331-D6-research-boundary #3278-D6-reset OD-006-historical-coordinate-authority))
-  (preserves . (legacy-Sens8-Sid8-Function8-non-authority D7-D8-research-boundary))
+  (preserves . (legacy-flat-identity-non-authority D7-D8-research-boundary))
 )
