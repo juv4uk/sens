@@ -39,15 +39,16 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
 /// Direct D3/D4 human-surface projection.
 ///
 /// This path consumes the exact-domain projection generated from
-/// lib/surface/domain-surfaces-d1-d4.lisp. It never consults a historical
-/// packed byte to recover domain identity.
+/// lib/surface/domain-surfaces-d1-d4.lisp. English, Ukrainian and Sanskrit
+/// spellings are peer projections onto one exact domain identity. It never
+/// consults a historical packed byte to recover domain identity.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
         let matches_human_surface = row.source_routable
             && row
                 .surfaces
                 .iter()
-                .any(|surface| matches!(surface.namespace, "uk" | "sa") && surface.name == name);
+                .any(|surface| matches!(surface.namespace, "en" | "uk" | "sa") && surface.name == name);
         matches_human_surface
             .then(|| exact_domain_identity_from_projection(row.width, row.bits))
             .flatten()
@@ -98,9 +99,9 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 }
 /// Current staged surface lookup.
 ///
-/// Ukrainian and Sanskrit D3/D4 spellings resolve directly through the
-/// exact-domain projection. The byte-backed lookup remains only as a bounded
-/// compatibility fallback for still-unmigrated spellings.
+/// English, Ukrainian and Sanskrit D3/D4 spellings resolve directly through
+/// the exact-domain projection. The byte-backed lookup remains only as a
+/// bounded compatibility fallback for still-unmigrated spellings.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     direct_domain_identity_for_surface(name).or_else(|| {
         registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
@@ -301,6 +302,31 @@ mod tests {
     #[test]
     fn unmigrated_registry_rows_have_no_fake_domain_identity() {
         assert_eq!(domain_identity_for_surface("+"), None);
+    }
+
+    #[test]
+    fn en_uk_sa_d3_d4_surfaces_share_one_exact_domain_identity() {
+        for (en, uk, sa, width, bits) in [
+            ("car", "перше", "ādi", 3, 0b100),
+            ("list", "список", "śreṇī", 4, 0b1110),
+        ] {
+            let en_id = direct_domain_identity_for_surface(en)
+                .unwrap_or_else(|| panic!("English exact-domain surface must resolve: {en}"));
+            let uk_id = direct_domain_identity_for_surface(uk)
+                .unwrap_or_else(|| panic!("Ukrainian exact-domain surface must resolve: {uk}"));
+            let sa_id = direct_domain_identity_for_surface(sa)
+                .unwrap_or_else(|| panic!("Sanskrit exact-domain surface must resolve: {sa}"));
+
+            assert_eq!(en_id, uk_id);
+            assert_eq!(uk_id, sa_id);
+            assert_eq!((en_id.width(), en_id.packed_bits()), (width, bits));
+        }
+
+        assert_eq!(
+            domain_identity_for_surface("+"),
+            None,
+            "unmigrated compatibility surfaces must not gain a fake exact domain"
+        );
     }
 
     #[test]
