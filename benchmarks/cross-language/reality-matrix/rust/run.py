@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import importlib.util
 import json
 import os
 import platform
@@ -20,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 FIXTURE = ROOT / "benchmarks" / "current-en-vs-d1d8" / "fixtures" / "d3-smoke.json"
 CONTROL_RS = Path(__file__).with_name("rust_control.rs")
+RSS_PY = Path(__file__).resolve().parents[1] / "rss.py"
 SENS_EXAMPLE = "current_en_vs_d1d8_cpu"
 CASES = ("d3-quote-empty", "d3-car-empty")
 
@@ -39,6 +41,15 @@ def parse_kv(text: str) -> dict[str, str]:
 
 def decode_hex(value: str) -> str:
     return bytes.fromhex(value).decode("utf-8")
+
+
+def load_rss_module():
+    spec = importlib.util.spec_from_file_location("reality_matrix_rss", RSS_PY)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {RSS_PY}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def contract_version() -> str:
@@ -174,6 +185,8 @@ def main() -> int:
     sens = build_sens()
     rust = build_rust(args.out_dir)
     fixtures = load_cases()
+    rssmod = load_rss_module()
+    rss_available = bool(rssmod.GNU_TIME.is_file())
 
     raw_rows: list[dict[str, object]] = []
     workloads: list[dict[str, object]] = []
@@ -197,19 +210,31 @@ def main() -> int:
 
             sens_ns: list[float] = []
             rust_ns: list[float] = []
+            sens_rss: list[float] = []
+            rust_rss: list[float] = []
             for rep in range(args.outer_reps):
-                sens_stdout = run_process(
-                    [str(sens), "canonical-d1d8", "repeated", str(canonical), str(args.inner_repeats)]
-                )
-                rust_stdout = run_process(
-                    [str(rust), case, "repeated", str(args.inner_repeats)]
-                )
+                sens_cmd = [
+                    str(sens), "canonical-d1d8", "repeated",
+                    str(canonical), str(args.inner_repeats),
+                ]
+                rust_cmd = [str(rust), case, "repeated", str(args.inner_repeats)]
+                sens_stdout = run_process(sens_cmd)
+                rust_stdout = run_process(rust_cmd)
                 s_fields = parse_kv(sens_stdout)
                 r_fields = parse_kv(rust_stdout)
                 s_per = int(s_fields["ELAPSED_NS"]) / args.inner_repeats
                 r_per = int(r_fields["ELAPSED_NS"]) / args.inner_repeats
                 sens_ns.append(s_per)
                 rust_ns.append(r_per)
+
+                s_rss = None
+                r_rss = None
+                if rss_available:
+                    _s_out, _s_err, s_rss = rssmod.measure_peak_rss_kb(sens_cmd)
+                    _r_out, _r_err, r_rss = rssmod.measure_peak_rss_kb(rust_cmd)
+                    sens_rss.append(float(s_rss))
+                    rust_rss.append(float(r_rss))
+
                 raw_rows.append(
                     {
                         "workload": case,
@@ -217,6 +242,8 @@ def main() -> int:
                         "inner_repeats": args.inner_repeats,
                         "sens_ns_per_op": s_per,
                         "rust_ns_per_op": r_per,
+                        "sens_maxrss_kb": "" if s_rss is None else s_rss,
+                        "rust_maxrss_kb": "" if r_rss is None else r_rss,
                     }
                 )
 
@@ -254,31 +281,65 @@ def main() -> int:
                 }
             )
 
-            measurements.append(
-                {
-                    "axis": "process_maxrss_kb",
-                    "status": "inconclusive",
-                    "unit": "KiB",
-                    "sens_samples": [],
-                    "competitor_samples": [],
-                    "sens_median": None,
-                    "competitor_median": None,
-                    "sens_p95": None,
-                    "competitor_p95": None,
-                    "notes": (
-                        "Not measured in this lane. The first smoke used os.wait4().ru_maxrss, "
-                        "which is a cumulative child-process maximum and can falsely report identical "
-                        "RSS for sequential commands. A dedicated per-process RSS owner is required."
-                    ),
-                }
-            )
-            verdicts.append(
-                {
-                    "axis": f"{case}:process_maxrss_kb",
-                    "verdict": "inconclusive",
-                    "evidence": "RSS withheld: cumulative wait4 child-max is not a valid per-process comparison",
-                }
-            )
+            if rss_available:
+                sr_med, sr_p95 = summary(sens_rss)
+                rr_med, rr_p95 = summary(rust_rss)
+                measurements.append(
+                    {
+                        "axis": "process_maxrss_kb",
+                        "status": "measured",
+                        "unit": "KiB",
+                        "sens_samples": sens_rss,
+                        "competitor_samples": rust_rss,
+                        "sens_median": sr_med,
+                        "competitor_median": rr_med,
+                        "sens_p95": sr_p95,
+                        "competitor_p95": rr_p95,
+                        "notes": (
+                            "Whole helper-process peak RSS from shared #3698 "
+                            "fresh-process GNU-time owner; timed execution remains separate."
+                        ),
+                    }
+                )
+                rss_verdict = (
+                    verdict_lower(sr_med, rr_med)
+                    if args.evidence_mode == "performance"
+                    else "inconclusive"
+                )
+                rss_evidence = (
+                    f"median SENS={sr_med:.0f} KiB; Rust={rr_med:.0f} KiB"
+                    if args.evidence_mode == "performance"
+                    else f"smoke observation only: SENS={sr_med:.0f} KiB; Rust={rr_med:.0f} KiB"
+                )
+                verdicts.append(
+                    {
+                        "axis": f"{case}:process_maxrss_kb",
+                        "verdict": rss_verdict,
+                        "evidence": rss_evidence,
+                    }
+                )
+            else:
+                measurements.append(
+                    {
+                        "axis": "process_maxrss_kb",
+                        "status": "inconclusive",
+                        "unit": "KiB",
+                        "sens_samples": [],
+                        "competitor_samples": [],
+                        "sens_median": None,
+                        "competitor_median": None,
+                        "sens_p95": None,
+                        "competitor_p95": None,
+                        "notes": "Shared #3698 RSS owner unavailable on this host.",
+                    }
+                )
+                verdicts.append(
+                    {
+                        "axis": f"{case}:process_maxrss_kb",
+                        "verdict": "inconclusive",
+                        "evidence": "shared #3698 RSS owner unavailable on this host",
+                    }
+                )
 
             workloads.append(
                 {
@@ -334,7 +395,7 @@ def main() -> int:
         "cpu": platform.processor() or None,
         "load_context": args.load_context,
         "evidence_mode": args.evidence_mode,
-        "rss_measurement": "withheld-until-dedicated-per-process-owner",
+        "rss_measurement": rssmod.METHOD if rss_available else "unavailable",
         "toolchain": {"rustc": rustc},
     }
     comparison = {
@@ -363,6 +424,9 @@ def main() -> int:
     (args.out_dir / "comparison.json").write_text(
         json.dumps(comparison, indent=2) + "\n", encoding="utf-8"
     )
+
+    validator = ROOT / "benchmarks" / "cross-language" / "reality-matrix" / "validate.py"
+    subprocess.run(["python3", str(validator), str(args.out_dir / "comparison.json")], check=True)
 
     report = [
         "# SENS vs Rust — D3 smoke reality slice",
