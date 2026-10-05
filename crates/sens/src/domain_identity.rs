@@ -3,10 +3,10 @@
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D4 and D7 retain current semantic authority.
-//! - D5 is owner-ratified again by #3305; D6/D8 remain research carriers after #3278.
-//! - `CoreDomainIdentity` retains historical/research variants for migration,
-//!   but canonical source projection currently admits callable D3/D4 only.
+//! - D1-D7 мають чинну семантичну authority згідно з Contract 11.6.
+//! - D5 ратифікований #3305, D6 ратифікований #3393; D8 лишається research.
+//! - `CoreDomainIdentity` зберігає D6 як точну current semantic identity,
+//!   але callable/mechanism admission лишається окремим фактом і може fail-closed.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
 //! - Eight-bit research carriers and historical Sens8/Sid8 remain distinct.
 
@@ -83,10 +83,13 @@ impl DomainIdentity {
 
     /// Explicit callable/Core-operation projection.
     ///
-    /// Current owner authority admits exact D3/D4/D5 Core-operation identity.
-    /// D1/D2/D7 are non-callable by their domain laws; D6/D8 remain revoked
-    /// under #3278. D5 residency is full 32/32 under #3305, while actual
-    /// resident mechanisms remain independently fail-closed when unavailable.
+    /// Це projection саме до callable/mechanism routing, а не реєстр
+    /// семантичної residency.
+    ///
+    /// D3/D4/D5 зараз мають admitted Core-operation projection. D6 є
+    /// OWNER-RATIFIED 64/64 під #3393, але на цій межі ще не має загального
+    /// callable projection: відсутній механізм лишається fail-closed і не
+    /// скасовує D6 semantic identity. D8 лишається research.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
@@ -283,16 +286,25 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_noncallable_or_unratified_domains() {
+    fn callable_projection_separates_current_d6_identity_from_missing_generic_mechanism() {
         for source in [
             BinarySourceWord::W1(Bit1::new(1).unwrap()),
             BinarySourceWord::W2(Bit2::new(1).unwrap()),
-            BinarySourceWord::W6(Bit6::new(1).unwrap()),
             BinarySourceWord::W7(Bit7::new(1).unwrap()),
             BinarySourceWord::W8(Bit8::new(1).unwrap()),
         ] {
             assert!(DomainIdentity::from_source_word(source).core_operation().is_none());
         }
+
+        // Contract 11.6 / #3393: D6 semantic identity is current.
+        // Водночас generic callable mechanism для D6 тут навмисно не
+        // приписується автоматично: semantic residency != mechanism admission.
+        let d6_word = Bit6::new(1).unwrap();
+        let d6_domain = DomainIdentity::from_source_word(BinarySourceWord::W6(d6_word));
+        assert!(matches!(d6_domain, DomainIdentity::D6(_)));
+        assert!(d6_domain.core_operation().is_none());
+        let d6_identity = CoreDomainIdentity::D6(CoreD6::from_word(d6_word));
+        assert_eq!((d6_identity.width(), d6_identity.packed_bits()), (6, 1));
 
         let d3 = DomainIdentity::from_source_word(
             BinarySourceWord::W3(Bit3::new(1).unwrap())
