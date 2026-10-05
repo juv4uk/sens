@@ -30,8 +30,10 @@ jobs:
           sudo apt-get install -y valgrind
           valgrind --version
 
-      - name: Build phase runner
-        run: cargo build -p sens --release --example current_exact_domain_phase_bench
+      - name: Build phase and startup runners
+        run: |
+          cargo build -p sens --release --example current_exact_domain_phase_bench
+          cargo build -p sens --release --example startup_bench
 
       - name: Measure startup load parse lower setup steady
         run: |
@@ -41,6 +43,15 @@ jobs:
             --reps 3 \
             --out /tmp/sens-phase-3490
           cat /tmp/sens-phase-3490/phase-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Break down Core loading path
+        run: |
+          python3 benchmarks/cross-language/core_load_breakdown.py \
+            --runner target/release/examples/startup_bench \
+            --fasl lib/core.lisp.fasl \
+            --reps 3 \
+            --out /tmp/sens-phase-3490
+          cat /tmp/sens-phase-3490/core-load-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         if: always()
