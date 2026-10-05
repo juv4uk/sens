@@ -15,6 +15,7 @@ import tempfile
 from pathlib import Path
 
 GNU_TIME = Path("/usr/bin/time")
+METHOD = "gnu-time-per-process-v1"
 
 
 def measure_peak_rss_kb(command: list[str]) -> tuple[str, str, int]:
