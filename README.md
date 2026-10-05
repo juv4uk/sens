@@ -53,7 +53,7 @@ D1 1  ≠  D2 01  ≠  D3 001  ≠  D4 0001
 
 Width входить в identity, але **width сам по собі не створює значення**.
 
-Поточний машинно-читаний контракт: [`language-contract.lisp`](language-contract.lisp), Contract **11.1**.
+Поточний машинно-читаний контракт: [`language-contract.lisp`](language-contract.lisp), Contract **11.6**.
 
 Докладний опис парадигми: [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md).
 
