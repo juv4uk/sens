@@ -5,7 +5,7 @@ Research-only benchmark for the proved CAR/CDR selector family.
 ## Current P0 profile — Contract 11.5 D6 generator vs flat16
 
 The first current result is deliberately narrow: the **16 D6 selector residents**
-made executable by #3500/#3394 are measured two ways on the same deterministic
+made executable by #3545/#3394 are measured two ways on the same deterministic
 workload:
 
 - `flat` — dense 16-entry predecoded table, **benchmark-only control**;
@@ -45,16 +45,21 @@ python3 benchmarks/semantic-tree/run.py \
 ```
 
 The CI smoke first runs the **real** `d6_selector_runtime` evaluator witness
-from #3500 and only then runs this isolated paired mechanism benchmark. Thus the
+from #3545 and only then runs this isolated paired mechanism benchmark. Thus the
 performance control cannot silently drift away from the admitted runtime law.
 
 ## Measurements
 
-Preparation and execution remain separate. Cachegrind execution cost is:
+Preparation and execution remain separate. Additive work counters use:
 
 ```text
-median(full counter) - median(prepare counter)
+median(full - prepare)
 ```
+
+This is used for instruction references and branch counts. Cache misses and
+branch mispredictions are stateful across separate Cachegrind processes, so the
+report keeps their `prepare_*` and `full_*` totals separate and does **not**
+label a subtraction as isolated execution misses.
 
 Current counters include:
 
