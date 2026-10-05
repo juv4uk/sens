@@ -1,0 +1,32 @@
+{
+  "domain": {
+    "name": "D3",
+    "width": 3
+  },
+  "laws": {
+    "L1_empty": "000",
+    "L4_dual_xor_mask": "111",
+    "L5_spine": [
+      "000",
+      "010",
+      "100",
+      "110"
+    ]
+  },
+  "non_authority": {
+    "backend_mechanism_table": false,
+    "compiler_role_table": false,
+    "d8_admission": false,
+    "human_name_routing": false
+  },
+  "projection_sha256": "e57a6ee1184c23cf31dde7c03d950476ea38e24e05fca2a62e6e2bc386dbb898",
+  "schema": "bija3-l1-l5-structure-projection/1",
+  "semantic_authority": {
+    "git_blob_sha1": "2dff6997345baad3bedf989b8772ea97c2e7d46a",
+    "owner_ratification": "#3202",
+    "path": "contracts/bija3-l1-l5-ratification.lisp",
+    "schema": "bija3-l1-l5-ratification/1",
+    "sha256": "8c76e07c9e41d495b8e475a69389620c40ceac8187d80716d2a3da8e21ab9680"
+  },
+  "status": "generated-projection-only"
+}
