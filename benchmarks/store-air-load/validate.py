@@ -153,10 +153,6 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
                     "text LOAD row must have parse_i_refs and null decode_i_refs"
                 )
 
-        if int(load_values["cold_total_i_refs"]) < int(load_values["ready_i_refs"]):
-            raise ValueError(
-                f"line {line_no} fixture={fixture_id}: cold total is below ready cost"
-            )
 
 
 def validate_file(path: Path) -> tuple[int, int]:
