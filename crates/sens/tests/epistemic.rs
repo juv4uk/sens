@@ -426,19 +426,22 @@ fn supporting_evidence_is_nil_when_claim_ref_does_not_match() {
 }
 
 #[test]
-fn supporting_evidence_still_works_as_a_cond_truthiness_check() {
-    // The exact case the audit's own next step asked to verify: a
-    // caller who only wants flow control, not the evidence itself,
-    // needs no change at all -- `cond` already treats any non-Nil
-    // value (including a full evidence record) as truthy.
+fn supporting_evidence_requires_an_explicit_d1_predicate_for_cond() {
+    // supporting-evidence is a retrieval function: a matching record remains
+    // ordinary structural data and must not be coerced into truth.  Flow
+    // control therefore asks an explicit predicate question about that data.
     assert_eq!(
         eval_epistemic(
             r#"(cond
-                 ((supporting-evidence
-                    (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
-                    (quote (claim-ref cml-build-available)))
+                 ((тотожне?
+                    (evidence-outcome
+                      (supporting-evidence
+                        (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
+                        (quote (claim-ref cml-build-available))))
+                    (quote supports))
                   (quote flows-through))
-                 (t (quote unreachable)))"#
+                 ((тотожне? (quote fallback) (quote fallback))
+                  (quote unreachable)))"#
         ),
         "flows-through"
     );
