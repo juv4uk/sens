@@ -14,6 +14,7 @@ use crate::CoreDomainIdentity;
 pub enum CompilerExecutionRole {
     SelectorHead,
     SelectorTail,
+    PairConstruct,
 }
 
 /// Project one exact current identity to the first compiler execution-role slice.
@@ -25,7 +26,18 @@ pub enum CompilerExecutionRole {
 pub fn compiler_execution_role(
     identity: CoreDomainIdentity,
 ) -> Option<CompilerExecutionRole> {
-    crate::eval::selector_law::compiler_execution_role(identity)
+    if let Some(selector_role) = crate::eval::selector_law::compiler_execution_role(identity) {
+        return Some(selector_role);
+    }
+
+    match crate::eval::canon::domain_primitive_kind(identity) {
+        Some(crate::eval::canon::DomainPrimitiveKind::PairConstruct) => {
+            Some(CompilerExecutionRole::PairConstruct)
+        }
+        Some(crate::eval::canon::DomainPrimitiveKind::AtomPredicate)
+        | Some(crate::eval::canon::DomainPrimitiveKind::AtomEquality)
+        | None => None,
+    }
 }
 
 #[cfg(test)]
@@ -38,7 +50,7 @@ mod tests {
     }
 
     #[test]
-    fn first_compiler_slice_projects_only_d3_selector_roots() {
+    fn compiler_slice_projects_selectors_and_pair_constructor_from_production_laws() {
         assert_eq!(
             compiler_execution_role(d3(0b100)),
             Some(CompilerExecutionRole::SelectorHead)
@@ -47,8 +59,12 @@ mod tests {
             compiler_execution_role(d3(0b011)),
             Some(CompilerExecutionRole::SelectorTail)
         );
+        assert_eq!(
+            compiler_execution_role(d3(0b111)),
+            Some(CompilerExecutionRole::PairConstruct)
+        );
 
-        for raw in [0b000, 0b001, 0b010, 0b101, 0b110, 0b111] {
+        for raw in [0b000, 0b001, 0b010, 0b101, 0b110] {
             assert_eq!(compiler_execution_role(d3(raw)), None);
         }
     }
@@ -59,11 +75,14 @@ mod tests {
             CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(0b1000).unwrap()));
         let d5_tail_tail_tail =
             CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(0b01111).unwrap()));
+        let d4_cons_payload =
+            CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0111).unwrap()));
         let d8_collision =
-            CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b10000000).unwrap()));
+            CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b00000111).unwrap()));
 
         assert_eq!(compiler_execution_role(d4_head_head), None);
         assert_eq!(compiler_execution_role(d5_tail_tail_tail), None);
+        assert_eq!(compiler_execution_role(d4_cons_payload), None);
         assert_eq!(compiler_execution_role(d8_collision), None);
     }
 }
