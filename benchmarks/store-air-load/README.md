@@ -84,10 +84,20 @@ current_en_vs_d1d8_cpu
 
 ## Поточні fixtures
 
-- `seven-bit-mechanical` — 7-bit exact-width packing control;
-- `zero-suffix-mechanical` — semantic zero suffix + tail control;
+Ratchet покриває всі критичні довжини:
+- `zero-suffix-mechanical` — 6 біт, semantic zero suffix;
+- `seven-bit-mechanical` — 7 біт, нижче байта;
+- `eight-bit-mechanical` — рівно 8 біт;
+- `twelve-bit-mechanical` — 9..15-бітний клас;
+- `mixed-28-bit-mechanical` — довга mixed-width послідовність D1..D7;
 - `d3-quote-empty` — English/canonical paired semantic witness;
 - `d3-car-empty` — другий English/canonical paired witness.
+
+Для кожної canonical fixture runner незалежно рахує
+`expected_semantic_bits = sum(word_widths)`, звіряє його з production helper,
+перевіряє `artifact_bytes = ceil(bits/8)` і вимагає exact-width round-trip
+через `unpack_binary_source_words`. CI також містить навмисно неправильний
+reference encoder «один байт на слово» й перевіряє, що validator його відкидає.
 
 Фактичні розміри, ratios і airtime генеруються runner-ом; у README немає
 ручних benchmark-констант.
