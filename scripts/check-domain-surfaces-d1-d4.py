@@ -81,6 +81,8 @@ def render_generated(rows: list[dict[str, str]]) -> str:
         "pub(super) const DOMAIN_SURFACE_ROWS: &[DomainSurfaceRow] = &[",
     ]
 
+    # EN/UK/SA names are emitted only from the Lisp-owned projection table;
+    # handwritten Rust never becomes authority for a human spelling.
     for row in rows:
         width = int(row["domain"][1:])
         source_routable = (
