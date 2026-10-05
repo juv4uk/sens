@@ -322,6 +322,58 @@ fn language_role_call(identity: CoreDomainIdentity) -> Expr {
     }
 }
 
+fn language_lowering_role_call(identity: CoreDomainIdentity) -> Expr {
+    let exact_identity = DomainIdentity::from_source_word(identity.source_word());
+    Expr {
+        kind: ExprKind::List(Rc::from(
+            vec![
+                symbol("compiler-lowering-role-from-laws"),
+                symbol(SHAPE_MECHANISM_NAME),
+                Expr {
+                    kind: ExprKind::DomainIdentity(exact_identity),
+                    span: Span::default(),
+                },
+                symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
+            ]
+            .into_boxed_slice(),
+        )),
+        span: Span::default(),
+    }
+}
+
+fn decode_lowering_role(value: &Value) -> Result<Option<CompilerLoweringRole>, LanguageError> {
+    let role = match value {
+        Value::Nil => return Ok(None),
+        Value::Symbol(name) => match name.as_ref() {
+            "quote-form" => CompilerLoweringRole::QuoteForm,
+            "atom-predicate" => CompilerLoweringRole::AtomPredicate,
+            "selector-tail" => CompilerLoweringRole::SelectorTail,
+            "selector-head" => CompilerLoweringRole::SelectorHead,
+            "atom-equality" => CompilerLoweringRole::AtomEquality,
+            "cond-form" => CompilerLoweringRole::CondForm,
+            "pair-construct" => CompilerLoweringRole::PairConstruct,
+            "lambda-form" => CompilerLoweringRole::LambdaForm,
+            "define-form" => CompilerLoweringRole::DefineForm,
+            other => {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("SENS compiler nucleus returned unknown lowering role: {other}"),
+                    Span::default(),
+                ))
+            }
+        },
+        other => {
+            return Err(LanguageError::new(
+                ErrorKind::InvalidForm,
+                format!("SENS compiler nucleus returned non-role value: {other}"),
+                Span::default(),
+            ))
+        }
+    };
+    Ok(Some(role))
+}
+
 fn decode_language_role(value: &Value) -> Result<Option<CompilerExecutionRole>, LanguageError> {
     match value {
         Value::Nil => Ok(None),
@@ -370,6 +422,34 @@ pub fn compiler_execution_role_from_sens(
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_role(&result)
+}
+
+
+/// Derive the complete current compiler-nucleus lowering role by executing
+/// SENS-owned structural laws.  Rust transports the provenance-bound D3/D4
+/// projections and decodes the returned abstract symbol; it never selects
+/// meaning from raw domain coordinates.
+pub fn compiler_lowering_role_from_sens(
+    identity: CoreDomainIdentity,
+) -> Result<Option<CompilerLoweringRole>, LanguageError> {
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+
+    session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+
+    let result =
+        eval_parsed_expressions(&[language_lowering_role_call(identity)], &mut session)?.value;
+    decode_lowering_role(&result)
 }
 
 
