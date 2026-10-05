@@ -11,8 +11,8 @@
 //! No historical Sid8/Sens8 identity is allowed anywhere in the lowered tree.
 
 use sens::{
-    eval_lowered_expressions, load_core_library, lower_program, parse_canonical_binary,
-    CoreDomainIdentity, ErrorKind, Expr, ExprKind, Session,
+    eval_lowered_expressions, load_core_library, lower_program, parse_binary_source_words,
+    parse_canonical_binary, CoreDomainIdentity, ErrorKind, Expr, ExprKind, Session,
 };
 
 struct Case {
@@ -84,18 +84,29 @@ fn assert_no_legacy_identity(expr: &Expr) {
 }
 
 fn top_d3(expr: &Expr) -> (usize, u8) {
-    let ExprKind::DomainCall(identity @ CoreDomainIdentity::D3(_), _) = &expr.kind else {
+    let ExprKind::DomainCall(identity, _) = &expr.kind else {
         panic!(
-            "compiler witness must lower to an exact D3 DomainCall, got {:?}",
+            "compiler witness must lower to an exact DomainCall, got {:?}",
             expr.kind
         );
     };
-    (identity.width(), identity.packed_bits())
+    match identity {
+        CoreDomainIdentity::D3(word) => (3, word.word().packed_bits()),
+        other => panic!("compiler witness must stay in D3, got {other:?}"),
+    }
 }
 
 #[test]
 fn compiler_vertical_corpus_is_exact_d3_and_has_no_legacy_byte_identity() {
     for case in CASES {
+        let tokens = parse_binary_source_words(case.source)
+            .unwrap_or_else(|error| panic!("{} source-word parse failed: {error:?}", case.name));
+        assert!(
+            tokens.iter().all(|token| matches!(token.word.width(), 2 | 3)),
+            "{} introduced a non-D2/D3 source word",
+            case.name
+        );
+
         let parsed = parse_canonical_binary(case.source)
             .unwrap_or_else(|error| panic!("{} canonical parse failed: {error:?}", case.name));
         let lowered = lower_program(&parsed);
@@ -125,8 +136,13 @@ fn compiler_vertical_corpus_matches_current_evaluator_observables() {
                 assert_eq!(result.value.to_string(), *expected, "{}", case.name);
             }
             Expected::Error(expected_kind) => {
-                let error = observed
-                    .expect_err(&format!("{} expected named failure", case.name));
+                let error = match observed {
+                    Ok(result) => panic!(
+                        "{} expected named failure, got value {}",
+                        case.name, result.value
+                    ),
+                    Err(error) => error,
+                };
                 assert_eq!(&error.kind, expected_kind, "{}", case.name);
             }
         }
