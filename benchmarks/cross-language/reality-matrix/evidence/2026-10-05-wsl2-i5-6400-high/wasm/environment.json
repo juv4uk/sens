@@ -1,0 +1,12 @@
+{
+  "os": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "arch": "x86_64",
+  "cpu": "x86_64",
+  "load_context": "high",
+  "evidence_mode": "performance",
+  "rss_measurement": "withheld-until-#3698",
+  "toolchain": {
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "node": "v18.19.1"
+  }
+}
