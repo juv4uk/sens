@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/research-3618-d8-commuting-square-screen.py"
       - "docs/research/3618-d8-commuting-square-screen.md"
+      - "docs/research/3618-d8-commuting-square-screen.uk.md"
       - "knowledge/d6-v2-binary-law-families.json"
       - "knowledge/d6-ratified.json"
       - ".github/workflows/d8-commuting-square-screen.yml"
@@ -14,6 +15,7 @@ on:
     paths:
       - "scripts/research-3618-d8-commuting-square-screen.py"
       - "docs/research/3618-d8-commuting-square-screen.md"
+      - "docs/research/3618-d8-commuting-square-screen.uk.md"
       - "knowledge/d6-v2-binary-law-families.json"
       - "knowledge/d6-ratified.json"
       - ".github/workflows/d8-commuting-square-screen.yml"
