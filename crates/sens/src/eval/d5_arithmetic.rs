@@ -64,16 +64,18 @@ mod tests {
                 .unwrap().unwrap().to_string(),
             "4"
         );
-        assert_eq!(
-            invoke(d5(0b11010), &[n(2.0), n(3.0)], &env, span)
-                .unwrap().unwrap().to_string(),
-            "1"
-        );
-        assert_eq!(
-            invoke(d5(0b11011), &[n(3.0), n(2.0)], &env, span)
-                .unwrap().unwrap().to_string(),
-            "1"
-        );
+        let less_yes = invoke(d5(0b11010), &[n(2.0), n(3.0)], &env, span)
+            .unwrap()
+            .unwrap();
+        let less_no = invoke(d5(0b11010), &[n(3.0), n(2.0)], &env, span)
+            .unwrap()
+            .unwrap();
+        let greater_yes = invoke(d5(0b11011), &[n(3.0), n(2.0)], &env, span)
+            .unwrap()
+            .unwrap();
+        assert_eq!(less_yes.as_predicate_bit(), Some(true));
+        assert_eq!(less_no.as_predicate_bit(), Some(false));
+        assert_eq!(greater_yes.as_predicate_bit(), Some(true));
         assert_eq!(
             invoke(d5(0b10110), &[n(2.0), n(3.0), n(4.0)], &env, span)
                 .unwrap().unwrap().to_string(),
@@ -84,6 +86,19 @@ mod tests {
                 .unwrap().unwrap().to_string(),
             "2"
         );
+    }
+
+    #[test]
+    fn d5_order_rejects_inexact_operands_instead_of_manufacturing_truth() {
+        let error = call_d5(
+            0b11010,
+            &[
+                Value::Number(2.0, Exactness::Inexact),
+                Value::Number(3.0, Exactness::Inexact),
+            ],
+        )
+        .expect_err("inexact order has no exact PredicateBit answer");
+        assert_eq!(error.kind, crate::ErrorKind::Type);
     }
 
     fn q(numerator: i64, denominator: i64) -> Value {
