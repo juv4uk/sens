@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - ".github/workflows/framing-as-confirm.yml"
-      - "benchmarks/cross-language/reality-matrix/**"
   workflow_dispatch:
 
 permissions:
