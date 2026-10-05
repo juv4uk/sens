@@ -172,6 +172,12 @@ assert candidate["class_accounting"]["10"]["free"]==2
 assert candidate["class_accounting"]["11"]["occupied"]==32
 assert candidate["class_accounting"]["11"]["free"]==0
 
+for ledger_doc in (ledger, geometry):
+    ref=ledger_doc["candidate_map"]
+    assert ref["path"]=="knowledge/d7-v2-candidate-d.json"
+    assert ref["status"]=="research-candidate-not-ratified"
+    assert (ref["capacity"],ref["occupancy"],ref["free"])==(128,124,4)
+
 print("D7-V2-CONSOLIDATION: PASS")
 print("baseline=107+21 overlay=19 migration-targets=2")
 print("phonology=75 convention=32 pinned=21 authority=RESEARCH")
