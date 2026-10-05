@@ -25,7 +25,7 @@ jobs:
 
       - name: Check machine-readable output
         run: |
-          python3 -m json.tool "$RUNNER_TEMP/reality-rust/comparison.json" >/dev/null
+          python3 benchmarks/cross-language/reality-matrix/validate.py             "$RUNNER_TEMP/reality-rust/comparison.json"
           test -s "$RUNNER_TEMP/reality-rust/raw/runs.tsv"
           test -s "$RUNNER_TEMP/reality-rust/report.md"
 
