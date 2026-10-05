@@ -104,13 +104,14 @@ def _validate_identity_trace(trace, line_no):
 
 
 def _validate_observable(observable, line_no):
-    keys = {"result_kind", "value", "error_kind", "order_trace", "mechanism_status"}
+    keys = {"result_kind", "value", "output", "error_kind", "order_trace", "mechanism_status"}
     where = f"line {line_no}: observable"
     _expect_exact_keys(observable, keys, where)
 
     kind = observable["result_kind"]
     mechanism = observable["mechanism_status"]
     value = observable["value"]
+    output = observable["output"]
     error = observable["error_kind"]
     order = observable["order_trace"]
 
@@ -120,6 +121,8 @@ def _validate_observable(observable, line_no):
         raise ValueError(f"{where}: invalid mechanism_status {mechanism!r}")
     if value is not None and not isinstance(value, str):
         raise ValueError(f"{where}: value must be string or null")
+    if not isinstance(output, str):
+        raise ValueError(f"{where}: output must be a string")
     if error is not None and (not isinstance(error, str) or not error):
         raise ValueError(f"{where}: error_kind must be non-empty string or null")
     if not isinstance(order, list) or any(not isinstance(x, str) for x in order):
