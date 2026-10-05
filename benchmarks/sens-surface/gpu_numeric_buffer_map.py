@@ -40,6 +40,13 @@ def checked(command: list[str], *, env: dict[str, str]) -> subprocess.CompletedP
     return result
 
 
+def best_effort_output(command: list[str], *, env: dict[str, str]) -> str:
+    try:
+        return checked(command, env=env).stdout.strip()
+    except RuntimeError as error:
+        return f"unavailable ({error})"
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as source:
@@ -129,7 +136,7 @@ def main() -> int:
 
     facts: dict[str, object] = {
         "timestamp_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-        "git_sha": checked(["git", "rev-parse", "HEAD"], env=env).stdout.strip(),
+        "git_sha": best_effort_output(["git", "rev-parse", "HEAD"], env=env),
         "python": platform.python_version(),
         "kernel": platform.release(),
         "machine": platform.machine(),
