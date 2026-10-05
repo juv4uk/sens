@@ -9,6 +9,14 @@
       "framing_bits": 0
     },
     {
+      "id": "seven-bit-overhead-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 01",
+      "framing_bits": 5,
+      "integrity_bits": 3,
+      "profile_overhead_bits": 2
+    },
+    {
       "id": "zero-suffix-mechanical",
       "kind": "mechanical",
       "canonical_source": "1 01 000",
