@@ -48,7 +48,22 @@
         "to": "0101110"
       }
     ],
-    "rule": "not provenance recovery; requires explicit owner migration decision because UPC7 cell number is part of Text7 identity"
+    "rule": "not provenance recovery; requires explicit owner migration decision because UPC7 cell number is part of Text7 identity",
+    "evaluation": {
+      "sens_issue": "#3432",
+      "shiva_donor": "juv4uk/shiva-sutras PR #114 (merged)",
+      "candidate": "D / UPC-14-derived Text7 geometry",
+      "measured": {
+        "shared_with_pinned_hand_map": "43/46",
+        "shared_with_independent_varna7": "41/42 shared sounds",
+        "strict_panini_1_1_9_matrix": "1760/1764",
+        "corpus_correct": "138/143 evaluated rows",
+        "positive_class_f1": 0.987,
+        "best_of_10000_permutations_f1": 0.449
+      },
+      "status": "RESEARCH-CANDIDATE-REQUIRES-OWNER-IDENTITY-MIGRATION",
+      "note": "objective evidence strengthens the candidate but does not override the pinned SENS Text7 identity"
+    }
   },
   "guardrails": [
     "same-coordinate Shiva overlay is evidence, not current SENS D7 admission",
@@ -1639,5 +1654,20 @@
     ],
     "law": "UPC7 cell identity stays exact; language profile/context chooses phonetic projection; IPA/audio never identity",
     "current_merge_state": "PR #91 not yet merged to shiva master; use as donor evidence only"
+  },
+  "cross_domain_firewall": {
+    "model": "typed disjoint roles over shared binary mechanics",
+    "shiva_witness": "juv4uk/shiva-sutras PR #104 (merged) prototype/d7_union.py",
+    "laws": [
+      "Sound/Text cell equality is exact within its role",
+      "Sound/Text and arithmetic Number never become equal from same-looking payload",
+      "arithmetic and ordering do not inherit onto Sound/Text",
+      "relabeling Sound/Text coordinates changes no Number result"
+    ],
+    "sens_evidence": [
+      "benchmarks/d7-ratification-conformance",
+      "contracts/d7-local-ordinal.lock",
+      "#2517/#2739"
+    ]
   }
 }
