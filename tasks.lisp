@@ -1265,4 +1265,26 @@
     (acceptance . "One end-to-end external-world fact query returns both result and why-believed proof graph; graph terminates in primitive roots; exact binary function numbers are visible; no human spelling required; UNKNOWN is not D1:0 and not (); remove/restore axiom, MODEL_LAW and observation invalidates/replays only dependent facts; feed #3435 closure metric and #2304 semantic-fact accounting.")
     (done . nil)))
 
+
+  ("WORLD-AXIOM-COLD-BOOT" . (
+    (priority . #b1010)
+    (capabilities . (world-knowledge axioms bootstrap testing derivation))
+    (origin . sens)
+    (depends-on . (WORLD-AXIOM-CANONICAL-NAME-ERASED))
+    (context . "OWNER DIRECTION 2026-10-05, authority #3502/#3374/#3386/#3420: an axiom is a true starting primitive only if SENS can cold-boot from primitive knowledge before any derived table, cache, human alias or generated fixture becomes authority.")
+    (description . "Boot from an empty knowledge state in strict order: mathematical seed axioms, seven name-erased WORLD_DEFINITION_AXIOM objects, exact-width binary function identities, MODEL_LAW authority, then observation boundary; DERIVED_FACT data may appear only by replay. Prove derived caches are disposable and removing one primitive axiom prevents dependent facts from being reconstructed.")
+    (acceptance . "Machine-readable boot-order authority; seven SI axioms queryable immediately after primitive load; zero si-derived facts before replay; delete/rebuild derived cache gives identical proof-backed facts; remove-one axiom test exposes the missing-knowledge frontier; no human spelling required.")
+    (done . nil)))
+
+  ("WORLD-KNOWLEDGE-GROWTH" . (
+    (priority . #b1010)
+    (capabilities . (world-knowledge observations derivation reasoning testing))
+    (origin . sens)
+    (depends-on . (WORLD-QUERYABLE-KNOWLEDGE CORE-MATH-AXIOM-CLOSURE-METRIC))
+    (context . "OWNER DIRECTION 2026-10-05, authority #3504/#3388/#3397/#3402: the language must demonstrate that external evidence enlarges or revises its knowledge graph, not merely that one fixed arithmetic witness can be evaluated.")
+    (description . "Run incremental knowledge states K0=axioms+MODEL_LAW, K1=K0+O1, K2=K1+O2 using typed observations. Report newly derivable facts, remaining UNKNOWN facts, graph deltas, binary function numbers executed and uncertainty propagation. Revision/withdrawal must invalidate and recompute only dependents. Reuse the #3435 closure engine and #3442 WHAT/WHY query path; do not create parallel reasoning machinery.")
+    (acceptance . "Deterministic K0->K1->K2 report; at least one observation creates a new DERIVED_FACT; unrelated facts stay stable; observation revision updates only dependents; withdrawal returns dependent facts to UNKNOWN; every new fact has a live WHY path; feed #3435 closure metrics and #2304 semantic accounting.")
+    (done . nil)))
+
+
   )))
