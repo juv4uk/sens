@@ -1,0 +1,35 @@
+name: Current SENS exact-domain corpus
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/current_exact_domain_bench.rs"
+      - "benchmarks/cross-language/current_sens.py"
+      - ".github/workflows/current-sens-exact-domain.yml"
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/eval/**"
+  workflow_dispatch:
+
+concurrency:
+  group: current-sens-exact-domain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build exact-domain benchmark runner
+        run: cargo build -p sens --release --example current_exact_domain_bench
+
+      - name: Prove shared five-workload corpus
+        run: |
+          python3 benchmarks/cross-language/current_sens.py \
+            --runner target/release/examples/current_exact_domain_bench \
+            --check-only
