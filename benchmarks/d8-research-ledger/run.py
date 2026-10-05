@@ -118,7 +118,7 @@ def run():
             "REDUCE-right",
             "SCAN-right",
             "#3704 / #3674",
-            "GREEN-UNMERGED",
+            "MERGED-MAIN",
             "PRODUCT-CANDIDATE-NONEMPTY",
         ),
         family(
@@ -128,7 +128,7 @@ def run():
             "ZIP-swapped",
             "UNZIP-swapped",
             "#3712 / #3710",
-            "GREEN-UNMERGED",
+            "MERGED-MAIN",
             "PRODUCT-CANDIDATE-TYPED",
         ),
     ]
