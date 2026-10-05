@@ -4,8 +4,8 @@
 Принцип:
 - STORE рахує канонічні semantic bits і окремо фізичний byte container;
 - AIR рахує carrier bits, не виводить їх автоматично з кількості байтів;
-- LOAD-поля присутні в спільній схемі, але лишаються null, доки #3513 не
-  надасть фазово ізольовані I-ref виміри.
+- базовий STORE/AIR runner залишає LOAD-поля null; load.py збагачує paired
+  рядки фазово ізольованими I-ref вимірами з чинних helpers.
 
 Парні English/canonical fixtures спочатку мають довести однаковий lowered
 semantic trace чинним exact-domain helper-ом. Mechanical fixtures явно
@@ -363,7 +363,7 @@ def main() -> int:
             "carrier_payload_bits + framing_bits + integrity_bits + "
             "profile_overhead_bits"
         ),
-        "load_metrics_status": "deferred-to-#3513",
+        "load_metrics_status": "base-null-enrich-with-load.py",
     }
 
     rows: list[dict[str, object]] = []
@@ -514,7 +514,7 @@ def main() -> int:
         f"wrote {len(rows)} STORE/AIR rows for {len(fixtures)} fixtures "
         f"at {args.bitrate_bps:g} bit/s -> {args.out}"
     )
-    print("LOAD I-ref fields are explicit null until #3513 supplies phase evidence")
+    print("LOAD I-ref fields are base-null; enrich paired rows with load.py")
     return 0
 
 
