@@ -15,6 +15,24 @@
       "framing_bits": 0
     },
     {
+      "id": "mixed-28-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "1 10 001 0101 10101 110011 1110001",
+      "framing_bits": 0
+    },
+    {
+      "id": "twelve-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 01 10101",
+      "framing_bits": 0
+    },
+    {
+      "id": "eight-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 001",
+      "framing_bits": 0
+    },
+    {
       "id": "d3-quote-empty",
       "kind": "paired-program",
       "english_source": "(quote ())",
