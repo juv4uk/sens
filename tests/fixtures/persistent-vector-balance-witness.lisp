@@ -14,8 +14,8 @@
 (00001001 range-list
   (00001000 (n acc)
     (00000111
-      ((00011010 n 0) 1 acc)
-      ((00011010 n 0) 0 (range-list (00001101 n 1) (00000100 n acc))))))
+      ((00011010 n 0) acc)
+      ((00011100 0 0) (range-list (00001101 n 1) (00000100 n acc))))))
 
 (00001001 persistent-vector-balance-check
   (00001000 ()
