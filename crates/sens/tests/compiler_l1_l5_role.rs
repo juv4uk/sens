@@ -97,7 +97,7 @@ fn sens_l1_l5_derivation_matches_rust_oracle_for_all_d3_identities() {
 
         match oracle {
             Some(role) => assert!(
-                matches!(result, Value::Symbol(name) if name.as_ref() == role_tag(role)),
+                matches!(result, Value::Symbol(ref name) if name.as_ref() == role_tag(role)),
                 "D3:{raw:03b} SENS law must match differential Rust oracle"
             ),
             None => assert!(
