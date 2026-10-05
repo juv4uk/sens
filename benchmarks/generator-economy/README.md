@@ -1,6 +1,6 @@
 # Current selector closure curve (#1973)
 
-This directory now also contains a **current Contract 11.5 closure/economics
+This directory now also contains a **current Contract 11.6 closure/economics
 harness**:
 
 ```sh
