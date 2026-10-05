@@ -27,11 +27,18 @@ jobs:
         with:
           shared-key: store-air-load
 
-      - name: Зібрати exact-width і semantic helpers / Build helpers
+      - name: Встановити Valgrind / Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Зібрати exact-width і LOAD helpers / Build helpers
         run: |
           cargo build --release -p sens \
             --example store_air_load_repr \
-            --example current_en_vs_d1d8_cpu
+            --example current_en_vs_d1d8_cpu \
+            --example startup_bench
 
       - name: Згенерувати STORE AIR evidence / Generate evidence
         run: |
@@ -41,8 +48,53 @@ jobs:
             --out /tmp/store-air-load.jsonl \
             --bitrate-bps 2
 
+      - name: Заповнити LOAD evidence / Enrich one paired fixture
+        run: |
+          python3 benchmarks/store-air-load/load.py \
+            --in /tmp/store-air-load.jsonl \
+            --out /tmp/store-air-load.load.jsonl \
+            --helper target/release/examples/current_en_vs_d1d8_cpu \
+            --startup-helper target/release/examples/startup_bench \
+            --fasl lib/core.lisp.fasl \
+            --only d3-quote-empty \
+            --reps 1
+          mv /tmp/store-air-load.load.jsonl /tmp/store-air-load.jsonl
+
       - name: Перевірити accounting invariants / Validate evidence
         run: python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl
+
+      - name: Довести фазово заповнений LOAD / Validate LOAD fields
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line)
+              for line in Path('/tmp/store-air-load.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          pair = {
+              row['representation']: row
+              for row in rows
+              if row['fixture_id'] == 'd3-quote-empty'
+          }
+          packed = pair['canonical-packed']
+          text = pair['text-surface']
+
+          assert packed['decode_i_refs'] is not None
+          assert packed['parse_i_refs'] is None
+          assert text['decode_i_refs'] is None
+          assert text['parse_i_refs'] is not None
+
+          for row in (packed, text):
+              assert row['lower_i_refs'] is not None
+              assert row['ready_i_refs'] is not None
+              assert row['cold_total_i_refs'] is not None
+              assert row['warm_incremental_i_refs'] is not None
+              assert row['provenance']['load_measurement']['tool'] == 'valgrind-cachegrind'
+              assert 'core_bootstrap' in row['provenance']
+          PY
 
       - name: Довести класи exact-width ratchet / Exact-width length classes
         run: |
