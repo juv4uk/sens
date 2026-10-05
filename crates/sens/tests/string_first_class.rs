@@ -25,7 +25,8 @@ fn eager_string_builtin_can_be_passed_higher_order() {
 
 #[test]
 fn all_migrated_string_mechanisms_keep_their_surface_behavior() {
-    assert_eq!(eval("(string? \"x\")"), Value::Symbol(Rc::from("t")));
+    assert_eq!(eval("(string? \"x\")").as_predicate_bit(), Some(true));
+    assert_eq!(eval("(string? 42)").as_predicate_bit(), Some(false));
     assert_eq!(
         eval("(symbol->string (quote hello))"),
         Value::String(Rc::from("hello")),
