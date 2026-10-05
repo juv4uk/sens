@@ -475,7 +475,7 @@ def main() -> int:
         "git_sha": git_fact("rev-parse", "HEAD"),
         "semantic_generation": "external-control-v2",
         "sens_rows_present": False,
-        "sens_contract_target": "11-6",
+        "sens_contract_target": "11.6",
         "sens_semantic_current": ["D1", "D2", "D3", "D4", "D5", "D6", "D7"],
         "sens_semantic_research": ["D8"],
         "sens_gate": "#3593/#3594",
