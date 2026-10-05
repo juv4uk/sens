@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/research-3622-d8-take-drop-edge.py"
       - "docs/research/3622-d8-take-drop-edge.md"
+      - "docs/research/3622-d8-take-drop-edge.uk.md"
       - ".github/workflows/d8-take-drop-edge.yml"
   push:
     branches:
