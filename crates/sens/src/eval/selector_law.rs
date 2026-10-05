@@ -9,14 +9,15 @@
 //! - selector-family suffix 1 -> compose CDR
 //! - D4 admits one selector suffix bit
 //! - owner-ratified D5 v2 (#3305/#3331) admits two selector suffix bits
+//! - owner-ratified D6 (#3393) admits three selector suffix bits
 //!
-//! This law is family-local. It does not create a universal D5 suffix meaning.
-//! D6/D7/D8 remain outside this production selector decoder and fail closed.
+//! This law is family-local. It does not create a universal suffix meaning.
+//! D7/D8 remain outside this production selector decoder and fail closed.
 
 use super::special_forms;
 use crate::{CoreDomainIdentity, ErrorKind, LanguageError, Span, Value};
 
-const MAX_SELECTOR_DEPTH: usize = 3;
+const MAX_SELECTOR_DEPTH: usize = 4;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
@@ -32,7 +33,7 @@ struct SelectorProgram {
 
 fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     let width = identity.width();
-    if !(3..=5).contains(&width) {
+    if !(3..=6).contains(&width) {
         return None;
     }
 
@@ -101,7 +102,7 @@ pub(super) fn invoke(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, Bit8, CoreD4, CoreD5, CoreD6, CoreD8};
+    use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, CoreD4, CoreD5, CoreD6, CoreD8, SoundD7};
     use std::rc::Rc;
 
     fn pair(head: Value, tail: Value) -> Value {
@@ -129,6 +130,9 @@ mod tests {
     fn d6(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()))
     }
+    fn d7(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D7(SoundD7::from_word(Bit7::new(raw).unwrap()))
+    }
     fn d8(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(raw).unwrap()))
     }
@@ -151,6 +155,28 @@ mod tests {
         assert_eq!(decode(d5(0b01101)).unwrap().steps[..3], [Step::Cdr, Step::Car, Step::Cdr]);
         assert_eq!(decode(d5(0b01110)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Car]);
         assert_eq!(decode(d5(0b01111)).unwrap().steps[..3], [Step::Cdr, Step::Cdr, Step::Cdr]);
+
+        let expected = [
+            (0b100000, [Step::Car, Step::Car, Step::Car, Step::Car]),
+            (0b100001, [Step::Car, Step::Car, Step::Car, Step::Cdr]),
+            (0b100010, [Step::Car, Step::Car, Step::Cdr, Step::Car]),
+            (0b100011, [Step::Car, Step::Car, Step::Cdr, Step::Cdr]),
+            (0b100100, [Step::Car, Step::Cdr, Step::Car, Step::Car]),
+            (0b100101, [Step::Car, Step::Cdr, Step::Car, Step::Cdr]),
+            (0b100110, [Step::Car, Step::Cdr, Step::Cdr, Step::Car]),
+            (0b100111, [Step::Car, Step::Cdr, Step::Cdr, Step::Cdr]),
+            (0b011000, [Step::Cdr, Step::Car, Step::Car, Step::Car]),
+            (0b011001, [Step::Cdr, Step::Car, Step::Car, Step::Cdr]),
+            (0b011010, [Step::Cdr, Step::Car, Step::Cdr, Step::Car]),
+            (0b011011, [Step::Cdr, Step::Car, Step::Cdr, Step::Cdr]),
+            (0b011100, [Step::Cdr, Step::Cdr, Step::Car, Step::Car]),
+            (0b011101, [Step::Cdr, Step::Cdr, Step::Car, Step::Cdr]),
+            (0b011110, [Step::Cdr, Step::Cdr, Step::Cdr, Step::Car]),
+            (0b011111, [Step::Cdr, Step::Cdr, Step::Cdr, Step::Cdr]),
+        ];
+        for (raw, steps) in expected {
+            assert_eq!(decode(d6(raw)).unwrap().steps[..4], steps);
+        }
     }
 
     #[test]
@@ -164,7 +190,9 @@ mod tests {
             d4(0b1101),
             d5(0b10100), // REVERSE, not a selector
             d5(0b11101), // MEMBER, not a selector
-            d6(0b100000),
+            d6(0b101000), // MAP, not a selector
+            d7(0b011000), // same payload as D6 CDAAAR, wrong domain/width
+            d8(0b011000), // same payload as D6 CDAAAR, wrong domain/width
             d8(0b10000000),
         ] {
             assert_eq!(decode(identity), None);
@@ -172,7 +200,7 @@ mod tests {
     }
 
     #[test]
-    fn d3_d4_and_d5_selectors_execute_without_descendant_rows() {
+    fn d3_through_d6_selectors_execute_without_descendant_rows() {
         let leaf = |n| Value::Number(n, crate::Exactness::Exact);
         let x = pair(
             pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0))),
@@ -203,6 +231,30 @@ mod tests {
         assert_eq!(invoke(d5(0b01101), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(6.0)); // CDADR
         assert_eq!(invoke(d5(0b01110), std::slice::from_ref(&x), span).unwrap().unwrap(), leaf(4.0)); // CDDAR
         assert_eq!(invoke(d5(0b01111), &[x], span).unwrap().unwrap(), leaf(8.0)); // CDDDR
+
+        let y = pair(
+            pair(
+                pair(pair(leaf(1.0), leaf(2.0)), pair(leaf(3.0), leaf(4.0))),
+                pair(pair(leaf(5.0), leaf(6.0)), pair(leaf(7.0), leaf(8.0))),
+            ),
+            pair(
+                pair(pair(leaf(9.0), leaf(10.0)), pair(leaf(11.0), leaf(12.0))),
+                pair(pair(leaf(13.0), leaf(14.0)), pair(leaf(15.0), leaf(16.0))),
+            ),
+        );
+
+        for (raw, expected) in [
+            (0b100000, 1.0), (0b100001, 9.0), (0b100010, 5.0), (0b100011, 13.0),
+            (0b100100, 3.0), (0b100101, 11.0), (0b100110, 7.0), (0b100111, 15.0),
+            (0b011000, 2.0), (0b011001, 10.0), (0b011010, 6.0), (0b011011, 14.0),
+            (0b011100, 4.0), (0b011101, 12.0), (0b011110, 8.0), (0b011111, 16.0),
+        ] {
+            assert_eq!(
+                invoke(d6(raw), std::slice::from_ref(&y), span).unwrap().unwrap(),
+                leaf(expected),
+                "D6 selector {raw:06b}"
+            );
+        }
     }
 
     #[test]
@@ -219,7 +271,7 @@ mod tests {
     }
 
     #[test]
-    fn exactly_two_d3_four_d4_and_eight_d5_selectors_are_admitted() {
+    fn exactly_two_d3_four_d4_eight_d5_and_sixteen_d6_selectors_are_admitted() {
         let mut generated = 0usize;
         for raw in 0u8..8 {
             generated += usize::from(decode(d3(raw)).is_some());
@@ -230,6 +282,9 @@ mod tests {
         for raw in 0u8..32 {
             generated += usize::from(decode(d5(raw)).is_some());
         }
-        assert_eq!(generated, 14);
+        for raw in 0u8..64 {
+            generated += usize::from(decode(d6(raw)).is_some());
+        }
+        assert_eq!(generated, 30);
     }
 }
