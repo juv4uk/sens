@@ -119,6 +119,7 @@ def source_stats(paths: list[Path]) -> tuple[int, int]:
 def generate_programs(
     workdir: Path,
     rustc_command: str,
+    python_command: str,
 ) -> tuple[
     dict[tuple[str, str], list[str]],
     dict[tuple[str, str], Path],
@@ -128,7 +129,7 @@ def generate_programs(
     artifacts: dict[tuple[str, str], Path] = {}
     sources: dict[tuple[str, str], Path] = {}
 
-    python_cmd = find_launcher(sys.executable)
+    python_cmd = find_launcher(python_command)
 
     for workload in CASES:
         py_src = workdir / f"{workload}.py"
@@ -198,7 +199,9 @@ def main() -> int:
     rustc_command = find_launcher(args.rustc)
     # Do not resolve rustc: on rustup-managed installations argv[0] dispatch
     # matters, and resolving the symlink turns "rustc -O" into invalid "rustup -O".
-    commands, artifacts, sources = generate_programs(workdir, rustc_command)
+    commands, artifacts, sources = generate_programs(
+        workdir, rustc_command, args.python
+    )
 
     sens_runner = Path(args.sens_runner).resolve()
     if not sens_runner.is_file():
