@@ -561,7 +561,14 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
             return;
         }
         environment.bind_domain_code_slot_once(identity, value.clone());
-        return;
+
+        // D3/D4 direct-domain definitions are fully migrated and stop here.
+        // Lisp-owned D5 definitions still have historical callers inside the
+        // compatibility Core/library corpus, so they must continue below long
+        // enough to install the temporary alias to this same Value/Rc.
+        if direct_d5_binding.is_none() {
+            return;
+        }
     }
 
     // Compatibility-only lane for registry rows that do not yet have a
