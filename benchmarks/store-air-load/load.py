@@ -314,6 +314,7 @@ if __name__ == "__main__":
         ValueError,
         KeyError,
         TypeError,
+        RuntimeError,
         json.JSONDecodeError,
         subprocess.SubprocessError,
     ) as exc:
