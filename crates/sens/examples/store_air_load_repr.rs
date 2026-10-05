@@ -45,7 +45,7 @@ fn run() -> Result<(), String> {
     println!("SEMANTIC_PAYLOAD_BITS={}", accounting.semantic_payload_bits);
     println!("FRAMING_BITS={}", accounting.framing_bits);
     println!("TAIL_UNUSED_BITS={}", accounting.tail_unused_bits);
-    println!("TOTAL_WIRE_BITS={}", accounting.total_wire_bits);
+    println!("BYTE_CONTAINER_TOTAL_BITS={}", accounting.total_wire_bits);
     println!("PHYSICAL_CONTAINER_BYTES={}", packed.byte_len());
     println!("PAYLOAD_UTILIZATION={utilization:.17}");
 
