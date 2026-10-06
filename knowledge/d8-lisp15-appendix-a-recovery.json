@@ -478,7 +478,8 @@
       "family": "dynamic-special-binding",
       "names": [
         "SPECIAL",
-        "UNSPECIAL"
+        "UNSPECIAL",
+        "SPECIAL-BINDING"
       ],
       "attested_by": "LISP 1.5 compiler/manual 1962",
       "behavior": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
