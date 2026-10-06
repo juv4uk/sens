@@ -56,7 +56,7 @@ pub enum ExprKind {
     /// uses `DomainIdentity`; this variant remains for historical parser,
     /// FASL/wire, and backend paths during #2817 migration.
     Sid(Sens8),
-    /// Canonical exact domain identity across the ratified D1→D8 ladder.
+    /// Canonical exact domain identity across the ratified D1→D9 ladder.
     /// Domain membership does not itself grant callability.
     DomainIdentity(DomainIdentity),
     String(Rc<str>),
@@ -840,6 +840,34 @@ mod wire_tests {
         assert_eq!(decoded_hash, hash);
         assert_eq!(decoded[0].kind, ExprKind::Local { depth: 1, index: 4 });
         assert_eq!(fasl::encode_program(&decoded, &hash), encoded);
+    }
+
+    #[test]
+    fn w9_domain_identity_round_trips_through_wire_and_fasl_without_byte_alias() {
+        let expr = Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D9(
+                crate::CoreD9::from_word(crate::Bit9::new(0b1_00000001).unwrap()),
+            )),
+            span: crate::Span { start: 0, end: 9 },
+        };
+
+        let wire = encode_program(&[expr.clone()]);
+        let decoded_wire = decode_program(&wire).expect("wire decodes W9 identity");
+        assert_eq!(decoded_wire[0].kind, expr.kind);
+        assert_eq!(encode_program(&decoded_wire), wire);
+
+        let hash = [9u8; 32];
+        let fasl_bytes = fasl::encode_program(&[expr.clone()], &hash);
+        let (decoded_fasl, decoded_hash) =
+            fasl::decode_program(&fasl_bytes).expect("fasl decodes W9 identity");
+        assert_eq!(decoded_hash, hash);
+        assert_eq!(decoded_fasl[0].kind, expr.kind);
+        assert_eq!(fasl::encode_program(&decoded_fasl, &hash), fasl_bytes);
+
+        let ExprKind::DomainIdentity(identity) = decoded_wire[0].kind else {
+            panic!("expected exact W9 domain identity");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (9, 257));
     }
 
     #[test]
