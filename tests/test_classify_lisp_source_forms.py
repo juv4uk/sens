@@ -77,24 +77,36 @@ class ThreePassClassifierTests(unittest.TestCase):
     def test_comments_strings_and_quoted_data_do_not_count(self):
         source = """
 ; (00000101 x)
-(foo "CAR")
 '(CAR x)
 #| (PLUS a b) |#
-(car x)
+(car "CAR")
 """
         hits = self.classify(source)
         self.assertEqual([(hit.pass_number, hit.token) for hit in hits], [(2, "car")])
 
-    def test_lowercase_historical_apply_is_not_pass3(self):
-        # Contract historical spelling is lowercase 'apply'; pass 3 is
-        # intentionally UPPERCASE-only per owner request.
+    def test_lowercase_historical_apply_is_my_lisp_pass2(self):
         hits = self.classify("(apply f xs)\n")
         self.assertEqual(len(hits), 1)
         self.assertEqual(hits[0].pass_number, 2)
 
-    def test_unknown_eight_bit_head_is_not_claimed(self):
+    def test_uppercase_apply_is_historical_pass3(self):
+        hits = self.classify("(APPLY f xs)\n")
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0].pass_number, 3)
+        self.assertEqual(hits[0].sid8, "10101111")
+
+    def test_unknown_eight_bit_head_is_still_pass1_unmapped(self):
         hits = self.classify("(11111111 x)\n")
-        self.assertEqual(hits, [])
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0].pass_number, 1)
+        self.assertEqual(hits[0].status, "unmapped")
+        self.assertEqual(hits[0].sid8, "11111111")
+
+    def test_user_defined_lowercase_head_is_my_lisp_pass2_unmapped(self):
+        hits = self.classify("(sqrt-iter x n)\n")
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0].pass_number, 2)
+        self.assertEqual(hits[0].status, "unmapped")
 
 
 if __name__ == "__main__":
