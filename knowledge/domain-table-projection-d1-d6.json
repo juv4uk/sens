@@ -14,7 +14,8 @@
   "initial_lexical_donors": [
     "lib/surface/domain-surfaces-d1-d4.lisp",
     "lib/surface/domain-surfaces-d5.lisp",
-    "lib/surface/semantic-registry.lisp (lexical donor only; legacy coordinates forbidden)"
+    "lib/surface/domain-surfaces-d6.lisp",
+    "lib/surface/semantic-registry.lisp (historical lexical donor only; legacy coordinates forbidden)"
   ],
   "domains": [
     {
