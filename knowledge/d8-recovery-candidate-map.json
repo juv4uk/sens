@@ -23,6 +23,40 @@
   "provisional_ladder_candidates": [
     {
       "ladder_coordinate": "00000000",
+      "candidate": "RPLACA",
+      "surfaces": [
+        "RPLACA",
+        "mutable CAR/head replacement"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "Lisp 1.5 basic list-structure operator",
+      "simple_law": "mutate CAR field of existing pair; return same pair identity; all aliases observe new head",
+      "evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ],
+      "reason": "Current D1-D7 can reconstruct a new pair but cannot mutate an existing pair cell observed through aliases."
+    },
+    {
+      "ladder_coordinate": "00000001",
+      "candidate": "RPLACD",
+      "surfaces": [
+        "RPLACD",
+        "mutable CDR/tail replacement"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "Lisp 1.5 basic list-structure operator",
+      "simple_law": "mutate CDR field of existing pair; return same pair identity; all aliases observe new tail",
+      "evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ],
+      "reason": "Current D1-D7 can reconstruct a new pair but cannot mutate an existing pair cell observed through aliases."
+    },
+    {
+      "ladder_coordinate": "00000010",
       "candidate": "ERRORSET",
       "surfaces": [
         "ERRORSET",
@@ -41,7 +75,7 @@
       "reason": "Current D1-D7 can produce/fail with language errors but has no language-level local error boundary that converts failure into a recoverable control result."
     },
     {
-      "ladder_coordinate": "00000001",
+      "ladder_coordinate": "00000011",
       "candidate": "ERROR",
       "surfaces": [
         "ERROR",
@@ -58,7 +92,7 @@
       "reason": "Current SENS has accidental/runtime LanguageError outcomes but no language operation whose intended meaning is to signal an error with an explicit payload."
     },
     {
-      "ladder_coordinate": "00000010",
+      "ladder_coordinate": "00000100",
       "candidate": "ENV-REFLECTION",
       "surfaces": [
         "ENV",
@@ -81,7 +115,7 @@
       "reason": "Current language exposes zero-argument environment reflection while D1-D7 has no resident for first-class environment enumeration."
     },
     {
-      "ladder_coordinate": "00000011",
+      "ladder_coordinate": "00000101",
       "candidate": "READ",
       "surfaces": [
         "READ",
@@ -100,7 +134,7 @@
       "reason": "D1-D7 structure does not contain a general parser from text to Lisp data."
     },
     {
-      "ladder_coordinate": "00000100",
+      "ladder_coordinate": "00000110",
       "candidate": "WRITE-TO-STRING",
       "surfaces": [
         "WRITE-TO-STRING",
@@ -119,7 +153,7 @@
       "reason": "Canonical structural serialization is not derivable from D1-D7 without a structure-to-text boundary."
     },
     {
-      "ladder_coordinate": "00000101",
+      "ladder_coordinate": "00000111",
       "candidate": "SYMBOL->STRING",
       "surfaces": [
         "SYMBOL->STRING",
@@ -138,7 +172,7 @@
       "reason": "Exact symbol-name observation is distinct from general serialization."
     },
     {
-      "ladder_coordinate": "00000110",
+      "ladder_coordinate": "00001000",
       "candidate": "STRING->SYMBOL",
       "surfaces": [
         "STRING->SYMBOL",
@@ -157,7 +191,7 @@
       "reason": "Can materialize symbol names that are not a single readable token, so it is not derivable from READ alone."
     },
     {
-      "ladder_coordinate": "00000111",
+      "ladder_coordinate": "00001001",
       "candidate": "VECTOR",
       "surfaces": [
         "VECTOR",
@@ -175,7 +209,7 @@
       "reason": "D1-D7 pair/list structure does not itself construct the current opaque indexed aggregate carrier."
     },
     {
-      "ladder_coordinate": "00001000",
+      "ladder_coordinate": "00001010",
       "candidate": "VECTOR-REF",
       "surfaces": [
         "VECTOR-REF",
@@ -192,7 +226,7 @@
       "reason": "CAR/CDR/list selectors do not observe an opaque vector cell by numeric index."
     },
     {
-      "ladder_coordinate": "00001001",
+      "ladder_coordinate": "00001011",
       "candidate": "VECTOR-SET!",
       "surfaces": [
         "VECTOR-SET!",
@@ -484,9 +518,9 @@
       "status": "PRESERVED-IN-MAIN"
     }
   ],
-  "next_fill_rule": "After the minimal ARRAY/VECTOR basis, continue Appendix-A recovery; allocate by semantic roots, never one slot per surface.",
+  "next_fill_rule": "RPLACA/RPLACD now lead the provisional D8 recovery ladder. Continue Appendix-A sweep; derive destructive conveniences from these roots before allocating more slots.",
   "accounting": {
-    "provisional_d8_ladder_candidates": 10,
+    "provisional_d8_ladder_candidates": 12,
     "provisional_coordinates": [
       "00000000",
       "00000001",
@@ -497,7 +531,9 @@
       "00000110",
       "00000111",
       "00001000",
-      "00001001"
+      "00001001",
+      "00001010",
+      "00001011"
     ],
     "resolved_recovery_no_slot": 11,
     "unresolved_recovery_rows": 2,
