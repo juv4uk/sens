@@ -391,7 +391,10 @@
   (функція (arguments)
     (за-умовою
       ((атом? arguments) (compiler-false ()))
-      ((тотожне? (решта arguments) ()) (compiler-true ()))
+      ((атом? (решта arguments))
+       (за-умовою
+         ((тотожне? (решта arguments) ()) (compiler-true ()))
+         ((compiler-true ()) (compiler-false ()))))
       ((compiler-true ()) (compiler-false ())))))
 
 (визначити compiler-exactly-two
@@ -399,7 +402,10 @@
     (за-умовою
       ((атом? arguments) (compiler-false ()))
       ((атом? (решта arguments)) (compiler-false ()))
-      ((тотожне? (решта (решта arguments)) ()) (compiler-true ()))
+      ((атом? (решта (решта arguments)))
+       (за-умовою
+         ((тотожне? (решта (решта arguments)) ()) (compiler-true ()))
+         ((compiler-true ()) (compiler-false ()))))
       ((compiler-true ()) (compiler-false ())))))
 
 ; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
