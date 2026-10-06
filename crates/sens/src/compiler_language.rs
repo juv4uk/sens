@@ -681,6 +681,35 @@ mod tests {
         )
     }
 
+    fn value_contains_symbol(value: &Value, wanted: &str) -> bool {
+        match value {
+            Value::Symbol(name) => name.as_ref() == wanted,
+            Value::Pair(head, tail) => {
+                value_contains_symbol(head, wanted) || value_contains_symbol(tail, wanted)
+            }
+            _ => false,
+        }
+    }
+
+    fn test_provenance() -> Value {
+        Value::list([
+            Value::String(Rc::from("juv4uk/sens")),
+            Value::String(Rc::from("test-whole-program")),
+        ])
+    }
+
+    fn atom_node(value: Value) -> Value {
+        Value::list([transport_symbol("atom"), value])
+    }
+
+    fn domain_call_node(identity: DomainIdentity, arguments: Vec<Value>) -> Value {
+        Value::list([
+            transport_symbol("domain-call"),
+            Value::DomainIdentity(identity),
+            Value::list(arguments),
+        ])
+    }
+
     #[test]
     fn stale_law_authority_is_a_bootstrap_failure_before_role_execution() {
         let stale_authority = format!("{LAW_AUTHORITY}\n; parity-test-stale-authority");
@@ -707,6 +736,87 @@ mod tests {
                 .contains("stale against its ratified authority"),
             "unexpected D4 stale-projection error: {error}"
         );
+    }
+
+    #[test]
+    fn whole_program_compiler_walks_real_nucleus_and_reaches_all_nine_roles() {
+        let artifact = compiler_program_artifact_from_sens(
+            COMPILER_NUCLEUS_SOURCE,
+            test_provenance(),
+        )
+        .expect("real compiler nucleus must compile as one SENS-owned program artifact");
+
+        assert_eq!(
+            result_head_symbol(&artifact),
+            Some("compiler-compilation-artifact/2")
+        );
+        for role in [
+            "quote-form",
+            "atom-predicate",
+            "selector-tail",
+            "selector-head",
+            "atom-equality",
+            "cond-form",
+            "pair-construct",
+            "lambda-form",
+            "define-form",
+        ] {
+            assert!(
+                value_contains_symbol(&artifact, role),
+                "whole-program artifact omitted SENS-derived role {role}"
+            );
+        }
+    }
+
+    #[test]
+    fn whole_program_compiler_is_deterministic_for_identical_bundle() {
+        let left = compiler_program_artifact_from_sens(
+            COMPILER_NUCLEUS_SOURCE,
+            test_provenance(),
+        )
+        .expect("first whole-program compile");
+        let right = compiler_program_artifact_from_sens(
+            COMPILER_NUCLEUS_SOURCE,
+            test_provenance(),
+        )
+        .expect("second whole-program compile");
+        assert_eq!(left, right);
+    }
+
+    #[test]
+    fn same_payload_wrong_domain_fails_source_shape_inside_sens() {
+        let wrong_identity = DomainIdentity::from_source_word(d4(0b0010).source_word());
+        let program = Value::list([domain_call_node(
+            wrong_identity,
+            vec![atom_node(Value::Symbol(Rc::from("x")))],
+        )]);
+        let error = compiler_program_artifact_from_transport(
+            program,
+            "0".repeat(64),
+            test_provenance(),
+        )
+        .expect_err("D4 LAMBDA identity with one ATOM-shaped argument must fail closed");
+
+        assert!(error.to_string().contains("source-shape-mismatch"));
+    }
+
+    #[test]
+    fn d8_domain_call_fails_closed_in_sens_program_compiler() {
+        let d8 = DomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        let program = Value::list([domain_call_node(
+            d8,
+            vec![atom_node(Value::Symbol(Rc::from("x")))],
+        )]);
+        let error = compiler_program_artifact_from_transport(
+            program,
+            "0".repeat(64),
+            test_provenance(),
+        )
+        .expect_err("D8 must remain outside current compiler closure");
+
+        assert!(error.to_string().contains("unsupported-domain-call"));
     }
 
     #[test]
