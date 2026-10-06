@@ -95,6 +95,16 @@ def fallback_eng(resident: str) -> str:
     return resident.lower()
 
 
+def selector_surfaces(resident: str) -> tuple[str, str] | None:
+    """Generate proved CAR/CDR selector spellings compositionally."""
+    if not re.fullmatch(r"C[AD]+R", resident):
+        return None
+    chain = resident[1:-1]
+    uk = "-від-".join("перше" if part == "A" else "решта" for part in chain)
+    san = "-".join("ādi" if part == "A" else "śeṣa" for part in chain)
+    return uk, san
+
+
 def render() -> str:
     foundation = json.loads(FOUNDATION.read_text(encoding="utf-8"))
     exact = parse_exact()
@@ -132,8 +142,12 @@ def render() -> str:
                 san = current["san"]
             else:
                 eng = fallback_eng(resident)
-                uk = None
-                san = None
+                generated_selector = selector_surfaces(resident)
+                if generated_selector:
+                    uk, san = generated_selector
+                else:
+                    uk = None
+                    san = None
 
             donor_key = D6_DONOR_ALIASES.get(resident, eng).lower()
             donor = legacy.get(donor_key, {})
