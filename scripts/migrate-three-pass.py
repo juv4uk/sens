@@ -50,8 +50,8 @@ NUMERIC_RE = re.compile(
 )
 
 HISTORICAL_ROW_RE = re.compile(
-    r"^\\s*\\(row\\s+([01]{8})\\s+([^\\s()]+)\\s+([^\\s()]+)\\s+"
-    r"([^\\s()]+)\\s+([^\\s()]+)\\s+([^\\s()]+)\\s*\\)",
+    r"^\s*\(row\s+([01]{8})\s+([^\s()]+)\s+([^\s()]+)\s+"
+    r"([^\s()]+)\s+([^\s()]+)\s+([^\s()]+)\s*\)",
     re.MULTILINE,
 )
 
