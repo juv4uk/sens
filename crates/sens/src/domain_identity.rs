@@ -50,14 +50,14 @@ impl DomainIdentity {
     /// never a semantic identity.
     pub const fn packed_bits(self) -> u16 {
         match self {
-            Self::D1(value) => u16::from(value.word().packed_bits()),
-            Self::D2(value) => u16::from(value.word().packed_bits()),
-            Self::D3(value) => u16::from(value.word().packed_bits()),
-            Self::D4(value) => u16::from(value.word().packed_bits()),
-            Self::D5(value) => u16::from(value.word().packed_bits()),
-            Self::D6(value) => u16::from(value.word().packed_bits()),
-            Self::D7(value) => u16::from(value.word().packed_bits()),
-            Self::D8(value) => u16::from(value.word().packed_bits()),
+            Self::D1(value) => value.word().packed_bits() as u16,
+            Self::D2(value) => value.word().packed_bits() as u16,
+            Self::D3(value) => value.word().packed_bits() as u16,
+            Self::D4(value) => value.word().packed_bits() as u16,
+            Self::D5(value) => value.word().packed_bits() as u16,
+            Self::D6(value) => value.word().packed_bits() as u16,
+            Self::D7(value) => value.word().packed_bits() as u16,
+            Self::D8(value) => value.word().packed_bits() as u16,
             Self::D9(value) => value.word().packed_bits(),
         }
     }
