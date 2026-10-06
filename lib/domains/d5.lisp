@@ -1,0 +1,41 @@
+; Canonical human-readable domain table.
+; D5: exact-width 5-bit keys only.
+; The binary key width is the domain address.
+; Columns: ук → укр → san → en → LISP → sym
+; Predicate marker rule: ук/укр/en end in ?, Sanskrit does not.
+; Empty/missing: ()
+
+(domain-table/1
+  (00000 (ук обчислити-як-є) (укр обчислити-як-є) (san svarūpa-vicāraṇa) (en evalquote) (LISP EVALQUOTE) (sym ()))
+  (00001 (ук функція-значення) (укр функція-значення) (san phalana-rūpa) (en function) (LISP FUNCTION) (sym ()))
+  (00010 (ук необчислений-вираз) (укр необчислений-вираз) (san avicārita-rūpa) (en fexpr) (LISP FEXPR) (sym ()))
+  (00011 (ук макрос) (укр макрос) (san vistāra-rūpa) (en macro) (LISP MACRO) (sym ()))
+  (00100 (ук мітка) (укр мітка) (san cihna) (en label) (LISP LABEL) (sym ()))
+  (00101 (ук програма) (укр програма) (san kāryakrama) (en prog) (LISP PROG) (sym ()))
+  (00110 (ук встановити) (укр встановити) (san sthāpana) (en set) (LISP SET) (sym ()))
+  (00111 (ук встановити-ім'я) (укр встановити-ім'я) (san nāma-sthāpana) (en setq) (LISP SETQ) (sym ()))
+  (01000 (ук нуль?) (укр нуль?) (san saṅkhyā-śūnya) (en zerop?) (LISP ZEROP) (sym ()))
+  (01001 (ук число?) (укр число?) (san saṅkhyā) (en numberp?) (LISP NUMBERP) (sym ()))
+  (01010 (ук додати) (укр додати) (san yoga) (en plus) (LISP PLUS) (sym +))
+  (01011 (ук відняти) (укр відняти) (san viyoga) (en difference) (LISP DIFFERENCE) (sym -))
+  (01100 (ук решта-від-першого-від-першого) (укр решта-від-першого-від-першого) (san śeṣa-ādi-ādi) (en cdaar) (LISP CDAAR) (sym ()))
+  (01101 (ук решта-від-першого-від-решти) (укр решта-від-першого-від-решти) (san śeṣa-ādi-śeṣa) (en cdadr) (LISP CDADR) (sym ()))
+  (01110 (ук решта-від-решти-від-першого) (укр решта-від-решти-від-першого) (san śeṣa-śeṣa-ādi) (en cddar) (LISP CDDAR) (sym ()))
+  (01111 (ук решта-від-решти-від-решти) (укр решта-від-решти-від-решти) (san śeṣa-śeṣa-śeṣa) (en cdddr) (LISP CDDDR) (sym ()))
+  (10000 (ук перше-від-першого-від-першого) (укр перше-від-першого-від-першого) (san ādi-ādi-ādi) (en caaar) (LISP CAAAR) (sym ()))
+  (10001 (ук перше-від-першого-від-решти) (укр перше-від-першого-від-решти) (san ādi-ādi-śeṣa) (en caadr) (LISP CAADR) (sym ()))
+  (10010 (ук перше-від-решти-від-першого) (укр перше-від-решти-від-першого) (san ādi-śeṣa-ādi) (en cadar) (LISP CADAR) (sym ()))
+  (10011 (ук перше-від-решти-від-решти) (укр перше-від-решти-від-решти) (san ādi-śeṣa-śeṣa) (en caddr) (LISP CADDR) (sym ()))
+  (10100 (ук зворот) (укр зворот) (san viloma) (en reverse) (LISP REVERSE) (sym ()))
+  (10101 (ук зворот-до) (укр зворот-до) (san viloma-saṅkalana) (en reverse-onto) (LISP REVERSE-ONTO) (sym ()))
+  (10110 (ук помножити) (укр помножити) (san guṇana) (en times) (LISP TIMES) (sym *))
+  (10111 (ук частка) (укр частка) (san bhāga) (en quotient) (LISP QUOTIENT) (sym ()))
+  (11000 (ук перейти) (укр перейти) (san gamana) (en go) (LISP GO) (sym ()))
+  (11001 (ук повернути) (укр повернути) (san nivartana) (en return) (LISP RETURN) (sym ()))
+  (11010 (ук менше?) (укр менше?) (san hīna) (en lessp?) (LISP LESSP) (sym <))
+  (11011 (ук більше?) (укр більше?) (san adhika) (en greaterp?) (LISP GREATERP) (sym >))
+  (11100 (ук знайти-за-ключем) (укр знайти-за-ключем) (san saṃbandha) (en assoc) (LISP ASSOC) (sym ()))
+  (11101 (ук значення-у-списку?) (укр значення-у-списку?) (san sambaddha) (en member?) (LISP MEMBER) (sym ()))
+  (11110 (ук спарувати) (укр спарувати) (san yugma-bandha) (en pairlis) (LISP PAIRLIS) (sym ()))
+  (11111 (ук замінити) (укр замінити) (san ādeśa) (en subst) (LISP SUBST) (sym ()))
+)
