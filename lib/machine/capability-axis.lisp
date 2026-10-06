@@ -32,6 +32,8 @@
        ((integer-subtract bounded-u64 no-underflow)))
      (10110
        ((integer-multiply bounded-u32-inputs u64-result)))
+     (10111
+       ((integer-quotient bounded-positive-i64 equal-operands-only)))
      (101
        ((identity-compare bounded-u64)))
      (110
@@ -73,6 +75,10 @@
        (integer-multiply bounded-u32-inputs u64-result
          (admitted-form imul-r64-r64)
          (lowering x86-lower-times-u64-forms))
+       (integer-quotient bounded-positive-i64 equal-operands-only
+         (admitted-form cqo)
+         (admitted-form idiv-r64)
+         (lowering x86-lower-quotient-i64-equal-forms))
        (identity-compare bounded-u64
          (admitted-form cmp-r64-r64)
          (lowering x86-lower-eq-cond-u64-forms))
