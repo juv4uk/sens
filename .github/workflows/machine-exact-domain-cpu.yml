@@ -11,6 +11,7 @@ on:
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_exact_d3_structural.rs"
       - "crates/sens/tests/machine_exact_d3_eq_cond.rs"
+      - "crates/sens/tests/machine_exact_d5_arithmetic.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
@@ -41,6 +42,7 @@ jobs:
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
           cargo test -p sens --test machine_exact_d3_structural -- --nocapture
           cargo test -p sens --test machine_exact_d3_eq_cond -- --nocapture
+          cargo test -p sens --test machine_exact_d5_arithmetic -- --nocapture
           cargo test -p sens --test machine_capability_axis -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Existing x86 lowering boundary

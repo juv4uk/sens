@@ -2,7 +2,7 @@
 ;
 ; This file does NOT define language semantics and does NOT define an ISA.
 ; Current semantic meaning is exact-domain: exact bits + exact domain +
-; ratified law (Contract 11.7). Human spellings and historical SID8 bytes are
+; ratified law (Contract 11.8). Human spellings and historical SID8 bytes are
 ; not machine-capability authority.
 ;
 ; Current axis:
@@ -27,7 +27,11 @@
 (00001001 machine-capability-axis-v2
   (00000001
     ((01010
-       ((integer-add bounded-u64)))
+       ((integer-add bounded-u32-inputs u64-result)))
+     (01011
+       ((integer-subtract bounded-u64 no-underflow)))
+     (10110
+       ((integer-multiply bounded-u32-inputs u64-result)))
      (101
        ((identity-compare bounded-u64)))
      (110
@@ -60,9 +64,15 @@
 (00001001 machine-capability-target-witnesses-v2
   (00000001
     ((x86-64
-       (integer-add bounded-u64
+       (integer-add bounded-u32-inputs u64-result
          (admitted-form add-r64-r64)
          (lowering x86-lower-add-u64-forms))
+       (integer-subtract bounded-u64 no-underflow
+         (admitted-form sub-r64-r64)
+         (lowering x86-lower-difference-u64-forms))
+       (integer-multiply bounded-u32-inputs u64-result
+         (admitted-form imul-r64-r64)
+         (lowering x86-lower-times-u64-forms))
        (identity-compare bounded-u64
          (admitted-form cmp-r64-r64)
          (lowering x86-lower-eq-cond-u64-forms))
