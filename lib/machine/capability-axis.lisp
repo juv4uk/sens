@@ -27,11 +27,11 @@
 (00001001 machine-capability-axis-v2
   (00000001
     ((01010
-       ((integer-add bounded-u64)))
+       ((integer-add bounded-u32-inputs u64-result)))
      (01011
-       ((integer-subtract bounded-u64 exact-result-guarded)))
+       ((integer-subtract bounded-u64 no-underflow)))
      (10110
-       ((integer-multiply bounded-u64 exact-result-guarded)))
+       ((integer-multiply bounded-u32-inputs u64-result)))
      (101
        ((identity-compare bounded-u64)))
      (110
@@ -64,13 +64,13 @@
 (00001001 machine-capability-target-witnesses-v2
   (00000001
     ((x86-64
-       (integer-add bounded-u64
+       (integer-add bounded-u32-inputs u64-result
          (admitted-form add-r64-r64)
          (lowering x86-lower-add-u64-forms))
-       (integer-subtract bounded-u64 exact-result-guarded
+       (integer-subtract bounded-u64 no-underflow
          (admitted-form sub-r64-r64)
          (lowering x86-lower-difference-u64-forms))
-       (integer-multiply bounded-u64 exact-result-guarded
+       (integer-multiply bounded-u32-inputs u64-result
          (admitted-form imul-r64-r64)
          (lowering x86-lower-times-u64-forms))
        (identity-compare bounded-u64
