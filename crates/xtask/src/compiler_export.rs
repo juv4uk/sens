@@ -81,22 +81,60 @@ fn role_name(role: CompilerLoweringRole) -> &'static str {
     }
 }
 
-fn parse_identity(bits: &str) -> Result<CoreDomainIdentity, String> {
-    if bits.len() != 3 || !bits.bytes().all(|b| matches!(b, b'0' | b'1')) {
-        return Err(format!("unsupported D3 head bits {bits:?}"));
-    }
-    let raw = u8::from_str_radix(bits, 2)
-        .map_err(|_| format!("invalid D3 head bits {bits:?}"))?;
+fn d3(raw: u8) -> Result<CoreDomainIdentity, String> {
     Ok(CoreDomainIdentity::D3(Bija3::from_word(
         Bit3::new(raw).ok_or_else(|| format!("invalid D3 value {raw}"))?,
     )))
 }
 
-fn parse_fixture_rows(
-    fixture: Option<&str>,
-) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
+fn d4(raw: u8) -> Result<CoreDomainIdentity, String> {
+    Ok(CoreDomainIdentity::D4(CoreD4::from_word(
+        Bit4::new(raw).ok_or_else(|| format!("invalid D4 value {raw}"))?,
+    )))
+}
+
+/// Enumerate candidate exact identities, but admit meaning only through the
+/// executable SENS-owned compiler law.
+fn current_role_rows() -> Result<Vec<(String, CoreDomainIdentity)>, String> {
     let mut rows = Vec::new();
-    for line in CORPUS.lines() {
+
+    for raw in 0u8..8 {
+        let identity = d3(raw)?;
+        if let Some(role) = compiler_lowering_role_from_sens(identity)
+            .map_err(|error| format!("SENS D3 role derivation failed for {raw:03b}: {error}"))?
+        {
+            rows.push((
+                format!("role-d3-{raw:03b}-{}", role_name(role)),
+                identity,
+            ));
+        }
+    }
+
+    for raw in 0u8..16 {
+        let identity = d4(raw)?;
+        if let Some(role) = compiler_lowering_role_from_sens(identity)
+            .map_err(|error| format!("SENS D4 role derivation failed for {raw:04b}: {error}"))?
+        {
+            rows.push((
+                format!("role-d4-{raw:04b}-{}", role_name(role)),
+                identity,
+            ));
+        }
+    }
+
+    if rows.len() != 9 {
+        return Err(format!(
+            "current compiler role closure exported {} rows, expected 9",
+            rows.len()
+        ));
+    }
+    Ok(rows)
+}
+
+/// Preserve the original D3 corpus fixture selector as a compatibility
+/// convenience. The role is still re-derived through the SENS law.
+fn legacy_d3_fixture(name: &str) -> Result<Option<(String, CoreDomainIdentity)>, String> {
+    for line in D3_CORPUS.lines() {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
@@ -108,21 +146,39 @@ fn parse_fixture_rows(
                 fields.len()
             ));
         }
-        let name = fields[0].to_string();
-        if let Some(requested) = fixture {
-            if requested != name {
-                continue;
-            }
+        if fields[0] != name {
+            continue;
         }
-        rows.push((name, parse_identity(fields[1])?));
+
+        let bits = fields[1];
+        if bits.len() != 3 || !bits.bytes().all(|b| matches!(b, b'0' | b'1')) {
+            return Err(format!("unsupported D3 fixture bits {bits:?}"));
+        }
+        let raw =
+            u8::from_str_radix(bits, 2).map_err(|_| format!("invalid D3 fixture bits {bits:?}"))?;
+        return Ok(Some((name.to_string(), d3(raw)?)));
     }
-    if rows.is_empty() {
-        return Err(match fixture {
-            Some(name) => format!("compiler corpus fixture not found: {name}"),
-            None => "compiler corpus is empty".into(),
-        });
+    Ok(None)
+}
+
+fn requested_rows(fixture: Option<&str>) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
+    let all = current_role_rows()?;
+    let Some(requested) = fixture else {
+        return Ok(all);
+    };
+
+    if let Some(row) = legacy_d3_fixture(requested)? {
+        return Ok(vec![row]);
     }
-    Ok(rows)
+
+    let selected: Vec<_> = all
+        .into_iter()
+        .filter(|(fixture_id, _)| fixture_id == requested)
+        .collect();
+    if selected.is_empty() {
+        return Err(format!("compiler corpus fixture not found: {requested}"));
+    }
+    Ok(selected)
 }
 
 fn render_request(
