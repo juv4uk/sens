@@ -847,7 +847,7 @@ mod tests {
         )
         .expect("representation-only request digest")
         {
-            Value::String(value) => value.to_string(),
+            Value::String(ref value) => value.to_string(),
             other => panic!("request digest mechanism returned non-string: {other}"),
         };
         assert!(matches!(
