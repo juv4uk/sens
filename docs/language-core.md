@@ -431,7 +431,7 @@ Compatibility adapters дозволені лише як явно обмежен�
 
 Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
 
-Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D7; D5 ratified #3305, D6 ratified #3393, D7 ratified #3572, а D8 лишається research.
+Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D8; D5 ratified #3305, D6 ratified #3393, D7 ratified #3572, D8 ratified #3960.
 
 Profile може вибирати mechanism, але не може:
 
