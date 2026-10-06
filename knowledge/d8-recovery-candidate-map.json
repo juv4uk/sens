@@ -1,0 +1,270 @@
+{
+  "schema": "d8-recovery-candidate-map/v1",
+  "status": "research-provisional-not-ratified",
+  "authority": [
+    "#3920",
+    "#3921",
+    "#3923",
+    "#3924"
+  ],
+  "principle_order": [
+    "necessity",
+    "historical-priority",
+    "simple-mathematical-logical-law",
+    "recovery-of-missed-evidence"
+  ],
+  "guards": [
+    "D8 remains unratified",
+    "candidate coordinate is not resident identity",
+    "Sens8/Function8 is not a donor table",
+    "ratified D1-D7 are not silently reshuffled",
+    "research geometric coordinates are preserved separately from ladder placement"
+  ],
+  "provisional_ladder_candidates": [
+    {
+      "ladder_coordinate": "00000000",
+      "candidate": "ENV-REFLECTION",
+      "surfaces": [
+        "ENV",
+        "ALIST/ENV (historical-concept alias only)"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "environment/a-list concept is foundational in early evaluator lineage; first-class ENV reflection is current-SENS and must not be backdated",
+      "simple_law": "visible binding enumeration + lexical lookup coherence + shadowing",
+      "evidence": [
+        "#3924",
+        "docs/FUNCTIONS.md",
+        "NOTE-FOR-SAKSHI.md",
+        "crates/sens/src/eval/builtins.rs"
+      ],
+      "current_runtime_provenance": {
+        "compatibility_sid8": "01001110",
+        "note": "implementation provenance only; not D8 placement authority"
+      },
+      "reason": "Current language exposes zero-argument environment reflection while D1-D7 has no resident for first-class environment enumeration."
+    }
+  ],
+  "recovered_no_slot": [
+    {
+      "candidate": "EQUAL",
+      "surfaces": [
+        "EQUAL",
+        "equal?"
+      ],
+      "status": "DERIVED-NO-SLOT",
+      "reason": "structural equality is recursively definable from lower-domain structure/equality operations",
+      "evidence": [
+        "lib/core.lisp",
+        "contracts/primitive-budget-audit-734.lisp",
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ]
+    },
+    {
+      "candidate": "PAIR",
+      "status": "DERIVED-NO-SLOT",
+      "reason": "ordinary recursive pair/list construction from D3 structure operators",
+      "evidence": [
+        "#2286",
+        "#2300",
+        "docs/research/2344-post-d4-historical-ledger.json"
+      ]
+    },
+    {
+      "candidate": "AND",
+      "status": "DERIVED-NO-SLOT",
+      "reason": "language-owned short-circuit macro over existing control and syntax construction",
+      "evidence": [
+        "lib/core.lisp"
+      ]
+    },
+    {
+      "candidate": "OR",
+      "status": "DERIVED-NO-SLOT",
+      "reason": "language-owned short-circuit macro over existing control and syntax construction",
+      "evidence": [
+        "lib/core.lisp"
+      ]
+    },
+    {
+      "candidate": "DIVIDE",
+      "status": "DERIVED/FOREIGN-REVIEW-NO-SLOT",
+      "reason": "historical combined quotient+remainder interface; test carrier-specific delta before any slot",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ]
+    }
+  ],
+  "unresolved_recovery": [
+    {
+      "candidate": "FSUBR",
+      "status": "UNRESOLVED-NO-SLOT",
+      "reason": "shares raw-operands + explicit caller-environment protocol family with FEXPR; no distinct resident theorem",
+      "evidence": [
+        "#2343",
+        "#2522",
+        "#2530",
+        "#2591",
+        "docs/research/2344-post-d4-historical-ledger.json"
+      ]
+    },
+    {
+      "candidate": "TRANSFORMER/HART-MACRO",
+      "status": "UNRESOLVED-NO-SLOT",
+      "reason": "five observable special-call axes are preserved, but width/coordinate theorem is absent",
+      "evidence": [
+        "#2567",
+        "#2588",
+        "#2591",
+        "#2616"
+      ]
+    },
+    {
+      "candidate": "ONEP/MINUSP/FIXP/FLOATP",
+      "status": "RECOVERY-REVIEW",
+      "reason": "early numeric predicates; test cheap derivability from current numeric relations first",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ]
+    },
+    {
+      "candidate": "LOGOR/LOGAND/LOGXOR/LEFTSHIFT",
+      "status": "CORE-MATH-OR-MECHANISM-REVIEW",
+      "reason": "early and algebraically simple, but historical 36-bit carrier semantics may belong outside Core",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ]
+    }
+  ],
+  "preserved_positive_research": [
+    {
+      "family": "TAKE/DROP × edge",
+      "source": "#3667",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "TAKE-right",
+        "DROP-right"
+      ],
+      "geometric_coordinates": [
+        "11000001/11000010 gauge orbit",
+        "11000011 fixed"
+      ],
+      "ladder_coordinates": null
+    },
+    {
+      "family": "ANY/ALL × predicate polarity",
+      "source": "#3668",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "ANY(NOT p)",
+        "ALL(NOT p)"
+      ],
+      "geometric_coordinates": [
+        "11110001/11110010 gauge orbit",
+        "11110011 fixed"
+      ],
+      "ladder_coordinates": null
+    },
+    {
+      "family": "REDUCE/SCAN × direction",
+      "source": "#3704",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "REDUCE-right",
+        "SCAN-right"
+      ],
+      "geometric_coordinates": [
+        "10111001/10111010 gauge orbit",
+        "10111011 fixed"
+      ],
+      "protocol_limit": "nonempty-list for SCAN",
+      "ladder_coordinates": null
+    },
+    {
+      "family": "ZIP/UNZIP × orientation",
+      "source": "#3712",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "ZIP-swapped",
+        "UNZIP-swapped"
+      ],
+      "geometric_coordinates": [
+        "11100001/11100010 gauge orbit",
+        "11100011 fixed"
+      ],
+      "ladder_coordinates": null
+    },
+    {
+      "family": "DO/WHILE × condition/projection",
+      "source": "#3779",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "continue-while-true+apply-result",
+        "stop-when-true+return-state"
+      ],
+      "geometric_coordinates": [
+        "11001101/11001110 gauge orbit",
+        "11001111 fixed"
+      ],
+      "ladder_coordinates": null
+    },
+    {
+      "family": "NEG/ABS × RECIP",
+      "source": "#3783 recovered",
+      "merge_state": "replay-in-recovery-branch",
+      "novel_semantics": [
+        "NEG∘RECIP",
+        "ABS∘RECIP"
+      ],
+      "geometric_coordinates": [
+        "01001001/01001010 gauge orbit",
+        "01001011 fixed"
+      ],
+      "ladder_coordinates": null
+    },
+    {
+      "family": "RASSOC/ACONS × association orientation",
+      "source": "#3783 recovered",
+      "merge_state": "replay-in-recovery-branch",
+      "novel_semantics": [
+        "orientation-derived association semantics"
+      ],
+      "geometric_coordinates": "preserved in witness",
+      "ladder_coordinates": null
+    },
+    {
+      "family": "NTH/MAPLIST × traversal direction",
+      "source": "#3783 recovered",
+      "merge_state": "replay-in-recovery-branch",
+      "novel_semantics": [
+        "NTH-right",
+        "MAPLIST-right"
+      ],
+      "geometric_coordinates": "preserved in witness",
+      "ladder_coordinates": null
+    }
+  ],
+  "preserved_negative_research": [
+    {
+      "family": "CURRY/FLIP × swapped arguments",
+      "source": "#3778 recovered",
+      "status": "DEPENDENT-AXIS-REJECTED"
+    },
+    {
+      "family": "INTEGERP/RATIONALP × sign",
+      "source": "#3778 recovered",
+      "status": "UNOBSERVABLE-AXIS-REJECTED"
+    },
+    {
+      "family": "RECIP/EXPT × reciprocal-base/exponent-sign",
+      "source": "#3778 recovered",
+      "status": "DEPENDENT-AXES-REJECTED"
+    },
+    {
+      "family": "five earlier second-axis falsifiers",
+      "source": "#3670",
+      "status": "PRESERVED-IN-MAIN"
+    }
+  ],
+  "next_fill_rule": "Resolve recovery rows first. Assign another ladder coordinate only when the capability is not represented/derived below and has a cheap explicit witness."
+}
