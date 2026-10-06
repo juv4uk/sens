@@ -59,6 +59,59 @@
     },
     {
       "ladder_coordinate": "00000010",
+      "candidate": "VECTOR",
+      "surfaces": [
+        "ARRAY (historical family name)",
+        "VECTOR (current SENS constructor)"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "ARRAY is attested in Lisp 1.5; current SENS exposes Vector as live indexed aggregate",
+      "simple_law": "construct finite indexed aggregate from supplied values",
+      "evidence": [
+        "#3933",
+        "LISP 1.5 Programmer's Manual ARRAY",
+        "crates/sens/src/eval/builtins.rs"
+      ],
+      "reason": "D1-D7 has no indexed aggregate constructor/type family; current Vector is opaque to CAR/CDR and is a live semantic value."
+    },
+    {
+      "ladder_coordinate": "00000011",
+      "candidate": "VECTOR-REF",
+      "surfaces": [
+        "ARRAY indexing/fetch (historical family behavior)",
+        "vector-ref"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "indexed array observation is part of the Lisp 1.5 ARRAY family",
+      "simple_law": "REF(VECTOR(x0..xn),i)=xi for in-range i",
+      "evidence": [
+        "#3933",
+        "crates/sens/src/eval/builtins.rs"
+      ],
+      "reason": "No D1-D7 operation can observe a current Vector cell; list CAR/CDR do not apply to the opaque Vector carrier."
+    },
+    {
+      "ladder_coordinate": "00000100",
+      "candidate": "VECTOR-SET!",
+      "surfaces": [
+        "ARRAY filling/update (historical family behavior)",
+        "vector-set!"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "mutable indexed array storage is present in the Lisp 1.5 ARRAY family",
+      "simple_law": "after SET(v,i,z), every alias of the same vector observes REF(v,i)=z",
+      "evidence": [
+        "#3933",
+        "crates/sens/src/eval/builtins.rs",
+        "crates/sens/src/value.rs"
+      ],
+      "reason": "Alias-visible in-place cell mutation is not reproduced by pure persistent list reconstruction."
+    },
+    {
+      "ladder_coordinate": "00000101",
       "candidate": "ENV-REFLECTION",
       "surfaces": [
         "ENV",
@@ -172,6 +225,26 @@
         "#2591",
         "#2616",
         "knowledge/d5-ratified.json"
+      ]
+    },
+    {
+      "candidate": "MAKE-VECTOR",
+      "status": "DERIVED-NO-SLOT",
+      "reason": "MAKE-VECTOR(n) = APPLY(VECTOR, repeat(EMPTY,n)); construction convenience over VECTOR + lower list recursion/APPLY.",
+      "evidence": [
+        "#3933",
+        "D4 APPLY",
+        "D3 EMPTY"
+      ]
+    },
+    {
+      "candidate": "VECTOR-LENGTH",
+      "status": "DERIVED-NO-SLOT",
+      "reason": "least n such that ERRORSET(VECTOR-REF(v,n)) = EMPTY; successful EMPTY element is distinguishable because ERRORSET success returns singleton LIST(EMPTY).",
+      "evidence": [
+        "#3933",
+        "#3929",
+        "VECTOR-REF"
       ]
     }
   ],
@@ -339,15 +412,18 @@
       "status": "PRESERVED-IN-MAIN"
     }
   ],
-  "next_fill_rule": "Preserve ERRORSET/ERROR as the early failure-control family and ENV reflection as the next provisional candidate; continue full pre-1963 recovery before allocating later-history slots.",
+  "next_fill_rule": "Continue complete Lisp-1.5 omission sweep. Prefer irreducible early/current capability families; derive convenience surfaces instead of spending slots.",
   "accounting": {
-    "provisional_d8_ladder_candidates": 3,
+    "provisional_d8_ladder_candidates": 6,
     "provisional_coordinates": [
       "00000000",
       "00000001",
-      "00000010"
+      "00000010",
+      "00000011",
+      "00000100",
+      "00000101"
     ],
-    "resolved_recovery_no_slot": 9,
+    "resolved_recovery_no_slot": 11,
     "unresolved_recovery_rows": 2,
     "preserved_positive_law_families": 8,
     "preserved_negative_falsifier_groups": 4,
