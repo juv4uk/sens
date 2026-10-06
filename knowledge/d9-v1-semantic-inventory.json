@@ -10,13 +10,14 @@
   "sources": [
     "knowledge/d9-selector-seed.json",
     "knowledge/d9-overflow-review-v1.json",
-    "knowledge/d9-surface-harvest-v1.json"
+    "knowledge/d9-surface-harvest-v1.json",
+    "knowledge/d9-library-harvest-v1.json"
   ],
   "accounting": {
-    "selected_semantic_candidates": 168,
+    "selected_semantic_candidates": 226,
     "law_forced_coordinates": 128,
-    "unplaced_selected_candidates": 40,
-    "remaining_semantic_inventory": 344,
+    "unplaced_selected_candidates": 98,
+    "remaining_semantic_inventory": 286,
     "ratified_d9_residents": 0
   },
   "rules": [
@@ -28,6 +29,992 @@
     "D9 remains unratified until explicit owner decision"
   ],
   "rows": [
+    {
+      "stable_id": "d9.lib.0c2e7f48fb1458be",
+      "semantic_name": "DEADLINE-AFTER-NS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "compute a deadline relative to the current monotonic observation",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "deadline-after-ns",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.1430c8b60b4d0d68",
+      "semantic_name": "EXPLAIN-PROOF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REASONING-ALGEBRA",
+      "behavior": "convert a proof object into explanatory structure",
+      "provenance": [
+        "#3983",
+        "lib/reason.lisp"
+      ],
+      "source_name": "explain-proof",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.17fdf69aeb69e5d4",
+      "semantic_name": "MAP->LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA",
+      "behavior": "convert a persistent map to its key/value list in map order",
+      "provenance": [
+        "#3983",
+        "lib/persistent-map.lisp"
+      ],
+      "source_name": "map->list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.1ab631055fcefdec",
+      "semantic_name": "DEADLINE-REACHED-AT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "test whether a supplied time has reached a supplied deadline",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "deadline-reached-at?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.1beb6518569974b4",
+      "semantic_name": "REASON",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REASONING-ALGEBRA",
+      "behavior": "run the reasoning engine over a goal/rule knowledge set",
+      "provenance": [
+        "#3983",
+        "lib/reason.lisp"
+      ],
+      "source_name": "reason",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.1e4d9eacb02fa6a3",
+      "semantic_name": "TIMEZONE-DETECT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "interpret raw timezone declarations into a detected/unknown language result",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "timezone-detect",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.2332d4fae8ac1988",
+      "semantic_name": "UNIFY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION-ALGEBRA",
+      "behavior": "compute a substitution that makes two terms equal when possible",
+      "provenance": [
+        "#3983",
+        "lib/unify.lisp"
+      ],
+      "source_name": "unify",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.27bb426ea5ba2b7a",
+      "semantic_name": "PROVE-GOALS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REASONING-ALGEBRA",
+      "behavior": "derive proof alternatives for a conjunction of goals",
+      "provenance": [
+        "#3983",
+        "lib/reason.lisp"
+      ],
+      "source_name": "prove-goals",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.2a530211b8b05789",
+      "semantic_name": "MODULE-KNOWN?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "test whether a named knowledge module currently exists",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "module-known?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.2d7b0709ec488f57",
+      "semantic_name": "EVIDENCE-METHOD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the method field of evidence",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "evidence-method",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.2f61936c40df45de",
+      "semantic_name": "INTENT-GOAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the goal field of an intent",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "intent-goal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.313a4cc73044d989",
+      "semantic_name": "ELAPSED-NS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "compute elapsed nanoseconds since a supplied monotonic starting point",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "elapsed-ns",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.3148f2669ff80d51",
+      "semantic_name": "EVIDENCE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "test whether a value has evidence-record semantics",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "evidence?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.359582ff0b209e23",
+      "semantic_name": "VEC-COUNT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA",
+      "behavior": "return the logical element count of a persistent vector",
+      "provenance": [
+        "#3983",
+        "lib/persistent-vector.lisp"
+      ],
+      "source_name": "vec-count",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.420ebee82dbe8ed8",
+      "semantic_name": "VEC->LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA",
+      "behavior": "convert a persistent vector to an ordinary list in index order",
+      "provenance": [
+        "#3983",
+        "lib/persistent-vector.lisp"
+      ],
+      "source_name": "vec->list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.4854bbddda3f573a",
+      "semantic_name": "COLLECT-FACTS-ABOUT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "collect current facts concerning a requested subject",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "collect-facts-about",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.4d4f57cb989c1df3",
+      "semantic_name": "OBSERVATION?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "test whether a value has observation-record semantics",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "observation?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.571c27fc551ca7f8",
+      "semantic_name": "PROVE-GOAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REASONING-ALGEBRA",
+      "behavior": "derive proof alternatives for one goal",
+      "provenance": [
+        "#3983",
+        "lib/reason.lisp"
+      ],
+      "source_name": "prove-goal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.57ea172747721ffc",
+      "semantic_name": "DESCRIBE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "produce a language-level description of known information about a subject",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "describe",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.5ab43021f6efb3be",
+      "semantic_name": "VEC-CONJ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA",
+      "behavior": "return a new persistent vector with one value appended",
+      "provenance": [
+        "#3983",
+        "lib/persistent-vector.lisp"
+      ],
+      "source_name": "vec-conj",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.5e9a3e5814f2b342",
+      "semantic_name": "UTC-NOW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "obtain the current UTC language value through the raw Unix-clock observation boundary",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "utc-now",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.664a3113932fca17",
+      "semantic_name": "IS-FACT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "test whether a knowledge clause is a fact",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "is-fact?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.69c1ad0b7edf6595",
+      "semantic_name": "CHECK-CONFLICT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "test whether a proposed knowledge change conflicts with current knowledge",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "check-conflict?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.6d7af3deb1780375",
+      "semantic_name": "SUPPORTING-EVIDENCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "return the matching evidence object supporting a specific claim reference, or empty if none",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "supporting-evidence",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.7094f80d3063da68",
+      "semantic_name": "MAP-CONTAINS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA",
+      "behavior": "test whether a persistent map contains a key",
+      "provenance": [
+        "#3983",
+        "lib/persistent-map.lisp"
+      ],
+      "source_name": "map-contains?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.771af7f7aabab179",
+      "semantic_name": "MAP-EMPTY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA",
+      "behavior": "construct the empty persistent map",
+      "provenance": [
+        "#3983",
+        "lib/persistent-map.lisp"
+      ],
+      "source_name": "map-empty",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.794755de21761e74",
+      "semantic_name": "VAR?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION-ALGEBRA",
+      "behavior": "test whether a value is a logic variable",
+      "provenance": [
+        "#3983",
+        "lib/unify.lisp"
+      ],
+      "source_name": "var?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.7c3494396fd84024",
+      "semantic_name": "MAP-GET",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA",
+      "behavior": "lookup a key in a persistent map and return a maybe-shaped result",
+      "provenance": [
+        "#3983",
+        "lib/persistent-map.lisp"
+      ],
+      "source_name": "map-get",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.8064830e852c857c",
+      "semantic_name": "CLAIM-STATEMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the statement field of a claim",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "claim-statement",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.88d6d226af52752b",
+      "semantic_name": "REASON-EXPLAIN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REASONING-ALGEBRA",
+      "behavior": "run reasoning and return/expose proof explanation",
+      "provenance": [
+        "#3983",
+        "lib/reason.lisp"
+      ],
+      "source_name": "reason-explain",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.8c74fd6477d78242",
+      "semantic_name": "DEADLINE-REACHED?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "test whether the current monotonic observation has reached a deadline",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "deadline-reached?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.8cda8cc8e56b376d",
+      "semantic_name": "APPLY-SUBST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION-ALGEBRA",
+      "behavior": "apply a substitution recursively to a term",
+      "provenance": [
+        "#3983",
+        "lib/unify.lisp"
+      ],
+      "source_name": "apply-subst",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.91ad65c0dec4b144",
+      "semantic_name": "CLAIM-REVIEW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the review field of a claim",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "claim-review",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.9314d798f4c0679e",
+      "semantic_name": "UNIX-TIME-OBSERVATION->UTC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "interpret a raw Unix-time observation as UTC language data",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "unix-time-observation->utc",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.9a0e4080dfeee21b",
+      "semantic_name": "INTENT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "test whether a value has intent-record semantics",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "intent?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.9b305f7838bbb39b",
+      "semantic_name": "VEC-EMPTY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA",
+      "behavior": "construct the empty persistent vector",
+      "provenance": [
+        "#3983",
+        "lib/persistent-vector.lisp"
+      ],
+      "source_name": "vec-empty",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.a14934fbe0b2c87d",
+      "semantic_name": "MAP-INSERT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA",
+      "behavior": "return a new persistent map with key/value inserted or replaced while preserving the original",
+      "provenance": [
+        "#3983",
+        "lib/persistent-map.lisp"
+      ],
+      "source_name": "map-insert",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.a6a115490cdb571b",
+      "semantic_name": "PROVENANCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REASONING-ALGEBRA",
+      "behavior": "derive provenance information from proof structure",
+      "provenance": [
+        "#3983",
+        "lib/reason.lisp"
+      ],
+      "source_name": "provenance",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.a854ae1ec64d11e1",
+      "semantic_name": "SOURCE-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REASONING-ALGEBRA",
+      "behavior": "retrieve the source identity attached to a proof/evidence object",
+      "provenance": [
+        "#3983",
+        "lib/reason.lisp"
+      ],
+      "source_name": "source-of",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.aa4d3782b9afce44",
+      "semantic_name": "TIMEZONE-NAME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "retrieve the name from an accepted timezone configuration",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "timezone-name",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.b5b1c3f0feef0a30",
+      "semantic_name": "LOGIC-VAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION-ALGEBRA",
+      "behavior": "construct a logic-variable representation",
+      "provenance": [
+        "#3983",
+        "lib/unify.lisp"
+      ],
+      "source_name": "logic-var",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.b967200ccd0e9914",
+      "semantic_name": "CONTAINS-ATOM?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "test whether a compound knowledge value contains a specified atom",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "contains-atom?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.bacde74143f0bdf6",
+      "semantic_name": "WALK",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION-ALGEBRA",
+      "behavior": "follow substitution links from a term toward its current representative",
+      "provenance": [
+        "#3983",
+        "lib/unify.lisp"
+      ],
+      "source_name": "walk",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.bcfce290e14a3dd7",
+      "semantic_name": "OCCURS-CHECK?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION-ALGEBRA",
+      "behavior": "test whether binding a variable to a term would create a recursive occurrence",
+      "provenance": [
+        "#3983",
+        "lib/unify.lisp"
+      ],
+      "source_name": "occurs-check?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.c1ee6e5e1920d9b3",
+      "semantic_name": "UTC-FROM-UNIX",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "deterministically convert Unix seconds/nanoseconds to UTC calendar data",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "utc-from-unix",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.c2e2bab667a8b1d3",
+      "semantic_name": "CLAIM?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "test whether a value has claim-record semantics",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "claim?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.c326da67608d1552",
+      "semantic_name": "OBSERVATION-STATEMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the statement field of an observation",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "observation-statement",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.d12ce69f441f1ec2",
+      "semantic_name": "MONO-MS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "obtain a monotonic millisecond language value derived from the raw nanosecond counter",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "mono-ms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.d1536670414a7503",
+      "semantic_name": "REASON-IN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "run reasoning scoped to a named knowledge module",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "reason-in",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.d1a83cbd550c6b7d",
+      "semantic_name": "VEC-FROM-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA",
+      "behavior": "construct a persistent vector from an ordinary list",
+      "provenance": [
+        "#3983",
+        "lib/persistent-vector.lisp"
+      ],
+      "source_name": "vec-from-list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.d4db3d46ace222c3",
+      "semantic_name": "FORWARD-IN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "run forward reasoning scoped to a named knowledge module",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "forward-in",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.d6d1d71d061e1d07",
+      "semantic_name": "TIMEZONE-OFFSET-SECONDS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "retrieve the UTC offset seconds from an accepted timezone configuration",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "timezone-offset-seconds",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.def50f3329f1d739",
+      "semantic_name": "MILLISECONDS-FROM-NANOSECONDS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "convert nonnegative nanoseconds to whole milliseconds",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "milliseconds-from-nanoseconds",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.df4bb696b4eff9ed",
+      "semantic_name": "EVIDENCE-OUTCOME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the outcome field of evidence",
+      "provenance": [
+        "#3983",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "evidence-outcome",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.e816f5a186c46086",
+      "semantic_name": "DEADLINE-FROM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "compute an absolute deadline from an observed time and a delta",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "deadline-from",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.eb6a49d45cc93606",
+      "semantic_name": "INTERNET-TIME-SYNC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA",
+      "behavior": "obtain and interpret an internet-time observation through the raw NTP boundary",
+      "provenance": [
+        "#3983",
+        "lib/time.lisp"
+      ],
+      "source_name": "internet-time-sync",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.f8f373f6fb2ecc4f",
+      "semantic_name": "VEC-NTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA",
+      "behavior": "lookup a persistent-vector element by index with explicit maybe-shaped absence",
+      "provenance": [
+        "#3983",
+        "lib/persistent-vector.lisp"
+      ],
+      "source_name": "vec-nth",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.lib.fc28205b541bb341",
+      "semantic_name": "MODULE-CLAUSES-NOW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA",
+      "behavior": "materialize the current clauses of a knowledge module from its journal",
+      "provenance": [
+        "#3983",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "module-clauses-now",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
     {
       "stable_id": "d9.review.0364ee983da2300d",
       "semantic_name": "OPEN",
