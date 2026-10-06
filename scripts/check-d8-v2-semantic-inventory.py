@@ -55,11 +55,21 @@ def main() -> int:
     # Усі 64 selector-law residents мають зберігати попередню координатну evidence.
     selector_rows = [row for row in rows if row["source_class"] == "SELECTOR-LAW"]
     require(len(selector_rows) == 64, "selector count drift")
-    donor_selectors = {row["name"]: row["coordinate"] for row in donor["coordinates"]}
+    current_selector_coords = set(recovery["selector_structural_lane"]["coordinates"])
+    require(len(current_selector_coords) == 64, "current selector coordinate count drift")
     for row in selector_rows:
         require(
-            donor_selectors.get(row["semantic_name"]) in row["coordinate_evidence"],
-            f"selector evidence lost: {row['semantic_name']}",
+            len(row["coordinate_evidence"]) == 1
+            and row["coordinate_evidence"][0] in current_selector_coords,
+            f"current selector evidence lost: {row['semantic_name']}",
+        )
+        require(
+            row.get("historical_donor_coordinate"),
+            f"historical selector donor coordinate not preserved: {row['semantic_name']}",
+        )
+        require(
+            row["coordinate_evidence"][0] != row["historical_donor_coordinate"],
+            f"stale #2934 selector coordinate accidentally reused: {row['semantic_name']}",
         )
 
     # Жоден із чинних recovery candidates не може зникнути.
