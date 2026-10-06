@@ -385,6 +385,63 @@
         (t
          (x86-encode-admitted-program forms))))))
 
+; #4018 exact D5 order-predicate machine proof.
+; These forms intentionally produce only an INTERNAL machine bit in RAX.
+; No native-call wrapper exposes that 0/1 as a language predicate. The
+; language-visible result boundary remains the existing D5 -> D1
+; canonicalization in Rust.
+(00001001 x86-current-d5-order-i63-safe?
+  (00001000 (left right)
+    (00000111
+      ((x86-admission-exact-integer? left)
+       (00000111
+         ((x86-admission-within-inclusive-integer-range?
+            left 0 9223372036854775807)
+          (00000111
+            ((x86-admission-exact-integer? right)
+             (x86-admission-within-inclusive-integer-range?
+               right 0 9223372036854775807))
+            (t (00000001 ()))))
+         (t (00000001 ()))))
+      (t (00000001 ())))))
+
+(00001001 x86-lower-order-i64-forms
+  (00001000 (identity left right)
+    (00000111
+      ((x86-current-d5-order-i63-safe? left right)
+       (00000111
+         ((00100010 identity 11010)
+          (00100111
+            (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+            (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+            (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
+            (00100111 (00000001 setl-r8) (00000001 al))
+            (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
+            (00100111 (00000001 ret))))
+         ((00100010 identity 11011)
+          (00100111
+            (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+            (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+            (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
+            (00100111 (00000001 setg-r8) (00000001 al))
+            (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
+            (00100111 (00000001 ret))))
+         (t
+          (00000001 unsupported-current-domain-order-i64))))
+      (t
+       (00000001 exact-d5-fallback-required)))))
+
+(00001001 x86-encode-current-order-bit
+  (00001000 (identity left right)
+    (10011100 ((forms (x86-lower-order-i64-forms identity left right)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-order-i64))
+         (00000001 unsupported-current-domain-order-i64))
+        ((00100010 forms (00000001 exact-d5-fallback-required))
+         (00000001 exact-d5-fallback-required))
+        (t
+         (x86-encode-admitted-program forms))))))
+
 ; #3996 exact-domain structural D3 dispatcher.
 ; These are bounded native-call witnesses only. They do not claim a general
 ; allocator, escaping pair ABI, GC, or arbitrary first-class native pair value.
