@@ -1,6 +1,6 @@
 ; language-contract.lisp — current machine-readable Level 1/2 contract.
 ;
-; Contract 11.7 — owner-ratified D1–D8 foundation.
+; Contract 11.8 — owner-ratified D1–D9 foundation.
 ; Owner paradigm: #2490. Implementation cutover: #2817 / #2822.
 ;
 ; Contract 11 preserves the observable PredicateBit / ATOM / EQ / COND law
@@ -19,11 +19,11 @@
 ; bounded compatibility / transport / backend projection during migration.
 ; It cannot mint or redefine canonical semantic identity.
 
-((major . #d11) (minor . 7)
+((major . #d11) (minor . 8)
  (status . current-domain-qualified-authority)
  (supersedes . "Contract 10.0 flat Function8 identity authority")
  (historical-snapshot . "docs/archive/historical/language-contract-10.0.lisp")
- (note . "Contract 11.7 owner-ratifies D1–D8 as the current foundation chain. D1–D7 retain their prior authorities; D8 is owner-ratified 256/256 in #3960 over the full #3959 v2 map. D8 residency is semantic authority, while callable/mechanism admission remains separate and may fail closed. Historical Sens8/Sid8/Function8 and #2934 donor coordinates remain provenance only.")
+ (note . "Contract 11.8 owner-ratifies D1–D9 as the current foundation chain. D1–D8 retain their prior authorities; D9 is owner-ratified 512/512 in #4008 over the full #4007 v1 map. D9 residency is semantic authority, while callable/mechanism admission remains separate and may fail closed. Historical Sens8/Sid8/Function8, semantic-registry source codes and pre-ratification D9 placement evidence remain provenance only.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-domain-identity
@@ -66,8 +66,10 @@
        . "Core.D7 is OWNER-RATIFIED 126/128 under #3572. Its exact resident map is normative in contracts/d7-ratification.lisp and knowledge/d7-ratified.json. The 19 same-coordinate Shiva overlays are admitted by owner decision; 0100001 and 0101010 remain owner-reserved/pinned, not free. Text digits remain Text, LocalOrdinal remains a separate W7 role, and D7 residency does not imply generic callable-Core mechanism.")
       (d8-ratified-status
        . "Core.D8 is OWNER-RATIFIED 256/256 under #3960. Its exact resident map is normative in contracts/d8-ratification.lisp and knowledge/d8-ratified.json. The #3959 selector/product/gauge coordinate assignment is now normative by owner decision, while proof-fixed, orbit-gauge and S4-gauge provenance remain distinguished. Ratified D8 residency does not imply callable mechanism; missing mechanisms fail closed. Historical Sens8/Sid8/Function8 and #2934 donor coordinates remain non-authoritative.")
+      (d9-ratified-status
+       . "Core.D9 is OWNER-RATIFIED 512/512 under #4008. Its exact resident map is normative in contracts/d9-ratification.lisp and knowledge/d9-ratified.json. The #4007 map has 128 theorem-forced selector coordinates and 384 owner-ratified S4 gauge choices; both are normative identity while their proof provenance remains distinct. Ratified D9 residency does not imply callable mechanism; missing mechanisms fail closed. Historical Sens8/Sid8/Function8, semantic-registry source codes and pre-ratification D9 placement evidence remain non-authoritative.")
       (cross-domain-non-collapse
-       . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8 or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
+       . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8, D9 or Core-Math domains without semantic equality. Cross-domain reuse requires an explicit independently proved bridge law.")
       (atom-one-bit-core1-4
        . "Core.D3 010 ATOM has one law across Core1/Core2/Core3/Core4: structural empty () and every admitted non-pair value answer PredicateBit 1; pair answers PredicateBit 0. Structural () is an ATOM-yes subject, not a truth value. Historical Function8 00000010 is compatibility projection only.")
       (eq-one-bit-core1-4
@@ -75,7 +77,7 @@
       (cond-two-part-core1-4
        . "Core.D3 110 COND has one law across Core1/Core2/Core3/Core4. Every clause has exactly two fields: (test expression). Tests are evaluated left-to-right and must return exact PredicateBit. PredicateBit 1 selects and evaluates that clause expression; PredicateBit 0 skips it. If no clause selects, COND returns structural (). Structural () is not a predicate answer. Historical Function8 00000111 is compatibility projection only.")
       (core-profile-law
-       . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D8 semantic domains or the D1/D3 predicate-control foundation.")
+       . "Core1/Core2/Core3/Core4 are execution/research profiles over shared admitted domain identities and laws. A profile may select mechanisms but may not mint, renumber, or override the shared D1-D9 semantic domains or the D1/D3 predicate-control foundation.")
       (kernel-archipelago
        . "Execution kernels may own native mechanisms and observations. They consume an already-selected domain-qualified semantic object or an explicitly compatibility-tagged legacy projection plus arguments/context. Kernel names, opcodes, packed bytes and native types never acquire SENS semantic identity by themselves.")
       (reader-apostrophe
