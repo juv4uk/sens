@@ -2,9 +2,7 @@
 
 **Authority:** `knowledge/d1-d7-foundation.json` (#3572).
 
-Human projection source: `knowledge/domain-table-projection-d1-d6.json`.
-Exact surface sources: `lib/surface/domain-surfaces-d1-d4.lisp`, `domain-surfaces-d5.lisp`, `domain-surfaces-d6.lisp`.
-Exact identity remains `bits + domain + ratified law`.
+**Machine-readable projection:** `lib/generated/domain-table-d1-d6.lisp`.
 
 Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
 Empty/missing surface marker: `()`.
@@ -109,7 +107,7 @@ Empty/missing surface marker: `()`.
 | `000110` | `()` | `()` | `()` | `macroexpand-1` | `MACROEXPAND-1` | `saṃghaṭana6:000110=MACROEXPAND-1` |
 | `000111` | `()` | `()` | `()` | `macroexpand` | `MACROEXPAND` | `saṃghaṭana6:000111=MACROEXPAND` |
 | `001000` | `нехай` | `нехай` | `()` | `let` | `LET` | `saṃghaṭana6:001000=LET` |
-| `001001` | `нехай*` | `нехай-послідовно` | `()` | `let*` | `LET*` | `saṃghaṭana6:001001=LET*` |
+| `001001` | `нехай*` | `нехай*` | `()` | `let*` | `LET*` | `saṃghaṭana6:001001=LET*` |
 | `001010` | `підставити-пари` | `підставити-пари` | `()` | `sublis` | `SUBLIS` | `saṃghaṭana6:001010=SUBLIS` |
 | `001011` | `()` | `()` | `()` | `compose` | `COMPOSE` | `saṃghaṭana6:001011=COMPOSE` |
 | `001100` | `()` | `()` | `()` | `rassoc` | `RASSOC` | `saṃghaṭana6:001100=RASSOC` |
