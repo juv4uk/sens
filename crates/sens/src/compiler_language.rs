@@ -713,6 +713,10 @@ mod tests {
             Value::String(value) if value.as_ref() == COMPILER_AUTHORITY_PATH
         ));
         assert!(matches!(
+            provenance[1],
+            Value::String(value) if value.as_ref() == bundle.authority_sha256.as_str()
+        ));
+        assert!(matches!(
             provenance[2],
             Value::String(value) if value.as_ref() == COMPILER_CONTRACT_VERSION
         ));
