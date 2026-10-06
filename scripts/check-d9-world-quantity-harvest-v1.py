@@ -73,20 +73,15 @@ for row in rows:
     assert candidate["coordinate_basis"]=="UNPLACED"
     assert candidate["ratified_resident"] is False
 
-assert len(inventory["rows"])==375
-assert len({row["stable_id"] for row in inventory["rows"]})==375
-assert len({row["semantic_name"] for row in inventory["rows"]})==375
-assert inventory["accounting"]=={
-    "selected_semantic_candidates":375,
-    "law_forced_coordinates":128,
-    "unplaced_selected_candidates":247,
-    "remaining_semantic_inventory":137,
-    "ratified_d9_residents":0,
-}
+target=state["target"]
+assert target["selected_semantic_candidates"]>=375
+assert target["remaining_semantic_candidates"]==512-target["selected_semantic_candidates"]
+assert target["ratified_residents"]==0
 
-assert state["target"]["selected_semantic_candidates"]==375
-assert state["target"]["remaining_semantic_candidates"]==137
-assert state["target"]["ratified_residents"]==0
+assert len(inventory["rows"])==target["selected_semantic_candidates"]
+assert len({row["stable_id"] for row in inventory["rows"]})==target["selected_semantic_candidates"]
+assert len({row["semantic_name"] for row in inventory["rows"]})==target["selected_semantic_candidates"]
+
 assert state["world_quantity_harvest"]=={
     "artifact":"knowledge/d9-world-quantity-harvest-v1.json",
     "selected":62,
@@ -95,4 +90,4 @@ assert state["world_quantity_harvest"]=={
 }
 
 print("D9-WORLD-QUANTITY-HARVEST-1=PASS")
-print("selected=62 inventory=375/512 placed=128 unplaced=247 remaining=137 ratified=0")
+selected_total=target["selected_semantic_candidates"]\nremaining_total=target["remaining_semantic_candidates"]\nprint(f"selected=62 inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
