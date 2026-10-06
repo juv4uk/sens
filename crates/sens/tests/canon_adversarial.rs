@@ -41,7 +41,7 @@ fn cond_surface_stops_at_the_first_true_clause() {
         "перша"
     );
     assert_eq!(
-        eval("(anukrama ((abheda? (svarūpa prathama) (svarūpa prathama)) (svarūpa prathama)) ((ayam-na-vidyate) (svarūpa dvitīya)))"),
+        eval("(anukrama ((abheda (svarūpa prathama) (svarūpa prathama)) (svarūpa prathama)) ((ayam-na-vidyate) (svarūpa dvitīya)))"),
         "prathama"
     );
 }

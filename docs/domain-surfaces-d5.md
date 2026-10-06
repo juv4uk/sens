@@ -26,8 +26,8 @@
 | 00101 | PROG | `програма` | `kāryakrama` |
 | 00110 | SET | `встановити` | `sthāpana` |
 | 00111 | SETQ | `встановити-ім'я` | `nāma-sthāpana` |
-| 01000 | ZEROP | `нуль?` | `saṅkhyā-śūnya?` |
-| 01001 | NUMBERP | `число?` | `saṅkhyā?` |
+| 01000 | ZEROP | `нуль?` | `saṅkhyā-śūnya` |
+| 01001 | NUMBERP | `число?` | `saṅkhyā` |
 | 01010 | PLUS | `додати` | `yoga` |
 | 01011 | DIFFERENCE | `відняти` | `viyoga` |
 | 01100 | CDAAR | `решта-від-першого-від-першого` | `śeṣa-ādi-ādi` |
@@ -44,10 +44,10 @@
 | 10111 | QUOTIENT | `частка` | `bhāga` |
 | 11000 | GO | `перейти` | `gamana` |
 | 11001 | RETURN | `повернути` | `nivartana` |
-| 11010 | LESSP | `менше?` | `hīna?` |
-| 11011 | GREATERP | `більше?` | `adhika?` |
+| 11010 | LESSP | `менше?` | `hīna` |
+| 11011 | GREATERP | `більше?` | `adhika` |
 | 11100 | ASSOC | `знайти-за-ключем` | `saṃbandha` |
-| 11101 | MEMBER | `значення-у-списку?` | `sambaddha?` |
+| 11101 | MEMBER | `значення-у-списку?` | `sambaddha` |
 | 11110 | PAIRLIS | `спарувати` | `yugma-bandha` |
 | 11111 | SUBST | `замінити` | `ādeśa` |
 

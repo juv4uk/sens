@@ -106,7 +106,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         for surface, bits in [
             ("атом?", "010"),
             ("сполучити", "111"),
-            ("aṇu?", "010"),
+            ("aṇu", "010"),
             ("додати", "01010"),
         ]:
             converted, hits, _ = self.binary(f"({surface} x)\n")

@@ -141,6 +141,14 @@ def validate(rows: list[dict[str, str]]) -> None:
 
     for row in rows:
         key = (row["domain"], row["bits"])
+        if row["role"] == "predicate":
+            if not row["uk"].endswith("?"):
+                fail(f"{key}: predicate UK surface must end in ?")
+            if not row["en"].endswith("?"):
+                fail(f"{key}: predicate EN surface must end in ?")
+            if row["sa"].endswith("?"):
+                fail(f"{key}: predicate Sanskrit surface must not end in ?")
+
         if key in DISPLAY_ONLY and row["role"] != "display":
             fail(f"{key}: structural/display identity became callable surface")
         if key not in DISPLAY_ONLY and row["role"] == "display":
