@@ -5,13 +5,10 @@ on:
     branches:
       - codex/sens-code-migration-tools
     paths:
-      - "crates/sens/examples/binary_master_export.rs"
-      - "scripts/export-binary-master.sh"
       - "scripts/migrate-to-sens-codes.py"
-      - "scripts/audit-sens-name-debt.py"
-      - "scripts/migrate-sens-ecosystem.py"
       - "tests/test_sens_code_migration.py"
       - "knowledge/d1-d7-foundation.json"
+      - "crates/sens/src/text7_projection_generated.rs"
       - ".github/workflows/publish-binary-master.yml"
   workflow_dispatch:
 
@@ -30,30 +27,35 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Prove comments do not affect binary output
+      - name: Test exact-width source migration
         shell: bash
         run: |
-          rm -rf /tmp/comment-a /tmp/comment-b /tmp/comment-out-a /tmp/comment-out-b
-          mkdir -p /tmp/comment-a /tmp/comment-b
-          cat > /tmp/comment-a/sample.lisp <<'EOF'
-          ; line comment must disappear
-          (car ; inline comment must disappear
-            (cons 'cat 'dog))
-          #| block comment must disappear |#
-          EOF
-          cat > /tmp/comment-b/sample.lisp <<'EOF'
-          (car (cons 'cat 'dog))
-          EOF
-          bash scripts/export-binary-master.sh /tmp/comment-a /tmp/comment-out-a
-          bash scripts/export-binary-master.sh /tmp/comment-b /tmp/comment-out-b
-          cmp /tmp/comment-out-a/sample.lisp.wire.bits /tmp/comment-out-b/sample.lisp.wire.bits
+          python3 -m unittest tests/test_sens_code_migration.py
 
-      - name: Export parse-lower-wire binary files
+      - name: Build comment-free binary source mirror
         shell: bash
         run: |
-          bash scripts/export-binary-master.sh . /tmp/sens-binary-out
+          rm -rf /tmp/sens-binary-out /tmp/sens-binary-report.json
+          python3 scripts/migrate-to-sens-codes.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --text7-projection crates/sens/src/text7_projection_generated.rs \
+            --binary-mirror /tmp/sens-binary-out \
+            --report /tmp/sens-binary-report.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("/tmp/sens-binary-report.json").read_text())
+          print(json.dumps(report["summary"], ensure_ascii=False))
+          blocked = [
+              row for row in report["files"]
+              if row["status"] == "blocked"
+          ]
+          print(f"blocked_files={len(blocked)}")
+          for row in blocked[:100]:
+              print("BLOCKED", row["path"], row["blockers"])
+          PY
 
-      - name: Validate binary-only output
+      - name: Validate exact-width visible binary files
         shell: bash
         run: |
           python3 - <<'PY'
@@ -63,20 +65,29 @@ jobs:
           files = [p for p in root.rglob("*") if p.is_file()]
           bad = []
           for p in files:
-              text = p.read_text(encoding="ascii")
+              try:
+                  text = p.read_text(encoding="ascii")
+              except UnicodeDecodeError:
+                  bad.append((str(p.relative_to(root)), "non-ascii"))
+                  continue
               if not text.strip() or not re.fullmatch(r"[01\s]+", text):
-                  bad.append(str(p.relative_to(root)))
+                  bad.append((str(p.relative_to(root)), "non-binary"))
+                  continue
+              for word in text.split():
+                  if not (1 <= len(word) <= 8):
+                      bad.append((str(p.relative_to(root)), f"word-width={len(word)}"))
+                      break
           print(f"validated_binary_files={len(files)}")
           if bad:
-              print("REFUSE non-binary output:")
-              print("\n".join(bad))
+              for item in bad[:100]:
+                  print("REFUSE", item)
               sys.exit(1)
           if not files:
               print("REFUSE empty export")
               sys.exit(1)
           PY
 
-      - name: Publish binary-only tree to master
+      - name: Publish only corrected binary files to master
         shell: bash
         run: |
           set -euo pipefail
@@ -92,12 +103,9 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re, sys
-          files = []
+          files = [p for p in Path(".").rglob("*") if p.is_file() and ".git" not in p.parts]
           bad = []
-          for p in Path(".").rglob("*"):
-              if not p.is_file() or ".git" in p.parts:
-                  continue
-              files.append(p)
+          for p in files:
               try:
                   text = p.read_text(encoding="ascii")
               except UnicodeDecodeError:
@@ -105,10 +113,13 @@ jobs:
                   continue
               if not text.strip() or not re.fullmatch(r"[01\s]+", text):
                   bad.append(str(p))
+                  continue
+              if any(not (1 <= len(word) <= 8) for word in text.split()):
+                  bad.append(str(p))
           print(f"validated_master_files={len(files)}")
           if bad:
-              print("REFUSE non-binary files in master candidate:")
-              print("\n".join(bad))
+              print("REFUSE non-canonical files:")
+              print("\n".join(bad[:100]))
               sys.exit(1)
           if not files:
               print("REFUSE empty master candidate")
@@ -117,11 +128,11 @@ jobs:
 
           git add -A
           if git diff --cached --quiet; then
-            echo "No binary output changed master."
+            echo "No binary source changed master."
             exit 0
           fi
 
           git config user.name "sens-binary-publisher"
           git config user.email "sens-binary-publisher@users.noreply.github.com"
-          git commit -m "master: publish parser-lowered SENS wire as binary-only files"
+          git commit -m "master: publish exact-width comment-free SENS source"
           git push origin HEAD:master
