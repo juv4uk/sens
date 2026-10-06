@@ -105,15 +105,17 @@ def load_mapping(path: Path) -> tuple[list[Mapping], dict[str, Mapping], dict[st
             )
         by_my[row.my_lisp] = row
 
-        # Pass 3 is deliberately only UPPERCASE Lisp 1/1.5 notation.
-        if row.historical.isupper() and any(ch.isalpha() for ch in row.historical):
-            old = by_historical_upper.get(row.historical)
+        # Pass 3 recognizes the UPPERCASE source spelling of every historical
+        # Lisp 1/1.5 name, even when provenance recorded it in lowercase.
+        historical_upper = row.historical.upper()
+        if any(ch.isalpha() for ch in historical_upper):
+            old = by_historical_upper.get(historical_upper)
             if old is not None and old.sid8 != row.sid8:
                 raise SystemExit(
-                    f"{path}: ambiguous historical spelling {row.historical!r}: "
+                    f"{path}: ambiguous historical spelling {historical_upper!r}: "
                     f"{old.sid8} vs {row.sid8}"
                 )
-            by_historical_upper[row.historical] = row
+            by_historical_upper[historical_upper] = row
 
     return rows, by_sid, by_my, by_historical_upper
 
@@ -260,7 +262,12 @@ def classify_three_passes(
     def key(head: Head) -> tuple[str, int, int]:
         return (head.path, head.start, head.end)
 
-    def add(pass_number: int, representation: str, head: Head, row: Mapping) -> None:
+    def add(
+        pass_number: int,
+        representation: str,
+        head: Head,
+        row: Mapping | None,
+    ) -> None:
         claimed.add(key(head))
         hits.append(
             Hit(
@@ -270,37 +277,41 @@ def classify_three_passes(
                 line=head.line,
                 column=head.column,
                 token=head.token,
-                sid8=row.sid8,
-                my_lisp=row.my_lisp,
-                historical=row.historical,
-                historical_source=row.source,
-                fit=row.fit,
-                status=row.status,
+                sid8=row.sid8 if row else (head.token if pass_number == 1 else ""),
+                my_lisp=row.my_lisp if row else "",
+                historical=row.historical if row else "",
+                historical_source=row.source if row else "",
+                fit=row.fit if row else "",
+                status=row.status if row else "unmapped",
             )
         )
 
-    # PASS 1 — exact legacy SID8/SENS8 heads.
+    # PASS 1 — every exact legacy 8-bit executable head. A historical
+    # contract row enriches the hit, but absence from the contract never hides
+    # the legacy form.
     for head in heads:
         if head.empty_list:
             continue
         if re.fullmatch(r"[01]{8}", head.token):
-            row = by_sid.get(head.token)
-            if row is not None:
-                add(1, "sid8-sens8", head, row)
+            add(1, "sid8-sens8", head, by_sid.get(head.token))
 
-    # PASS 2 — our my-lisp notation. Literal () is the my-lisp empty-list
-    # surface corresponding to the historical SID8 empty-list row.
+    # PASS 2 — our my-lisp notation. Reserve known historical UPPERCASE names
+    # for pass 3, and leave already-binary exact-width heads alone. Everything
+    # else in executable head position is a my-lisp surface, including
+    # user-defined functions and symbolic names. Literal () is its own case.
     empty_row = by_my.get("empty-list")
+    historical_upper_tokens = set(by_historical_upper)
     for head in heads:
         if key(head) in claimed:
             continue
         if head.empty_list:
-            if empty_row is not None:
-                add(2, "my-lisp-empty-list", head, empty_row)
+            add(2, "my-lisp-empty-list", head, empty_row)
             continue
-        row = by_my.get(head.token)
-        if row is not None:
-            add(2, "my-lisp", head, row)
+        if re.fullmatch(r"[01]{1,8}", head.token):
+            continue
+        if head.token in historical_upper_tokens:
+            continue
+        add(2, "my-lisp", head, by_my.get(head.token))
 
     # PASS 3 — historical Lisp 1 / Lisp 1.5 spelling, UPPERCASE only.
     for head in heads:
