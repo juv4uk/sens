@@ -19,6 +19,8 @@
 00000000  ERRORSET
 00000001  ERROR
 00000010  ENV-REFLECTION
+00000011  READ
+00000100  WRITE-TO-STRING
 ```
 
 Це **candidate coordinates**, не ратифіковані residents.
@@ -133,8 +135,8 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   3
-provisional coordinates            00000000, 00000001, 00000010
+provisional D8 ladder candidates   5
+provisional coordinates            00000000..00000100
 ratified D8 residents              0
 resolved recovery no-slot          9
 unresolved recovery rows           2
@@ -144,7 +146,7 @@ preserved negative groups          4
 
 ## Наступне правило заповнення
 
-Після `ERRORSET`, `ERROR` і `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
+Після `ERRORSET`, `ERROR`, `ENV-REFLECTION`, `READ` і `WRITE-TO-STRING` новий D8 slot видаємо тільки тоді, коли:
 
 ```text
 capability не представлена D1-D7
@@ -154,3 +156,42 @@ AND має дешевий зрозумілий witness
 ```
 
 Отже D8 росте повільніше, але чистіше: верхній домен збирає справді пропущені можливості, а не копії вже наявної алгебри.
+
+
+## Structure ↔ text recovery
+
+`READ` тут не означає host stdin. Для D8-кандидата береться саме одноаргументний закон:
+
+```text
+READ(string) -> один структурний Lisp datum
+```
+
+без виконання цього datum.
+
+`WRITE-TO-STRING` дає зворотну стрілку:
+
+```text
+WRITE(value) -> canonical readable text
+```
+
+Основний дешевий закон:
+
+```text
+READ(WRITE(x)) = x
+```
+
+на admitted readable-value carrier.
+
+Зворотна композиція є canonicalization:
+
+```text
+WRITE(READ(t)) = canonicalize(t)
+```
+
+Отже це не console I/O, а мовний міст structure ↔ text.
+
+### D7 blocker
+
+Current mechanism використовує `Value::String`, а канонічний текстовий домен D7 — Text7/UPC-7. Тому обидва кандидати залишаються provisional до явного D7↔reader/writer bridge. Unicode/String representation не є D8 identity.
+
+`READ-ALL` поки класифіковано як derived wrapper над тим самим reader mechanism; `PRINT` і `PRINC` лишаються host/transcript mechanisms.

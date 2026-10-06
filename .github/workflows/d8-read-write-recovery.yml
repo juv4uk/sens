@@ -1,0 +1,32 @@
+name: D8 READ-WRITE recovery
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/d8_read_write_recovery.rs"
+      - "crates/sens/src/eval/special_forms/io.rs"
+      - "crates/sens/src/value.rs"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "docs/research/d8-recovery-candidate-map.uk.md"
+      - ".github/workflows/d8-read-write-recovery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/d8_read_write_recovery.rs"
+      - "crates/sens/src/eval/special_forms/io.rs"
+      - "crates/sens/src/value.rs"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "docs/research/d8-recovery-candidate-map.uk.md"
+      - ".github/workflows/d8-read-write-recovery.yml"
+  workflow_dispatch:
+
+jobs:
+  round-trip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Show Rust toolchain
+        run: rustc --version && cargo --version
+      - name: Run focused READ/WRITE witness
+        run: cargo test -p sens --test d8_read_write_recovery
