@@ -1,6 +1,13 @@
 name: publish-binary-master
 
 on:
+  push:
+    branches:
+      - codex/sens-code-migration-tools
+    paths:
+      - "scripts/migrate-three-pass.py"
+      - "tests/test_three_pass_migration.py"
+      - ".github/workflows/publish-binary-master.yml"
   workflow_dispatch:
 
 concurrency:
