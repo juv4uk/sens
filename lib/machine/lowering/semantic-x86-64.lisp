@@ -114,6 +114,19 @@
       (00100111 (00000001 imul-r64-r64) (00000001 rax) (00000001 rcx))
       (00100111 (00000001 ret)))))
 
+; #4017 first exact-D5 QUOTIENT machine witness.
+; This intentionally proves only x/x = 1 for positive signed-i64 operands.
+; The narrow relation guarantees exact divisibility without borrowing a
+; spelling, historical SID8 remainder helper, or truncating rational semantics.
+(00001001 x86-lower-quotient-i64-equal-forms
+  (00001000 (left right)
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+      (00100111 (00000001 cqo))
+      (00100111 (00000001 idiv-r64) (00000001 rcx))
+      (00100111 (00000001 ret)))))
+
 ; #196 bounded conditional-growth witness for existing EQ + COND semantics.
 ; This routine does not define equality or conditional evaluation. It chooses
 ; one fixed-width u64 realization whose only purpose is to establish the
@@ -322,6 +335,51 @@
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-binary-u64))
          (00000001 unsupported-current-domain-binary-u64))
+        ((00100010 forms (00000001 exact-d5-fallback-required))
+         (00000001 exact-d5-fallback-required))
+        (t
+         (x86-encode-admitted-program forms))))))
+
+; #4017 exact D5:10111 QUOTIENT bounded dispatcher.
+; Only equal positive exact integers inside signed i64 enter IDIV. This is a
+; proof slice, not a claim of general integer division. All non-equal,
+; rational, zero, negative or out-of-range cases remain exact Lisp/Q fallback.
+(00001001 x86-current-d5-quotient-i64-equal-safe?
+  (00001000 (left right)
+    (00000111
+      ((x86-admission-exact-integer? left)
+       (00000111
+         ((x86-admission-within-inclusive-integer-range?
+            left 1 9223372036854775807)
+          (00000111
+            ((x86-admission-exact-integer? right)
+             (00000111
+               ((x86-admission-within-inclusive-integer-range?
+                  right 1 9223372036854775807)
+                (00100010 left right))
+               (t (00000001 ()))))
+            (t (00000001 ()))))
+         (t (00000001 ()))))
+      (t (00000001 ())))))
+
+(00001001 x86-lower-current-quotient-i64-forms
+  (00001000 (identity left right)
+    (00000111
+      ((00100010 identity 10111)
+       (00000111
+         ((x86-current-d5-quotient-i64-equal-safe? left right)
+          (x86-lower-quotient-i64-equal-forms left right))
+         (t (00000001 exact-d5-fallback-required))))
+      (t (00000001 unsupported-current-domain-quotient-i64)))))
+
+(00001001 x86-encode-current-quotient-i64
+  (00001000 (identity left right)
+    (10011100 ((forms
+                  (x86-lower-current-quotient-i64-forms
+                    identity left right)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-quotient-i64))
+         (00000001 unsupported-current-domain-quotient-i64))
         ((00100010 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
         (t
