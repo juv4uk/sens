@@ -617,7 +617,7 @@
                        (compiler-artifact-field
                          (як-є artifact-status)
                          (як-є canonical-backend-neutral))
-                       ()))))))))
+                       ())))))))))
       ((compiler-true ())
        (сполучити
          (як-є compiler-compilation-error/1)
@@ -629,7 +629,7 @@
              (compiler-artifact-field
                (як-є error)
                (як-є compiler-program-rejected))
-             ()))))))))
+             ())))))))
 
 (визначити compiler-compile-program-artifact
   (функція
