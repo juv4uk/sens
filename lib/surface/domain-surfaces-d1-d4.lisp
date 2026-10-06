@@ -35,10 +35,10 @@
   ; D3 — foundation
   (row D3 "000" display "empty" "порожнє" "śūnya" selected selected)
   (row D3 "001" form "quote" "як-є" "svarūpa" selected stable-donor)
-  (row D3 "010" predicate "atom" "атом?" "aṇu?" selected stable-donor)
+  (row D3 "010" predicate "atom?" "атом?" "aṇu" selected stable-donor)
   (row D3 "011" function "cdr" "решта" "śeṣa" selected stable-donor)
   (row D3 "100" function "car" "перше" "ādi" selected stable-donor)
-  (row D3 "101" predicate "eq" "тотожне?" "abheda?" selected stable-donor)
+  (row D3 "101" predicate "eq?" "тотожне?" "abheda" selected stable-donor)
   (row D3 "110" form "cond" "за-умовою" "krama" selected stable-donor)
   (row D3 "111" function "cons" "сполучити" "saṃyuj" selected stable-donor)
 
@@ -47,8 +47,8 @@
   (row D4 "0001" function "eval" "обчислити" "vicāraṇa" selected donor-candidate)
   (row D4 "0010" form "lambda" "функція" "phalana" selected candidate)
   (row D4 "0011" form "define" "визначити" "nirvacana" selected candidate)
-  (row D4 "0100" predicate "not" "не" "niṣedha" selected candidate)
-  (row D4 "0101" predicate "null" "порожнє?" "śūnya?" selected candidate)
+  (row D4 "0100" predicate "not?" "хибне?" "na" stable-donor stable-donor)
+  (row D4 "0101" predicate "null?" "порожнє?" "śūnya" selected candidate)
   (row D4 "0110" selector "cdar" "решта-від-першого" "śeṣa-ādi" selected generated)
   (row D4 "0111" selector "cddr" "решта-від-решти" "śeṣa-śeṣa" selected generated)
   (row D4 "1000" selector "caar" "перше-від-першого" "ādi-ādi" selected generated)
