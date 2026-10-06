@@ -1,0 +1,2336 @@
+{
+  "schema": "d8-v2-gauge-fixed-candidate/v1",
+  "status": "RESEARCH-GAUGE-FIXED-CANDIDATE",
+  "authority": "#3958",
+  "width": 8,
+  "capacity": 256,
+  "occupancy": 256,
+  "ratified_residents": 0,
+  "semantic_inventory": "knowledge/d8-v2-semantic-inventory.json",
+  "geometry_state": "knowledge/d8-v2-geometry-state.json",
+  "basis_counts": {
+    "GAUGE-FIXED": 177,
+    "GAUGE-ORIENTED": 7,
+    "PRODUCT-FIXED": 8,
+    "LAW-FORCED": 64
+  },
+  "gauge_rule": {
+    "fixed": "preserve all S2 fixed assignments",
+    "orbit": "choose lexicographically smaller coordinate in each unresolved two-coordinate orbit",
+    "residue": "sort remaining stable semantic IDs and remaining free coordinates lexicographically, then zip",
+    "authority_boundary": "gauge convention is reproducible but not semantic theorem; owner ratification required"
+  },
+  "forbidden_inputs": [
+    "legacy Sens8/Function8 coordinates",
+    "#2934 historical donor placement",
+    "migration distance",
+    "runtime implementation address",
+    "human surface-name desirability"
+  ],
+  "rows": [
+    {
+      "coordinate": "00000000",
+      "stable_id": "d8.hist.00000001.print",
+      "semantic_name": "PRINT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00000001",
+      "stable_id": "d8.hist.00000010.compile",
+      "semantic_name": "COMPILE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00000010",
+      "stable_id": "d8.hist.00001000.make-closure",
+      "semantic_name": "MAKE-CLOSURE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00000011",
+      "stable_id": "d8.hist.00001001.closurep",
+      "semantic_name": "CLOSUREP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00000100",
+      "stable_id": "d8.hist.00001010.values",
+      "semantic_name": "VALUES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00000101",
+      "stable_id": "d8.hist.00001011.values-list",
+      "semantic_name": "VALUES-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00000110",
+      "stable_id": "d8.hist.00001110.partial",
+      "semantic_name": "PARTIAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00000111",
+      "stable_id": "d8.hist.00010000.expr",
+      "semantic_name": "EXPR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001000",
+      "stable_id": "d8.hist.00010001.special",
+      "semantic_name": "SPECIAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001001",
+      "stable_id": "d8.hist.00010011.locally",
+      "semantic_name": "LOCALLY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001010",
+      "stable_id": "d8.hist.00010101.rest",
+      "semantic_name": "&REST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001011",
+      "stable_id": "d8.hist.00010110.optional",
+      "semantic_name": "&OPTIONAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001100",
+      "stable_id": "d8.hist.00011010.macroexpand-all",
+      "semantic_name": "MACROEXPAND-ALL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001101",
+      "stable_id": "d8.hist.00100000.named-lambda",
+      "semantic_name": "NAMED-LAMBDA",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001110",
+      "stable_id": "d8.hist.00100001.flambda",
+      "semantic_name": "FLAMBDA",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00001111",
+      "stable_id": "d8.hist.00100010.letrec",
+      "semantic_name": "LETREC",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00010000",
+      "stable_id": "d8.hist.00100011.multiple-value-bind",
+      "semantic_name": "MULTIPLE-VALUE-BIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00010001",
+      "stable_id": "d8.struct.07.00.nth-right",
+      "semantic_name": "NTH-right",
+      "basis": "GAUGE-ORIENTED",
+      "placement_evidence": "#3744; lexicographically first coordinate in unresolved two-coordinate orbit",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "00010010",
+      "stable_id": "d8.hist.00100100.prog1",
+      "semantic_name": "PROG1",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00010011",
+      "stable_id": "d8.struct.07.01.maplist-right",
+      "semantic_name": "MAPLIST-right",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3744",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "00010100",
+      "stable_id": "d8.hist.00100101.prog2",
+      "semantic_name": "PROG2",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00010101",
+      "stable_id": "d8.hist.00100110.do",
+      "semantic_name": "DO*",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00010110",
+      "stable_id": "d8.hist.00100111.loop",
+      "semantic_name": "LOOP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00010111",
+      "stable_id": "d8.hist.00101000.doh",
+      "semantic_name": "DOH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011000",
+      "stable_id": "d8.hist.00101001.repeat",
+      "semantic_name": "REPEAT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011001",
+      "stable_id": "d8.hist.00101010.doseq",
+      "semantic_name": "DOSEQ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011010",
+      "stable_id": "d8.hist.00101011.dotimes",
+      "semantic_name": "DOTIMES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011011",
+      "stable_id": "d8.hist.00101100.until",
+      "semantic_name": "UNTIL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011100",
+      "stable_id": "d8.hist.00101101.always",
+      "semantic_name": "ALWAYS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011101",
+      "stable_id": "d8.hist.00101110.never",
+      "semantic_name": "NEVER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011110",
+      "stable_id": "d8.hist.00101111.every",
+      "semantic_name": "EVERY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00011111",
+      "stable_id": "d8.hist.00110000.push",
+      "semantic_name": "PUSH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100000",
+      "stable_id": "d8.hist.00110001.pop",
+      "semantic_name": "POP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100001",
+      "stable_id": "d8.hist.00110010.set-car",
+      "semantic_name": "SET-CAR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100010",
+      "stable_id": "d8.hist.00110011.last",
+      "semantic_name": "LAST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100011",
+      "stable_id": "d8.hist.00110100.set-cdr",
+      "semantic_name": "SET-CDR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100100",
+      "stable_id": "d8.hist.00110101.nthcdr",
+      "semantic_name": "NTHCDR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100101",
+      "stable_id": "d8.hist.00110110.butlast",
+      "semantic_name": "BUTLAST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100110",
+      "stable_id": "d8.hist.00110111.remove",
+      "semantic_name": "REMOVE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00100111",
+      "stable_id": "d8.hist.00111000.incf",
+      "semantic_name": "INCF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101000",
+      "stable_id": "d8.hist.00111001.decf",
+      "semantic_name": "DECF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101001",
+      "stable_id": "d8.hist.00111010.pushnew",
+      "semantic_name": "PUSHNEW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101010",
+      "stable_id": "d8.hist.00111011.rotate",
+      "semantic_name": "ROTATE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101011",
+      "stable_id": "d8.hist.00111100.defconstant",
+      "semantic_name": "DEFCONSTANT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101100",
+      "stable_id": "d8.hist.01000000.1",
+      "semantic_name": "1+",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101101",
+      "stable_id": "d8.hist.01000001.1",
+      "semantic_name": "1-",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101110",
+      "stable_id": "d8.hist.01000010.signum",
+      "semantic_name": "SIGNUM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00101111",
+      "stable_id": "d8.hist.01000011.mod",
+      "semantic_name": "MOD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00110000",
+      "stable_id": "d8.hist.01000100.plusp",
+      "semantic_name": "PLUSP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00110001",
+      "stable_id": "d8.hist.01001000.floor",
+      "semantic_name": "FLOOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00110010",
+      "stable_id": "d8.hist.01001001.ceiling",
+      "semantic_name": "CEILING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00110011",
+      "stable_id": "d8.struct.06.00.acons-swapped",
+      "semantic_name": "ACONS-SWAPPED",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3741",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "00110100",
+      "stable_id": "d8.hist.01001010.truncate",
+      "semantic_name": "TRUNCATE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00110101",
+      "stable_id": "d8.hist.01001011.round",
+      "semantic_name": "ROUND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00110110",
+      "stable_id": "d8.hist.01001100.float",
+      "semantic_name": "FLOAT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00110111",
+      "stable_id": "d8.hist.01001101.rational",
+      "semantic_name": "RATIONAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111000",
+      "stable_id": "d8.hist.01001110.rationalize",
+      "semantic_name": "RATIONALIZE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111001",
+      "stable_id": "d8.hist.01001111.complex",
+      "semantic_name": "COMPLEX",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111010",
+      "stable_id": "d8.hist.01010000.logand",
+      "semantic_name": "LOGAND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111011",
+      "stable_id": "d8.hist.01010001.logior",
+      "semantic_name": "LOGIOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111100",
+      "stable_id": "d8.hist.01010010.logxor",
+      "semantic_name": "LOGXOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111101",
+      "stable_id": "d8.hist.01010011.lognot",
+      "semantic_name": "LOGNOT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111110",
+      "stable_id": "d8.hist.01010100.sqrt",
+      "semantic_name": "SQRT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "00111111",
+      "stable_id": "d8.hist.01010101.exp",
+      "semantic_name": "EXP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000000",
+      "stable_id": "d8.hist.01010110.log",
+      "semantic_name": "LOG",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000001",
+      "stable_id": "d8.hist.01010111.sin",
+      "semantic_name": "SIN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000010",
+      "stable_id": "d8.hist.01011000.ash",
+      "semantic_name": "ASH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000011",
+      "stable_id": "d8.hist.01011001.integer-length",
+      "semantic_name": "INTEGER-LENGTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000100",
+      "stable_id": "d8.hist.01011010.arithmetic-shift",
+      "semantic_name": "ARITHMETIC-SHIFT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000101",
+      "stable_id": "d8.hist.01011100.conjugate",
+      "semantic_name": "CONJUGATE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000110",
+      "stable_id": "d8.hist.01011101.scale",
+      "semantic_name": "SCALE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01000111",
+      "stable_id": "d8.hist.01011110.realpart",
+      "semantic_name": "REALPART",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01001000",
+      "stable_id": "d8.hist.01011111.imagpart",
+      "semantic_name": "IMAGPART",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01001001",
+      "stable_id": "d8.struct.05.00.neg-compose-recip",
+      "semantic_name": "NEG∘RECIP",
+      "basis": "GAUGE-ORIENTED",
+      "placement_evidence": "#3729/#3783; lexicographically first coordinate in unresolved two-coordinate orbit",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "01001010",
+      "stable_id": "d8.hist.01100000.throw",
+      "semantic_name": "THROW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01001011",
+      "stable_id": "d8.struct.05.01.abs-compose-recip",
+      "semantic_name": "ABS∘RECIP",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3729/#3783",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "01001100",
+      "stable_id": "d8.hist.01100001.unwind-protect",
+      "semantic_name": "UNWIND-PROTECT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01001101",
+      "stable_id": "d8.hist.01100010.signal",
+      "semantic_name": "SIGNAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01001110",
+      "stable_id": "d8.hist.01100011.ignore-error",
+      "semantic_name": "IGNORE-ERROR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01001111",
+      "stable_id": "d8.hist.01100110.restart-bind",
+      "semantic_name": "RESTART-BIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010000",
+      "stable_id": "d8.hist.01100111.restart-case",
+      "semantic_name": "RESTART-CASE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010001",
+      "stable_id": "d8.hist.01101000.progv",
+      "semantic_name": "PROGV",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010010",
+      "stable_id": "d8.hist.01101001.flet",
+      "semantic_name": "FLET",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010011",
+      "stable_id": "d8.hist.01101010.labels",
+      "semantic_name": "LABELS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010100",
+      "stable_id": "d8.hist.01101011.local",
+      "semantic_name": "LOCAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010101",
+      "stable_id": "d8.hist.01101100.handler-case",
+      "semantic_name": "HANDLER-CASE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010110",
+      "stable_id": "d8.hist.01101101.handler-bind",
+      "semantic_name": "HANDLER-BIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01010111",
+      "stable_id": "d8.hist.01101110.make-condition",
+      "semantic_name": "MAKE-CONDITION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011000",
+      "stable_id": "d8.hist.01110000.eql",
+      "semantic_name": "EQL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011001",
+      "stable_id": "d8.hist.01110010.char",
+      "semantic_name": "CHAR=",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011010",
+      "stable_id": "d8.hist.01110011.string",
+      "semantic_name": "STRING=",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011011",
+      "stable_id": "d8.hist.01110100.position",
+      "semantic_name": "POSITION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011100",
+      "stable_id": "d8.hist.01110101.sort",
+      "semantic_name": "SORT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011101",
+      "stable_id": "d8.hist.01110111.remove-duplicates",
+      "semantic_name": "REMOVE-DUPLICATES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011110",
+      "stable_id": "d8.hist.01111000.char",
+      "semantic_name": "CHAR<",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01011111",
+      "stable_id": "d8.hist.01111001.string",
+      "semantic_name": "STRING<",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "01100000",
+      "stable_id": "d8.sel.01100000",
+      "semantic_name": "CDAAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01100001",
+      "stable_id": "d8.sel.01100001",
+      "semantic_name": "CDAAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01100010",
+      "stable_id": "d8.sel.01100010",
+      "semantic_name": "CDAAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01100011",
+      "stable_id": "d8.sel.01100011",
+      "semantic_name": "CDAAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01100100",
+      "stable_id": "d8.sel.01100100",
+      "semantic_name": "CDAADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01100101",
+      "stable_id": "d8.sel.01100101",
+      "semantic_name": "CDAADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01100110",
+      "stable_id": "d8.sel.01100110",
+      "semantic_name": "CDAADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01100111",
+      "stable_id": "d8.sel.01100111",
+      "semantic_name": "CDAADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101000",
+      "stable_id": "d8.sel.01101000",
+      "semantic_name": "CDADAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101001",
+      "stable_id": "d8.sel.01101001",
+      "semantic_name": "CDADAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101010",
+      "stable_id": "d8.sel.01101010",
+      "semantic_name": "CDADADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101011",
+      "stable_id": "d8.sel.01101011",
+      "semantic_name": "CDADADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101100",
+      "stable_id": "d8.sel.01101100",
+      "semantic_name": "CDADDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101101",
+      "stable_id": "d8.sel.01101101",
+      "semantic_name": "CDADDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101110",
+      "stable_id": "d8.sel.01101110",
+      "semantic_name": "CDADDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01101111",
+      "stable_id": "d8.sel.01101111",
+      "semantic_name": "CDADDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110000",
+      "stable_id": "d8.sel.01110000",
+      "semantic_name": "CDDAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110001",
+      "stable_id": "d8.sel.01110001",
+      "semantic_name": "CDDAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110010",
+      "stable_id": "d8.sel.01110010",
+      "semantic_name": "CDDAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110011",
+      "stable_id": "d8.sel.01110011",
+      "semantic_name": "CDDAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110100",
+      "stable_id": "d8.sel.01110100",
+      "semantic_name": "CDDADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110101",
+      "stable_id": "d8.sel.01110101",
+      "semantic_name": "CDDADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110110",
+      "stable_id": "d8.sel.01110110",
+      "semantic_name": "CDDADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01110111",
+      "stable_id": "d8.sel.01110111",
+      "semantic_name": "CDDADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111000",
+      "stable_id": "d8.sel.01111000",
+      "semantic_name": "CDDDAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111001",
+      "stable_id": "d8.sel.01111001",
+      "semantic_name": "CDDDAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111010",
+      "stable_id": "d8.sel.01111010",
+      "semantic_name": "CDDDADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111011",
+      "stable_id": "d8.sel.01111011",
+      "semantic_name": "CDDDADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111100",
+      "stable_id": "d8.sel.01111100",
+      "semantic_name": "CDDDDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111101",
+      "stable_id": "d8.sel.01111101",
+      "semantic_name": "CDDDDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111110",
+      "stable_id": "d8.sel.01111110",
+      "semantic_name": "CDDDDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "01111111",
+      "stable_id": "d8.sel.01111111",
+      "semantic_name": "CDDDDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000000",
+      "stable_id": "d8.sel.10000000",
+      "semantic_name": "CAAAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000001",
+      "stable_id": "d8.sel.10000001",
+      "semantic_name": "CAAAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000010",
+      "stable_id": "d8.sel.10000010",
+      "semantic_name": "CAAAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000011",
+      "stable_id": "d8.sel.10000011",
+      "semantic_name": "CAAAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000100",
+      "stable_id": "d8.sel.10000100",
+      "semantic_name": "CAAADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000101",
+      "stable_id": "d8.sel.10000101",
+      "semantic_name": "CAAADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000110",
+      "stable_id": "d8.sel.10000110",
+      "semantic_name": "CAAADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10000111",
+      "stable_id": "d8.sel.10000111",
+      "semantic_name": "CAAADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001000",
+      "stable_id": "d8.sel.10001000",
+      "semantic_name": "CAADAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001001",
+      "stable_id": "d8.sel.10001001",
+      "semantic_name": "CAADAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001010",
+      "stable_id": "d8.sel.10001010",
+      "semantic_name": "CAADADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001011",
+      "stable_id": "d8.sel.10001011",
+      "semantic_name": "CAADADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001100",
+      "stable_id": "d8.sel.10001100",
+      "semantic_name": "CAADDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001101",
+      "stable_id": "d8.sel.10001101",
+      "semantic_name": "CAADDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001110",
+      "stable_id": "d8.sel.10001110",
+      "semantic_name": "CAADDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10001111",
+      "stable_id": "d8.sel.10001111",
+      "semantic_name": "CAADDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010000",
+      "stable_id": "d8.sel.10010000",
+      "semantic_name": "CADAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010001",
+      "stable_id": "d8.sel.10010001",
+      "semantic_name": "CADAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010010",
+      "stable_id": "d8.sel.10010010",
+      "semantic_name": "CADAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010011",
+      "stable_id": "d8.sel.10010011",
+      "semantic_name": "CADAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010100",
+      "stable_id": "d8.sel.10010100",
+      "semantic_name": "CADADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010101",
+      "stable_id": "d8.sel.10010101",
+      "semantic_name": "CADADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010110",
+      "stable_id": "d8.sel.10010110",
+      "semantic_name": "CADADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10010111",
+      "stable_id": "d8.sel.10010111",
+      "semantic_name": "CADADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011000",
+      "stable_id": "d8.sel.10011000",
+      "semantic_name": "CADDAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011001",
+      "stable_id": "d8.sel.10011001",
+      "semantic_name": "CADDAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011010",
+      "stable_id": "d8.sel.10011010",
+      "semantic_name": "CADDADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011011",
+      "stable_id": "d8.sel.10011011",
+      "semantic_name": "CADDADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011100",
+      "stable_id": "d8.sel.10011100",
+      "semantic_name": "CADDDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011101",
+      "stable_id": "d8.sel.10011101",
+      "semantic_name": "CADDDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011110",
+      "stable_id": "d8.sel.10011110",
+      "semantic_name": "CADDDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10011111",
+      "stable_id": "d8.sel.10011111",
+      "semantic_name": "CADDDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "selector-law #3646/#3673",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "10100000",
+      "stable_id": "d8.hist.01111010.member-if",
+      "semantic_name": "MEMBER-IF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10100001",
+      "stable_id": "d8.hist.01111011.assoc-if",
+      "semantic_name": "ASSOC-IF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10100010",
+      "stable_id": "d8.hist.01111100.char",
+      "semantic_name": "CHAR>",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10100011",
+      "stable_id": "d8.hist.01111101.string",
+      "semantic_name": "STRING>",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10100100",
+      "stable_id": "d8.hist.01111110.find",
+      "semantic_name": "FIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10100101",
+      "stable_id": "d8.hist.01111111.delete",
+      "semantic_name": "DELETE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10100110",
+      "stable_id": "d8.hist.10000000.copy-list",
+      "semantic_name": "COPY-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10100111",
+      "stable_id": "d8.hist.10000001.revappend",
+      "semantic_name": "REVAPPEND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101000",
+      "stable_id": "d8.hist.10000010.list",
+      "semantic_name": "LIST*",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101001",
+      "stable_id": "d8.hist.10000011.list-length",
+      "semantic_name": "LIST-LENGTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101010",
+      "stable_id": "d8.hist.10000100.length-list",
+      "semantic_name": "LENGTH-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101011",
+      "stable_id": "d8.hist.10000101.boundp",
+      "semantic_name": "BOUNDP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101100",
+      "stable_id": "d8.hist.10000110.elt",
+      "semantic_name": "ELT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101101",
+      "stable_id": "d8.hist.10000111.subseq",
+      "semantic_name": "SUBSEQ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101110",
+      "stable_id": "d8.hist.10001000.mapc",
+      "semantic_name": "MAPC",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10101111",
+      "stable_id": "d8.hist.10001001.mapl",
+      "semantic_name": "MAPL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110000",
+      "stable_id": "d8.hist.10001010.mapcan",
+      "semantic_name": "MAPCAN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110001",
+      "stable_id": "d8.hist.10001011.destructure-bind",
+      "semantic_name": "DESTRUCTURE-BIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110010",
+      "stable_id": "d8.hist.10001100.aref",
+      "semantic_name": "AREF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110011",
+      "stable_id": "d8.hist.10001110.char",
+      "semantic_name": "CHAR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110100",
+      "stable_id": "d8.hist.10010000.lsh",
+      "semantic_name": "LSH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110101",
+      "stable_id": "d8.hist.10010001.rsh",
+      "semantic_name": "RSH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110110",
+      "stable_id": "d8.hist.10010011.logbitp",
+      "semantic_name": "LOGBITP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10110111",
+      "stable_id": "d8.hist.10010100.numerator",
+      "semantic_name": "NUMERATOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10111000",
+      "stable_id": "d8.hist.10010101.denominator",
+      "semantic_name": "DENOMINATOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10111001",
+      "stable_id": "d8.struct.02.00.reduce-right",
+      "semantic_name": "REDUCE-right",
+      "basis": "GAUGE-ORIENTED",
+      "placement_evidence": "#3704; lexicographically first coordinate in unresolved two-coordinate orbit",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "10111010",
+      "stable_id": "d8.hist.10010110.canonicalize",
+      "semantic_name": "CANONICALIZE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10111011",
+      "stable_id": "d8.struct.02.01.scan-right",
+      "semantic_name": "SCAN-right",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3704",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "10111100",
+      "stable_id": "d8.hist.10010111.lcm",
+      "semantic_name": "LCM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10111101",
+      "stable_id": "d8.hist.10011000.div",
+      "semantic_name": "DIV",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10111110",
+      "stable_id": "d8.hist.10011001.rem",
+      "semantic_name": "REM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "10111111",
+      "stable_id": "d8.hist.10011010.char-code",
+      "semantic_name": "CHAR-CODE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11000000",
+      "stable_id": "d8.hist.10011011.code-char",
+      "semantic_name": "CODE-CHAR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11000001",
+      "stable_id": "d8.struct.00.00.take-right",
+      "semantic_name": "TAKE-right",
+      "basis": "GAUGE-ORIENTED",
+      "placement_evidence": "#3667; lexicographically first coordinate in unresolved two-coordinate orbit",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11000010",
+      "stable_id": "d8.hist.10011100.1",
+      "semantic_name": "1/",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11000011",
+      "stable_id": "d8.struct.00.01.drop-right",
+      "semantic_name": "DROP-right",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3667",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11000100",
+      "stable_id": "d8.hist.10011101.asin",
+      "semantic_name": "ASIN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11000101",
+      "stable_id": "d8.hist.10011110.acos",
+      "semantic_name": "ACOS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11000110",
+      "stable_id": "d8.hist.10011111.atan",
+      "semantic_name": "ATAN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11000111",
+      "stable_id": "d8.hist.11100000.assq",
+      "semantic_name": "ASSQ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11001000",
+      "stable_id": "d8.hist.11100001.rassq",
+      "semantic_name": "RASSQ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11001001",
+      "stable_id": "d8.hist.11100010.getprop",
+      "semantic_name": "GETPROP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11001010",
+      "stable_id": "d8.hist.11100011.get",
+      "semantic_name": "GET",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11001011",
+      "stable_id": "d8.hist.11100100.vcons",
+      "semantic_name": "VCONS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11001100",
+      "stable_id": "d8.hist.11100101.tablerp",
+      "semantic_name": "TABLERP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11001101",
+      "stable_id": "d8.struct.04.00.continue-while-true-apply-result",
+      "semantic_name": "continue-while-true+apply-result",
+      "basis": "GAUGE-ORIENTED",
+      "placement_evidence": "#3779; lexicographically first coordinate in unresolved two-coordinate orbit",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11001110",
+      "stable_id": "d8.hist.11100111.putprop",
+      "semantic_name": "PUTPROP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11001111",
+      "stable_id": "d8.struct.04.01.stop-when-true-return-state",
+      "semantic_name": "stop-when-true+return-state",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3779",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11010000",
+      "stable_id": "d8.hist.11101000.set-difference",
+      "semantic_name": "SET-DIFFERENCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11010001",
+      "stable_id": "d8.hist.11101001.adjoin",
+      "semantic_name": "ADJOIN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11010010",
+      "stable_id": "d8.hist.11101010.subsetp",
+      "semantic_name": "SUBSETP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11010011",
+      "stable_id": "d8.hist.11101110.ldiff",
+      "semantic_name": "LDIFF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11010100",
+      "stable_id": "d8.hist.11101111.tailp",
+      "semantic_name": "TAILP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11010101",
+      "stable_id": "d8.hist.11110000.map-any",
+      "semantic_name": "MAP-ANY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11010110",
+      "stable_id": "d8.hist.11110001.map",
+      "semantic_name": "MAP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11010111",
+      "stable_id": "d8.hist.11110010.notany",
+      "semantic_name": "NOTANY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011000",
+      "stable_id": "d8.hist.11110011.some",
+      "semantic_name": "SOME",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011001",
+      "stable_id": "d8.hist.11110100.mapcon",
+      "semantic_name": "MAPCON",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011010",
+      "stable_id": "d8.hist.11110101.maplist",
+      "semantic_name": "MAPLIST*",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011011",
+      "stable_id": "d8.hist.11110110.mapqn",
+      "semantic_name": "MAPQN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011100",
+      "stable_id": "d8.hist.11110111.remap",
+      "semantic_name": "REMAP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011101",
+      "stable_id": "d8.hist.11111000.prin1",
+      "semantic_name": "PRIN1",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011110",
+      "stable_id": "d8.hist.11111001.princ",
+      "semantic_name": "PRINC",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11011111",
+      "stable_id": "d8.hist.11111010.terpri",
+      "semantic_name": "TERPRI",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11100000",
+      "stable_id": "d8.hist.11111011.tree-equ",
+      "semantic_name": "TREE-EQU",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11100001",
+      "stable_id": "d8.struct.03.00.zip-swapped",
+      "semantic_name": "ZIP-swapped",
+      "basis": "GAUGE-ORIENTED",
+      "placement_evidence": "#3712; lexicographically first coordinate in unresolved two-coordinate orbit",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11100010",
+      "stable_id": "d8.hist.11111100.copy-structure",
+      "semantic_name": "COPY-STRUCTURE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11100011",
+      "stable_id": "d8.struct.03.01.unzip-swapped",
+      "semantic_name": "UNZIP-swapped",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3712",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11100100",
+      "stable_id": "d8.hist.11111101.copy-array",
+      "semantic_name": "COPY-ARRAY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11100101",
+      "stable_id": "d8.hist.11111110.vector-copy",
+      "semantic_name": "VECTOR-COPY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11100110",
+      "stable_id": "d8.hist.11111111.copy-seq",
+      "semantic_name": "COPY-SEQ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "HISTORICAL-DONOR",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "11100111",
+      "stable_id": "d8.recovery.env-reflection",
+      "semantic_name": "ENV-REFLECTION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "RECOVERY-CAPABILITY"
+    },
+    {
+      "coordinate": "11101000",
+      "stable_id": "d8.recovery.error",
+      "semantic_name": "ERROR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "CONTROL-FAMILY"
+    },
+    {
+      "coordinate": "11101001",
+      "stable_id": "d8.recovery.errorset",
+      "semantic_name": "ERRORSET",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "CONTROL-FAMILY"
+    },
+    {
+      "coordinate": "11101010",
+      "stable_id": "d8.recovery.read",
+      "semantic_name": "READ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "REPRESENTATION-INVERSE-FAMILY"
+    },
+    {
+      "coordinate": "11101011",
+      "stable_id": "d8.recovery.rplaca",
+      "semantic_name": "RPLACA",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "LOCAL-DUALITY"
+    },
+    {
+      "coordinate": "11101100",
+      "stable_id": "d8.recovery.rplacd",
+      "semantic_name": "RPLACD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "LOCAL-DUALITY"
+    },
+    {
+      "coordinate": "11101101",
+      "stable_id": "d8.recovery.string-to-symbol",
+      "semantic_name": "STRING->SYMBOL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "REPRESENTATION-INVERSE-FAMILY"
+    },
+    {
+      "coordinate": "11101110",
+      "stable_id": "d8.recovery.symbol-to-string",
+      "semantic_name": "SYMBOL->STRING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "REPRESENTATION-INVERSE-FAMILY"
+    },
+    {
+      "coordinate": "11101111",
+      "stable_id": "d8.recovery.vector",
+      "semantic_name": "VECTOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "INDEXED-DATA-FAMILY"
+    },
+    {
+      "coordinate": "11110000",
+      "stable_id": "d8.recovery.vector-ref",
+      "semantic_name": "VECTOR-REF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "INDEXED-DATA-FAMILY"
+    },
+    {
+      "coordinate": "11110001",
+      "stable_id": "d8.struct.01.00.any-not-p",
+      "semantic_name": "ANY(NOT p)",
+      "basis": "GAUGE-ORIENTED",
+      "placement_evidence": "#3668; lexicographically first coordinate in unresolved two-coordinate orbit",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11110010",
+      "stable_id": "d8.recovery.vector-set",
+      "semantic_name": "VECTOR-SET!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "INDEXED-DATA-FAMILY"
+    },
+    {
+      "coordinate": "11110011",
+      "stable_id": "d8.struct.01.01.all-not-p",
+      "semantic_name": "ALL(NOT p)",
+      "basis": "PRODUCT-FIXED",
+      "placement_evidence": "#3668",
+      "source_class": "STRUCTURAL-GEOMETRIC",
+      "relation_class": "PRODUCT-AXIS"
+    },
+    {
+      "coordinate": "11110100",
+      "stable_id": "d8.recovery.write-to-string",
+      "semantic_name": "WRITE-TO-STRING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "RECOVERY",
+      "relation_class": "REPRESENTATION-INVERSE-FAMILY"
+    },
+    {
+      "coordinate": "11110101",
+      "stable_id": "d8.reopened.and",
+      "semantic_name": "AND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11110110",
+      "stable_id": "d8.reopened.divide",
+      "semantic_name": "DIVIDE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11110111",
+      "stable_id": "d8.reopened.equal",
+      "semantic_name": "EQUAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111000",
+      "stable_id": "d8.reopened.fsubr",
+      "semantic_name": "FSUBR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111001",
+      "stable_id": "d8.reopened.make-vector",
+      "semantic_name": "MAKE-VECTOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111010",
+      "stable_id": "d8.reopened.minusp",
+      "semantic_name": "MINUSP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111011",
+      "stable_id": "d8.reopened.onep",
+      "semantic_name": "ONEP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111100",
+      "stable_id": "d8.reopened.or",
+      "semantic_name": "OR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111101",
+      "stable_id": "d8.reopened.pair",
+      "semantic_name": "PAIR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111110",
+      "stable_id": "d8.reopened.transformer-hart-macro",
+      "semantic_name": "TRANSFORMER/HART-MACRO",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    },
+    {
+      "coordinate": "11111111",
+      "stable_id": "d8.reopened.vector-length",
+      "semantic_name": "VECTOR-LENGTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic lexicographic stable-id ↔ free-coordinate representative",
+      "source_class": "REOPENED-PRIOR-WORK",
+      "relation_class": "DERIVED-OR-HISTORICAL-RESIDENCY-OPEN"
+    }
+  ]
+}
