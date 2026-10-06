@@ -2,6 +2,7 @@ name: Compiler role authority cutover
 # zero-dependency core repair gate; serialization stays outside semantic core.
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "lib/compiler-nucleus.lisp"
