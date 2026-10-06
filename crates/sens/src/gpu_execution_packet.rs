@@ -4,8 +4,8 @@
 //! by SENS. This module defines bytes, handles, dependencies and provenance.
 
 use crate::{
-    compiler_execution_role, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit8,
-    CompilerExecutionRole, CoreDomainIdentity, DomainIdentity,
+    compiler_execution_role, BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8,
+    CompilerExecutionRole, CoreD8, CoreDomainIdentity, DomainIdentity,
 };
 
 const MAGIC: [u8; 4] = *b"SGP\x01";
