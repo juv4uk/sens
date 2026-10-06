@@ -34,6 +34,10 @@
        ((integer-multiply bounded-u32-inputs u64-result)))
      (10111
        ((integer-quotient bounded-positive-i64 equal-operands-only)))
+     (11010
+       ((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary)))
+     (11011
+       ((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary)))
      (101
        ((identity-compare bounded-u64)))
      (110
@@ -79,6 +83,16 @@
          (admitted-form cqo)
          (admitted-form idiv-r64)
          (lowering x86-lower-quotient-i64-equal-forms))
+       (integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary
+         (admitted-form cmp-r64-r64)
+         (admitted-form setl-r8)
+         (admitted-form movzx-r64-r8)
+         (lowering x86-lower-order-i64-forms))
+       (integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary
+         (admitted-form cmp-r64-r64)
+         (admitted-form setg-r8)
+         (admitted-form movzx-r64-r8)
+         (lowering x86-lower-order-i64-forms))
        (identity-compare bounded-u64
          (admitted-form cmp-r64-r64)
          (lowering x86-lower-eq-cond-u64-forms))
