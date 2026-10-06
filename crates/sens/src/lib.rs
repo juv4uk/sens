@@ -15,10 +15,8 @@ mod canonical_reader;
 pub mod compilation_artifact;
 pub mod compilation_artifact_producer;
 pub mod conformance_oracle;
-<<<<<<< HEAD
 pub mod fixpoint_checkpoint;
-=======
->>>>>>> origin/main
+pub mod gpu_admission;
 pub mod program_compiler;
 mod compiler_role;
 mod compiler_bootstrap;
@@ -144,6 +142,7 @@ pub use compiler_language::{
     compiler_execution_role_from_sens, compiler_lowering_role_from_sens,
     compiler_program_requests_from_sens, compiler_semantic_input_from_sens, CompilerSemanticInput,
 };
+pub use gpu_admission::{GpuAdmission, GpuAdmissionInventory};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};

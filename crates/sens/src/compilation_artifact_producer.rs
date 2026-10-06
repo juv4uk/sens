@@ -100,14 +100,12 @@ fn extract_domain_usage(exprs: &[Expr]) -> BTreeMap<String, Vec<String>> {
                 usage.entry(domain).or_insert_with(Vec::new).push(bits);
             }
             ExprKind::List(items) => {
-                for item in items {
+                for item in items.iter() {
                     visit(item, usage);
                 }
             }
-            ExprKind::DottedList(items, tail) => {
-                for item in items {
-                    visit(item, usage);
-                }
+            ExprKind::Pair(head, tail) => {
+                visit(head, usage);
                 visit(tail, usage);
             }
             _ => {}

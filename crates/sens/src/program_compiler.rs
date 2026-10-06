@@ -7,7 +7,7 @@
 //! lib/compiler-nucleus.lisp source through C0→C1→C2 and record the artifact.
 
 use crate::{
-    compilation_artifact::CompilationArtifact, sha256_source, Expr, ExprKind,
+    compilation_artifact::CompilationArtifact, sha256_source, Expr,
 };
 
 /// Compile a SENS program to a canonical CompilationArtifact.
@@ -40,7 +40,7 @@ pub fn compile_program_to_artifact(
     };
 
     // Program digest (ordered tree structure)
-    let program_digest = program_digest_deterministic(program_exprs);
+    let _program_digest = program_digest_deterministic(program_exprs);
 
     // Traverse program and collect exact-domain identities and operations
     let (exact_domains, required_mechanisms) = traverse_program_operations(program_exprs)?;
@@ -176,15 +176,13 @@ fn traverse_program_operations(
                 Ok(())
             }
             ExprKind::List(items) => {
-                for item in items {
+                for item in items.iter() {
                     visit(item, domains, mechanisms)?;
                 }
                 Ok(())
             }
-            ExprKind::DottedList(items, tail) => {
-                for item in items {
-                    visit(item, domains, mechanisms)?;
-                }
+            ExprKind::Pair(head, tail) => {
+                visit(head, domains, mechanisms)?;
                 visit(tail, domains, mechanisms)?;
                 Ok(())
             }

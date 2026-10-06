@@ -367,6 +367,7 @@ version = "0.41.0"
 dependencies = [
  "sens-host",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -374,11 +375,11 @@ name = "sens-cli"
 version = "0.41.0"
 dependencies = [
  "rustyline",
+ "sens",
  "sens-host",
  "sens-lsp",
- "sens",
- "serde_json",
  "serde",
+ "serde_json",
  "wsm-clips-kernel",
  "wsm-common-lisp-kernel",
  "wsm-datalog-kernel",

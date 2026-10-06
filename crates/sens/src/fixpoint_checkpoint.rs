@@ -137,6 +137,7 @@ impl FixpointCycleCheckpoint {
                 diff_digest: None,
                 evidence_strength: None,
             },
+            lineage_digest: String::new(),
             status: "in-progress".to_string(),
             diagnostics: BTreeMap::new(),
         }
