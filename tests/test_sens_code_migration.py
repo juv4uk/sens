@@ -3,13 +3,15 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "migrate-to-sens-codes.py"
 SPEC = importlib.util.spec_from_file_location("sens_migrator", SCRIPT)
-mod = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
+mod = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
