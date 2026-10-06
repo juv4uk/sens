@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 304,
+    "selected_semantic_candidates": 330,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 48,
-    "remaining_semantic_inventory": 720,
+    "unplaced_selected_candidates": 74,
+    "remaining_semantic_inventory": 694,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -24,6 +24,448 @@
     "D10 remains unratified until explicit owner decision"
   ],
   "rows": [
+    {
+      "stable_id": "d10.forward.022a97b1bb7244c8",
+      "semantic_name": "MATCH-ONE-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "dispatch one rule condition to its matching law",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-one-condition",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.03cb5c7dfe52ee7d",
+      "semantic_name": "CONDITION-IS-AND?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has AND form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "condition-is-and?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.0605416682d9c37c",
+      "semantic_name": "MATCH-EXISTS-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match an existential condition against candidate facts",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-exists-condition",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.13fee7a6e2cdd322",
+      "semantic_name": "CONDITION-IS-FORALL?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has universal-quantification form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "condition-is-forall?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.14697462da4366f2",
+      "semantic_name": "JTMS-STATE-SUBST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "JTMS-STATE-ALGEBRA",
+      "behavior": "retrieve the substitution carried by an explicit JTMS matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "jtms-state-subst",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.1a2d7526901bc272",
+      "semantic_name": "MATCH-NEGATED-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a negated rule condition under current substitution/fact evidence",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-negated-condition",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.1d0d6a4c58de4fa6",
+      "semantic_name": "MATCH-CONDITIONS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a sequence/conjunction of rule conditions while threading substitutions",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-conditions",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.272b65957473a815",
+      "semantic_name": "CONDITION-IS-NOT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has negation form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "condition-is-not?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.28bd75f0f882b92f",
+      "semantic_name": "MATCH-CONDITIONS-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "match a conjunction/list of JTMS rule conditions while threading explicit matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-conditions-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.2ebd0001d13e0700",
+      "semantic_name": "MATCH-TEST-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "evaluate/match an explicit test condition under current substitution",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-test-condition",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.4da32404e28cdd68",
+      "semantic_name": "CONDITION-IS-EXISTS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has existential form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "condition-is-exists?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.57b3e4f93d9bb02d",
+      "semantic_name": "MATCH-CONDITION-AGAINST-FACTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match one rule condition against an explicit fact set",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-condition-against-facts",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.62f4c67a5e87460d",
+      "semantic_name": "MATCH-AND-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a conjunction of rule conditions",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-and-condition",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.6f5786573ba8603d",
+      "semantic_name": "MATCH-PLAIN-CONDITION-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "match one ordinary rule condition against JTMS facts while carrying explicit matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-plain-condition-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.7d09083d7dbc0951",
+      "semantic_name": "FORALL-EVERY-CANDIDATE-SATISFIES?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "test whether every candidate satisfying the quantified domain also satisfies the universal condition",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "forall-every-candidate-satisfies?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.8877867473fd3e2a",
+      "semantic_name": "FIRE-RULES-MULTI",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MULTI-FORWARD-EXECUTION",
+      "behavior": "fire a rule set over all matching substitutions",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rules-multi",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.8b4a53a013867ebf",
+      "semantic_name": "JTMS-MAKE-STATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "JTMS-STATE-ALGEBRA",
+      "behavior": "construct an explicit JTMS matching state from substitution and used-fact/support data",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "jtms-make-state",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.8ea4e7248eb20e1a",
+      "semantic_name": "MATCH-FORALL-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a universal condition against an explicit fact set",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-forall-condition",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.ab10f3b5553d2070",
+      "semantic_name": "JTMS-STATE-USED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "JTMS-STATE-ALGEBRA",
+      "behavior": "retrieve the used-fact/support set carried by an explicit JTMS matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "jtms-state-used",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.c5d5059e75133175",
+      "semantic_name": "MATCH-ONE-CONDITION-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "dispatch one JTMS rule condition to the appropriate matching law",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-one-condition-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.d4850df00d1f1d84",
+      "semantic_name": "CONDITION-IS-TEST?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has explicit test form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "condition-is-test?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.d4f31203838f06cd",
+      "semantic_name": "FIRE-RULE-MULTI",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MULTI-FORWARD-EXECUTION",
+      "behavior": "fire one rule over all matching substitutions instead of only one match",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-multi",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.e6388253c74f02d9",
+      "semantic_name": "MATCH-OR-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a disjunction of rule conditions and return the alternative matches",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-or-condition",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.ec697a4164384b8d",
+      "semantic_name": "RUN-MULTI",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MULTI-FORWARD-EXECUTION",
+      "behavior": "iterate multi-match forward reasoning to its language-defined result",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run-multi",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.eec8fab861521eea",
+      "semantic_name": "MATCH-OR-CONDITION-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "match an OR condition against JTMS facts and return the resulting state alternatives",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "match-or-condition-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.ef4703c320091533",
+      "semantic_name": "CONDITION-IS-OR?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has OR form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "source_name": "condition-is-or?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
     {
       "stable_id": "d10.lib.04a9548ac98a58f9",
       "semantic_name": "SCIENCE-MERGE-DIMENSIONS",
@@ -5720,6 +6162,7 @@
   "sources": [
     "knowledge/d10-recovery-v1.json",
     "knowledge/d10-recovery-v2.json",
-    "knowledge/d10-library-harvest-v1.json"
+    "knowledge/d10-library-harvest-v1.json",
+    "knowledge/d10-forward-harvest-v1.json"
   ]
 }
