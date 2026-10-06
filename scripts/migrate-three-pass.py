@@ -49,6 +49,23 @@ NUMERIC_RE = re.compile(
     """
 )
 
+HISTORICAL_ROW_RE = re.compile(
+    r"^\\s*\\(row\\s+([01]{8})\\s+([^\\s()]+)\\s+([^\\s()]+)\\s+"
+    r"([^\\s()]+)\\s+([^\\s()]+)\\s+([^\\s()]+)\\s*\\)",
+    re.MULTILINE,
+)
+
+def normalize_role(name: str):
+    aliases={
+        "+":"PLUS","-":"DIFFERENCE","*":"TIMES","/":"QUOTIENT",
+        "<":"LESSP",">":"GREATERP","NIL":"EMPTY","EMPTY-LIST":"EMPTY",
+        "ATOM?":"ATOM","EQ?":"EQ","NULL?":"NULL","NUMBER?":"NUMBERP",
+        "INTEGER?":"INTEGERP","RATIONAL?":"RATIONALP","ZERO?":"ZEROP",
+        "EVEN?":"EVENP","ODD?":"ODDP","MEMBER?":"MEMBER",
+    }
+    value=name.strip()
+    return aliases.get(value.upper(),value.upper())
+
 @dataclass(frozen=True)
 class Tok:
     kind: str
@@ -297,10 +314,11 @@ def parse_semantic_rows(path: Path):
     return rows
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
-                          semantic_registry: Path, necessary_forms: Path):
+                          semantic_registry: Path, necessary_forms: Path,
+                          historical_map: Path|None=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
-    legacy=parse_legacy_successors(semantic_registry,necessary_forms)
+    proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
     sem_rows=parse_semantic_rows(semantic_generated)
 
     # A historical byte may also gain a proven successor through surface
@@ -310,23 +328,44 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
         candidates={current[name] for _,name in surfaces if name in current}
         if len(candidates)==1:
             ident=next(iter(candidates))
-            legacy.setdefault(byte,(ident[0],ident[1],"surface-equivalence-successor"))
+            proven_legacy.setdefault(byte,(ident[0],ident[1],"surface-equivalence-successor"))
+
+    # Preserve knowledge that an old function existed even when it has no
+    # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
+    legacy={byte:proven_legacy.get(byte) for byte in sem_rows}
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
         candidates=set()
-        if byte in legacy:
-            candidates.add(legacy[byte][:2])
+        ident=legacy.get(byte)
+        if ident is not None:
+            candidates.add(ident[:2])
         for _,name in surfaces:
             if name in current:
                 candidates.add(current[name])
-        if len(candidates)==1:
-            ident=next(iter(candidates))
-            for namespace,name in surfaces:
-                if name != name.upper() or namespace=="sym":
-                    my.setdefault(name,ident)
+        unique=next(iter(candidates)) if len(candidates)==1 else None
+        for namespace,name in surfaces:
+            # Uppercase historical names are reserved for pass 3.
+            if name != name.upper() or namespace=="sym":
+                if name not in my:
+                    my[name]=unique
 
     upper={name:ident for name,ident in residents.items()}
+    if historical_map is not None:
+        hist_text="\n".join(
+            line.split(";",1)[0]
+            for line in historical_map.read_text(encoding="utf-8").splitlines()
+        )
+        for m in HISTORICAL_ROW_RE.finditer(hist_text):
+            _sid,my_name,historical,*_rest=m.groups()
+            if not any(ch.isalpha() for ch in historical):
+                continue
+            key=historical.upper()
+            candidate=residents.get(normalize_role(historical))
+            if candidate is None:
+                candidate=residents.get(normalize_role(my_name))
+            upper.setdefault(key,candidate)
+
     return legacy,my,upper
 
 def extract_projection(text: str,name: str):
@@ -391,23 +430,46 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # Pass 1: only replace an old exact-eight identity when a proven successor exists.
+        # Pass 1: every exact-eight executable head belongs to the old
+        # SID8/Sens8 generation. It may migrate only through a proven current
+        # successor; old/unassigned bytes never fall through as text.
         if len(t)==8 and set(t)<=set("01"):
-            ident=self.legacy.get(t)
-            if ident is not None:
-                self.counts["pass1-sens8"]+=1
-                return [ident[0]],"pass1-sens8"
-            self.counts["passthrough-head"]+=1
-            return [t],"passthrough-head"
-        # Pass 2: my-lisp/current admitted surfaces.
-        ident=self.my.get(t)
-        if ident is not None:
+            if t not in self.legacy:
+                raise MigrationError(
+                    f"legacy-unmapped SID8/Sens8 {t}: no historical registry row",
+                    tok,
+                )
+            ident=self.legacy[t]
+            if ident is None:
+                raise MigrationError(
+                    f"legacy-unmapped SID8/Sens8 {t}: no current D3-D6 resident",
+                    tok,
+                )
+            self.counts["pass1-sens8"]+=1
+            return [ident[0]],"pass1-sens8"
+
+        # Pass 2: known my-lisp/current admitted surfaces. A surface known to
+        # the old registry but lacking a current resident is a blocker.
+        if t in self.my:
+            ident=self.my[t]
+            if ident is None:
+                raise MigrationError(
+                    f"legacy-unmapped my-lisp function {t!r}: no current D3-D6 resident",
+                    tok,
+                )
             self.counts["pass2-my-lisp"]+=1
             return [ident[0]],"pass2-my-lisp"
-        # Pass 3: historical LISP 1–1.5 uppercase names.
+
+        # Pass 3: historical LISP I / Lisp 1.5 UPPERCASE names.
         if t==t.upper() and t in self.upper:
+            ident=self.upper[t]
+            if ident is None:
+                raise MigrationError(
+                    f"legacy-unmapped Lisp 1-1.5 function {t}: no current D3-D6 resident",
+                    tok,
+                )
             self.counts["pass3-lisp15"]+=1
-            return [self.upper[t][0]],"pass3-lisp15"
+            return [ident[0]],"pass3-lisp15"
         # D1/D2 or any unresolved dynamic/user function stays exactly as written.
         self.counts["passthrough-head"]+=1
         return [t],"passthrough-head"
@@ -565,13 +627,15 @@ def main():
     ap.add_argument("--semantic-generated",type=Path,required=True)
     ap.add_argument("--semantic-registry",type=Path,required=True)
     ap.add_argument("--necessary-forms",type=Path,required=True)
+    ap.add_argument("--historical-map",type=Path,required=True)
     ap.add_argument("--text7",type=Path,required=True)
     ap.add_argument("--report",type=Path,required=True)
     args=ap.parse_args()
 
     data=load_foundation(args.foundation)
     legacy,my,upper=build_three_pass_maps(
-        data,args.domain_surfaces,args.semantic_generated,args.semantic_registry,args.necessary_forms
+        data,args.domain_surfaces,args.semantic_generated,args.semantic_registry,args.necessary_forms,
+        args.historical_map
     )
     text7=build_text7(data,args.text7)
     args.out.mkdir(parents=True,exist_ok=True)
@@ -633,7 +697,7 @@ def main():
         },
         "structure":{"empty":"000","open":"10","separator":"00","dot":"11","close":"01"},
         "output_naming":"source .lisp suffix removed; no new extension; file/directory collisions use __file",
-        "fallback":"unrecognized function/D1/D2/data spelling is preserved verbatim",
+        "fallback":"unknown dynamic/data spelling may remain visible; any known legacy function without a current D3-D6 successor blocks the file",
         "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
         "files":rows,
     }
