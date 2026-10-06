@@ -43,7 +43,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     .expect("D5 PLUS capability lookup")
     .value
     .to_string();
-    assert_eq!(add, "((integer-add bounded-u64))");
+    assert_eq!(add, "((integer-add bounded-u32-inputs u64-result))");
 
     let car = eval_program(
         "(machine-capabilities-for-domain 100)",
@@ -89,6 +89,8 @@ fn historical_sid_capability_lookup_is_compatibility_only() {
 fn capability_names_do_not_mint_semantic_identities() {
     for capability in [
         "integer-add",
+        "integer-subtract",
+        "integer-multiply",
         "identity-compare",
         "conditional-branch",
         "pair-field-store",
@@ -135,6 +137,8 @@ fn x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning
 
     for name in [
         "x86-lower-add-u64-forms",
+        "x86-lower-difference-u64-forms",
+        "x86-lower-times-u64-forms",
         "x86-lower-eq-cond-u64-forms",
         "x86-lower-bounded-pair-store-u64-forms",
         "x86-lower-cons-car-u64-forms",
