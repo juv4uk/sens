@@ -549,3 +549,69 @@
       d3-proof
       d4-proof
       provenance)))
+
+
+; #3839 whole-program artifact composition.
+;
+; The host supplies only the digest of the already-ratified canonical SW\x01
+; program bytes. Semantic request order and authority/proof lineage come from
+; compiler-compile-program above and are composed here by SENS itself.
+(визначити compiler-artifact-field
+  (функція (name value)
+    (сполучити name (сполучити value ()))))
+
+(визначити compiler-artifact-from-result
+  (функція (program-wire-sha256 provenance result)
+    (за-умовою
+      ((compiler-result-success result)
+       (сполучити
+         (як-є compiler-compilation-artifact/2)
+         (сполучити
+           (compiler-artifact-field
+             (як-є program-wire-sha256)
+             program-wire-sha256)
+           (сполучити
+             (compiler-artifact-field
+               (як-є authority-provenance)
+               provenance)
+             (сполучити
+               (compiler-artifact-field
+                 (як-є semantic-requests)
+                 (compiler-result-requests result))
+               (сполучити
+                 (compiler-artifact-field
+                   (як-є required-capabilities)
+                   ())
+                 (сполучити
+                   (compiler-artifact-field
+                     (як-є artifact-status)
+                     (як-є canonical-backend-neutral))
+                   ())))))))
+      ((compiler-true ())
+       (сполучити
+         (як-є compiler-compilation-error/1)
+         (сполучити
+           (compiler-artifact-field
+             (як-є program-wire-sha256)
+             program-wire-sha256)
+           (сполучити
+             (compiler-artifact-field
+               (як-є error)
+               (як-є compiler-program-rejected))
+             ())))))))
+
+(визначити compiler-compile-program-artifact
+  (функція
+    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof provenance program-wire-sha256)
+    (compiler-artifact-from-result
+      program-wire-sha256
+      provenance
+      (compiler-compile-program
+        shape-or-empty
+        decompose
+        program
+        d3-law
+        d4-law
+        d3-proof
+        d4-proof
+        provenance))))
