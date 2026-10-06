@@ -381,6 +381,24 @@
          ((compiler-true ()) (compiler-result-fail))))
       ((compiler-true ()) (compiler-result-fail)))))
 
+(визначити compiler-request-role
+  (функція (request)
+    (перше (решта request))))
+
+; Program traversal policy is semantic and therefore SENS-owned.
+; QUOTE payload is data.  LAMBDA parameters and DEFINE name are data.
+; Other admitted forms recursively compile every argument position.
+(визначити compiler-domain-children
+  (функція (request arguments)
+    (за-умовою
+      ((атом? request) ())
+      ((тотожне? (compiler-request-role request) (як-є quote-form)) ())
+      ((тотожне? (compiler-request-role request) (як-є lambda-form))
+       (решта arguments))
+      ((тотожне? (compiler-request-role request) (як-є define-form))
+       (решта arguments))
+      ((compiler-true ()) arguments))))
+
 (визначити compiler-domain-result
   (функція
     (request child-result)
@@ -447,7 +465,16 @@
          (compiler-program-list
            shape-or-empty
            decompose
-           (решта node)
+           (compiler-domain-children
+             (compiler-request-from-laws
+               decompose
+               (перше node)
+               d3-law
+               d4-law
+               d3-proof
+               d4-proof
+               provenance)
+             (решта node))
            d3-law
            d4-law
            d3-proof
