@@ -129,13 +129,28 @@ def augment_code_map_with_domain_surfaces(code_map, paths):
     return out
 
 
-def augment_code_map_with_registry_aliases(code_map, registry_path):
-    """Add legacy/UI aliases only when their English row resolves to one exact entry.
+def _registry_rows(text):
+    """Yield (sid8, fields) from one-row-per-line semantic-registry source."""
+    field_re = re.compile(
+        r'\((en|ук|укр|sa|sym)\s+("(?:\\.|[^"\\])*"|\(\)|[^()\s]+)\)'
+    )
+    for raw in text.splitlines():
+        match = re.match(r'^\s*\(([01]{8})\s+(.*)\)\s*$', raw)
+        if not match:
+            continue
+        sid = match.group(1)
+        fields = []
+        for namespace, raw_value in field_re.findall(match.group(2)):
+            value = raw_value
+            if value.startswith('"'):
+                value = ast.literal_eval(value)
+            fields.append((namespace, value))
+        if fields:
+            yield sid, fields
 
-    This never derives exact identity from the historical byte. The byte row is
-    used only as a bag of synonymous spellings after the row's English spelling
-    has independently resolved to a current exact-domain entry.
-    """
+
+def augment_code_map_with_registry_aliases(code_map, registry_path):
+    """Add UI aliases only after one exact-domain entry is independently known."""
     text = registry_path.read_text(encoding="utf-8")
     out = dict(code_map)
 
@@ -143,20 +158,15 @@ def augment_code_map_with_registry_aliases(code_map, registry_path):
     for surface, entry in out.items():
         normalized.setdefault(normalize_legacy_surface(surface), set()).add(entry)
 
-    row_re = re.compile(r'^\s*\(([01]{8})\s+((?:\([^\n]*\)\s*)+)\)', re.M)
-    field_re = re.compile(r'\((en|ук|укр|sa|sym)\s+([^)]*)\)')
-
-    for row_match in row_re.finditer(text):
-        fields = field_re.findall(row_match.group(2))
-        en_values = [value.strip() for ns, value in fields if ns == "en"]
-        if len(en_values) != 1 or en_values[0] == "()":
+    for _sid, fields in _registry_rows(text):
+        en_values = [value for ns, value in fields if ns == "en" and value != "()"]
+        if len(en_values) != 1:
             continue
         candidates = normalized.get(normalize_legacy_surface(en_values[0]), set())
         if len(candidates) != 1:
             continue
         entry = next(iter(candidates))
-        for _ns, value in fields:
-            value = value.strip()
+        for _namespace, value in fields:
             if not value or value == "()":
                 continue
             key = value.upper()
@@ -472,42 +482,19 @@ def normalize_legacy_surface(name: str) -> str:
 
 def build_legacy_sid_map(registry_path: Path, code_map):
     text = registry_path.read_text(encoding="utf-8")
-    rows = re.findall(
-        r"^\s*\(([01]{8})\s+\(en\s+([^)]+)\)",
-        text,
-        flags=re.M,
-    )
 
     by_surface = {}
-    for entry in code_map.values():
-        key = normalize_legacy_surface(entry.label)
-        by_surface.setdefault(key, []).append(entry)
+    for surface, entry in code_map.items():
+        by_surface.setdefault(normalize_legacy_surface(surface), set()).add(entry)
 
     out = {}
-    for sid, surface in rows:
-        surface = surface.strip()
-        if surface == "()":
+    for sid, fields in _registry_rows(text):
+        en_values = [value for ns, value in fields if ns == "en" and value != "()"]
+        if len(en_values) != 1:
             continue
-        key = normalize_legacy_surface(surface)
-        candidates = by_surface.get(key, [])
+        candidates = by_surface.get(normalize_legacy_surface(en_values[0]), set())
         if len(candidates) == 1:
-            out[sid] = candidates[0]
-
-    # Explicit, semantics-preserving aliases where Lisp-1-style labels use P
-    # but the legacy registry used a trailing question mark or a historical name.
-    aliases = {
-        "atom?": "ATOM",
-        "eq?": "EQ",
-        "not?": "NOT",
-        "null?": "NULL",
-        "member?": "MEMBER",
-    }
-    registry_by_surface = {surface.strip().lower(): sid for sid, surface in rows}
-    for surface, current_label in aliases.items():
-        sid = registry_by_surface.get(surface)
-        entry = code_map.get(current_label)
-        if sid and entry:
-            out[sid] = entry
+            out[sid] = next(iter(candidates))
 
     return out
 
