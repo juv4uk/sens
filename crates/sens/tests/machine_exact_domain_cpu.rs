@@ -117,7 +117,10 @@ fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
         );
     }
     assert!(!profile.contains("semantic-registry"));
-    assert!(!profile.contains("SID8"));
+    assert!(
+        !profile.contains("00001100"),
+        "current exact-domain profile must not key PLUS by the historical SID8 byte"
+    );
 
     let boundary = fs::read_to_string(repo_root().join("lib/machine/authority-boundary.lisp"))
         .expect("machine authority boundary");
