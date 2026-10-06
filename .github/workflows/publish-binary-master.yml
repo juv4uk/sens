@@ -15,6 +15,10 @@ on:
       - ".github/workflows/publish-binary-master.yml"
   workflow_dispatch:
 
+concurrency:
+  group: publish-binary-master
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
