@@ -13,6 +13,59 @@ use sens::{
 const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
 const PRODUCTION_ADAPTER: &str = include_str!("../src/compiler_language.rs");
 
+fn assert_cond_clause_shapes(expr: &Expr) {
+    match &expr.kind {
+        ExprKind::DomainCall(identity, args) => {
+            let role = compiler_lowering_role_from_sens(*identity)
+                .expect("current compiler identity must have a decidable lowering role")
+                .expect("current compiler DomainCall must have an admitted lowering role");
+
+            if role == CompilerLoweringRole::CondForm {
+                assert!(
+                    !args.is_empty(),
+                    "current compiler nucleus contains an empty exact COND"
+                );
+                for (index, clause) in args.iter().enumerate() {
+                    let ExprKind::List(parts) = &clause.kind else {
+                        panic!(
+                            "current compiler exact COND clause {index} is not a source list: {:?}",
+                            clause.kind
+                        );
+                    };
+                    assert_eq!(
+                        parts.len(),
+                        2,
+                        "current compiler exact COND clause {index} must be exactly (test expression)"
+                    );
+                }
+            }
+
+            for arg in args.iter() {
+                assert_cond_clause_shapes(arg);
+            }
+        }
+        ExprKind::List(items) => {
+            for item in items.iter() {
+                assert_cond_clause_shapes(item);
+            }
+        }
+        ExprKind::Pair(head, tail) => {
+            assert_cond_clause_shapes(head);
+            assert_cond_clause_shapes(tail);
+        }
+        ExprKind::Sid(_)
+        | ExprKind::Call(_, _)
+        | ExprKind::Number(_, _)
+        | ExprKind::Rational(_)
+        | ExprKind::BinaryNumber(_)
+        | ExprKind::NumericBuffer(_)
+        | ExprKind::DomainIdentity(_)
+        | ExprKind::String(_)
+        | ExprKind::Symbol(_)
+        | ExprKind::Local { .. } => {}
+    }
+}
+
 fn collect_roles(expr: &Expr, roles: &mut Vec<CompilerLoweringRole>) {
     match &expr.kind {
         ExprKind::DomainCall(identity, args) => {
@@ -83,6 +136,16 @@ fn every_exact_domain_call_in_current_compiler_nucleus_has_a_sens_owned_role() {
             roles.contains(&expected),
             "current compiler nucleus did not exercise expected SENS-owned lowering role {expected:?}; observed {roles:?}"
         );
+    }
+}
+
+#[test]
+fn every_exact_cond_in_current_compiler_nucleus_has_two_part_clauses() {
+    let parsed = parse(NUCLEUS).expect("current compiler nucleus source must parse");
+    let lowered = lower_program(&parsed);
+
+    for expr in &lowered {
+        assert_cond_clause_shapes(expr);
     }
 }
 
