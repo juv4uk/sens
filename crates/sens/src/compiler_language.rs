@@ -28,7 +28,7 @@ pub const COMPILER_ROLE_LAW_REF: &str =
 pub const COMPILER_D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp";
 pub const COMPILER_D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 pub const COMPILER_AUTHORITY_PATH: &str = "language-contract.lisp";
-pub const COMPILER_CONTRACT_VERSION: &str = "11.6";
+pub const COMPILER_CONTRACT_VERSION: &str = "11.7";
 
 /// SENS-owned semantic input for one current compiler identity.
 ///
@@ -780,7 +780,7 @@ mod tests {
         assert_eq!(d3_input.semantic_status, "current");
         assert_eq!(d3_input.authority_path, "language-contract.lisp");
         assert_eq!(d3_input.authority_sha256.len(), 64);
-        assert_eq!(d3_input.language_contract_version, "11.6");
+        assert_eq!(d3_input.language_contract_version, "11.7");
 
         let d4_input = compiler_semantic_input_from_sens(d4(0b0010))
             .expect("D4 semantic input")
