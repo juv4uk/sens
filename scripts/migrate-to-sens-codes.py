@@ -382,6 +382,54 @@ def _extract_projection(text: str, name: str) -> dict[str, tuple[int, ...]]:
     return result
 
 
+def normalize_legacy_surface(name: str) -> str:
+    # Preserve * because LET and LET* are distinct. Drop only punctuation
+    # that is surface decoration rather than semantic spelling.
+    return name.strip().lower().rstrip("?").replace("-", "")
+
+
+def build_legacy_sid_map(registry_path: Path, code_map):
+    text = registry_path.read_text(encoding="utf-8")
+    rows = re.findall(
+        r"^\\s*\\(([01]{8})\\s+\\(en\\s+([^)]+)\\)",
+        text,
+        flags=re.M,
+    )
+
+    by_surface = {}
+    for entry in code_map.values():
+        key = normalize_legacy_surface(entry.label)
+        by_surface.setdefault(key, []).append(entry)
+
+    out = {}
+    for sid, surface in rows:
+        surface = surface.strip()
+        if surface == "()":
+            continue
+        key = normalize_legacy_surface(surface)
+        candidates = by_surface.get(key, [])
+        if len(candidates) == 1:
+            out[sid] = candidates[0]
+
+    # Explicit, semantics-preserving aliases where Lisp-1-style labels use P
+    # but the legacy registry used a trailing question mark or a historical name.
+    aliases = {
+        "atom?": "ATOM",
+        "eq?": "EQ",
+        "not?": "NOT",
+        "null?": "NULL",
+        "member?": "MEMBER",
+    }
+    registry_by_surface = {surface.strip().lower(): sid for sid, surface in rows}
+    for surface, current_label in aliases.items():
+        sid = registry_by_surface.get(surface)
+        entry = code_map.get(current_label)
+        if sid and entry:
+            out[sid] = entry
+
+    return out
+
+
 def build_text7_encoder(foundation, generated_projection: Path):
     generated = generated_projection.read_text(encoding="utf-8")
     slp = _extract_projection(generated, "SA_SLP1_ENCODE")
@@ -492,10 +540,15 @@ def _emit_item(out, words, need_separator):
     out.extend(words)
 
 
-def binary_rewrite(text, code_map, text7_candidates):
+def binary_rewrite(text, code_map, text7_candidates, legacy_sid_map=None):
     """Encode one source file as exact-width visible binary SENS words."""
     source = strip_comments(text)
     shadowed = {row["label"] for row in shadowing(source, code_map)}
+    legacy_sid_map = legacy_sid_map or {}
+    current_words = {
+        (entry.width, entry.bits): entry
+        for entry in code_map.values()
+    }
 
     out = []
     hits = []
@@ -622,7 +675,7 @@ def binary_rewrite(text, code_map, text7_candidates):
         quoted = current_quoted()
         upper = token.upper()
         entry = code_map.get(upper)
-        already_binary_head = (
+        binary_head = (
             is_head
             and not quoted
             and 1 <= len(token) <= 8
@@ -639,8 +692,28 @@ def binary_rewrite(text, code_map, text7_candidates):
             out.append(entry.bits)
             line, col = line_col(source, start)
             hits.append(Hit(line, col, entry.label, entry.bits, entry.domain))
-        elif already_binary_head:
-            out.append(token)
+        elif binary_head:
+            if len(token) == 8:
+                migrated = legacy_sid_map.get(token)
+                if migrated is None:
+                    raise BinaryMigrationError(
+                        f"legacy 8-bit call head {token} has no admitted D3-D6 migration"
+                    )
+                out.append(migrated.bits)
+                line, col = line_col(source, start)
+                hits.append(Hit(
+                    line,
+                    col,
+                    migrated.label,
+                    migrated.bits,
+                    migrated.domain,
+                ))
+            elif (len(token), token) in current_words:
+                out.append(token)
+            else:
+                raise BinaryMigrationError(
+                    f"binary call head {token} is not a current D3-D6 resident"
+                )
         else:
             out.extend(encode_text7_spelling(token, text7_candidates))
 
@@ -701,6 +774,12 @@ def main():
         default=Path("crates/sens/src/text7_projection_generated.rs"),
         help="generated pinned Text7 projection used by --binary-mirror",
     )
+    parser.add_argument(
+        "--semantic-registry",
+        type=Path,
+        default=Path("lib/surface/semantic-registry.lisp"),
+        help="pinned legacy SID8 surface registry used only for exact D3-D6 migration",
+    )
     parser.add_argument("--report", type=Path, default=Path("sens-code-migration-report.json"))
     args = parser.parse_args()
 
@@ -712,6 +791,11 @@ def main():
     code_map = build_map(foundation, args.domains)
     text7_candidates = (
         build_text7_encoder(foundation, args.text7_projection)
+        if args.binary_mirror
+        else None
+    )
+    legacy_sid_map = (
+        build_legacy_sid_map(args.semantic_registry, code_map)
         if args.binary_mirror
         else None
     )
@@ -728,7 +812,12 @@ def main():
 
         if args.binary_mirror:
             try:
-                converted, hits, shadowed = binary_rewrite(text, code_map, text7_candidates)
+                converted, hits, shadowed = binary_rewrite(
+                    text,
+                    code_map,
+                    text7_candidates,
+                    legacy_sid_map,
+                )
                 if not converted.strip():
                     status = "empty"
                 else:
