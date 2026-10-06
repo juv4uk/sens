@@ -87,6 +87,7 @@ def load_exact() -> dict[tuple[str, str], dict[str, str | None]]:
             if key in out:
                 fail(f"duplicate exact row {domain}:{bits}")
             out[key] = {
+                "role": _role,
                 "en": decode(en_t),
                 "uk": decode(uk_t),
                 "san": decode(san_t),
@@ -138,8 +139,16 @@ def build_rows(foundation: dict, exact: dict, donor: dict) -> list[dict]:
                 fail(f"{domain}:{bits}: missing exact surface row")
 
             en = current["en"]
-            if en is None or en.upper() != resident:
+            if en is None or en.removesuffix("?").upper() != resident:
                 fail(f"{domain}:{bits}: en/resident drift")
+
+            if current["role"] == "predicate":
+                if current["uk"] is None or not current["uk"].endswith("?"):
+                    fail(f"{domain}:{bits}: predicate UK surface must end in ?")
+                if not en.endswith("?"):
+                    fail(f"{domain}:{bits}: predicate EN surface must end in ?")
+                if current["san"] is None or current["san"].endswith("?"):
+                    fail(f"{domain}:{bits}: predicate Sanskrit surface must not end in ?")
 
             donor_key = DONOR_ALIASES.get(en.lower(), en.lower())
             old = donor.get(donor_key, {})
@@ -169,6 +178,19 @@ def build_rows(foundation: dict, exact: dict, donor: dict) -> list[dict]:
 
     if any(row["san"] is None for row in rows):
         fail("Sanskrit surface must be complete for D1-D6")
+
+    predicate_keys = {
+        (f"D{len(row['bits'])}", row["bits"])
+        for row in rows
+        if row["en"] is not None and row["en"].endswith("?")
+    }
+    for row in rows:
+        key = (f"D{len(row['bits'])}", row["bits"])
+        if key in predicate_keys:
+            if row["укр"] is None or not row["укр"].endswith("?"):
+                fail(f"{key[0]}:{key[1]}: predicate UKR surface must end in ?")
+            if row["san"] is None or row["san"].endswith("?"):
+                fail(f"{key[0]}:{key[1]}: predicate Sanskrit surface must not end in ?")
 
     return rows
 
