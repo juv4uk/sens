@@ -23,6 +23,9 @@
 00000100  WRITE-TO-STRING
 00000101  SYMBOL->STRING
 00000110  STRING->SYMBOL
+00000111  VECTOR
+00001000  VECTOR-REF
+00001001  VECTOR-SET!
 ```
 
 Це **candidate coordinates**, не ратифіковані residents.
@@ -137,8 +140,8 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   7
-provisional coordinates            00000000..00000110
+provisional D8 ladder candidates   10
+provisional coordinates            00000000..00001001
 ratified D8 residents              0
 resolved recovery no-slot          9
 unresolved recovery rows           2
@@ -217,3 +220,28 @@ READ("strange symbol")            -> два top-level forms / InvalidForm
 Історичні `PNAME`, `INTERN`, `OBLIST`, `REMOB` зберігаються окремо. Поточний `STRING->SYMBOL` не оголошується тотожним історичному `INTERN` без доказу symbol-table identity.
 
 Як і READ/WRITE, ця пара provisional до явного мосту з D7/Text7.
+
+## ARRAY / VECTOR recovery
+
+Історичний `ARRAY` і current `VECTOR` зведено до трьох незалежних коренів:
+
+```text
+VECTOR       construct finite indexed aggregate
+VECTOR-REF   observe cell by numeric index
+VECTOR-SET!  alias-visible in-place update
+```
+
+`MAKE-VECTOR` — constructor convenience і окремого слота не отримує.
+
+`VECTOR-LENGTH` теж не займає незалежний слот: extent є властивістю finite indexed carrier; після ERRORSET його можна спостерігати пошуком першого failing index, причому успішний EMPTY відрізняється від failure, бо ERRORSET(success EMPTY) дає singleton `(EMPTY)`.
+
+Головний witness для mutation:
+
+```text
+v = VECTOR(10,20)
+w = v
+VECTOR-SET!(v,0,99)
+VECTOR-REF(w,0) = 99
+```
+
+Тобто pure persistent list rewrite не є тією самою семантикою без окремої shared mutable identity.
