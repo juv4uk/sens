@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 367,
-    "remaining_semantic_candidates": 657,
+    "selected_semantic_candidates": 388,
+    "remaining_semantic_candidates": 636,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 111,
+    "unplaced_selected_candidates": 132,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -135,5 +135,13 @@
     "review_required_selected": 15,
     "no_new_definite_noncore": true,
     "rule": "Existing definite non-Core rows may only be removed/reclassified. Review-required rows need an explicit ownership witness before D10 ratification."
+  },
+  "historical_maclisp_v1": {
+    "artifact": "knowledge/d10-historical-maclisp-v1.json",
+    "source": "MacLisp Reference Manual 1975",
+    "selected": 21,
+    "coordinates_assigned": 0,
+    "ownership": "CORE-OWNED-CANDIDATE",
+    "sens8_preservation": "UNCHANGED"
   }
 }
