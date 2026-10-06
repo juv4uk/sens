@@ -1,5 +1,5 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Authority: lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp
+// Authority: lib/domains/d1.lisp ... lib/domains/d5.lisp
 // Checked by: scripts/check-domain-surfaces-d1-d4.py
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

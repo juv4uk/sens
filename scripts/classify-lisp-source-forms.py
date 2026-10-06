@@ -323,10 +323,7 @@ def main() -> int:
         "--domain-surfaces",
         type=Path,
         nargs="*",
-        default=[
-            Path("lib/surface/domain-surfaces-d1-d4.lisp"),
-            Path("lib/surface/domain-surfaces-d5.lisp"),
-        ],
+        default=[Path(f"lib/domains/d{width}.lisp") for width in range(1, 7)],
     )
     parser.add_argument("--json", type=Path)
     parser.add_argument("--tsv", type=Path)

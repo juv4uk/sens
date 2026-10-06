@@ -8,6 +8,7 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 
 1. **Machine-readable language authority**
    - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.6 D1–D7 foundation contract.
+   - [`lib/domains/d1.lisp`](lib/domains/d1.lisp) … [`lib/domains/d6.lisp`](lib/domains/d6.lisp) — canonical human-readable domain tables, **one domain per file**, columns `ук → укр → san → en → LISP → sym`. No aggregate D1–D6 table is authoritative.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
    - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are exactly D1–D7 under owner foundation #3572. D7 is owner-ratified 126/128; D8 remains UNRATIFIED/RESEARCH. Exact carriers remain mechanically representable independently of semantic admission. Historical Sens8/Sid8 is compatibility/provenance only.
@@ -65,6 +66,6 @@ Historical McCarthy names remain useful when discussing the 1960 evaluator, Core
 
 1. Read `AGENTS.md` and `docs/agent-doctrine.md`.
 2. Read `language-contract.lisp` and this file before trusting older design prose.
-3. Read `lib/surface/semantic-registry.lisp` only as transitional routing/compatibility metadata; do not infer domain membership or meaning from a spelling or eight-bit row.
+3. Read the relevant `lib/domains/dN.lisp` table for human surfaces. Read `lib/surface/semantic-registry.lisp` only as transitional routing/compatibility metadata; do not infer domain membership or meaning from a spelling or eight-bit row.
 4. Inspect `crates/sens` for the current Rust reference mechanism and the relevant executable witnesses for the behavior being changed.
 5. Run the focused tests for your slice and then the applicable repository gates before claiming the change works.
