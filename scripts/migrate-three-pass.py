@@ -12,7 +12,8 @@ Hard rules:
 - () serializes as D3 EMPTY = 000.
 - Non-empty list structure uses D2: 10 open, 00 separator, 11 dot, 01 close.
 - Unknown executable heads PASS THROUGH unchanged after the three recognition passes.
-- Unknown D1/D2 words PASS THROUGH unchanged.
+- D2 words are reserved exclusively for structural control and never pass as data/call heads.
+- Unknown D1 words may pass through unchanged as predicate/data evidence, but are never reclassified as D2.
 - Comments disappear before migration.
 - Unrecognized data/numbers/strings PASS THROUGH unchanged instead of being forced into Text7.
 - Output is extensionless; recognized language structure/functions are binary, unresolved source remains visible.
@@ -457,6 +458,13 @@ class Resolver:
         self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     def head(self,tok: Tok):
         t=tok.text
+        # D2 is structural control only. A two-bit word in executable-head
+        # position is ambiguous/corrupt source, never a callable identity.
+        if len(t)==2 and set(t)<=set("01"):
+            raise MigrationError(
+                f"D2 word {t} is structural control only; it cannot be an executable head",
+                tok,
+            )
         # Exact current function words are already migrated.
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
@@ -511,9 +519,18 @@ class Resolver:
         return [t],"passthrough-head"
 
 def encode_atom_data(node: Atom,text7):
-    # Fail-soft migration: if an atom is not one of the recognized function
-    # heads handled by Resolver, preserve the original source spelling.
-    return [node.tok.text]
+    # W2 is reserved by the grammar. It can only be emitted by the structural
+    # encoder as OPEN/CLOSE/SEPARATOR/DOT; treating the same width as ordinary
+    # data would make the exact-width stream ambiguous.
+    t=node.tok.text
+    if len(t)==2 and set(t)<=set("01"):
+        raise MigrationError(
+            f"D2 word {t} is structural control only; it cannot be ordinary data",
+            node.tok,
+        )
+    # Fail-soft migration: other unresolved atoms remain visible until their
+    # own semantic/number/text law is admitted.
+    return [t]
 
 def encode_string(node: String,text7):
     # Strings are data, not function identities. Preserve them verbatim.
@@ -731,7 +748,15 @@ def main():
             "2":"my-lisp/current admitted surface -> exact-domain identity",
             "3":"historical LISP 1-1.5 uppercase resident -> ratified D3-D6 identity",
         },
-        "structure":{"empty":"000","open":"10","separator":"00","dot":"11","close":"01"},
+        "structure":{
+            "empty":"000",
+            "control_domain":"D2-only",
+            "open":"10",
+            "separator":"00",
+            "dot":"11",
+            "close":"01",
+            "rule":"every exact-width W2 word in emitted source is grammar control, never data or a callable head",
+        },
         "output_naming":"source .lisp suffix removed; no new extension; file/directory collisions use __file",
         "fallback":"unknown dynamic/data spelling may remain visible; any known legacy function without a current D3-D6 successor blocks the file",
         "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
