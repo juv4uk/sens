@@ -3,12 +3,12 @@
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D7 мають чинну семантичну authority згідно з Contract 11.6.
-//! - D5 ратифікований #3305, D6 ратифікований #3393; D8 лишається research.
-//! - `CoreDomainIdentity` зберігає D6 як точну current semantic identity,
-//!   але callable/mechanism admission лишається окремим фактом і може fail-closed.
+//! - D1-D8 мають чинну семантичну authority згідно з Contract 11.7.
+//! - D5 ратифікований #3305, D6 #3393, D7 #3572, D8 #3960.
+//! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
+//!   відсутній механізм може fail-closed навіть для ратифікованого resident.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
-//! - Eight-bit research carriers and historical Sens8/Sid8 remain distinct.
+//! - D8 exact identity is current; historical Sens8/Sid8 remains compatibility/provenance only.
 
 use crate::{
     Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, PredicateBit, Racana2, SoundD7,
@@ -89,7 +89,8 @@ impl DomainIdentity {
     /// D3/D4/D5 зараз мають admitted Core-operation projection. D6 є
     /// OWNER-RATIFIED 64/64 під #3393, але на цій межі ще не має загального
     /// callable projection: відсутній механізм лишається fail-closed і не
-    /// скасовує D6 semantic identity. D8 лишається research.
+    /// скасовує D6 semantic identity. D8 так само OWNER-RATIFIED #3960,
+    /// але без окремого mechanism admission тут не стає callable автоматично.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
@@ -296,7 +297,7 @@ mod tests {
             assert!(DomainIdentity::from_source_word(source).core_operation().is_none());
         }
 
-        // Contract 11.6 / #3393: D6 semantic identity is current.
+        // Contract 11.7 / #3393: D6 semantic identity is current.
         // Водночас generic callable mechanism для D6 тут навмисно не
         // приписується автоматично: semantic residency != mechanism admission.
         let d6_word = Bit6::new(1).unwrap();
