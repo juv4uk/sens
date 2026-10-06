@@ -1,0 +1,60 @@
+{
+  "schema": "d9-fill-v1-state/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#3964",
+  "date": "2026-10-06",
+  "foundation": {
+    "contract": "11.7",
+    "authority": "#3960",
+    "current_domains": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8"
+    ],
+    "research_domain": "D9"
+  },
+  "target": {
+    "domain": "D9",
+    "width": 9,
+    "capacity": 512,
+    "dense_target": 512,
+    "selected_semantic_candidates": 128,
+    "remaining_semantic_candidates": 384,
+    "ratified_residents": 0
+  },
+  "first_tranche": {
+    "kind": "PROVED-SELECTOR-GENERATOR",
+    "artifact": "knowledge/d9-selector-seed.json",
+    "parents": 64,
+    "children": 128,
+    "coordinate_rule": "D8 selector p -> D9 p0/p1",
+    "meaning_rule": "suffix 0 appends A/CAR; suffix 1 appends D/CDR"
+  },
+  "recovery_queue": {
+    "d8_overflow": "knowledge/d8-v2-overflow-ledger.json",
+    "automatic_admission": false,
+    "note": "D8 overflow, prior falsifiers, held-out historical capabilities and new language-visible capabilities must be re-reviewed; provenance is preserved but no row becomes a D9 resident automatically."
+  },
+  "construction_order": [
+    "preserve prior positive and negative evidence",
+    "generate law-forced candidates",
+    "build 512 distinct semantic meanings",
+    "reject exact D1-D8 duplicates, pure aliases, mechanism-only rows and falsified rows",
+    "classify generator/algebra/duality/product/local families",
+    "fix law-forced geometry",
+    "gauge-fix only residual placement after semantics are complete",
+    "owner ratification last"
+  ],
+  "invariants": [
+    "width alone never grants meaning",
+    "derivable does not imply excluded",
+    "D8 parent coordinate plus one bit is geometry only unless a local law proves semantics",
+    "Sens8/Sid8/Function8 coordinates have zero D9 placement authority",
+    "D9 remains research until an explicit owner ratification"
+  ]
+}
