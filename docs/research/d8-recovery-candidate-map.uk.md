@@ -18,7 +18,10 @@
 ```text
 00000000  ERRORSET
 00000001  ERROR
-00000010  ENV-REFLECTION
+00000010  VECTOR        ; historical family: ARRAY
+00000011  VECTOR-REF
+00000100  VECTOR-SET!
+00000101  ENV-REFLECTION
 ```
 
 Це **candidate coordinates**, не ратифіковані residents.
@@ -33,6 +36,8 @@ error   -> EMPTY
 Звичайний D1–D7 `COND` не може перехопити помилку, яка не стала значенням. Тому error boundary є окремою capability.
 
 `ERROR` — сусідня рання capability: навмисно сигналізувати language error із payload. Вона відрізняється від випадкової помилки типу неправильного `CAR`: програма явно заявляє про failure, а не маскує його під чужу partiality.
+
+Далі йде історична `ARRAY`-сім'я. Current SENS називає її `VECTOR`. Простий basis reduction залишає три незалежні residents: constructor `VECTOR`, indexed observation `VECTOR-REF`, alias-visible mutation `VECTOR-SET!`. `MAKE-VECTOR` та `VECTOR-LENGTH` — похідні convenience і слотів не витрачають.
 
 `ENV-REFLECTION` відділяється від самого evaluator environment:
 
@@ -56,6 +61,8 @@ PAIR        DERIVED-NO-SLOT
 AND         DERIVED-NO-SLOT
 OR          DERIVED-NO-SLOT
 DIVIDE      DERIVED/FOREIGN-REVIEW-NO-SLOT
+MAKE-VECTOR DERIVED-NO-SLOT
+VECTOR-LENGTH DERIVED-NO-SLOT
 ONEP        DERIVED-NO-SLOT
 MINUSP      DERIVED-NO-SLOT
 FSUBR       HISTORICAL-MECHANISM-NO-SLOT
@@ -70,6 +77,8 @@ EQUAL(a,b)  = structural recursion over ATOM/EQ/CAR/CDR
 ONEP(x)     = ZEROP(DIFFERENCE(x,1))
 MINUSP(x)   = LESSP(x,0)
 DIVIDE(x,y) = pair(QUOTIENT(x,y), REMAINDER(x,y))
+MAKE-VECTOR(n) = APPLY(VECTOR, repeat(EMPTY,n))
+VECTOR-LENGTH(v) = least n where ERRORSET(VECTOR-REF(v,n)) = EMPTY
 ```
 
 `PAIR`, `AND`, `OR` уже language-owned compositions.
@@ -133,10 +142,10 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   3
-provisional coordinates            00000000, 00000001, 00000010
+provisional D8 ladder candidates   6
+provisional coordinates            00000000..00000101
 ratified D8 residents              0
-resolved recovery no-slot          9
+resolved recovery no-slot          11
 unresolved recovery rows           2
 preserved positive law families    8
 preserved negative groups          4
@@ -144,7 +153,7 @@ preserved negative groups          4
 
 ## Наступне правило заповнення
 
-Після `ERRORSET`, `ERROR` і `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
+Після failure-family, мінімальної ARRAY/VECTOR-бази та `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
 
 ```text
 capability не представлена D1-D7
