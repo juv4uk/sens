@@ -92,6 +92,19 @@ def load_donor() -> dict[str, dict[str, str | None]]:
     return out
 
 
+DONOR_ALIASES = {
+    "atom": "atom?",
+    "eq": "eq?",
+    "not": "not?",
+    "null": "null?",
+    "member": "member?",
+    "lessp": "lessp?",
+    "greaterp": "greaterp?",
+    "zerop": "zerop?",
+    "numberp": "numberp?",
+}
+
+
 def lisp_name(domain: str, resident: str) -> str | None:
     if domain == "D1":
         return "NIL" if resident == "NO" else "T"
@@ -116,7 +129,8 @@ def build_rows(foundation: dict, exact: dict, donor: dict) -> list[dict]:
             en = current["en"]
             if en is None or en.upper() != resident:
                 fail(f"{domain}:{bits}: en/resident drift")
-            old = donor.get(en.lower(), {})
+            donor_key = DONOR_ALIASES.get(en.lower(), en.lower())
+            old = donor.get(donor_key, {})
             rows.append(
                 {
                     "bits": bits,
