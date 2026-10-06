@@ -1,19 +1,6 @@
 name: publish-binary-master
 
 on:
-  push:
-    branches:
-      - codex/sens-code-migration-tools
-    paths:
-      - "scripts/migrate-three-pass.py"
-      - "tests/test_three_pass_migration.py"
-      - "knowledge/d1-d7-foundation.json"
-      - "crates/sens/src/domain_surface_registry_generated.rs"
-      - "crates/sens/src/semantic_registry_generated.rs"
-      - "crates/sens/src/semantic_registry.rs"
-      - "crates/sens/src/eval/necessary_forms_generated.rs"
-      - "crates/sens/src/text7_projection_generated.rs"
-      - ".github/workflows/publish-binary-master.yml"
   workflow_dispatch:
 
 concurrency:
