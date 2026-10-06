@@ -181,22 +181,39 @@ fn requested_rows(fixture: Option<&str>) -> Result<Vec<(String, CoreDomainIdenti
     Ok(selected)
 }
 
+fn identity_transport(
+    identity: CoreDomainIdentity,
+) -> Result<(&'static str, String, &'static str, &'static str), String> {
+    match identity {
+        CoreDomainIdentity::D3(word) => Ok((
+            "D3",
+            format!("{:03b}", word.word().packed_bits()),
+            "knowledge/bija3-l1-l5-structure-projection.json",
+            "contracts/bija3-l1-l5-ratification.lisp",
+        )),
+        CoreDomainIdentity::D4(word) => Ok((
+            "D4",
+            format!("{:04b}", word.word().packed_bits()),
+            "knowledge/d4-bootstrap-compiler-structure-projection.json",
+            "contracts/d4-bootstrap-ratification.lisp",
+        )),
+        _ => Err("compiler semantic export admits only current D3/D4 nucleus identities".into()),
+    }
+}
+
 fn render_request(
     fixture_id: &str,
     identity: CoreDomainIdentity,
     role: CompilerLoweringRole,
     source_commit: &str,
     authority: &str,
-) -> String {
-    let bits = match identity {
-        CoreDomainIdentity::D3(word) => format!("{:03b}", word.word().packed_bits()),
-        _ => unreachable!("compiler export corpus is D3-only"),
-    };
-    format!(
-        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (identity . ((domain . D3) (bits . {bits})))\n           (law . ((authority-ref . \"knowledge/bija3-l1-l5-structure-projection.json\") (proof-ref . \"contracts/bija3-l1-l5-ratification.lisp\") (semantic-status . current)))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (provenance . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"knowledge/bija3-l1-l5-structure-projection.json\") (authority-sha256 . \"{authority}\") (compiler-nucleus-sha256 . \"{}\") (contract . 11.6))))",
+) -> Result<String, String> {
+    let (domain, bits, authority_ref, proof_ref) = identity_transport(identity)?;
+    Ok(format!(
+        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (identity . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{authority_ref}\") (proof-ref . \"{proof_ref}\") (semantic-status . current)))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (provenance . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"{authority_ref}\") (authority-sha256 . \"{authority}\") (compiler-nucleus-sha256 . \"{}\") (contract . 11.6))))",
         role_name(role),
         sha256_hex(NUCLEUS.as_bytes())
-    )
+    ))
 }
 
 pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
@@ -204,7 +221,7 @@ pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
     let source_commit = current_commit(root)?;
     let authority = authority_digest()?;
 
-    let rows = parse_fixture_rows(options.fixture.as_deref())?;
+    let rows = requested_rows(options.fixture.as_deref())?;
     let mut rendered = Vec::with_capacity(rows.len());
     for (name, identity) in rows {
         let role = compiler_lowering_role_from_sens(identity)
@@ -217,7 +234,7 @@ pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
             role,
             &source_commit,
             &authority,
-        ));
+        )?);
     }
 
     Ok(format!("{}\n", rendered.join("\n\n")))
