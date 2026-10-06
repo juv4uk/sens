@@ -398,6 +398,26 @@ mod tests {
     }
 
     #[test]
+    fn noncanonical_input_count_varint_fails_closed() {
+        let packet = GpuExecutionPacketV1::try_new(
+            d3(0b111),
+            vec![],
+            GpuOutputRequest::Materialize,
+            None,
+            [0; 32],
+        ).unwrap();
+        let mut encoded = packet.encode().unwrap();
+        // Byte 6 is the zero input-count varint. Expand it to the non-canonical
+        // two-byte spelling 0x80 0x00 by inserting one byte.
+        assert_eq!(encoded[6], 0);
+        encoded[6] = 0x80;
+        encoded.insert(7, 0x00);
+        assert!(matches!(
+            GpuExecutionPacketV1::decode(&encoded),
+            Err(GpuExecutionPacketError::NonCanonicalVarint { offset: 6 })
+        ));
+    }
+    #[test]
     fn provenance_is_opaque_transport_not_admission() {
         let a = GpuExecutionPacketV1::try_new(d3(0b111), vec![], GpuOutputRequest::Materialize, None, [1; 32]).unwrap();
         let b = GpuExecutionPacketV1::try_new(d3(0b111), vec![], GpuOutputRequest::Materialize, None, [2; 32]).unwrap();
