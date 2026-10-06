@@ -1,5 +1,5 @@
 ; Semantic -> x86-64 lowering projection.
-; Language meaning remains owned by lib/surface/semantic-registry.lisp.
+; Language meaning remains owned by Contract 11.7 + ratified exact-domain laws.
 ; ISA identity/encoding remains owned by lib/machine/isa + lib/machine/encoding.
 ; Rows here only say how an already-existing semantic identity may be realized.
 ;
@@ -7,7 +7,8 @@
 ; belongs to the closed Lisp-owned admission layer and is deliberately not
 ; re-exported from semantic lowering as a compatibility convenience.
 
-(00001001 x86-semantic-lowering-profile
+; Historical byte-SID projection retained only as compatibility/provenance.
+(00001001 x86-legacy-sid-lowering-profile-v1
   (00000001
     ((00000010 sequence "tag-test: TEST/AND/CMP")
      (00000011 direct "CMP/SETE")
@@ -228,3 +229,26 @@
         (00000101 pair-value)
         (00000110 pair-value))
       x86-pair-cell-bytes)))
+
+
+; #3989 current exact-domain CPU entry for the first migrated binary slice.
+; The caller passes an exact DomainIdentity value. No historical SID8 byte and
+; no surface spelling participates in dispatch. For now the only admitted
+; binary-u64 current route is D5:01010 PLUS, whose bounded integer fast path is
+; already witnessed by x86-lower-add-u64-forms.
+(00001001 x86-lower-current-binary-u64-forms
+  (00001000 (identity left right)
+    (00000111
+      ((00100010 identity 01010)
+       (x86-lower-add-u64-forms left right))
+      (t
+       (00000001 unsupported-current-domain-binary-u64)))))
+
+(00001001 x86-encode-current-binary-u64
+  (00001000 (identity left right)
+    (10011100 ((forms (x86-lower-current-binary-u64-forms identity left right)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-binary-u64))
+         (00000001 unsupported-current-domain-binary-u64))
+        (t
+         (x86-encode-admitted-program forms))))))

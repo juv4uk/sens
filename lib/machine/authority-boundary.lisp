@@ -9,7 +9,7 @@
 ; it, but the authority direction and prohibitions are stated here.
 
 (machine-authority-boundary/1
-  (semantic-authority lib/surface/semantic-registry.lisp)
+  (semantic-authority language-contract.lisp+ratified-domain-laws)
   (machine-root lib/machine)
   (public-api-excluded-root lib/machine)
   (machine-public-api-admission explicit-ratification-only)

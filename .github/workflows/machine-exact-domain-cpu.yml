@@ -1,0 +1,43 @@
+name: machine-exact-domain-cpu
+
+concurrency:
+  group: machine-exact-domain-cpu-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/**"
+      - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_capability_axis.rs"
+      - "crates/sens/tests/machine_noninterference_contract.rs"
+      - "crates/sens/tests/machine_lowering_boundary.rs"
+      - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - ".github/workflows/machine-exact-domain-cpu.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/**"
+      - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_capability_axis.rs"
+      - "crates/sens/tests/machine_noninterference_contract.rs"
+      - "crates/sens/tests/machine_lowering_boundary.rs"
+      - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - ".github/workflows/machine-exact-domain-cpu.yml"
+
+jobs:
+  exact-domain-x86:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact-domain CPU bridge
+        run: |
+          cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
+          cargo test -p sens --test machine_capability_axis -- --nocapture
+          cargo test -p sens --test machine_noninterference_contract -- --nocapture
+      - name: Existing x86 lowering boundary
+        run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
+      - name: Lisp-owned x86 encoder bytes
+        run: cargo test -p sens --test x86_64_lisp_encoder -- --nocapture
