@@ -1,0 +1,137 @@
+{
+  "schema": "d9-laws-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#3970",
+  "date": "2026-10-06",
+  "foundation": "#3960 / Contract 11.7",
+  "inventory": "knowledge/d9-v1-semantic-inventory.json",
+  "rule": "Test local semantic laws independently of coordinates. A proved law may classify a family or reduce future geometry, but does not ratify D9 and does not assign a coordinate unless the law itself forces one.",
+  "accounting": {
+    "candidates_reviewed": 20,
+    "proved_family_members": 7,
+    "proved_distinct_independent": 1,
+    "underdetermined": 12,
+    "fixed_coordinates": 0,
+    "orbit_coordinates": 0,
+    "ratified_d9_residents": 0
+  },
+  "proved_families": [
+    {
+      "family": "STREAM-SCOPED-RESOURCE",
+      "members": [
+        "OPEN",
+        "CLOSE",
+        "WITH-OPEN-FILE"
+      ],
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "law": "WITH-OPEN-FILE is observationally equivalent, on the abstract resource state and body result, to OPEN -> lexical body -> CLOSE. OPEN and CLOSE are opposite resource-state transitions but not mathematical inverses because handle allocation/history is observable.",
+      "positive_controls": [
+        "scope begins with no live handle; body observes exactly one live handle; scope exits with no live handle",
+        "body result is preserved across automatic CLOSE"
+      ],
+      "falsifier": "remove CLOSE: the live-handle set differs after scope exit",
+      "host_boundary": "abstract handle token only; no file descriptor, path implementation or OS API is semantic identity"
+    },
+    {
+      "family": "NAMED-DESCRIPTOR-GENERATOR",
+      "members": [
+        "DEFSTRUCT",
+        "DEFTYPE",
+        "DEFINE-CONDITION"
+      ],
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "law": "All three are instances of DEFINE-DESCRIPTOR(kind,name,payload); descriptor kind remains an observable independent axis: structure, type, condition.",
+      "positive_controls": [
+        "same name may coexist under different descriptor kinds",
+        "lookup by (kind,name) recovers the corresponding payload"
+      ],
+      "falsifier": "remove the kind axis: equal names overwrite/collapse observably distinct descriptor classes",
+      "host_boundary": "registry entries are abstract language descriptors, not host type metadata"
+    },
+    {
+      "family": "ROW-MAJOR-INDEX-REFINEMENT",
+      "members": [
+        "ROW-MAJOR-AREF"
+      ],
+      "lower_anchor": "D8 AREF",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "law": "For shape [n], ROW-MAJOR-AREF(a,i)=AREF(a,i). For rank>1, the row-major linear index deterministically maps to a multidimensional index and therefore adds semantics not present in the one-dimensional D8 AREF identity.",
+      "positive_controls": [
+        "rank-1 equality with AREF",
+        "rank-2 2x3 array: linear index 4 maps to multidimensional index [1,1]"
+      ],
+      "falsifier": "treat linear index as only the first dimension index: rank-2 result differs or is out of range",
+      "host_boundary": "finite abstract array only; no host layout pointer or byte stride"
+    }
+  ],
+  "proved_distinctions": [
+    {
+      "semantic_name": "NUNION",
+      "lower_anchor": "D6 UNION",
+      "result": "PROVED",
+      "relation_class": "MUTATION-REFINEMENT",
+      "placement_consequence": "NONE",
+      "law": "NUNION is observably distinct from pure UNION when alias-visible mutation is admitted: an alias of the first input observes the destructive update; pure UNION leaves that alias unchanged.",
+      "positive_control": "alias(first) changes after NUNION but not after UNION",
+      "falsifier": "erase aliases: the destructive distinction becomes observationally invisible",
+      "prerequisite": "D8 RPLACA/RPLACD already establish mutation observability"
+    }
+  ],
+  "underdetermined": [
+    {
+      "semantic_name": "DRIBBLE",
+      "reason": "Transcript tee behavior still depends on an abstract console/session source and destination law; current description is too host-facing for a coordinate law."
+    },
+    {
+      "semantic_name": "FFI-CALL",
+      "reason": "Typed foreign-call meaning is language-visible, but a substrate-independent argument/result/effect protocol is not yet specified."
+    },
+    {
+      "semantic_name": "ARGLIST",
+      "reason": "Evaluated variadic argument-list access is distinct by description, but no independent pairing/axis with existing binding laws is proved here."
+    },
+    {
+      "semantic_name": "&WHOLE",
+      "reason": "Whole-original-form binding is distinct by description, but its exact relation to ARGLIST/raw macro binding remains under-specified."
+    },
+    {
+      "semantic_name": "SYMBOL-MACRO",
+      "reason": "Name-level expansion behavior is distinct, but current corpus does not prove a coordinate law or accessor/definition algebra."
+    },
+    {
+      "semantic_name": "DEFINE-SYMBOL-MACRO",
+      "reason": "Definition operation lacks a proved inverse/accessor relation in the current candidate set."
+    },
+    {
+      "semantic_name": "MACRO-FUNCTION",
+      "reason": "Access to a macro expansion function is distinct from expansion itself, but the exact algebra with D6 MACROEXPAND-1 is not yet proved."
+    },
+    {
+      "semantic_name": "COMPILER-MACRO",
+      "reason": "Compiler-time rewrite hook is language-visible only after its phase/timing observation is pinned independently of compiler internals."
+    },
+    {
+      "semantic_name": "DEFINE-COMPILER-MACRO",
+      "reason": "Definition-side relation to COMPILER-MACRO remains under-specified without an abstract lookup/phase law."
+    },
+    {
+      "semantic_name": "ERROR-IF-NOT-ERROR",
+      "reason": "The candidate depends on a precise dynamic error-handling state predicate that is not yet represented by a finite current law."
+    },
+    {
+      "semantic_name": "DEHANDLER",
+      "reason": "Handler removal is plausible stack mutation, but exact interaction with D8 ERRORSET and nested handlers is not yet pinned."
+    },
+    {
+      "semantic_name": "NRECONC",
+      "reason": "Historical behavior text 'destructive reconciliation of two ordered lists' is insufficiently precise to prove a mutation law without importing an external definition."
+    }
+  ],
+  "coordinate_boundary": {
+    "assigned_now": 0,
+    "rule": "All 20 remain at their prior coordinate status. Law mining classifies meanings only; D9 placement waits for a larger inventory and explicit geometry evidence."
+  }
+}
