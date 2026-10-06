@@ -306,3 +306,147 @@
       (compiler-role-from-l1-l5 decompose identity law)
       proof-ref
       provenance)))
+
+
+; #3837 — bounded whole-program compiler body.
+;
+; Bootstrap transport presents parser structure only:
+;   ()                                  leaf / no executable children
+;   (children (<node> ...))             generic syntax/container children
+;   (domain-call <DomainIdentity> (<node> ...))
+;
+; The transport carries no role names.  This SENS program owns:
+; - exact-domain role selection through the already-ratified D3/D4 laws;
+; - QUOTE traversal policy (quoted children are opaque data);
+; - deterministic preorder request composition;
+; - fail-closed behavior for any unsupported exact domain identity.
+;
+; A successful result is:
+;   (compiler-compilation-artifact/1 (<request> ...))
+; Failure is the distinguished symbol compiler-failure.
+; Target/backend installation remains outside this nucleus.
+
+(визначити compiler-failure
+  (як-є compiler-failure))
+
+(визначити compiler-append
+  (функція (left right)
+    (за-умовою
+      ((атом? left) right)
+      ((compiler-true left)
+       (сполучити
+         (перше left)
+         (compiler-append (решта left) right))))))
+
+(визначити compiler-proof-for-identity
+  (функція (decompose identity d3-law d4-law d3-proof d4-proof)
+    (за-умовою
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-law-width d3-law))
+       d3-proof)
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-d4-law-width d4-law))
+       d4-proof)
+      ((compiler-true identity) ()))))
+
+(визначити compiler-request-from-laws
+  (функція
+    (decompose identity d3-law d4-law d3-proof d4-proof provenance)
+    (compiler-request-from-role
+      identity
+      identity
+      (compiler-lowering-role-from-laws
+        decompose identity d3-law d4-law)
+      (compiler-proof-for-identity
+        decompose identity d3-law d4-law d3-proof d4-proof)
+      provenance)))
+
+(визначити compiler-combine-results
+  (функція (left right)
+    (за-умовою
+      ((тотожне? left compiler-failure) compiler-failure)
+      ((тотожне? right compiler-failure) compiler-failure)
+      ((compiler-true left) (compiler-append left right)))))
+
+(визначити compiler-compile-nodes
+  (функція
+    (decompose nodes d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((атом? nodes) ())
+      ((compiler-true nodes)
+       (compiler-combine-results
+         (compiler-compile-node
+           decompose
+           (перше nodes)
+           d3-law d4-law d3-proof d4-proof provenance)
+         (compiler-compile-nodes
+           decompose
+           (решта nodes)
+           d3-law d4-law d3-proof d4-proof provenance))))))
+
+(визначити compiler-compile-domain-call-result
+  (функція
+    (decompose identity children role request
+     d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((тотожне? role ()) compiler-failure)
+      ((тотожне? request ()) compiler-failure)
+      ((тотожне? role (як-є quote-form))
+       (сполучити request ()))
+      ((compiler-true identity)
+       (compiler-combine-results
+         (сполучити request ())
+         (compiler-compile-nodes
+           decompose children
+           d3-law d4-law d3-proof d4-proof provenance))))))
+
+(визначити compiler-compile-domain-call
+  (функція
+    (decompose identity children d3-law d4-law d3-proof d4-proof provenance)
+    (compiler-compile-domain-call-result
+      decompose
+      identity
+      children
+      (compiler-lowering-role-from-laws
+        decompose identity d3-law d4-law)
+      (compiler-request-from-laws
+        decompose identity d3-law d4-law d3-proof d4-proof provenance)
+      d3-law d4-law d3-proof d4-proof provenance)))
+
+(визначити compiler-compile-node
+  (функція
+    (decompose node d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((тотожне? node ()) ())
+      ((атом? node) compiler-failure)
+      ((тотожне? (перше node) (як-є domain-call))
+       (compiler-compile-domain-call
+         decompose
+         (перше (решта node))
+         (перше (решта (решта node)))
+         d3-law d4-law d3-proof d4-proof provenance))
+      ((тотожне? (перше node) (як-є children))
+       (compiler-compile-nodes
+         decompose
+         (перше (решта node))
+         d3-law d4-law d3-proof d4-proof provenance))
+      ((compiler-true node) compiler-failure))))
+
+(визначити compiler-artifact-from-requests
+  (функція (requests)
+    (за-умовою
+      ((тотожне? requests compiler-failure) compiler-failure)
+      ((compiler-true requests)
+       (сполучити
+         (як-є compiler-compilation-artifact/1)
+         (сполучити requests ()))))))
+
+(визначити compiler-compile-program
+  (функція
+    (decompose program d3-law d4-law d3-proof d4-proof provenance)
+    (compiler-artifact-from-requests
+      (compiler-compile-node
+        decompose program
+        d3-law d4-law d3-proof d4-proof provenance))))
