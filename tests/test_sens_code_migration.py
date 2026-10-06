@@ -38,6 +38,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         )
         cls.text7 = mod.build_text7_encoder(data, TEXT7)
         cls.legacy = mod.build_legacy_sid_map(REGISTRY, cls.code_map)
+        cls.registry_surfaces = mod.build_registry_surface_sid_map(REGISTRY)
 
     def test_current_d3_authority_is_used(self):
         self.assertEqual(self.code_map["CAR"].bits, "100")
@@ -121,15 +122,28 @@ class SensCodeMigrationTests(unittest.TestCase):
             )
             self.assertEqual(hits[0].label, label)
 
-    def test_unmapped_legacy_sid8_call_head_fails_closed(self):
-        # Legacy PRINT has no ratified D3-D6 coordinate in the current foundation.
-        with self.assertRaises(mod.BinaryMigrationError):
-            mod.binary_rewrite(
-                "(01001000 x)\n",
-                self.code_map,
-                self.text7,
-                self.legacy,
-            )
+    def test_unmigrated_known_sid8_head_stays_function_code_not_text7(self):
+        converted, hits, _ = mod.binary_rewrite(
+            "(01001000 x)\n",
+            self.code_map,
+            self.text7,
+            self.legacy,
+            self.registry_surfaces,
+        )
+        self.assertTrue(converted.startswith("10 01001000 00 "))
+        self.assertEqual(hits[0].domain, "W8-COMPAT")
+
+    def test_named_known_function_uses_registry_code_not_text7(self):
+        converted, hits, _ = mod.binary_rewrite(
+            "(print 0)\n",
+            self.code_map,
+            self.text7,
+            self.legacy,
+            self.registry_surfaces,
+        )
+        self.assertTrue(converted.startswith("10 01001000 00 "), converted)
+        self.assertEqual(hits[0].bits, "01001000")
+        self.assertEqual(hits[0].domain, "W8-COMPAT")
 
     def test_current_exact_width_head_is_preserved(self):
         converted, _, _ = mod.binary_rewrite(
