@@ -11,6 +11,7 @@ use sens::{
 };
 
 const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+const PRODUCTION_ADAPTER: &str = include_str!("../src/compiler_language.rs");
 
 fn collect_roles(expr: &Expr, roles: &mut Vec<CompilerLoweringRole>) {
     match &expr.kind {
@@ -103,8 +104,7 @@ fn equal_payloads_outside_the_owning_domain_stay_fail_closed() {
 }
 
 #[test]
-fn coverage_test_contains_no_compiler_role_projection_of_its_own() {
-    let source = include_str!("compiler_selfhost_lowering_coverage.rs");
+fn production_role_path_contains_no_host_owned_identity_to_role_projection() {
     for forbidden in [
         "d3_syntax_kind",
         "domain_primitive_kind",
@@ -112,8 +112,12 @@ fn coverage_test_contains_no_compiler_role_projection_of_its_own() {
         "match word.word().packed_bits()",
     ] {
         assert!(
-            !source.contains(forbidden),
-            "coverage test must consume the production SENS-owned API, not project roles through {forbidden}"
+            !PRODUCTION_ADAPTER.contains(forbidden),
+            "production adapter must execute the SENS-owned role law, not project roles through {forbidden}"
+        );
+        assert!(
+            !NUCLEUS.contains(forbidden),
+            "SENS compiler nucleus must remain structural and backend-neutral: found {forbidden}"
         );
     }
 }
