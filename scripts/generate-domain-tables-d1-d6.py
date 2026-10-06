@@ -139,6 +139,7 @@ def render(projection: dict) -> str:
         "Exact identity remains `bits + domain + ratified law`.",
         "",
         "Canonical surface order: **ук → укр → san → eng → LISP → SUM**.",
+        f"Empty/missing surface marker: \`{projection['empty_marker']}\`.",
         "",
     ]
 
