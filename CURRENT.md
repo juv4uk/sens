@@ -7,11 +7,11 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.6 D1–D7 foundation contract.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.7 D1–D8 foundation contract.
    - [`lib/domains/d1.lisp`](lib/domains/d1.lisp) … [`lib/domains/d6.lisp`](lib/domains/d6.lisp) — canonical human-readable domain tables, **one domain per file**, columns `ук → укр → san → en → LISP → sym`. No aggregate D1–D6 table is authoritative.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are exactly D1–D7 under owner foundation #3572. D7 is owner-ratified 126/128; D8 remains UNRATIFIED/RESEARCH. Exact carriers remain mechanically representable independently of semantic admission. Historical Sens8/Sid8 is compatibility/provenance only.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1–D8 under owner foundation #3960. D7 is owner-ratified 126/128; D8 is owner-ratified 256/256. Exact carriers remain mechanically representable independently of semantic admission. Historical Sens8/Sid8 is compatibility/provenance only.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
    - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
@@ -41,7 +41,7 @@ D4  full compact bootstrap — 0000 APPLY, 0001 EVAL, 0010 LAMBDA, 0011 DEFINE, 
 D5  full compact 32/32 — owner-ratified #3331 via #3305/#3330; canonical map in knowledge/d5-ratified.json
 D6  full compact 64/64 — owner-ratified #3393; canonical map in knowledge/d6-ratified.json
 D7  owner-ratified 126/128 — #3572; canonical map in knowledge/d7-ratified.json; 0100001 and 0101010 owner-reserved/pinned
-D8  UNRATIFIED / RESEARCH — clean-room rebuild #3281
+D8  full compact 256/256 — owner-ratified #3960; canonical map in knowledge/d8-ratified.json — clean-room rebuild #3281
 ```
 
 Owner foundation ratification #3572 extends the current chain through D7: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 #3572. #3393 remains the historical D1–D6 foundation cut; D8 is the only unratified exact-width Core domain. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
