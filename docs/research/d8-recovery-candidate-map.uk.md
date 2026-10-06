@@ -1,3 +1,61 @@
+
+## ВАЖЛИВЕ ВИПРАВЛЕННЯ — DERIVED ≠ NO-SLOT
+
+Попередня редакція цієї карти помилково ввела правило:
+
+```text
+якщо функція виводиться з нижчих residents -> вона не може жити в D8
+```
+
+Це суперечить самій драбині SENS: D4-D6 вже містять багато похідних/генерованих residents (`CAAR/CADR`, `LIST`, `APPEND`, `REVERSE`, `PAIRLIS`, `MAP`, `FILTER`, `REDUCE`, `SCAN`, `TAKE`, `DROP`, `ZIP`, `ANY` тощо).
+
+Правильне правило:
+
+```text
+derivable = можна побудувати з нижчих
+resident  = окреме питання про місце в домені
+```
+
+NO-SLOT без додаткового owner-рішення допускається лише для:
+
+```text
+точного семантичного дубля
+чистого surface alias
+implementation-only механізму без user-visible delta
+falsified candidate
+```
+
+Тому попередня D8-робота відновлена як першокласна candidate evidence.
+
+### Structural/geometric lane відновлено
+
+- 64 selector candidate coordinates з #3646;
+- TAKE/DROP × edge;
+- ANY/ALL × predicate polarity;
+- REDUCE/SCAN × direction;
+- ZIP/UNZIP × orientation;
+- DO/WHILE × condition/projection;
+- NEG/ABS × RECIP;
+- RASSOC/ACONS × association orientation;
+- NTH/MAPLIST × traversal direction.
+
+Їхні fixed/gauge coordinates не є автоматично residents, але й **не є відкинутими NO-SLOT**.
+
+### Дві рівноправні доріжки D8
+
+```text
+HISTORICAL / RECOVERY
+  необхідність -> історія -> простий закон -> пропущене
+
+STRUCTURAL / GEOMETRIC
+  selector/product/duality/orientation/generator laws -> candidate coordinates
+```
+
+До ратифікації одна доріжка не має права стирати іншу.
+
+### Reopened residency review
+
+`EQUAL`, `PAIR`, `AND`, `OR`, `DIVIDE`, `ONEP`, `MINUSP`, `FSUBR`, Hart `TRANSFORMER/MACRO`, `MAKE-VECTOR`, `VECTOR-LENGTH` більше не вважаються відкинутими лише через derivability/family resemblance. Вони повернуті в residency-open review з нижчим або окремим пріоритетом.
 # D8 recovery candidate map
 
 **Статус:** research / provisional. **D8 не ратифікований.**
