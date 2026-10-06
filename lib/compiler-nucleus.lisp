@@ -565,3 +565,85 @@
       d3-proof
       d4-proof
       provenance)))
+
+
+; #3839 whole-program artifact composition.
+;
+; The host supplies only mechanical provenance values:
+; - exact canonical SW\x01 program-byte digest,
+; - exact pinned SENS revision,
+; - exact compiler-nucleus source digest,
+; - and one representation-only digest mechanism.
+;
+; SENS itself chooses the ordered semantic-request value to hash and composes
+; the whole backend-neutral artifact. The digest mechanism owns no identity
+; meaning, role/proof routing or backend policy.
+(визначити compiler-artifact-field
+  (функція (name value)
+    (сполучити name (сполучити value ()))))
+
+(визначити compiler-artifact-from-result
+  (функція
+    (digest program-wire-sha256 artifact-provenance result)
+    (за-умовою
+      ((compiler-result-success result)
+       (сполучити
+         (як-є compiler-compilation-artifact/1)
+         (сполучити
+           (compiler-artifact-field
+             (як-є artifact-kind)
+             (як-є whole-program))
+           (сполучити
+             (compiler-artifact-field
+               (як-є program-wire-sha256)
+               program-wire-sha256)
+             (сполучити
+               (compiler-artifact-field
+                 (як-є semantic-requests-sha256)
+                 (digest (compiler-result-requests result)))
+               (сполучити
+                 (compiler-artifact-field
+                   (як-є authority-provenance)
+                   artifact-provenance)
+                 (сполучити
+                   (compiler-artifact-field
+                     (як-є semantic-requests)
+                     (compiler-result-requests result))
+                   (сполучити
+                     (compiler-artifact-field
+                       (як-є required-capabilities)
+                       ())
+                     (сполучити
+                       (compiler-artifact-field
+                         (як-є artifact-status)
+                         (як-є canonical-backend-neutral))
+                       ()))))))))
+      ((compiler-true ())
+       (сполучити
+         (як-є compiler-compilation-error/1)
+         (сполучити
+           (compiler-artifact-field
+             (як-є program-wire-sha256)
+             program-wire-sha256)
+           (сполучити
+             (compiler-artifact-field
+               (як-є error)
+               (як-є compiler-program-rejected))
+             ()))))))))
+
+(визначити compiler-compile-program-artifact
+  (функція
+    (shape-or-empty decompose digest program d3-law d4-law d3-proof d4-proof request-provenance artifact-provenance program-wire-sha256)
+    (compiler-artifact-from-result
+      digest
+      program-wire-sha256
+      artifact-provenance
+      (compiler-compile-program
+        shape-or-empty
+        decompose
+        program
+        d3-law
+        d4-law
+        d3-proof
+        d4-proof
+        request-provenance))))
