@@ -35,6 +35,7 @@ D7 має 126 semantic rows; `0100001` і `0101010` owner-reserved. D8 owner-rat
 - [`program-surface-translator.md`](program-surface-translator.md) — механічний переклад source spellings через exact-domain projections.
 - [`domain-surfaces-d7.md`](domain-surfaces-d7.md) — специфіка D7 sound/text surfaces.
 - [`domain-surfaces-d8.md`](domain-surfaces-d8.md) — специфіка D8 human surfaces.
+- [`domain-surfaces-d9.md`](domain-surfaces-d9.md) — D9 512/512 human projection і межа W9 runtime.
 
 ## Реалізація та conformance
 
