@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 304,
-    "remaining_semantic_candidates": 720,
+    "selected_semantic_candidates": 330,
+    "remaining_semantic_candidates": 694,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 48,
+    "unplaced_selected_candidates": 74,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -100,6 +100,19 @@
       "generic local helpers",
       "compatibility wrappers",
       "host mechanisms"
+    ]
+  },
+  "forward_harvest_v1": {
+    "artifact": "knowledge/d10-forward-harvest-v1.json",
+    "selected": 26,
+    "coordinates_assigned": 0,
+    "excluded_no_slot": [
+      "*working-memory*",
+      "*justified-memory*",
+      "*jtms-memory*",
+      "find-entry",
+      "map-apply-head",
+      "map-apply-head-jtms"
     ]
   }
 }

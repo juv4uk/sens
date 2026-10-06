@@ -1,0 +1,37 @@
+name: D10 forward harvest v1
+
+on:
+  pull_request:
+    paths:
+      - "lib/forward.lisp"
+      - "knowledge/d10-forward-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-forward-harvest-v1.py"
+      - ".github/workflows/d10-forward-harvest-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-forward-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-forward-harvest-v1.py"
+      - ".github/workflows/d10-forward-harvest-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  forward-harvest:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify selector seed
+        run: python3 scripts/check-d10-fill-v1-seed.py
+      - name: Verify recovery v2
+        run: python3 scripts/check-d10-recovery-v2.py
+      - name: Verify library harvest v1
+        run: python3 scripts/check-d10-library-harvest-v1.py
+      - name: Verify forward/JTMS harvest
+        run: python3 scripts/check-d10-forward-harvest-v1.py
