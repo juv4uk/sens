@@ -1,0 +1,528 @@
+{
+  "schema": "d8-fill-v2-state/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#3951",
+  "target": {
+    "width": 8,
+    "capacity": 256,
+    "semantic_inventory_target": 256,
+    "occupancy_target": "dense 256/256 candidate inventory before owner ratification",
+    "exact_lower_domain_duplicates_target": 0
+  },
+  "inherited_method": {
+    "D3": "#3202 — dense 8/8, law-selected exact representative",
+    "D4": "#3272 — dense 16/16, derived residents allowed",
+    "D5": "#3284/#3297/#3305 — dense 32/32, distinct meanings, local-law federation, history allowed",
+    "D6": "#3333/#3384/#3390/#3393 — dense 64/64 semantic inventory first, geometry/gauge second"
+  },
+  "fill_order": [
+    "semantic-generator",
+    "clean-local-algebra-duality-product-axis",
+    "genuinely-useful-historical-capability",
+    "historical-coordinate/tie-break only after stronger law is exhausted"
+  ],
+  "preserved_sources": {
+    "selector_lane": {
+      "source": "#3646/#3673",
+      "count": 64,
+      "coordinates": [
+        "01100000",
+        "01100001",
+        "01100010",
+        "01100011",
+        "01100100",
+        "01100101",
+        "01100110",
+        "01100111",
+        "01101000",
+        "01101001",
+        "01101010",
+        "01101011",
+        "01101100",
+        "01101101",
+        "01101110",
+        "01101111",
+        "01110000",
+        "01110001",
+        "01110010",
+        "01110011",
+        "01110100",
+        "01110101",
+        "01110110",
+        "01110111",
+        "01111000",
+        "01111001",
+        "01111010",
+        "01111011",
+        "01111100",
+        "01111101",
+        "01111110",
+        "01111111",
+        "10000000",
+        "10000001",
+        "10000010",
+        "10000011",
+        "10000100",
+        "10000101",
+        "10000110",
+        "10000111",
+        "10001000",
+        "10001001",
+        "10001010",
+        "10001011",
+        "10001100",
+        "10001101",
+        "10001110",
+        "10001111",
+        "10010000",
+        "10010001",
+        "10010010",
+        "10010011",
+        "10010100",
+        "10010101",
+        "10010110",
+        "10010111",
+        "10011000",
+        "10011001",
+        "10011010",
+        "10011011",
+        "10011100",
+        "10011101",
+        "10011110",
+        "10011111"
+      ],
+      "status": "FIRST-CLASS-STRUCTURAL-CANDIDATE"
+    },
+    "structural_product_lane": {
+      "source": "#3667 #3668 #3704 #3712 #3779 #3783",
+      "families": [
+        {
+          "family": "TAKE/DROP × edge",
+          "source": "#3667",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": [
+            "11000001/11000010 gauge orbit",
+            "11000011 fixed"
+          ],
+          "novel_semantics": [
+            "TAKE-right",
+            "DROP-right"
+          ],
+          "protocol_limit": null,
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        },
+        {
+          "family": "ANY/ALL × predicate polarity",
+          "source": "#3668",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": [
+            "11110001/11110010 gauge orbit",
+            "11110011 fixed"
+          ],
+          "novel_semantics": [
+            "ANY(NOT p)",
+            "ALL(NOT p)"
+          ],
+          "protocol_limit": null,
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        },
+        {
+          "family": "REDUCE/SCAN × direction",
+          "source": "#3704",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": [
+            "10111001/10111010 gauge orbit",
+            "10111011 fixed"
+          ],
+          "novel_semantics": [
+            "REDUCE-right",
+            "SCAN-right"
+          ],
+          "protocol_limit": "nonempty-list for SCAN",
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        },
+        {
+          "family": "ZIP/UNZIP × orientation",
+          "source": "#3712",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": [
+            "11100001/11100010 gauge orbit",
+            "11100011 fixed"
+          ],
+          "novel_semantics": [
+            "ZIP-swapped",
+            "UNZIP-swapped"
+          ],
+          "protocol_limit": null,
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        },
+        {
+          "family": "DO/WHILE × condition/projection",
+          "source": "#3779",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": [
+            "11001101/11001110 gauge orbit",
+            "11001111 fixed"
+          ],
+          "novel_semantics": [
+            "continue-while-true+apply-result",
+            "stop-when-true+return-state"
+          ],
+          "protocol_limit": null,
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        },
+        {
+          "family": "NEG/ABS × RECIP",
+          "source": "#3783 recovered",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": [
+            "01001001/01001010 gauge orbit",
+            "01001011 fixed"
+          ],
+          "novel_semantics": [
+            "NEG∘RECIP",
+            "ABS∘RECIP"
+          ],
+          "protocol_limit": null,
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        },
+        {
+          "family": "RASSOC/ACONS × association orientation",
+          "source": "#3783 recovered",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": "preserved in witness",
+          "novel_semantics": [
+            "orientation-derived association semantics"
+          ],
+          "protocol_limit": null,
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        },
+        {
+          "family": "NTH/MAPLIST × traversal direction",
+          "source": "#3783 recovered",
+          "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+          "geometric_coordinates": "preserved in witness",
+          "novel_semantics": [
+            "NTH-right",
+            "MAPLIST-right"
+          ],
+          "protocol_limit": null,
+          "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+        }
+      ],
+      "status": "FIRST-CLASS-STRUCTURAL-CANDIDATE"
+    },
+    "current_recovery_lane": {
+      "source": "knowledge/d8-recovery-candidate-map.json",
+      "count": 12,
+      "candidates": [
+        {
+          "candidate": "RPLACA",
+          "provisional_coordinate": "00000000",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3943",
+            "Lisp 1.5 Programmer's Manual §7.4"
+          ]
+        },
+        {
+          "candidate": "RPLACD",
+          "provisional_coordinate": "00000001",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3943",
+            "Lisp 1.5 Programmer's Manual §7.4"
+          ]
+        },
+        {
+          "candidate": "ERRORSET",
+          "provisional_coordinate": "00000010",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3929",
+            "LISP 1.5 Programmer's Manual §6.4",
+            "Memo 26 Errorset"
+          ]
+        },
+        {
+          "candidate": "ERROR",
+          "provisional_coordinate": "00000011",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3931",
+            "LISP 1.5 Programmer's Manual §6.3 and evaluator/list definitions"
+          ]
+        },
+        {
+          "candidate": "ENV-REFLECTION",
+          "provisional_coordinate": "00000100",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3924",
+            "docs/FUNCTIONS.md",
+            "NOTE-FOR-SAKSHI.md",
+            "crates/sens/src/eval/builtins.rs"
+          ]
+        },
+        {
+          "candidate": "READ",
+          "provisional_coordinate": "00000101",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3937",
+            "crates/sens/src/eval/special_forms/io.rs",
+            "crates/sens/tests/mccarthy.rs"
+          ]
+        },
+        {
+          "candidate": "WRITE-TO-STRING",
+          "provisional_coordinate": "00000110",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3937",
+            "crates/sens/src/eval/special_forms/io.rs",
+            "crates/sens/src/value.rs"
+          ]
+        },
+        {
+          "candidate": "SYMBOL->STRING",
+          "provisional_coordinate": "00000111",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3939",
+            "crates/sens/src/eval/special_forms/strings.rs",
+            "crates/sens/tests/string_first_class.rs"
+          ]
+        },
+        {
+          "candidate": "STRING->SYMBOL",
+          "provisional_coordinate": "00001000",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3939",
+            "crates/sens/src/eval/special_forms/strings.rs",
+            "crates/sens/tests/string_first_class.rs"
+          ]
+        },
+        {
+          "candidate": "VECTOR",
+          "provisional_coordinate": "00001001",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3933",
+            "crates/sens/tests/vectors.rs",
+            "Lisp 1.5 ARRAY lineage"
+          ]
+        },
+        {
+          "candidate": "VECTOR-REF",
+          "provisional_coordinate": "00001010",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3933",
+            "crates/sens/tests/vectors.rs"
+          ]
+        },
+        {
+          "candidate": "VECTOR-SET!",
+          "provisional_coordinate": "00001011",
+          "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+          "evidence": [
+            "#3933",
+            "crates/sens/tests/vectors.rs"
+          ]
+        }
+      ],
+      "rule": "preserve every current candidate; provisional coordinate is provenance until final D8 geometry"
+    },
+    "donor_2934": {
+      "path": "knowledge/d8-donor-2934-historical-full-map.json",
+      "source_branch": "feat/d8-historical-full-occupancy",
+      "source_pr": "#2934",
+      "selector_rows": 64,
+      "historical_rows": 192,
+      "rule": "capability/provenance donor only; old automatic four-per-D6 coordinate law remains falsified"
+    }
+  },
+  "first_pass_accounting": {
+    "donor_selector_semantics": 64,
+    "donor_historical_semantics": 192,
+    "donor_historical_lower_name_collisions": 6,
+    "donor_historical_distinct_by_name": 186,
+    "current_recovery_total": 12,
+    "current_recovery_overlap_with_donor": 2,
+    "current_recovery_additional_names": 10,
+    "raw_distinct_name_seed_after_name_collision_filter": 260,
+    "warning": "name equality is only a first-pass filter; semantic duplicate review is still required"
+  },
+  "lower_name_collision_review": [
+    {
+      "name": "OPEN",
+      "donor_coordinate": "00000100",
+      "donor_parent_d6": "000001",
+      "status": "EXACT-SEMANTIC-DUPLICATE-REVIEW"
+    },
+    {
+      "name": "CLOSE",
+      "donor_coordinate": "00000101",
+      "donor_parent_d6": "000001",
+      "status": "EXACT-SEMANTIC-DUPLICATE-REVIEW"
+    },
+    {
+      "name": "APPLY",
+      "donor_coordinate": "00001100",
+      "donor_parent_d6": "000011",
+      "status": "EXACT-SEMANTIC-DUPLICATE-REVIEW"
+    },
+    {
+      "name": "COMPOSE",
+      "donor_coordinate": "00001101",
+      "donor_parent_d6": "000011",
+      "status": "EXACT-SEMANTIC-DUPLICATE-REVIEW"
+    },
+    {
+      "name": "REDUCE",
+      "donor_coordinate": "01110110",
+      "donor_parent_d6": "011101",
+      "status": "EXACT-SEMANTIC-DUPLICATE-REVIEW"
+    },
+    {
+      "name": "MAP",
+      "donor_coordinate": "11110001",
+      "donor_parent_d6": "111100",
+      "status": "EXACT-SEMANTIC-DUPLICATE-REVIEW"
+    }
+  ],
+  "current_recovery_overlap_with_donor": [
+    {
+      "candidate": "ERROR",
+      "provisional_coordinate": "00000011",
+      "donor_rows": [
+        "01100100"
+      ]
+    },
+    {
+      "candidate": "READ",
+      "provisional_coordinate": "00000101",
+      "donor_rows": [
+        "00000000"
+      ]
+    }
+  ],
+  "current_recovery_additional_names": [
+    {
+      "candidate": "RPLACA",
+      "provisional_coordinate": "00000000",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ]
+    },
+    {
+      "candidate": "RPLACD",
+      "provisional_coordinate": "00000001",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ]
+    },
+    {
+      "candidate": "ERRORSET",
+      "provisional_coordinate": "00000010",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3929",
+        "LISP 1.5 Programmer's Manual §6.4",
+        "Memo 26 Errorset"
+      ]
+    },
+    {
+      "candidate": "ENV-REFLECTION",
+      "provisional_coordinate": "00000100",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3924",
+        "docs/FUNCTIONS.md",
+        "NOTE-FOR-SAKSHI.md",
+        "crates/sens/src/eval/builtins.rs"
+      ]
+    },
+    {
+      "candidate": "WRITE-TO-STRING",
+      "provisional_coordinate": "00000110",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3937",
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/src/value.rs"
+      ]
+    },
+    {
+      "candidate": "SYMBOL->STRING",
+      "provisional_coordinate": "00000111",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ]
+    },
+    {
+      "candidate": "STRING->SYMBOL",
+      "provisional_coordinate": "00001000",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ]
+    },
+    {
+      "candidate": "VECTOR",
+      "provisional_coordinate": "00001001",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs",
+        "Lisp 1.5 ARRAY lineage"
+      ]
+    },
+    {
+      "candidate": "VECTOR-REF",
+      "provisional_coordinate": "00001010",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs"
+      ]
+    },
+    {
+      "candidate": "VECTOR-SET!",
+      "provisional_coordinate": "00001011",
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs"
+      ]
+    }
+  ],
+  "next_steps": [
+    "semantic duplicate review of all 192 donor historical rows against current D1-D6",
+    "merge Appendix-A recovery and symbol-metadata candidates into semantic inventory",
+    "merge structural product/generated meanings into residency competition rather than excluding them",
+    "select 256 distinct useful meanings",
+    "classify every resident relation as generator/local-algebra/product/multi-delta/coordinate-historical/gauge-free",
+    "apply law-forced D8 coordinates",
+    "gauge-fix residual placement only after 256-meaning inventory is complete",
+    "owner ratification remains separate"
+  ],
+  "invariants": [
+    "DERIVABLE does not mean NO-SLOT",
+    "history donates semantics but not automatic coordinates",
+    "no legacy Sens8/Function8 coordinate authority",
+    "no previous D8 positive or negative evidence is discarded",
+    "residency and runtime callability are separate"
+  ]
+}
