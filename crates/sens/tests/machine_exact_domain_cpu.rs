@@ -1,0 +1,126 @@
+use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
+use std::fs;
+use std::path::PathBuf;
+
+fn repo_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
+}
+
+fn load_lisp_file(path: &str, session: &mut Session) {
+    let path = repo_root().join(path);
+    let source = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
+    eval_program(&source, session)
+        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+}
+
+#[test]
+fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
+    let parsed = parse("(додати 2 3)").expect("current Ukrainian PLUS surface parses");
+    let lowered = lower_program(&parsed);
+    assert_eq!(lowered.len(), 1);
+
+    let identity = match &lowered[0].kind {
+        ExprKind::DomainCall(identity, args) => {
+            assert_eq!(identity.width(), 5);
+            assert_eq!(identity.packed_bits(), 0b01010);
+            assert_eq!(args.len(), 2);
+            *identity
+        }
+        other => panic!("current PLUS must lower to exact DomainCall, got {other:?}"),
+    };
+
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/capability-axis.lisp", &mut session);
+    load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
+
+    let identity_source = format!("{identity}");
+    assert_eq!(identity_source, "01010");
+
+    let capabilities = eval_program(
+        &format!("(machine-capabilities-for-domain {identity_source})"),
+        &mut session,
+    )
+    .expect("exact-domain machine capability lookup")
+    .value
+    .to_string();
+    assert_eq!(capabilities, "((integer-add bounded-u64))");
+
+    let bytes = eval_program(
+        &format!("(x86-encode-current-binary-u64 {identity_source} 2 3)"),
+        &mut session,
+    )
+    .expect("exact D5 PLUS must reach admitted x86 bytes")
+    .value
+    .to_string();
+
+    assert_eq!(
+        bytes,
+        "(72 184 2 0 0 0 0 0 0 0 72 185 3 0 0 0 0 0 0 0 72 1 200 195)"
+    );
+
+    let unsupported = eval_program(
+        "(x86-encode-current-binary-u64 101 2 3)",
+        &mut session,
+    )
+    .expect("unsupported current identity fails closed as named data")
+    .value
+    .to_string();
+    assert_eq!(unsupported, "unsupported-current-domain-binary-u64");
+}
+
+#[test]
+fn current_d3_machine_capabilities_are_keyed_by_exact_domain_identity() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    load_lisp_file("lib/machine/capability-axis.lisp", &mut session);
+
+    for (identity, expected) in [
+        ("101", "((identity-compare bounded-u64))"),
+        ("110", "((conditional-branch bounded-u64))"),
+        (
+            "111",
+            "((pair-field-store head bounded-u64) (pair-field-store tail bounded-u64))",
+        ),
+        ("100", "((pair-field-load head bounded-u64))"),
+        ("011", "((pair-field-load tail bounded-u64))"),
+    ] {
+        let actual = eval_program(
+            &format!("(machine-capabilities-for-domain {identity})"),
+            &mut session,
+        )
+        .unwrap_or_else(|error| panic!("D3:{identity} capability lookup failed: {error}"))
+        .value
+        .to_string();
+        assert_eq!(actual, expected, "D3:{identity}");
+    }
+}
+
+#[test]
+fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
+    let axis = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
+        .expect("capability axis");
+    assert!(axis.contains("machine-capability-axis-v2"));
+    assert!(axis.contains("machine-capabilities-for-domain"));
+    assert!(axis.contains("machine-capability-legacy-sid-axis-v1"));
+
+    let profile =
+        fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
+            .expect("current exact-domain x86 profile");
+    for exact_identity in ["01010", "101", "110", "111", "100", "011"] {
+        assert!(
+            profile.contains(&format!("({exact_identity} ")),
+            "current profile missing exact identity {exact_identity}"
+        );
+    }
+    assert!(!profile.contains("semantic-registry"));
+    assert!(!profile.contains("SID8"));
+
+    let boundary = fs::read_to_string(repo_root().join("lib/machine/authority-boundary.lisp"))
+        .expect("machine authority boundary");
+    assert!(boundary.contains("(semantic-authority language-contract.lisp+ratified-domain-laws)"));
+    assert!(!boundary.contains("(semantic-authority lib/surface/semantic-registry.lisp)"));
+}
