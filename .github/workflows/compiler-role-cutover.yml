@@ -42,9 +42,18 @@ on:
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
 
+concurrency:
+  group: compiler-role-cutover-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cutover:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    # Rust/Python control-plane gate: do not reserve the GPU-labelled runner.
+    # Keep CPU pressure bounded while the real CUDA lane runs in parallel.
+    runs-on: [self-hosted, guix]
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
       - name: D4 bootstrap projection must match ratified authority
