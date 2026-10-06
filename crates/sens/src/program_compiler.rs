@@ -208,7 +208,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn program_digest_deterministic() {
+    fn test_program_digest_is_deterministic() {
         let empty_program = vec![];
         let digest1 = program_digest_deterministic(&empty_program);
         let digest2 = program_digest_deterministic(&empty_program);
