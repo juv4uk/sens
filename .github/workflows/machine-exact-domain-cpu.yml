@@ -9,6 +9,7 @@ on:
     paths:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_exact_d3_structural.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
@@ -19,6 +20,7 @@ on:
     paths:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_exact_d3_structural.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
@@ -35,6 +37,7 @@ jobs:
       - name: Exact-domain CPU bridge
         run: |
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
+          cargo test -p sens --test machine_exact_d3_structural -- --nocapture
           cargo test -p sens --test machine_capability_axis -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Existing x86 lowering boundary
