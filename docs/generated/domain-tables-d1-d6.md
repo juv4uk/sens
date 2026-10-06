@@ -2,8 +2,8 @@
 
 **Authority:** `knowledge/d1-d7-foundation.json` (#3572).
 
-These are human projections only. Exact identity remains `bits + domain + ratified law`.
-The historical 8-bit registry is consulted only as a lexical donor and never as coordinate authority.
+Human projection source: `knowledge/domain-table-projection-d1-d6.json`.
+Exact identity remains `bits + domain + ratified law`.
 
 Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
 
