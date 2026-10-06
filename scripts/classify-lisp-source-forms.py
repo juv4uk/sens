@@ -1,48 +1,37 @@
 #!/usr/bin/env python3
-"""Three-pass inventory of legacy Lisp source forms.
+"""Inventory real SENS source generations before canonical migration.
 
-Pass order is intentional:
-  1. legacy exact 8-bit SID8/SENS8 call heads;
-  2. my-lisp surface call heads (lowercase/symbolic spellings) + literal ();
-  3. historical Lisp 1 / Lisp 1.5 UPPERCASE call heads.
+History-derived pass order:
+  1. legacy exact 8-bit SID8/Sens8 executable heads;
+  2. known my-lisp / admitted surface executable heads;
+  3. historical Lisp I / Lisp 1.5 UPPERCASE executable heads.
 
-The authoritative mapping is parsed from:
-  contracts/core1-historical-sid-map.lisp
+Already-current D3-D6 exact-width heads are reported separately.  Unknown
+user/dynamic call heads are also separate and are NEVER mislabeled as my-lisp
+builtins.  Literal () is structural-empty inventory, not a function head.
 
-This tool inventories syntax only. It does not rewrite source and does not
-assign current D1-D7 semantics.
+This is an inventory/resolution tool; it does not rewrite source.
 """
 from __future__ import annotations
 
 import argparse
 import collections
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
-import re
-from typing import Iterable
+import sys
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from sens_source_resolver import Resolution, SourceResolver, build_resolver
 
 SOURCE_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
 SKIP_DIRS = {
     ".git", ".hg", ".svn", "target", "node_modules", "vendor",
     ".venv", "venv", "dist", "build", "__pycache__",
 }
-
-ROW_RE = re.compile(
-    r"^\s*\(row\s+([01]{8})\s+([^\s()]+)\s+([^\s()]+)\s+"
-    r"([^\s()]+)\s+([^\s()]+)\s+([^\s()]+)\s*\)",
-    re.MULTILINE,
-)
-
-
-@dataclass(frozen=True)
-class Mapping:
-    sid8: str
-    my_lisp: str
-    historical: str
-    source: str
-    fit: str
-    status: str
 
 
 @dataclass(frozen=True)
@@ -53,7 +42,6 @@ class Head:
     start: int
     end: int
     token: str
-    quoted: bool
     empty_list: bool = False
 
 
@@ -65,55 +53,14 @@ class Hit:
     line: int
     column: int
     token: str
-    sid8: str
+    current_domain: str
+    current_bits: str
+    current_label: str
+    legacy_sid8: str
     my_lisp: str
     historical: str
-    historical_source: str
-    fit: str
-    status: str
-
-
-def strip_contract_comments(text: str) -> str:
-    return "\n".join(line.split(";", 1)[0] for line in text.splitlines())
-
-
-def load_mapping(path: Path) -> tuple[list[Mapping], dict[str, Mapping], dict[str, Mapping], dict[str, list[Mapping]]]:
-    source = strip_contract_comments(path.read_text(encoding="utf-8"))
-    rows = [
-        Mapping(*match.groups())
-        for match in ROW_RE.finditer(source)
-    ]
-    if not rows:
-        raise SystemExit(f"{path}: no historical SID rows found")
-
-    by_sid: dict[str, Mapping] = {}
-    by_my: dict[str, Mapping] = {}
-    by_historical_upper: dict[str, list[Mapping]] = {}
-
-    for row in rows:
-        if row.sid8 in by_sid and by_sid[row.sid8] != row:
-            raise SystemExit(f"{path}: duplicate SID8 {row.sid8}")
-        by_sid[row.sid8] = row
-
-        # One my-lisp spelling may intentionally share a historical mechanism;
-        # exact duplicate spellings with different SIDs would be ambiguous.
-        old = by_my.get(row.my_lisp)
-        if old is not None and old.sid8 != row.sid8:
-            raise SystemExit(
-                f"{path}: ambiguous my-lisp spelling {row.my_lisp!r}: "
-                f"{old.sid8} vs {row.sid8}"
-            )
-        by_my[row.my_lisp] = row
-
-        # Pass 3 recognizes the UPPERCASE source spelling of every historical
-        # Lisp 1/1.5 name. Multiple old SID8 rows may legitimately share one
-        # historical spelling (e.g. DEFINE), so preserve all candidates.
-        historical_upper = row.historical.upper()
-        if any(ch.isalpha() for ch in historical_upper):
-            by_historical_upper.setdefault(historical_upper, []).append(row)
-
-
-    return rows, by_sid, by_my, by_historical_upper
+    resolution: str
+    evidence: str
 
 
 def line_col(text: str, offset: int) -> tuple[int, int]:
@@ -123,7 +70,12 @@ def line_col(text: str, offset: int) -> tuple[int, int]:
 
 
 def scan_heads(path: str, text: str) -> list[Head]:
-    """Return executable list heads, excluding strings/comments/quoted data."""
+    """Lexically find list heads while excluding quoted/comment/string data.
+
+    This scanner intentionally does not call unknown heads "my-lisp".  Semantic
+    special-form container cleanup happens later; unknown heads are blockers /
+    dynamic evidence, never static function identity.
+    """
     heads: list[Head] = []
     frames: list[dict[str, object]] = []
     i = 0
@@ -168,8 +120,6 @@ def scan_heads(path: str, text: str) -> list[Head]:
                 else:
                     i += 1
             pending_quote = False
-            # A string can syntactically occupy a list-head position, but it is
-            # never one of the three source notations we inventory.
             if frames and frames[-1]["need_head"]:
                 frames[-1]["need_head"] = False
             continue
@@ -204,9 +154,7 @@ def scan_heads(path: str, text: str) -> list[Head]:
                 if frame["need_head"] and not frame["quoted"]:
                     open_offset = int(frame["open_offset"])
                     line, col = line_col(text, open_offset)
-                    heads.append(
-                        Head(path, line, col, open_offset, i + 1, "()", False, True)
-                    )
+                    heads.append(Head(path, line, col, open_offset, i + 1, "()", True))
             pending_quote = False
             i += 1
             continue
@@ -239,95 +187,55 @@ def scan_heads(path: str, text: str) -> list[Head]:
     return heads
 
 
-def classify_three_passes(
-    heads: Iterable[Head],
-    by_sid: dict[str, Mapping],
-    by_my: dict[str, Mapping],
-    by_historical_upper: dict[str, list[Mapping]],
-) -> list[Hit]:
-    heads = list(heads)
-    claimed: set[tuple[str, int, int]] = set()
-    hits: list[Hit] = []
+def _hit(head: Head, resolution: Resolution) -> Hit:
+    current = resolution.current
+    return Hit(
+        pass_number=resolution.pass_number,
+        representation=resolution.kind,
+        path=head.path,
+        line=head.line,
+        column=head.column,
+        token=head.token,
+        current_domain=current.domain if current else "",
+        current_bits=current.bits if current else "",
+        current_label=current.label if current else "",
+        legacy_sid8=resolution.legacy_sid8 or "",
+        my_lisp=resolution.my_lisp or "",
+        historical=resolution.historical or "",
+        resolution=(
+            "resolved"
+            if resolution.resolved
+            else "ambiguous"
+            if resolution.ambiguous
+            else "unresolved"
+        ),
+        evidence=";".join(resolution.evidence),
+    )
 
-    def key(head: Head) -> tuple[str, int, int]:
-        return (head.path, head.start, head.end)
 
-    def add(
-        pass_number: int,
-        representation: str,
-        head: Head,
-        rows: Mapping | list[Mapping] | None,
-    ) -> None:
-        claimed.add(key(head))
-        if rows is None:
-            candidates: list[Mapping] = []
-        elif isinstance(rows, list):
-            candidates = rows
+def classify_heads(
+    heads: list[Head],
+    resolver: SourceResolver,
+) -> tuple[list[Hit], list[Hit], list[Head], list[Head]]:
+    """Return (three_pass_hits, current_exact, dynamic_heads, empty_lists)."""
+    three_pass: list[Hit] = []
+    current: list[Hit] = []
+    dynamic: list[Head] = []
+    empty: list[Head] = []
+
+    for head in heads:
+        if head.empty_list:
+            empty.append(head)
+            continue
+        resolution = resolver.resolve_head(head.token)
+        if resolution.pass_number in (1, 2, 3):
+            three_pass.append(_hit(head, resolution))
+        elif resolution.kind == "current-exact":
+            current.append(_hit(head, resolution))
         else:
-            candidates = [rows]
+            dynamic.append(head)
 
-        def joined(field: str) -> str:
-            values = []
-            for row in candidates:
-                value = str(getattr(row, field))
-                if value not in values:
-                    values.append(value)
-            return "|".join(values)
-
-        hits.append(
-            Hit(
-                pass_number=pass_number,
-                representation=representation,
-                path=head.path,
-                line=head.line,
-                column=head.column,
-                token=head.token,
-                sid8=joined("sid8") if candidates else (head.token if pass_number == 1 else ""),
-                my_lisp=joined("my_lisp"),
-                historical=joined("historical"),
-                historical_source=joined("source"),
-                fit=joined("fit"),
-                status=joined("status") if candidates else "unmapped",
-            )
-        )
-
-
-    # PASS 1 — every exact legacy 8-bit executable head. A historical
-    # contract row enriches the hit, but absence from the contract never hides
-    # the legacy form.
-    for head in heads:
-        if head.empty_list:
-            continue
-        if re.fullmatch(r"[01]{8}", head.token):
-            add(1, "sid8-sens8", head, by_sid.get(head.token))
-
-    # PASS 2 — our my-lisp notation. Reserve known historical UPPERCASE names
-    # for pass 3, and leave already-binary exact-width heads alone. Everything
-    # else in executable head position is a my-lisp surface, including
-    # user-defined functions and symbolic names. Literal () is its own case.
-    empty_row = by_my.get("empty-list")
-    historical_upper_tokens = set(by_historical_upper)
-    for head in heads:
-        if key(head) in claimed:
-            continue
-        if head.empty_list:
-            add(2, "my-lisp-empty-list", head, empty_row)
-            continue
-        if re.fullmatch(r"[01]{1,8}", head.token):
-            continue
-        if head.token in historical_upper_tokens:
-            continue
-        add(2, "my-lisp", head, by_my.get(head.token))
-
-    # PASS 3 — historical Lisp 1 / Lisp 1.5 spelling, UPPERCASE only.
-    for head in heads:
-        if key(head) in claimed or head.empty_list:
-            continue
-        row = by_historical_upper.get(head.token)
-        if row is not None:
-            add(3, "lisp1-1.5-uppercase", head, row)
-
-    return sorted(hits, key=lambda hit: (hit.path, hit.line, hit.column, hit.pass_number))
+    return three_pass, current, dynamic, empty
 
 
 def source_files(root: Path):
@@ -340,9 +248,14 @@ def source_files(root: Path):
             yield path
 
 
-def scan_tree(root: Path, contract: Path) -> tuple[list[Hit], dict[str, int]]:
-    _, by_sid, by_my, by_historical = load_mapping(contract)
-    all_hits: list[Hit] = []
+def scan_tree(
+    root: Path,
+    resolver: SourceResolver,
+) -> tuple[list[Hit], list[Hit], list[Head], list[Head], dict[str, int]]:
+    historical: list[Hit] = []
+    current: list[Hit] = []
+    dynamic: list[Head] = []
+    empty: list[Head] = []
     files_seen = 0
 
     for path in source_files(root):
@@ -352,27 +265,33 @@ def scan_tree(root: Path, contract: Path) -> tuple[list[Hit], dict[str, int]]:
         except (OSError, UnicodeDecodeError):
             continue
         rel = path.relative_to(root).as_posix()
-        heads = scan_heads(rel, text)
-        all_hits.extend(classify_three_passes(heads, by_sid, by_my, by_historical))
+        groups = classify_heads(scan_heads(rel, text), resolver)
+        historical.extend(groups[0])
+        current.extend(groups[1])
+        dynamic.extend(groups[2])
+        empty.extend(groups[3])
 
-    counts = collections.Counter(hit.representation for hit in all_hits)
+    counts = collections.Counter(hit.pass_number for hit in historical)
     summary = {
         "files_seen": files_seen,
-        "hits_total": len(all_hits),
-        "pass1_sid8_sens8": counts["sid8-sens8"],
-        "pass2_my_lisp": counts["my-lisp"] + counts["my-lisp-empty-list"],
-        "pass2_my_lisp_empty_list": counts["my-lisp-empty-list"],
-        "pass3_lisp1_1_5_uppercase": counts["lisp1-1.5-uppercase"],
+        "three_pass_hits": len(historical),
+        "pass1_sid8_sens8": counts[1],
+        "pass2_my_lisp_surface": counts[2],
+        "pass3_lisp1_1_5_uppercase": counts[3],
+        "current_exact_heads": len(current),
+        "dynamic_or_unresolved_heads": len(dynamic),
+        "structural_empty_lists": len(empty),
+        "resolved_to_current": sum(hit.resolution == "resolved" for hit in historical),
+        "historical_unresolved_or_ambiguous": sum(
+            hit.resolution != "resolved" for hit in historical
+        ),
     }
-    return all_hits, summary
+    return historical, current, dynamic, empty, summary
 
 
 def write_tsv(path: Path, hits: list[Hit]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    columns = [
-        "pass_number", "representation", "path", "line", "column", "token",
-        "sid8", "my_lisp", "historical", "historical_source", "fit", "status",
-    ]
+    columns = list(Hit.__dataclass_fields__)
     lines = ["\t".join(columns)]
     for hit in hits:
         row = asdict(hit)
@@ -384,39 +303,73 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path, nargs="?", default=Path("."))
     parser.add_argument(
-        "--contract",
+        "--historical-map",
         type=Path,
         default=Path("contracts/core1-historical-sid-map.lisp"),
+    )
+    parser.add_argument(
+        "--foundation",
+        type=Path,
+        default=Path("knowledge/d1-d7-foundation.json"),
+    )
+    parser.add_argument(
+        "--registry",
+        type=Path,
+        default=Path("lib/surface/semantic-registry.lisp"),
+    )
+    parser.add_argument(
+        "--domain-surfaces",
+        type=Path,
+        nargs="*",
+        default=[
+            Path("lib/surface/domain-surfaces-d1-d4.lisp"),
+            Path("lib/surface/domain-surfaces-d5.lisp"),
+        ],
     )
     parser.add_argument("--json", type=Path)
     parser.add_argument("--tsv", type=Path)
     parser.add_argument("--summary-only", action="store_true")
     args = parser.parse_args()
 
-    root = args.root.resolve()
-    contract = args.contract.resolve()
-    hits, summary = scan_tree(root, contract)
+    resolver = build_resolver(
+        historical_map=args.historical_map.resolve(),
+        foundation=args.foundation.resolve(),
+        registry=args.registry.resolve(),
+        domain_surfaces=[p.resolve() for p in args.domain_surfaces],
+    )
+    result = scan_tree(args.root.resolve(), resolver)
+    historical, current, dynamic, empty, summary = result
 
     if args.json:
         args.json.parent.mkdir(parents=True, exist_ok=True)
         args.json.write_text(
             json.dumps(
-                {"summary": summary, "hits": [asdict(hit) for hit in hits]},
+                {
+                    "summary": summary,
+                    "three_pass_hits": [asdict(hit) for hit in historical],
+                    "current_exact_heads": [asdict(hit) for hit in current],
+                    "dynamic_or_unresolved_heads": [asdict(head) for head in dynamic],
+                    "structural_empty_lists": [asdict(head) for head in empty],
+                },
                 indent=2,
                 ensure_ascii=False,
             ) + "\n",
             encoding="utf-8",
         )
     if args.tsv:
-        write_tsv(args.tsv, hits)
+        write_tsv(args.tsv, historical)
 
     print(json.dumps(summary, ensure_ascii=False))
     if not args.summary_only:
-        for hit in hits:
+        for hit in historical:
+            current_text = (
+                f"{hit.current_domain}:{hit.current_bits}:{hit.current_label}"
+                if hit.current_bits else "UNRESOLVED"
+            )
             print(
                 f"P{hit.pass_number}\t{hit.representation}\t"
                 f"{hit.path}:{hit.line}:{hit.column}\t{hit.token}\t"
-                f"sid8={hit.sid8}\tmy={hit.my_lisp}\thist={hit.historical}"
+                f"=> {current_text}"
             )
     return 0
 
