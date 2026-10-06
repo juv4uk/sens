@@ -15,6 +15,8 @@
     (01011 fast-path "SUB / u64, left>=right")     ; D5 DIFFERENCE
     (10110 fast-path "IMUL / u32 inputs -> exact u64 result")    ; D5 TIMES
     (10111 fast-path "CQO+IDIV / positive i64 equal operands")    ; D5 QUOTIENT
+    (11010 proof "CMP+SETL+MOVZX / internal bit; D1 boundary")     ; D5 LESSP
+    (11011 proof "CMP+SETG+MOVZX / internal bit; D1 boundary")     ; D5 GREATERP
     (101 direct "CMP/SETE")                        ; D3 EQ
     (110 control "CMP+Jcc")                        ; D3 COND
     (111 runtime "STORE-pair-head+tail")           ; D3 CONS
