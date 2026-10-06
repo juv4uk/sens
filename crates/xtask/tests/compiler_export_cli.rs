@@ -58,7 +58,7 @@ fn compiler_export_emits_full_sens_owned_d3_d4_closure() {
     ));
     assert!(stdout.contains("(authority-path . \"language-contract.lisp\")"));
     assert!(stdout.contains("(repository . \"juv4uk/sens\")"));
-    assert!(stdout.contains("(contract . 11.7)"));
+    assert!(stdout.contains("(contract . 11.8)"));
     assert!(stdout.contains("(mechanism-status . unknown)"));
     assert!(stdout.contains("(mechanism-ref . ())"));
 
