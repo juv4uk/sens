@@ -1,0 +1,2593 @@
+{
+  "schema": "d9-selector-seed/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#3964",
+  "date": "2026-10-06",
+  "domain": "D9",
+  "width": 9,
+  "target_capacity": 512,
+  "source_foundation": {
+    "contract": "11.7",
+    "foundation_authority": "#3960",
+    "d8_map": "knowledge/d8-ratified.json",
+    "d8_selector_count": 64
+  },
+  "law": {
+    "name": "selector-suffix-extension",
+    "statement": "For each ratified D8 selector p/name, D9 p0 appends A before R and D9 p1 appends D before R.",
+    "zero_bit": "compose CAR / append A",
+    "one_bit": "compose CDR / append D",
+    "coordinate_status": "LAW-FORCED-CANDIDATE",
+    "semantic_status": "RESEARCH-CANDIDATE",
+    "ratification_effect": "NONE"
+  },
+  "accounting": {
+    "d8_selector_parents": 64,
+    "generated_d9_selector_candidates": 128,
+    "target_d9_capacity": 512,
+    "remaining_semantic_inventory": 384,
+    "ratified_d9_residents": 0
+  },
+  "rows": [
+    {
+      "stable_id": "d9.sel.38666895d53a035b",
+      "coordinate": "011000000",
+      "semantic_name": "CDAAAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100000",
+      "parent_semantic_name": "CDAAAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.38711e95d5438d22",
+      "coordinate": "011000001",
+      "semantic_name": "CDAAAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100000",
+      "parent_semantic_name": "CDAAAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.63aee395edbc0000",
+      "coordinate": "011000010",
+      "semantic_name": "CDAAAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100001",
+      "parent_semantic_name": "CDAAAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.63a53595edb436d1",
+      "coordinate": "011000011",
+      "semantic_name": "CDAAAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100001",
+      "parent_semantic_name": "CDAAAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.7e5ffab155a495fe",
+      "coordinate": "011000100",
+      "semantic_name": "CDAAADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100010",
+      "parent_semantic_name": "CDAAADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.7e70f4b155b2feff",
+      "coordinate": "011000101",
+      "semantic_name": "CDAAADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100010",
+      "parent_semantic_name": "CDAAADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9863b7b1646331d1",
+      "coordinate": "011000110",
+      "semantic_name": "CDAAADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100011",
+      "parent_semantic_name": "CDAAADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.986d65b1646afb00",
+      "coordinate": "011000111",
+      "semantic_name": "CDAAADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100011",
+      "parent_semantic_name": "CDAAADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.386e11082ea9d794",
+      "coordinate": "011001000",
+      "semantic_name": "CDAADAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100100",
+      "parent_semantic_name": "CDAADAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.387f13082eb84e2d",
+      "coordinate": "011001001",
+      "semantic_name": "CDAADAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100100",
+      "parent_semantic_name": "CDAADAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.50bece083bf6dee7",
+      "coordinate": "011001010",
+      "semantic_name": "CDAADADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100101",
+      "parent_semantic_name": "CDAADADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.50adb4083be83f86",
+      "coordinate": "011001011",
+      "semantic_name": "CDAADADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100101",
+      "parent_semantic_name": "CDAADADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4707a731d3ecf951",
+      "coordinate": "011001100",
+      "semantic_name": "CDAADDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100110",
+      "parent_semantic_name": "CDAADDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.47115531d3f4c280",
+      "coordinate": "011001101",
+      "semantic_name": "CDAADDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100110",
+      "parent_semantic_name": "CDAADDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2d03ea31c52e5d7e",
+      "coordinate": "011001110",
+      "semantic_name": "CDAADDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100111",
+      "parent_semantic_name": "CDAADDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2d14e431c53cc67f",
+      "coordinate": "011001111",
+      "semantic_name": "CDAADDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01100111",
+      "parent_semantic_name": "CDAADDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.28e8efddfb7eb652",
+      "coordinate": "011010000",
+      "semantic_name": "CDADAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101000",
+      "parent_semantic_name": "CDADAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.28deb9ddfb76060b",
+      "coordinate": "011010001",
+      "semantic_name": "CDADAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101000",
+      "parent_semantic_name": "CDADAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.fd9ff4dde2fbe02d",
+      "coordinate": "011010010",
+      "semantic_name": "CDADAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101001",
+      "parent_semantic_name": "CDADAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.fd8ef2dde2ed6994",
+      "coordinate": "011010011",
+      "semantic_name": "CDADAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101001",
+      "parent_semantic_name": "CDADAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.37821e07a0c12757",
+      "coordinate": "011010100",
+      "semantic_name": "CDADADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101010",
+      "parent_semantic_name": "CDADADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.37714407a0b2f4b6",
+      "coordinate": "011010101",
+      "semantic_name": "CDADADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101010",
+      "parent_semantic_name": "CDADADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1d7ee10792036504",
+      "coordinate": "011010110",
+      "semantic_name": "CDADADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101011",
+      "parent_semantic_name": "CDADADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1d8fe3079211db9d",
+      "coordinate": "011010111",
+      "semantic_name": "CDADADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101011",
+      "parent_semantic_name": "CDADADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2636cb96bcec5119",
+      "coordinate": "011011000",
+      "semantic_name": "CDADDAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101100",
+      "parent_semantic_name": "CDADDAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.26411996bcf52a28",
+      "coordinate": "011011001",
+      "semantic_name": "CDADDAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101100",
+      "parent_semantic_name": "CDADDAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0c338e96ae2e8ec6",
+      "coordinate": "011011010",
+      "semantic_name": "CDADDADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101101",
+      "parent_semantic_name": "CDADDADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0c44a896ae3d2e27",
+      "coordinate": "011011011",
+      "semantic_name": "CDADDADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101101",
+      "parent_semantic_name": "CDADDADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.15eab56d1638745c",
+      "coordinate": "011011100",
+      "semantic_name": "CDADDDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101110",
+      "parent_semantic_name": "CDADDDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.15fbb76d1646eaf5",
+      "coordinate": "011011101",
+      "semantic_name": "CDADDDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101110",
+      "parent_semantic_name": "CDADDDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2fedf26d24f636af",
+      "coordinate": "011011110",
+      "semantic_name": "CDADDDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101111",
+      "parent_semantic_name": "CDADDDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2fdcf86d24e7cdae",
+      "coordinate": "011011111",
+      "semantic_name": "CDADDDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01101111",
+      "parent_semantic_name": "CDADDDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.cd120c5e61848320",
+      "coordinate": "011100000",
+      "semantic_name": "CDDAAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110000",
+      "parent_semantic_name": "CDDAAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.cd07de5e617be071",
+      "coordinate": "011100001",
+      "semantic_name": "CDDAAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110000",
+      "parent_semantic_name": "CDDAAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a1c9115e4901acfb",
+      "coordinate": "011100010",
+      "semantic_name": "CDDAAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110001",
+      "parent_semantic_name": "CDDAAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a1d3475e490a5d42",
+      "coordinate": "011100011",
+      "semantic_name": "CDDAAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110001",
+      "parent_semantic_name": "CDDAAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dbd5824555187a15",
+      "coordinate": "011100100",
+      "semantic_name": "CDDAADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110010",
+      "parent_semantic_name": "CDDAADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dbc48045550a037c",
+      "coordinate": "011100101",
+      "semantic_name": "CDDAADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110010",
+      "parent_semantic_name": "CDDAADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.071e9d456d9b869a",
+      "coordinate": "011100110",
+      "semantic_name": "CDDAADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110011",
+      "parent_semantic_name": "CDDAADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.071447456d929ff3",
+      "coordinate": "011100111",
+      "semantic_name": "CDDAADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110011",
+      "parent_semantic_name": "CDDAADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bc506a9a91980e2f",
+      "coordinate": "011101000",
+      "semantic_name": "CDDADAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110100",
+      "parent_semantic_name": "CDDADAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bc3f709a9189a52e",
+      "coordinate": "011101001",
+      "semantic_name": "CDDADAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110100",
+      "parent_semantic_name": "CDDADAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a24d2d9a82da4bdc",
+      "coordinate": "011101010",
+      "semantic_name": "CDDADADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110101",
+      "parent_semantic_name": "CDDADADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a25e2f9a82e8c275",
+      "coordinate": "011101011",
+      "semantic_name": "CDDADADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110101",
+      "parent_semantic_name": "CDDADADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.adb71c70ec5566ca",
+      "coordinate": "011101100",
+      "semantic_name": "CDDADDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110110",
+      "parent_semantic_name": "CDDADDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.adad0670ec4cece3",
+      "coordinate": "011101101",
+      "semantic_name": "CDDADDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110110",
+      "parent_semantic_name": "CDDADDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.826e8170d3d333c5",
+      "coordinate": "011101110",
+      "semantic_name": "CDDADDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110111",
+      "parent_semantic_name": "CDDADDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.825d7f70d3c4bd2c",
+      "coordinate": "011101111",
+      "semantic_name": "CDDADDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01110111",
+      "parent_semantic_name": "CDDADDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.33000d18b0b0c7c1",
+      "coordinate": "011110000",
+      "semantic_name": "CDDDAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111000",
+      "parent_semantic_name": "CDDDAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.330abb18b0ba43f0",
+      "coordinate": "011110001",
+      "semantic_name": "CDDDAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111000",
+      "parent_semantic_name": "CDDDAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.18fd5018a1f3deee",
+      "coordinate": "011110010",
+      "semantic_name": "CDDDAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111001",
+      "parent_semantic_name": "CDDDAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.190e4a18a20247ef",
+      "coordinate": "011110011",
+      "semantic_name": "CDDDAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111001",
+      "parent_semantic_name": "CDDDAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.22b3b6ef09fc7e44",
+      "coordinate": "011110100",
+      "semantic_name": "CDDDADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111010",
+      "parent_semantic_name": "CDDDADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.22c4b8ef0a0af4dd",
+      "coordinate": "011110101",
+      "semantic_name": "CDDDADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111010",
+      "parent_semantic_name": "CDDDADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3cb6f3ef18ba4097",
+      "coordinate": "011110110",
+      "semantic_name": "CDDDADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111011",
+      "parent_semantic_name": "CDDDADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3ca619ef18ac0df6",
+      "coordinate": "011110111",
+      "semantic_name": "CDDDADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111011",
+      "parent_semantic_name": "CDDDADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dc97358894afb1fa",
+      "coordinate": "011111000",
+      "semantic_name": "CDDDDAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111100",
+      "parent_semantic_name": "CDDDDAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dc8d5f8894a7a4d3",
+      "coordinate": "011111001",
+      "semantic_name": "CDDDDAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111100",
+      "parent_semantic_name": "CDDDDAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.b14e9a887c2d7ef5",
+      "coordinate": "011111010",
+      "semantic_name": "CDDDDADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111101",
+      "parent_semantic_name": "CDDDDADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.b13d98887c1f085c",
+      "coordinate": "011111011",
+      "semantic_name": "CDDDDADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111101",
+      "parent_semantic_name": "CDDDDADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.ece3c3b23b645a9f",
+      "coordinate": "011111100",
+      "semantic_name": "CDDDDDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111110",
+      "parent_semantic_name": "CDDDDDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.ecd2c9b23b55f19e",
+      "coordinate": "011111101",
+      "semantic_name": "CDDDDDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111110",
+      "parent_semantic_name": "CDDDDDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d2e006b22ca5becc",
+      "coordinate": "011111110",
+      "semantic_name": "CDDDDDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111111",
+      "parent_semantic_name": "CDDDDDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d2f108b22cb43565",
+      "coordinate": "011111111",
+      "semantic_name": "CDDDDDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "01111111",
+      "parent_semantic_name": "CDDDDDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.59add05bbe501cee",
+      "coordinate": "100000000",
+      "semantic_name": "CAAAAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000000",
+      "parent_semantic_name": "CAAAAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.59beca5bbe5e85ef",
+      "coordinate": "100000001",
+      "semantic_name": "CAAAAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000000",
+      "parent_semantic_name": "CAAAAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.73b08d5bcd0d05c1",
+      "coordinate": "100000010",
+      "semantic_name": "CAAAAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000001",
+      "parent_semantic_name": "CAAAAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.73bb3b5bcd1681f0",
+      "coordinate": "100000011",
+      "semantic_name": "CAAAAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000001",
+      "parent_semantic_name": "CAAAAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bd2efe4525e3c88b",
+      "coordinate": "100000100",
+      "semantic_name": "CAAAADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000010",
+      "parent_semantic_name": "CAAAADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bd39344525ec78d2",
+      "coordinate": "100000101",
+      "semantic_name": "CAAAADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000010",
+      "parent_semantic_name": "CAAAADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.e877b9453e6631f0",
+      "coordinate": "100000110",
+      "semantic_name": "CAAAADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000011",
+      "parent_semantic_name": "CAAAADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.e86d0b453e5cb5c1",
+      "coordinate": "100000111",
+      "semantic_name": "CAAAADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000011",
+      "parent_semantic_name": "CAAAADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.48ec6e97ee6414bd",
+      "coordinate": "100001000",
+      "semantic_name": "CAAADAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000100",
+      "parent_semantic_name": "CAAADAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.48db6c97ee559e24",
+      "coordinate": "100001001",
+      "semantic_name": "CAAADAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000100",
+      "parent_semantic_name": "CAAADAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.7435299806e67e22",
+      "coordinate": "100001010",
+      "semantic_name": "CAAADADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000101",
+      "parent_semantic_name": "CAAADADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.742a739806dcf45b",
+      "coordinate": "100001011",
+      "semantic_name": "CAAADADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000101",
+      "parent_semantic_name": "CAAADADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a28b8b0facfb108",
+      "coordinate": "100001100",
+      "semantic_name": "CAAADDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000110",
+      "parent_semantic_name": "CAAADDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a1deab0fac5fe79",
+      "coordinate": "100001101",
+      "semantic_name": "CAAADDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000110",
+      "parent_semantic_name": "CAAADDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0ee01db0e24d7e03",
+      "coordinate": "100001110",
+      "semantic_name": "CAAADDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000111",
+      "parent_semantic_name": "CAAADDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0eea33b0e255f7ea",
+      "coordinate": "100001111",
+      "semantic_name": "CAAADDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10000111",
+      "parent_semantic_name": "CAAADDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d4d90ba9b5e9e4cf",
+      "coordinate": "100010000",
+      "semantic_name": "CAADAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001000",
+      "parent_semantic_name": "CAADAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d4c811a9b5db7bce",
+      "coordinate": "100010001",
+      "semantic_name": "CAADAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001000",
+      "parent_semantic_name": "CAADAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bad54ea9a72b48fc",
+      "coordinate": "100010010",
+      "semantic_name": "CAADAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001001",
+      "parent_semantic_name": "CAADAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bae650a9a739bf95",
+      "coordinate": "100010011",
+      "semantic_name": "CAADAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001001",
+      "parent_semantic_name": "CAADAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.c7f2bd801218d1ea",
+      "coordinate": "100010100",
+      "semantic_name": "CAADADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001010",
+      "parent_semantic_name": "CAADADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.c7e8a78012105803",
+      "coordinate": "100010101",
+      "semantic_name": "CAADADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001010",
+      "parent_semantic_name": "CAADADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9ca9a27ff995c565",
+      "coordinate": "100010110",
+      "semantic_name": "CAADADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001011",
+      "parent_semantic_name": "CAADADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9c98a07ff9874ecc",
+      "coordinate": "100010111",
+      "semantic_name": "CAADADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001011",
+      "parent_semantic_name": "CAADADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a57ad6ff9d4d5c0",
+      "coordinate": "100011000",
+      "semantic_name": "CAADDAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001100",
+      "parent_semantic_name": "CAADDAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a4cff6ff9cb5991",
+      "coordinate": "100011001",
+      "semantic_name": "CAADDAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001100",
+      "parent_semantic_name": "CAADDAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0f0f326fe152d91b",
+      "coordinate": "100011010",
+      "semantic_name": "CAADDADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001101",
+      "parent_semantic_name": "CAADDADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0f18e86fe15aafe2",
+      "coordinate": "100011011",
+      "semantic_name": "CAADDADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001101",
+      "parent_semantic_name": "CAADDADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4acea356eedb3ab5",
+      "coordinate": "100011100",
+      "semantic_name": "CAADDDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001110",
+      "parent_semantic_name": "CAADDDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4abda156eeccc41c",
+      "coordinate": "100011101",
+      "semantic_name": "CAADDDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001110",
+      "parent_semantic_name": "CAADDDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.76173e57075d6dba",
+      "coordinate": "100011110",
+      "semantic_name": "CAADDDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001111",
+      "parent_semantic_name": "CAADDDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.760c68570753ad93",
+      "coordinate": "100011111",
+      "semantic_name": "CAADDDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10001111",
+      "parent_semantic_name": "CAADDDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a09d90336a33ce11",
+      "coordinate": "100100000",
+      "semantic_name": "CADAAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010000",
+      "parent_semantic_name": "CADAAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a0a83e336a3d4a40",
+      "coordinate": "100100001",
+      "semantic_name": "CADAAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010000",
+      "parent_semantic_name": "CADAAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADAAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.869ad3335b76e53e",
+      "coordinate": "100100010",
+      "semantic_name": "CADAAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010001",
+      "parent_semantic_name": "CADAAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.86abcd335b854e3f",
+      "coordinate": "100100011",
+      "semantic_name": "CADAAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010001",
+      "parent_semantic_name": "CADAAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADAAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9204fa09c4f25f54",
+      "coordinate": "100100100",
+      "semantic_name": "CADAADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010010",
+      "parent_semantic_name": "CADAADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9215fc09c500d5ed",
+      "coordinate": "100100101",
+      "semantic_name": "CADAADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010010",
+      "parent_semantic_name": "CADAADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADAADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.adbab709d520dca7",
+      "coordinate": "100100110",
+      "semantic_name": "CADAADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010011",
+      "parent_semantic_name": "CADAADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.ada99d09d5123d46",
+      "coordinate": "100100111",
+      "semantic_name": "CADAADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010011",
+      "parent_semantic_name": "CADAADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADAADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4e91b47834c6044a",
+      "coordinate": "100101000",
+      "semantic_name": "CADADAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010100",
+      "parent_semantic_name": "CADADAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4e879e7834bd8a63",
+      "coordinate": "100101001",
+      "semantic_name": "CADADAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010100",
+      "parent_semantic_name": "CADADAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADADAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.234919781c43d145",
+      "coordinate": "100101010",
+      "semantic_name": "CADADADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010101",
+      "parent_semantic_name": "CADADADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.233817781c355aac",
+      "coordinate": "100101011",
+      "semantic_name": "CADADADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010101",
+      "parent_semantic_name": "CADADADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADADADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.5d2b02a1da08abaf",
+      "coordinate": "100101100",
+      "semantic_name": "CADADDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010110",
+      "parent_semantic_name": "CADADDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.5d1a08a1d9fa42ae",
+      "coordinate": "100101101",
+      "semantic_name": "CADADDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010110",
+      "parent_semantic_name": "CADADDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADADDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4327c5a1cb4ae95c",
+      "coordinate": "100101110",
+      "semantic_name": "CADADDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010111",
+      "parent_semantic_name": "CADADDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4338c7a1cb595ff5",
+      "coordinate": "100101111",
+      "semantic_name": "CADADDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10010111",
+      "parent_semantic_name": "CADADDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADADDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3c624f791c78b130",
+      "coordinate": "100110000",
+      "semantic_name": "CADDAAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011000",
+      "parent_semantic_name": "CADDAAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3c58a1791c70e801",
+      "coordinate": "100110001",
+      "semantic_name": "CADDAAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011000",
+      "parent_semantic_name": "CADDAAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDAAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1119947903f647cb",
+      "coordinate": "100110010",
+      "semantic_name": "CADDAADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011001",
+      "parent_semantic_name": "CADDAADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1123ca7903fef812",
+      "coordinate": "100110011",
+      "semantic_name": "CADDAADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011001",
+      "parent_semantic_name": "CADDAADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDAADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4cd90560117ea965",
+      "coordinate": "100110100",
+      "semantic_name": "CADDADAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011010",
+      "parent_semantic_name": "CADDADAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4cc80360117032cc",
+      "coordinate": "100110101",
+      "semantic_name": "CADDADADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011010",
+      "parent_semantic_name": "CADDADAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDADAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.782220602a01b5ea",
+      "coordinate": "100110110",
+      "semantic_name": "CADDADDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011011",
+      "parent_semantic_name": "CADDADDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.78180a6029f93c03",
+      "coordinate": "100110111",
+      "semantic_name": "CADDADDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011011",
+      "parent_semantic_name": "CADDADDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDADDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.82116db7c1fd92ff",
+      "coordinate": "100111000",
+      "semantic_name": "CADDDAAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011100",
+      "parent_semantic_name": "CADDDAAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.820073b7c1ef29fe",
+      "coordinate": "100111001",
+      "semantic_name": "CADDDAADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011100",
+      "parent_semantic_name": "CADDDAAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDAAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.665b30b7b1ce3c2c",
+      "coordinate": "100111010",
+      "semantic_name": "CADDDADAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011101",
+      "parent_semantic_name": "CADDDADR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.666c32b7b1dcb2c5",
+      "coordinate": "100111011",
+      "semantic_name": "CADDDADDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011101",
+      "parent_semantic_name": "CADDDADR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDADR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.73785f8e1cbb585a",
+      "coordinate": "100111100",
+      "semantic_name": "CADDDDAAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011110",
+      "parent_semantic_name": "CADDDDAR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.736e098e1cb271b3",
+      "coordinate": "100111101",
+      "semantic_name": "CADDDDADR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011110",
+      "parent_semantic_name": "CADDDDAR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDDAR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4830448e0439fed5",
+      "coordinate": "100111110",
+      "semantic_name": "CADDDDDAR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011111",
+      "parent_semantic_name": "CADDDDDR",
+      "generator_suffix_bit": "0",
+      "generator_suffix_role": "CAR/A",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.481f428e042b883c",
+      "coordinate": "100111111",
+      "semantic_name": "CADDDDDDR",
+      "status": "RESEARCH-CANDIDATE",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "parent_domain": "D8",
+      "parent_coordinate": "10011111",
+      "parent_semantic_name": "CADDDDDR",
+      "generator_suffix_bit": "1",
+      "generator_suffix_role": "CDR/D",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDDDR",
+      "authority": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    }
+  ]
+}
