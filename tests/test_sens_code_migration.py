@@ -4,20 +4,26 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import sys
-import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "migrate-to-sens-codes.py"
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+SCRIPT = SCRIPTS / "migrate-to-sens-codes.py"
 SPEC = importlib.util.spec_from_file_location("sens_migrator", SCRIPT)
 assert SPEC and SPEC.loader
 mod = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 
+from sens_source_resolver import build_resolver
+
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
+HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
 DOMAIN_SURFACES = [
     ROOT / "lib" / "surface" / "domain-surfaces-d1-d4.lisp",
     ROOT / "lib" / "surface" / "domain-surfaces-d5.lisp",
@@ -39,6 +45,22 @@ class SensCodeMigrationTests(unittest.TestCase):
         cls.text7 = mod.build_text7_encoder(data, TEXT7)
         cls.legacy = mod.build_legacy_sid_map(REGISTRY, cls.code_map)
         cls.registry_surfaces = mod.build_registry_surface_sid_map(REGISTRY)
+        cls.resolver = build_resolver(
+            historical_map=HISTORICAL,
+            foundation=FOUNDATION,
+            registry=REGISTRY,
+            domain_surfaces=DOMAIN_SURFACES,
+        )
+
+    def binary(self, source: str):
+        return mod.binary_rewrite(
+            source,
+            self.code_map,
+            self.text7,
+            self.legacy,
+            self.registry_surfaces,
+            self.resolver,
+        )
 
     def test_current_d3_authority_is_used(self):
         self.assertEqual(self.code_map["CAR"].bits, "100")
@@ -55,44 +77,43 @@ class SensCodeMigrationTests(unittest.TestCase):
 
     def test_empty_list_is_d3_empty_not_open_close(self):
         for source in ["()\n", "(   )\n"]:
-            converted, hits, shadowed = mod.binary_rewrite(
-                source, self.code_map, self.text7, self.legacy
-            )
+            converted, hits, shadowed = self.binary(source)
             self.assertEqual(converted, "000\n")
             self.assertFalse(hits)
             self.assertFalse(shadowed)
 
     def test_nested_empty_list_uses_000(self):
-        converted, _, _ = mod.binary_rewrite(
-            "(CONS () ())\n", self.code_map, self.text7, self.legacy
-        )
+        converted, _, _ = self.binary("(CONS () ())\n")
         self.assertEqual(converted, "10 111 00 000 00 000 01\n")
         self.assertNotIn("10 01", converted)
 
-    def test_function_surface_aliases_resolve_before_text7(self):
+    def test_all_three_historical_function_notations_resolve_before_text7(self):
         cases = {
-            "atom?": "010",
-            "eq?": "101",
-            "сполучити": "111",
-            "aṇu?": "010",
-            "додати": "01010",
-            "+": "01010",
+            "(00000101 x)\n": ("100", "CAR"),
+            "(car x)\n": ("100", "CAR"),
+            "(CAR x)\n": ("100", "CAR"),
+            "(00001100 a b)\n": ("01010", "PLUS"),
+            "(+ a b)\n": ("01010", "PLUS"),
+            "(PLUS a b)\n": ("01010", "PLUS"),
         }
-        for surface, bits in cases.items():
-            converted, hits, _ = mod.binary_rewrite(
-                f"({surface} x)\n",
-                self.code_map,
-                self.text7,
-                self.legacy,
-            )
+        for source, (bits, label) in cases.items():
+            converted, hits, _ = self.binary(source)
+            self.assertTrue(converted.startswith(f"10 {bits} 00 "), (source, converted))
+            self.assertEqual(hits[0].label, label, source)
+
+    def test_admitted_non_english_surface_resolves_before_text7(self):
+        for surface, bits in [
+            ("атом?", "010"),
+            ("сполучити", "111"),
+            ("aṇu?", "010"),
+            ("додати", "01010"),
+        ]:
+            converted, hits, _ = self.binary(f"({surface} x)\n")
             self.assertTrue(converted.startswith(f"10 {bits} 00 "), (surface, converted))
             self.assertTrue(hits, surface)
 
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
-        source = "(CONS (CAR x) (CDR y))\n"
-        converted, hits, shadowed = mod.binary_rewrite(
-            source, self.code_map, self.text7
-        )
+        converted, hits, shadowed = self.binary("(CONS (CAR x) (CDR y))\n")
         # x = SLP1 0x50, y = SLP1 0x26.
         self.assertEqual(
             converted,
@@ -102,57 +123,33 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertEqual([hit.label for hit in hits], ["CONS", "CAR", "CDR"])
         self.assertFalse(shadowed)
 
-    def test_legacy_sid8_call_heads_migrate_to_current_domains(self):
-        cases = {
-            "00000101": ("100", "CAR"),
-            "00001001": ("0011", "DEFINE"),
-            "00001100": ("01010", "PLUS"),
-            "00110111": ("101000", "MAP"),
-        }
-        for sid8, (current, label) in cases.items():
-            converted, hits, _ = mod.binary_rewrite(
-                f"({sid8} x)\n",
-                self.code_map,
-                self.text7,
-                self.legacy,
-            )
-            self.assertTrue(
-                converted.startswith(f"10 {current} 00 "),
-                (sid8, converted),
-            )
-            self.assertEqual(hits[0].label, label)
+    def test_registry_only_old_sid_map_reaches_current_d6_map(self):
+        converted, hits, _ = self.binary("(00110111 f xs)\n")
+        self.assertTrue(converted.startswith("10 101000 00 "), converted)
+        self.assertEqual((hits[0].label, hits[0].domain), ("MAP", "D6"))
 
-    def test_unmigrated_known_sid8_head_stays_function_code_not_text7(self):
-        converted, hits, _ = mod.binary_rewrite(
-            "(01001000 x)\n",
-            self.code_map,
-            self.text7,
-            self.legacy,
-            self.registry_surfaces,
-        )
-        self.assertTrue(converted.startswith("10 01001000 00 "))
-        self.assertEqual(hits[0].domain, "W8-COMPAT")
+    def test_unresolved_legacy_sid8_fails_closed_instead_of_surviving_as_w8(self):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "unresolved executable head"):
+            self.binary("(11111111 x)\n")
 
-    def test_named_known_function_uses_registry_code_not_text7(self):
-        converted, hits, _ = mod.binary_rewrite(
-            "(print 0)\n",
-            self.code_map,
-            self.text7,
-            self.legacy,
-            self.registry_surfaces,
-        )
-        self.assertTrue(converted.startswith("10 01001000 00 "), converted)
-        self.assertEqual(hits[0].bits, "01001000")
-        self.assertEqual(hits[0].domain, "W8-COMPAT")
+    def test_unresolved_named_legacy_function_fails_instead_of_becoming_text(self):
+        # PRINT still exists in the old flat registry, but has no proved current
+        # D3-D6 identity.  It must not become either W8 compatibility or Text7.
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "unresolved executable head"):
+            self.binary("(print x)\n")
 
     def test_current_exact_width_head_is_preserved(self):
-        converted, _, _ = mod.binary_rewrite(
-            "(100 x)\n",
-            self.code_map,
-            self.text7,
-            self.legacy,
-        )
+        converted, hits, _ = self.binary("(100 x)\n")
         self.assertTrue(converted.startswith("10 100 00 "))
+        self.assertEqual(hits[0].label, "CAR")
+
+    def test_unknown_user_call_head_is_blocker_not_text7(self):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "dynamic-symbol-head"):
+            self.binary("(sqrt-iter x n)\n")
+
+    def test_numeric_literal_is_number_blocker_not_text7_digits(self):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "belongs to Number, not Text7"):
+            self.binary("(LIST 25)\n")
 
     def test_comments_are_absent_and_do_not_change_binary_output(self):
         commented = """; outside
@@ -161,53 +158,38 @@ class SensCodeMigrationTests(unittest.TestCase):
   x)
 """
         plain = "(CAR x)\n"
-        a, _, _ = mod.binary_rewrite(commented, self.code_map, self.text7)
-        b, _, _ = mod.binary_rewrite(plain, self.code_map, self.text7)
+        a, _, _ = self.binary(commented)
+        b, _, _ = self.binary(plain)
         self.assertEqual(a, b)
         self.assertNotIn(";", a)
         self.assertNotIn("#", a)
 
     def test_comment_markers_inside_string_are_data_not_comments(self):
         source = '(LIST ";not-comment" "#|not-comment|#")\n'
-        converted, hits, _ = mod.binary_rewrite(source, self.code_map, self.text7)
+        converted, hits, _ = self.binary(source)
         self.assertTrue(converted.startswith("10 1110 "))
         self.assertEqual([hit.label for hit in hits], ["LIST"])
         self.assertRegex(converted, r"^[01\s]+$")
 
-    def test_d7_digits_encode_source_spelling_not_number_domain(self):
-        converted, _, _ = mod.binary_rewrite("(foo 25)\n", self.code_map, self.text7)
-        # 2 -> text.digit.2 = 0011101; 5 -> text.digit.5 = 0111011.
-        self.assertIn("0011101 0111011", converted)
-
-    def test_quoted_call_head_is_text_not_callable_domain(self):
-        converted, hits, _ = mod.binary_rewrite("'(CAR x)\n", self.code_map, self.text7)
+    def test_quoted_function_name_is_data_not_callable_identity(self):
+        converted, hits, _ = self.binary("'(CAR x)\n")
         self.assertFalse(hits)
-        # CAR must not appear as the D3 100 word when quoted.
         words = converted.split()
         self.assertNotEqual(words[words.index("10") + 1], "100")
         self.assertRegex(converted, r"^[01\s]+$")
 
-    def test_standalone_dot_is_d2_dot_but_dot_inside_symbol_is_text7(self):
-        dotted, _, _ = mod.binary_rewrite("(a . b)\n", self.code_map, self.text7)
+    def test_standalone_dot_is_d2_dot_but_dot_inside_data_symbol_is_text7(self):
+        dotted, _, _ = self.binary("(LIST a . b)\n")
         self.assertIn(" 11 ", dotted)
-        symbol, _, _ = mod.binary_rewrite("(foo a.b)\n", self.code_map, self.text7)
-        # Text7 sign.dot = 1111010.
-        self.assertIn("1111010", symbol)
+        symbol, _, _ = self.binary("(LIST a.b)\n")
+        self.assertIn("1111010", symbol)  # Text7 sign.dot
 
-    def test_shadowed_builtin_stays_text7_in_binary_source(self):
-        source = "(DEFUN CAR (x) x)\n(CAR y)\n"
-        converted, hits, shadowed = mod.binary_rewrite(source, self.code_map, self.text7)
-        self.assertIn("CAR", shadowed)
-        self.assertFalse(any(hit.label == "CAR" for hit in hits))
-        self.assertRegex(converted, r"^[01\s]+$")
-
-    def test_unencodable_character_fails_closed(self):
+    def test_unencodable_data_character_fails_closed(self):
         with self.assertRaises(mod.BinaryMigrationError):
-            mod.binary_rewrite("(foo 🙂)\n", self.code_map, self.text7)
+            self.binary("(LIST 🙂)\n")
 
     def test_binary_output_is_ascii_bits_only(self):
-        source = '(CONS "привіт" test-25)\n'
-        converted, _, _ = mod.binary_rewrite(source, self.code_map, self.text7)
+        converted, _, _ = self.binary('(CONS "привіт" test-name)\n')
         self.assertRegex(converted, r"^[01\s]+$")
         converted.encode("ascii")
 
