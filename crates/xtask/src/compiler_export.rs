@@ -5,20 +5,14 @@
 //! raw coordinates itself.
 
 use sens::{
-    compiler_lowering_role_from_sens, sha256_source, Bija3, Bit3, Bit4, CompilerLoweringRole,
-    CoreD4, CoreDomainIdentity,
+    compiler_semantic_input_from_sens, sha256_source, Bija3, Bit3, Bit4, CompilerLoweringRole,
+    CompilerSemanticInput, CoreD4, CoreDomainIdentity,
 };
 use std::path::Path;
 
 const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
-const LANGUAGE_CONTRACT: &str = include_str!("../../../language-contract.lisp");
 const CORPUS: &str =
     include_str!("../../../contracts/compiler-nucleus-identity-corpus-v1.tsv");
-
-const COMPILER_ROLE_LAW_REF: &str =
-    "lib/compiler-nucleus.lisp:compiler-lowering-role-from-laws";
-const D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp";
-const D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 
 #[derive(Debug, Clone)]
 pub struct ExportOptions {
@@ -30,10 +24,6 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect()
-}
-
-fn authority_digest() -> String {
-    sha256_hex(LANGUAGE_CONTRACT.as_bytes())
 }
 
 fn current_commit(repo_root: &Path) -> Result<String, String> {
@@ -137,56 +127,45 @@ fn parse_fixture_rows(
     Ok(rows)
 }
 
-fn identity_transport(identity: CoreDomainIdentity) -> (&'static str, String, &'static str) {
+fn identity_transport(identity: CoreDomainIdentity) -> (&'static str, String) {
     match identity {
-        CoreDomainIdentity::D3(word) => (
-            "D3",
-            format!("{:03b}", word.word().packed_bits()),
-            D3_PROOF_REF,
-        ),
-        CoreDomainIdentity::D4(word) => (
-            "D4",
-            format!("{:04b}", word.word().packed_bits()),
-            D4_PROOF_REF,
-        ),
+        CoreDomainIdentity::D3(word) => ("D3", format!("{:03b}", word.word().packed_bits())),
+        CoreDomainIdentity::D4(word) => ("D4", format!("{:04b}", word.word().packed_bits())),
         _ => unreachable!("compiler export corpus admits only current D3/D4"),
     }
 }
 
 fn render_request(
     fixture_id: &str,
-    identity: CoreDomainIdentity,
-    role: CompilerLoweringRole,
+    input: &CompilerSemanticInput,
     source_commit: &str,
-    authority: &str,
 ) -> String {
-    let (domain, bits, proof_ref) = identity_transport(identity);
+    let (domain, bits) = identity_transport(input.identity);
     format!(
-        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (identity . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{COMPILER_ROLE_LAW_REF}\") (proof-ref . \"{proof_ref}\") (semantic-status . current)))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (provenance . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"language-contract.lisp\") (authority-sha256 . \"{authority}\") (compiler-nucleus-sha256 . \"{}\") (contract . 11.6))))",
-        role_name(role),
-        sha256_hex(NUCLEUS.as_bytes())
+        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (identity . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{}\") (proof-ref . \"{}\") (semantic-status . {})))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (provenance . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"{}\") (authority-sha256 . \"{}\") (compiler-nucleus-sha256 . \"{}\") (contract . {}))))",
+        input.authority_ref,
+        input.proof_ref,
+        input.semantic_status,
+        role_name(input.lowering_role),
+        input.authority_path,
+        input.authority_sha256,
+        sha256_hex(NUCLEUS.as_bytes()),
+        input.language_contract_version,
     )
 }
 
 pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
     let root = Path::new(repo_root);
     let source_commit = current_commit(root)?;
-    let authority = authority_digest();
 
     let rows = parse_fixture_rows(options.fixture.as_deref())?;
     let mut rendered = Vec::with_capacity(rows.len());
     for (name, identity) in rows {
-        let role = compiler_lowering_role_from_sens(identity)
-            .map_err(|error| format!("SENS role derivation failed for {name}: {error}"))?
+        let input = compiler_semantic_input_from_sens(identity)
+            .map_err(|error| format!("SENS semantic input production failed for {name}: {error}"))?
             .ok_or_else(|| format!("SENS compiler law returned no role for {name}"))?;
 
-        rendered.push(render_request(
-            &name,
-            identity,
-            role,
-            &source_commit,
-            &authority,
-        ));
+        rendered.push(render_request(&name, &input, &source_commit));
     }
 
     Ok(format!("{}\n", rendered.join("\n\n")))
@@ -217,9 +196,10 @@ mod tests {
         let roles = rows
             .into_iter()
             .map(|(_, identity)| {
-                compiler_lowering_role_from_sens(identity)
+                compiler_semantic_input_from_sens(identity)
                     .unwrap()
-                    .expect("every nucleus identity must have a SENS-owned role")
+                    .expect("every nucleus identity must have SENS-owned semantic input")
+                    .lowering_role
             })
             .collect::<std::collections::HashSet<_>>();
         assert_eq!(roles.len(), 9);
