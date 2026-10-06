@@ -1,6 +1,7 @@
 name: Compiler role authority cutover
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "lib/compiler-nucleus.lisp"
