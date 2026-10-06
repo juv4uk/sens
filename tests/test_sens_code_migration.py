@@ -18,6 +18,10 @@ SPEC.loader.exec_module(mod)
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
+DOMAIN_SURFACES = [
+    ROOT / "lib" / "surface" / "domain-surfaces-d1-d4.lisp",
+    ROOT / "lib" / "surface" / "domain-surfaces-d5.lisp",
+]
 
 
 class SensCodeMigrationTests(unittest.TestCase):
@@ -26,6 +30,12 @@ class SensCodeMigrationTests(unittest.TestCase):
         data, _ = mod.load_foundation(FOUNDATION)
         cls.data = data
         cls.code_map = mod.build_map(data, ["D3", "D4", "D5", "D6"])
+        cls.code_map = mod.augment_code_map_with_domain_surfaces(
+            cls.code_map, DOMAIN_SURFACES
+        )
+        cls.code_map = mod.augment_code_map_with_registry_aliases(
+            cls.code_map, REGISTRY
+        )
         cls.text7 = mod.build_text7_encoder(data, TEXT7)
         cls.legacy = mod.build_legacy_sid_map(REGISTRY, cls.code_map)
 
@@ -41,6 +51,41 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertEqual(converted, "(111 (100 x) (011 y))\n")
         self.assertEqual(len(hits), 3)
         self.assertFalse(blocked)
+
+    def test_empty_list_is_d3_empty_not_open_close(self):
+        for source in ["()\n", "(   )\n"]:
+            converted, hits, shadowed = mod.binary_rewrite(
+                source, self.code_map, self.text7, self.legacy
+            )
+            self.assertEqual(converted, "000\n")
+            self.assertFalse(hits)
+            self.assertFalse(shadowed)
+
+    def test_nested_empty_list_uses_000(self):
+        converted, _, _ = mod.binary_rewrite(
+            "(CONS () ())\n", self.code_map, self.text7, self.legacy
+        )
+        self.assertEqual(converted, "10 111 00 000 00 000 01\n")
+        self.assertNotIn("10 01", converted)
+
+    def test_function_surface_aliases_resolve_before_text7(self):
+        cases = {
+            "atom?": "010",
+            "eq?": "101",
+            "сполучити": "111",
+            "aṇu?": "010",
+            "додати": "01010",
+            "+": "01010",
+        }
+        for surface, bits in cases.items():
+            converted, hits, _ = mod.binary_rewrite(
+                f"({surface} x)\n",
+                self.code_map,
+                self.text7,
+                self.legacy,
+            )
+            self.assertTrue(converted.startswith(f"10 {bits} 00 "), (surface, converted))
+            self.assertTrue(hits, surface)
 
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
         source = "(CONS (CAR x) (CDR y))\n"
