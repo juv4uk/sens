@@ -9,6 +9,8 @@ on:
       - "lib/surface/domain-surfaces-d6.lisp"
       - "lib/surface/semantic-registry.lisp"
       - "scripts/generate-domain-tables-d1-d6.py"
+      - "scripts/check-domain-table-readable.lisp"
+      - "scripts/check-domain-table-readable.lisp"
       - "lib/generated/domain-table-d1-d6.lisp"
       - "docs/generated/domain-tables-d1-d6.md"
       - ".github/workflows/domain-tables-d1-d6.yml"
@@ -54,3 +56,7 @@ jobs:
       - name: Enforce result
         shell: bash
         run: test "$(cat domain-table-exit-code.txt)" = "0"
+      - name: Build SENS reader witness
+        run: cargo build -p sens-cli --bin sens
+      - name: Prove SENS reads canonical domain table
+        run: ./target/debug/sens scripts/check-domain-table-readable.lisp
