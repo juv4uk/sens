@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, read_domain_table
@@ -98,6 +99,45 @@ def validate_d7(authority: dict):
     return rows
 
 
+def validate_compact_uk(rows) -> None:
+    for row in rows:
+        if row.uk is None or row.ukr is None:
+            fail(f"{row.domain}:{row.bits}: uk/ukr must both be present")
+
+        if len(row.uk) > len(row.ukr):
+            fail(
+                f"{row.domain}:{row.bits}: compact uk surface {row.uk!r} "
+                f"is longer than expanded ukr {row.ukr!r}"
+            )
+
+        if "-на-місці" in row.uk:
+            fail(f"{row.domain}:{row.bits}: compact uk must use ! instead of -на-місці")
+
+        if row.uk.startswith("звук-") or row.uk.startswith("текст-"):
+            fail(f"{row.domain}:{row.bits}: compact uk must omit redundant D7 context prefix")
+
+        if row.uk.startswith("український-"):
+            fail(f"{row.domain}:{row.bits}: compact uk should use the stable укр- prefix")
+
+        if row.ukr and "на-місці" in row.ukr and not row.uk.endswith("!"):
+            fail(f"{row.domain}:{row.bits}: destructive compact uk surface must end in !")
+
+        if row.lisp and re.fullmatch(r"C[AD]{2,6}R", row.lisp.upper()):
+            path = row.lisp.upper()[1:-1]
+            expected = "-".join("п" if ch == "A" else "р" for ch in path)
+            if row.uk != expected:
+                fail(
+                    f"{row.domain}:{row.bits}: selector uk {row.uk!r} "
+                    f"must be compact path {expected!r}"
+                )
+
+    by_lisp = {row.lisp: row for row in rows if row.lisp}
+    for name, expected in (("GCD", "нсд"), ("LCM", "нск")):
+        row = by_lisp.get(name)
+        if row is not None and row.uk != expected:
+            fail(f"{row.domain}:{row.bits}: {name} compact uk must be {expected!r}")
+
+
 def main() -> int:
     foundation = json.loads(FOUNDATION.read_text(encoding="utf-8"))
     total = 0
@@ -126,6 +166,8 @@ def main() -> int:
     all_rows.extend(d8_rows)
     total += 256
 
+    validate_compact_uk(all_rows)
+
     for attr in ("uk", "ukr", "san"):
         seen = {}
         for row in all_rows:
@@ -148,6 +190,7 @@ def main() -> int:
     print("d7-reserved=0100001,0101010")
     print("missing-uk=0 missing-ukr=0 missing-san=0")
     print("surface-collisions=0 namespaces=uk,ukr,san")
+    print("uk-style=compact ukr-style=expanded selectors=п/р mutation=! predicate=?")
     print("columns=ук->укр->san->en->LISP->sym")
     return 0
 
