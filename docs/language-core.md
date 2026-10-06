@@ -36,10 +36,10 @@ D4  exact four-bit bootstrap — RATIFIED
 D5  exact five-bit full compact domain — RATIFIED #3305
 D6  exact six-bit full compact domain — RATIFIED #3393
 D7  exact seven-bit sound/text domain — RATIFIED #3572 (126/128)
-D8  exact eight-bit research carrier — UNRATIFIED
+D8  exact eight-bit full compact domain — RATIFIED #3960 (256/256)
 ```
 
-General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7 is ratified #3572; D8 remains the unratified research carrier.
+General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7 is ratified #3572; D8 is ratified #3960 with 256/256 distinct residents.
 
 При цьому:
 
@@ -254,7 +254,7 @@ D5 semantic residency не дорівнює готовності всіх runtim
 
 D6 **OWNER-RATIFIED #3393**, 64/64 occupied, 64 distinct residents.
 
-Нормативні машинні джерела: `contracts/d6-ratification.lisp`, `knowledge/d6-ratified.json`, Contract 11.6.
+Нормативні машинні джерела: `contracts/d6-ratification.lisp`, `knowledge/d6-ratified.json`, Contract 11.7.
 
 Coordinate basis зберігає походження доказу:
 - 16 selector-generator coordinates — proved;
@@ -267,7 +267,9 @@ Coordinate basis зберігає походження доказу:
 
 ## D7 — owner-ratified sound/text domain
 
-D7 **OWNER-RATIFIED #3572**, 126/128 admitted residents. Нормативні машинні джерела: `contracts/d7-ratification.lisp`, `knowledge/d7-ratified.json`, Contract 11.6.
+D7 **OWNER-RATIFIED #3572**, 126/128 admitted residents. Нормативні машинні джерела: `contracts/d7-ratification.lisp`, `knowledge/d7-ratified.json`, Contract 11.7.
+
+D8 **OWNER-RATIFIED #3960**, 256/256 distinct residents. Нормативні машинні джерела: `contracts/d8-ratification.lisp`, `knowledge/d8-ratified.json`, Contract 11.7. Ratified residency не означає автоматичну runtime callability.
 
 Поточний cut складається з 107 baseline-recovered residents та 19 owner-admitted same-coordinate Shiva overlays. Координати `0100001` і `0101010` лишаються owner-reserved/pinned — це не вільні opcode-и.
 
