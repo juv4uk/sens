@@ -117,6 +117,44 @@
       ],
       "ratification_blocker": "Canonical output currently materializes as Value::String; bridge to D7 text identity must be specified.",
       "reason": "Canonical structural serialization is not derivable from D1-D7 without a structure-to-text boundary."
+    },
+    {
+      "ladder_coordinate": "00000101",
+      "candidate": "SYMBOL->STRING",
+      "surfaces": [
+        "SYMBOL->STRING",
+        "symbol->string"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "early Lisp symbol print-name lineage; current surface is modern",
+      "simple_law": "SYMBOL->STRING(STRING->SYMBOL(s)) = s",
+      "evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ],
+      "ratification_blocker": "Bridge must target canonical D7 text, not Value::String implementation.",
+      "reason": "Exact symbol-name observation is distinct from general serialization."
+    },
+    {
+      "ladder_coordinate": "00000110",
+      "candidate": "STRING->SYMBOL",
+      "surfaces": [
+        "STRING->SYMBOL",
+        "string->symbol"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "related to PNAME/INTERN/OBLIST lineage, but not claimed identical to historical INTERN",
+      "simple_law": "STRING->SYMBOL(SYMBOL->STRING(sym)) = sym",
+      "evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ],
+      "ratification_blocker": "D7 text bridge and distinction from historical interning must remain explicit.",
+      "reason": "Can materialize symbol names that are not a single readable token, so it is not derivable from READ alone."
     }
   ],
   "recovered_no_slot": [
@@ -377,15 +415,17 @@
       "status": "PRESERVED-IN-MAIN"
     }
   ],
-  "next_fill_rule": "Continue pre-1963 recovery. Do not allocate a slot for host I/O wrappers or lower-domain compositions. READ/WRITE stay provisional until their D7 text-carrier bridge is explicit.",
+  "next_fill_rule": "Continue Appendix-A recovery. Keep symbol-name bridge distinct from reader/writer and from historical INTERN/OBLIST machinery.",
   "accounting": {
-    "provisional_d8_ladder_candidates": 5,
+    "provisional_d8_ladder_candidates": 7,
     "provisional_coordinates": [
       "00000000",
       "00000001",
       "00000010",
       "00000011",
-      "00000100"
+      "00000100",
+      "00000101",
+      "00000110"
     ],
     "resolved_recovery_no_slot": 9,
     "unresolved_recovery_rows": 2,
