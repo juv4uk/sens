@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "knowledge/d1-d7-foundation.json"
+      - "knowledge/domain-table-projection-d1-d6.json"
+      - "knowledge/domain-table-projection-d1-d6.json"
       - "lib/surface/domain-surfaces-d1-d4.lisp"
       - "lib/surface/domain-surfaces-d5.lisp"
       - "lib/surface/semantic-registry.lisp"
