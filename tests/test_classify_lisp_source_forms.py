@@ -153,8 +153,18 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual(len(historical), 1)
         hit = historical[0]
         self.assertEqual(hit.pass_number, 1)
-        self.assertEqual(hit.resolution, "unresolved")
+        self.assertEqual(hit.resolution, "legacy-unmapped")
         self.assertEqual(hit.legacy_sid8, "11111111")
+
+    def test_old_registry_function_without_current_domain_is_legacy_unmapped(self):
+        historical, _, dynamic, _ = self.classify("(01001000 x)\n")
+        self.assertFalse(dynamic)
+        self.assertEqual(len(historical), 1)
+        hit = historical[0]
+        self.assertEqual(hit.pass_number, 1)
+        self.assertEqual(hit.legacy_sid8, "01001000")
+        self.assertEqual(hit.resolution, "legacy-unmapped")
+        self.assertEqual(hit.current_domain, "")
 
 
 if __name__ == "__main__":

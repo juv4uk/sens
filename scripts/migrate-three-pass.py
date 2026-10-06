@@ -11,13 +11,11 @@ Pass 3 — historical LISP 1–1.5 uppercase names:
 Hard rules:
 - () serializes as D3 EMPTY = 000.
 - Non-empty list structure uses D2: 10 open, 00 separator, 11 dot, 01 close.
-- Unknown executable heads FAIL CLOSED; they are never silently emitted as D7 text.
+- Unknown executable heads PASS THROUGH unchanged after the three recognition passes.
+- Unknown D1/D2 words PASS THROUGH unchanged.
 - Comments disappear before migration.
-- D7/Text7 is intentionally NOT used in these three passes.
-- Unclassified atoms and strings fail closed for a later text-vs-variable pass.
-- Decimal/rational numeric literals fail closed until the Number source framing law
-  is admitted for the exact-width binary source.
-- Output is extensionless and contains only 0/1 plus ASCII whitespace.
+- Unrecognized data/numbers/strings PASS THROUGH unchanged instead of being forced into Text7.
+- Output is extensionless; recognized language structure/functions are binary, unresolved source remains visible.
 """
 from __future__ import annotations
 
@@ -50,6 +48,23 @@ NUMERIC_RE = re.compile(
     )
     """
 )
+
+HISTORICAL_ROW_RE = re.compile(
+    r"^\s*\(row\s+([01]{8})\s+([^\s()]+)\s+([^\s()]+)\s+"
+    r"([^\s()]+)\s+([^\s()]+)\s+([^\s()]+)\s*\)",
+    re.MULTILINE,
+)
+
+def normalize_role(name: str):
+    aliases={
+        "+":"PLUS","-":"DIFFERENCE","*":"TIMES","/":"QUOTIENT",
+        "<":"LESSP",">":"GREATERP","NIL":"EMPTY","EMPTY-LIST":"EMPTY",
+        "ATOM?":"ATOM","EQ?":"EQ","NULL?":"NULL","NUMBER?":"NUMBERP",
+        "INTEGER?":"INTEGERP","RATIONAL?":"RATIONALP","ZERO?":"ZEROP",
+        "EVEN?":"EVENP","ODD?":"ODDP","MEMBER?":"MEMBER",
+    }
+    value=name.strip()
+    return aliases.get(value.upper(),value.upper())
 
 @dataclass(frozen=True)
 class Tok:
@@ -160,7 +175,7 @@ def tokenize(source: str) -> list[Tok]:
             out.append(Tok("STRING",source[start:i],start))
             continue
         start=i
-        while i<n and (not source[i].isspace()) and source[i] not in "()'\"`,": 
+        while i<n and (not source[i].isspace()) and source[i] not in ("(", ")", "'", '"', "`", ","):
             i+=1
         text=source[start:i]
         if text==".":
@@ -299,94 +314,219 @@ def parse_semantic_rows(path: Path):
     return rows
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
-                          semantic_registry: Path, necessary_forms: Path):
+                          semantic_registry: Path, necessary_forms: Path,
+                          historical_map: Path|None=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
-    legacy=parse_legacy_successors(semantic_registry,necessary_forms)
+    proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
     sem_rows=parse_semantic_rows(semantic_generated)
 
-    # A historical byte may also gain a proven successor through surface
-    # equivalence: one of its registry spellings is a current exact-domain
-    # spelling. This is not byte truncation.
+    # A historical byte may gain a successor through semantic-name
+    # equivalence.  Crucially, this is independent of the old byte value:
+    # the old registry spelling/historical name must resolve to one current
+    # owner-ratified D3-D6 label.
     for byte,surfaces in sem_rows.items():
         candidates={current[name] for _,name in surfaces if name in current}
+        for _namespace,name in surfaces:
+            by_role=residents.get(normalize_role(name))
+            if by_role is not None:
+                candidates.add(by_role)
         if len(candidates)==1:
             ident=next(iter(candidates))
-            legacy.setdefault(byte,(ident[0],ident[1],"surface-equivalence-successor"))
+            proven_legacy.setdefault(byte,(ident[0],ident[1],"semantic-name-successor"))
+
+    # Historical Core1 rows provide independent name evidence for early SIDs,
+    # including rows that have no useful generated surface entry.
+    historical_rows=[]
+    if historical_map is not None:
+        hist_text="\n".join(
+            line.split(";",1)[0]
+            for line in historical_map.read_text(encoding="utf-8").splitlines()
+        )
+        historical_rows=list(HISTORICAL_ROW_RE.finditer(hist_text))
+        for m in historical_rows:
+            sid,my_name,historical,*_rest=m.groups()
+            candidates=set()
+            for name in (my_name,historical):
+                by_role=residents.get(normalize_role(name))
+                if by_role is not None:
+                    candidates.add(by_role)
+            if len(candidates)==1:
+                ident=next(iter(candidates))
+                proven_legacy.setdefault(sid,(ident[0],ident[1],"historical-name-successor"))
+
+    # Preserve knowledge that an old function existed even when it has no
+    # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
+    legacy={byte:proven_legacy.get(byte) for byte in sem_rows}
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
         candidates=set()
-        if byte in legacy:
-            candidates.add(legacy[byte][:2])
+        ident=legacy.get(byte)
+        if ident is not None:
+            candidates.add(ident[:2])
         for _,name in surfaces:
             if name in current:
                 candidates.add(current[name])
-        if len(candidates)==1:
-            ident=next(iter(candidates))
-            for namespace,name in surfaces:
-                if name != name.upper() or namespace=="sym":
-                    my.setdefault(name,ident)
+            by_role=residents.get(normalize_role(name))
+            if by_role is not None:
+                candidates.add(by_role)
+        unique=next(iter(candidates)) if len(candidates)==1 else None
+        for namespace,name in surfaces:
+            # Uppercase historical names are reserved for pass 3.
+            if name != name.upper() or namespace=="sym":
+                if name not in my:
+                    my[name]=unique
+
+    # Historical my-lisp spellings are also pass-2 evidence.
+    for m in historical_rows:
+        sid,my_name,historical,*_rest=m.groups()
+        ident=legacy.get(sid)
+        if my_name not in my:
+            my[my_name]=ident[:2] if ident is not None else None
 
     upper={name:ident for name,ident in residents.items()}
+    for m in historical_rows:
+        sid,my_name,historical,*_rest=m.groups()
+        if not any(ch.isalpha() for ch in historical):
+            continue
+        key=historical.upper()
+        ident=legacy.get(sid)
+        candidate=ident[:2] if ident is not None else None
+        # Do not let a similarly-spelled modern resident erase evidence that
+        # this specific historical function lacks a proven successor.
+        upper.setdefault(key,candidate)
+
     return legacy,my,upper
+
+def extract_projection(text: str,name: str):
+    start=text.find(f"pub(crate) const {name}")
+    if start<0: raise MigrationError(f"missing Text7 projection {name}")
+    end=text.find("];",start)
+    sec=text[start:end]
+    out={}
+    rx=re.compile(r'^\s*\(("(?:\\.|[^"\\])*"),\s*Some\(&\[([^\]]*)\]\)\)',re.M)
+    for m in rx.finditer(sec):
+        spelling=ast.literal_eval(m.group(1))
+        vals=tuple(int(x.strip(),16) for x in m.group(2).split(",") if x.strip())
+        out[spelling]=vals
+    if not out: raise MigrationError(f"empty Text7 projection {name}")
+    return out
+
+def build_text7(data, projection_path: Path):
+    text=projection_path.read_text(encoding="utf-8")
+    slp=extract_projection(text,"SA_SLP1_ENCODE")
+    uk=extract_projection(text,"UK_ENCODE")
+    d7=data["domains"]["D7"]["residents"]
+    labels={label:bits for bits,label in d7.items()}
+    candidates={}
+    for source in (slp,uk):
+        for spelling,vals in source.items():
+            candidates.setdefault(spelling,tuple(f"{v:07b}" for v in vals))
+    for n in range(10):
+        candidates[str(n)]=(labels[f"text.digit.{n}"],)
+
+    # Longest-match projection, indexed by first source character. This keeps
+    # multi-character cells (e.g. Ukrainian дж/дз) deterministic without
+    # rescanning the full table for every character in large source trees.
+    buckets={}
+    for key,cells in candidates.items():
+        buckets.setdefault(key[0],[]).append((key,cells))
+    for rows in buckets.values():
+        rows.sort(key=lambda x:(-len(x[0]),x[0]))
+    return buckets
+
+def text7_encode(spelling: str,candidates,tok: Tok):
+    words=[]
+    i=0
+    while i<len(spelling):
+        rows=candidates.get(spelling[i],())
+        for key,cells in rows:
+            if spelling.startswith(key,i):
+                words.extend(cells); i+=len(key); break
+        else:
+            ch=spelling[i]
+            raise MigrationError(f"Text7 cannot encode {ch!r} U+{ord(ch):04X}",tok)
+    return words
 
 class Resolver:
     def __init__(self,legacy,my,upper):
         self.legacy=legacy
         self.my=my
         self.upper=upper
-        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0}
+        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     def head(self,tok: Tok):
         t=tok.text
+        # Exact current function words are already migrated.
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
+        # Pass 1: every exact-eight executable head belongs to the old
+        # SID8/Sens8 generation. It may migrate only through a proven current
+        # successor; old/unassigned bytes never fall through as text.
         if len(t)==8 and set(t)<=set("01"):
-            ident=self.legacy.get(t)
+            if t not in self.legacy:
+                raise MigrationError(
+                    f"legacy-unmapped SID8/Sens8 {t}: no historical registry row",
+                    tok,
+                )
+            ident=self.legacy[t]
             if ident is None:
-                raise MigrationError(f"pass1: legacy Sens8/Sid8 {t} has no proven exact-domain successor",tok)
+                raise MigrationError(
+                    f"legacy-unmapped SID8/Sens8 {t}: no current D3-D6 resident",
+                    tok,
+                )
+            if ident[1]=="D3" and ident[0]==D3_EMPTY:
+                raise MigrationError(
+                    f"legacy SID8/Sens8 {t} resolves to structural EMPTY, not a callable head",
+                    tok,
+                )
             self.counts["pass1-sens8"]+=1
             return [ident[0]],"pass1-sens8"
-        ident=self.my.get(t)
-        if ident is not None:
+
+        # Pass 2: known my-lisp/current admitted surfaces. A surface known to
+        # the old registry but lacking a current resident is a blocker.
+        if t in self.my:
+            ident=self.my[t]
+            if ident is None:
+                raise MigrationError(
+                    f"legacy-unmapped my-lisp function {t!r}: no current D3-D6 resident",
+                    tok,
+                )
             self.counts["pass2-my-lisp"]+=1
             return [ident[0]],"pass2-my-lisp"
+
+        # Pass 3: historical LISP I / Lisp 1.5 UPPERCASE names.
         if t==t.upper() and t in self.upper:
+            ident=self.upper[t]
+            if ident is None:
+                raise MigrationError(
+                    f"legacy-unmapped Lisp 1-1.5 function {t}: no current D3-D6 resident",
+                    tok,
+                )
             self.counts["pass3-lisp15"]+=1
-            return [self.upper[t][0]],"pass3-lisp15"
-        raise MigrationError(f"unknown executable head after 3 passes: {t!r}",tok)
+            return [ident[0]],"pass3-lisp15"
+        # D1/D2 or any unresolved dynamic/user function stays exactly as written.
+        self.counts["passthrough-head"]+=1
+        return [t],"passthrough-head"
 
-def encode_atom_data(node: Atom):
-    t=node.tok.text
-    # Exact-width binary source identity wins before decimal-looking syntax.
-    # Thus 000 is D3 EMPTY/domain data here, not decimal zero.
-    if 1<=len(t)<=8 and set(t)<=set("01"):
-        return [t]
-    if NUMERIC_RE.fullmatch(t):
-        raise MigrationError(
-            f"numeric literal {t!r} awaits admitted Number framing; refusing to guess its role",
-            node.tok,
-        )
-    raise MigrationError(
-        f"unclassified non-function atom {t!r}; D7/Text7 is deferred until text-vs-variable classification",
-        node.tok,
-    )
+def encode_atom_data(node: Atom,text7):
+    # Fail-soft migration: if an atom is not one of the recognized function
+    # heads handled by Resolver, preserve the original source spelling.
+    return [node.tok.text]
 
-def encode_string(node: String):
-    raise MigrationError(
-        "string/text datum requires the deferred D7/Text7 classification pass",
-        node.tok,
-    )
+def encode_string(node: String,text7):
+    # Strings are data, not function identities. Preserve them verbatim.
+    return [node.tok.text]
 
-def encode_clause(node,resolver):
+def encode_clause(node,resolver,text7):
     """COND clause is structural: the clause itself is not a function call.
 
     Nested list expressions inside it remain executable. Bare atoms at clause
     level (e.g. t) are data/control values, never function heads.
     """
     if not isinstance(node,ListNode):
-        return encode(node,resolver,quoted=False)
+        return encode(node,resolver,text7,quoted=False)
     if not node.items and node.tail is None:
         return [D3_EMPTY]
     words=[D2_OPEN]
@@ -394,16 +534,16 @@ def encode_clause(node,resolver):
         if idx:
             words.append(D2_SEP)
         if isinstance(item,ListNode):
-            words.extend(encode(item,resolver,quoted=False))
+            words.extend(encode(item,resolver,text7,quoted=False))
         else:
-            words.extend(encode(item,resolver,quoted=True))
+            words.extend(encode(item,resolver,text7,quoted=True))
     if node.tail is not None:
         words.append(D2_DOT)
-        words.extend(encode(node.tail,resolver,quoted=True))
+        words.extend(encode(node.tail,resolver,text7,quoted=True))
     words.append(D2_CLOSE)
     return words
 
-def encode(node,resolver,quoted=False):
+def encode(node,resolver,text7,quoted=False):
     if isinstance(node,ListNode):
         if not node.items and node.tail is None:
             return [D3_EMPTY]
@@ -423,124 +563,40 @@ def encode(node,resolver,quoted=False):
 
             # Explicit QUOTE: every datum is data, never an executable head.
             if not quoted and head_bits=="001":
-                words.extend(encode(item,resolver,quoted=True))
+                words.extend(encode(item,resolver,text7,quoted=True))
                 continue
 
             # LAMBDA: first argument is the parameter-list grammar.
             if not quoted and head_bits=="0010" and idx==1:
-                words.extend(encode(item,resolver,quoted=True))
+                words.extend(encode(item,resolver,text7,quoted=True))
                 continue
 
             # DEFINE: a shorthand signature (define (f x) body) is data at the
             # signature level. A plain name is already encoded as atom data.
             if not quoted and head_bits=="0011" and idx==1 and isinstance(item,ListNode):
-                words.extend(encode(item,resolver,quoted=True))
+                words.extend(encode(item,resolver,text7,quoted=True))
                 continue
 
             # COND: each clause is a grammar container, not a call itself.
             if not quoted and head_bits=="110":
-                words.extend(encode_clause(item,resolver))
+                words.extend(encode_clause(item,resolver,text7))
                 continue
 
-            words.extend(encode(item,resolver,quoted=quoted))
+            words.extend(encode(item,resolver,text7,quoted=quoted))
 
         if node.tail is not None:
             words.append(D2_DOT)
-            words.extend(encode(node.tail,resolver,quoted=True))
+            words.extend(encode(node.tail,resolver,text7,quoted=True))
         words.append(D2_CLOSE)
         return words
 
     if isinstance(node,Quote):
-        return [D2_OPEN,"001",D2_SEP,*encode(node.value,resolver,quoted=True),D2_CLOSE]
+        return [D2_OPEN,"001",D2_SEP,*encode(node.value,resolver,text7,quoted=True),D2_CLOSE]
     if isinstance(node,String):
-        return encode_string(node)
+        return encode_string(node,text7)
     if isinstance(node,Atom):
-        return encode_atom_data(node)
+        return encode_atom_data(node,text7)
     raise TypeError(node)
-
-def _diagnostic(error: MigrationError):
-    return {
-        "reason": error.message,
-        "token": error.tok.text if error.tok else None,
-        "offset": error.tok.offset if error.tok else None,
-    }
-
-def scan_clause(node,resolver,diagnostics):
-    if not isinstance(node,ListNode):
-        scan_node(node,resolver,diagnostics,quoted=False)
-        return
-    if not node.items and node.tail is None:
-        return
-    for item in node.items:
-        if isinstance(item,ListNode):
-            scan_node(item,resolver,diagnostics,quoted=False)
-        else:
-            scan_node(item,resolver,diagnostics,quoted=True)
-    if node.tail is not None:
-        scan_node(node.tail,resolver,diagnostics,quoted=True)
-
-def scan_node(node,resolver,diagnostics,quoted=False):
-    """Traverse the full AST without D7 so every resolvable head is counted.
-
-    Data/text problems are collected instead of aborting at the first one.
-    """
-    if isinstance(node,ListNode):
-        if not node.items and node.tail is None:
-            return
-
-        head_bits=None
-        for idx,item in enumerate(node.items):
-            if idx==0 and not quoted and isinstance(item,Atom):
-                try:
-                    head,_=resolver.head(item.tok)
-                    head_bits=head[0]
-                except MigrationError as error:
-                    diagnostics.append(_diagnostic(error))
-                continue
-
-            if not quoted and head_bits=="001":
-                scan_node(item,resolver,diagnostics,quoted=True)
-                continue
-            if not quoted and head_bits=="0010" and idx==1:
-                scan_node(item,resolver,diagnostics,quoted=True)
-                continue
-            if not quoted and head_bits=="0011" and idx==1 and isinstance(item,ListNode):
-                scan_node(item,resolver,diagnostics,quoted=True)
-                continue
-            if not quoted and head_bits=="110":
-                scan_clause(item,resolver,diagnostics)
-                continue
-            scan_node(item,resolver,diagnostics,quoted=quoted)
-
-        if node.tail is not None:
-            scan_node(node.tail,resolver,diagnostics,quoted=True)
-        return
-
-    if isinstance(node,Quote):
-        scan_node(node.value,resolver,diagnostics,quoted=True)
-        return
-    if isinstance(node,String):
-        diagnostics.append(_diagnostic(MigrationError(
-            "string/text datum requires the deferred D7/Text7 classification pass",
-            node.tok,
-        )))
-        return
-    if isinstance(node,Atom):
-        try:
-            encode_atom_data(node)
-        except MigrationError as error:
-            diagnostics.append(_diagnostic(error))
-        return
-    raise TypeError(node)
-
-def scan_file(source: str,resolver):
-    stripped=strip_comments(source)
-    tokens=tokenize(stripped)
-    forms=Parser(tokens).parse_program()
-    diagnostics=[]
-    for form in forms:
-        scan_node(form,resolver,diagnostics,quoted=False)
-    return diagnostics
 
 def line_col(source: str,offset: int):
     line=source.count("\n",0,offset)+1
@@ -557,20 +613,45 @@ def source_files(root: Path):
 def extensionless(rel: Path):
     return rel.with_suffix("")
 
-def migrate_file(source: str,resolver):
+def plan_extensionless_destinations(rels):
+    """Plan extensionless output names without file/directory collisions.
+
+    If foo.lisp coexists with foo/bar.lisp, plain "foo" cannot be both a file
+    and a directory. The file becomes "foo__file" (still extensionless).
+    """
+    rels=list(rels)
+    source_dirs=set()
+    for rel in rels:
+        parent=rel.parent
+        while parent != Path("."):
+            source_dirs.add(parent)
+            parent=parent.parent
+
+    planned={}
+    used={}
+    for rel in sorted(rels,key=lambda p:str(p)):
+        dest=extensionless(rel)
+        if dest in source_dirs or dest in used:
+            base=dest.with_name(dest.name+"__file")
+            dest=base
+            n=2
+            while dest in source_dirs or dest in used:
+                dest=base.with_name(base.name+str(n))
+                n+=1
+        planned[rel]=dest
+        used[dest]=rel
+    return planned
+
+def migrate_file(source: str,resolver,text7):
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
     forms=Parser(tokens).parse_program()
     all_words=[]
     for i,form in enumerate(forms):
         if i: all_words.append(D2_SEP)
-        all_words.extend(encode(form,resolver,quoted=False))
+        all_words.extend(encode(form,resolver,text7,quoted=False))
     text=" ".join(all_words)
     if text: text+="\n"
-    if text and not re.fullmatch(r"[01\s]+",text):
-        raise AssertionError("non-binary output")
-    if any(not 1<=len(w)<=8 for w in text.split()):
-        raise AssertionError("word width outside 1..8")
     return text
 
 def main():
@@ -582,25 +663,31 @@ def main():
     ap.add_argument("--semantic-generated",type=Path,required=True)
     ap.add_argument("--semantic-registry",type=Path,required=True)
     ap.add_argument("--necessary-forms",type=Path,required=True)
+    ap.add_argument("--historical-map",type=Path,required=True)
+    ap.add_argument("--text7",type=Path,required=True)
     ap.add_argument("--report",type=Path,required=True)
     args=ap.parse_args()
 
     data=load_foundation(args.foundation)
     legacy,my,upper=build_three_pass_maps(
-        data,args.domain_surfaces,args.semantic_generated,args.semantic_registry,args.necessary_forms
+        data,args.domain_surfaces,args.semantic_generated,args.semantic_registry,args.necessary_forms,
+        args.historical_map
     )
+    text7=build_text7(data,args.text7)
     args.out.mkdir(parents=True,exist_ok=True)
 
     rows=[]
     written=0
     blocked=0
-    totals={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0}
+    totals={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     destinations={}
 
     root=args.root.resolve()
-    for path in source_files(root):
-        rel=path.resolve().relative_to(root)
-        dest=extensionless(rel)
+    paths=list(source_files(root))
+    rels=[path.resolve().relative_to(root) for path in paths]
+    destination_plan=plan_extensionless_destinations(rels)
+    for path,rel in zip(paths,rels):
+        dest=destination_plan[rel]
         if dest in destinations:
             rows.append({"path":str(rel),"status":"blocked","reason":f"extensionless collision with {destinations[dest]}"})
             blocked+=1
@@ -610,46 +697,17 @@ def main():
         try:
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
-            diagnostics=scan_file(source,resolver)
-            for k,v in resolver.counts.items():
-                totals[k]+=v
-
-            if diagnostics:
-                signal.alarm(0)
-                blocked+=1
-                unresolved=[]
-                for diag in diagnostics:
-                    item=dict(diag)
-                    if item.get("offset") is not None:
-                        line,col=line_col(source,item["offset"])
-                        item.update({"line":line,"column":col})
-                    unresolved.append(item)
-                first=unresolved[0]
-                rows.append({
-                    "path":str(rel),
-                    "status":"blocked",
-                    "reason":f"{len(unresolved)} unresolved pre-D7 item(s)",
-                    "token":first.get("token"),
-                    "line":first.get("line"),
-                    "column":first.get("column"),
-                    "passes":resolver.counts,
-                    "unresolved":unresolved,
-                })
-                continue
-
-            # Encoding is a second strict phase. It must not discover anything
-            # the full-file scan failed to classify.
-            output_resolver=Resolver(legacy,my,upper)
-            output=migrate_file(source,output_resolver)
+            output=migrate_file(source,resolver,text7)
             signal.alarm(0)
             if not output.strip():
                 rows.append({"path":str(rel),"status":"empty","passes":resolver.counts})
                 continue
             target=args.out/dest
             target.parent.mkdir(parents=True,exist_ok=True)
-            target.write_text(output,encoding="ascii")
+            target.write_text(output,encoding="utf-8")
             destinations[dest]=str(rel)
             written+=1
+            for k,v in resolver.counts.items(): totals[k]+=v
             rows.append({"path":str(rel),"output":str(dest),"status":"written","passes":resolver.counts})
         except MigrationError as e:
             signal.alarm(0)
@@ -667,22 +725,22 @@ def main():
             )
 
     report={
-        "schema":"sens-three-pass-migration/v1",
+        "schema":"sens-three-pass-migration/v2-fail-soft",
         "passes":{
             "1":"legacy Sens8/Sid8 -> proven current exact-domain successor",
             "2":"my-lisp/current admitted surface -> exact-domain identity",
             "3":"historical LISP 1-1.5 uppercase resident -> ratified D3-D6 identity",
         },
         "structure":{"empty":"000","open":"10","separator":"00","dot":"11","close":"01"},
-        "output_naming":"source .lisp suffix removed; no new extension",
-        "d7_policy":"deferred: no D7/Text7 encoding occurs in passes 1-3; unresolved atoms/strings block",
+        "output_naming":"source .lisp suffix removed; no new extension; file/directory collisions use __file",
+        "fallback":"unknown dynamic/data spelling may remain visible; any known legacy function without a current D3-D6 successor blocks the file",
         "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
         "files":rows,
     }
     args.report.parent.mkdir(parents=True,exist_ok=True)
     args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report["summary"],ensure_ascii=False))
-    return 0
+    return 0 if written else 2
 
 if __name__=="__main__":
     raise SystemExit(main())
