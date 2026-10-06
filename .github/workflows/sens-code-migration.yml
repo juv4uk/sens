@@ -1,0 +1,32 @@
+name: sens-code-migration
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate-to-sens-codes.py"
+      - "scripts/audit-sens-name-debt.py"
+      - "scripts/migrate-sens-ecosystem.py"
+      - "tests/test_sens_code_migration.py"
+      - "knowledge/d1-d7-foundation.json"
+      - ".github/workflows/sens-code-migration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-to-sens-codes.py"
+      - "scripts/audit-sens-name-debt.py"
+      - "scripts/migrate-sens-ecosystem.py"
+      - "tests/test_sens_code_migration.py"
+      - "knowledge/d1-d7-foundation.json"
+
+jobs:
+  migration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test manifest-driven migration
+        run: python3 -m unittest tests/test_sens_code_migration.py
+      - name: Audit migrator itself
+        run: |
+          python3 scripts/audit-sens-name-debt.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --report /tmp/sens-name-debt.json
