@@ -78,7 +78,8 @@ jobs:
           set -euo pipefail
           git fetch origin master
           rm -rf /tmp/sens-master
-          git worktree add --detach /tmp/sens-master origin/master
+          git worktree prune
+          git worktree add -f --detach /tmp/sens-master origin/master
 
           cd /tmp/sens-master
           git rm -r --ignore-unmatch . >/dev/null 2>&1 || true
