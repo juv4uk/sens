@@ -19,6 +19,7 @@ on:
       - "crates/sens/tests/compiler_selfhost_role_closure.rs"
       - "crates/sens/tests/compiler_selfhost_lowering_coverage.rs"
       - "contracts/compiler-program-data-v1.lisp"
+      - "contracts/compiler-compilation-artifact-v2.lisp"
       - "crates/sens/tests/compiler_program_data.rs"
       - "crates/sens/src/lib.rs"
       - "crates/xtask/src/compiler_export.rs"
@@ -29,6 +30,7 @@ on:
     branches: [main]
     paths:
       - "lib/compiler-nucleus.lisp"
+      - "contracts/compiler-compilation-artifact-v2.lisp"
       - "knowledge/bija3-l1-l5-structure-projection.json"
       - "contracts/d4-bootstrap-ratification.lisp"
       - "knowledge/d4-bootstrap-compiler-structure-projection.json"
@@ -86,6 +88,27 @@ jobs:
           cargo test -p sens --lib \
             compiler_language::tests::direct_d8_domain_call_fails_closed_in_sens_program_traversal \
             -- --nocapture
+      - name: Whole-program artifact v2 stays SENS-owned and backend-neutral
+        run: |
+          cargo test -p sens --lib \
+            compiler_language::tests::whole_program_artifact_v2_is_sens_composed_and_digest_bound \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::whole_program_artifact_v2_keeps_d8_fail_closed \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::whole_program_artifact_rejects_noncanonical_revision_provenance \
+            -- --nocapture
+          if grep -nE '\(sha256-hex|\(write-to-string' lib/compiler-nucleus.lisp; then
+            echo "self-host compiler nucleus reintroduced historical digest/string builtins" >&2
+            exit 1
+          fi
+          if grep -niE 'cuda|ptx|sass|graal|fpga|register-allocation|install-target' \
+              contracts/compiler-compilation-artifact-v2.lisp; then
+            echo "whole-program artifact contract leaked backend/install policy" >&2
+            exit 1
+          fi
+
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib
