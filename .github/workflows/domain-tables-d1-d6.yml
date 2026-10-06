@@ -7,6 +7,8 @@ on:
       - "knowledge/domain-table-projection-d1-d6.json"
       - "lib/surface/domain-surfaces-d1-d4.lisp"
       - "lib/surface/domain-surfaces-d5.lisp"
+      - "lib/surface/domain-surfaces-d6.lisp"
+      - "lib/surface/domain-surfaces-d6.lisp"
       - "scripts/generate-domain-tables-d1-d6.py"
       - "docs/generated/domain-tables-d1-d6.md"
       - ".github/workflows/domain-tables-d1-d6.yml"
