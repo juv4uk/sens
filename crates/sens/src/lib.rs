@@ -15,6 +15,7 @@ mod canonical_reader;
 pub mod compilation_artifact;
 pub mod compilation_artifact_producer;
 pub mod conformance_oracle;
+pub mod fixpoint_checkpoint;
 pub mod gpu_admission;
 pub mod program_compiler;
 mod compiler_role;
