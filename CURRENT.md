@@ -46,7 +46,7 @@ D8  full compact 256/256 — owner-ratified #3960; canonical map in knowledge/d8
 
 Owner foundation ratification #3572 extends the current chain through D7: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 #3572. #3393 remains the historical D1–D6 foundation cut; D8 is now owner-ratified 256/256 under #3960. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
-Equal packed bits in two domains do not imply equal identity. In particular an eight-bit D8 research carrier is not historical Sens8 merely because both occupy eight physical bits. D7 Sound/Text residency is ratified under #3572, while LocalOrdinal remains a separate W7 role; neither inherits selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
+Equal packed bits in two domains do not imply equal identity. In particular owner-ratified Core.D8 is not historical Sens8 merely because both occupy eight physical bits. D7 Sound/Text residency is ratified under #3572, while LocalOrdinal remains a separate W7 role; neither inherits selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 
 Historical exact-eight-bit Sens8/Sid8/Function8 forms remain bounded compatibility, transport, backend and provenance mechanisms while #2817 migrates runtime consumers. They are not current universal semantic authority.
 
