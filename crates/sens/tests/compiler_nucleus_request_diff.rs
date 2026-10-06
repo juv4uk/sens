@@ -264,7 +264,7 @@ fn selector_corpus_emits_identical_normalized_requests() {
     let mut compared = 0usize;
 
     for line in CORPUS.lines().filter(|line| !line.is_empty() && !line.starts_with('#')) {
-        let fields: Vec<_> = line.split('	').collect();
+        let fields: Vec<_> = line.split('\t').collect();
         assert_eq!(fields.len(), 6, "compiler corpus row shape changed: {line}");
         let raw = u8::from_str_radix(fields[1], 2).expect("head_bits are exact binary");
         let identity = d3(raw);
