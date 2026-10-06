@@ -21,7 +21,7 @@ MD_OUTPUT = ROOT / "docs/generated/domain-tables-d1-d6.md"
 
 EMPTY = "()"
 COLUMNS = ["ук", "укр", "san", "en", "LISP", "sym"]
-TOKEN = r'(\(\)|"[^"]*"|[^()\s]+)'
+TOKEN = r'(?:\(\)|"[^"]*"|[^()\s]+)'
 ROW = re.compile(
     r'^\s*\(row\s+(D[1-6])\s+"([01]+)"\s+(\S+)\s+'
     + TOKEN + r'\s+' + TOKEN + r'\s+' + TOKEN
@@ -139,7 +139,7 @@ def render_lisp(rows: list[dict]) -> str:
     out = [
         "; GENERATED — DO NOT EDIT BY HAND",
         "; Self-describing exact-width domain table.",
-        "; Binary key width is the domain address; no domain/resident/identity label is repeated.",
+        "; Binary key width is the domain address; no redundant semantic label is repeated.",
         "; Columns: ук → укр → san → en → LISP → sym",
         "; Empty/missing: ()",
         "",
