@@ -54,3 +54,29 @@ pub fn domain_identity_shape_mechanism() -> Value {
         ]))
     }))
 }
+
+
+/// Build an opt-in representation-only predicate for exact DomainIdentity data.
+///
+/// This answers only whether one runtime value is carried by the canonical
+/// DomainIdentity variant. It never inspects width/bits and never maps an
+/// identity to a language/compiler role.
+pub fn domain_identity_predicate_mechanism() -> Value {
+    Value::host_function(Rc::new(|arguments, _environment, span| {
+        if arguments.len() != 1 {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!(
+                    "domain identity predicate mechanism expects exactly 1 argument, got {}",
+                    arguments.len()
+                ),
+                span,
+            ));
+        }
+
+        Ok(Value::predicate_bit(matches!(
+            arguments[0],
+            Value::DomainIdentity(_)
+        )))
+    }))
+}
