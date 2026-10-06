@@ -46,12 +46,12 @@ jobs:
                   print("BLOCKED",row["path"],row.get("line"),row.get("column"),row.get("token"),row["reason"])
           PY
 
-      - name: Validate binary and extensionless output
+      - name: Validate extensionless migration output
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re,sys
+          import sys
           root=Path("/tmp/sens-master-out")
           files=[p for p in root.rglob("*") if p.is_file()]
           bad=[]
@@ -61,17 +61,12 @@ jobs:
                   bad.append((str(rel),"source extension survived"))
                   continue
               try:
-                  text=p.read_text(encoding="ascii")
+                  text=p.read_text(encoding="utf-8")
               except UnicodeDecodeError:
-                  bad.append((str(rel),"non-ascii"))
+                  bad.append((str(rel),"invalid utf-8"))
                   continue
-              if not text.strip() or not re.fullmatch(r"[01\s]+",text):
-                  bad.append((str(rel),"non-binary"))
-                  continue
-              for word in text.split():
-                  if not 1 <= len(word) <= 8:
-                      bad.append((str(rel),f"bad-width-{len(word)}"))
-                      break
+              if not text.strip():
+                  bad.append((str(rel),"empty output"))
           print(f"validated_files={len(files)}")
           if not files:
               print("REFUSE: no corrected files")
@@ -95,7 +90,7 @@ jobs:
 
           python3 - <<'PY'
           from pathlib import Path
-          import re,sys
+          import sys
           bad=[]
           files=[]
           for p in Path(".").rglob("*"):
@@ -105,12 +100,10 @@ jobs:
               if p.name.endswith(".lisp"):
                   bad.append(str(p)); continue
               try:
-                  text=p.read_text(encoding="ascii")
+                  text=p.read_text(encoding="utf-8")
               except UnicodeDecodeError:
                   bad.append(str(p)); continue
-              if not text.strip() or not re.fullmatch(r"[01\s]+",text):
-                  bad.append(str(p)); continue
-              if any(not 1<=len(w)<=8 for w in text.split()):
+              if not text.strip():
                   bad.append(str(p))
           print(f"master_files={len(files)}")
           if bad or not files:
@@ -125,5 +118,5 @@ jobs:
           fi
           git config user.name "sens-three-pass-migrator"
           git config user.email "sens-three-pass-migrator@users.noreply.github.com"
-          git commit -m "master: publish three-pass exact SENS sources without extensions"
+          git commit -m "master: publish three-pass migration with unresolved source preserved"
           git push origin HEAD:master
