@@ -7,6 +7,10 @@ on:
       - CURRENT.md
       - docs/semantic-authority-map.md
       - docs/semantic-authority-map.uk.md
+      - docs/domain-paradigm.uk.md
+      - docs/program-surface-translator.md
+      - docs/ukrainian-api.md
+      - docs/README.md
       - scripts/check-current-authority-docs.sh
       - .github/workflows/current-authority-docs.yml
   push:
