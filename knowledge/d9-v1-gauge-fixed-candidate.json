@@ -1,0 +1,4641 @@
+{
+  "schema": "d9-v1-gauge-fixed-candidate/v1",
+  "status": "RESEARCH-GAUGE-FIXED-CANDIDATE",
+  "authority": "#4005",
+  "date": "2026-10-07",
+  "width": 9,
+  "capacity": 512,
+  "occupancy": 512,
+  "ratified_residents": 0,
+  "semantic_inventory": "knowledge/d9-v1-semantic-inventory.json",
+  "geometry_state": "knowledge/d9-v1-geometry-state.json",
+  "s3_evidence": "knowledge/d9-geometry-laws-s3.json",
+  "basis_counts": {
+    "GAUGE-FIXED": 384,
+    "LAW-FORCED": 128
+  },
+  "gauge_rule": {
+    "fixed": "preserve all 128 S2 selector-law assignments",
+    "residue": "sort remaining coordinate-independent stable semantic IDs and remaining free 9-bit coordinates lexicographically, then zip",
+    "authority_boundary": "GAUGE-FIXED is a reproducible convention under current evidence, not a semantic theorem; explicit owner ratification remains required"
+  },
+  "forbidden_inputs": [
+    "legacy Sens8/Sid8/Function8 coordinates",
+    "semantic-registry/source codes",
+    "human surface-name desirability",
+    "source-file order",
+    "runtime implementation addresses",
+    "D8-prefix proximity",
+    "migration distance"
+  ],
+  "rows": [
+    {
+      "coordinate": "000000000",
+      "stable_id": "d9.api.01f2519991001e25",
+      "semantic_name": "GUARD-EVIDENCE-STATUS?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000000001",
+      "stable_id": "d9.api.0f2c161319e12044",
+      "semantic_name": "NARRATE-ANSWER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000000010",
+      "stable_id": "d9.api.1fd12bce36491031",
+      "semantic_name": "TRANSLATION-ADMISSION-PAYLOAD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000000011",
+      "stable_id": "d9.api.20a73e9db776cbef",
+      "semantic_name": "TRANSLATION-EVIDENCE-ENTRY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000000100",
+      "stable_id": "d9.api.217b699c0c4d5534",
+      "semantic_name": "RESULT-TAGGED?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000000101",
+      "stable_id": "d9.api.260e1e7d1904c1a4",
+      "semantic_name": "TRANSLATION-STATUS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000000110",
+      "stable_id": "d9.api.26cef518802ae7db",
+      "semantic_name": "GUARD-UNKNOWN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000000111",
+      "stable_id": "d9.api.27c93f8f62b1dbe1",
+      "semantic_name": "MAKE-DISPUTED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000001000",
+      "stable_id": "d9.api.2a0e6d8c1e10b089",
+      "semantic_name": "GUARD-UNKNOWN-ROUTES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000001001",
+      "stable_id": "d9.api.2dd01e9c833c65c9",
+      "semantic_name": "UTF8-DECODE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "UTF8-UNICODE-ALGEBRA"
+    },
+    {
+      "coordinate": "000001010",
+      "stable_id": "d9.api.2eb2f8dc7bcbd923",
+      "semantic_name": "UTF8-DECODE-STRING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "UTF8-UNICODE-ALGEBRA"
+    },
+    {
+      "coordinate": "000001011",
+      "stable_id": "d9.api.3127dd5858498ece",
+      "semantic_name": "UNDERSTAND-IS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE"
+    },
+    {
+      "coordinate": "000001100",
+      "stable_id": "d9.api.3301886fa5483d19",
+      "semantic_name": "UNDERSTAND-RELATION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE"
+    },
+    {
+      "coordinate": "000001101",
+      "stable_id": "d9.api.35853ca9e83b9ccd",
+      "semantic_name": "MAKE-INVALID",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000001110",
+      "stable_id": "d9.api.3b4371c142ab62e2",
+      "semantic_name": "TRANSLATION-EVIDENCE-NEXT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000001111",
+      "stable_id": "d9.api.3e08c3b9cfd17141",
+      "semantic_name": "PROVENANCE-RULE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000010000",
+      "stable_id": "d9.api.3fddc626d99e6f98",
+      "semantic_name": "REASON-OBSERVE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000010001",
+      "stable_id": "d9.api.41c2b74aba373430",
+      "semantic_name": "GUARD-DECISION?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000010010",
+      "stable_id": "d9.api.434d44cdf8b08fde",
+      "semantic_name": "TRANSLATION-REVIEW-WITH-EVIDENCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000010011",
+      "stable_id": "d9.api.44cd1e4e597cb45f",
+      "semantic_name": "GUARD-REFERENCE-FIELD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000010100",
+      "stable_id": "d9.api.4c9c68853f781e78",
+      "semantic_name": "TRANSLATION-SOURCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000010101",
+      "stable_id": "d9.api.509016e9f0c08df2",
+      "semantic_name": "UTF8-ENCODE-STRING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "UTF8-UNICODE-ALGEBRA"
+    },
+    {
+      "coordinate": "000010110",
+      "stable_id": "d9.api.526c661f225741d7",
+      "semantic_name": "PROVENANCE-GOAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000010111",
+      "stable_id": "d9.api.5628393e0b23db99",
+      "semantic_name": "CONTENT-STORE-SIZE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA"
+    },
+    {
+      "coordinate": "000011000",
+      "stable_id": "d9.api.60f543adb54f5382",
+      "semantic_name": "NARRATE-FACT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000011001",
+      "stable_id": "d9.api.69f66acf3e3a141a",
+      "semantic_name": "RESULT-STATUS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000011010",
+      "stable_id": "d9.api.6e9ee1401ac78353",
+      "semantic_name": "MAKE-TRANSLATION-REVIEW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000011011",
+      "stable_id": "d9.api.6f012d42d3d64d34",
+      "semantic_name": "NARRATE-PROVENANCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000011100",
+      "stable_id": "d9.api.735af35d19b2a478",
+      "semantic_name": "PROVENANCE-DERIVED-FROM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000011101",
+      "stable_id": "d9.api.740d379669e9026a",
+      "semantic_name": "RESULT-GOAL?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000011110",
+      "stable_id": "d9.api.76e5623953425bce",
+      "semantic_name": "CONTENT-STORE-CONTAINS?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA"
+    },
+    {
+      "coordinate": "000011111",
+      "stable_id": "d9.api.7a12f0dcea9ca352",
+      "semantic_name": "UNDERSTAND-UNIVERSAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE"
+    },
+    {
+      "coordinate": "000100000",
+      "stable_id": "d9.api.7d97d5c97a14983e",
+      "semantic_name": "CONTENT-STORE-GET",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA"
+    },
+    {
+      "coordinate": "000100001",
+      "stable_id": "d9.api.801c8f86deeee90a",
+      "semantic_name": "EMPTY-CONTENT-STORE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA"
+    },
+    {
+      "coordinate": "000100010",
+      "stable_id": "d9.api.84c8b48a85e356bf",
+      "semantic_name": "UNICODE-SCALARS->STRING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "UTF8-UNICODE-ALGEBRA"
+    },
+    {
+      "coordinate": "000100011",
+      "stable_id": "d9.api.86487bdddec74f09",
+      "semantic_name": "TRANSLATION-REVIEW-CODE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000100100",
+      "stable_id": "d9.api.89158d799d454286",
+      "semantic_name": "MAKE-GUARD-FINDING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000100101",
+      "stable_id": "d9.api.8e79e8c25cf9711a",
+      "semantic_name": "TRANSLATION-REVIEW-PROPOSAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000100110",
+      "stable_id": "d9.api.8ecda37e003ad0e5",
+      "semantic_name": "NARRATE-OUTCOME",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000100111",
+      "stable_id": "d9.api.99da7575158284eb",
+      "semantic_name": "MAKE-BLOCKED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000101000",
+      "stable_id": "d9.api.a26d7fde5d1653e5",
+      "semantic_name": "TRANSLATION-REVIEW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000101001",
+      "stable_id": "d9.api.a4390de338f2066f",
+      "semantic_name": "PROVENANCE-SOURCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000101010",
+      "stable_id": "d9.api.a4f3edf2b7cad936",
+      "semantic_name": "UNDERSTAND-QUERY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE"
+    },
+    {
+      "coordinate": "000101011",
+      "stable_id": "d9.api.a51e0640263050c4",
+      "semantic_name": "UTF8-VALID?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "UTF8-UNICODE-ALGEBRA"
+    },
+    {
+      "coordinate": "000101100",
+      "stable_id": "d9.api.a56223e9013a910e",
+      "semantic_name": "TRANSLATION-KIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000101101",
+      "stable_id": "d9.api.a8797c1333bae877",
+      "semantic_name": "CONTENT-STORE-PUT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA"
+    },
+    {
+      "coordinate": "000101110",
+      "stable_id": "d9.api.a9376137778e6f38",
+      "semantic_name": "TRANSLATION-PAYLOAD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000101111",
+      "stable_id": "d9.api.abe128a00160f8fb",
+      "semantic_name": "TRANSLATION-REVIEW-DETAIL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000110000",
+      "stable_id": "d9.api.b2558d12ef7a9ce3",
+      "semantic_name": "UNDERSTAND-QUERY-RELATION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE"
+    },
+    {
+      "coordinate": "000110001",
+      "stable_id": "d9.api.b8883b7b0855c0c7",
+      "semantic_name": "UNDERSTAND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE"
+    },
+    {
+      "coordinate": "000110010",
+      "stable_id": "d9.api.bd0100a28f4bea5a",
+      "semantic_name": "RESULT-PAYLOAD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000110011",
+      "stable_id": "d9.api.be45c3dd173ef501",
+      "semantic_name": "GUARD-SYNC-WINDOW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000110100",
+      "stable_id": "d9.api.c5b5b4d9fcb78773",
+      "semantic_name": "REASON-IN-OBSERVE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000110101",
+      "stable_id": "d9.api.c5f66697d860f704",
+      "semantic_name": "MAKE-UNKNOWN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000110110",
+      "stable_id": "d9.api.c8acae01e1775162",
+      "semantic_name": "GUARD-COMPARE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "GUARD-DECISION-ALGEBRA"
+    },
+    {
+      "coordinate": "000110111",
+      "stable_id": "d9.api.d28c3b2e2321ce28",
+      "semantic_name": "TRANSLATION-ADMITTABLE?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000111000",
+      "stable_id": "d9.api.d760df142156d533",
+      "semantic_name": "NARRATE-DERIVATION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "STRUCTURE-TO-NARRATION"
+    },
+    {
+      "coordinate": "000111001",
+      "stable_id": "d9.api.d7e833e30bc1c68a",
+      "semantic_name": "UNDERSTAND-QUERY-IS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE"
+    },
+    {
+      "coordinate": "000111010",
+      "stable_id": "d9.api.db02157927365016",
+      "semantic_name": "RESULT-NEGATED-GOAL?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000111011",
+      "stable_id": "d9.api.dbc435508604aad7",
+      "semantic_name": "TRANSLATION-EVIDENCE-WORTHY?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000111100",
+      "stable_id": "d9.api.e28da836fbdcb26c",
+      "semantic_name": "TRANSLATION-REVIEW-STATUS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA"
+    },
+    {
+      "coordinate": "000111101",
+      "stable_id": "d9.api.e3bee4bb7abf0f15",
+      "semantic_name": "MAKE-PROVED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000111110",
+      "stable_id": "d9.api.efb34792999e32ad",
+      "semantic_name": "RESULT-OPPOSITE-GOAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "000111111",
+      "stable_id": "d9.api.f1b8cce0694bb442",
+      "semantic_name": "CONTENT-STORE-PUT-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA"
+    },
+    {
+      "coordinate": "001000000",
+      "stable_id": "d9.api.f491d675b0b5712e",
+      "semantic_name": "MAKE-PARTIAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "relation_class": "RESULT-STATUS-ALGEBRA"
+    },
+    {
+      "coordinate": "001000001",
+      "stable_id": "d9.final.06932134b7a7d6e9",
+      "semantic_name": "CLIPS-IMPORT-FORMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001000010",
+      "stable_id": "d9.final.0c77b566dd12de39",
+      "semantic_name": "CANON-LAW-STATUS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001000011",
+      "stable_id": "d9.final.0de30854a5298af1",
+      "semantic_name": "LINT-GLOBALS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "001000100",
+      "stable_id": "d9.final.12317452e5147d6d",
+      "semantic_name": "CLIPS-IMPORT-FILE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001000101",
+      "stable_id": "d9.final.12b69ee4a29344b1",
+      "semantic_name": "APPEND-NEW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001000110",
+      "stable_id": "d9.final.15008dc310b24ce3",
+      "semantic_name": "CANON-LAW-CDR-CONS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001000111",
+      "stable_id": "d9.final.156825a410f86ae1",
+      "semantic_name": "LINT-FORM-HEAD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "001001000",
+      "stable_id": "d9.final.15b41003a0e3d87b",
+      "semantic_name": "RETRACT-FACT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001001001",
+      "stable_id": "d9.final.15cc14f70b3b7c25",
+      "semantic_name": "PROCESS-RUN-TEXT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "PROCESS-TEXT-ADAPTERS"
+    },
+    {
+      "coordinate": "001001010",
+      "stable_id": "d9.final.16c4247e60f00dde",
+      "semantic_name": "FS-JOURNAL-UNBIND-EVENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001001011",
+      "stable_id": "d9.final.1a4145b6b2f9e985",
+      "semantic_name": "RETRACT-FACT-TMS!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001001100",
+      "stable_id": "d9.final.1ded893eeb792a23",
+      "semantic_name": "FIRE-RULES-ON-WORKING-MEMORY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001001101",
+      "stable_id": "d9.final.1eac707c04d9e99d",
+      "semantic_name": "RUN-JTMS!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001001110",
+      "stable_id": "d9.final.245f7164d5739689",
+      "semantic_name": "FIRE-RULES-ON-FACTS-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001001111",
+      "stable_id": "d9.final.278871f126ee24a9",
+      "semantic_name": "FIRE-RULES-JTMS-MULTI",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001010000",
+      "stable_id": "d9.final.29974643287170d4",
+      "semantic_name": "FS-OBJECTS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001010001",
+      "stable_id": "d9.final.2c4679dcb7a603a5",
+      "semantic_name": "PROCESS-PUBLIC-EXIT-CODE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "PROCESS-TEXT-ADAPTERS"
+    },
+    {
+      "coordinate": "001010010",
+      "stable_id": "d9.final.2c513b2d0d075095",
+      "semantic_name": "ASSERT-FACT-JTMS!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001010011",
+      "stable_id": "d9.final.2e722b82bc6ad787",
+      "semantic_name": "CLIPS-TEMPLATES-FROM-FORMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001010100",
+      "stable_id": "d9.final.3078283206f2a41e",
+      "semantic_name": "FS-OBJECT-ADDRESSES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001010101",
+      "stable_id": "d9.final.347f3eedf8cb61c9",
+      "semantic_name": "CLIPS-TEMPLATE-SLOT-ORDER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001010110",
+      "stable_id": "d9.final.34a7c0bcc67b45ee",
+      "semantic_name": "FS-BINDINGS-FROM-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001010111",
+      "stable_id": "d9.final.3520c4cbdddc4be9",
+      "semantic_name": "CANON-LAW-VIOLATED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001011000",
+      "stable_id": "d9.final.39a66f1ed64f182d",
+      "semantic_name": "CLIPS-IMPORT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001011001",
+      "stable_id": "d9.final.3c2e4adc792e443e",
+      "semantic_name": "FS-JOURNAL-APPEND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001011010",
+      "stable_id": "d9.final.3d3c8e3b4ab245af",
+      "semantic_name": "RETRACT-FACTS-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001011011",
+      "stable_id": "d9.final.411dcc8fd399caae",
+      "semantic_name": "FS-EMPTY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001011100",
+      "stable_id": "d9.final.41927a9a4bf45629",
+      "semantic_name": "DEPENDENTS-OF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001011101",
+      "stable_id": "d9.final.42d9d249cf8607e5",
+      "semantic_name": "FIRE-RULE-ON-WORKING-MEMORY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001011110",
+      "stable_id": "d9.final.4569f94536ebd42f",
+      "semantic_name": "CLIPS-VAR-TERM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001011111",
+      "stable_id": "d9.final.461bf1d9bf901b4e",
+      "semantic_name": "FS-ROOT-PACKAGE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001100000",
+      "stable_id": "d9.final.474c40340fc0231a",
+      "semantic_name": "FS-UNBIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001100001",
+      "stable_id": "d9.final.48f8828db6ad0fdf",
+      "semantic_name": "LINT-SIZE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "001100010",
+      "stable_id": "d9.final.498fb86f6733f23f",
+      "semantic_name": "ADD-NEW-ENTRIES-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001100011",
+      "stable_id": "d9.final.49918841af1d0cf9",
+      "semantic_name": "CLIPS-SLOT-NAME",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001100100",
+      "stable_id": "d9.final.4c98d01981bccd52",
+      "semantic_name": "FS-BUILD-OBJECT-STORE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001100101",
+      "stable_id": "d9.final.4e6255fe1c608686",
+      "semantic_name": "FS-JOURNAL-ROOT-COMMIT-EVENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001100110",
+      "stable_id": "d9.final.4f19632c87a39b31",
+      "semantic_name": "CLIPS-DEFTEMPLATE-SLOTS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001100111",
+      "stable_id": "d9.final.54805edca9cf69f0",
+      "semantic_name": "FS-JOURNAL-WRITE-EVENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001101000",
+      "stable_id": "d9.final.55e20f71256b9c41",
+      "semantic_name": "RUN-TMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001101001",
+      "stable_id": "d9.final.5637cc81a60e55c6",
+      "semantic_name": "TCP-READ-BYTES->TEXT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS"
+    },
+    {
+      "coordinate": "001101010",
+      "stable_id": "d9.final.5754f4230f72cad1",
+      "semantic_name": "CLIPS-DEFTEMPLATE-NAME",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001101011",
+      "stable_id": "d9.final.5be5791a8dc1163c",
+      "semantic_name": "FS-JOURNAL-EVENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001101100",
+      "stable_id": "d9.final.5d9bfd85d24689f5",
+      "semantic_name": "RETRACT-FACTS-TMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001101101",
+      "stable_id": "d9.final.5f3508469d1970dd",
+      "semantic_name": "RUN-JTMS-MULTI!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001101110",
+      "stable_id": "d9.final.60027ece880a6065",
+      "semantic_name": "REMOVE-ENTRY-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001101111",
+      "stable_id": "d9.final.6031813a2c434b27",
+      "semantic_name": "ASSERT-FACT!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001110000",
+      "stable_id": "d9.final.63eafa8213562a4b",
+      "semantic_name": "PRUNE-JUSTIFICATIONS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001110001",
+      "stable_id": "d9.final.69845f321e1fda93",
+      "semantic_name": "CLIPS-FACTS->CLAUSES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001110010",
+      "stable_id": "d9.final.6bde08dcbab6e589",
+      "semantic_name": "CANON-LAW-EQ-REFLEXIVE-ATOM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001110011",
+      "stable_id": "d9.final.6f725028147dee52",
+      "semantic_name": "FS-DESERIALIZE-ROOT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001110100",
+      "stable_id": "d9.final.701602017e99f2cb",
+      "semantic_name": "CLIPS-VAR?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001110101",
+      "stable_id": "d9.final.7406c30981656ec3",
+      "semantic_name": "CANON-LAW-RESULT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001110110",
+      "stable_id": "d9.final.756f68ddc3cb9d31",
+      "semantic_name": "CANON-LAW-CDR-IMPROPER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001110111",
+      "stable_id": "d9.final.760e14fd67c739ed",
+      "semantic_name": "CLIPS-SLOT-NAMES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "001111000",
+      "stable_id": "d9.final.76cc13f3edbe33e9",
+      "semantic_name": "CANON-LAW-SYMBOLIC-SURFACE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001111001",
+      "stable_id": "d9.final.780ec32ecc7e713b",
+      "semantic_name": "CANON-EMPTY-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "001111010",
+      "stable_id": "d9.final.7860a6aafda51f47",
+      "semantic_name": "MAKE-JUSTIFIED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001111011",
+      "stable_id": "d9.final.786f866b997c5175",
+      "semantic_name": "AXIOM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001111100",
+      "stable_id": "d9.final.78e86b4c271d1d8c",
+      "semantic_name": "FS-SERIALIZE-JOURNAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "001111101",
+      "stable_id": "d9.final.794d0c1a6e307f01",
+      "semantic_name": "ASSERT-FACTS!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001111110",
+      "stable_id": "d9.final.7a36147bff1c61b9",
+      "semantic_name": "FIRE-RULE-ON-FACTS-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "001111111",
+      "stable_id": "d9.final.7c76fecb9e1f1aee",
+      "semantic_name": "FS-JOURNAL-BIND-EVENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010000000",
+      "stable_id": "d9.final.7e58b6ce64afb0c9",
+      "semantic_name": "CANON-LAW-CDR-PROPER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010000001",
+      "stable_id": "d9.final.7f482cfe2e0fd006",
+      "semantic_name": "FS-BINDINGS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010000010",
+      "stable_id": "d9.final.7fe48551079dbcd2",
+      "semantic_name": "FS-WRITE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010000011",
+      "stable_id": "d9.final.80456f9df5c80f05",
+      "semantic_name": "PRUNE-ENTRY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010000100",
+      "stable_id": "d9.final.825e13ac2f53405b",
+      "semantic_name": "RUN-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010000101",
+      "stable_id": "d9.final.82bfae08d2f2712b",
+      "semantic_name": "FIRE-RULE-JTMS-MULTI",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010000110",
+      "stable_id": "d9.final.82d9f80c5f1357c1",
+      "semantic_name": "LINT-CHECK",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "010000111",
+      "stable_id": "d9.final.82f3b27bc04c8029",
+      "semantic_name": "CANON-LAW-ATOM-CONS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010001000",
+      "stable_id": "d9.final.84d2f535766f1f41",
+      "semantic_name": "PROCESS-RESULT->TEXT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "PROCESS-TEXT-ADAPTERS"
+    },
+    {
+      "coordinate": "010001001",
+      "stable_id": "d9.final.8663f3c358bcab1f",
+      "semantic_name": "CLIPS-DEFRULE->CLAUSES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "010001010",
+      "stable_id": "d9.final.89843c64e2498aad",
+      "semantic_name": "SUPPORTS-OF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010001011",
+      "stable_id": "d9.final.8a1a0dc22359f4cd",
+      "semantic_name": "RUN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010001100",
+      "stable_id": "d9.final.8dca5377acfc8446",
+      "semantic_name": "FS-ROOT-ADDRESS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010001101",
+      "stable_id": "d9.final.905c5fe279dffa79",
+      "semantic_name": "CLIPS-CONVERT-TEMPLATE-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "010001110",
+      "stable_id": "d9.final.90af58f27b8a1739",
+      "semantic_name": "LINT-ALL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "010001111",
+      "stable_id": "d9.final.9419bf633735dcff",
+      "semantic_name": "CLIPS-CONVERT-TEMPLATE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "010010000",
+      "stable_id": "d9.final.97209380bceeb9f1",
+      "semantic_name": "CLIPS-DEFFACTS->CLAUSES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "010010001",
+      "stable_id": "d9.final.9824302ae0049f85",
+      "semantic_name": "ADD-NEW-JUSTIFIED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010010010",
+      "stable_id": "d9.final.98bd844939863065",
+      "semantic_name": "LINT-EFFECTS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "010010011",
+      "stable_id": "d9.final.994fe17713ae3f95",
+      "semantic_name": "JUSTIFICATIONS-OF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010010100",
+      "stable_id": "d9.final.99eabfcc51bed5d7",
+      "semantic_name": "CANON-CONFORMANCE-FROM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010010101",
+      "stable_id": "d9.final.9bc4959f20b2db3a",
+      "semantic_name": "FS-REVISION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010010110",
+      "stable_id": "d9.final.a060b9164dae54c6",
+      "semantic_name": "FS-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010010111",
+      "stable_id": "d9.final.a1e134e734d9c4ae",
+      "semantic_name": "FS-SERIALIZE-OBJECT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010011000",
+      "stable_id": "d9.final.a3de446bcd0bfa3e",
+      "semantic_name": "FS-SERIALIZE-ROOT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010011001",
+      "stable_id": "d9.final.a40bf004ebe99cd1",
+      "semantic_name": "MAP-FACT-OF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010011010",
+      "stable_id": "d9.final.a754f119ad0108f9",
+      "semantic_name": "LINT-HEAD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "010011011",
+      "stable_id": "d9.final.a7c66ab016197669",
+      "semantic_name": "CANON-CONFORMANCE-RESULT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010011100",
+      "stable_id": "d9.final.a83fb61a8682d6b5",
+      "semantic_name": "CANON-LAW-CAR-CONS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010011101",
+      "stable_id": "d9.final.acd417f42849fd11",
+      "semantic_name": "JUSTIFIED-MEMBER?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010011110",
+      "stable_id": "d9.final.ae3554e64518985d",
+      "semantic_name": "RETRACT-FACT!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010011111",
+      "stable_id": "d9.final.af44130cec6f5a95",
+      "semantic_name": "FIRE-RULE-TMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010100000",
+      "stable_id": "d9.final.b1a71f490c017265",
+      "semantic_name": "CLIPS-FORM->CLAUSES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "010100001",
+      "stable_id": "d9.final.b3755fa5474136cc",
+      "semantic_name": "FS-CONTAINS?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010100010",
+      "stable_id": "d9.final.b50f19eea3cdcc86",
+      "semantic_name": "FS-OBJECT-PACKAGE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010100011",
+      "stable_id": "d9.final.b74938a674987365",
+      "semantic_name": "PRUNE-ALL-ENTRIES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010100100",
+      "stable_id": "d9.final.b807a391b81f7ced",
+      "semantic_name": "LINT-NESTING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "010100101",
+      "stable_id": "d9.final.b81997133f7a8df1",
+      "semantic_name": "RUN-TMS!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010100110",
+      "stable_id": "d9.final.be8a3bcfb8e92ff0",
+      "semantic_name": "TCP-LISTEN-ON",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS"
+    },
+    {
+      "coordinate": "010100111",
+      "stable_id": "d9.final.bed10723f9b74c9d",
+      "semantic_name": "RETRACT-FACT-TMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010101000",
+      "stable_id": "d9.final.bfb32b79721e0946",
+      "semantic_name": "FS-RECONSTRUCT-ROOT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010101001",
+      "stable_id": "d9.final.c2c94ed3059bcdef",
+      "semantic_name": "REMOVE-JUSTIFIED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010101010",
+      "stable_id": "d9.final.c2cc8305536934c9",
+      "semantic_name": "FIRE-RULES-ON-FACTS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010101011",
+      "stable_id": "d9.final.c47e8d74c17f265d",
+      "semantic_name": "FACT-OF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010101100",
+      "stable_id": "d9.final.c493dbd0a2df5469",
+      "semantic_name": "CANON-LAW-COND-FIRST-MATCH-SHORT-CIRCUIT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010101101",
+      "stable_id": "d9.final.c5211ec032e39c7d",
+      "semantic_name": "UNSUPPORTED-FACTS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010101110",
+      "stable_id": "d9.final.c5b1acc3df4500fd",
+      "semantic_name": "DROP-UNSUPPORTED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010101111",
+      "stable_id": "d9.final.c9978c8fac5faa2e",
+      "semantic_name": "FS-PACKAGE-FIELD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010110000",
+      "stable_id": "d9.final.cb3f86c7be0f8835",
+      "semantic_name": "FIRE-RULE-ON-FACTS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010110001",
+      "stable_id": "d9.final.cc440d3261e7b8d9",
+      "semantic_name": "CANON-LAW-CDR-DOTTED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010110010",
+      "stable_id": "d9.final.ccb136e58a687993",
+      "semantic_name": "RUN-JTMS-MULTI",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010110011",
+      "stable_id": "d9.final.ccd94b33a97f9826",
+      "semantic_name": "FS-READ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010110100",
+      "stable_id": "d9.final.d0964dbf73fbaf01",
+      "semantic_name": "CLIPS-DEFTEMPLATE-FORM?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "010110101",
+      "stable_id": "d9.final.d17d9be0640dc063",
+      "semantic_name": "FIRE-RULE-ON-FACTS-TMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010110110",
+      "stable_id": "d9.final.d4248d1f74bb5f50",
+      "semantic_name": "TCP-WRITE-TEXT->BYTES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS"
+    },
+    {
+      "coordinate": "010110111",
+      "stable_id": "d9.final.d4a592348bb26122",
+      "semantic_name": "FS-JOURNAL-REPLAY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010111000",
+      "stable_id": "d9.final.d91adfec9856d659",
+      "semantic_name": "CLIPS-FACT-CLAUSE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "010111001",
+      "stable_id": "d9.final.da9fecc626a1483d",
+      "semantic_name": "RETRACT-FACT-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010111010",
+      "stable_id": "d9.final.dc7c1f07f01acb2e",
+      "semantic_name": "FS-DESERIALIZE-JOURNAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "010111011",
+      "stable_id": "d9.final.dcd1fdaf875aa011",
+      "semantic_name": "CANON-LAW-EMPTY-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010111100",
+      "stable_id": "d9.final.de92b718f7f4e8fd",
+      "semantic_name": "CANON-LAW-QUOTE-SUPPRESSES-EVALUATION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010111101",
+      "stable_id": "d9.final.df971523c5541627",
+      "semantic_name": "RETRACT-FACT-JTMS!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "010111110",
+      "stable_id": "d9.final.e02e23aa57def6b9",
+      "semantic_name": "CANON-CONFORMS?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "010111111",
+      "stable_id": "d9.final.eb2dd45e0b5cbb7d",
+      "semantic_name": "COLLECT-FREE-VARS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "011000000",
+      "stable_id": "d9.sel.38666895d53a035b",
+      "semantic_name": "CDAAAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011000001",
+      "stable_id": "d9.sel.38711e95d5438d22",
+      "semantic_name": "CDAAAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011000010",
+      "stable_id": "d9.sel.63aee395edbc0000",
+      "semantic_name": "CDAAAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011000011",
+      "stable_id": "d9.sel.63a53595edb436d1",
+      "semantic_name": "CDAAAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011000100",
+      "stable_id": "d9.sel.7e5ffab155a495fe",
+      "semantic_name": "CDAAADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011000101",
+      "stable_id": "d9.sel.7e70f4b155b2feff",
+      "semantic_name": "CDAAADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011000110",
+      "stable_id": "d9.sel.9863b7b1646331d1",
+      "semantic_name": "CDAAADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011000111",
+      "stable_id": "d9.sel.986d65b1646afb00",
+      "semantic_name": "CDAAADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001000",
+      "stable_id": "d9.sel.386e11082ea9d794",
+      "semantic_name": "CDAADAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001001",
+      "stable_id": "d9.sel.387f13082eb84e2d",
+      "semantic_name": "CDAADAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001010",
+      "stable_id": "d9.sel.50bece083bf6dee7",
+      "semantic_name": "CDAADADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001011",
+      "stable_id": "d9.sel.50adb4083be83f86",
+      "semantic_name": "CDAADADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001100",
+      "stable_id": "d9.sel.4707a731d3ecf951",
+      "semantic_name": "CDAADDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001101",
+      "stable_id": "d9.sel.47115531d3f4c280",
+      "semantic_name": "CDAADDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001110",
+      "stable_id": "d9.sel.2d03ea31c52e5d7e",
+      "semantic_name": "CDAADDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011001111",
+      "stable_id": "d9.sel.2d14e431c53cc67f",
+      "semantic_name": "CDAADDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010000",
+      "stable_id": "d9.sel.28e8efddfb7eb652",
+      "semantic_name": "CDADAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010001",
+      "stable_id": "d9.sel.28deb9ddfb76060b",
+      "semantic_name": "CDADAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010010",
+      "stable_id": "d9.sel.fd9ff4dde2fbe02d",
+      "semantic_name": "CDADAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010011",
+      "stable_id": "d9.sel.fd8ef2dde2ed6994",
+      "semantic_name": "CDADAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010100",
+      "stable_id": "d9.sel.37821e07a0c12757",
+      "semantic_name": "CDADADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010101",
+      "stable_id": "d9.sel.37714407a0b2f4b6",
+      "semantic_name": "CDADADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010110",
+      "stable_id": "d9.sel.1d7ee10792036504",
+      "semantic_name": "CDADADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011010111",
+      "stable_id": "d9.sel.1d8fe3079211db9d",
+      "semantic_name": "CDADADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011000",
+      "stable_id": "d9.sel.2636cb96bcec5119",
+      "semantic_name": "CDADDAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011001",
+      "stable_id": "d9.sel.26411996bcf52a28",
+      "semantic_name": "CDADDAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011010",
+      "stable_id": "d9.sel.0c338e96ae2e8ec6",
+      "semantic_name": "CDADDADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011011",
+      "stable_id": "d9.sel.0c44a896ae3d2e27",
+      "semantic_name": "CDADDADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011100",
+      "stable_id": "d9.sel.15eab56d1638745c",
+      "semantic_name": "CDADDDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011101",
+      "stable_id": "d9.sel.15fbb76d1646eaf5",
+      "semantic_name": "CDADDDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011110",
+      "stable_id": "d9.sel.2fedf26d24f636af",
+      "semantic_name": "CDADDDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011011111",
+      "stable_id": "d9.sel.2fdcf86d24e7cdae",
+      "semantic_name": "CDADDDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100000",
+      "stable_id": "d9.sel.cd120c5e61848320",
+      "semantic_name": "CDDAAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100001",
+      "stable_id": "d9.sel.cd07de5e617be071",
+      "semantic_name": "CDDAAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100010",
+      "stable_id": "d9.sel.a1c9115e4901acfb",
+      "semantic_name": "CDDAAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100011",
+      "stable_id": "d9.sel.a1d3475e490a5d42",
+      "semantic_name": "CDDAAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100100",
+      "stable_id": "d9.sel.dbd5824555187a15",
+      "semantic_name": "CDDAADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100101",
+      "stable_id": "d9.sel.dbc48045550a037c",
+      "semantic_name": "CDDAADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100110",
+      "stable_id": "d9.sel.071e9d456d9b869a",
+      "semantic_name": "CDDAADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011100111",
+      "stable_id": "d9.sel.071447456d929ff3",
+      "semantic_name": "CDDAADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101000",
+      "stable_id": "d9.sel.bc506a9a91980e2f",
+      "semantic_name": "CDDADAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101001",
+      "stable_id": "d9.sel.bc3f709a9189a52e",
+      "semantic_name": "CDDADAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101010",
+      "stable_id": "d9.sel.a24d2d9a82da4bdc",
+      "semantic_name": "CDDADADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101011",
+      "stable_id": "d9.sel.a25e2f9a82e8c275",
+      "semantic_name": "CDDADADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101100",
+      "stable_id": "d9.sel.adb71c70ec5566ca",
+      "semantic_name": "CDDADDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101101",
+      "stable_id": "d9.sel.adad0670ec4cece3",
+      "semantic_name": "CDDADDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101110",
+      "stable_id": "d9.sel.826e8170d3d333c5",
+      "semantic_name": "CDDADDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011101111",
+      "stable_id": "d9.sel.825d7f70d3c4bd2c",
+      "semantic_name": "CDDADDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110000",
+      "stable_id": "d9.sel.33000d18b0b0c7c1",
+      "semantic_name": "CDDDAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110001",
+      "stable_id": "d9.sel.330abb18b0ba43f0",
+      "semantic_name": "CDDDAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110010",
+      "stable_id": "d9.sel.18fd5018a1f3deee",
+      "semantic_name": "CDDDAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110011",
+      "stable_id": "d9.sel.190e4a18a20247ef",
+      "semantic_name": "CDDDAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110100",
+      "stable_id": "d9.sel.22b3b6ef09fc7e44",
+      "semantic_name": "CDDDADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110101",
+      "stable_id": "d9.sel.22c4b8ef0a0af4dd",
+      "semantic_name": "CDDDADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110110",
+      "stable_id": "d9.sel.3cb6f3ef18ba4097",
+      "semantic_name": "CDDDADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011110111",
+      "stable_id": "d9.sel.3ca619ef18ac0df6",
+      "semantic_name": "CDDDADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111000",
+      "stable_id": "d9.sel.dc97358894afb1fa",
+      "semantic_name": "CDDDDAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111001",
+      "stable_id": "d9.sel.dc8d5f8894a7a4d3",
+      "semantic_name": "CDDDDAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111010",
+      "stable_id": "d9.sel.b14e9a887c2d7ef5",
+      "semantic_name": "CDDDDADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111011",
+      "stable_id": "d9.sel.b13d98887c1f085c",
+      "semantic_name": "CDDDDADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111100",
+      "stable_id": "d9.sel.ece3c3b23b645a9f",
+      "semantic_name": "CDDDDDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111101",
+      "stable_id": "d9.sel.ecd2c9b23b55f19e",
+      "semantic_name": "CDDDDDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111110",
+      "stable_id": "d9.sel.d2e006b22ca5becc",
+      "semantic_name": "CDDDDDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "011111111",
+      "stable_id": "d9.sel.d2f108b22cb43565",
+      "semantic_name": "CDDDDDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000000",
+      "stable_id": "d9.sel.59add05bbe501cee",
+      "semantic_name": "CAAAAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000001",
+      "stable_id": "d9.sel.59beca5bbe5e85ef",
+      "semantic_name": "CAAAAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000010",
+      "stable_id": "d9.sel.73b08d5bcd0d05c1",
+      "semantic_name": "CAAAAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000011",
+      "stable_id": "d9.sel.73bb3b5bcd1681f0",
+      "semantic_name": "CAAAAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000100",
+      "stable_id": "d9.sel.bd2efe4525e3c88b",
+      "semantic_name": "CAAAADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000101",
+      "stable_id": "d9.sel.bd39344525ec78d2",
+      "semantic_name": "CAAAADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000110",
+      "stable_id": "d9.sel.e877b9453e6631f0",
+      "semantic_name": "CAAAADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100000111",
+      "stable_id": "d9.sel.e86d0b453e5cb5c1",
+      "semantic_name": "CAAAADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001000",
+      "stable_id": "d9.sel.48ec6e97ee6414bd",
+      "semantic_name": "CAAADAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001001",
+      "stable_id": "d9.sel.48db6c97ee559e24",
+      "semantic_name": "CAAADAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001010",
+      "stable_id": "d9.sel.7435299806e67e22",
+      "semantic_name": "CAAADADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001011",
+      "stable_id": "d9.sel.742a739806dcf45b",
+      "semantic_name": "CAAADADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001100",
+      "stable_id": "d9.sel.3a28b8b0facfb108",
+      "semantic_name": "CAAADDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001101",
+      "stable_id": "d9.sel.3a1deab0fac5fe79",
+      "semantic_name": "CAAADDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001110",
+      "stable_id": "d9.sel.0ee01db0e24d7e03",
+      "semantic_name": "CAAADDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100001111",
+      "stable_id": "d9.sel.0eea33b0e255f7ea",
+      "semantic_name": "CAAADDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010000",
+      "stable_id": "d9.sel.d4d90ba9b5e9e4cf",
+      "semantic_name": "CAADAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010001",
+      "stable_id": "d9.sel.d4c811a9b5db7bce",
+      "semantic_name": "CAADAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010010",
+      "stable_id": "d9.sel.bad54ea9a72b48fc",
+      "semantic_name": "CAADAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010011",
+      "stable_id": "d9.sel.bae650a9a739bf95",
+      "semantic_name": "CAADAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010100",
+      "stable_id": "d9.sel.c7f2bd801218d1ea",
+      "semantic_name": "CAADADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010101",
+      "stable_id": "d9.sel.c7e8a78012105803",
+      "semantic_name": "CAADADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010110",
+      "stable_id": "d9.sel.9ca9a27ff995c565",
+      "semantic_name": "CAADADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100010111",
+      "stable_id": "d9.sel.9c98a07ff9874ecc",
+      "semantic_name": "CAADADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011000",
+      "stable_id": "d9.sel.3a57ad6ff9d4d5c0",
+      "semantic_name": "CAADDAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011001",
+      "stable_id": "d9.sel.3a4cff6ff9cb5991",
+      "semantic_name": "CAADDAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011010",
+      "stable_id": "d9.sel.0f0f326fe152d91b",
+      "semantic_name": "CAADDADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011011",
+      "stable_id": "d9.sel.0f18e86fe15aafe2",
+      "semantic_name": "CAADDADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011100",
+      "stable_id": "d9.sel.4acea356eedb3ab5",
+      "semantic_name": "CAADDDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011101",
+      "stable_id": "d9.sel.4abda156eeccc41c",
+      "semantic_name": "CAADDDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011110",
+      "stable_id": "d9.sel.76173e57075d6dba",
+      "semantic_name": "CAADDDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100011111",
+      "stable_id": "d9.sel.760c68570753ad93",
+      "semantic_name": "CAADDDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100000",
+      "stable_id": "d9.sel.a09d90336a33ce11",
+      "semantic_name": "CADAAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100001",
+      "stable_id": "d9.sel.a0a83e336a3d4a40",
+      "semantic_name": "CADAAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100010",
+      "stable_id": "d9.sel.869ad3335b76e53e",
+      "semantic_name": "CADAAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100011",
+      "stable_id": "d9.sel.86abcd335b854e3f",
+      "semantic_name": "CADAAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100100",
+      "stable_id": "d9.sel.9204fa09c4f25f54",
+      "semantic_name": "CADAADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100101",
+      "stable_id": "d9.sel.9215fc09c500d5ed",
+      "semantic_name": "CADAADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100110",
+      "stable_id": "d9.sel.adbab709d520dca7",
+      "semantic_name": "CADAADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100100111",
+      "stable_id": "d9.sel.ada99d09d5123d46",
+      "semantic_name": "CADAADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101000",
+      "stable_id": "d9.sel.4e91b47834c6044a",
+      "semantic_name": "CADADAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101001",
+      "stable_id": "d9.sel.4e879e7834bd8a63",
+      "semantic_name": "CADADAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101010",
+      "stable_id": "d9.sel.234919781c43d145",
+      "semantic_name": "CADADADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101011",
+      "stable_id": "d9.sel.233817781c355aac",
+      "semantic_name": "CADADADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101100",
+      "stable_id": "d9.sel.5d2b02a1da08abaf",
+      "semantic_name": "CADADDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101101",
+      "stable_id": "d9.sel.5d1a08a1d9fa42ae",
+      "semantic_name": "CADADDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101110",
+      "stable_id": "d9.sel.4327c5a1cb4ae95c",
+      "semantic_name": "CADADDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100101111",
+      "stable_id": "d9.sel.4338c7a1cb595ff5",
+      "semantic_name": "CADADDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110000",
+      "stable_id": "d9.sel.3c624f791c78b130",
+      "semantic_name": "CADDAAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110001",
+      "stable_id": "d9.sel.3c58a1791c70e801",
+      "semantic_name": "CADDAAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110010",
+      "stable_id": "d9.sel.1119947903f647cb",
+      "semantic_name": "CADDAADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110011",
+      "stable_id": "d9.sel.1123ca7903fef812",
+      "semantic_name": "CADDAADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110100",
+      "stable_id": "d9.sel.4cd90560117ea965",
+      "semantic_name": "CADDADAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110101",
+      "stable_id": "d9.sel.4cc80360117032cc",
+      "semantic_name": "CADDADADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110110",
+      "stable_id": "d9.sel.782220602a01b5ea",
+      "semantic_name": "CADDADDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100110111",
+      "stable_id": "d9.sel.78180a6029f93c03",
+      "semantic_name": "CADDADDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111000",
+      "stable_id": "d9.sel.82116db7c1fd92ff",
+      "semantic_name": "CADDDAAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111001",
+      "stable_id": "d9.sel.820073b7c1ef29fe",
+      "semantic_name": "CADDDAADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111010",
+      "stable_id": "d9.sel.665b30b7b1ce3c2c",
+      "semantic_name": "CADDDADAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111011",
+      "stable_id": "d9.sel.666c32b7b1dcb2c5",
+      "semantic_name": "CADDDADDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111100",
+      "stable_id": "d9.sel.73785f8e1cbb585a",
+      "semantic_name": "CADDDDAAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111101",
+      "stable_id": "d9.sel.736e098e1cb271b3",
+      "semantic_name": "CADDDDADR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111110",
+      "stable_id": "d9.sel.4830448e0439fed5",
+      "semantic_name": "CADDDDDAR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "100111111",
+      "stable_id": "d9.sel.481f428e042b883c",
+      "semantic_name": "CADDDDDDR",
+      "basis": "LAW-FORCED",
+      "placement_evidence": "D9 selector suffix-extension law from #3964/#3966",
+      "source_class": "SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "101000000",
+      "stable_id": "d9.final.f381652e78148815",
+      "semantic_name": "ADD-JUSTIFICATION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "101000001",
+      "stable_id": "d9.final.f3b4e53f3653c0c9",
+      "semantic_name": "LINT-COMPLEXITY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "LINTER-SEMANTICS"
+    },
+    {
+      "coordinate": "101000010",
+      "stable_id": "d9.final.f82f705740d76031",
+      "semantic_name": "FIRE-RULES-ON-FACTS-TMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "101000011",
+      "stable_id": "d9.final.f9b10859736403dd",
+      "semantic_name": "ASSERT-FACT-TMS!",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "101000100",
+      "stable_id": "d9.final.fa33ebc344c1e901",
+      "semantic_name": "CANON-LAW-SATISFIED",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA"
+    },
+    {
+      "coordinate": "101000101",
+      "stable_id": "d9.final.fbbfc0d59ed17f14",
+      "semantic_name": "TCP-WRITE-VIA-RAW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS"
+    },
+    {
+      "coordinate": "101000110",
+      "stable_id": "d9.final.fc3b55890f85f2da",
+      "semantic_name": "FS-DESERIALIZE-OBJECT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA"
+    },
+    {
+      "coordinate": "101000111",
+      "stable_id": "d9.final.fd1424d4abb71da7",
+      "semantic_name": "CLIPS-CONVERT-VARS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS"
+    },
+    {
+      "coordinate": "101001000",
+      "stable_id": "d9.final.fe97e6919d606c8d",
+      "semantic_name": "FIRE-RULE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "101001001",
+      "stable_id": "d9.final.fea3dca51dec0973",
+      "semantic_name": "FIRE-RULE-JTMS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA"
+    },
+    {
+      "coordinate": "101001010",
+      "stable_id": "d9.lib.0c2e7f48fb1458be",
+      "semantic_name": "DEADLINE-AFTER-NS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101001011",
+      "stable_id": "d9.lib.1430c8b60b4d0d68",
+      "semantic_name": "EXPLAIN-PROOF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "REASONING-ALGEBRA"
+    },
+    {
+      "coordinate": "101001100",
+      "stable_id": "d9.lib.17fdf69aeb69e5d4",
+      "semantic_name": "MAP->LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA"
+    },
+    {
+      "coordinate": "101001101",
+      "stable_id": "d9.lib.1ab631055fcefdec",
+      "semantic_name": "DEADLINE-REACHED-AT?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101001110",
+      "stable_id": "d9.lib.1beb6518569974b4",
+      "semantic_name": "REASON",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "REASONING-ALGEBRA"
+    },
+    {
+      "coordinate": "101001111",
+      "stable_id": "d9.lib.1e4d9eacb02fa6a3",
+      "semantic_name": "TIMEZONE-DETECT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101010000",
+      "stable_id": "d9.lib.2332d4fae8ac1988",
+      "semantic_name": "UNIFY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "UNIFICATION-ALGEBRA"
+    },
+    {
+      "coordinate": "101010001",
+      "stable_id": "d9.lib.27bb426ea5ba2b7a",
+      "semantic_name": "PROVE-GOALS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "REASONING-ALGEBRA"
+    },
+    {
+      "coordinate": "101010010",
+      "stable_id": "d9.lib.2a530211b8b05789",
+      "semantic_name": "MODULE-KNOWN?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101010011",
+      "stable_id": "d9.lib.2d7b0709ec488f57",
+      "semantic_name": "EVIDENCE-METHOD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101010100",
+      "stable_id": "d9.lib.2f61936c40df45de",
+      "semantic_name": "INTENT-GOAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101010101",
+      "stable_id": "d9.lib.313a4cc73044d989",
+      "semantic_name": "ELAPSED-NS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101010110",
+      "stable_id": "d9.lib.3148f2669ff80d51",
+      "semantic_name": "EVIDENCE?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101010111",
+      "stable_id": "d9.lib.359582ff0b209e23",
+      "semantic_name": "VEC-COUNT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA"
+    },
+    {
+      "coordinate": "101011000",
+      "stable_id": "d9.lib.420ebee82dbe8ed8",
+      "semantic_name": "VEC->LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA"
+    },
+    {
+      "coordinate": "101011001",
+      "stable_id": "d9.lib.4854bbddda3f573a",
+      "semantic_name": "COLLECT-FACTS-ABOUT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101011010",
+      "stable_id": "d9.lib.4d4f57cb989c1df3",
+      "semantic_name": "OBSERVATION?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101011011",
+      "stable_id": "d9.lib.571c27fc551ca7f8",
+      "semantic_name": "PROVE-GOAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "REASONING-ALGEBRA"
+    },
+    {
+      "coordinate": "101011100",
+      "stable_id": "d9.lib.57ea172747721ffc",
+      "semantic_name": "DESCRIBE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101011101",
+      "stable_id": "d9.lib.5ab43021f6efb3be",
+      "semantic_name": "VEC-CONJ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA"
+    },
+    {
+      "coordinate": "101011110",
+      "stable_id": "d9.lib.5e9a3e5814f2b342",
+      "semantic_name": "UTC-NOW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101011111",
+      "stable_id": "d9.lib.664a3113932fca17",
+      "semantic_name": "IS-FACT?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101100000",
+      "stable_id": "d9.lib.69c1ad0b7edf6595",
+      "semantic_name": "CHECK-CONFLICT?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101100001",
+      "stable_id": "d9.lib.6d7af3deb1780375",
+      "semantic_name": "SUPPORTING-EVIDENCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101100010",
+      "stable_id": "d9.lib.7094f80d3063da68",
+      "semantic_name": "MAP-CONTAINS?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA"
+    },
+    {
+      "coordinate": "101100011",
+      "stable_id": "d9.lib.771af7f7aabab179",
+      "semantic_name": "MAP-EMPTY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA"
+    },
+    {
+      "coordinate": "101100100",
+      "stable_id": "d9.lib.794755de21761e74",
+      "semantic_name": "VAR?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "UNIFICATION-ALGEBRA"
+    },
+    {
+      "coordinate": "101100101",
+      "stable_id": "d9.lib.7c3494396fd84024",
+      "semantic_name": "MAP-GET",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA"
+    },
+    {
+      "coordinate": "101100110",
+      "stable_id": "d9.lib.8064830e852c857c",
+      "semantic_name": "CLAIM-STATEMENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101100111",
+      "stable_id": "d9.lib.88d6d226af52752b",
+      "semantic_name": "REASON-EXPLAIN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "REASONING-ALGEBRA"
+    },
+    {
+      "coordinate": "101101000",
+      "stable_id": "d9.lib.8c74fd6477d78242",
+      "semantic_name": "DEADLINE-REACHED?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101101001",
+      "stable_id": "d9.lib.8cda8cc8e56b376d",
+      "semantic_name": "APPLY-SUBST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "UNIFICATION-ALGEBRA"
+    },
+    {
+      "coordinate": "101101010",
+      "stable_id": "d9.lib.91ad65c0dec4b144",
+      "semantic_name": "CLAIM-REVIEW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101101011",
+      "stable_id": "d9.lib.9314d798f4c0679e",
+      "semantic_name": "UNIX-TIME-OBSERVATION->UTC",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101101100",
+      "stable_id": "d9.lib.9a0e4080dfeee21b",
+      "semantic_name": "INTENT?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101101101",
+      "stable_id": "d9.lib.9b305f7838bbb39b",
+      "semantic_name": "VEC-EMPTY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA"
+    },
+    {
+      "coordinate": "101101110",
+      "stable_id": "d9.lib.a14934fbe0b2c87d",
+      "semantic_name": "MAP-INSERT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-MAP-ALGEBRA"
+    },
+    {
+      "coordinate": "101101111",
+      "stable_id": "d9.lib.a6a115490cdb571b",
+      "semantic_name": "PROVENANCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "REASONING-ALGEBRA"
+    },
+    {
+      "coordinate": "101110000",
+      "stable_id": "d9.lib.a854ae1ec64d11e1",
+      "semantic_name": "SOURCE-OF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "REASONING-ALGEBRA"
+    },
+    {
+      "coordinate": "101110001",
+      "stable_id": "d9.lib.aa4d3782b9afce44",
+      "semantic_name": "TIMEZONE-NAME",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101110010",
+      "stable_id": "d9.lib.b5b1c3f0feef0a30",
+      "semantic_name": "LOGIC-VAR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "UNIFICATION-ALGEBRA"
+    },
+    {
+      "coordinate": "101110011",
+      "stable_id": "d9.lib.b967200ccd0e9914",
+      "semantic_name": "CONTAINS-ATOM?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101110100",
+      "stable_id": "d9.lib.bacde74143f0bdf6",
+      "semantic_name": "WALK",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "UNIFICATION-ALGEBRA"
+    },
+    {
+      "coordinate": "101110101",
+      "stable_id": "d9.lib.bcfce290e14a3dd7",
+      "semantic_name": "OCCURS-CHECK?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "UNIFICATION-ALGEBRA"
+    },
+    {
+      "coordinate": "101110110",
+      "stable_id": "d9.lib.c1ee6e5e1920d9b3",
+      "semantic_name": "UTC-FROM-UNIX",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101110111",
+      "stable_id": "d9.lib.c2e2bab667a8b1d3",
+      "semantic_name": "CLAIM?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101111000",
+      "stable_id": "d9.lib.c326da67608d1552",
+      "semantic_name": "OBSERVATION-STATEMENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "101111001",
+      "stable_id": "d9.lib.d12ce69f441f1ec2",
+      "semantic_name": "MONO-MS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101111010",
+      "stable_id": "d9.lib.d1536670414a7503",
+      "semantic_name": "REASON-IN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101111011",
+      "stable_id": "d9.lib.d1a83cbd550c6b7d",
+      "semantic_name": "VEC-FROM-LIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA"
+    },
+    {
+      "coordinate": "101111100",
+      "stable_id": "d9.lib.d4db3d46ace222c3",
+      "semantic_name": "FORWARD-IN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "101111101",
+      "stable_id": "d9.lib.d6d1d71d061e1d07",
+      "semantic_name": "TIMEZONE-OFFSET-SECONDS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101111110",
+      "stable_id": "d9.lib.def50f3329f1d739",
+      "semantic_name": "MILLISECONDS-FROM-NANOSECONDS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "101111111",
+      "stable_id": "d9.lib.df4bb696b4eff9ed",
+      "semantic_name": "EVIDENCE-OUTCOME",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA"
+    },
+    {
+      "coordinate": "110000000",
+      "stable_id": "d9.lib.e816f5a186c46086",
+      "semantic_name": "DEADLINE-FROM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "110000001",
+      "stable_id": "d9.lib.eb6a49d45cc93606",
+      "semantic_name": "INTERNET-TIME-SYNC",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TIME-SEMANTIC-ALGEBRA"
+    },
+    {
+      "coordinate": "110000010",
+      "stable_id": "d9.lib.f8f373f6fb2ecc4f",
+      "semantic_name": "VEC-NTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "PERSISTENT-VECTOR-ALGEBRA"
+    },
+    {
+      "coordinate": "110000011",
+      "stable_id": "d9.lib.fc28205b541bb341",
+      "semantic_name": "MODULE-CLAUSES-NOW",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "KNOWLEDGE-BASE-ALGEBRA"
+    },
+    {
+      "coordinate": "110000100",
+      "stable_id": "d9.review.0364ee983da2300d",
+      "semantic_name": "OPEN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "LOCAL-ALGEBRA"
+    },
+    {
+      "coordinate": "110000101",
+      "stable_id": "d9.review.1621e2bb444e196a",
+      "semantic_name": "CLOSE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "LOCAL-ALGEBRA"
+    },
+    {
+      "coordinate": "110000110",
+      "stable_id": "d9.review.2be63d1ed50b2af8",
+      "semantic_name": "DEHANDLER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110000111",
+      "stable_id": "d9.review.3bc92ae4c4d1f1dd",
+      "semantic_name": "FFI-CALL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110001000",
+      "stable_id": "d9.review.476f359358f384ab",
+      "semantic_name": "&WHOLE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110001001",
+      "stable_id": "d9.review.64db395c20b8cedf",
+      "semantic_name": "SYMBOL-MACRO",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110001010",
+      "stable_id": "d9.review.6b06443e9bf925a7",
+      "semantic_name": "MACRO-FUNCTION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110001011",
+      "stable_id": "d9.review.7537894f89a67cbe",
+      "semantic_name": "COMPILER-MACRO",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110001100",
+      "stable_id": "d9.review.795b7e18545ed97c",
+      "semantic_name": "NUNION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "MUTATION-REFINEMENT"
+    },
+    {
+      "coordinate": "110001101",
+      "stable_id": "d9.review.79ca622ff9fca1d4",
+      "semantic_name": "DEFINE-COMPILER-MACRO",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110001110",
+      "stable_id": "d9.review.7d4262ddb5101167",
+      "semantic_name": "WITH-OPEN-FILE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "LOCAL-ALGEBRA"
+    },
+    {
+      "coordinate": "110001111",
+      "stable_id": "d9.review.9443748470add6d9",
+      "semantic_name": "ARGLIST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110010000",
+      "stable_id": "d9.review.94630545116f9ad9",
+      "semantic_name": "ROW-MAJOR-AREF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "LOCAL-ALGEBRA"
+    },
+    {
+      "coordinate": "110010001",
+      "stable_id": "d9.review.b1fb10409833516e",
+      "semantic_name": "DEFINE-SYMBOL-MACRO",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110010010",
+      "stable_id": "d9.review.b69642a1c58485bb",
+      "semantic_name": "ERROR-IF-NOT-ERROR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110010011",
+      "stable_id": "d9.review.bb917ffbcc0a55e0",
+      "semantic_name": "DRIBBLE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110010100",
+      "stable_id": "d9.review.bbcd3b98a8c2a4f1",
+      "semantic_name": "NRECONC",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "HISTORICAL-CAPABILITY"
+    },
+    {
+      "coordinate": "110010101",
+      "stable_id": "d9.review.d8c2ce0fed701331",
+      "semantic_name": "DEFINE-CONDITION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "110010110",
+      "stable_id": "d9.review.e11b2f44569bd044",
+      "semantic_name": "DEFSTRUCT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "110010111",
+      "stable_id": "d9.review.e44e9b93029bb356",
+      "semantic_name": "DEFTYPE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "relation_class": "SEMANTIC-GENERATOR"
+    },
+    {
+      "coordinate": "110011000",
+      "stable_id": "d9.surface.1ff307a51199bf98",
+      "semantic_name": "SHA256-HEX",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110011001",
+      "stable_id": "d9.surface.2559b1509e3a79a9",
+      "semantic_name": "I32-BUFFER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110011010",
+      "stable_id": "d9.surface.3df53bae2d2af17e",
+      "semantic_name": "NUMERIC-BUFFER-LENGTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110011011",
+      "stable_id": "d9.surface.5013864913e3fcec",
+      "semantic_name": "NUMERIC-BUFFERP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110011100",
+      "stable_id": "d9.surface.5082fc466cf91c97",
+      "semantic_name": "STRING-EMPTY?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110011101",
+      "stable_id": "d9.surface.5213b9cbf1878424",
+      "semantic_name": "STRING-REST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110011110",
+      "stable_id": "d9.surface.5a27f8d716544b7a",
+      "semantic_name": "STRING-APPEND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110011111",
+      "stable_id": "d9.surface.71a59f5677b2a581",
+      "semantic_name": "NUMERIC-BUFFER-MAP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100000",
+      "stable_id": "d9.surface.8052a32a5bf91ed6",
+      "semantic_name": "NUMERIC-BUFFER-TYPE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100001",
+      "stable_id": "d9.surface.84198d1f58285f53",
+      "semantic_name": "F32-BUFFER",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100010",
+      "stable_id": "d9.surface.915768c6b5e40fea",
+      "semantic_name": "STRING-LENGTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100011",
+      "stable_id": "d9.surface.a4c10489330f4c8d",
+      "semantic_name": "STRING-SLICE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100100",
+      "stable_id": "d9.surface.ad0553c64579b865",
+      "semantic_name": "JSON-PARSE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100101",
+      "stable_id": "d9.surface.b48cc705e3dc2a7c",
+      "semantic_name": "NUMERIC-EQUALITY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100110",
+      "stable_id": "d9.surface.c5473590c02e5e98",
+      "semantic_name": "STRINGP",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110100111",
+      "stable_id": "d9.surface.ca674f55eb3e0675",
+      "semantic_name": "NUMERIC-BUFFER-REF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110101000",
+      "stable_id": "d9.surface.cd191c877fbf5ca0",
+      "semantic_name": "STRING-CONTAINS?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110101001",
+      "stable_id": "d9.surface.f49d1edf1dc64f89",
+      "semantic_name": "READ-ALL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110101010",
+      "stable_id": "d9.surface.f8753bfc762ccacb",
+      "semantic_name": "STRING-PREFIX?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110101011",
+      "stable_id": "d9.surface.fc54423dfb6a95ed",
+      "semantic_name": "STRING-FIRST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY"
+    },
+    {
+      "coordinate": "110101100",
+      "stable_id": "d9.tail.015ce3a94eea8555",
+      "semantic_name": "SYMBOL?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "TYPE-PREDICATE"
+    },
+    {
+      "coordinate": "110101101",
+      "stable_id": "d9.tail.3c720eb2bfd30c8d",
+      "semantic_name": "ANSWER-WEAKEN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "ANSWER-ALGEBRA"
+    },
+    {
+      "coordinate": "110101110",
+      "stable_id": "d9.tail.46f3783d8b60e88d",
+      "semantic_name": "IDENTITY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "FUNCTION-ALGEBRA"
+    },
+    {
+      "coordinate": "110101111",
+      "stable_id": "d9.tail.4ce8ad56255802e4",
+      "semantic_name": "PROCESS-RUN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER"
+    },
+    {
+      "coordinate": "110110000",
+      "stable_id": "d9.tail.4fb187a793a51ff9",
+      "semantic_name": "THREAD-LAST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "MACRO-TRANSFORM"
+    },
+    {
+      "coordinate": "110110001",
+      "stable_id": "d9.tail.4ffd37b72879f148",
+      "semantic_name": "ANSWER-EQ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "ANSWER-ALGEBRA"
+    },
+    {
+      "coordinate": "110110010",
+      "stable_id": "d9.tail.55e4974929a4f35c",
+      "semantic_name": "ANSWER-OR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "ANSWER-ALGEBRA"
+    },
+    {
+      "coordinate": "110110011",
+      "stable_id": "d9.tail.57f23215be459163",
+      "semantic_name": "TCP-WRITE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER"
+    },
+    {
+      "coordinate": "110110100",
+      "stable_id": "d9.tail.58d4804ae5302c40",
+      "semantic_name": "ANSWER-AND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "ANSWER-ALGEBRA"
+    },
+    {
+      "coordinate": "110110101",
+      "stable_id": "d9.tail.7d5007d3f5a202f1",
+      "semantic_name": "FIFTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "SELECTOR-RECOVERY"
+    },
+    {
+      "coordinate": "110110110",
+      "stable_id": "d9.tail.84da249772d254e7",
+      "semantic_name": "BINARY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "REPRESENTATION-DESCRIPTOR"
+    },
+    {
+      "coordinate": "110110111",
+      "stable_id": "d9.tail.85f830bf780a65d5",
+      "semantic_name": "READ-FILE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER"
+    },
+    {
+      "coordinate": "110111000",
+      "stable_id": "d9.tail.87128ebb8ab28c6f",
+      "semantic_name": "GENSYM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "FRESH-NAME-GENERATOR"
+    },
+    {
+      "coordinate": "110111001",
+      "stable_id": "d9.tail.8a9a73f6bceb270a",
+      "semantic_name": "NUMBER->STRING",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "REPRESENTATION-CONVERSION"
+    },
+    {
+      "coordinate": "110111010",
+      "stable_id": "d9.tail.aac24b4f469e4e8a",
+      "semantic_name": "ISQRT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "EXACT-INTEGER-ARITHMETIC"
+    },
+    {
+      "coordinate": "110111011",
+      "stable_id": "d9.tail.db19809a7972f8c9",
+      "semantic_name": "ANSWER-NOT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "ANSWER-ALGEBRA"
+    },
+    {
+      "coordinate": "110111100",
+      "stable_id": "d9.tail.dd50486541b4498a",
+      "semantic_name": "WRITE-FILE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER"
+    },
+    {
+      "coordinate": "110111101",
+      "stable_id": "d9.tail.dda09c82c2d75998",
+      "semantic_name": "TCP-LISTEN",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER"
+    },
+    {
+      "coordinate": "110111110",
+      "stable_id": "d9.tail.df9c78aecc7f7d6c",
+      "semantic_name": "TCP-READ",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER"
+    },
+    {
+      "coordinate": "110111111",
+      "stable_id": "d9.tail.e17b3440bf4c9773",
+      "semantic_name": "DIVMOD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "ARITHMETIC-PRODUCT"
+    },
+    {
+      "coordinate": "111000000",
+      "stable_id": "d9.tail.f234cf5ee8311005",
+      "semantic_name": "ANSWER-ATOM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "ANSWER-ALGEBRA"
+    },
+    {
+      "coordinate": "111000001",
+      "stable_id": "d9.tail.f8418043b19924fb",
+      "semantic_name": "THREAD-FIRST",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "relation_class": "MACRO-TRANSFORM"
+    },
+    {
+      "coordinate": "111000010",
+      "stable_id": "d9.worldqty.04ffc75c9edeb104",
+      "semantic_name": "SCIENTIFIC-CONSTANT-NAME",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111000011",
+      "stable_id": "d9.worldqty.06c4043fa3c68841",
+      "semantic_name": "UNIT?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111000100",
+      "stable_id": "d9.worldqty.09327f61a9cf6170",
+      "semantic_name": "UNIT-PRODUCT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111000101",
+      "stable_id": "d9.worldqty.09f849e5b37fbd5d",
+      "semantic_name": "QUANTITY?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111000110",
+      "stable_id": "d9.worldqty.0ae2ebe088c3c5c6",
+      "semantic_name": "ADVICE-DECISION-IN-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111000111",
+      "stable_id": "d9.worldqty.0af138793a9bf977",
+      "semantic_name": "WORLD-METADATA",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111001000",
+      "stable_id": "d9.worldqty.0e08143c7b3d7fb8",
+      "semantic_name": "EMPTY-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111001001",
+      "stable_id": "d9.worldqty.0e384511b5eb1f82",
+      "semantic_name": "SCIENTIFIC-CONSTANT-KIND",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111001010",
+      "stable_id": "d9.worldqty.12eecc46dc944cac",
+      "semantic_name": "WORLD-RETRACT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111001011",
+      "stable_id": "d9.worldqty.1e28edbacea63d62",
+      "semantic_name": "WORLD-DEPTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111001100",
+      "stable_id": "d9.worldqty.231d77e0fa653597",
+      "semantic_name": "MAKE-DIMENSION",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111001101",
+      "stable_id": "d9.worldqty.28d95271fbc4d130",
+      "semantic_name": "DIMENSION-EXPONENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111001110",
+      "stable_id": "d9.worldqty.2f695b1bd0eec08a",
+      "semantic_name": "UNIT-QUOTIENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111001111",
+      "stable_id": "d9.worldqty.337c7c5d8115153c",
+      "semantic_name": "MAKE-QUANTITY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111010000",
+      "stable_id": "d9.worldqty.3d2a090ba3a307c7",
+      "semantic_name": "DIMENSION?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111010001",
+      "stable_id": "d9.worldqty.3f8825e7b97672b4",
+      "semantic_name": "MAKE-UNIT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111010010",
+      "stable_id": "d9.worldqty.4331f2a7d60e914f",
+      "semantic_name": "SCIENTIFIC-CONSTANT-STATUS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111010011",
+      "stable_id": "d9.worldqty.439f15c8bfdd0138",
+      "semantic_name": "QUANTITY-PRODUCT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111010100",
+      "stable_id": "d9.worldqty.45a1489a36250c15",
+      "semantic_name": "WORLD-JOURNAL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111010101",
+      "stable_id": "d9.worldqty.50be95b8c6ae63ad",
+      "semantic_name": "WORLD-TELL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111010110",
+      "stable_id": "d9.worldqty.5b61e265b870b179",
+      "semantic_name": "WORLD-CLAUSES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111010111",
+      "stable_id": "d9.worldqty.5e2ae45f990b60f7",
+      "semantic_name": "SCIENTIFIC-CONSTANT-VALUE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111011000",
+      "stable_id": "d9.worldqty.5e5ab66e1e4497d4",
+      "semantic_name": "ADVISE-ALL-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111011001",
+      "stable_id": "d9.worldqty.5f50b2eaa4968866",
+      "semantic_name": "SCIENTIFIC-CONSTANT-UNIT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111011010",
+      "stable_id": "d9.worldqty.62f999f115c7e4c9",
+      "semantic_name": "TELL-KNOWLEDGE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111011011",
+      "stable_id": "d9.worldqty.645f9ba518a7892d",
+      "semantic_name": "ADVICE-ALL-DECISION-IN-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111011100",
+      "stable_id": "d9.worldqty.6eb706106a13281b",
+      "semantic_name": "UNIT-DIMENSIONS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111011101",
+      "stable_id": "d9.worldqty.6eb88cda7436ae43",
+      "semantic_name": "SCIENCE-SOURCE?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111011110",
+      "stable_id": "d9.worldqty.7a379f3e011ba6a1",
+      "semantic_name": "IMPORT-KNOWLEDGE-PACKAGE-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111011111",
+      "stable_id": "d9.worldqty.7a59699e203803fc",
+      "semantic_name": "WORLD-AT-DEPTH",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111100000",
+      "stable_id": "d9.worldqty.7e827cadb6648130",
+      "semantic_name": "WORLD-MODULE-KNOWN?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111100001",
+      "stable_id": "d9.worldqty.8005e0ac088fb54a",
+      "semantic_name": "MAKE-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111100010",
+      "stable_id": "d9.worldqty.8186d0fa231deedb",
+      "semantic_name": "WORLD-CONTENT-ADDRESS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111100011",
+      "stable_id": "d9.worldqty.81fac2d2fbecd177",
+      "semantic_name": "QUANTITY-QUOTIENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111100100",
+      "stable_id": "d9.worldqty.839887e9065937c3",
+      "semantic_name": "WORLD-MODULE-EVENTS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111100101",
+      "stable_id": "d9.worldqty.85e61e5e7a7318af",
+      "semantic_name": "WORLD-DIFF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111100110",
+      "stable_id": "d9.worldqty.8957c76e56dd25d0",
+      "semantic_name": "DEFMODULE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111100111",
+      "stable_id": "d9.worldqty.8a3b41c2049f34d5",
+      "semantic_name": "SCIENTIFIC-CONSTANT->CLAUSES",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111101000",
+      "stable_id": "d9.worldqty.8e6b8637d6920fdc",
+      "semantic_name": "QUANTITY-VALUE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111101001",
+      "stable_id": "d9.worldqty.8f4cab367b5f7cf5",
+      "semantic_name": "REASON-IN-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111101010",
+      "stable_id": "d9.worldqty.9760d44ecdadbf68",
+      "semantic_name": "WORLD-COMMON-ANCESTOR",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111101011",
+      "stable_id": "d9.worldqty.9f9fb29b9e4ba5ad",
+      "semantic_name": "FORWARD-IN-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111101100",
+      "stable_id": "d9.worldqty.a2163e474a958730",
+      "semantic_name": "DIMENSION-BASE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111101101",
+      "stable_id": "d9.worldqty.a5ef2a64755f8448",
+      "semantic_name": "SCIENTIFIC-CONSTANT-QUANTITY",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111101110",
+      "stable_id": "d9.worldqty.adddac55698b4687",
+      "semantic_name": "MAKE-SCIENTIFIC-CONSTANT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111101111",
+      "stable_id": "d9.worldqty.b9904eee9891c744",
+      "semantic_name": "SCIENTIFIC-CONSTANT-KIND-VALID?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111110000",
+      "stable_id": "d9.worldqty.c03b346c783c0695",
+      "semantic_name": "WORLD-ADDRESS-CONTENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111110001",
+      "stable_id": "d9.worldqty.c4e59950c95a2c14",
+      "semantic_name": "MAKE-WORLD-KNOWLEDGE-PACKAGE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111110010",
+      "stable_id": "d9.worldqty.d064b313981bff6c",
+      "semantic_name": "SCIENTIFIC-CONSTANT-STATUS-VALID?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111110011",
+      "stable_id": "d9.worldqty.d1b250c2822bee65",
+      "semantic_name": "WORLD-TELL-ALL",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111110100",
+      "stable_id": "d9.worldqty.d3e1d631d625f850",
+      "semantic_name": "WORLD-BRANCH-DIFF",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111110101",
+      "stable_id": "d9.worldqty.d4bd2ae7d1f32801",
+      "semantic_name": "MAKE-SCIENCE-SOURCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111110110",
+      "stable_id": "d9.worldqty.dbdb75859765ae9d",
+      "semantic_name": "SCIENTIFIC-CONSTANT-SOURCE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111110111",
+      "stable_id": "d9.worldqty.dd05c425600fc1e7",
+      "semantic_name": "ADVISE-WORLD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111111000",
+      "stable_id": "d9.worldqty.de8ceea0aa91ba60",
+      "semantic_name": "WORLD-PARENT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111111001",
+      "stable_id": "d9.worldqty.e52b412df34974ff",
+      "semantic_name": "QUANTITY-UNIT",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111111010",
+      "stable_id": "d9.worldqty.e5b9e747228876fc",
+      "semantic_name": "WORLD?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111111011",
+      "stable_id": "d9.worldqty.e6f1b737d1d25b87",
+      "semantic_name": "WORLD-RECORD",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111111100",
+      "stable_id": "d9.worldqty.e819707e686862b4",
+      "semantic_name": "RETRACT-KNOWLEDGE",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    },
+    {
+      "coordinate": "111111101",
+      "stable_id": "d9.worldqty.ef11fb1a73a7834f",
+      "semantic_name": "SCIENTIFIC-CONSTANT-SYSTEM",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111111110",
+      "stable_id": "d9.worldqty.f1d8653bb037cb30",
+      "semantic_name": "SCIENTIFIC-CONSTANT?",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA"
+    },
+    {
+      "coordinate": "111111111",
+      "stable_id": "d9.worldqty.fbbda2516f8a26d2",
+      "semantic_name": "KNOWLEDGE-CONTENT-ADDRESS",
+      "basis": "GAUGE-FIXED",
+      "placement_evidence": "S4 deterministic coordinate-independent stable-id ↔ free-coordinate representative",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA"
+    }
+  ]
+}
