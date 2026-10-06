@@ -107,4 +107,6 @@ assert state["library_harvest"]=={
 }
 
 print("D9-LIBRARY-HARVEST-1=PASS")
-selected_total=target["selected_semantic_candidates"]\nremaining_total=target["remaining_semantic_candidates"]\nprint(f"selected=58 inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+print(f"selected=58 inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
