@@ -168,3 +168,38 @@ pub fn canonical_value_sha256_mechanism() -> Value {
         Ok(Value::String(Rc::from(digest)))
     }))
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compiler_evidence_binary_layout_is_stable() {
+        let identity = crate::CoreDomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b010).expect("D3 word")),
+        );
+        let value = Value::list([
+            Value::DomainIdentity(identity.into()),
+            Value::Symbol(Rc::from("x")),
+            Value::String(Rc::from("ok")),
+        ]);
+
+        let encoded =
+            compiler_evidence_canonical_bytes(&value).expect("compiler evidence encoding");
+
+        assert_eq!(
+            encoded,
+            vec![
+                0x04,
+                0x01, 0x03, 0x02,
+                0x04,
+                0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, b'x',
+                0x04,
+                0x03, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, b'o', b'k',
+                0x00,
+            ],
+            "compiler evidence encoding is a cross-substrate digest ABI"
+        );
+    }
+}
