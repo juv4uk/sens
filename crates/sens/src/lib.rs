@@ -12,8 +12,6 @@ mod bignum;
 mod binary_number;
 mod bits;
 mod canonical_reader;
-pub mod compilation_artifact;
-pub mod compilation_artifact_producer;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
