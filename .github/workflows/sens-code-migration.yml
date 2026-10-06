@@ -1,0 +1,83 @@
+name: sens-code-migration
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate-to-sens-codes.py"
+      - "scripts/sens_source_resolver.py"
+      - "scripts/classify-lisp-source-forms.py"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/audit-sens-name-debt.py"
+      - "scripts/migrate-sens-ecosystem.py"
+      - "tests/test_sens_code_migration.py"
+      - "tests/test_classify_lisp_source_forms.py"
+      - "tests/test_three_pass_migration.py"
+      - "contracts/core1-historical-sid-map.lisp"
+      - "knowledge/d1-d7-foundation.json"
+      - ".github/workflows/sens-code-migration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-to-sens-codes.py"
+      - "scripts/sens_source_resolver.py"
+      - "scripts/classify-lisp-source-forms.py"
+      - "scripts/audit-sens-name-debt.py"
+      - "scripts/migrate-sens-ecosystem.py"
+      - "tests/test_sens_code_migration.py"
+      - "tests/test_classify_lisp_source_forms.py"
+      - "contracts/core1-historical-sid-map.lisp"
+      - "knowledge/d1-d7-foundation.json"
+
+concurrency:
+  group: sens-code-migration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migration-tests:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test manifest-driven migration and three-pass classifier
+        run: |
+          set +e
+          python3 -m unittest \
+            tests/test_sens_code_migration.py \
+            tests/test_classify_lisp_source_forms.py \
+            tests/test_three_pass_migration.py > migration-test.log 2>&1
+          status=$?
+          cat migration-test.log
+          echo "$status" > migration-test.status
+          exit 0
+      - name: Upload migration test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-code-migration-test-log
+          path: |
+            migration-test.log
+            migration-test.status
+      - name: Build three-pass source inventory
+        run: |
+          python3 scripts/classify-lisp-source-forms.py . \
+            --historical-map contracts/core1-historical-sid-map.lisp \
+            --summary-only \
+            --json /tmp/lisp-source-forms.json \
+            --tsv /tmp/lisp-source-forms.tsv
+
+      - name: Upload three-pass inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: lisp-source-three-pass-inventory
+          path: |
+            /tmp/lisp-source-forms.json
+            /tmp/lisp-source-forms.tsv
+
+      - name: Audit migrator itself
+        run: |
+          python3 scripts/audit-sens-name-debt.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --report /tmp/sens-name-debt.json
+
+      - name: Enforce migration tests
+        if: always()
+        run: exit "$(cat migration-test.status)"
