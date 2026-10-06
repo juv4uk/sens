@@ -15,6 +15,7 @@ mod canonical_reader;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
+mod compiler_program_data;
 mod domain_words;
 mod domain_identity;
 mod packed_bits;
@@ -132,6 +133,10 @@ pub use compiler_bootstrap::domain_identity_shape_mechanism;
 pub use compiler_language::{
     compiler_execution_role_from_sens, compiler_lowering_role_from_sens,
     compiler_semantic_input_from_sens, CompilerSemanticInput,
+};
+pub use compiler_program_data::{
+    CompilerProgramData, CompilerProgramDataError, CompilerProgramNode,
+    COMPILER_PROGRAM_DATA_SCHEMA,
 };
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, PredicateBit, Racana2};
