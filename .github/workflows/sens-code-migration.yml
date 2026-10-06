@@ -24,9 +24,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test manifest-driven migration
-        run: python3 -m unittest tests/test_sens_code_migration.py
+        run: |
+          set +e
+          python3 -m unittest tests/test_sens_code_migration.py > migration-test.log 2>&1
+          status=$?
+          cat migration-test.log
+          echo "$status" > migration-test.status
+          exit 0
+      - name: Upload migration test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-code-migration-test-log
+          path: |
+            migration-test.log
+            migration-test.status
       - name: Audit migrator itself
         run: |
           python3 scripts/audit-sens-name-debt.py . \
             --foundation knowledge/d1-d7-foundation.json \
             --report /tmp/sens-name-debt.json
+      - name: Enforce migration tests
+        if: always()
+        run: exit "$(cat migration-test.status)"
