@@ -135,8 +135,8 @@ pub use compiler_language::{
     compiler_semantic_input_from_sens, CompilerSemanticInput,
 };
 pub use compiler_program_data::{
-    CompilerProgramData, CompilerProgramDataError, CompilerProgramNode,
-    COMPILER_PROGRAM_DATA_SCHEMA,
+    compiler_program_data_contract_sha256, CompilerProgramData, CompilerProgramDataError,
+    CompilerProgramNode, COMPILER_PROGRAM_DATA_CONTRACT, COMPILER_PROGRAM_DATA_SCHEMA,
 };
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, PredicateBit, Racana2};
