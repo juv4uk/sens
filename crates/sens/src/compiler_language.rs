@@ -46,6 +46,19 @@ pub struct CompilerSemanticInput {
     pub authority_sha256: String,
     pub language_contract_version: &'static str,
 }
+#[derive(Clone, Debug)]
+pub struct CompilerProgramBootstrapBundle {
+    pub d3_law: Value,
+    pub d4_law: Value,
+    pub d3_proof_ref: &'static str,
+    pub d4_proof_ref: &'static str,
+    pub request_provenance: Value,
+    pub authority_path: &'static str,
+    pub authority_sha256: String,
+    pub language_contract_version: &'static str,
+    pub compiler_nucleus_sha256: String,
+}
+
 const LAW_PROJECTION: &str =
     include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
 const LAW_AUTHORITY: &str = include_str!("../../../contracts/bija3-l1-l5-ratification.lisp");
@@ -328,6 +341,33 @@ fn compiler_d4_bootstrap_law_value() -> Result<Value, LanguageError> {
                 .collect::<Result<Vec<_>, _>>()?,
         ),
     ]))
+}
+
+/// Return the verified, representation-only bootstrap values required by the
+/// compiled C1 whole-program entry.
+///
+/// This function does not expose or compute any DomainIdentity -> role mapping.
+/// D3/D4 role meaning remains inside the SENS-written compiler nucleus. The
+/// bundle contains only already-verified structural-law values, proof
+/// references, and immutable provenance bytes needed to install that nucleus
+/// in another substrate.
+pub fn compiler_program_bootstrap_bundle() -> Result<CompilerProgramBootstrapBundle, LanguageError> {
+    let authority_sha256 = sha256_hex(LANGUAGE_CONTRACT.as_bytes());
+    Ok(CompilerProgramBootstrapBundle {
+        d3_law: compiler_l1_l5_law_value()?,
+        d4_law: compiler_d4_bootstrap_law_value()?,
+        d3_proof_ref: COMPILER_D3_PROOF_REF,
+        d4_proof_ref: COMPILER_D4_PROOF_REF,
+        request_provenance: Value::list([
+            Value::String(Rc::from(COMPILER_AUTHORITY_PATH)),
+            Value::String(Rc::from(authority_sha256.as_str())),
+            Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
+        ]),
+        authority_path: COMPILER_AUTHORITY_PATH,
+        authority_sha256,
+        language_contract_version: COMPILER_CONTRACT_VERSION,
+        compiler_nucleus_sha256: sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()),
+    })
 }
 
 fn symbol(name: &str) -> Expr {
@@ -648,6 +688,60 @@ mod tests {
         CoreDomainIdentity::D4(
             crate::CoreD4::from_word(crate::Bit4::new(raw).expect("D4 test word")),
         )
+    }
+
+    #[test]
+    fn compiled_driver_bootstrap_bundle_contains_verified_representation_only_inputs() {
+        let bundle =
+            compiler_program_bootstrap_bundle().expect("verified compiler bootstrap bundle");
+
+        assert_eq!(bundle.d3_law, compiler_l1_l5_law_value().unwrap());
+        assert_eq!(bundle.d4_law, compiler_d4_bootstrap_law_value().unwrap());
+        assert_eq!(bundle.d3_proof_ref, COMPILER_D3_PROOF_REF);
+        assert_eq!(bundle.d4_proof_ref, COMPILER_D4_PROOF_REF);
+        assert_eq!(bundle.authority_path, COMPILER_AUTHORITY_PATH);
+        assert_eq!(bundle.language_contract_version, COMPILER_CONTRACT_VERSION);
+        assert_eq!(
+            bundle.authority_sha256,
+            sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        );
+        assert_eq!(
+            bundle.compiler_nucleus_sha256,
+            sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
+        );
+
+        let provenance = list_values(&bundle.request_provenance);
+        assert_eq!(provenance.len(), 3);
+        assert!(matches!(
+            provenance[0],
+            Value::String(value) if value.as_ref() == COMPILER_AUTHORITY_PATH
+        ));
+        assert!(matches!(
+            provenance[1],
+            Value::String(value) if value.as_ref() == bundle.authority_sha256.as_str()
+        ));
+        assert!(matches!(
+            provenance[2],
+            Value::String(value) if value.as_ref() == COMPILER_CONTRACT_VERSION
+        ));
+
+        let rendered = format!("{bundle:?}");
+        for forbidden in [
+            "QuoteForm",
+            "AtomPredicate",
+            "SelectorTail",
+            "SelectorHead",
+            "AtomEquality",
+            "Conditional",
+            "PairConstruct",
+            "LambdaForm",
+            "DefineForm",
+        ] {
+            assert!(
+                !rendered.contains(forbidden),
+                "bootstrap bundle leaked compiler role meaning: {forbidden}"
+            );
+        }
     }
 
     #[test]
