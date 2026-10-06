@@ -9,13 +9,14 @@
   "foundation": "#3960 / Contract 11.7",
   "sources": [
     "knowledge/d9-selector-seed.json",
-    "knowledge/d9-overflow-review-v1.json"
+    "knowledge/d9-overflow-review-v1.json",
+    "knowledge/d9-surface-harvest-v1.json"
   ],
   "accounting": {
-    "selected_semantic_candidates": 148,
+    "selected_semantic_candidates": 168,
     "law_forced_coordinates": 128,
-    "unplaced_selected_candidates": 20,
-    "remaining_semantic_inventory": 364,
+    "unplaced_selected_candidates": 40,
+    "remaining_semantic_inventory": 344,
     "ratified_d9_residents": 0
   },
   "rules": [
@@ -442,6 +443,346 @@
       ],
       "law_family": "NAMED-DESCRIPTOR-GENERATOR",
       "law_status": "PROVED-RESEARCH"
+    },
+    {
+      "stable_id": "d9.surface.1ff307a51199bf98",
+      "semantic_name": "SHA256-HEX",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return the SHA-256 hex digest",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "sha256-hex",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.2559b1509e3a79a9",
+      "semantic_name": "I32-BUFFER",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Create a signed 32-bit numeric buffer",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "i32-buffer",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.3df53bae2d2af17e",
+      "semantic_name": "NUMERIC-BUFFER-LENGTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return the element count",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "numeric-buffer-length",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.5013864913e3fcec",
+      "semantic_name": "NUMERIC-BUFFERP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Test for a numeric buffer",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "numeric-buffer?",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.5082fc466cf91c97",
+      "semantic_name": "STRING-EMPTY?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Test whether the string is empty",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-empty?",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.5213b9cbf1878424",
+      "semantic_name": "STRING-REST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return the string without its first character",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-rest",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.5a27f8d716544b7a",
+      "semantic_name": "STRING-APPEND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Concatenate two strings",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-append",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.71a59f5677b2a581",
+      "semantic_name": "NUMERIC-BUFFER-MAP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Map a function over a numeric buffer",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "numeric-buffer-map",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.8052a32a5bf91ed6",
+      "semantic_name": "NUMERIC-BUFFER-TYPE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return i32 or f32",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "numeric-buffer-type",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.84198d1f58285f53",
+      "semantic_name": "F32-BUFFER",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Create a binary32 numeric buffer",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "f32-buffer",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.915768c6b5e40fea",
+      "semantic_name": "STRING-LENGTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return the number of characters",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-length",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.a4c10489330f4c8d",
+      "semantic_name": "STRING-SLICE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return a UTF-8-safe substring",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-slice",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.ad0553c64579b865",
+      "semantic_name": "JSON-PARSE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Parse JSON into sens values",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "json-parse",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.b48cc705e3dc2a7c",
+      "semantic_name": "NUMERIC-EQUALITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Numeric equality",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "=",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.c5473590c02e5e98",
+      "semantic_name": "STRINGP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return t if value is a string",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string?",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.ca674f55eb3e0675",
+      "semantic_name": "NUMERIC-BUFFER-REF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return an element by index",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "numeric-buffer-ref",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.cd191c877fbf5ca0",
+      "semantic_name": "STRING-CONTAINS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Test whether needle occurs in string",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-contains?",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.f49d1edf1dc64f89",
+      "semantic_name": "READ-ALL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Read all expressions from a string",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "read-all",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.f8753bfc762ccacb",
+      "semantic_name": "STRING-PREFIX?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Test whether string starts with prefix",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-prefix?",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.surface.fc54423dfb6a95ed",
+      "semantic_name": "STRING-FIRST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "PUBLIC-SIGNATURE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PUBLIC-LANGUAGE-CAPABILITY",
+      "behavior": "Return the first character as a string",
+      "provenance": [
+        "#3977",
+        "lib/surface/function-signatures.lisp"
+      ],
+      "surface_source": "string-first",
+      "law_status": "UNTESTED",
+      "ratified_resident": false
     },
     {
       "stable_id": "d9.sel.38666895d53a035b",
