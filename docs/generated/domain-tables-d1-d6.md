@@ -6,6 +6,7 @@ Human projection source: `knowledge/domain-table-projection-d1-d6.json`.
 Exact identity remains `bits + domain + ratified law`.
 
 Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
+Empty/missing surface marker: `()`.
 
 ## uttara1 (D1)
 
@@ -18,10 +19,10 @@ Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
 
 | bits | ук | укр | san | eng | LISP | SUM |
 |---|---|---|---|---|---|---|
-| `00` | `пропуск` | `пропуск` | `antarāla` | `separator` | `—` | `racanā2:00=SEPARATOR` |
-| `01` | `закрити` | `закрити` | `samāpana` | `close` | `—` | `racanā2:01=CLOSE` |
-| `10` | `відкрити` | `відкрити` | `udghāṭana` | `open` | `—` | `racanā2:10=OPEN` |
-| `11` | `крапка` | `крапка` | `bindu` | `dot` | `—` | `racanā2:11=DOT` |
+| `00` | `пропуск` | `пропуск` | `antarāla` | `separator` | `()` | `racanā2:00=SEPARATOR` |
+| `01` | `закрити` | `закрити` | `samāpana` | `close` | `()` | `racanā2:01=CLOSE` |
+| `10` | `відкрити` | `відкрити` | `udghāṭana` | `open` | `()` | `racanā2:10=OPEN` |
+| `11` | `крапка` | `крапка` | `bindu` | `dot` | `()` | `racanā2:11=DOT` |
 
 ## bīja3 (D3)
 
@@ -99,29 +100,29 @@ Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
 | bits | ук | укр | san | eng | LISP | SUM |
 |---|---|---|---|---|---|---|
 | `000000` | `довжина` | `довжина` | `pramāṇa` | `length` | `LENGTH` | `saṃghaṭana6:000000=LENGTH` |
-| `000001` | `—` | `—` | `—` | `length-onto` | `LENGTH-ONTO` | `saṃghaṭana6:000001=LENGTH-ONTO` |
-| `000010` | `найменше-у-списку` | `найменше-у-списку` | `—` | `min-list` | `MIN-LIST` | `saṃghaṭana6:000010=MIN-LIST` |
-| `000011` | `найбільше-у-списку` | `найбільше-у-списку` | `—` | `max-list` | `MAX-LIST` | `saṃghaṭana6:000011=MAX-LIST` |
+| `000001` | `()` | `()` | `()` | `length-onto` | `LENGTH-ONTO` | `saṃghaṭana6:000001=LENGTH-ONTO` |
+| `000010` | `найменше-у-списку` | `найменше-у-списку` | `()` | `min-list` | `MIN-LIST` | `saṃghaṭana6:000010=MIN-LIST` |
+| `000011` | `найбільше-у-списку` | `найбільше-у-списку` | `()` | `max-list` | `MAX-LIST` | `saṃghaṭana6:000011=MAX-LIST` |
 | `000100` | `елемент-списку-за-індексом` | `елемент-списку-за-індексом` | `kramāṅka` | `nth` | `NTH` | `saṃghaṭana6:000100=NTH` |
-| `000101` | `відобразити-залишки` | `відобразити-залишки` | `—` | `maplist` | `MAPLIST` | `saṃghaṭana6:000101=MAPLIST` |
-| `000110` | `—` | `—` | `—` | `macroexpand-1` | `MACROEXPAND-1` | `saṃghaṭana6:000110=MACROEXPAND-1` |
-| `000111` | `—` | `—` | `—` | `macroexpand` | `MACROEXPAND` | `saṃghaṭana6:000111=MACROEXPAND` |
-| `001000` | `нехай` | `нехай` | `—` | `let` | `LET` | `saṃghaṭana6:001000=LET` |
-| `001001` | `нехай*` | `нехай-послідовно` | `—` | `let*` | `LET*` | `saṃghaṭana6:001001=LET*` |
-| `001010` | `підставити-пари` | `підставити-пари` | `—` | `sublis` | `SUBLIS` | `saṃghaṭana6:001010=SUBLIS` |
-| `001011` | `—` | `—` | `—` | `compose` | `COMPOSE` | `saṃghaṭana6:001011=COMPOSE` |
-| `001100` | `—` | `—` | `—` | `rassoc` | `RASSOC` | `saṃghaṭana6:001100=RASSOC` |
-| `001101` | `—` | `—` | `—` | `acons` | `ACONS` | `saṃghaṭana6:001101=ACONS` |
-| `001110` | `—` | `—` | `—` | `add1` | `ADD1` | `saṃghaṭana6:001110=ADD1` |
-| `001111` | `—` | `—` | `—` | `sub1` | `SUB1` | `saṃghaṭana6:001111=SUB1` |
-| `010000` | `—` | `—` | `—` | `evenp` | `EVENP` | `saṃghaṭana6:010000=EVENP` |
-| `010001` | `—` | `—` | `—` | `oddp` | `ODDP` | `saṃghaṭana6:010001=ODDP` |
-| `010010` | `—` | `—` | `—` | `neg` | `NEG` | `saṃghaṭana6:010010=NEG` |
+| `000101` | `відобразити-залишки` | `відобразити-залишки` | `()` | `maplist` | `MAPLIST` | `saṃghaṭana6:000101=MAPLIST` |
+| `000110` | `()` | `()` | `()` | `macroexpand-1` | `MACROEXPAND-1` | `saṃghaṭana6:000110=MACROEXPAND-1` |
+| `000111` | `()` | `()` | `()` | `macroexpand` | `MACROEXPAND` | `saṃghaṭana6:000111=MACROEXPAND` |
+| `001000` | `нехай` | `нехай` | `()` | `let` | `LET` | `saṃghaṭana6:001000=LET` |
+| `001001` | `нехай*` | `нехай-послідовно` | `()` | `let*` | `LET*` | `saṃghaṭana6:001001=LET*` |
+| `001010` | `підставити-пари` | `підставити-пари` | `()` | `sublis` | `SUBLIS` | `saṃghaṭana6:001010=SUBLIS` |
+| `001011` | `()` | `()` | `()` | `compose` | `COMPOSE` | `saṃghaṭana6:001011=COMPOSE` |
+| `001100` | `()` | `()` | `()` | `rassoc` | `RASSOC` | `saṃghaṭana6:001100=RASSOC` |
+| `001101` | `()` | `()` | `()` | `acons` | `ACONS` | `saṃghaṭana6:001101=ACONS` |
+| `001110` | `()` | `()` | `()` | `add1` | `ADD1` | `saṃghaṭana6:001110=ADD1` |
+| `001111` | `()` | `()` | `()` | `sub1` | `SUB1` | `saṃghaṭana6:001111=SUB1` |
+| `010000` | `()` | `()` | `()` | `evenp` | `EVENP` | `saṃghaṭana6:010000=EVENP` |
+| `010001` | `()` | `()` | `()` | `oddp` | `ODDP` | `saṃghaṭana6:010001=ODDP` |
+| `010010` | `()` | `()` | `()` | `neg` | `NEG` | `saṃghaṭana6:010010=NEG` |
 | `010011` | `модуль` | `модуль` | `rūpa` | `abs` | `ABS` | `saṃghaṭana6:010011=ABS` |
 | `010100` | `остача` | `остача` | `avasiṣṭa` | `remainder` | `REMAINDER` | `saṃghaṭana6:010100=REMAINDER` |
-| `010101` | `—` | `—` | `—` | `gcd` | `GCD` | `saṃghaṭana6:010101=GCD` |
-| `010110` | `—` | `—` | `—` | `recip` | `RECIP` | `saṃghaṭana6:010110=RECIP` |
-| `010111` | `—` | `—` | `—` | `expt` | `EXPT` | `saṃghaṭana6:010111=EXPT` |
+| `010101` | `()` | `()` | `()` | `gcd` | `GCD` | `saṃghaṭana6:010101=GCD` |
+| `010110` | `()` | `()` | `()` | `recip` | `RECIP` | `saṃghaṭana6:010110=RECIP` |
+| `010111` | `()` | `()` | `()` | `expt` | `EXPT` | `saṃghaṭana6:010111=EXPT` |
 | `011000` | `решта-від-перше-від-перше-від-перше` | `решта-від-перше-від-перше-від-перше` | `śeṣa-ādi-ādi-ādi` | `cdaaar` | `CDAAAR` | `saṃghaṭana6:011000=CDAAAR` |
 | `011001` | `решта-від-перше-від-перше-від-решта` | `решта-від-перше-від-перше-від-решта` | `śeṣa-ādi-ādi-śeṣa` | `cdaadr` | `CDAADR` | `saṃghaṭana6:011001=CDAADR` |
 | `011010` | `решта-від-перше-від-решта-від-перше` | `решта-від-перше-від-решта-від-перше` | `śeṣa-ādi-śeṣa-ādi` | `cdadar` | `CDADAR` | `saṃghaṭana6:011010=CDADAR` |
@@ -140,25 +141,25 @@ Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
 | `100111` | `перше-від-решта-від-решта-від-решта` | `перше-після-трьох-решт` | `ādi-śeṣa-śeṣa-śeṣa` | `cadddr` | `CADDDR` | `saṃghaṭana6:100111=CADDDR` |
 | `101000` | `відобразити` | `відобразити` | `āvartana` | `map` | `MAP` | `saṃghaṭana6:101000=MAP` |
 | `101001` | `відсіяти` | `відсіяти` | `kalpana` | `filter` | `FILTER` | `saṃghaṭana6:101001=FILTER` |
-| `101010` | `—` | `—` | `—` | `map-onto` | `MAP-ONTO` | `saṃghaṭana6:101010=MAP-ONTO` |
-| `101011` | `—` | `—` | `—` | `filter-onto` | `FILTER-ONTO` | `saṃghaṭana6:101011=FILTER-ONTO` |
-| `101100` | `—` | `—` | `—` | `curry` | `CURRY` | `saṃghaṭana6:101100=CURRY` |
-| `101101` | `—` | `—` | `—` | `flip` | `FLIP` | `saṃghaṭana6:101101=FLIP` |
+| `101010` | `()` | `()` | `()` | `map-onto` | `MAP-ONTO` | `saṃghaṭana6:101010=MAP-ONTO` |
+| `101011` | `()` | `()` | `()` | `filter-onto` | `FILTER-ONTO` | `saṃghaṭana6:101011=FILTER-ONTO` |
+| `101100` | `()` | `()` | `()` | `curry` | `CURRY` | `saṃghaṭana6:101100=CURRY` |
+| `101101` | `()` | `()` | `()` | `flip` | `FLIP` | `saṃghaṭana6:101101=FLIP` |
 | `101110` | `згорнути` | `згорнути` | `saṅgraha` | `reduce` | `REDUCE` | `saṃghaṭana6:101110=REDUCE` |
-| `101111` | `—` | `—` | `—` | `scan` | `SCAN` | `saṃghaṭana6:101111=SCAN` |
-| `110000` | `—` | `—` | `—` | `take` | `TAKE` | `saṃghaṭana6:110000=TAKE` |
-| `110001` | `—` | `—` | `—` | `drop` | `DROP` | `saṃghaṭana6:110001=DROP` |
-| `110010` | `—` | `—` | `—` | `do` | `DO` | `saṃghaṭana6:110010=DO` |
-| `110011` | `—` | `—` | `—` | `while` | `WHILE` | `saṃghaṭana6:110011=WHILE` |
+| `101111` | `()` | `()` | `()` | `scan` | `SCAN` | `saṃghaṭana6:101111=SCAN` |
+| `110000` | `()` | `()` | `()` | `take` | `TAKE` | `saṃghaṭana6:110000=TAKE` |
+| `110001` | `()` | `()` | `()` | `drop` | `DROP` | `saṃghaṭana6:110001=DROP` |
+| `110010` | `()` | `()` | `()` | `do` | `DO` | `saṃghaṭana6:110010=DO` |
+| `110011` | `()` | `()` | `()` | `while` | `WHILE` | `saṃghaṭana6:110011=WHILE` |
 | `110100` | `не-більше?` | `не-більше?` | `na-adhika?` | `leq` | `LEQ` | `saṃghaṭana6:110100=LEQ` |
 | `110101` | `найменше` | `найменше` | `alpatara` | `min` | `MIN` | `saṃghaṭana6:110101=MIN` |
 | `110110` | `не-менше?` | `не-менше?` | `na-hīna?` | `geq` | `GEQ` | `saṃghaṭana6:110110=GEQ` |
 | `110111` | `найбільше` | `найбільше` | `brhattara` | `max` | `MAX` | `saṃghaṭana6:110111=MAX` |
-| `111000` | `—` | `—` | `—` | `zip` | `ZIP` | `saṃghaṭana6:111000=ZIP` |
-| `111001` | `—` | `—` | `—` | `unzip` | `UNZIP` | `saṃghaṭana6:111001=UNZIP` |
-| `111010` | `—` | `—` | `—` | `intersection` | `INTERSECTION` | `saṃghaṭana6:111010=INTERSECTION` |
-| `111011` | `—` | `—` | `—` | `union` | `UNION` | `saṃghaṭana6:111011=UNION` |
-| `111100` | `—` | `—` | `—` | `any` | `ANY` | `saṃghaṭana6:111100=ANY` |
-| `111101` | `—` | `—` | `—` | `all` | `ALL` | `saṃghaṭana6:111101=ALL` |
-| `111110` | `—` | `—` | `—` | `integerp` | `INTEGERP` | `saṃghaṭana6:111110=INTEGERP` |
-| `111111` | `—` | `—` | `—` | `rationalp` | `RATIONALP` | `saṃghaṭana6:111111=RATIONALP` |
+| `111000` | `()` | `()` | `()` | `zip` | `ZIP` | `saṃghaṭana6:111000=ZIP` |
+| `111001` | `()` | `()` | `()` | `unzip` | `UNZIP` | `saṃghaṭana6:111001=UNZIP` |
+| `111010` | `()` | `()` | `()` | `intersection` | `INTERSECTION` | `saṃghaṭana6:111010=INTERSECTION` |
+| `111011` | `()` | `()` | `()` | `union` | `UNION` | `saṃghaṭana6:111011=UNION` |
+| `111100` | `()` | `()` | `()` | `any` | `ANY` | `saṃghaṭana6:111100=ANY` |
+| `111101` | `()` | `()` | `()` | `all` | `ALL` | `saṃghaṭana6:111101=ALL` |
+| `111110` | `()` | `()` | `()` | `integerp` | `INTEGERP` | `saṃghaṭana6:111110=INTEGERP` |
+| `111111` | `()` | `()` | `()` | `rationalp` | `RATIONALP` | `saṃghaṭana6:111111=RATIONALP` |
