@@ -7,12 +7,12 @@
   "width": 10,
   "target_capacity": 1024,
   "source_foundation": {
-    "current_contract": "11.7",
-    "current_ratified_foundation": "#3960 / D1-D8",
-    "parent_research_domain": "D9",
-    "d9_inventory": "knowledge/d9-v1-semantic-inventory.json",
-    "d9_inventory_count": 512,
-    "d9_ratified": false,
+    "current_contract": "11.8",
+    "current_ratified_foundation": "#4008 / D1-D9",
+    "parent_domain": "D9",
+    "d9_ratified_map": "knowledge/d9-ratified.json",
+    "d9_occupancy": 512,
+    "d9_ratified": true,
     "d9_selector_parent_count": 128
   },
   "law": {
@@ -22,7 +22,7 @@
     "one_bit": "compose CDR / append D",
     "coordinate_status": "LAW-FORCED-CANDIDATE",
     "semantic_status": "RESEARCH-CANDIDATE",
-    "authority_boundary": "The selector law crosses from D9 because it is independently proved and anchored in the ratified D8 selector lineage; no other unratified D9 placement is inherited."
+    "authority_boundary": "D9 coordinates are normative parent identities under #4008, but D10 child semantics are not inferred from parent width. The selector family crosses because its generator law is independently proved."
   },
   "accounting": {
     "d9_selector_parents": 128,
@@ -48,8 +48,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -69,8 +69,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -90,8 +90,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -111,8 +111,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -132,8 +132,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -153,8 +153,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -174,8 +174,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -195,8 +195,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -216,8 +216,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -237,8 +237,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -258,8 +258,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -279,8 +279,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -300,8 +300,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -321,8 +321,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -342,8 +342,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -363,8 +363,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -384,8 +384,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -405,8 +405,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -426,8 +426,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -447,8 +447,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -468,8 +468,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -489,8 +489,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -510,8 +510,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -531,8 +531,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -552,8 +552,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -573,8 +573,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -594,8 +594,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -615,8 +615,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -636,8 +636,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -657,8 +657,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -678,8 +678,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDAADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -699,8 +699,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDAADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -720,8 +720,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -741,8 +741,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -762,8 +762,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -783,8 +783,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -804,8 +804,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -825,8 +825,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -846,8 +846,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -867,8 +867,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -888,8 +888,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -909,8 +909,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -930,8 +930,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -951,8 +951,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -972,8 +972,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -993,8 +993,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1014,8 +1014,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1035,8 +1035,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1056,8 +1056,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1077,8 +1077,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1098,8 +1098,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1119,8 +1119,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1140,8 +1140,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1161,8 +1161,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1182,8 +1182,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1203,8 +1203,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1224,8 +1224,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1245,8 +1245,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1266,8 +1266,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1287,8 +1287,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1308,8 +1308,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1329,8 +1329,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1350,8 +1350,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDADDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1371,8 +1371,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDADDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1392,8 +1392,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1413,8 +1413,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1434,8 +1434,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1455,8 +1455,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1476,8 +1476,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1497,8 +1497,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1518,8 +1518,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1539,8 +1539,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1560,8 +1560,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1581,8 +1581,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1602,8 +1602,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1623,8 +1623,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1644,8 +1644,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1665,8 +1665,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1686,8 +1686,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1707,8 +1707,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1728,8 +1728,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1749,8 +1749,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1770,8 +1770,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1791,8 +1791,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1812,8 +1812,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1833,8 +1833,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1854,8 +1854,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1875,8 +1875,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1896,8 +1896,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1917,8 +1917,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1938,8 +1938,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1959,8 +1959,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -1980,8 +1980,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2001,8 +2001,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2022,8 +2022,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2043,8 +2043,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2064,8 +2064,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2085,8 +2085,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2106,8 +2106,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2127,8 +2127,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2148,8 +2148,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2169,8 +2169,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2190,8 +2190,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2211,8 +2211,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2232,8 +2232,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2253,8 +2253,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2274,8 +2274,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2295,8 +2295,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2316,8 +2316,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2337,8 +2337,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2358,8 +2358,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2379,8 +2379,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2400,8 +2400,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2421,8 +2421,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2442,8 +2442,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2463,8 +2463,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2484,8 +2484,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2505,8 +2505,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2526,8 +2526,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2547,8 +2547,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2568,8 +2568,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2589,8 +2589,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2610,8 +2610,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2631,8 +2631,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2652,8 +2652,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2673,8 +2673,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2694,8 +2694,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CDDDDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2715,8 +2715,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CDDDDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2736,8 +2736,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2757,8 +2757,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2778,8 +2778,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2799,8 +2799,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2820,8 +2820,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2841,8 +2841,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2862,8 +2862,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2883,8 +2883,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2904,8 +2904,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2925,8 +2925,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2946,8 +2946,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2967,8 +2967,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -2988,8 +2988,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3009,8 +3009,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3030,8 +3030,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3051,8 +3051,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3072,8 +3072,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3093,8 +3093,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3114,8 +3114,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3135,8 +3135,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3156,8 +3156,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3177,8 +3177,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3198,8 +3198,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3219,8 +3219,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3240,8 +3240,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3261,8 +3261,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3282,8 +3282,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3303,8 +3303,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3324,8 +3324,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3345,8 +3345,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3366,8 +3366,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAAADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3387,8 +3387,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAAADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3408,8 +3408,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3429,8 +3429,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3450,8 +3450,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3471,8 +3471,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3492,8 +3492,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3513,8 +3513,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3534,8 +3534,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3555,8 +3555,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3576,8 +3576,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3597,8 +3597,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3618,8 +3618,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3639,8 +3639,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3660,8 +3660,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3681,8 +3681,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3702,8 +3702,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3723,8 +3723,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3744,8 +3744,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3765,8 +3765,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3786,8 +3786,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3807,8 +3807,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3828,8 +3828,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3849,8 +3849,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3870,8 +3870,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3891,8 +3891,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3912,8 +3912,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3933,8 +3933,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3954,8 +3954,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3975,8 +3975,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -3996,8 +3996,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4017,8 +4017,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4038,8 +4038,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CAADDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4059,8 +4059,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CAADDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4080,8 +4080,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4101,8 +4101,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4122,8 +4122,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4143,8 +4143,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4164,8 +4164,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4185,8 +4185,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4206,8 +4206,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4227,8 +4227,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4248,8 +4248,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4269,8 +4269,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4290,8 +4290,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4311,8 +4311,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4332,8 +4332,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4353,8 +4353,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4374,8 +4374,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4395,8 +4395,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADAADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4416,8 +4416,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4437,8 +4437,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4458,8 +4458,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4479,8 +4479,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4500,8 +4500,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4521,8 +4521,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4542,8 +4542,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4563,8 +4563,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4584,8 +4584,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4605,8 +4605,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4626,8 +4626,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4647,8 +4647,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4668,8 +4668,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4689,8 +4689,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4710,8 +4710,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4731,8 +4731,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADADDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4752,8 +4752,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4773,8 +4773,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDAAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4794,8 +4794,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4815,8 +4815,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDAAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4836,8 +4836,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4857,8 +4857,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDAADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4878,8 +4878,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4899,8 +4899,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDAADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4920,8 +4920,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4941,8 +4941,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDADAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4962,8 +4962,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -4983,8 +4983,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDADADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5004,8 +5004,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5025,8 +5025,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDADDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5046,8 +5046,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5067,8 +5067,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDADDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5088,8 +5088,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5109,8 +5109,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDAAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5130,8 +5130,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5151,8 +5151,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDAADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5172,8 +5172,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5193,8 +5193,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDADAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5214,8 +5214,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5235,8 +5235,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDADDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5256,8 +5256,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5277,8 +5277,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDDAAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5298,8 +5298,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5319,8 +5319,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDDADR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5340,8 +5340,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5361,8 +5361,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDDDAR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5382,8 +5382,8 @@
       "behavior": "compose CAR after the D9 selector path represented by CADDDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     },
@@ -5403,8 +5403,8 @@
       "behavior": "compose CDR after the D9 selector path represented by CADDDDDDR",
       "authority": [
         "#4012",
-        "knowledge/d9-v1-semantic-inventory.json",
-        "D8 selector law lineage #3960"
+        "#4008",
+        "knowledge/d9-ratified.json"
       ],
       "ratified_resident": false
     }
