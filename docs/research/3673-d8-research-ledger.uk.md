@@ -7,16 +7,16 @@
 ```text
 місткість D8                             256
 selector candidate coordinates            64
-footprint чотирьох product-family          16
-проаналізовано унікальних координат        80
-untouched coordinates                    176
+footprint п'яти product-family              20
+проаналізовано унікальних координат        84
+untouched coordinates                    172
 
-fixed novel candidates, full protocol       2
+fixed novel candidates, full protocol       3
 fixed novel candidate, protocol-bounded      1
 fixed novel candidate, typed                 1
-gauge-unresolved novel semantics             4
-fixed lower-domain duplicate coordinates     4
-gauge orbits                                 4
+gauge-unresolved novel semantics             5
+fixed lower-domain duplicate coordinates     5
+gauge orbits                                 5
 falsified second-axis hypotheses             5
 ```
 
@@ -79,6 +79,18 @@ D7 не є їхнім предком.
 Це typed product witness для equal-length ZIP/UNZIP lane.
 #3712 уже merged у main; ця сім'я є merged research evidence, а не D8 occupancy authority.
 
+### DO/WHILE × condition/projection — #3779
+
+```text
+11001100 11001101 11001110 11001111
+```
+
+- `11001100`: lower-domain WHILE duplicate;
+- `01/10`: DO duplicate + generated `continue-while-true + apply-result`, gauge unresolved;
+- `11001111`: generated fixed candidate `stop-when-true + return-state`.
+
+Bounded witness на трьох станах перевіряє 5832 схеми: 972 завершуються в усіх чотирьох кутах, а 432 мають чотири попарно різні глобальні semantic tables. #3779 уже merged як research evidence і не допускає жодної D8 coordinate.
+
 ## Відкинуті осі
 
 #3670 відкидає п'ять конкретних гіпотез:
@@ -98,5 +110,5 @@ python3 benchmarks/d8-research-ledger/run.py \
   --out /tmp/d8-research-ledger
 ```
 
-Artifact містить 64 selector candidates, чотири product footprints, усі 176
+Artifact містить 64 selector candidates, п'ять product footprints, усі 172
 untouched coordinates, gauge metadata, evidence merge state і список falsified axes.
