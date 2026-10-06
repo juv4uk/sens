@@ -166,12 +166,12 @@ fn math_coordinate(session: &mut Session, sid: Sens8) -> String {
     .to_string()
 }
 
-fn machine_coordinate(session: &mut Session, sid: Sens8) -> String {
+fn machine_coordinate(session: &mut Session, exact_domain_bits: &str) -> String {
     eval_program(
-        &format!("(machine-capabilities-for-sid {sid})"),
+        &format!("(machine-capabilities-for-domain {exact_domain_bits})"),
         session,
     )
-    .expect("machine coordinate query")
+    .expect("exact-domain machine coordinate query")
     .value
     .to_string()
 }
@@ -192,7 +192,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     let add_math = math_coordinate(&mut session, sens::sens!(00001100));
     assert!(add_math.contains("exact-rational-sum"));
     assert_eq!(
-        machine_coordinate(&mut session, sens::sens!(00001100)),
+        machine_coordinate(&mut session, "01010"),
         "((integer-add bounded-u64))"
     );
     assert_eq!(kernel_statuses_for_sid(&kernel_source, sens::sens!(00001100)), None);
@@ -203,7 +203,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert_eq!(eq_kernels.len(), 1);
     assert_eq!(eq_kernels.get("sens").map(String::as_str), Some("live"));
     assert_eq!(
-        machine_coordinate(&mut session, sens::sens!(00000011)),
+        machine_coordinate(&mut session, "101"),
         "((identity-compare bounded-u64))"
     );
 
@@ -218,7 +218,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
         Some("integration-gated")
     );
     assert_eq!(
-        machine_coordinate(&mut session, sens::sens!(00000100)),
+        machine_coordinate(&mut session, "111"),
         "((pair-field-store head bounded-u64) (pair-field-store tail bounded-u64))"
     );
 
@@ -234,7 +234,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert_eq!(cond_kernels.get("prolog").map(String::as_str), Some("absent"));
     assert_eq!(cond_kernels.get("clips").map(String::as_str), Some("absent"));
     assert_eq!(
-        machine_coordinate(&mut session, sens::sens!(00000111)),
+        machine_coordinate(&mut session, "110"),
         "((conditional-branch bounded-u64))"
     );
 }
