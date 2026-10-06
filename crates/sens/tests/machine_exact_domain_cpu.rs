@@ -47,7 +47,7 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     .expect("exact-domain machine capability lookup")
     .value
     .to_string();
-    assert_eq!(capabilities, "((integer-add bounded-u64))");
+    assert_eq!(capabilities, "((integer-add bounded-u32-inputs u64-result))");
 
     let bytes = eval_program(
         &format!("(x86-encode-current-binary-u64 {identity_source} 2 3)"),
