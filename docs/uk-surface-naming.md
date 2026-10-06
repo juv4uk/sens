@@ -10,7 +10,7 @@ The compact surface must stay guessable from the expanded one. We shorten struct
 ## Stable compact grammar
 
 - predicates keep `?`;
-- destructive/in-place operations use `!` instead of `-на-місці`;
+- destructive/in-place operations use `!` in all programming surfaces: `ук`, `укр`, and `en`; `укр` may retain the expanded `-на-місці!` wording;
 - composite selectors use a path alphabet:
   - `п` = `перше`;
   - `р` = `решта`;
@@ -24,7 +24,7 @@ The compact surface must stay guessable from the expanded one. We shorten struct
 | ук | укр |
 |---|---|
 | `п-р` | `перше-від-решти` |
-| `видалити!` | `видалити-на-місці` |
+| `видалити!` | `видалити-на-місці!` |
 | `нсд` | `найбільший-спільний-дільник` |
 | `а-короткий` | `звук-голосний-а-ротовий-короткий` |
 | `цифра-8` | `текст-цифра-8` |

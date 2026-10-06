@@ -19,8 +19,14 @@ def fail(message: str) -> None:
     raise SystemExit(f"DOMAIN-TABLES: FAIL: {message}")
 
 
-def normalized_en(value: str) -> str:
-    return value.removesuffix("?").casefold()
+def en_matches_resident(value: str, resident: str) -> bool:
+    candidate = value.casefold()
+    target = resident.casefold()
+    if candidate == target:
+        return True
+    if candidate.endswith(("?", "!")) and candidate[:-1] == target:
+        return True
+    return False
 
 
 def validate_dense_table(path: Path, width: int, residents: dict[str, str], require_human: bool):
@@ -42,7 +48,7 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
 
         if row.en is None:
             fail(f"{domain}:{row.bits}: missing en")
-        if normalized_en(row.en) != resident.casefold():
+        if not en_matches_resident(row.en, resident):
             fail(f"{domain}:{row.bits}: en {row.en!r} does not match resident {resident!r}")
 
         if width == 8:
@@ -119,8 +125,19 @@ def validate_compact_uk(rows) -> None:
         if row.domain == "D7" and row.uk.startswith("український-"):
             fail(f"{row.domain}:{row.bits}: compact uk should use the stable укр- prefix")
 
-        if row.ukr and "на-місці" in row.ukr and not row.uk.endswith("!"):
-            fail(f"{row.domain}:{row.bits}: destructive compact uk surface must end in !")
+        mutation = (
+            row.uk.endswith("!")
+            or row.ukr.endswith("!")
+            or (row.en is not None and row.en.endswith("!"))
+            or "на-місці" in row.ukr
+        )
+        if mutation:
+            if not row.uk.endswith("!"):
+                fail(f"{row.domain}:{row.bits}: destructive uk surface must end in !")
+            if not row.ukr.endswith("!"):
+                fail(f"{row.domain}:{row.bits}: destructive ukr surface must end in !")
+            if row.en is None or not row.en.endswith("!"):
+                fail(f"{row.domain}:{row.bits}: destructive en surface must end in !")
 
         if row.lisp and re.fullmatch(r"C[AD]{2,6}R", row.lisp.upper()):
             path = row.lisp.upper()[1:-1]
@@ -190,7 +207,7 @@ def main() -> int:
     print("d7-reserved=0100001,0101010")
     print("missing-uk=0 missing-ukr=0 missing-san=0")
     print("surface-collisions=0 namespaces=uk,ukr,san")
-    print("uk-style=compact ukr-style=expanded selectors=п/р mutation=! predicate=?")
+    print("uk-style=compact ukr-style=expanded selectors=п/р mutation=! in uk,ukr,en predicate=? in uk,ukr,en")
     print("columns=ук->укр->san->en->LISP->sym")
     return 0
 
