@@ -521,6 +521,42 @@ mod tests {
     }
 
     #[test]
+    fn semantic_input_api_owns_law_proof_and_root_authority_facts() {
+        let d3_input = compiler_semantic_input_from_sens(d3(0b010))
+            .expect("D3 semantic input")
+            .expect("ATOM is in compiler closure");
+        assert_eq!(d3_input.lowering_role, CompilerLoweringRole::AtomPredicate);
+        assert_eq!(d3_input.authority_ref, COMPILER_ROLE_LAW_REF);
+        assert_eq!(d3_input.proof_ref, COMPILER_D3_PROOF_REF);
+        assert_eq!(d3_input.semantic_status, "current");
+        assert_eq!(d3_input.authority_path, "language-contract.lisp");
+        assert_eq!(d3_input.authority_sha256.len(), 64);
+        assert_eq!(d3_input.language_contract_version, "11.6");
+
+        let d4_input = compiler_semantic_input_from_sens(d4(0b0010))
+            .expect("D4 semantic input")
+            .expect("LAMBDA is in compiler closure");
+        assert_eq!(d4_input.lowering_role, CompilerLoweringRole::LambdaForm);
+        assert_eq!(d4_input.authority_ref, COMPILER_ROLE_LAW_REF);
+        assert_eq!(d4_input.proof_ref, COMPILER_D4_PROOF_REF);
+        assert_eq!(d4_input.authority_sha256, d3_input.authority_sha256);
+
+        assert!(
+            compiler_semantic_input_from_sens(d3(0b000))
+                .expect("D3 empty transport")
+                .is_none()
+        );
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        assert!(
+            compiler_semantic_input_from_sens(d8)
+                .expect("D8 must fail closed as no compiler input")
+                .is_none()
+        );
+    }
+
+    #[test]
     fn current_nucleus_roles_are_derived_by_the_single_sens_owned_law() {
         let expected = [
             (d3(0b001), CompilerLoweringRole::QuoteForm),
