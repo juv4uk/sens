@@ -1,0 +1,128 @@
+name: publish-binary-master
+
+on:
+  push:
+    branches:
+      - codex/sens-code-migration-tools
+    paths:
+      - "scripts/migrate-to-sens-codes.py"
+      - "scripts/audit-sens-name-debt.py"
+      - "scripts/migrate-sens-ecosystem.py"
+      - "tests/test_sens_code_migration.py"
+      - "knowledge/d1-d7-foundation.json"
+      - ".github/workflows/publish-binary-master.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Run migration scripts
+        shell: bash
+        run: |
+          set +e
+          rm -rf /tmp/sens-mirror /tmp/sens-binary-out
+          mkdir -p /tmp/sens-mirror /tmp/sens-binary-out
+          python3 scripts/audit-sens-name-debt.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --report /tmp/sens-name-debt.json
+          python3 scripts/migrate-to-sens-codes.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --mirror /tmp/sens-mirror \
+            --report /tmp/sens-migration.json
+          echo "migration_rc=$?" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Keep only canonical binary-only results
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, shutil
+
+          src = Path("/tmp/sens-mirror")
+          dst = Path("/tmp/sens-binary-out")
+          dst.mkdir(parents=True, exist_ok=True)
+          accepted = []
+          rejected = []
+
+          for path in src.rglob("*"):
+              if not path.is_file():
+                  continue
+              try:
+                  text = path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  rejected.append((str(path), "non-utf8"))
+                  continue
+              if text.strip() and re.fullmatch(r"[01\s]+", text):
+                  rel = path.relative_to(src)
+                  target = dst / rel
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_text(text, encoding="utf-8")
+                  accepted.append(str(rel))
+              else:
+                  rejected.append((str(path.relative_to(src)), "mixed/non-binary"))
+
+          print(f"accepted_binary_files={len(accepted)}")
+          print(f"rejected_mixed_files={len(rejected)}")
+          for p in accepted:
+              print(f"ACCEPT {p}")
+          Path("/tmp/binary-count").write_text(str(len(accepted)))
+          PY
+
+      - name: Publish binary-only tree to master
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin master
+          rm -rf /tmp/sens-master
+          git worktree add --detach /tmp/sens-master origin/master
+
+          cd /tmp/sens-master
+          git rm -r --ignore-unmatch . >/dev/null 2>&1 || true
+
+          if [ -d /tmp/sens-binary-out ]; then
+            cp -a /tmp/sens-binary-out/. .
+          fi
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, sys
+          root = Path(".")
+          bad = []
+          files = []
+          for p in root.rglob("*"):
+              if not p.is_file() or ".git" in p.parts:
+                  continue
+              files.append(p)
+              try:
+                  t = p.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  bad.append(str(p))
+                  continue
+              if not t.strip() or not re.fullmatch(r"[01\s]+", t):
+                  bad.append(str(p))
+          if bad:
+              print("REFUSE: non-binary files in master candidate:")
+              print("\n".join(bad))
+              sys.exit(1)
+          print(f"validated_master_files={len(files)}")
+          PY
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No validated binary result changed master."
+            exit 0
+          fi
+
+          git config user.name "sens-binary-publisher"
+          git config user.email "sens-binary-publisher@users.noreply.github.com"
+          git commit -m "master: publish validated binary-only migration results"
+          git push origin HEAD:master
