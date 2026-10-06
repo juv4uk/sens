@@ -1,0 +1,56 @@
+name: lisp-source-three-pass-classifier
+
+on:
+  pull_request:
+    paths:
+      - "scripts/classify-lisp-source-forms.py"
+      - "tests/test_classify_lisp_source_forms.py"
+      - "contracts/core1-historical-sid-map.lisp"
+      - ".github/workflows/lisp-source-classifier.yml"
+  push:
+    branches:
+      - codex/sens-code-migration-tools
+    paths:
+      - "scripts/classify-lisp-source-forms.py"
+      - "tests/test_classify_lisp_source_forms.py"
+      - "contracts/core1-historical-sid-map.lisp"
+      - ".github/workflows/lisp-source-classifier.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: lisp-source-three-pass-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Test three-pass classifier
+        run: python3 -m unittest tests/test_classify_lisp_source_forms.py
+
+      - name: Build inventory
+        run: |
+          python3 scripts/classify-lisp-source-forms.py . \
+            --contract contracts/core1-historical-sid-map.lisp \
+            --summary-only \
+            --json /tmp/lisp-source-forms.json \
+            --tsv /tmp/lisp-source-forms.tsv
+
+      - name: Show summary
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("/tmp/lisp-source-forms.json").read_text())
+          print(json.dumps(report["summary"], ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: lisp-source-three-pass-inventory
+          path: |
+            /tmp/lisp-source-forms.json
+            /tmp/lisp-source-forms.tsv
