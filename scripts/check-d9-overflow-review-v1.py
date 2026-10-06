@@ -75,8 +75,8 @@ assert all(r["d9_coordinate"] is None for r in selected)
 target=state["target"]
 assert target["domain"]=="D9"
 assert target["capacity"]==512
-assert target["selected_semantic_candidates"]==148
-assert target["remaining_semantic_candidates"]==364
+assert target["selected_semantic_candidates"]>=148
+assert target["remaining_semantic_candidates"]==512-target["selected_semantic_candidates"]
 assert target["ratified_residents"]==0
 assert state["overflow_review"]=={
     "artifact":"knowledge/d9-overflow-review-v1.json",
@@ -87,4 +87,4 @@ assert state["overflow_review"]=={
 }
 
 print("D9-OVERFLOW-REVIEW-V1: PASS")
-print("selected=20 hold=11 reject-lower-duplicate=3 total-selected=148/512 remaining=364")
+print(f"selected=20 hold=11 reject-lower-duplicate=3 total-selected={target['selected_semantic_candidates']}/512 remaining={target['remaining_semantic_candidates']}")

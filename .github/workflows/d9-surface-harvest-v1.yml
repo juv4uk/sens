@@ -1,0 +1,40 @@
+name: D9 surface harvest v1
+
+on:
+  pull_request:
+    paths:
+      - "lib/surface/function-signatures.lisp"
+      - "knowledge/d9-surface-harvest-v1.json"
+      - "knowledge/d9-v1-semantic-inventory.json"
+      - "knowledge/d9-fill-v1-state.json"
+      - "scripts/check-d9-surface-harvest-v1.py"
+      - "scripts/check-d9-v1-semantic-inventory.py"
+      - "scripts/check-d9-overflow-review-v1.py"
+      - "scripts/check-d9-laws-1.py"
+      - ".github/workflows/d9-surface-harvest-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d9-surface-harvest-v1.json"
+      - "knowledge/d9-v1-semantic-inventory.json"
+      - "knowledge/d9-fill-v1-state.json"
+      - "scripts/check-d9-surface-harvest-v1.py"
+      - ".github/workflows/d9-surface-harvest-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  surface-harvest:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify public-surface harvest
+        run: python3 scripts/check-d9-surface-harvest-v1.py
+      - name: Verify global D9 inventory
+        run: python3 scripts/check-d9-v1-semantic-inventory.py
+      - name: Preserve D8-overflow tranche
+        run: python3 scripts/check-d9-overflow-review-v1.py
+      - name: Preserve first law-mining tranche
+        run: python3 scripts/check-d9-laws-1.py

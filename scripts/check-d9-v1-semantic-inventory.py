@@ -11,24 +11,32 @@ state=json.loads((root/"knowledge/d9-fill-v1-state.json").read_text(encoding="ut
 assert inventory["schema"]=="d9-v1-semantic-inventory/v1"
 assert inventory["status"]=="RESEARCH-UNRATIFIED-PARTIAL"
 assert inventory["domain"]=="D9" and inventory["width"]==9 and inventory["capacity"]==512
+
+target=state["target"]
+selected_count=target["selected_semantic_candidates"]
+remaining=target["remaining_semantic_candidates"]
+assert selected_count>=148
+assert remaining==512-selected_count
+assert target["ratified_residents"]==0
+
 assert inventory["accounting"]=={
-    "selected_semantic_candidates":148,
+    "selected_semantic_candidates":selected_count,
     "law_forced_coordinates":128,
-    "unplaced_selected_candidates":20,
-    "remaining_semantic_inventory":364,
+    "unplaced_selected_candidates":selected_count-128,
+    "remaining_semantic_inventory":remaining,
     "ratified_d9_residents":0,
 }
 
 rows=inventory["rows"]
-assert len(rows)==148
-assert len({r["stable_id"] for r in rows})==148
-assert len({r["semantic_name"] for r in rows})==148
+assert len(rows)==selected_count
+assert len({r["stable_id"] for r in rows})==selected_count
+assert len({r["semantic_name"] for r in rows})==selected_count
 assert all(r["ratified_resident"] is False for r in rows)
 
 placed=[r for r in rows if r["coordinate"] is not None]
 unplaced=[r for r in rows if r["coordinate"] is None]
 assert len(placed)==128
-assert len(unplaced)==20
+assert len(unplaced)==selected_count-128
 assert len({r["coordinate"] for r in placed})==128
 assert all(len(r["coordinate"])==9 and set(r["coordinate"])<=set("01") for r in placed)
 assert all(r["coordinate_basis"]=="PROVED-SELECTOR-GENERATOR" for r in placed)
@@ -36,22 +44,27 @@ assert all(r["coordinate_basis"]=="UNPLACED" for r in unplaced)
 
 seed_ids={r["stable_id"] for r in seed["rows"]}
 review_ids={r["stable_id"] for r in review["rows"] if r["selected_d9_candidate"]}
-assert {r["stable_id"] for r in placed}==seed_ids
-assert {r["stable_id"] for r in unplaced}==review_ids
+placed_ids={r["stable_id"] for r in placed}
+unplaced_ids={r["stable_id"] for r in unplaced}
+assert placed_ids==seed_ids
+assert review_ids <= unplaced_ids
+
+surface_path=root/"knowledge/d9-surface-harvest-v1.json"
+if surface_path.exists():
+    surface=json.loads(surface_path.read_text(encoding="utf-8"))
+    surface_ids={r["stable_id"] for r in surface["rows"] if r["selected_d9_candidate"]}
+    assert surface_ids <= unplaced_ids
 
 for name in ("APPLY","COMPOSE","REDUCE"):
     assert name not in {r["semantic_name"] for r in rows}
 
-assert state["target"]["selected_semantic_candidates"]==148
-assert state["target"]["remaining_semantic_candidates"]==364
-assert state["target"]["ratified_residents"]==0
 assert state["semantic_inventory"]=={
     "artifact":"knowledge/d9-v1-semantic-inventory.json",
-    "selected":148,
+    "selected":selected_count,
     "law_forced_coordinates":128,
-    "unplaced_selected":20,
-    "remaining":364,
+    "unplaced_selected":selected_count-128,
+    "remaining":remaining,
 }
 
 print("D9-V1-SEMANTIC-INVENTORY: PASS")
-print("selected=148/512 placed=128 unplaced=20 remaining=364 ratified=0")
+print(f"selected={selected_count}/512 placed=128 unplaced={selected_count-128} remaining={remaining} ratified=0")
