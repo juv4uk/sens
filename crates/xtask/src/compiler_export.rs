@@ -17,6 +17,7 @@ const CORPUS: &str =
 #[derive(Debug, Clone)]
 pub struct ExportOptions {
     pub fixture: Option<String>,
+    pub artifact: bool,
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {
@@ -154,6 +155,13 @@ fn render_request(
     )
 }
 
+fn render_artifact(fixture_id: &str, semantic_request: &str) -> String {
+    let semantic_request_sha256 = sha256_hex(semantic_request.as_bytes());
+    format!(
+        "(compilation-artifact\n           (schema . compiler-compilation-artifact/1)\n           (fixture-id . \"{fixture_id}\")\n           (semantic-request-sha256 . \"{semantic_request_sha256}\")\n           (semantic-request . {semantic_request})\n           (required-capabilities . ())\n           (artifact-status . canonical-backend-neutral))"
+    )
+}
+
 pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
     let root = Path::new(repo_root);
     let source_commit = current_commit(root)?;
@@ -165,7 +173,12 @@ pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
             .map_err(|error| format!("SENS semantic input production failed for {name}: {error}"))?
             .ok_or_else(|| format!("SENS compiler law returned no role for {name}"))?;
 
-        rendered.push(render_request(&name, &input, &source_commit));
+        let request = render_request(&name, &input, &source_commit);
+        rendered.push(if options.artifact {
+            render_artifact(&name, &request)
+        } else {
+            request
+        });
     }
 
     Ok(format!("{}\n", rendered.join("\n\n")))
@@ -203,5 +216,44 @@ mod tests {
             })
             .collect::<std::collections::HashSet<_>>();
         assert_eq!(roles.len(), 9);
+    }
+
+    #[test]
+    fn compilation_artifact_wraps_the_exact_semantic_request_by_digest() {
+        let input = compiler_semantic_input_from_sens(parse_identity("D3", "010").unwrap())
+            .unwrap()
+            .expect("ATOM compiler input");
+        let request = render_request("atom", &input, "0123456789abcdef0123456789abcdef01234567");
+        let artifact = render_artifact("atom", &request);
+        let request_digest = sha256_hex(request.as_bytes());
+
+        assert!(artifact.contains("(schema . compiler-compilation-artifact/1)"));
+        assert!(artifact.contains(&format!("(semantic-request-sha256 . \"{request_digest}\")")));
+        assert!(artifact.contains(&format!("(semantic-request . {request})")));
+        assert!(artifact.contains("(artifact-status . canonical-backend-neutral)"));
+    }
+
+    #[test]
+    fn compilation_artifact_carries_no_backend_or_install_policy() {
+        let input = compiler_semantic_input_from_sens(parse_identity("D4", "0010").unwrap())
+            .unwrap()
+            .expect("LAMBDA compiler input");
+        let request = render_request("lambda", &input, "0123456789abcdef0123456789abcdef01234567");
+        let artifact = render_artifact("lambda", &request).to_ascii_lowercase();
+
+        for forbidden in [
+            "cuda",
+            "ptx",
+            "sass",
+            "graal",
+            "fpga",
+            "register-allocation",
+            "install-target",
+        ] {
+            assert!(
+                !artifact.contains(forbidden),
+                "backend policy leaked into artifact: {forbidden}"
+            );
+        }
     }
 }
