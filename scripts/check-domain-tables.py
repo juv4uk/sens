@@ -21,7 +21,7 @@ def normalized_en(value: str) -> str:
     return value.removesuffix("?").casefold()
 
 
-def validate_dense_table(path: Path, width: int, residents: dict[str, str], require_human: bool) -> tuple[int, int]:
+def validate_dense_table(path: Path, width: int, residents: dict[str, str], require_human: bool):
     rows = read_domain_table(path)
     domain = f"D{width}"
     expected_count = 1 << width
@@ -70,28 +70,44 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
             if row.san is not None and row.san.endswith("?"):
                 fail(f"{domain}:{row.bits}: predicate san must not end in ?")
 
-    return missing_uk, missing_san
+    return rows, missing_uk, missing_san
 
 
 def main() -> int:
     foundation = json.loads(FOUNDATION.read_text(encoding="utf-8"))
     total = 0
+    all_rows = []
 
     for width, path in enumerate(DOMAIN_TABLES, start=1):
         residents = foundation["domains"][f"D{width}"]["residents"]
-        validate_dense_table(path, width, residents, require_human=True)
+        rows, _, _ = validate_dense_table(path, width, residents, require_human=True)
+        all_rows.extend(rows)
         total += 1 << width
 
     d8_authority = json.loads(D8_AUTHORITY.read_text(encoding="utf-8"))
     if d8_authority.get("status") != "owner-ratified" or d8_authority.get("authority") != "#3960":
         fail("D8 authority is not owner-ratified #3960")
-    missing_uk, missing_san = validate_dense_table(
+    d8_rows, missing_uk, missing_san = validate_dense_table(
         D8_TABLE,
         8,
         d8_authority["residents"],
-        require_human=False,
+        require_human=True,
     )
+    all_rows.extend(d8_rows)
     total += 256
+
+    for attr in ("uk", "ukr", "san"):
+        seen = {}
+        for row in all_rows:
+            value = getattr(row, attr)
+            previous = seen.get(value)
+            key = (row.domain, row.bits, row.lisp)
+            if previous is not None and previous != key:
+                fail(
+                    f"{attr}: duplicate surface {value!r} for "
+                    f"{previous} and {key}"
+                )
+            seen[value] = key
 
     if total != 382:
         fail(f"expected D1-D6 + D8 total 382 rows, found {total}")
@@ -99,7 +115,8 @@ def main() -> int:
     print("DOMAIN-TABLES: PASS")
     print("files=7 layout=one-domain-per-file current-human-tables=D1-D6,D8")
     print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d8:256 total=382")
-    print(f"d8-missing-uk={missing_uk} d8-missing-san={missing_san}")
+    print(f"d8-missing-uk={missing_uk} d8-missing-san={missing_san} d8-missing-ukr=0")
+    print("surface-collisions=0 namespaces=uk,ukr,san")
     print("columns=ук->укр->san->en->LISP->sym")
     return 0
 
