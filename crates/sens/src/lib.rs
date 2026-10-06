@@ -17,6 +17,7 @@ pub mod compilation_artifact_producer;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
+pub mod selfhost_lineage;
 mod domain_words;
 mod domain_identity;
 mod packed_bits;
