@@ -1,0 +1,38 @@
+name: D8 gauge S4
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d8-v2-gauge-fixed-candidate.json"
+      - "knowledge/d8-v2-geometry-state.json"
+      - "knowledge/d8-v2-semantic-inventory.json"
+      - "scripts/check-d8-v2-gauge-s4.py"
+      - "scripts/check-d8-v2-geometry-s2.py"
+      - "scripts/check-d8-v2-semantic-inventory.py"
+      - ".github/workflows/d8-v2-gauge-s4.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d8-v2-gauge-fixed-candidate.json"
+      - "knowledge/d8-v2-geometry-state.json"
+      - "knowledge/d8-v2-semantic-inventory.json"
+      - "scripts/check-d8-v2-gauge-s4.py"
+      - "scripts/check-d8-v2-geometry-s2.py"
+      - "scripts/check-d8-v2-semantic-inventory.py"
+      - ".github/workflows/d8-v2-gauge-s4.yml"
+  workflow_dispatch:
+
+jobs:
+  gauge-s4:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner presence
+        run: nvidia-smi || true
+      - name: Check semantic inventory
+        run: python3 scripts/check-d8-v2-semantic-inventory.py
+      - name: Check S2 geometry
+        run: python3 scripts/check-d8-v2-geometry-s2.py
+      - name: Reproduce S4 candidate
+        run: python3 scripts/check-d8-v2-gauge-s4.py
