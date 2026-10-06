@@ -4,27 +4,47 @@ on:
   pull_request:
     paths:
       - "knowledge/d1-d7-foundation.json"
-      - "lib/surface/domain-surfaces-d1-d4.lisp"
-      - "lib/surface/domain-surfaces-d5.lisp"
-      - "lib/surface/domain-surfaces-d6.lisp"
-      - "lib/surface/semantic-registry.lisp"
+      - "knowledge/d5-ratified.json"
+      - "lib/domains/d1.lisp"
+      - "lib/domains/d2.lisp"
+      - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
+      - "lib/domains/d5.lisp"
+      - "lib/domains/d6.lisp"
+      - "scripts/domain_tables.py"
       - "scripts/generate-domain-tables-d1-d6.py"
-      - "scripts/check-domain-table-readable.lisp"
-      - "lib/generated/domain-table-d1-d6.lisp"
-      - "docs/generated/domain-tables-d1-d6.md"
+      - "scripts/check-domain-surfaces-d1-d4.py"
+      - "scripts/check-domain-surfaces-d5.py"
+      - "scripts/translate-domain-program.py"
+      - "scripts/sens_source_resolver.py"
+      - "scripts/migrate-to-sens-codes.py"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/presentation.rs"
+      - "crates/sens/src/eval/lower.rs"
       - ".github/workflows/domain-tables-d1-d6.yml"
   push:
     branches: [main]
     paths:
       - "knowledge/d1-d7-foundation.json"
-      - "lib/surface/domain-surfaces-d1-d4.lisp"
-      - "lib/surface/domain-surfaces-d5.lisp"
-      - "lib/surface/domain-surfaces-d6.lisp"
-      - "lib/surface/semantic-registry.lisp"
+      - "knowledge/d5-ratified.json"
+      - "lib/domains/d1.lisp"
+      - "lib/domains/d2.lisp"
+      - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
+      - "lib/domains/d5.lisp"
+      - "lib/domains/d6.lisp"
+      - "scripts/domain_tables.py"
       - "scripts/generate-domain-tables-d1-d6.py"
-      - "scripts/check-domain-table-readable.lisp"
-      - "lib/generated/domain-table-d1-d6.lisp"
-      - "docs/generated/domain-tables-d1-d6.md"
+      - "scripts/check-domain-surfaces-d1-d4.py"
+      - "scripts/check-domain-surfaces-d5.py"
+      - "scripts/translate-domain-program.py"
+      - "scripts/sens_source_resolver.py"
+      - "scripts/migrate-to-sens-codes.py"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/presentation.rs"
+      - "crates/sens/src/eval/lower.rs"
       - ".github/workflows/domain-tables-d1-d6.yml"
 
 jobs:
@@ -32,31 +52,24 @@ jobs:
     runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     steps:
       - uses: actions/checkout@v5
-      - name: Check canonical D1-D6 Lisp-first tables
-        id: check
-        shell: bash
-        run: |
-          set +e
-          python3 scripts/generate-domain-tables-d1-d6.py > domain-table-check.log 2>&1
-          code=$?
-          echo "$code" > domain-table-exit-code.txt
-          cat domain-table-check.log
-          exit 0
-      - name: Upload diagnostic
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: domain-table-check
-          path: |
-            domain-table-check.log
-            domain-table-exit-code.txt
-      - name: Enforce result
-        shell: bash
-        run: test "$(cat domain-table-exit-code.txt)" = "0"
+      - name: Validate six canonical domain tables
+        run: python3 scripts/generate-domain-tables-d1-d6.py
+      - name: Check D1-D5 runtime projection
+        run: python3 scripts/check-domain-surfaces-d1-d4.py
+      - name: Check D5 authority
+        run: python3 scripts/check-domain-surfaces-d5.py
+      - name: Check human-surface translation
+        run: python3 scripts/translate-domain-program.py --self-test
       - name: Prove exact-width substrate preserves domain address
         run: |
           cargo test -p sens source_words::tests::same_numeric_payload_at_different_widths_never_collapses
           cargo test -p sens canonical_reader::tests::w3_through_w8_reach_ast_with_exact_domain_preserved
+      - name: Prove direct exact-domain human lowering
+        run: |
+          cargo test -p sens uk_sa_
+          cargo test -p sens necessary_forms_lower_to_exact_d4_calls
+          cargo test -p sens exact_domain_human_presentation_round_trips_d1_d4_surfaces
+          cargo test -p sens sanskrit_presentation_projects_domain_identities_inside_lists
       - name: Record Lisp table-reader gap
         run: |
-          echo "ordinary read-all width bridge tracked by #3946; acceptance witness is scripts/check-domain-table-readable.lisp"
+          echo "ordinary read-all width bridge tracked by #3946; canonical tables are lib/domains/d1.lisp..d6.lisp"
