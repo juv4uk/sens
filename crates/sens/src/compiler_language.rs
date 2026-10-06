@@ -13,9 +13,9 @@
 
 use crate::{
     domain_identity_shape_mechanism, eval_parsed_expressions, eval_program, load_core_library,
-    sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
-    ErrorKind, Exactness,
-    Expr, ExprKind, LanguageError, Session, Span, Value,
+    lower_program, parse, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
+    CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
+    Session, Span, Value,
 };
 use std::rc::Rc;
 
@@ -55,6 +55,10 @@ const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-rat
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
+const PROGRAM_AST_VALUE_NAME: &str = "__compiler_program_ast";
+const D3_PROOF_VALUE_NAME: &str = "__compiler_d3_proof";
+const D4_PROOF_VALUE_NAME: &str = "__compiler_d4_proof";
+const PROGRAM_PROVENANCE_VALUE_NAME: &str = "__compiler_program_provenance";
 
 fn invalid_projection(message: impl Into<String>) -> LanguageError {
     LanguageError::new(ErrorKind::InvalidForm, message, Span::default())
@@ -458,6 +462,137 @@ pub fn compiler_semantic_input_from_sens(
     }))
 }
 
+fn compiler_ast_transport_node(expr: &Expr) -> Result<Value, LanguageError> {
+    let children = |items: &[Expr]| -> Result<Value, LanguageError> {
+        Ok(Value::list([
+            Value::Symbol(Rc::from("children")),
+            Value::list(
+                items
+                    .iter()
+                    .map(compiler_ast_transport_node)
+                    .collect::<Result<Vec<_>, _>>()?,
+            ),
+        ]))
+    };
+
+    match &expr.kind {
+        ExprKind::DomainCall(identity, arguments) => Ok(Value::list([
+            Value::Symbol(Rc::from("domain-call")),
+            Value::DomainIdentity(DomainIdentity::from_source_word(identity.source_word())),
+            Value::list(
+                arguments
+                    .iter()
+                    .map(compiler_ast_transport_node)
+                    .collect::<Result<Vec<_>, _>>()?,
+            ),
+        ])),
+        ExprKind::List(items) => children(items),
+        ExprKind::Pair(head, tail) => children(&[(**head).clone(), (**tail).clone()]),
+        ExprKind::Sid(_) | ExprKind::Call(_, _) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "legacy Sid8/Call cannot enter current compiler-program AST transport",
+            expr.span,
+        )),
+        ExprKind::Number(_, _)
+        | ExprKind::Rational(_)
+        | ExprKind::BinaryNumber(_)
+        | ExprKind::NumericBuffer(_)
+        | ExprKind::DomainIdentity(_)
+        | ExprKind::String(_)
+        | ExprKind::Symbol(_)
+        | ExprKind::Local { .. } => Ok(Value::Nil),
+    }
+}
+
+fn compiler_program_ast_transport(expressions: &[Expr]) -> Result<Value, LanguageError> {
+    Ok(Value::list([
+        Value::Symbol(Rc::from("children")),
+        Value::list(
+            expressions
+                .iter()
+                .map(compiler_ast_transport_node)
+                .collect::<Result<Vec<_>, _>>()?,
+        ),
+    ]))
+}
+
+fn compiler_program_provenance_value(source: &str) -> Value {
+    Value::list([
+        Value::String(Rc::from(sha256_hex(source.as_bytes()))),
+        Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
+        Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
+        Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
+    ])
+}
+
+fn compiler_program_artifact_call() -> Expr {
+    Expr {
+        kind: ExprKind::List(Rc::from(
+            vec![
+                symbol("compiler-compile-program"),
+                symbol(SHAPE_MECHANISM_NAME),
+                symbol(PROGRAM_AST_VALUE_NAME),
+                symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
+                symbol(D3_PROOF_VALUE_NAME),
+                symbol(D4_PROOF_VALUE_NAME),
+                symbol(PROGRAM_PROVENANCE_VALUE_NAME),
+            ]
+            .into_boxed_slice(),
+        )),
+        span: Span::default(),
+    }
+}
+
+fn compiler_program_artifact_from_expressions(
+    lowered: &[Expr],
+    provenance_source: &str,
+) -> Result<Value, LanguageError> {
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+
+    session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    session.environment.define(
+        D3_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D3_PROOF_REF)),
+    );
+    session.environment.define(
+        D4_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D4_PROOF_REF)),
+    );
+    session.environment.define(
+        PROGRAM_PROVENANCE_VALUE_NAME,
+        compiler_program_provenance_value(provenance_source),
+    );
+    session.environment.define(
+        PROGRAM_AST_VALUE_NAME,
+        compiler_program_ast_transport(lowered)?,
+    );
+
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
+}
+
+/// Compile one exact current SENS source bundle into the backend-neutral
+/// whole-program request artifact by executing the SENS-written compiler body.
+///
+/// Rust owns only parser -> canonical AST-data transport and the bootstrap
+/// installation of already-generated structural-law values. It never chooses
+/// an identity's compiler role or proof.
+pub fn compiler_program_artifact_from_sens(source: &str) -> Result<Value, LanguageError> {
+    let parsed = parse(source)?;
+    let lowered = lower_program(&parsed);
+    compiler_program_artifact_from_expressions(&lowered, source)
+}
+
 pub fn compiler_execution_role_from_sens(
     identity: CoreDomainIdentity,
 ) -> Result<Option<CompilerExecutionRole>, LanguageError> {
@@ -554,6 +689,157 @@ mod tests {
                 .expect("D8 must fail closed as no compiler input")
                 .is_none()
         );
+    }
+
+    fn list_values(value: &Value) -> Option<Vec<&Value>> {
+        let mut out = Vec::new();
+        let mut cursor = value;
+        loop {
+            match cursor {
+                Value::Nil => return Some(out),
+                Value::Pair(head, tail) => {
+                    out.push(head.as_ref());
+                    cursor = tail.as_ref();
+                }
+                _ => return None,
+            }
+        }
+    }
+
+    fn domain_call(identity: CoreDomainIdentity, arguments: Vec<Expr>) -> Expr {
+        Expr {
+            kind: ExprKind::DomainCall(identity, Rc::from(arguments.into_boxed_slice())),
+            span: Span::default(),
+        }
+    }
+
+    fn artifact_requests(value: &Value) -> Option<Vec<&Value>> {
+        let outer = list_values(value)?;
+        if outer.len() != 2 {
+            return None;
+        }
+        if !matches!(outer[0], Value::Symbol(name) if name.as_ref() == "compiler-compilation-artifact/1") {
+            return None;
+        }
+        list_values(outer[1])
+    }
+
+    #[test]
+    fn whole_program_compiler_walks_real_nucleus_and_reaches_all_nine_roles() {
+        let artifact = compiler_program_artifact_from_sens(COMPILER_NUCLEUS_SOURCE)
+            .expect("whole current compiler nucleus artifact");
+        let second = compiler_program_artifact_from_sens(COMPILER_NUCLEUS_SOURCE)
+            .expect("whole current compiler nucleus artifact is deterministic");
+        assert_eq!(artifact, second, "whole-program artifact must be deterministic");
+
+        let requests = artifact_requests(&artifact).expect("versioned whole-program artifact");
+        assert!(
+            requests.len() >= 9,
+            "real compiler nucleus must emit at least the nine current semantic requests"
+        );
+
+        let mut roles = std::collections::HashSet::new();
+        let mut saw_d3_proof = false;
+        let mut saw_d4_proof = false;
+        for request in requests {
+            let row = list_values(request).expect("compiler request row");
+            assert_eq!(row.len(), 4);
+            match row[0] {
+                Value::DomainIdentity(identity) => {
+                    assert!(
+                        matches!(identity.width(), 3 | 4),
+                        "whole current compiler artifact admitted unexpected domain {identity:?}"
+                    );
+                }
+                other => panic!("request identity is not exact DomainIdentity: {other}"),
+            }
+            match row[1] {
+                Value::Symbol(role) => {
+                    roles.insert(role.to_string());
+                }
+                other => panic!("request role is not a symbol: {other}"),
+            }
+            match row[2] {
+                Value::String(proof) if proof.as_ref() == COMPILER_D3_PROOF_REF => {
+                    saw_d3_proof = true;
+                }
+                Value::String(proof) if proof.as_ref() == COMPILER_D4_PROOF_REF => {
+                    saw_d4_proof = true;
+                }
+                other => panic!("unexpected compiler proof: {other}"),
+            }
+        }
+
+        let expected = [
+            "quote-form",
+            "atom-predicate",
+            "selector-tail",
+            "selector-head",
+            "atom-equality",
+            "cond-form",
+            "pair-construct",
+            "lambda-form",
+            "define-form",
+        ]
+        .into_iter()
+        .map(str::to_string)
+        .collect::<std::collections::HashSet<_>>();
+        assert_eq!(roles, expected);
+        assert!(saw_d3_proof && saw_d4_proof);
+    }
+
+    #[test]
+    fn whole_program_compiler_owns_quote_opacity() {
+        let quoted_d8 = domain_call(
+            d3(0b001),
+            vec![domain_call(
+                CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                    crate::Bit8::new(0b0000_0100).unwrap(),
+                )),
+                vec![],
+            )],
+        );
+        let artifact = compiler_program_artifact_from_expressions(
+            &[quoted_d8],
+            "(synthetic quote-opacity witness)",
+        )
+        .expect("QUOTE child is opaque compiler data");
+        let requests = artifact_requests(&artifact).expect("QUOTE artifact");
+        assert_eq!(requests.len(), 1, "quoted D8 child must not be traversed");
+        let row = list_values(requests[0]).unwrap();
+        assert!(matches!(row[1], Value::Symbol(role) if role.as_ref() == "quote-form"));
+    }
+
+    #[test]
+    fn same_payload_wrong_domain_and_d8_fail_closed_in_whole_program_compile() {
+        let d3_car = domain_call(d3(0b100), vec![]);
+        let d3_artifact = compiler_program_artifact_from_expressions(
+            &[d3_car],
+            "(synthetic D3 payload witness)",
+        )
+        .expect("D3 CAR compiler program");
+        assert!(artifact_requests(&d3_artifact).is_some());
+
+        let d4_same_payload = domain_call(d4(0b0100), vec![]);
+        let wrong_domain = compiler_program_artifact_from_expressions(
+            &[d4_same_payload],
+            "(synthetic D4 same-payload witness)",
+        )
+        .expect("unsupported D4 identity returns fail-closed language value");
+        assert!(matches!(wrong_domain, Value::Symbol(name) if name.as_ref() == "compiler-failure"));
+
+        let d8 = domain_call(
+            CoreDomainIdentity::D8(crate::CoreD8::from_word(
+                crate::Bit8::new(0b0000_0100).unwrap(),
+            )),
+            vec![],
+        );
+        let d8_result = compiler_program_artifact_from_expressions(
+            &[d8],
+            "(synthetic D8 witness)",
+        )
+        .expect("D8 returns fail-closed language value");
+        assert!(matches!(d8_result, Value::Symbol(name) if name.as_ref() == "compiler-failure"));
     }
 
     #[test]
