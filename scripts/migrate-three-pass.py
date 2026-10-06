@@ -158,7 +158,7 @@ def tokenize(source: str) -> list[Tok]:
             out.append(Tok("STRING",source[start:i],start))
             continue
         start=i
-        while i<n and (not source[i].isspace()) and source[i] not in "()'\"\`,": 
+        while i<n and (not source[i].isspace()) and source[i] not in ("(", ")", "'", '"', "`", ","):
             i+=1
         text=source[start:i]
         if text==".":
