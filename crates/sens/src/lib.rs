@@ -12,6 +12,8 @@ mod bignum;
 mod binary_number;
 mod bits;
 mod canonical_reader;
+pub mod compilation_artifact;
+pub mod compilation_artifact_producer;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
@@ -532,6 +534,10 @@ pub fn fasl_encode(expressions: &[Expr], source_hash: &[u8; 32]) -> Vec<u8> {
 pub fn sha256_source(input: &[u8]) -> [u8; 32] {
     eval::digest_sha256(input)
 }
+pub use compilation_artifact::{
+    CompilationArtifact, CompilationMetadata, CompilerNucleusRef, ContractAuthority,
+    MechanismRequirement, ProofLineage, ARTIFACT_VERSION_MAJOR, ARTIFACT_VERSION_MINOR,
+};
 pub use syntax::{Exactness, Expr, ExprKind, Span};
 pub use value::{Closure, NumericBuffer, Rational, Value};
 
