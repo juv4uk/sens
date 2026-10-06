@@ -516,12 +516,11 @@ fn compiler_program_data_expr_value(expr: &Expr) -> Result<Value, LanguageError>
     }
 }
 
-fn compiler_program_data_value(expressions: &[Expr]) -> Result<Value, LanguageError> {
-    let wire = wire_encode_program(expressions);
-    let decoded = wire_decode_program(&wire).ok_or_else(|| {
+fn compiler_program_data_value(program_data: &[u8]) -> Result<Value, LanguageError> {
+    let decoded = wire_decode_program(program_data).ok_or_else(|| {
         LanguageError::new(
             ErrorKind::InvalidForm,
-            "canonical compiler-program-data/1 SW1 round-trip failed",
+            "canonical compiler-program-data/1 SW1 decode failed",
             Span::default(),
         )
     })?;
@@ -563,8 +562,8 @@ fn compiler_program_artifact_call() -> Expr {
     }
 }
 
-fn compiler_program_artifact_from_expressions(
-    lowered: &[Expr],
+fn compiler_program_artifact_from_program_data_with_provenance(
+    program_data: &[u8],
     provenance_source: &str,
 ) -> Result<Value, LanguageError> {
     let mut session = Session::default();
@@ -593,11 +592,26 @@ fn compiler_program_artifact_from_expressions(
     );
     session.environment.define(
         PROGRAM_AST_VALUE_NAME,
-        compiler_program_data_value(lowered)?,
+        compiler_program_data_value(program_data)?,
     );
 
     eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
+}
+
+/// Consume canonical `compiler-program-data/1` (SW1) bytes and execute the
+/// SENS-written whole-program compiler body.
+///
+/// The host adapter decodes bytes and installs representation-only mechanisms
+/// plus provenance-bound structural laws. It does not select compiler roles,
+/// proofs, traversal policy, or backend mechanisms.
+pub fn compiler_program_artifact_from_program_data(
+    program_data: &[u8],
+) -> Result<Value, LanguageError> {
+    compiler_program_artifact_from_program_data_with_provenance(
+        program_data,
+        "compiler-program-data/1",
+    )
 }
 
 /// Compile one exact current SENS source bundle into the backend-neutral
@@ -609,7 +623,8 @@ fn compiler_program_artifact_from_expressions(
 pub fn compiler_program_artifact_from_sens(source: &str) -> Result<Value, LanguageError> {
     let parsed = parse(source)?;
     let lowered = lower_program(&parsed);
-    compiler_program_artifact_from_expressions(&lowered, source)
+    let program_data = wire_encode_program(&lowered);
+    compiler_program_artifact_from_program_data_with_provenance(&program_data, source)
 }
 
 pub fn compiler_execution_role_from_sens(
@@ -836,8 +851,8 @@ mod tests {
                 vec![],
             )],
         );
-        let artifact = compiler_program_artifact_from_expressions(
-            &[quoted_d8],
+        let artifact = compiler_program_artifact_from_program_data_with_provenance(
+            &wire_encode_program(&[quoted_d8]),
             "(synthetic quote-opacity witness)",
         )
         .expect("QUOTE child is opaque compiler data");
@@ -858,8 +873,8 @@ mod tests {
         assert!(artifact_requests(&d3_artifact).is_some());
 
         let d4_same_payload = domain_call(d4(0b0100), vec![]);
-        let wrong_domain = compiler_program_artifact_from_expressions(
-            &[d4_same_payload],
+        let wrong_domain = compiler_program_artifact_from_program_data_with_provenance(
+            &wire_encode_program(&[d4_same_payload]),
             "(synthetic D4 same-payload witness)",
         )
         .expect("unsupported D4 identity returns fail-closed language value");
