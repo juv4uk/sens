@@ -1,10 +1,10 @@
 //! Canonical visible-binary source boundary for SENS .lisp files.
 //!
 //! This module owns source token shape only. It deliberately does not assign
-//! D1-D8 meaning; semantic wrappers consume these exact-width words later.
+//! D1-D9 meaning; semantic wrappers consume these exact-width words later.
 
 use crate::{
-    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, ErrorKind, LanguageError, Span,
+    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, ErrorKind, LanguageError, Span,
 };
 use std::fmt;
 
@@ -26,6 +26,7 @@ pub enum BinarySourceWord {
     W6(Bit6),
     W7(Bit7),
     W8(Bit8),
+    W9(Bit9),
 }
 
 impl BinarySourceWord {
@@ -39,20 +40,24 @@ impl BinarySourceWord {
             Self::W6(_) => 6,
             Self::W7(_) => 7,
             Self::W8(_) => 8,
+            Self::W9(_) => 9,
         }
     }
 
     /// Mechanical payload only. Width must remain attached to the enum value.
-    pub const fn packed_bits(self) -> u8 {
+    ///
+    /// `u16` is required so W9 can never be truncated to the historical byte lane.
+    pub const fn packed_bits(self) -> u16 {
         match self {
-            Self::W1(word) => word.packed_bits(),
-            Self::W2(word) => word.packed_bits(),
-            Self::W3(word) => word.packed_bits(),
-            Self::W4(word) => word.packed_bits(),
-            Self::W5(word) => word.packed_bits(),
-            Self::W6(word) => word.packed_bits(),
-            Self::W7(word) => word.packed_bits(),
-            Self::W8(word) => word.packed_bits(),
+            Self::W1(word) => u16::from(word.packed_bits()),
+            Self::W2(word) => u16::from(word.packed_bits()),
+            Self::W3(word) => u16::from(word.packed_bits()),
+            Self::W4(word) => u16::from(word.packed_bits()),
+            Self::W5(word) => u16::from(word.packed_bits()),
+            Self::W6(word) => u16::from(word.packed_bits()),
+            Self::W7(word) => u16::from(word.packed_bits()),
+            Self::W8(word) => u16::from(word.packed_bits()),
+            Self::W9(word) => word.packed_bits(),
         }
     }
 
@@ -134,11 +139,19 @@ impl BinarySourceWord {
         }
     }
 
-    /// Total exact-width qualified lift for the W1→W8 carrier ladder.
+    /// Lift an exact nine-bit source word into the owner-ratified D9 carrier (#4008).
+    /// Runtime callability remains a separate mechanism decision.
+    pub const fn d9(self) -> Option<crate::CoreD9> {
+        match self {
+            Self::W9(word) => Some(crate::CoreD9::from_word(word)),
+            _ => None,
+        }
+    }
+
+    /// Total exact-width qualified lift for the W1→W9 carrier ladder.
     ///
     /// Contract 11.8: D1-D9 have current semantic authority.
-    /// This helper still materializes only W1-W8; D9 remains fail-closed here
-    /// until an exact W9 carrier is implemented. Callability is separate.
+    /// D1-D9 identity is materialized exactly; callability remains separate.
     pub const fn domain_identity(self) -> crate::DomainIdentity {
         crate::DomainIdentity::from_source_word(self)
     }
@@ -193,6 +206,12 @@ impl From<crate::CoreD8> for BinarySourceWord {
     }
 }
 
+impl From<crate::CoreD9> for BinarySourceWord {
+    fn from(value: crate::CoreD9) -> Self {
+        Self::W9(value.word())
+    }
+}
+
 impl fmt::Display for BinarySourceWord {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -220,7 +239,7 @@ pub struct BinarySourceToken {
 /// Tokenize canonical visible-binary SENS source.
 ///
 /// Whitespace separates words. Semicolon starts a comment through end-of-line.
-/// Every non-comment token must contain only 0/1 and have width 1..=8.
+/// Every non-comment token must contain only 0/1 and have width 1..=9.
 /// This function performs no semantic lookup and no human-name fallback.
 pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>, LanguageError> {
     let bytes = source.as_bytes();
@@ -245,10 +264,10 @@ pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>,
                 }
                 let token = &source[start..cursor];
                 let word = parse_word(token).ok_or_else(|| {
-                    let message = if token.len() > 8
+                    let message = if token.len() > 9
                         && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
                     {
-                        "canonical SENS source word exceeds bounded 8-bit carrier"
+                        "canonical SENS source word exceeds current 9-bit carrier"
                     } else {
                         "canonical SENS source accepts only exact-width binary words"
                     };
@@ -270,27 +289,29 @@ pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>,
 }
 
 fn parse_word(token: &str) -> Option<BinarySourceWord> {
-    if token.is_empty() || token.len() > 8 {
+    if token.is_empty() || token.len() > 9 {
         return None;
     }
     if !token.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
         return None;
     }
 
-    let mut packed = 0u8;
+    let mut packed = 0u16;
     for byte in token.bytes() {
-        packed = (packed << 1) | (byte - b'0');
+        packed = (packed << 1) | u16::from(byte - b'0');
     }
 
+    let small = || u8::try_from(packed).ok();
     Some(match token.len() {
-        1 => BinarySourceWord::W1(Bit1::new(packed)?),
-        2 => BinarySourceWord::W2(Bit2::new(packed)?),
-        3 => BinarySourceWord::W3(Bit3::new(packed)?),
-        4 => BinarySourceWord::W4(Bit4::new(packed)?),
-        5 => BinarySourceWord::W5(Bit5::new(packed)?),
-        6 => BinarySourceWord::W6(Bit6::new(packed)?),
-        7 => BinarySourceWord::W7(Bit7::new(packed)?),
-        8 => BinarySourceWord::W8(Bit8::new(packed)?),
+        1 => BinarySourceWord::W1(Bit1::new(small()?)?),
+        2 => BinarySourceWord::W2(Bit2::new(small()?)?),
+        3 => BinarySourceWord::W3(Bit3::new(small()?)?),
+        4 => BinarySourceWord::W4(Bit4::new(small()?)?),
+        5 => BinarySourceWord::W5(Bit5::new(small()?)?),
+        6 => BinarySourceWord::W6(Bit6::new(small()?)?),
+        7 => BinarySourceWord::W7(Bit7::new(small()?)?),
+        8 => BinarySourceWord::W8(Bit8::new(small()?)?),
+        9 => BinarySourceWord::W9(Bit9::new(packed)?),
         _ => return None,
     })
 }
@@ -310,6 +331,30 @@ mod tests {
         assert_eq!(tokens[0].span, Span { start: 0, end: 2 });
         assert_eq!(tokens[1].span, Span { start: 3, end: 6 });
         assert_eq!(tokens[2].span, Span { start: 7, end: 9 });
+    }
+
+    #[test]
+    fn w9_source_token_preserves_high_bit_and_exact_width() {
+        let tokens = parse_binary_source_words("000000001 100000001 111111111").unwrap();
+        assert_eq!(
+            tokens.iter().map(|t| t.word.width()).collect::<Vec<_>>(),
+            [9, 9, 9]
+        );
+        assert_eq!(tokens[0].word.packed_bits(), 1);
+        assert_eq!(tokens[1].word.packed_bits(), 257);
+        assert_eq!(tokens[2].word.packed_bits(), 511);
+        assert_eq!(tokens[1].word.to_string(), "100000001");
+    }
+
+    #[test]
+    fn w9_does_not_alias_same_low_byte_w8() {
+        let tokens = parse_binary_source_words("00000001 100000001").unwrap();
+        assert_eq!(tokens[0].word.packed_bits(), 1);
+        assert_eq!(tokens[1].word.packed_bits(), 257);
+        assert_ne!(tokens[0].word, tokens[1].word);
+        assert!(tokens[0].word.d9().is_none());
+        assert!(tokens[1].word.d8().is_none());
+        assert_eq!(tokens[1].word.d9().unwrap().word().packed_bits(), 257);
     }
 
     #[test]
