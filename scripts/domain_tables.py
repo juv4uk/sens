@@ -9,8 +9,9 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 DOMAIN_TABLES = tuple(ROOT / "lib" / "domains" / f"d{width}.lisp" for width in range(1, 7))
+D7_TABLE = ROOT / "lib" / "domains" / "d7.lisp"
 D8_TABLE = ROOT / "lib" / "domains" / "d8.lisp"
-CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D8_TABLE,)
+CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D7_TABLE, D8_TABLE,)
 
 TOKEN = r'(\(\)|"[^"]*"|[^()\s]+)'
 ROW = re.compile(
@@ -83,7 +84,7 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
                 sym=decode(sym),
             )
         )
-    expected = 1 << expected_width
+    expected = 126 if expected_width == 7 else 1 << expected_width
     if len(rows) != expected:
         raise ValueError(f"{path}: expected {expected} rows, found {len(rows)}")
     return rows
