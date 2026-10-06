@@ -89,6 +89,18 @@ class ThreePassMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.MigrationError,"D7/Text7 is deferred"):
             self.migrate("(CAR x)\n")
 
+    def test_full_file_scan_counts_all_three_pass_heads_before_d7(self):
+        resolver=self.resolver()
+        diagnostics=mod.scan_file(
+            "(00000101 x)\n(car y)\n(PLUS a b)\n",
+            resolver,
+        )
+        self.assertEqual(resolver.counts["pass1-sens8"],1)
+        self.assertEqual(resolver.counts["pass2-my-lisp"],1)
+        self.assertEqual(resolver.counts["pass3-lisp15"],1)
+        self.assertEqual(len(diagnostics),4)
+        self.assertTrue(all("D7/Text7 is deferred" in d["reason"] for d in diagnostics))
+
     def test_string_blocks_until_d7_role_is_known(self):
         with self.assertRaisesRegex(mod.MigrationError,"deferred D7/Text7"):
             self.migrate('(CAR "text")\n')
