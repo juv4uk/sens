@@ -277,3 +277,34 @@
          (00000001 unsupported-current-domain-structural-u64))
         (t
          (x86-encode-admitted-program-or-reject forms))))))
+
+
+; #4000 exact-domain bounded composition for current D3 EQ + COND.
+; This route intentionally does not expose an independent numeric-boolean EQ
+; machine API. The equality decision stays internal to the already-witnessed
+; two-arm composition; the language boundary remains exact D1/EMPTY according
+; to current D3 law.
+(00001001 x86-lower-current-eq-cond-u64-forms
+  (00001000 (eq-identity cond-identity left right then-value else-value)
+    (00000111
+      ((00100010 eq-identity 101)
+       (00000111
+         ((00100010 cond-identity 110)
+          (x86-lower-eq-cond-u64-forms
+            left right then-value else-value))
+         (t
+          (00000001 unsupported-current-domain-eq-cond-u64))))
+      (t
+       (00000001 unsupported-current-domain-eq-cond-u64)))))
+
+(00001001 x86-encode-current-eq-cond-u64
+  (00001000 (eq-identity cond-identity left right then-value else-value)
+    (10011100 ((forms
+            (x86-lower-current-eq-cond-u64-forms
+              eq-identity cond-identity
+              left right then-value else-value)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-eq-cond-u64))
+         (00000001 unsupported-current-domain-eq-cond-u64))
+        (t
+         (x86-encode-admitted-program-or-reject forms))))))
