@@ -126,5 +126,14 @@
       "TCP/file transport",
       "usage counters"
     ]
+  },
+  "ownership_gate": {
+    "authority": "#4033",
+    "artifact": "knowledge/island-ownership-gate-v1.json",
+    "status": "RATIFICATION-BLOCKER",
+    "definite_noncore_selected": 55,
+    "review_required_selected": 15,
+    "no_new_definite_noncore": true,
+    "rule": "Existing definite non-Core rows may only be removed/reclassified. Review-required rows need an explicit ownership witness before D10 ratification."
   }
 }
