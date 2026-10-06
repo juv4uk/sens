@@ -2,19 +2,19 @@
 
 **Статус:** RESEARCH / UNRATIFIED  
 **Authority task:** #4012  
-**Current ratified foundation:** #3960 / Contract 11.7 / D1–D8
+**Current ratified foundation:** #4008 / Contract 11.8 / D1–D9
 
 ## Стартова точка
 
-D9 уже має повний research inventory 512/512, але ще не ратифікований.
+D9 уже owner-ratified 512/512 під #4008.
 
-Тому D10 не може просто успадкувати D9 coordinates.
+Тому D9 coordinates є нормативними D9 identities, але вони не породжують D10 meanings автоматично.
 
-Єдина геометрія, яка переходить зараз, — доведений selector-generator law.
+У D10 зараз переходить лише доведений selector-generator law.
 
 ## Перші 256 meanings
 
-D9 має 128 selector candidates із PROVED-SELECTOR-GENERATOR.
+D9 має 128 selector residents із proved-selector-generator basis.
 
 Для кожного:
 
@@ -38,12 +38,12 @@ ratified D10 residents          0
 ## Authority boundary
 
 ```text
-D9 semantic inventory = donor evidence
-D9 unratified placement = no D10 authority
-D9 proved selector law = may cross
+D9 coordinate = normative D9 parent identity
+D9 parent + one extra bit != automatic D10 semantic child
+proved selector generator = may cross
 ```
 
-Це дозволяє почати D10 до ратифікації D9, не змішуючи research coordinate choice з semantic authority.
+Це дозволяє використовувати ратифікований D9 як стабільну батьківську основу, не плутаючи ширину з новим meaning.
 
 ## Заборонено
 
