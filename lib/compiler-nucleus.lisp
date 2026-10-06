@@ -549,3 +549,71 @@
       d3-proof
       d4-proof
       provenance)))
+
+
+; #3839 whole-program artifact completion slice.
+;
+; DIGEST is an injected representation-only capability.  It may canonicalize
+; and SHA-256 hash the ordinary SENS value supplied to it, but it owns no
+; identity meaning, role, proof or backend policy.
+;
+; Artifact v2 ordinary-data shape:
+;   (compiler-compilation-artifact/2
+;     compiler-program-data/1
+;     program-sha256
+;     request-sequence-sha256
+;     provenance
+;     ordered-requests
+;     required-capabilities
+;     canonical-backend-neutral)
+
+(визначити compiler-whole-artifact-value
+  (функція (digest program provenance requests)
+    (сполучити
+      (як-є compiler-compilation-artifact/2)
+      (сполучити
+        (як-є compiler-program-data/1)
+        (сполучити
+          (digest program)
+          (сполучити
+            (digest requests)
+            (сполучити
+              provenance
+              (сполучити
+                requests
+                (сполучити
+                  ()
+                  (сполучити
+                    (як-є canonical-backend-neutral)
+                    ()))))))))))
+
+(визначити compiler-artifact-result
+  (функція (digest program provenance compile-result)
+    (за-умовою
+      ((compiler-result-success compile-result)
+       (compiler-result-ok
+         (сполучити
+           (compiler-whole-artifact-value
+             digest
+             program
+             provenance
+             (compiler-result-requests compile-result))
+           ())))
+      ((compiler-true ()) (compiler-result-fail)))))
+
+(визначити compiler-compile-program-artifact
+  (функція
+    (shape-or-empty decompose digest program d3-law d4-law d3-proof d4-proof provenance)
+    (compiler-artifact-result
+      digest
+      program
+      provenance
+      (compiler-compile-program
+        shape-or-empty
+        decompose
+        program
+        d3-law
+        d4-law
+        d3-proof
+        d4-proof
+        provenance))))
