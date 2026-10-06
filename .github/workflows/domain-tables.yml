@@ -1,18 +1,20 @@
-name: domain-tables-d1-d6
+name: domain-tables
 
 on:
   pull_request:
     paths:
-      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d1-d8-foundation.json"
       - "knowledge/d5-ratified.json"
+      - "knowledge/d8-ratified.json"
       - "lib/domains/d1.lisp"
       - "lib/domains/d2.lisp"
       - "lib/domains/d3.lisp"
       - "lib/domains/d4.lisp"
       - "lib/domains/d5.lisp"
       - "lib/domains/d6.lisp"
+      - "lib/domains/d8.lisp"
       - "scripts/domain_tables.py"
-      - "scripts/check-domain-tables-d1-d6.py"
+      - "scripts/check-domain-tables.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
@@ -22,20 +24,22 @@ on:
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
-      - ".github/workflows/domain-tables-d1-d6.yml"
+      - ".github/workflows/domain-tables.yml"
   push:
     branches: [main]
     paths:
-      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d1-d8-foundation.json"
       - "knowledge/d5-ratified.json"
+      - "knowledge/d8-ratified.json"
       - "lib/domains/d1.lisp"
       - "lib/domains/d2.lisp"
       - "lib/domains/d3.lisp"
       - "lib/domains/d4.lisp"
       - "lib/domains/d5.lisp"
       - "lib/domains/d6.lisp"
+      - "lib/domains/d8.lisp"
       - "scripts/domain_tables.py"
-      - "scripts/check-domain-tables-d1-d6.py"
+      - "scripts/check-domain-tables.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
@@ -45,15 +49,15 @@ on:
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
-      - ".github/workflows/domain-tables-d1-d6.yml"
+      - ".github/workflows/domain-tables.yml"
 
 jobs:
   canonical-domain-tables:
     runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     steps:
       - uses: actions/checkout@v5
-      - name: Validate six canonical domain tables
-        run: python3 scripts/check-domain-tables-d1-d6.py
+      - name: Validate canonical domain tables
+        run: python3 scripts/check-domain-tables.py
       - name: Check D1-D5 runtime projection
         run: python3 scripts/check-domain-surfaces-d1-d4.py
       - name: Check D5 authority
@@ -72,4 +76,4 @@ jobs:
           cargo test -p sens sanskrit_presentation_projects_domain_identities_inside_lists
       - name: Record Lisp table-reader gap
         run: |
-          echo "ordinary read-all width bridge tracked by #3946; canonical tables are lib/domains/d1.lisp..d6.lisp"
+          echo "ordinary read-all width bridge tracked by #3946; canonical human tables include lib/domains/d8.lisp"

@@ -24,6 +24,7 @@
 (00001001 d4 (load-domain "lib/domains/d4.lisp"))
 (00001001 d5 (load-domain "lib/domains/d5.lisp"))
 (00001001 d6 (load-domain "lib/domains/d6.lisp"))
+(00001001 d8 (load-domain "lib/domains/d8.lisp"))
 
 (00000111
   ((00000011 (00000101 d1) (00000001 domain-table/1))
@@ -40,6 +41,8 @@
                   (00000111
                     ((00000011 (00101000 (table-rows d6)) 64)
                      (00000111
+                       ((00000011 (00101000 (table-rows d8)) 256)
+                        (00000111
                        ((00000011 (first-key-text d1) "0")
                         (00000111
                           ((00000011 (first-key-text d2) "00")
@@ -51,13 +54,17 @@
                                    ((00000011 (first-key-text d5) "00000")
                                     (00000111
                                       ((00000011 (first-key-text d6) "000000")
-                                       (01001000 "DOMAIN-TABLE-READ: PASS files=6 rows=126 widths=1..6"))
+                                       (00000111
+                                         ((00000011 (first-key-text d8) "00000000")
+                                          (01001000 "DOMAIN-TABLE-READ: PASS files=7 rows=382 widths=1..6,8"))
+                                         (t (domain-table-width-loss-d8))))
                                       (t (domain-table-width-loss-d6))))
                                    (t (domain-table-width-loss-d5))))
                                 (t (domain-table-width-loss-d4))))
                              (t (domain-table-width-loss-d3))))
                           (t (domain-table-width-loss-d2))))
                        (t (domain-table-width-loss-d1))))
+                          (t (domain-table-d8-count-failure))))
                     (t (domain-table-d6-count-failure))))
                  (t (domain-table-d5-count-failure))))
               (t (domain-table-d4-count-failure))))
