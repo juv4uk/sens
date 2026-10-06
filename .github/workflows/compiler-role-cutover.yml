@@ -50,7 +50,7 @@ jobs:
   cutover:
     # Rust/Python control-plane gate: use GitHub-hosted CPU capacity.
     # Do not reserve GPU runners or depend on an online local guix label.
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
