@@ -21,6 +21,7 @@ SPEC.loader.exec_module(mod)
 from sens_source_resolver import build_resolver
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
+NUMBER_WIDTHS = ROOT / "knowledge" / "number-width-ratified.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
@@ -147,8 +148,19 @@ class SensCodeMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.BinaryMigrationError, "dynamic-symbol-head"):
             self.binary("(sqrt-iter x n)\n")
 
+    def test_number_width_ladder_is_owner_ratified_24_48_96(self):
+        import json
+        policy = json.loads(NUMBER_WIDTHS.read_text(encoding="utf-8"))
+        self.assertEqual(policy["status"], "owner-ratified")
+        self.assertEqual(policy["first_width_bits"], 24)
+        self.assertEqual(policy["growth_law"], "width(n) = 24 * 2^n")
+        self.assertEqual(policy["ratified_prefix_bits"][:3], [24, 48, 96])
+
     def test_numeric_literal_is_number_blocker_not_text7_digits(self):
-        with self.assertRaisesRegex(mod.BinaryMigrationError, "belongs to Number, not Text7"):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "ratified Number widths are 24 -> 48 -> 96"
+        ):
             self.binary("(LIST 25)\n")
 
     def test_comments_are_absent_and_do_not_change_binary_output(self):
