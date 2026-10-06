@@ -111,7 +111,7 @@ pub struct ConformanceCorpus {
 /// Authority facts for the corpus.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AuthorityInfo {
-    /// Language-contract.lisp version (e.g., "11.6").
+    /// Language-contract.lisp version (e.g., "11.7").
     pub contract_version: String,
 
     /// Contract SHA-256.
@@ -120,7 +120,7 @@ pub struct AuthorityInfo {
     /// SENS repository commit SHA.
     pub upstream_sha: String,
 
-    /// Domain laws referenced (D1-D7 ratification refs).
+    /// Domain laws referenced (D1-D8 ratification refs).
     pub ratified_laws: Vec<String>,
 }
 
@@ -131,7 +131,7 @@ pub struct AuthorityInfo {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct NegativeControl {
     /// What this negative control tests.
-    /// e.g., "wrong-domain-equal-payload", "d8-research-invocation",
+    /// e.g., "wrong-domain-equal-payload", "d8-missing-mechanism",
     /// "d7-non-callable-role", "d6-missing-mechanism"
     pub control_name: String,
 
@@ -188,7 +188,7 @@ mod tests {
     fn observable_serializes_to_json() {
         let observable = CanonicalObservable {
             case_id: "d3-001-quote-empty".to_string(),
-            contract: "11.6".to_string(),
+            contract: "11.7".to_string(),
             upstream_sha: "abc123".to_string(),
             program_digest: "def456".to_string(),
             identity_trace_digest: "ghi789".to_string(),

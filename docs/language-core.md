@@ -36,10 +36,10 @@ D4  exact four-bit bootstrap — RATIFIED
 D5  exact five-bit full compact domain — RATIFIED #3305
 D6  exact six-bit full compact domain — RATIFIED #3393
 D7  exact seven-bit sound/text domain — RATIFIED #3572 (126/128)
-D8  exact eight-bit research carrier — UNRATIFIED
+D8  exact eight-bit full compact domain — RATIFIED #3960 (256/256)
 ```
 
-General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7 is ratified #3572; D8 remains the unratified research carrier.
+General exact-width carrier має зберігати W1…W8 без втрати width. Semantic domain admission is separate from carrier existence. D5 re-ratified #3305 after the #3278 reset; D6 is ratified #3393; D7 is ratified #3572; D8 is ratified #3960 with 256/256 distinct residents.
 
 При цьому:
 
@@ -254,7 +254,7 @@ D5 semantic residency не дорівнює готовності всіх runtim
 
 D6 **OWNER-RATIFIED #3393**, 64/64 occupied, 64 distinct residents.
 
-Нормативні машинні джерела: `contracts/d6-ratification.lisp`, `knowledge/d6-ratified.json`, Contract 11.6.
+Нормативні машинні джерела: `contracts/d6-ratification.lisp`, `knowledge/d6-ratified.json`, Contract 11.7.
 
 Coordinate basis зберігає походження доказу:
 - 16 selector-generator coordinates — proved;
@@ -267,7 +267,9 @@ Coordinate basis зберігає походження доказу:
 
 ## D7 — owner-ratified sound/text domain
 
-D7 **OWNER-RATIFIED #3572**, 126/128 admitted residents. Нормативні машинні джерела: `contracts/d7-ratification.lisp`, `knowledge/d7-ratified.json`, Contract 11.6.
+D7 **OWNER-RATIFIED #3572**, 126/128 admitted residents. Нормативні машинні джерела: `contracts/d7-ratification.lisp`, `knowledge/d7-ratified.json`, Contract 11.7.
+
+D8 **OWNER-RATIFIED #3960**, 256/256 distinct residents. Нормативні машинні джерела: `contracts/d8-ratification.lisp`, `knowledge/d8-ratified.json`, Contract 11.7. Ratified residency не означає автоматичну runtime callability.
 
 Поточний cut складається з 107 baseline-recovered residents та 19 owner-admitted same-coordinate Shiva overlays. Координати `0100001` і `0101010` лишаються owner-reserved/pinned — це не вільні opcode-и.
 
@@ -281,11 +283,11 @@ Shiva candidate D (`h/r/l` migration + відмова від двох ḹ-line i
 
 ---
 
-## D8 — exact eight-bit research space
+## D8 — full compact 256/256
 
-D8 наразі **UNRATIFIED / RESEARCH** (#3278, clean-room #3281).
+D8 **OWNER-RATIFIED #3960**, 256/256 distinct residents. Нормативні джерела: `contracts/d8-ratification.lisp`, `knowledge/d8-ratified.json`, Contract 11.7.
 
-Bit8/W8 механіка може існувати, але 8 physical bits не створюють Core.D8 semantics, callability або occupancy. Legacy Function8/Sens8 та старі D8 maps є лише donor/provenance evidence.
+D8 semantic residency ратифікована #3960; generic callability лишається окремою mechanism-віссю. Legacy Function8/Sens8 та старі D8 maps є лише donor/provenance evidence.
 
 ---
 
@@ -429,7 +431,7 @@ Compatibility adapters дозволені лише як явно обмежен�
 
 Core1/Core2/Core3/Core4 у старих дослідженнях — execution/research profiles та historical stages, а не альтернативні semantic universes.
 
-Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D7; D5 ratified #3305, D6 ratified #3393, D7 ratified #3572, а D8 лишається research.
+Поточна exact-width ladder W1–W8 є спільною механічною основою. Чинна semantic ratification охоплює D1–D8; D5 ratified #3305, D6 ratified #3393, D7 ratified #3572, D8 ratified #3960.
 
 Profile може вибирати mechanism, але не може:
 
