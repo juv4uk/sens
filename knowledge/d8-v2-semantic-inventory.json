@@ -2220,8 +2220,8 @@
       "notes": "Prior D8 structural research preserved."
     },
     {
-      "stable_id": "d8.struct.06.00.orientation-derived-association-semantics",
-      "semantic_name": "orientation-derived association semantics",
+      "stable_id": "d8.struct.06.00.acons-swapped",
+      "semantic_name": "ACONS-SWAPPED",
       "source_class": "STRUCTURAL-GEOMETRIC",
       "source_provenance": [
         "#3783 recovered",
@@ -2238,7 +2238,7 @@
       "lower_domain_comparison": "Generated/refined from RASSOC/ACONS × association orientation; derivability does not exclude residency.",
       "derivability": "GENERATED/STRUCTURAL",
       "necessity": "HIGH",
-      "notes": "Prior D8 structural research preserved."
+      "notes": "Prior D8 structural research preserved. Precise name recovered from #3741; previous generic label retained only in git history."
     },
     {
       "stable_id": "d8.struct.07.00.nth-right",
