@@ -51,11 +51,6 @@ jobs:
           path: |
             migration-test.log
             migration-test.status
-      - name: Audit migrator itself
-        run: |
-          python3 scripts/audit-sens-name-debt.py . \
-            --foundation knowledge/d1-d7-foundation.json \
-            --report /tmp/sens-name-debt.json
       - name: Build three-pass source inventory
         run: |
           python3 scripts/classify-lisp-source-forms.py . \
@@ -71,6 +66,12 @@ jobs:
           path: |
             /tmp/lisp-source-forms.json
             /tmp/lisp-source-forms.tsv
+
+      - name: Audit migrator itself
+        run: |
+          python3 scripts/audit-sens-name-debt.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --report /tmp/sens-name-debt.json
 
       - name: Enforce migration tests
         if: always()
