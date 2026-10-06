@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 265,
-    "remaining_semantic_candidates": 759,
+    "selected_semantic_candidates": 304,
+    "remaining_semantic_candidates": 720,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 9,
+    "unplaced_selected_candidates": 48,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -89,5 +89,17 @@
     "projection": 1,
     "hold": 5,
     "coordinates_assigned": 0
+  },
+  "library_harvest_v1": {
+    "artifact": "knowledge/d10-library-harvest-v1.json",
+    "selected": 39,
+    "coordinates_assigned": 0,
+    "excluded_classes": [
+      "schema/version/global constants",
+      "onto accumulators",
+      "generic local helpers",
+      "compatibility wrappers",
+      "host mechanisms"
+    ]
   }
 }
