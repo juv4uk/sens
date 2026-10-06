@@ -7,21 +7,19 @@ fn parsed_head(source: &str) -> Vec<sens::Expr> {
 }
 
 #[test]
-fn od005_od006_owner_coordinates_are_not_yet_direct_sid_tokens() {
-    for source in ["(00111)", "(001111)"] {
+fn od005_od006_owner_coordinates_now_reach_exact_domain_identity() {
+    for (source, width, bits) in [
+        ("(00111)", 5usize, 0b00111u8),
+        ("(001111)", 6usize, 0b001111u8),
+    ] {
         let expressions = parsed_head(source);
         let ExprKind::List(items) = &expressions[0].kind else {
             panic!("{source}: expected list")
         };
-
-        assert!(
-            !matches!(&items[0].kind, ExprKind::Sid(_)),
-            "{source}: D5/D6 bare owner coordinate must not be reported as admitted SID before exact-width carrier migration"
-        );
-        assert!(
-            matches!(&items[0].kind, ExprKind::Number(_, _) | ExprKind::Rational(_)),
-            "{source}: current reader collision witness should remain numeric until the explicit migration changes it"
-        );
+        let ExprKind::DomainIdentity(identity) = items[0].kind else {
+            panic!("{source}: exact owner coordinate must be domain-qualified after #2817 migration")
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
     }
 }
 
@@ -33,6 +31,6 @@ fn exact_eight_bit_legacy_control_is_still_sid() {
     };
     assert!(
         matches!(&items[0].kind, ExprKind::Sid(_)),
-        "8-bit legacy control must remain a SID in this transitional audit"
+        "8-bit legacy control remains an explicit compatibility SID"
     );
 }
