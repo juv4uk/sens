@@ -15,6 +15,9 @@ on:
       - "crates/sens/tests/machine_exact_d5_quotient.rs"
       - "crates/sens/tests/machine_exact_d5_order.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
+      - "crates/sens/tests/i5_6400_machine_profile.rs"
+      - "crates/sens/tests/semantic_coordinate_join_2.rs"
+      - "crates/sens/tests/semantic_coordinate_join.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
@@ -48,6 +51,9 @@ jobs:
           cargo test -p sens --test machine_exact_d5_quotient -- --nocapture
           cargo test -p sens --test machine_exact_d5_order -- --nocapture
           cargo test -p sens --test machine_capability_axis -- --nocapture
+          cargo test -p sens --test semantic_coordinate_join -- --nocapture
+          cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
+          cargo test -p sens --test i5_6400_machine_profile -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Existing x86 lowering boundary
         run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
