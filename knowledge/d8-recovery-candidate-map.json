@@ -241,6 +241,25 @@
         "crates/sens/tests/vectors.rs"
       ],
       "reason": "Alias-visible in-place update is not reproduced by a pure persistent list rewrite without importing shared mutable identity."
+    },
+    {
+      "ladder_coordinate": "00001100",
+      "candidate": "SPECIAL-BINDING",
+      "surfaces": [
+        "SPECIAL",
+        "dynamic special binding"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "LISP 1.5 SPECIAL-variable compiler/runtime semantics, 1962",
+      "simple_law": "dynamic bind saves old symbol cell, free references observe current cell, scope exit restores old value",
+      "evidence": [
+        "#3945",
+        "LISP 1.5 Programmer's Manual compiler appendix",
+        "current lexical-capture evidence in PLAN.md/meta-eval tests"
+      ],
+      "reason": "Lexical closure capture and dynamically rebound free-variable lookup are observably different; ordinary caller shadowing does not retarget current lexical closures.",
+      "caveat": "Historical SPECIAL is compiler/runtime scoped; candidate identity is the abstract dynamic-binding law, not the IBM 704 SPECIAL-cell representation."
     }
   ],
   "recovered_no_slot": [
@@ -518,9 +537,9 @@
       "status": "PRESERVED-IN-MAIN"
     }
   ],
-  "next_fill_rule": "RPLACA/RPLACD now lead the provisional D8 recovery ladder. Continue Appendix-A sweep; derive destructive conveniences from these roots before allocating more slots.",
+  "next_fill_rule": "After SPECIAL-BINDING, resolve APVAL/property metadata and INTERN/OBLIST before post-1963 chronology; COMMON remains compiler-bridge evidence unless an independent law survives.",
   "accounting": {
-    "provisional_d8_ladder_candidates": 12,
+    "provisional_d8_ladder_candidates": 13,
     "provisional_coordinates": [
       "00000000",
       "00000001",
@@ -533,7 +552,8 @@
       "00001000",
       "00001001",
       "00001010",
-      "00001011"
+      "00001011",
+      "00001100"
     ],
     "resolved_recovery_no_slot": 11,
     "unresolved_recovery_rows": 2,
