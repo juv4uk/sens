@@ -77,7 +77,7 @@ def strip_contract_comments(text: str) -> str:
     return "\n".join(line.split(";", 1)[0] for line in text.splitlines())
 
 
-def load_mapping(path: Path) -> tuple[list[Mapping], dict[str, Mapping], dict[str, Mapping], dict[str, Mapping]]:
+def load_mapping(path: Path) -> tuple[list[Mapping], dict[str, Mapping], dict[str, Mapping], dict[str, list[Mapping]]]:
     source = strip_contract_comments(path.read_text(encoding="utf-8"))
     rows = [
         Mapping(*match.groups())
@@ -88,7 +88,7 @@ def load_mapping(path: Path) -> tuple[list[Mapping], dict[str, Mapping], dict[st
 
     by_sid: dict[str, Mapping] = {}
     by_my: dict[str, Mapping] = {}
-    by_historical_upper: dict[str, Mapping] = {}
+    by_historical_upper: dict[str, list[Mapping]] = {}
 
     for row in rows:
         if row.sid8 in by_sid and by_sid[row.sid8] != row:
@@ -106,16 +106,12 @@ def load_mapping(path: Path) -> tuple[list[Mapping], dict[str, Mapping], dict[st
         by_my[row.my_lisp] = row
 
         # Pass 3 recognizes the UPPERCASE source spelling of every historical
-        # Lisp 1/1.5 name, even when provenance recorded it in lowercase.
+        # Lisp 1/1.5 name. Multiple old SID8 rows may legitimately share one
+        # historical spelling (e.g. DEFINE), so preserve all candidates.
         historical_upper = row.historical.upper()
         if any(ch.isalpha() for ch in historical_upper):
-            old = by_historical_upper.get(historical_upper)
-            if old is not None and old.sid8 != row.sid8:
-                raise SystemExit(
-                    f"{path}: ambiguous historical spelling {historical_upper!r}: "
-                    f"{old.sid8} vs {row.sid8}"
-                )
-            by_historical_upper[historical_upper] = row
+            by_historical_upper.setdefault(historical_upper, []).append(row)
+
 
     return rows, by_sid, by_my, by_historical_upper
 
@@ -134,13 +130,12 @@ def scan_heads(path: str, text: str) -> list[Head]:
     pending_quote = False
     block_depth = 0
 
-    def inherited_quoted() -> bool:
+    def current_quoted() -> bool:
         return bool(frames and frames[-1]["quoted"])
 
     while i < len(text):
         ch = text[i]
 
-        # Nested block comments.
         if block_depth:
             if text.startswith("#|", i):
                 block_depth += 1
@@ -152,19 +147,16 @@ def scan_heads(path: str, text: str) -> list[Head]:
                 i += 1
             continue
 
-        # Line comments.
         if ch == ";":
             end = text.find("\n", i)
             i = len(text) if end < 0 else end + 1
             continue
 
-        # Block comment opener.
         if text.startswith("#|", i):
             block_depth = 1
             i += 2
             continue
 
-        # Strings.
         if ch == '"':
             i += 1
             while i < len(text):
@@ -176,9 +168,12 @@ def scan_heads(path: str, text: str) -> list[Head]:
                 else:
                     i += 1
             pending_quote = False
+            # A string can syntactically occupy a list-head position, but it is
+            # never one of the three source notations we inventory.
+            if frames and frames[-1]["need_head"]:
+                frames[-1]["need_head"] = False
             continue
 
-        # Reader quote abbreviations make the next datum non-executable data.
         if text.startswith("#'", i):
             pending_quote = True
             i += 2
@@ -188,51 +183,30 @@ def scan_heads(path: str, text: str) -> list[Head]:
             i += 1
             continue
         if ch == ",":
-            # unquote escapes one quoted layer; for an inventory, keep it
-            # conservative and do not classify its immediate datum.
             pending_quote = True
             i += 2 if i + 1 < len(text) and text[i + 1] == "@" else 1
             continue
 
         if ch == "(":
-            open_offset = i
-            i += 1
-            while i < len(text) and text[i].isspace():
-                i += 1
-
-            quoted = inherited_quoted() or pending_quote
+            quoted = current_quoted() or pending_quote
+            frames.append({
+                "quoted": quoted,
+                "need_head": True,
+                "open_offset": i,
+            })
             pending_quote = False
-
-            # Empty list literal: () (allowing whitespace before close).
-            if i < len(text) and text[i] == ")":
-                if not quoted:
-                    line, col = line_col(text, open_offset)
-                    heads.append(
-                        Head(path, line, col, open_offset, i + 1, "()", False, True)
-                    )
-                i += 1
-                continue
-
-            frames.append({"quoted": quoted})
-
-            # Tokenize the list head without consuming nested structure.
-            if i < len(text) and text[i] not in "()":
-                start = i
-                while i < len(text):
-                    if text[i].isspace() or text[i] in "()\";',":
-                        break
-                    if text.startswith("#|", i):
-                        break
-                    i += 1
-                token = text[start:i]
-                if token and not quoted:
-                    line, col = line_col(text, start)
-                    heads.append(Head(path, line, col, start, i, token, False))
+            i += 1
             continue
 
         if ch == ")":
             if frames:
-                frames.pop()
+                frame = frames.pop()
+                if frame["need_head"] and not frame["quoted"]:
+                    open_offset = int(frame["open_offset"])
+                    line, col = line_col(text, open_offset)
+                    heads.append(
+                        Head(path, line, col, open_offset, i + 1, "()", False, True)
+                    )
             pending_quote = False
             i += 1
             continue
@@ -241,9 +215,25 @@ def scan_heads(path: str, text: str) -> list[Head]:
             i += 1
             continue
 
-        # Ordinary atom outside head position.
-        while i < len(text) and not text[i].isspace() and text[i] not in "()\";',":
+        start = i
+        while i < len(text):
+            if text[i].isspace() or text[i] in "()\";',":
+                break
+            if text.startswith("#|", i):
+                break
             i += 1
+        token = text[start:i]
+        if not token:
+            i += 1
+            continue
+
+        if frames and frames[-1]["need_head"]:
+            frame = frames[-1]
+            if not frame["quoted"]:
+                line, col = line_col(text, start)
+                heads.append(Head(path, line, col, start, i, token, False))
+            frame["need_head"] = False
+
         pending_quote = False
 
     return heads
@@ -253,7 +243,7 @@ def classify_three_passes(
     heads: Iterable[Head],
     by_sid: dict[str, Mapping],
     by_my: dict[str, Mapping],
-    by_historical_upper: dict[str, Mapping],
+    by_historical_upper: dict[str, list[Mapping]],
 ) -> list[Hit]:
     heads = list(heads)
     claimed: set[tuple[str, int, int]] = set()
@@ -266,9 +256,24 @@ def classify_three_passes(
         pass_number: int,
         representation: str,
         head: Head,
-        row: Mapping | None,
+        rows: Mapping | list[Mapping] | None,
     ) -> None:
         claimed.add(key(head))
+        if rows is None:
+            candidates: list[Mapping] = []
+        elif isinstance(rows, list):
+            candidates = rows
+        else:
+            candidates = [rows]
+
+        def joined(field: str) -> str:
+            values = []
+            for row in candidates:
+                value = str(getattr(row, field))
+                if value not in values:
+                    values.append(value)
+            return "|".join(values)
+
         hits.append(
             Hit(
                 pass_number=pass_number,
@@ -277,14 +282,15 @@ def classify_three_passes(
                 line=head.line,
                 column=head.column,
                 token=head.token,
-                sid8=row.sid8 if row else (head.token if pass_number == 1 else ""),
-                my_lisp=row.my_lisp if row else "",
-                historical=row.historical if row else "",
-                historical_source=row.source if row else "",
-                fit=row.fit if row else "",
-                status=row.status if row else "unmapped",
+                sid8=joined("sid8") if candidates else (head.token if pass_number == 1 else ""),
+                my_lisp=joined("my_lisp"),
+                historical=joined("historical"),
+                historical_source=joined("source"),
+                fit=joined("fit"),
+                status=joined("status") if candidates else "unmapped",
             )
         )
+
 
     # PASS 1 — every exact legacy 8-bit executable head. A historical
     # contract row enriches the hit, but absence from the contract never hides
