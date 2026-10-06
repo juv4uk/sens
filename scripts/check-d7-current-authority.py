@@ -64,11 +64,11 @@ assert "(d7-coordinate-law . " in contract
 assert "(identity . " not in contract
 assert '(owner-reserved-pinned . ("0100001" "0101010"))' in contract
 assert '(candidate-occupancy . #d124)' in contract
-assert "(minor . 6)" in lang
-assert "Contract 11.6" in lang
+assert "(minor . 7)" in lang
+assert "Contract 11.7" in lang
 assert "D7 is owner-ratified 126/128 in #3572" in lang
 assert "D7  owner-ratified 126/128" in current
-assert "D8  UNRATIFIED / RESEARCH" in current
+assert "D8  full compact 256/256" in current
 
 print("D7-CURRENT-AUTHORITY: PASS")
 print("occupancy=126/128 baseline=107 shiva-overlays=19 reserved-pinned=2 candidate-D=NOT-RATIFIED")
