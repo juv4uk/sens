@@ -7,6 +7,7 @@ on:
     paths:
       - "scripts/migrate-three-pass.py"
       - "tests/test_three_pass_migration.py"
+      - "contracts/core1-historical-sid-map.lisp"
       - ".github/workflows/publish-binary-master.yml"
   workflow_dispatch:
 
@@ -41,6 +42,7 @@ jobs:
             --semantic-generated crates/sens/src/semantic_registry_generated.rs \
             --semantic-registry crates/sens/src/semantic_registry.rs \
             --necessary-forms crates/sens/src/eval/necessary_forms_generated.rs \
+            --historical-map contracts/core1-historical-sid-map.lisp \
             --text7 crates/sens/src/text7_projection_generated.rs \
             --report /tmp/sens-three-pass-report.json
           python3 - <<'PY'
@@ -125,5 +127,5 @@ jobs:
           fi
           git config user.name "sens-three-pass-migrator"
           git config user.email "sens-three-pass-migrator@users.noreply.github.com"
-          git commit -m "master: publish three-pass migration with unresolved source preserved"
+          git commit -m "master: publish three-pass migration; legacy-unmapped files excluded"
           git push origin HEAD:master
