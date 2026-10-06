@@ -49,14 +49,14 @@ impl BinarySourceWord {
     /// `u16` is required so W9 can never be truncated to the historical byte lane.
     pub const fn packed_bits(self) -> u16 {
         match self {
-            Self::W1(word) => u16::from(word.packed_bits()),
-            Self::W2(word) => u16::from(word.packed_bits()),
-            Self::W3(word) => u16::from(word.packed_bits()),
-            Self::W4(word) => u16::from(word.packed_bits()),
-            Self::W5(word) => u16::from(word.packed_bits()),
-            Self::W6(word) => u16::from(word.packed_bits()),
-            Self::W7(word) => u16::from(word.packed_bits()),
-            Self::W8(word) => u16::from(word.packed_bits()),
+            Self::W1(word) => word.packed_bits() as u16,
+            Self::W2(word) => word.packed_bits() as u16,
+            Self::W3(word) => word.packed_bits() as u16,
+            Self::W4(word) => word.packed_bits() as u16,
+            Self::W5(word) => word.packed_bits() as u16,
+            Self::W6(word) => word.packed_bits() as u16,
+            Self::W7(word) => word.packed_bits() as u16,
+            Self::W8(word) => word.packed_bits() as u16,
             Self::W9(word) => word.packed_bits(),
         }
     }
