@@ -73,11 +73,13 @@ jobs:
         run: cargo test -p sens --test compiler_program_data -- --nocapture
 
       - name: SENS recursive program compiler traversal
-        run: >-
-          cargo test -p sens --lib
-          compiler_language::tests::sens_program_traversal_is_role_aware_and_quote_shields_domain_data
-          compiler_language::tests::direct_d8_domain_call_fails_closed_in_sens_program_traversal
-          -- --nocapture
+        run: |
+          cargo test -p sens --lib \
+            compiler_language::tests::sens_program_traversal_is_role_aware_and_quote_shields_domain_data \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::direct_d8_domain_call_fails_closed_in_sens_program_traversal \
+            -- --nocapture
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib
