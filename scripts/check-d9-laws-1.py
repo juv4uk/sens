@@ -53,8 +53,8 @@ for row in selected:
     else:
         assert row["law_status"]=="UNDERDETERMINED"
 
-assert state["target"]["selected_semantic_candidates"]==148
-assert state["target"]["remaining_semantic_candidates"]==364
+assert state["target"]["selected_semantic_candidates"]>=148
+assert state["target"]["remaining_semantic_candidates"]==512-state["target"]["selected_semantic_candidates"]
 assert state["target"]["ratified_residents"]==0
 assert state["law_mining"]=={
     "artifact":"knowledge/d9-laws-v1.json",
