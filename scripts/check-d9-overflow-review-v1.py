@@ -87,4 +87,4 @@ assert state["overflow_review"]=={
 }
 
 print("D9-OVERFLOW-REVIEW-V1: PASS")
-print(f"selected=20 hold=11 reject-lower-duplicate=3 total-selected={target[\"selected_semantic_candidates\"]}/512 remaining={target[\"remaining_semantic_candidates\"]}")
+print(f"selected=20 hold=11 reject-lower-duplicate=3 total-selected={target['selected_semantic_candidates']}/512 remaining={target['remaining_semantic_candidates']}")
