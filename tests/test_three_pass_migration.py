@@ -19,6 +19,7 @@ DOMAIN_SURFACES=ROOT/"crates"/"sens"/"src"/"domain_surface_registry_generated.rs
 SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
 NECESSARY=ROOT/"crates"/"sens"/"src"/"eval"/"necessary_forms_generated.rs"
+HISTORICAL=ROOT/"contracts"/"core1-historical-sid-map.lisp"
 TEXT7=ROOT/"crates"/"sens"/"src"/"text7_projection_generated.rs"
 
 class ThreePassMigrationTests(unittest.TestCase):
@@ -26,7 +27,7 @@ class ThreePassMigrationTests(unittest.TestCase):
     def setUpClass(cls):
         data=mod.load_foundation(FOUNDATION)
         cls.legacy,cls.my,cls.upper=mod.build_three_pass_maps(
-            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY
+            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY,HISTORICAL
         )
         cls.text7=mod.build_text7(data,TEXT7)
 
@@ -83,10 +84,21 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertEqual(out,"10 totally-unknown-function 00 x 01\n")
         self.assertEqual(resolver.counts["passthrough-head"],1)
 
-    def test_unresolved_sid8_passes_through_verbatim(self):
-        out,resolver=self.migrate("(11111111 x)\n")
-        self.assertEqual(out,"10 11111111 00 x 01\n")
-        self.assertEqual(resolver.counts["passthrough-head"],1)
+    def test_unresolved_sid8_blocks_instead_of_becoming_text(self):
+        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
+            self.migrate("(11111111 x)\n")
+
+    def test_old_print_sid8_without_current_resident_blocks(self):
+        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
+            self.migrate("(01001000 x)\n")
+
+    def test_old_my_lisp_print_without_current_resident_blocks(self):
+        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped my-lisp function"):
+            self.migrate("(print x)\n")
+
+    def test_old_lisp15_equal_without_current_resident_blocks(self):
+        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped Lisp 1-1.5 function"):
+            self.migrate("(EQUAL a b)\n")
 
     def test_d1_d2_head_words_pass_through_verbatim(self):
         out1,resolver1=self.migrate("(1 x)\n")
