@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate/check D1-D6 tables in the same Lisp-first shape as SENS8."""
+"""Generate/check the self-describing exact-width D1-D6 table."""
 
 from __future__ import annotations
 
@@ -15,29 +15,25 @@ SURFACE_SOURCES = (
     ROOT / "lib/surface/domain-surfaces-d5.lisp",
     ROOT / "lib/surface/domain-surfaces-d6.lisp",
 )
-LEGACY_LEXICAL_DONOR = ROOT / "lib/surface/semantic-registry.lisp"
+LEXICAL_DONOR = ROOT / "lib/surface/semantic-registry.lisp"
 LISP_OUTPUT = ROOT / "lib/generated/domain-table-d1-d6.lisp"
 MD_OUTPUT = ROOT / "docs/generated/domain-tables-d1-d6.md"
 
-COLUMNS = ["ук", "укр", "san", "eng", "LISP", "SUM"]
 EMPTY = "()"
-HEADER = "| bits | ук | укр | san | eng | LISP | SUM |"
-DIVIDER = "|---|---|---|---|---|---|---|"
-
-SURFACE_TOKEN = r'(\(\)|"[^"]*")'
-EXACT_ROW = re.compile(
+COLUMNS = ["ук", "укр", "san", "en", "LISP", "sym"]
+TOKEN = r'(\(\)|"[^"]*"|[^()\s]+)'
+ROW = re.compile(
     r'^\s*\(row\s+(D[1-6])\s+"([01]+)"\s+(\S+)\s+'
-    + SURFACE_TOKEN + r'\s+'
-    + SURFACE_TOKEN + r'\s+'
-    + SURFACE_TOKEN + r'\s+'
-    + r'(\S+)\s+(\S+)\)\s*$'
+    + TOKEN + r'\s+' + TOKEN + r'\s+' + TOKEN
+    + r'\s+(\S+)\s+(\S+)\)\s*$'
 )
-LEGACY_ROW = re.compile(
+DONOR = re.compile(
     r'^\s*\([01]{8}\s+'
-    + r'\(en\s+' + SURFACE_TOKEN + r'\)\s+'
-    + r'\(ук\s+' + SURFACE_TOKEN + r'\)\s+'
-    + r'\(укр\s+' + SURFACE_TOKEN + r'\)\s+'
-    + r'\(sa\s+' + SURFACE_TOKEN + r'\)'
+    + r'\(en\s+' + TOKEN + r'\)\s+'
+    + r'\(ук\s+' + TOKEN + r'\)\s+'
+    + r'\(укр\s+' + TOKEN + r'\)\s+'
+    + r'\(sa\s+' + TOKEN + r'\)\s+'
+    + r'\(sym\s+' + TOKEN + r'\)'
 )
 
 
@@ -50,55 +46,53 @@ def decode(token: str) -> str | None:
         return None
     if token.startswith('"') and token.endswith('"'):
         return token[1:-1]
-    fail(f"bad token {token!r}")
+    return token
 
 
 def atom(value: str | None) -> str:
     if value is None or value == "":
         return EMPTY
-    if any(ch.isspace() for ch in value) or any(ch in '()"' for ch in value):
+    if value == "'" or any(ch.isspace() for ch in value) or any(ch in '()"' for ch in value):
         return json.dumps(value, ensure_ascii=False)
     return value
 
 
 def load_exact() -> dict[tuple[str, str], dict[str, str | None]]:
-    rows: dict[tuple[str, str], dict[str, str | None]] = {}
+    out: dict[tuple[str, str], dict[str, str | None]] = {}
     for path in SURFACE_SOURCES:
         for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if not line.lstrip().startswith("(row "):
                 continue
-            m = EXACT_ROW.match(line)
+            m = ROW.match(line)
             if not m:
                 fail(f"cannot parse {path}:{line_no}")
-            domain, bits, role, eng_t, uk_t, san_t, uk_status, san_status = m.groups()
+            domain, bits, _role, en_t, uk_t, san_t, _uk_status, _san_status = m.groups()
             key = (domain, bits)
-            if key in rows:
+            if key in out:
                 fail(f"duplicate exact row {domain}:{bits}")
-            rows[key] = {
-                "role": role,
-                "eng": decode(eng_t),
-                "uk": decode(uk_t),
-                "san": decode(san_t),
-                "uk_status": uk_status,
-                "san_status": san_status,
-            }
-    return rows
+            out[key] = {"en": decode(en_t), "uk": decode(uk_t), "san": decode(san_t)}
+    return out
 
 
-def load_ukr_donor() -> dict[str, str | None]:
-    donor: dict[str, str | None] = {}
-    for line in LEGACY_LEXICAL_DONOR.read_text(encoding="utf-8").splitlines():
-        m = LEGACY_ROW.match(line)
+def load_donor() -> dict[str, dict[str, str | None]]:
+    out: dict[str, dict[str, str | None]] = {}
+    for line in LEXICAL_DONOR.read_text(encoding="utf-8").splitlines():
+        m = DONOR.match(line)
         if not m:
             continue
-        eng_t, _uk_t, ukr_t, _san_t = m.groups()
-        eng = decode(eng_t)
-        if eng:
-            donor[eng.lower()] = decode(ukr_t)
-    return donor
+        en_t, uk_t, ukr_t, sa_t, sym_t = m.groups()
+        en = decode(en_t)
+        if en:
+            out[en.lower()] = {
+                "uk": decode(uk_t),
+                "ukr": decode(ukr_t),
+                "san": decode(sa_t),
+                "sym": decode(sym_t),
+            }
+    return out
 
 
-def lisp_label(domain: str, resident: str) -> str | None:
+def lisp_name(domain: str, resident: str) -> str | None:
     if domain == "D1":
         return "NIL" if resident == "NO" else "T"
     if domain == "D2":
@@ -108,137 +102,79 @@ def lisp_label(domain: str, resident: str) -> str | None:
     return resident
 
 
-def validate(
-    foundation: dict,
-    exact: dict[tuple[str, str], dict[str, str | None]],
-) -> None:
-    total = 0
+def build_rows(foundation: dict, exact: dict, donor: dict) -> list[dict]:
+    rows: list[dict] = []
     for width in range(1, 7):
         domain = f"D{width}"
-        current = foundation["domains"][domain]
-        if not current.get("sanskrit_name"):
-            fail(f"{domain}: missing sanskrit_name")
-        expected_bits = sorted(current["residents"], key=lambda bits: int(bits, 2))
-        if len(expected_bits) != (1 << width):
-            fail(f"{domain}: authority is not dense {1 << width}/{1 << width}")
-        for bits in expected_bits:
-            row = exact.get((domain, bits))
-            if row is None:
+        residents = foundation["domains"][domain]["residents"]
+        if len(residents) != (1 << width):
+            fail(f"{domain}: expected {1 << width} residents")
+        for bits, resident in sorted(residents.items(), key=lambda item: int(item[0], 2)):
+            current = exact.get((domain, bits))
+            if current is None:
                 fail(f"{domain}:{bits}: missing exact surface row")
-            resident = current["residents"][bits]
-            if row["eng"] is None:
-                fail(f"{domain}:{bits}: English reference must be present")
-            if row["eng"].upper() != resident:
-                fail(
-                    f"{domain}:{bits}: exact surface {row['eng']!r} "
-                    f"!= resident {resident!r}"
-                )
-            total += 1
-    if total != 126 or len(exact) != 126:
-        fail(f"expected exactly 126 D1-D6 rows, got authority={total} exact={len(exact)}")
+            en = current["en"]
+            if en is None or en.upper() != resident:
+                fail(f"{domain}:{bits}: en/resident drift")
+            old = donor.get(en.lower(), {})
+            rows.append(
+                {
+                    "bits": bits,
+                    "ук": current["uk"],
+                    "укр": old.get("ukr") if old.get("ukr") is not None else current["uk"],
+                    "san": current["san"],
+                    "en": en,
+                    "LISP": lisp_name(domain, resident),
+                    "sym": old.get("sym"),
+                }
+            )
+    if len(rows) != 126:
+        fail(f"expected 126 rows, got {len(rows)}")
+    if len({row["bits"] for row in rows}) != 126:
+        fail("exact-width binary keys must be unique by spelling")
+    return rows
 
 
-def iter_rows(
-    foundation: dict,
-    exact: dict[tuple[str, str], dict[str, str | None]],
-    ukr_donor: dict[str, str | None],
-):
-    for width in range(1, 7):
-        domain = f"D{width}"
-        info = foundation["domains"][domain]
-        name = info["sanskrit_name"]
-        for bits, resident in sorted(
-            info["residents"].items(), key=lambda item: int(item[0], 2)
-        ):
-            surface = exact[(domain, bits)]
-            eng = surface["eng"]
-            uk = surface["uk"]
-            san = surface["san"]
-            ukr = ukr_donor.get((eng or "").lower())
-            if ukr is None:
-                ukr = uk
-            yield {
-                "domain": domain,
-                "name": name,
-                "bits": bits,
-                "formal": f"identity:{name}:{bits}",
-                "uk": uk,
-                "ukr": ukr,
-                "san": san,
-                "eng": eng,
-                "lisp": lisp_label(domain, resident),
-                "sum": f"{name}:{bits}={resident}",
-            }
-
-
-def render_lisp(all_rows: list[dict[str, str | None]]) -> str:
+def render_lisp(rows: list[dict]) -> str:
     out = [
         "; GENERATED — DO NOT EDIT BY HAND",
-        "; Authority: knowledge/d1-d7-foundation.json (#3572)",
-        "; Surface sources: lib/surface/domain-surfaces-d1-d4.lisp, domain-surfaces-d5.lisp, domain-surfaces-d6.lisp",
-        "; Generator: scripts/generate-domain-tables-d1-d6.py",
-        "; Schema domain-ft/1: (domain-name bits formal (ук ...) (укр ...) (san ...) (eng ...) (LISP ...) (SUM ...))",
-        "; Display order: ук → укр → san → eng → LISP → SUM",
-        "; Empty/missing surface: ()",
-        "; Projection only: exact bits + exact domain + ratified law remain semantic authority",
+        "; Self-describing exact-width domain table.",
+        "; Binary key width is the domain address; no domain/resident/identity label is repeated.",
+        "; Columns: ук → укр → san → en → LISP → sym",
+        "; Empty/missing: ()",
         "",
-        "(domain-ft/1",
+        "(domains/1",
     ]
-    current_name = None
-    for row in all_rows:
-        if row["name"] != current_name:
-            current_name = row["name"]
-            out.append(f"  ; {row['name']} / {row['domain']}")
+    for row in rows:
         out.append(
-            "  ("
-            + f"{row['name']} {row['bits']} {row['formal']}"
-            + f" (ук {atom(row['uk'])})"
-            + f" (укр {atom(row['ukr'])})"
+            f"  ({row['bits']}"
+            + f" (ук {atom(row['ук'])})"
+            + f" (укр {atom(row['укр'])})"
             + f" (san {atom(row['san'])})"
-            + f" (eng {atom(row['eng'])})"
-            + f" (LISP {atom(row['lisp'])})"
-            + f" (SUM {atom(row['sum'])})"
-            + ")"
+            + f" (en {atom(row['en'])})"
+            + f" (LISP {atom(row['LISP'])})"
+            + f" (sym {atom(row['sym'])}))"
         )
     out += [")", ""]
     return "\n".join(out)
 
 
-def render_md(all_rows: list[dict[str, str | None]]) -> str:
+def render_md(rows: list[dict]) -> str:
     out = [
-        "# Domain tables D1–D6",
+        "# Exact-width domain table",
         "",
-        "**Authority:** `knowledge/d1-d7-foundation.json` (#3572).",
+        "Binary key width identifies the domain. Rows repeat no domain or resident label.",
         "",
-        "**Machine-readable projection:** `lib/generated/domain-table-d1-d6.lisp`.",
+        "Columns: **ук → укр → san → en → LISP → sym**. Empty/missing: `()`.",
         "",
-        "Canonical surface order: **ук → укр → san → eng → LISP → SUM**.",
-        "Empty/missing surface marker: `()`.",
-        "",
+        "| bits | ук | укр | san | en | LISP | sym |",
+        "|---|---|---|---|---|---|---|",
     ]
-    current_name = None
-    for row in all_rows:
-        if row["name"] != current_name:
-            if current_name is not None:
-                out.append("")
-            current_name = row["name"]
-            out += [
-                f"## {row['name']} ({row['domain']})",
-                "",
-                HEADER,
-                DIVIDER,
-            ]
-        cells = [
-            row["uk"],
-            row["ukr"],
-            row["san"],
-            row["eng"],
-            row["lisp"],
-            row["sum"],
-        ]
+    for row in rows:
+        cells = [row[name] for name in COLUMNS]
         rendered = " | ".join(f"`{atom(value)}`" for value in cells)
         out.append(f"| `{row['bits']}` | {rendered} |")
-    return "\n".join(out).rstrip() + "\n"
+    return "\n".join(out) + "\n"
 
 
 def write_or_check(path: Path, content: str, write: bool) -> None:
@@ -248,9 +184,9 @@ def write_or_check(path: Path, content: str, write: bool) -> None:
         print(f"wrote {path.relative_to(ROOT)}")
         return
     if not path.exists():
-        fail(f"missing generated file {path.relative_to(ROOT)}")
+        fail(f"missing {path.relative_to(ROOT)}")
     if path.read_text(encoding="utf-8") != content:
-        fail(f"stale generated file {path.relative_to(ROOT)}")
+        fail(f"stale {path.relative_to(ROOT)}")
 
 
 def main() -> int:
@@ -259,19 +195,12 @@ def main() -> int:
     args = parser.parse_args()
 
     foundation = json.loads(FOUNDATION.read_text(encoding="utf-8"))
-    exact = load_exact()
-    validate(foundation, exact)
-    ukr_donor = load_ukr_donor()
-    all_rows = list(iter_rows(foundation, exact, ukr_donor))
-
-    if len(all_rows) != 126:
-        fail(f"expected 126 generated rows, got {len(all_rows)}")
-
-    write_or_check(LISP_OUTPUT, render_lisp(all_rows), args.write)
-    write_or_check(MD_OUTPUT, render_md(all_rows), args.write)
+    rows = build_rows(foundation, load_exact(), load_donor())
+    write_or_check(LISP_OUTPUT, render_lisp(rows), args.write)
+    write_or_check(MD_OUTPUT, render_md(rows), args.write)
 
     print("DOMAIN-TABLES-D1-D6: PASS")
-    print("rows=126 form=SENS8-like-lisp-first order=ук->укр->san->eng->LISP->SUM")
+    print("rows=126 columns=ук->укр->san->en->LISP->sym")
     return 0
 
 
