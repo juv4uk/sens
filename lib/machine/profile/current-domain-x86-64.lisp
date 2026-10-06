@@ -11,9 +11,9 @@
   (target x86-64)
   (cpu intel-core-i5-6400)
   (rows
-    (01010 fast-path "ADD / bounded-u64, exact-result guard")     ; D5 PLUS
-    (01011 fast-path "SUB / bounded-u64, exact-result guard")     ; D5 DIFFERENCE
-    (10110 fast-path "IMUL / bounded-u64, exact-result guard")    ; D5 TIMES
+    (01010 fast-path "ADD / u32 inputs -> exact u64 result")     ; D5 PLUS
+    (01011 fast-path "SUB / u64, left>=right")     ; D5 DIFFERENCE
+    (10110 fast-path "IMUL / u32 inputs -> exact u64 result")    ; D5 TIMES
     (101 direct "CMP/SETE")                        ; D3 EQ
     (110 control "CMP+Jcc")                        ; D3 COND
     (111 runtime "STORE-pair-head+tail")           ; D3 CONS
