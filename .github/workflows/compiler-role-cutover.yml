@@ -42,6 +42,10 @@ on:
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
 
+concurrency:
+  group: compiler-role-cutover-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cutover:
     # Rust/Python control-plane gate: do not reserve the GPU-labelled runner.
