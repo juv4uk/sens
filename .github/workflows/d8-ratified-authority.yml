@@ -6,8 +6,11 @@ on:
       - "knowledge/d8-ratified.json"
       - "knowledge/d8-v2-gauge-fixed-candidate.json"
       - "knowledge/d1-d8-foundation.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "knowledge/d9-ratified.json"
       - "contracts/d8-ratification.lisp"
       - "contracts/d1-d8-foundation-ratification.lisp"
+      - "contracts/d1-d9-foundation-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "docs/language-core.md"
@@ -20,8 +23,11 @@ on:
     paths:
       - "knowledge/d8-ratified.json"
       - "knowledge/d1-d8-foundation.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "knowledge/d9-ratified.json"
       - "contracts/d8-ratification.lisp"
       - "contracts/d1-d8-foundation-ratification.lisp"
+      - "contracts/d1-d9-foundation-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "crates/sens/src/domain_identity.rs"
@@ -39,5 +45,5 @@ jobs:
         run: nvidia-smi || true
       - name: Verify D8 current authority
         run: python3 scripts/check-d8-current-authority.py
-      - name: Verify D1-D8 foundation
+      - name: Verify D1-D9 foundation
         run: python3 scripts/check-d1-d5-foundation.py
