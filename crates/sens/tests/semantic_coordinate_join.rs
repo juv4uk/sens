@@ -197,12 +197,16 @@ fn math_coordinate_value(session: &mut Session, sid: Sens8) -> String {
     .to_string()
 }
 
-fn machine_coordinate_value(session: &mut Session, sid: Sens8) -> String {
+fn machine_coordinate_value(session: &mut Session, exact_domain_bits: &str) -> String {
     eval_program(
-        &format!("(machine-capabilities-for-sid {sid})"),
+        &format!("(machine-capabilities-for-domain {exact_domain_bits})"),
         session,
     )
-    .unwrap_or_else(|error| panic!("machine capability lookup failed for {sid}: {error:?}"))
+    .unwrap_or_else(|error| {
+        panic!(
+            "exact-domain machine capability lookup failed for {exact_domain_bits}: {error:?}"
+        )
+    })
     .value
     .to_string()
 }
@@ -222,7 +226,7 @@ fn kernel_car_block(source: &str) -> &str {
 }
 
 #[test]
-fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
+fn car_provenance_sid_keeps_math_kernel_history_while_machine_uses_exact_d3() {
     assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sens!(00000101)));
 
     let mut session = load_coordinate_session();
@@ -240,7 +244,7 @@ fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
     assert!(!math.contains("common-lisp"));
 
     let machine = eval_program(
-        r#"(machine-capabilities-for-sid 00000101)"#,
+        r#"(machine-capabilities-for-domain 100)"#,
         &mut session,
     )
     .expect("CAR machine capability coordinate")
@@ -268,30 +272,30 @@ fn car_sid_joins_math_kernel_and_machine_axes_without_collapsing_them() {
 
 
 #[test]
-fn add_sid_preserves_math_and_machine_evidence_with_explicit_kernel_gap() {
+fn add_provenance_sid_preserves_math_history_while_machine_uses_exact_d5() {
     assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
 
     let mut session = load_coordinate_session();
     let math = math_coordinate_value(&mut session, sens::sens!(00001100));
-    let machine = machine_coordinate_value(&mut session, sens::sens!(00001100));
+    let machine = machine_coordinate_value(&mut session, "01010");
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
     let kernels = kernel_statuses_for_sid(&kernel_source, sens::sens!(00001100));
 
     assert!(math.contains("exact-rational-sum"));
-    assert_eq!(machine, "((integer-add bounded-u64))");
+    assert_eq!(machine, "((integer-add bounded-u32-inputs u64-result))");
     assert!(kernels.is_empty(), "absence must remain explicit, not guessed");
     assert!(!math.contains("add-r64-r64"));
     assert!(!machine.contains("exact-rational-sum"));
 }
 
 #[test]
-fn eq_sid_keeps_sens_and_compare_capability_without_old_relation_axis() {
+fn eq_provenance_sid_keeps_kernel_history_while_machine_uses_exact_d3() {
     assert_eq!(semantic_id_for_admitted_surface("eq?"), Some(sens::sens!(00000011)));
 
     let mut session = load_coordinate_session();
-    let machine = machine_coordinate_value(&mut session, sens::sens!(00000011));
+    let machine = machine_coordinate_value(&mut session, "101");
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
@@ -302,12 +306,12 @@ fn eq_sid_keeps_sens_and_compare_capability_without_old_relation_axis() {
 }
 
 #[test]
-fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
+fn cons_provenance_sid_keeps_law_and_kernels_while_machine_uses_exact_d3() {
     assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
 
     let mut session = load_coordinate_session();
     let math = math_coordinate_value(&mut session, sens::sens!(00000100));
-    let machine = machine_coordinate_value(&mut session, sens::sens!(00000100));
+    let machine = machine_coordinate_value(&mut session, "111");
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
@@ -324,12 +328,12 @@ fn cons_sid_joins_pair_law_two_kernel_witnesses_and_pair_store_capability() {
 }
 
 #[test]
-fn cond_sid_keeps_negative_math_evidence_and_absent_external_kernels_visible() {
+fn cond_provenance_sid_keeps_history_while_machine_uses_exact_d3() {
     assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
 
     let mut session = load_coordinate_session();
     let math = math_coordinate_value(&mut session, sens::sens!(00000111));
-    let machine = machine_coordinate_value(&mut session, sens::sens!(00000111));
+    let machine = machine_coordinate_value(&mut session, "110");
     let kernel_source =
         fs::read_to_string(repo_root().join("contracts/sid-kernel-witness-735.lisp"))
             .expect("kernel witness contract");
