@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/migrate-to-sens-codes.py"
+      - "scripts/sens_source_resolver.py"
       - "scripts/classify-lisp-source-forms.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
@@ -16,6 +17,7 @@ on:
     branches: [main]
     paths:
       - "scripts/migrate-to-sens-codes.py"
+      - "scripts/sens_source_resolver.py"
       - "scripts/classify-lisp-source-forms.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
