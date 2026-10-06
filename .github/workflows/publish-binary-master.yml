@@ -2,6 +2,14 @@ name: publish-binary-master
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+      - codex/three-pass-no-d7
+    paths:
+      - "scripts/migrate-three-pass.py"
+      - "tests/test_three_pass_migration.py"
+      - ".github/workflows/publish-binary-master.yml"
 
 concurrency:
   group: publish-binary-master
@@ -23,7 +31,7 @@ jobs:
         run: |
           python3 -m unittest tests/test_three_pass_migration.py
 
-      - name: Run three-pass migration
+      - name: Run three-pass migration without D7
         shell: bash
         run: |
           rm -rf /tmp/sens-master-out /tmp/sens-three-pass-report.json
@@ -34,13 +42,13 @@ jobs:
             --semantic-generated crates/sens/src/semantic_registry_generated.rs \
             --semantic-registry crates/sens/src/semantic_registry.rs \
             --necessary-forms crates/sens/src/eval/necessary_forms_generated.rs \
-            --text7 crates/sens/src/text7_projection_generated.rs \
             --report /tmp/sens-three-pass-report.json
           python3 - <<'PY'
           import json
           from pathlib import Path
           report=json.loads(Path("/tmp/sens-three-pass-report.json").read_text())
           print(json.dumps(report["summary"], ensure_ascii=False))
+          print("d7_policy=", report.get("d7_policy"))
           for row in report["files"]:
               if row["status"]=="blocked":
                   print("BLOCKED",row["path"],row.get("line"),row.get("column"),row.get("token"),row["reason"])
