@@ -34,13 +34,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "LOCAL-ALGEBRA",
       "behavior": "open a named file or stream object for reading or writing",
       "provenance": [
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "STREAM-SCOPED-RESOURCE",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.review.1621e2bb444e196a",
@@ -49,13 +56,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "LOCAL-ALGEBRA",
       "behavior": "close an open stream and release its resource",
       "provenance": [
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "STREAM-SCOPED-RESOURCE",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.review.2be63d1ed50b2af8",
@@ -70,7 +84,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.3bc92ae4c4d1f1dd",
@@ -85,7 +104,12 @@
         "Lisp Machine FFI",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.476f359358f384ab",
@@ -100,7 +124,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.64db395c20b8cedf",
@@ -115,7 +144,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.6b06443e9bf925a7",
@@ -130,7 +164,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.7537894f89a67cbe",
@@ -145,7 +184,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.795b7e18545ed97c",
@@ -154,13 +198,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "MUTATION-REFINEMENT",
       "behavior": "destructive union sharing structure where possible",
       "provenance": [
         "MacLisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "NUNION-VS-UNION-MUTATION",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.review.79ca622ff9fca1d4",
@@ -175,7 +226,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.7d4262ddb5101167",
@@ -184,13 +240,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "LOCAL-ALGEBRA",
       "behavior": "open, bind lexically and close on scope exit",
       "provenance": [
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "STREAM-SCOPED-RESOURCE",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.review.9443748470add6d9",
@@ -205,7 +268,12 @@
         "MacLisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.94630545116f9ad9",
@@ -214,13 +282,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "LOCAL-ALGEBRA",
       "behavior": "retrieve an element by row-major index",
       "provenance": [
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "ROW-MAJOR-INDEX-REFINEMENT",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.review.b1fb10409833516e",
@@ -235,7 +310,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.b69642a1c58485bb",
@@ -250,7 +330,12 @@
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.bb917ffbcc0a55e0",
@@ -265,7 +350,12 @@
         "MacLisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.bbcd3b98a8c2a4f1",
@@ -280,7 +370,12 @@
         "MacLisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json"
+      ],
+      "law_status": "UNDERDETERMINED"
     },
     {
       "stable_id": "d9.review.d8c2ce0fed701331",
@@ -289,13 +384,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "SEMANTIC-GENERATOR",
       "behavior": "define a named condition type for the condition system",
       "provenance": [
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "NAMED-DESCRIPTOR-GENERATOR",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.review.e11b2f44569bd044",
@@ -304,13 +406,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "SEMANTIC-GENERATOR",
       "behavior": "define a structure type with constructor and accessors",
       "provenance": [
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "NAMED-DESCRIPTOR-GENERATOR",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.review.e44e9b93029bb356",
@@ -319,13 +428,20 @@
       "source_class": "D8-OVERFLOW-RECOVERY",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
-      "relation_class": "HISTORICAL-CAPABILITY",
+      "relation_class": "SEMANTIC-GENERATOR",
       "behavior": "define a named type specifier",
       "provenance": [
         "Common Lisp",
         "#2934"
       ],
-      "ratified_resident": false
+      "ratified_resident": false,
+      "law_evidence": [
+        "#3970",
+        "knowledge/d9-laws-v1.json",
+        "scripts/research-d9-laws-1.py"
+      ],
+      "law_family": "NAMED-DESCRIPTOR-GENERATOR",
+      "law_status": "PROVED-RESEARCH"
     },
     {
       "stable_id": "d9.sel.38666895d53a035b",
