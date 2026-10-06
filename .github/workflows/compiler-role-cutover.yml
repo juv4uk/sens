@@ -1,4 +1,5 @@
 name: Compiler role authority cutover
+# #3823 clean coverage retrigger; no semantic authority lives in this workflow.
 
 on:
   pull_request:
