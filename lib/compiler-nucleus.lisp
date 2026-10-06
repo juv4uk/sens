@@ -433,8 +433,18 @@
        (compiler-exactly-two arguments))
       ((тотожне? (compiler-request-role request) (як-є pair-construct))
        (compiler-exactly-two arguments))
+; D4 LAMBDA is parameters plus one-or-more body expressions.
+; Runtime create_lambda enforces the same minimum arity and preserves every
+; body expression, so the compiler shape law must not collapse it to exactly 2.
+(визначити compiler-at-least-two
+  (функція (arguments)
+    (за-умовою
+      ((атом? arguments) (compiler-false ()))
+      ((атом? (решта arguments)) (compiler-false ()))
+      ((compiler-true ()) (compiler-true ())))))
+
       ((тотожне? (compiler-request-role request) (як-є lambda-form))
-       (compiler-exactly-two arguments))
+       (compiler-at-least-two arguments))
       ((тотожне? (compiler-request-role request) (як-є define-form))
        (compiler-exactly-two arguments))
       ((тотожне? (compiler-request-role request) (як-є cond-form))
