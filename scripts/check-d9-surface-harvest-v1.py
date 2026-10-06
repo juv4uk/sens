@@ -87,4 +87,6 @@ assert state["surface_harvest"]=={
 
 print("D9-SURFACE-HARVEST-1=PASS")
 print("signatures=57 selected=20 lower/projection=30 hold=7")
-print(f"inventory={target[\'selected_semantic_candidates\']}/512 placed=128 unplaced={target[\'selected_semantic_candidates\']-128} remaining={target[\'remaining_semantic_candidates\']} ratified=0")
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+print(f"inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
