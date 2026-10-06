@@ -12,8 +12,9 @@
 //! It must never decide identity -> role from domain coordinates.
 
 use crate::{
-    domain_identity_shape_mechanism, domain_identity_shape_or_empty_mechanism,
-    eval_parsed_expressions, eval_program, load_core_library,
+    canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
+    load_core_library,
     sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
     ErrorKind, Exactness,
     Expr, ExprKind, LanguageError, Session, Span, Value,
@@ -22,6 +23,8 @@ use std::rc::Rc;
 
 const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
 const LANGUAGE_CONTRACT: &str = include_str!("../../../language-contract.lisp");
+const COMPILATION_ARTIFACT_V2_CONTRACT: &str =
+    include_str!("../../../contracts/compiler-compilation-artifact-v2.lisp");
 
 pub const COMPILER_ROLE_LAW_REF: &str =
     "lib/compiler-nucleus.lisp:compiler-lowering-role-from-laws";
@@ -59,6 +62,7 @@ const PROGRAM_VALUE_NAME: &str = "__compiler_program_data";
 const D3_PROOF_VALUE_NAME: &str = "__compiler_d3_proof";
 const D4_PROOF_VALUE_NAME: &str = "__compiler_d4_proof";
 const PROVENANCE_VALUE_NAME: &str = "__compiler_program_provenance";
+const DIGEST_MECHANISM_NAME: &str = "__compiler_canonical_value_sha256_mechanism";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 
@@ -361,6 +365,28 @@ fn compiler_program_call() -> Expr {
                 symbol("compiler-compile-program"),
                 symbol(SHAPE_OR_EMPTY_MECHANISM_NAME),
                 symbol(SHAPE_MECHANISM_NAME),
+                symbol(PROGRAM_VALUE_NAME),
+                symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
+                symbol(D3_PROOF_VALUE_NAME),
+                symbol(D4_PROOF_VALUE_NAME),
+                symbol(PROVENANCE_VALUE_NAME),
+            ]
+            .into_boxed_slice(),
+        )),
+        span: Span::default(),
+    }
+}
+
+
+fn compiler_program_artifact_call() -> Expr {
+    Expr {
+        kind: ExprKind::List(Rc::from(
+            vec![
+                symbol("compiler-compile-program-artifact"),
+                symbol(SHAPE_OR_EMPTY_MECHANISM_NAME),
+                symbol(SHAPE_MECHANISM_NAME),
+                symbol(DIGEST_MECHANISM_NAME),
                 symbol(PROGRAM_VALUE_NAME),
                 symbol(LAW_VALUE_NAME),
                 symbol(D4_LAW_VALUE_NAME),
