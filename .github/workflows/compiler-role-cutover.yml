@@ -74,20 +74,29 @@ jobs:
       - name: Selfhost program-data wire
         run: cargo test -p sens --test compiler_program_data -- --nocapture
 
-      - name: SENS recursive program compiler traversal
-        run: |
-          cargo test -p sens --lib \
-            compiler_language::tests::sens_program_traversal_is_role_aware_and_quote_shields_domain_data \
-            -- --nocapture
-          cargo test -p sens --lib \
-            compiler_language::tests::same_payload_wrong_domain_with_wrong_shape_fails_closed \
-            -- --nocapture
-          cargo test -p sens --lib \
-            compiler_language::tests::malformed_exact_d3_cond_clause_fails_closed_before_request_emission \
-            -- --nocapture
-          cargo test -p sens --lib \
-            compiler_language::tests::direct_d8_domain_call_fails_closed_in_sens_program_traversal \
-            -- --nocapture
+      - name: SENS traversal — Lambda + Quote shielding
+        run: >-
+          cargo test -p sens --lib
+          compiler_language::tests::sens_program_traversal_is_role_aware_and_quote_shields_domain_data
+          -- --nocapture
+
+      - name: SENS traversal — same payload wrong domain
+        run: >-
+          cargo test -p sens --lib
+          compiler_language::tests::same_payload_wrong_domain_with_wrong_shape_fails_closed
+          -- --nocapture
+
+      - name: SENS traversal — malformed COND fail closed
+        run: >-
+          cargo test -p sens --lib
+          compiler_language::tests::malformed_exact_d3_cond_clause_fails_closed_before_request_emission
+          -- --nocapture
+
+      - name: SENS traversal — direct D8 fail closed
+        run: >-
+          cargo test -p sens --lib
+          compiler_language::tests::direct_d8_domain_call_fails_closed_in_sens_program_traversal
+          -- --nocapture
 
       - name: SENS whole-program compilation artifact
         run: |
