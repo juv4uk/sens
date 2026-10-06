@@ -160,7 +160,7 @@ def tokenize(source: str) -> list[Tok]:
             out.append(Tok("STRING",source[start:i],start))
             continue
         start=i
-        while i<n and (not source[i].isspace()) and source[i] not in "()'\"\`,": 
+        while i<n and (not source[i].isspace()) and source[i] not in "()'\"`,": 
             i+=1
         text=source[start:i]
         if text==".":
@@ -359,13 +359,15 @@ class Resolver:
 
 def encode_atom_data(node: Atom):
     t=node.tok.text
+    # Exact-width binary source identity wins before decimal-looking syntax.
+    # Thus 000 is D3 EMPTY/domain data here, not decimal zero.
+    if 1<=len(t)<=8 and set(t)<=set("01"):
+        return [t]
     if NUMERIC_RE.fullmatch(t):
         raise MigrationError(
             f"numeric literal {t!r} awaits admitted Number framing; refusing to guess its role",
             node.tok,
         )
-    if 1<=len(t)<=8 and set(t)<=set("01"):
-        return [t]
     raise MigrationError(
         f"unclassified non-function atom {t!r}; D7/Text7 is deferred until text-vs-variable classification",
         node.tok,
