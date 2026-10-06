@@ -10,7 +10,6 @@ on:
       - "lib/surface/semantic-registry.lisp"
       - "scripts/generate-domain-tables-d1-d6.py"
       - "scripts/check-domain-table-readable.lisp"
-      - "scripts/check-domain-table-readable.lisp"
       - "lib/generated/domain-table-d1-d6.lisp"
       - "docs/generated/domain-tables-d1-d6.md"
       - ".github/workflows/domain-tables-d1-d6.yml"
@@ -23,6 +22,7 @@ on:
       - "lib/surface/domain-surfaces-d6.lisp"
       - "lib/surface/semantic-registry.lisp"
       - "scripts/generate-domain-tables-d1-d6.py"
+      - "scripts/check-domain-table-readable.lisp"
       - "lib/generated/domain-table-d1-d6.lisp"
       - "docs/generated/domain-tables-d1-d6.md"
       - ".github/workflows/domain-tables-d1-d6.yml"
@@ -32,9 +32,6 @@ jobs:
     runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
       - name: Check canonical D1-D6 Lisp-first tables
         id: check
         shell: bash
