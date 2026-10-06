@@ -72,6 +72,10 @@ class Resolution:
     def resolved(self) -> bool:
         return self.current is not None and not self.ambiguous
 
+    @property
+    def legacy_unmapped(self) -> bool:
+        return self.pass_number in (1, 2, 3) and self.current is None and not self.ambiguous
+
 
 def _strip_semicolon_comments(text: str) -> str:
     return "\n".join(line.split(";", 1)[0] for line in text.splitlines())
