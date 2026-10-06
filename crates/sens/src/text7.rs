@@ -354,7 +354,7 @@ mod tests {
         let text = Text7::from_cells(Vec::new()).unwrap();
 
         assert!(text.is_empty());
-        assert_eq!(text.cells(), &[]);
+        assert_eq!(text.cells(), &[] as &[u8]);
         assert_eq!(format!("{text:?}"), "Text7()");
     }
 }

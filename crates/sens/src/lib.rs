@@ -17,6 +17,7 @@ pub mod compilation_artifact_producer;
 pub mod conformance_oracle;
 pub mod fixpoint_checkpoint;
 pub mod gpu_admission;
+pub mod gpu_oracle;
 pub mod program_compiler;
 mod compiler_role;
 mod compiler_bootstrap;
