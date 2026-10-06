@@ -1,15 +1,15 @@
-# Sens8 проти чинної драбини D1–D7
+# Sens8 проти історичного зрізу драбини D1–D7
 
 **Дата зрізу:** 2026-10-06  
-**Статус:** аналітична інвентаризація / migration evidence. **НЕ semantic authority.**  
-**Чинна семантична влада:** `language-contract.lisp`, `knowledge/d1-d7-foundation.json`, ратифіковані domain laws та джерела, перелічені в `CURRENT.md`.
+**Статус:** frozen pre-D8 аналітичний зріз / migration evidence. **НЕ current semantic authority.**  
+**Важливо:** цей підрахунок зроблено до owner-ratification D8 #3960. Поточна влада — Contract 11.7, `knowledge/d1-d8-foundation.json`, `knowledge/d8-ratified.json`, `lib/domains/d1.lisp … d8.lisp` як human projections і джерела з `CURRENT.md`.
 
 ## Навіщо цей документ
 
 Цей зріз відповідає на два окремі питання:
 
 1. що з історичної плоскої 8-бітної таблиці Sens8 отримало доведеного наступника в чинній exact-width драбині;
-2. які старі Sens8-операції не ввійшли до ратифікованого ядра D1–D7.
+2. які старі Sens8-операції не ввійшли до ратифікованого ядра D1–D7 **на момент цього pre-D8 зрізу**.
 
 Ключове правило: **чинна драбина не є просто стисненим Sens8**.
 
@@ -29,7 +29,7 @@ D1–D7:
 
 ## Джерела цього зрізу
 
-Підрахунок зроблено з чинного `main`:
+Підрахунок нижче зафіксований як історичний pre-D8 snapshot і не перерахований після #3960:
 
 - `knowledge/d1-d7-foundation.json` — ратифіковані D1–D7;
 - `crates/sens/src/semantic_registry_generated.rs` — 256 історичних Sens8 slot-ів і їхні surface-проєкції;
