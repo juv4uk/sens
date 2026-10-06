@@ -23,8 +23,8 @@
     "width": 9,
     "capacity": 512,
     "dense_target": 512,
-    "selected_semantic_candidates": 226,
-    "remaining_semantic_candidates": 286,
+    "selected_semantic_candidates": 248,
+    "remaining_semantic_candidates": 264,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -66,10 +66,10 @@
   },
   "semantic_inventory": {
     "artifact": "knowledge/d9-v1-semantic-inventory.json",
-    "selected": 226,
+    "selected": 248,
     "law_forced_coordinates": 128,
-    "unplaced_selected": 98,
-    "remaining": 286
+    "unplaced_selected": 120,
+    "remaining": 264
   },
   "law_mining": {
     "artifact": "knowledge/d9-laws-v1.json",
@@ -94,5 +94,14 @@
     "selected": 58,
     "coordinates_assigned": 0,
     "raw_host_mechanisms_excluded": 3
+  },
+  "registry_tail_review": {
+    "artifact": "knowledge/d9-registry-tail-v1.json",
+    "source_rows": 39,
+    "selected": 22,
+    "lower_or_projection": 12,
+    "internal": 4,
+    "hold_mechanism": 1,
+    "coordinates_assigned": 0
   }
 }

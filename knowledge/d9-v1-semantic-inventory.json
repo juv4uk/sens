@@ -11,13 +11,14 @@
     "knowledge/d9-selector-seed.json",
     "knowledge/d9-overflow-review-v1.json",
     "knowledge/d9-surface-harvest-v1.json",
-    "knowledge/d9-library-harvest-v1.json"
+    "knowledge/d9-library-harvest-v1.json",
+    "knowledge/d9-registry-tail-v1.json"
   ],
   "accounting": {
-    "selected_semantic_candidates": 226,
+    "selected_semantic_candidates": 248,
     "law_forced_coordinates": 128,
-    "unplaced_selected_candidates": 98,
-    "remaining_semantic_inventory": 286,
+    "unplaced_selected_candidates": 120,
+    "remaining_semantic_inventory": 264,
     "ratified_d9_residents": 0
   },
   "rules": [
@@ -1769,6 +1770,424 @@
       ],
       "surface_source": "string-first",
       "law_status": "UNTESTED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.015ce3a94eea8555",
+      "semantic_name": "SYMBOL?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-PREDICATE",
+      "behavior": "test whether an atomic value is specifically a symbol rather than another atom kind",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "symbol?",
+      "source_binding": "symbol?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.3c720eb2bfd30c8d",
+      "semantic_name": "ANSWER-WEAKEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "weaken an answer value according to the language-owned answer lattice law",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "answer-weaken",
+      "source_binding": "answer-weaken",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.46f3783d8b60e88d",
+      "semantic_name": "IDENTITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FUNCTION-ALGEBRA",
+      "behavior": "return the supplied value unchanged",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "identity",
+      "source_binding": "identity",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.4ce8ad56255802e4",
+      "semantic_name": "PROCESS-RUN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER",
+      "behavior": "run an allowed process through the raw mechanism and expose decoded exit/stdout/stderr language semantics",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp"
+      ],
+      "source_name": "process-run",
+      "source_binding": "process-run",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.4fb187a793a51ff9",
+      "semantic_name": "THREAD-LAST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MACRO-TRANSFORM",
+      "behavior": "thread an expression as the last argument through a transformation pipeline",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "thread-last",
+      "source_binding": "->>",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.4ffd37b72879f148",
+      "semantic_name": "ANSWER-EQ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "lift equality into the answer-valued semantic layer",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "answer-eq",
+      "source_binding": "answer-eq",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.55e4974929a4f35c",
+      "semantic_name": "ANSWER-OR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "compute bitwise disjunction over answer values under the answer-width law",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "answer-or",
+      "source_binding": "answer-or",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.57f23215be459163",
+      "semantic_name": "TCP-WRITE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER",
+      "behavior": "encode text and write through the raw TCP mechanism while preserving public text-result semantics",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/tcp.lisp"
+      ],
+      "source_name": "tcp-write",
+      "source_binding": "tcp-write",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.58d4804ae5302c40",
+      "semantic_name": "ANSWER-AND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "compute bitwise conjunction over answer values under the answer-width law",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "answer-and",
+      "source_binding": "answer-and",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.7d5007d3f5a202f1",
+      "semantic_name": "FIFTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SELECTOR-RECOVERY",
+      "behavior": "return the fifth element of a list, equivalent to historical selector CADDDDR",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "fifth",
+      "source_binding": "fifth",
+      "law_status": "RECOVERED-MISSING-SELECTOR",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.84da249772d254e7",
+      "semantic_name": "BINARY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REPRESENTATION-DESCRIPTOR",
+      "behavior": "construct the language-owned binary-width format descriptor",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "binary",
+      "source_binding": "binary",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.85f830bf780a65d5",
+      "semantic_name": "READ-FILE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER",
+      "behavior": "read file bytes through the raw mechanism and expose UTF-8 decoded text or explicit rejection",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/fs.lisp"
+      ],
+      "source_name": "read-file",
+      "source_binding": "read-file",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.87128ebb8ab28c6f",
+      "semantic_name": "GENSYM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FRESH-NAME-GENERATOR",
+      "behavior": "construct a fresh symbol preserving the caller-supplied prefix",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "gensym",
+      "source_binding": "gensym",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.8a9a73f6bceb270a",
+      "semantic_name": "NUMBER->STRING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REPRESENTATION-CONVERSION",
+      "behavior": "render a number into its language-level string representation",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "number->string",
+      "source_binding": "number->string",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.aac24b4f469e4e8a",
+      "semantic_name": "ISQRT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-INTEGER-ARITHMETIC",
+      "behavior": "compute the exact integer square root by a terminating language-owned algorithm",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "isqrt",
+      "source_binding": "isqrt",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.db19809a7972f8c9",
+      "semantic_name": "ANSWER-NOT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "invert every bit of an answer value while preserving answer width",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "answer-not",
+      "source_binding": "answer-not",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.dd50486541b4498a",
+      "semantic_name": "WRITE-FILE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER",
+      "behavior": "encode language text and persist it through the raw byte-write mechanism",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/fs.lisp"
+      ],
+      "source_name": "write-file",
+      "source_binding": "write-file",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.dda09c82c2d75998",
+      "semantic_name": "TCP-LISTEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER",
+      "behavior": "expose the public TCP listen policy over the raw listen mechanism",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/tcp.lisp"
+      ],
+      "source_name": "tcp-listen",
+      "source_binding": "tcp-listen",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.df9c78aecc7f7d6c",
+      "semantic_name": "TCP-READ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LISP-OWNED-HOST-WRAPPER",
+      "behavior": "read raw TCP bytes through the mechanism boundary and expose UTF-8 text semantics",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/tcp.lisp"
+      ],
+      "source_name": "tcp-read",
+      "source_binding": "tcp-read",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.e17b3440bf4c9773",
+      "semantic_name": "DIVMOD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARITHMETIC-PRODUCT",
+      "behavior": "return quotient and remainder together for one division operation",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "divmod",
+      "source_binding": "divmod",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.f234cf5ee8311005",
+      "semantic_name": "ANSWER-ATOM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "lift/test atomicity into the answer-valued semantic layer",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "answer-atom",
+      "source_binding": "answer-atom",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.tail.f8418043b19924fb",
+      "semantic_name": "THREAD-FIRST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-TAIL-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MACRO-TRANSFORM",
+      "behavior": "thread an expression as the first argument through a transformation pipeline",
+      "provenance": [
+        "#3985",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp"
+      ],
+      "source_name": "thread-first",
+      "source_binding": "->",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
       "ratified_resident": false
     },
     {

@@ -61,6 +61,12 @@ if library_path.exists():
     library_ids={r["stable_id"] for r in library["rows"] if r["selected_d9_candidate"]}
     assert library_ids <= unplaced_ids
 
+tail_path=root/"knowledge/d9-registry-tail-v1.json"
+if tail_path.exists():
+    tail=json.loads(tail_path.read_text(encoding="utf-8"))
+    tail_ids={r["stable_id"] for r in tail["rows"] if r["selected_d9_candidate"]}
+    assert tail_ids <= unplaced_ids
+
 for name in ("APPLY","COMPOSE","REDUCE"):
     assert name not in {r["semantic_name"] for r in rows}
 
