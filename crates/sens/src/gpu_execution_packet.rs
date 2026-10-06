@@ -296,7 +296,7 @@ impl<'a> Reader<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Bija3, Bit3};
+    use crate::{Bija3, Bit3, Bit7, CoreD8};
 
     fn d3(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()))
