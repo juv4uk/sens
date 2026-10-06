@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
-"""Generate/check SENS8-like D1-D6 human tables from current exact-domain authority.
-
-Semantic identity comes only from knowledge/d1-d7-foundation.json.
-Legacy semantic-registry.lisp is used only as a lexical donor; its 8-bit rows
-never select or renumber a current domain identity.
-
-Canonical human column order:
-    ук -> укр -> san -> eng -> LISP -> SUM
-"""
+"""Generate/check canonical D1-D6 human projection tables."""
 
 from __future__ import annotations
 
@@ -18,167 +10,144 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d7-foundation.json"
+PROJECTION = ROOT / "knowledge/domain-table-projection-d1-d6.json"
+OUTPUT = ROOT / "docs/generated/domain-tables-d1-d6.md"
 SURFACE_SOURCES = (
     ROOT / "lib/surface/domain-surfaces-d1-d4.lisp",
     ROOT / "lib/surface/domain-surfaces-d5.lisp",
 )
-LEGACY_DONOR = ROOT / "lib/surface/semantic-registry.lisp"
-OUTPUT = ROOT / "docs/generated/domain-tables-d1-d6.md"
 
-EXACT_ROW = re.compile(
-    r'^\\s*\\(row\\s+(D[1-5])\\s+"([01]+)"\\s+(\\S+)\\s+'
-    r'"([^"]+)"\\s+"([^"]+)"\\s+"([^"]+)"\\s+(\\S+)\\s+(\\S+)\\)\\s*$'
-)
-ATOM_TOKEN = r'(\\(\\)|"[^"]*"|[^()\\s]+)'
-LEGACY_ROW = re.compile(
-    r'^\\s*\\([01]{8}\\s+'
-    + r'\\(en\\s+' + ATOM_TOKEN + r'\\)\\s+'
-    + r'\\(ук\\s+' + ATOM_TOKEN + r'\\)\\s+'
-    + r'\\(укр\\s+' + ATOM_TOKEN + r'\\)\\s+'
-    + r'\\(sa\\s+' + ATOM_TOKEN + r'\\)'
-)
-
+COLUMNS = ["ук", "укр", "san", "eng", "LISP", "SUM"]
 HEADER = "| bits | ук | укр | san | eng | LISP | SUM |"
 DIVIDER = "|---|---|---|---|---|---|---|"
 
-D6_DONOR_ALIASES = {
-    "LEQ": "not-greaterp?",
-    "GEQ": "not-lessp?",
-    "REMAINDER": "mod",
-}
+EXACT_ROW = re.compile(
+    r'^\s*\(row\s+(D[1-5])\s+"([01]+)"\s+(\S+)\s+'
+    r'"([^"]+)"\s+"([^"]+)"\s+"([^"]+)"\s+(\S+)\s+(\S+)\)\s*$'
+)
 
 
-def atom(value: str) -> str | None:
-    value = value.strip()
-    if value == "()":
-        return None
-    if len(value) >= 2 and value[0] == '"' and value[-1] == '"':
-        return value[1:-1]
-    return value
+def fail(message: str) -> None:
+    raise SystemExit(f"DOMAIN-TABLES-D1-D6: FAIL: {message}")
 
 
-def parse_exact() -> dict[tuple[str, str], dict[str, str]]:
-    out: dict[tuple[str, str], dict[str, str]] = {}
+def load_exact_surfaces() -> dict[tuple[str, str], dict[str, str]]:
+    rows: dict[tuple[str, str], dict[str, str]] = {}
     for path in SURFACE_SOURCES:
-        for line in path.read_text(encoding="utf-8").splitlines():
-            m = EXACT_ROW.match(line)
-            if not m:
+        for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if not line.lstrip().startswith("(row "):
                 continue
-            domain, bits, role, eng, uk, san, _uk_status, _san_status = m.groups()
-            out[(domain, bits)] = {"role": role, "eng": eng, "uk": uk, "san": san}
-    return out
+            match = EXACT_ROW.match(line)
+            if not match:
+                fail(f"cannot parse exact surface row at {path}:{line_no}")
+            domain, bits, _role, eng, uk, san, _uk_status, _san_status = match.groups()
+            rows[(domain, bits)] = {"uk": uk, "san": san, "eng": eng}
+    return rows
 
 
-def parse_legacy_donor() -> dict[str, dict[str, str | None]]:
-    out: dict[str, dict[str, str | None]] = {}
-    for line in LEGACY_DONOR.read_text(encoding="utf-8").splitlines():
-        m = LEGACY_ROW.match(line)
-        if not m:
-            continue
-        eng, uk, ukr, san = (atom(x) for x in m.groups())
-        if eng:
-            out[eng.lower()] = {"uk": uk, "ukr": ukr, "san": san}
-    return out
+def validate(
+    foundation: dict,
+    projection: dict,
+    exact_surfaces: dict[tuple[str, str], dict[str, str]],
+) -> None:
+    if projection.get("columns") != COLUMNS:
+        fail(f"column order must be {COLUMNS!r}")
+
+    domains = projection.get("domains")
+    if not isinstance(domains, list) or len(domains) != 6:
+        fail("projection must contain exactly D1-D6")
+
+    total = 0
+    seen: set[tuple[str, str]] = set()
+
+    for width, projected in enumerate(domains, start=1):
+        domain = f"D{width}"
+        if projected.get("domain") != domain:
+            fail(f"expected {domain} at position {width}")
+
+        current = foundation["domains"][domain]
+        name = current.get("sanskrit_name")
+        if not name:
+            fail(f"{domain}: missing sanskrit_name in ratified foundation")
+        if projected.get("name") != name:
+            fail(f"{domain}: projection name drift")
+
+        rows = projected.get("rows")
+        if not isinstance(rows, list) or len(rows) != (1 << width):
+            fail(f"{domain}: expected {1 << width} rows")
+
+        expected_bits = sorted(current["residents"], key=lambda b: int(b, 2))
+        actual_bits = [row.get("bits") for row in rows]
+        if actual_bits != expected_bits:
+            fail(f"{domain}: row bit order/coverage drift")
+
+        for row in rows:
+            bits = row["bits"]
+            resident = row.get("resident")
+            expected_resident = current["residents"][bits]
+            if resident != expected_resident:
+                fail(f"{domain}:{bits}: resident drift {resident!r} != {expected_resident!r}")
+
+            key = (domain, bits)
+            if key in seen:
+                fail(f"duplicate key {domain}:{bits}")
+            seen.add(key)
+
+            values = row.get("values")
+            if not isinstance(values, list) or len(values) != 6:
+                fail(f"{domain}:{bits}: expected six surface columns")
+
+            expected_sum = f"{name}:{bits}={resident}"
+            if values[5] != expected_sum:
+                fail(f"{domain}:{bits}: SUM drift")
+
+            if width <= 5:
+                exact = exact_surfaces.get(key)
+                if exact is None:
+                    fail(f"{domain}:{bits}: missing current exact surface row")
+                if values[0] != exact["uk"]:
+                    fail(f"{domain}:{bits}: ук drift from exact-domain source")
+                if values[2] != exact["san"]:
+                    fail(f"{domain}:{bits}: san drift from exact-domain source")
+                if values[3] != exact["eng"]:
+                    fail(f"{domain}:{bits}: eng drift from exact-domain source")
+
+            total += 1
+
+    if total != 126:
+        fail(f"expected 126 rows, found {total}")
+    if len(exact_surfaces) != 62:
+        fail(f"expected 62 exact D1-D5 surface rows, found {len(exact_surfaces)}")
 
 
-def lisp_label(domain: str, resident: str) -> str:
-    if domain == "D1":
-        return {"NO": "NIL", "YES": "T"}[resident]
-    if domain == "D2":
+def cell(value: object) -> str:
+    if value is None or value == "":
         return "—"
-    if domain == "D3" and resident == "EMPTY":
-        return "NIL"
-    return resident
+    return str(value)
 
 
-def fallback_eng(resident: str) -> str:
-    return resident.lower()
-
-
-def selector_surfaces(resident: str) -> tuple[str, str] | None:
-    """Generate proved CAR/CDR selector spellings compositionally."""
-    if not re.fullmatch(r"C[AD]+R", resident):
-        return None
-    chain = resident[1:-1]
-    uk = "-від-".join("перше" if part == "A" else "решта" for part in chain)
-    san = "-".join("ādi" if part == "A" else "śeṣa" for part in chain)
-    return uk, san
-
-
-def render() -> str:
-    foundation = json.loads(FOUNDATION.read_text(encoding="utf-8"))
-    exact = parse_exact()
-    legacy = parse_legacy_donor()
-
+def render(projection: dict) -> str:
     lines = [
         "# Domain tables D1–D6",
         "",
         "**Authority:** `knowledge/d1-d7-foundation.json` (#3572).",
         "",
-        "These are human projections only. Exact identity remains `bits + domain + ratified law`.",
-        "The historical 8-bit registry is consulted only as a lexical donor and never as coordinate authority.",
+        "Human projection source: `knowledge/domain-table-projection-d1-d6.json`.",
+        "Exact identity remains `bits + domain + ratified law`.",
         "",
         "Canonical surface order: **ук → укр → san → eng → LISP → SUM**.",
         "",
     ]
 
-    total = 0
-    for width in range(1, 7):
-        domain = f"D{width}"
-        info = foundation["domains"][domain]
-        name = info["sanskrit_name"]
-        residents = info["residents"]
-        expected = 1 << width
-        if len(residents) != expected:
-            raise SystemExit(f"{domain}: expected {expected} residents, found {len(residents)}")
-
-        lines += [f"## {name} ({domain})", "", HEADER, DIVIDER]
-
-        for bits, resident in sorted(residents.items(), key=lambda item: int(item[0], 2)):
-            current = exact.get((domain, bits))
-            if current:
-                eng = current["eng"]
-                uk = current["uk"]
-                san = current["san"]
-            else:
-                eng = fallback_eng(resident)
-                generated_selector = selector_surfaces(resident)
-                if generated_selector:
-                    uk, san = generated_selector
-                else:
-                    uk = None
-                    san = None
-
-            donor_key = D6_DONOR_ALIASES.get(resident, eng).lower()
-            donor = legacy.get(donor_key, {})
-
-            if not uk:
-                uk = donor.get("uk")
-            ukr = donor.get("ukr") or uk
-            if not san:
-                san = donor.get("san")
-
-            uk = uk or "—"
-            ukr = ukr or "—"
-            san = san or "—"
-            eng = eng or "—"
-            lisp = lisp_label(domain, resident)
-            summary = f"{name}:{bits}={resident}"
-
-            lines.append(
-                f"| `{bits}` | `{uk}` | `{ukr}` | `{san}` | "
-                f"`{eng}` | `{lisp}` | `{summary}` |"
-            )
-            total += 1
+    for domain in projection["domains"]:
+        lines += [f"## {domain['name']} ({domain['domain']})", "", HEADER, DIVIDER]
+        for row in domain["rows"]:
+            values = [cell(value) for value in row["values"]]
+            rendered = " | ".join(f"`{value}`" for value in values)
+            lines.append(f"| `{row['bits']}` | {rendered} |")
         lines.append("")
 
-    if total != 126:
-        raise SystemExit(f"expected 126 D1-D6 rows, found {total}")
-
-    text = "\n".join(lines).rstrip() + "\n"
-    if HEADER not in text:
-        raise SystemExit("canonical header missing")
-    return text
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def main() -> int:
@@ -186,7 +155,12 @@ def main() -> int:
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
 
-    generated = render()
+    foundation = json.loads(FOUNDATION.read_text(encoding="utf-8"))
+    projection = json.loads(PROJECTION.read_text(encoding="utf-8"))
+    exact_surfaces = load_exact_surfaces()
+    validate(foundation, projection, exact_surfaces)
+    generated = render(projection)
+
     if args.write:
         OUTPUT.parent.mkdir(parents=True, exist_ok=True)
         OUTPUT.write_text(generated, encoding="utf-8")
@@ -194,15 +168,12 @@ def main() -> int:
         return 0
 
     if not OUTPUT.exists():
-        raise SystemExit(f"missing generated file: {OUTPUT.relative_to(ROOT)}")
-    current = OUTPUT.read_text(encoding="utf-8")
-    if current != generated:
-        raise SystemExit(
-            "domain table drift: run python3 scripts/generate-domain-tables-d1-d6.py --write"
-        )
+        fail(f"missing generated file: {OUTPUT.relative_to(ROOT)}")
+    if OUTPUT.read_text(encoding="utf-8") != generated:
+        fail("generated markdown is stale; run with --write")
 
     print("DOMAIN-TABLES-D1-D6: PASS")
-    print("rows=126 order=ук->укр->san->eng->LISP->SUM identity=unchanged")
+    print("rows=126 order=ук->укр->san->eng->LISP->SUM")
     return 0
 
 
