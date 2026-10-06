@@ -408,6 +408,16 @@
          ((compiler-true ()) (compiler-false ()))))
       ((compiler-true ()) (compiler-false ())))))
 
+; LAMBDA admits parameters plus one or more body expressions.
+; This structural predicate deliberately asks only whether the first two
+; argument cells exist; it does not impose a maximum body length.
+(визначити compiler-at-least-two
+  (функція (arguments)
+    (за-умовою
+      ((атом? arguments) (compiler-false ()))
+      ((атом? (решта arguments)) (compiler-false ()))
+      ((compiler-true ()) (compiler-true ())))))
+
 ; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
 (визначити compiler-cond-clauses-valid
   (функція (clauses)
@@ -434,7 +444,7 @@
       ((тотожне? (compiler-request-role request) (як-є pair-construct))
        (compiler-exactly-two arguments))
       ((тотожне? (compiler-request-role request) (як-є lambda-form))
-       (compiler-exactly-two arguments))
+       (compiler-at-least-two arguments))
       ((тотожне? (compiler-request-role request) (як-є define-form))
        (compiler-exactly-two arguments))
       ((тотожне? (compiler-request-role request) (як-є cond-form))
