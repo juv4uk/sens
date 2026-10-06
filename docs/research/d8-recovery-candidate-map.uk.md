@@ -135,8 +135,8 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   3
-provisional coordinates            00000000, 00000001, 00000010
+provisional D8 ladder candidates   5
+provisional coordinates            00000000..00000100
 ratified D8 residents              0
 resolved recovery no-slot          9
 unresolved recovery rows           2
@@ -146,7 +146,7 @@ preserved negative groups          4
 
 ## Наступне правило заповнення
 
-Після `ERRORSET`, `ERROR` і `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
+Після `ERRORSET`, `ERROR`, `ENV-REFLECTION`, `READ` і `WRITE-TO-STRING` новий D8 slot видаємо тільки тоді, коли:
 
 ```text
 capability не представлена D1-D7
