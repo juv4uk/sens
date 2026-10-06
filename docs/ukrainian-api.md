@@ -1,8 +1,8 @@
 # Українська програмна поверхня SENS
 
-**Статус:** актуальний довідник human surfaces для Contract 11.7.
+**Статус:** актуальний довідник human surfaces для Contract 11.8.
 
-Українські назви — це **проєкції над exact-domain semantic identity**, а не окремі semantic IDs. Канонічні human-readable таблиці лежать у `lib/domains/d1.lisp … lib/domains/d8.lisp`, по одному домену на файл.
+Українські назви — це **проєкції над exact-domain semantic identity**, а не окремі semantic IDs. Канонічні human-readable таблиці D1–D8 лежать у `lib/domains/d1.lisp … lib/domains/d8.lisp`, по одному домену на файл. D9 уже owner-ratified #4008; його нормативна карта зараз machine-readable у `knowledge/d9-ratified.json`, а human projection є окремим наступним кроком.
 
 Старий `lib/surface/semantic-registry.lisp` і generated Function8/Sens8 таблиці можуть лишатися для compatibility/provenance. Вони **не визначають current placement або meaning**.
 
