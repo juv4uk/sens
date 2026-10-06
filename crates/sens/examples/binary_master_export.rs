@@ -9,6 +9,79 @@ const SKIP_DIRS: &[&str] = &[
     "__pycache__", "dist", "build",
 ];
 
+fn strip_comments(source: &str) -> String {
+    #[derive(Clone, Copy)]
+    enum State {
+        Normal,
+        String,
+        LineComment,
+        BlockComment(usize),
+    }
+
+    let bytes = source.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0usize;
+    let mut state = State::Normal;
+
+    while i < bytes.len() {
+        match state {
+            State::Normal => {
+                if bytes[i] == b'"' {
+                    out.push(bytes[i]);
+                    i += 1;
+                    state = State::String;
+                } else if bytes[i] == b';' {
+                    i += 1;
+                    state = State::LineComment;
+                } else if i + 1 < bytes.len() && bytes[i] == b'#' && bytes[i + 1] == b'|' {
+                    i += 2;
+                    state = State::BlockComment(1);
+                } else {
+                    out.push(bytes[i]);
+                    i += 1;
+                }
+            }
+            State::String => {
+                out.push(bytes[i]);
+                if bytes[i] == b'\\' && i + 1 < bytes.len() {
+                    i += 1;
+                    out.push(bytes[i]);
+                } else if bytes[i] == b'"' {
+                    state = State::Normal;
+                }
+                i += 1;
+            }
+            State::LineComment => {
+                if bytes[i] == b'\n' {
+                    out.push(b'\n');
+                    state = State::Normal;
+                }
+                i += 1;
+            }
+            State::BlockComment(depth) => {
+                if i + 1 < bytes.len() && bytes[i] == b'#' && bytes[i + 1] == b'|' {
+                    i += 2;
+                    state = State::BlockComment(depth + 1);
+                } else if i + 1 < bytes.len() && bytes[i] == b'|' && bytes[i + 1] == b'#' {
+                    i += 2;
+                    state = if depth == 1 {
+                        State::Normal
+                    } else {
+                        State::BlockComment(depth - 1)
+                    };
+                } else {
+                    if bytes[i] == b'\n' {
+                        out.push(b'\n');
+                    }
+                    i += 1;
+                }
+            }
+        }
+    }
+
+    String::from_utf8(out).expect("comment stripping preserves UTF-8 bytes")
+}
+
 fn should_skip(path: &Path) -> bool {
     path.components().any(|c| {
         let s = c.as_os_str().to_string_lossy();
@@ -90,6 +163,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
         };
+
+        let source = strip_comments(&source);
 
         let parsed = match parse(&source) {
             Ok(x) => x,
