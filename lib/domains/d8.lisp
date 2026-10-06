@@ -233,7 +233,7 @@
   (11011111 (ук знайти-перший-збіг) (укр знайти-перший-збіг) (san prathama-anveṣaṇa) (en find) (LISP FIND) (sym ()))
   (11100000 (ук код-символу) (укр код-символу) (san varṇa-koda) (en char-code) (LISP CHAR-CODE) (sym ()))
   (11100001 (ук спарувати-послідовності-навпаки) (укр спарувати-послідовності-навпаки) (san viparīta-yugma-saṃyojana) (en zip-swapped) (LISP ZIP-swapped) (sym ()))
-  (11100010 (ук встановити-перше-пари) (укр встановити-перше-пари) (san ādi-parivartana) (en set-car) (LISP SET-CAR) (sym ()))
+  (11100010 (ук встановити-перше-пари) (укр встановити-перше-пари) (san ādi-sthāpana) (en set-car) (LISP SET-CAR) (sym ()))
   (11100011 (ук розпарувати-пари-навпаки) (укр розпарувати-пари-навпаки) (san viparīta-yugma-vibhajana) (en unzip-swapped) (LISP UNZIP-swapped) (sym ()))
   (11100100 (ук усі-задовольняють?) (укр усі-задовольняють?) (san sarva-parīkṣā) (en every?) (LISP EVERY) (sym ()))
   (11100101 (ук обробити-умову) (укр обробити-умову) (san avasthā-pratikriyā) (en handler-case) (LISP HANDLER-CASE) (sym ()))
