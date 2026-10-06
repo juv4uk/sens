@@ -5,8 +5,8 @@
 //! raw coordinates itself.
 
 use sens::{
-    compiler_lowering_role_from_sens, sha256_source, Bija3, Bit3, CompilerLoweringRole,
-    CoreDomainIdentity,
+    compiler_lowering_role_from_sens, sha256_source, Bija3, Bit3, Bit4, CompilerLoweringRole,
+    CoreD4, CoreDomainIdentity,
 };
 use std::path::Path;
 
@@ -14,7 +14,7 @@ const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
 const D3_LAW: &str = include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
 const D4_LAW: &str =
     include_str!("../../../knowledge/d4-bootstrap-compiler-structure-projection.json");
-const CORPUS: &str = include_str!("../../../contracts/compiler-d3-selector-corpus-v1.tsv");
+const D3_CORPUS: &str = include_str!("../../../contracts/compiler-d3-selector-corpus-v1.tsv");
 
 #[derive(Debug, Clone)]
 pub struct ExportOptions {
