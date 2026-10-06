@@ -284,7 +284,7 @@ fn add_provenance_sid_preserves_math_history_while_machine_uses_exact_d5() {
     let kernels = kernel_statuses_for_sid(&kernel_source, sens::sens!(00001100));
 
     assert!(math.contains("exact-rational-sum"));
-    assert_eq!(machine, "((integer-add bounded-u64))");
+    assert_eq!(machine, "((integer-add bounded-u32-inputs u64-result))");
     assert!(kernels.is_empty(), "absence must remain explicit, not guessed");
     assert!(!math.contains("add-r64-r64"));
     assert!(!machine.contains("exact-rational-sum"));
