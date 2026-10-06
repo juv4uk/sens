@@ -25,6 +25,13 @@ from hashlib import sha256
 import json
 from pathlib import Path
 import re
+import sys
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
 LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
@@ -633,6 +640,7 @@ def binary_rewrite(
     text7_candidates,
     legacy_sid_map=None,
     registry_surface_sid_map=None,
+    resolver: SourceResolver | None = None,
 ):
     """Encode one source file as exact-width visible binary SENS words."""
     source = strip_comments(text)
@@ -778,85 +786,72 @@ def binary_rewrite(
         frame = frames[-1] if frames else None
         is_head = bool(frame and frame["head"])
         quoted = current_quoted()
-        upper = token.upper()
-        entry = code_map.get(upper)
-        binary_head = (
-            is_head
-            and not quoted
-            and 1 <= len(token) <= 8
-            and set(token) <= {"0", "1"}
-        )
+        resolved_label = None
 
-        if (
-            is_head
-            and not quoted
-            and entry
-            and upper not in shadowed
-            and ":" not in token
-        ):
-            out.append(entry.bits)
-            line, col = line_col(source, start)
-            hits.append(Hit(line, col, entry.label, entry.bits, entry.domain))
-        elif binary_head:
-            if len(token) == 8:
-                migrated = legacy_sid_map.get(token)
-                if migrated is not None:
-                    out.append(migrated.bits)
-                    line, col = line_col(source, start)
-                    hits.append(Hit(
-                        line,
-                        col,
-                        migrated.label,
-                        migrated.bits,
-                        migrated.domain,
-                    ))
-                else:
-                    # Known compatibility function code: keep the exact W8
-                    # identity rather than misclassifying it as Text7.
-                    out.append(token)
-                    line, col = line_col(source, start)
-                    hits.append(Hit(
-                        line,
-                        col,
-                        token,
-                        token,
-                        "W8-COMPAT",
-                    ))
-            elif (len(token), token) in current_words:
-                out.append(token)
-            else:
+        if is_head and not quoted:
+            if resolver is None:
                 raise BinaryMigrationError(
-                    f"binary call head {token} is not a current D3-D6 resident"
+                    "history-aware SourceResolver is required for binary migration"
                 )
-        elif is_head and not quoted and upper in registry_surface_sid_map:
-            sid = registry_surface_sid_map[upper]
-            migrated = legacy_sid_map.get(sid)
-            if migrated is not None:
-                out.append(migrated.bits)
-                line, col = line_col(source, start)
-                hits.append(Hit(
-                    line,
-                    col,
-                    migrated.label,
-                    migrated.bits,
-                    migrated.domain,
-                ))
-            else:
-                out.append(sid)
-                line, col = line_col(source, start)
-                hits.append(Hit(
-                    line,
-                    col,
-                    token,
-                    sid,
-                    "W8-COMPAT",
-                ))
+            resolution = resolver.resolve_head(token)
+            if not resolution.resolved:
+                detail = (
+                    ", ".join(resolution.ambiguous)
+                    if resolution.ambiguous
+                    else "no proven current exact-domain identity"
+                )
+                raise BinaryMigrationError(
+                    f"unresolved executable head {token!r}: "
+                    f"{resolution.kind}; {detail}"
+                )
+            identity = resolution.current
+            assert identity is not None
+            if identity.label == "EMPTY":
+                raise BinaryMigrationError(
+                    "structural EMPTY/000 cannot be used as a callable head"
+                )
+            out.append(identity.bits)
+            resolved_label = identity.label
+            line, col = line_col(source, start)
+            hits.append(Hit(
+                line,
+                col,
+                identity.label,
+                identity.bits,
+                identity.domain,
+            ))
         else:
-            out.extend(encode_text7_spelling(token, text7_candidates))
+            # Explicit legacy SID values are semantic identities even outside a
+            # call head; migrate them by named historical evidence rather than
+            # spelling their eight digits as Text7.
+            if re.fullmatch(r"[01]{8}", token):
+                if resolver is None:
+                    raise BinaryMigrationError(
+                        "history-aware SourceResolver is required for SID data migration"
+                    )
+                resolution = resolver.resolve_head(token)
+                if not resolution.resolved:
+                    raise BinaryMigrationError(
+                        f"unresolved legacy SID value {token!r}"
+                    )
+                identity = resolution.current
+                assert identity is not None
+                out.append(identity.bits)
+            elif re.fullmatch(
+                r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)"
+                r"(?:[eE][+-]?[0-9]+)?(?:/[0-9]+)?",
+                token,
+            ):
+                raise BinaryMigrationError(
+                    f"numeric literal {token!r} belongs to Number, not Text7; "
+                    "canonical numeric source framing is not supplied by this migration"
+                )
+            else:
+                out.extend(encode_text7_spelling(token, text7_candidates))
 
         if frame and frame["head"]:
             frame["head"] = False
-            if upper == "QUOTE":
+            if resolved_label == "QUOTE":
                 frame["quote_children"] = True
         pending_quote = False
 
@@ -912,6 +907,12 @@ def main():
         help="generated pinned Text7 projection used by --binary-mirror",
     )
     parser.add_argument(
+        "--historical-map",
+        type=Path,
+        default=Path("contracts/core1-historical-sid-map.lisp"),
+        help="historical SID8/my-lisp/Lisp-I/1.5 transition evidence",
+    )
+    parser.add_argument(
         "--semantic-registry",
         type=Path,
         default=Path("lib/surface/semantic-registry.lisp"),
@@ -938,6 +939,12 @@ def main():
     code_map = build_map(foundation, args.domains)
     code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
     code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
+    resolver = build_resolver(
+        historical_map=args.historical_map,
+        foundation=args.foundation,
+        registry=args.semantic_registry,
+        domain_surfaces=args.domain_surfaces,
+    )
     text7_candidates = (
         build_text7_encoder(foundation, args.text7_projection)
         if args.binary_mirror
@@ -972,6 +979,7 @@ def main():
                     text7_candidates,
                     legacy_sid_map,
                     registry_surface_sid_map,
+                    resolver,
                 )
                 if not converted.strip():
                     status = "empty"
