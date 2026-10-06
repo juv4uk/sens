@@ -287,7 +287,7 @@ Shiva candidate D (`h/r/l` migration + відмова від двох ḹ-line i
 
 D8 **OWNER-RATIFIED #3960**, 256/256 distinct residents. Нормативні джерела: `contracts/d8-ratification.lisp`, `knowledge/d8-ratified.json`, Contract 11.7.
 
-Bit8/W8 механіка може існувати, але 8 physical bits не створюють Core.D8 semantics, callability або occupancy. Legacy Function8/Sens8 та старі D8 maps є лише donor/provenance evidence.
+D8 semantic residency ратифікована #3960; generic callability лишається окремою mechanism-віссю. Legacy Function8/Sens8 та старі D8 maps є лише donor/provenance evidence.
 
 ---
 
