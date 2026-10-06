@@ -26,6 +26,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Prove comments do not affect binary output
+        shell: bash
+        run: |
+          rm -rf /tmp/comment-a /tmp/comment-b /tmp/comment-out-a /tmp/comment-out-b
+          mkdir -p /tmp/comment-a /tmp/comment-b
+          cat > /tmp/comment-a/sample.lisp <<'EOF'
+          ; line comment must disappear
+          (car ; inline comment must disappear
+            (cons 'cat 'dog))
+          #| block comment must disappear |#
+          EOF
+          cat > /tmp/comment-b/sample.lisp <<'EOF'
+          (car (cons 'cat 'dog))
+          EOF
+          bash scripts/export-binary-master.sh /tmp/comment-a /tmp/comment-out-a
+          bash scripts/export-binary-master.sh /tmp/comment-b /tmp/comment-out-b
+          cmp /tmp/comment-out-a/sample.lisp.wire.bits /tmp/comment-out-b/sample.lisp.wire.bits
+
       - name: Export parse-lower-wire binary files
         shell: bash
         run: |
