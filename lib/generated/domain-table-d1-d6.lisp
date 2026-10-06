@@ -1,7 +1,7 @@
 ; GENERATED — DO NOT EDIT BY HAND
 ; Authority: knowledge/d1-d7-foundation.json (#3572)
 ; Surface sources: lib/surface/domain-surfaces-d1-d4.lisp, domain-surfaces-d5.lisp, domain-surfaces-d6.lisp
-; Generator target: scripts/generate-domain-tables-d1-d6.py
+; Generator: scripts/generate-domain-tables-d1-d6.py
 ; Schema domain-ft/1: (domain-name bits formal (ук ...) (укр ...) (san ...) (eng ...) (LISP ...) (SUM ...))
 ; Display order: ук → укр → san → eng → LISP → SUM
 ; Empty/missing surface: ()
