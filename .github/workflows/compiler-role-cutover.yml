@@ -17,6 +17,7 @@ on:
       - "crates/sens/tests/compiler_domain_shape.rs"
       - "crates/sens/tests/compiler_nucleus_sens.rs"
       - "crates/sens/tests/compiler_selfhost_role_closure.rs"
+      - "crates/sens/tests/compiler_selfhost_lowering_coverage.rs"
       - ".github/workflows/compiler-role-cutover.yml"
   push:
     branches: [main]
@@ -54,6 +55,7 @@ jobs:
           --test compiler_nucleus_sens
           --test compiler_nucleus_diff
           --test compiler_selfhost_role_closure
+          --test compiler_selfhost_lowering_coverage
           -- --nocapture
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
