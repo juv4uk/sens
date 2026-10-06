@@ -27,7 +27,7 @@
 
   (authority
     . ((semantic-root . "language-contract.lisp")
-       (foundation-chain . "contracts/d1-d8-foundation-ratification.lisp")
+       (foundation-chain . "contracts/d1-d9-foundation-ratification.lisp")
        (meaning-owned-by . sens)
        (compiler-may-infer-meaning . no)
        (backend-may-infer-meaning . no)
@@ -103,7 +103,7 @@
 
   ; Cross-repo consumer зобов'язаний перевірити не лише номер Contract,
   ; а exact revision+digest. Номер версії є пояснювальним provenance,
-  ; digest — захистом від "11.7, але інший файл".
+  ; digest — захистом від "11.8, але інший файл".
   (cross-repository-law
     . ((pin-revision . required)
        (pin-authority-sha256 . required)
