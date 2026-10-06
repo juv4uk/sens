@@ -53,59 +53,129 @@ pub fn lower_expr(identity: CoreDomainIdentity, args: &[Expr]) -> Result<(), Low
     }
 }
 
-fn lower_quote(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_quote(args: &[Expr]) -> Result<(), LowerError> {
     // QUOTE: D3:001
-    // Returns its argument as an unevaluated literal structure
-    todo!("lower_quote: D3:001")
+    // Returns argument as unevaluated literal. Arity: exactly 1.
+    // (quote x) → x (as data, not code)
+    match args {
+        [_quoted] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D3:001 QUOTE expects exactly 1 argument".to_string()
+        )),
+    }
 }
 
-fn lower_atom(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_atom(args: &[Expr]) -> Result<(), LowerError> {
     // ATOM?: D3:010
-    // Predicate test: structural () or atom → D1:1, pair → D1:0
-    todo!("lower_atom: D3:010 predicate")
+    // Predicate test: empty/atom → D1:1, pair → D1:0. Arity: exactly 1.
+    // (atom? x) → PredicateBit
+    match args {
+        [_value] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D3:010 ATOM? expects exactly 1 argument".to_string()
+        )),
+    }
 }
 
-fn lower_cdr(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_cdr(args: &[Expr]) -> Result<(), LowerError> {
     // CDR: D3:011
-    // Accessor: rest of pair
-    todo!("lower_cdr: D3:011")
+    // Accessor: rest of pair. Arity: exactly 1.
+    // (cdr x) → tail of pair structure
+    match args {
+        [_pair] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D3:011 CDR expects exactly 1 argument".to_string()
+        )),
+    }
 }
 
-fn lower_car(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_car(args: &[Expr]) -> Result<(), LowerError> {
     // CAR: D3:100
-    // Accessor: first of pair
-    todo!("lower_car: D3:100")
+    // Accessor: first of pair. Arity: exactly 1.
+    // (car x) → head of pair structure
+    match args {
+        [_pair] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D3:100 CAR expects exactly 1 argument".to_string()
+        )),
+    }
 }
 
-fn lower_eq(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_eq(args: &[Expr]) -> Result<(), LowerError> {
     // EQ: D3:101
-    // Predicate: exact atom identity → D1:1, else → D1:0
-    todo!("lower_eq: D3:101 predicate")
+    // Predicate: exact atom identity. Arity: exactly 2.
+    // (eq? x y) → same atom → D1:1, else → D1:0
+    match args {
+        [_left, _right] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D3:101 EQ? expects exactly 2 arguments".to_string()
+        )),
+    }
 }
 
-fn lower_cond(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_cond(args: &[Expr]) -> Result<(), LowerError> {
     // COND: D3:110
-    // Conditional dispatch on (test . expr) clauses
-    // Test must be PredicateBit (D1); 1→evaluate expr, 0→skip
-    todo!("lower_cond: D3:110")
+    // Conditional dispatch on (test . expr) clauses.
+    // Each clause: (test-expr result-expr). At least one clause.
+    // Test must evaluate to PredicateBit; 1→evaluate expr, 0→skip.
+    // No clauses → returns structural () (D3:000).
+    if args.is_empty() {
+        return Err(LowerError::InvalidForm(
+            "D3:110 COND requires at least one clause".to_string()
+        ));
+    }
+
+    // Validate all clauses are two-element lists
+    for clause in args {
+        if let ExprKind::List(items) = &clause.kind {
+            if items.len() != 2 {
+                return Err(LowerError::InvalidForm(
+                    "D3:110 COND clause must be (test expr)".to_string()
+                ));
+            }
+        } else {
+            return Err(LowerError::InvalidForm(
+                "D3:110 COND clause must be a list".to_string()
+            ));
+        }
+    }
+    Ok(())
 }
 
-fn lower_cons(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_cons(args: &[Expr]) -> Result<(), LowerError> {
     // CONS: D3:111
-    // Constructor: make pair from two values
-    todo!("lower_cons: D3:111")
+    // Constructor: make pair from two values. Arity: exactly 2.
+    // (cons x y) → (x . y) pair structure
+    match args {
+        [_head, _tail] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D3:111 CONS expects exactly 2 arguments".to_string()
+        )),
+    }
 }
 
-fn lower_lambda(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_lambda(args: &[Expr]) -> Result<(), LowerError> {
     // LAMBDA: D4:0010
-    // Function definition (params body)
-    todo!("lower_lambda: D4:0010")
+    // Function definition. Arity: exactly 2 (params body).
+    // (lambda (p1 p2 ...) body)
+    match args {
+        [_params, _body] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D4:0010 LAMBDA expects exactly 2 arguments (params body)".to_string()
+        )),
+    }
 }
 
-fn lower_define(_args: &[Expr]) -> Result<(), LowerError> {
+fn lower_define(args: &[Expr]) -> Result<(), LowerError> {
     // DEFINE: D4:0011
-    // Top-level binding (name value)
-    todo!("lower_define: D4:0011")
+    // Top-level binding. Arity: exactly 2 (name value).
+    // (define name value)
+    match args {
+        [_name, _value] => Ok(()),
+        _ => Err(LowerError::Arity(
+            "D4:0011 DEFINE expects exactly 2 arguments (name value)".to_string()
+        )),
+    }
 }
 
 #[cfg(test)]
