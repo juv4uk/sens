@@ -12,7 +12,7 @@ on:
       - "lib/domains/d5.lisp"
       - "lib/domains/d6.lisp"
       - "scripts/domain_tables.py"
-      - "scripts/generate-domain-tables-d1-d6.py"
+      - "scripts/check-domain-tables-d1-d6.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
@@ -35,7 +35,7 @@ on:
       - "lib/domains/d5.lisp"
       - "lib/domains/d6.lisp"
       - "scripts/domain_tables.py"
-      - "scripts/generate-domain-tables-d1-d6.py"
+      - "scripts/check-domain-tables-d1-d6.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Validate six canonical domain tables
-        run: python3 scripts/generate-domain-tables-d1-d6.py
+        run: python3 scripts/check-domain-tables-d1-d6.py
       - name: Check D1-D5 runtime projection
         run: python3 scripts/check-domain-surfaces-d1-d4.py
       - name: Check D5 authority
