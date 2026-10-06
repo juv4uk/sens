@@ -136,4 +136,6 @@ assert state["registry_tail_review"]=={
 
 print("D9-REGISTRY-TAIL-1=PASS")
 print("rows=39 selected=22 lower/projection=12 internal=4 hold=1")
-selected_total=target["selected_semantic_candidates"]\nremaining_total=target["remaining_semantic_candidates"]\nprint(f"inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+print(f"inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
