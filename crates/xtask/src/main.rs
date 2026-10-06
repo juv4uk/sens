@@ -34,8 +34,12 @@ fn main() -> ExitCode {
 fn run_compiler_export(mut args: impl Iterator<Item = String>) -> ExitCode {
     let repo_root = locate_repo_root();
     let mut fixture: Option<String> = None;
+    let mut artifact = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
+            "--artifact" => {
+                artifact = true;
+            }
             "--fixture" => {
                 let Some(value) = args.next() else {
                     eprintln!("--fixture requires a compiler corpus fixture name");
@@ -45,7 +49,7 @@ fn run_compiler_export(mut args: impl Iterator<Item = String>) -> ExitCode {
             }
             other => {
                 eprintln!("unknown compiler-export option: {other}");
-                eprintln!("  available: --fixture <name>");
+                eprintln!("  available: --artifact, --fixture <name>");
                 return ExitCode::FAILURE;
             }
         }
@@ -53,7 +57,7 @@ fn run_compiler_export(mut args: impl Iterator<Item = String>) -> ExitCode {
 
     match compiler_export::run(
         &repo_root,
-        compiler_export::ExportOptions { fixture },
+        compiler_export::ExportOptions { fixture, artifact },
     ) {
         Ok(rendered) => {
             print!("{rendered}");
@@ -68,7 +72,7 @@ fn run_compiler_export(mut args: impl Iterator<Item = String>) -> ExitCode {
 
 fn print_usage() {
     eprintln!(
-        "usage: cargo xtask <compiler-export [--fixture NAME]|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
+        "usage: cargo xtask <compiler-export [--artifact] [--fixture NAME]|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
     );
 }
 

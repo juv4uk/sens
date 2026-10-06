@@ -98,6 +98,30 @@ fn compiler_export_preserves_same_payload_at_different_widths() {
 }
 
 #[test]
+fn compiler_export_artifact_mode_wraps_the_canonical_request_without_target_policy() {
+    let output = compiler_export(&["--artifact", "--fixture", "nucleus-d3-010"]);
+    assert!(
+        output.status.success(),
+        "compiler-export --artifact failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert_eq!(stdout.matches("(compilation-artifact").count(), 1);
+    assert!(stdout.contains("(schema . compiler-compilation-artifact/1)"));
+    assert!(stdout.contains("(semantic-request . (compiler-semantic-request"));
+    assert!(stdout.contains("(semantic-request-sha256 . \""));
+    assert!(stdout.contains("(artifact-status . canonical-backend-neutral)"));
+
+    for forbidden in ["cuda", "ptx", "sass", "graal", "fpga", "install-target"] {
+        assert!(
+            !stdout.to_ascii_lowercase().contains(forbidden),
+            "compiler artifact leaked backend/install policy: {forbidden}"
+        );
+    }
+}
+
+#[test]
 fn compiler_export_rejects_unknown_fixture() {
     let output = compiler_export(&["--fixture", "does-not-exist"]);
     assert!(!output.status.success());
