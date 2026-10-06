@@ -172,7 +172,13 @@ pub(crate) mod fasl {
 
     fn put_domain_identity(out: &mut Vec<u8>, identity: crate::DomainIdentity) {
         out.push(identity.width() as u8);
-        out.push(identity.packed_bits());
+        if identity.width() <= 8 {
+            // Preserve D1-D8 FASL/wire bytes exactly.
+            out.push(identity.packed_bits() as u8);
+        } else {
+            // W9 requires two payload bytes; no byte truncation is permitted.
+            out.extend_from_slice(&identity.packed_bits().to_le_bytes());
+        }
     }
 
     fn get_domain_identity(
@@ -180,17 +186,31 @@ pub(crate) mod fasl {
         pos: &mut usize,
     ) -> Option<crate::DomainIdentity> {
         let domain = *bytes.get(*pos)?;
-        let payload = *bytes.get(*pos + 1)?;
-        *pos += 2;
+        *pos += 1;
+
+        let payload = if domain <= 8 {
+            let value = u16::from(*bytes.get(*pos)?);
+            *pos += 1;
+            value
+        } else if domain == 9 {
+            let slice = bytes.get(*pos..*pos + 2)?;
+            *pos += 2;
+            u16::from_le_bytes(slice.try_into().ok()?)
+        } else {
+            return None;
+        };
+
+        let small = || u8::try_from(payload).ok();
         match domain {
-            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
-            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
-            3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
-            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
-            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
-            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
-            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(payload)?).into()),
-            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(small()?)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(small()?)?).into()),
+            3 => Some(crate::Bija3::from_word(crate::Bit3::new(small()?)?).into()),
+            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(small()?)?).into()),
+            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(small()?)?).into()),
+            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(small()?)?).into()),
+            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(small()?)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(small()?)?).into()),
+            9 => Some(crate::CoreD9::from_word(crate::Bit9::new(payload)?).into()),
             _ => None,
         }
     }
@@ -473,7 +493,13 @@ pub(crate) mod wire {
 
     fn put_domain_identity(out: &mut Vec<u8>, identity: crate::DomainIdentity) {
         out.push(identity.width() as u8);
-        out.push(identity.packed_bits());
+        if identity.width() <= 8 {
+            // Preserve D1-D8 FASL/wire bytes exactly.
+            out.push(identity.packed_bits() as u8);
+        } else {
+            // W9 requires two payload bytes; no byte truncation is permitted.
+            out.extend_from_slice(&identity.packed_bits().to_le_bytes());
+        }
     }
 
     fn get_domain_identity(
@@ -481,17 +507,31 @@ pub(crate) mod wire {
         pos: &mut usize,
     ) -> Option<crate::DomainIdentity> {
         let domain = *bytes.get(*pos)?;
-        let payload = *bytes.get(*pos + 1)?;
-        *pos += 2;
+        *pos += 1;
+
+        let payload = if domain <= 8 {
+            let value = u16::from(*bytes.get(*pos)?);
+            *pos += 1;
+            value
+        } else if domain == 9 {
+            let slice = bytes.get(*pos..*pos + 2)?;
+            *pos += 2;
+            u16::from_le_bytes(slice.try_into().ok()?)
+        } else {
+            return None;
+        };
+
+        let small = || u8::try_from(payload).ok();
         match domain {
-            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
-            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
-            3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
-            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
-            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
-            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
-            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(payload)?).into()),
-            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(small()?)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(small()?)?).into()),
+            3 => Some(crate::Bija3::from_word(crate::Bit3::new(small()?)?).into()),
+            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(small()?)?).into()),
+            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(small()?)?).into()),
+            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(small()?)?).into()),
+            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(small()?)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(small()?)?).into()),
+            9 => Some(crate::CoreD9::from_word(crate::Bit9::new(payload)?).into()),
             _ => None,
         }
     }
