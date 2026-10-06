@@ -214,9 +214,9 @@ mod tests {
 
     #[test]
     fn uk_sa_selector_surfaces_lower_directly_to_ratified_d4() {
-        assert_domain_call("(решта-від-першого x)", 4, 0b0110);
+        assert_domain_call("(р-п x)", 4, 0b0110);
         assert_domain_call("(śeṣa-ādi x)", 4, 0b0110);
-        assert_domain_call("(перше-від-першого x)", 4, 0b1000);
+        assert_domain_call("(п-п x)", 4, 0b1000);
         assert_domain_call("(ādi-ādi x)", 4, 0b1000);
     }
 
@@ -226,7 +226,7 @@ mod tests {
         assert_domain_call("(yoga 1 2)", 5, 0b01010);
         assert_domain_call("(зворот x)", 5, 0b10100);
         assert_domain_call("(viloma x)", 5, 0b10100);
-        assert_domain_call("(перше-від-решти-від-першого x)", 5, 0b10010);
+        assert_domain_call("(п-р-п x)", 5, 0b10010);
         assert_domain_call("(ādi-śeṣa-ādi x)", 5, 0b10010);
     }
 

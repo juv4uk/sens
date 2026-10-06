@@ -14,7 +14,7 @@ fn d5_uk_and_sanskrit_plus_execute_through_ratified_d5() {
 
 #[test]
 fn d5_depth3_selector_surface_executes_selector_law() {
-    for surface in ["перше-від-решти-від-першого", "ādi-śeṣa-ādi"] {
+    for surface in ["п-р-п", "ādi-śeṣa-ādi"] {
         let source = format!("({surface} (як-є ((1 2) (3 4))))");
         let mut session = Session::default();
         let result = eval_program(&source, &mut session)

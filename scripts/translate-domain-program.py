@@ -126,11 +126,11 @@ def self_test() -> None:
     # Generated D5 selector witness.
     assert (
         translate_program("(caddr x)", translation_map("en", "uk"))
-        == "(перше-від-решти-від-решти x)"
+        == "(п-р-р x)"
     )
     assert (
         translate_program(
-            "(перше-від-решти-від-решти x)", translation_map("uk", "sa")
+            "(п-р-р x)", translation_map("uk", "sa")
         )
         == "(ādi-śeṣa-śeṣa x)"
     )
