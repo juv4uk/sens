@@ -16,10 +16,20 @@
 ## Provisional ladder
 
 ```text
-00000000  ENV-REFLECTION
+00000000  ERRORSET
+00000001  ENV-REFLECTION
 ```
 
-Це **candidate coordinate**, не ратифікований resident.
+Це **candidate coordinates**, не ратифіковані residents.
+
+`ERRORSET` стоїть першим, бо він історично ранній (Lisp 1.5, 1961–1962), фундаментально додає локальне відновлення після помилки й має дуже короткий закон:
+
+```text
+success -> LIST(value)
+error   -> EMPTY
+```
+
+Звичайний D1–D7 `COND` не може перехопити помилку, яка не стала значенням. Тому error boundary є окремою capability.
 
 `ENV-REFLECTION` відділяється від самого evaluator environment:
 
@@ -120,8 +130,8 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   1
-provisional coordinate             00000000
+provisional D8 ladder candidates   2
+provisional coordinates            00000000, 00000001
 ratified D8 residents              0
 resolved recovery no-slot          9
 unresolved recovery rows           2
@@ -131,7 +141,7 @@ preserved negative groups          4
 
 ## Наступне правило заповнення
 
-Після `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
+Після `ERRORSET` і `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
 
 ```text
 capability не представлена D1-D7
