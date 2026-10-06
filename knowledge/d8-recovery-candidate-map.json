@@ -79,6 +79,44 @@
         "note": "implementation provenance only; not D8 placement authority"
       },
       "reason": "Current language exposes zero-argument environment reflection while D1-D7 has no resident for first-class environment enumeration."
+    },
+    {
+      "ladder_coordinate": "00000011",
+      "candidate": "READ",
+      "surfaces": [
+        "READ",
+        "read"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "early Lisp reader lineage; exact source/date delegated to #3934",
+      "simple_law": "text containing exactly one form -> structural datum without evaluation",
+      "evidence": [
+        "#3937",
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ],
+      "ratification_blocker": "Current mechanism consumes Value::String; canonical D7 text carrier bridge must be explicit before D8 ratification.",
+      "reason": "D1-D7 structure does not contain a general parser from text to Lisp data."
+    },
+    {
+      "ladder_coordinate": "00000100",
+      "candidate": "WRITE-TO-STRING",
+      "surfaces": [
+        "WRITE-TO-STRING",
+        "write-to-string"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "early Lisp print/reader lineage; current pure canonical serializer surface is modern",
+      "simple_law": "READ(WRITE(x)) = x on admitted readable values; WRITE(READ(t)) canonicalizes t",
+      "evidence": [
+        "#3937",
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/src/value.rs"
+      ],
+      "ratification_blocker": "Canonical output currently materializes as Value::String; bridge to D7 text identity must be specified.",
+      "reason": "Canonical structural serialization is not derivable from D1-D7 without a structure-to-text boundary."
     }
   ],
   "recovered_no_slot": [
@@ -339,13 +377,15 @@
       "status": "PRESERVED-IN-MAIN"
     }
   ],
-  "next_fill_rule": "Preserve ERRORSET/ERROR as the early failure-control family and ENV reflection as the next provisional candidate; continue full pre-1963 recovery before allocating later-history slots.",
+  "next_fill_rule": "Continue pre-1963 recovery. Do not allocate a slot for host I/O wrappers or lower-domain compositions. READ/WRITE stay provisional until their D7 text-carrier bridge is explicit.",
   "accounting": {
-    "provisional_d8_ladder_candidates": 3,
+    "provisional_d8_ladder_candidates": 5,
     "provisional_coordinates": [
       "00000000",
       "00000001",
-      "00000010"
+      "00000010",
+      "00000011",
+      "00000100"
     ],
     "resolved_recovery_no_slot": 9,
     "unresolved_recovery_rows": 2,
