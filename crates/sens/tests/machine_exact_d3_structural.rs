@@ -47,15 +47,8 @@ fn parse_bytes(rendered: &str) -> Vec<u8> {
         .collect()
 }
 
-fn render_decoded(forms: &[x86_64_block_decoder::DecodedMachineForm]) -> String {
-    format!(
-        "({})",
-        forms
-            .iter()
-            .map(x86_64_block_decoder::DecodedMachineForm::render)
-            .collect::<Vec<_>>()
-            .join(" ")
-    )
+fn render_decoded(forms: &[String]) -> String {
+    format!("({})", forms.join(" "))
 }
 
 #[test]
