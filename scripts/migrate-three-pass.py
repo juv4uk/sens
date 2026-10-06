@@ -458,6 +458,90 @@ def encode(node,resolver,quoted=False):
         return encode_atom_data(node)
     raise TypeError(node)
 
+def _diagnostic(error: MigrationError):
+    return {
+        "reason": error.message,
+        "token": error.tok.text if error.tok else None,
+        "offset": error.tok.offset if error.tok else None,
+    }
+
+def scan_clause(node,resolver,diagnostics):
+    if not isinstance(node,ListNode):
+        scan_node(node,resolver,diagnostics,quoted=False)
+        return
+    if not node.items and node.tail is None:
+        return
+    for item in node.items:
+        if isinstance(item,ListNode):
+            scan_node(item,resolver,diagnostics,quoted=False)
+        else:
+            scan_node(item,resolver,diagnostics,quoted=True)
+    if node.tail is not None:
+        scan_node(node.tail,resolver,diagnostics,quoted=True)
+
+def scan_node(node,resolver,diagnostics,quoted=False):
+    """Traverse the full AST without D7 so every resolvable head is counted.
+
+    Data/text problems are collected instead of aborting at the first one.
+    """
+    if isinstance(node,ListNode):
+        if not node.items and node.tail is None:
+            return
+
+        head_bits=None
+        for idx,item in enumerate(node.items):
+            if idx==0 and not quoted and isinstance(item,Atom):
+                try:
+                    head,_=resolver.head(item.tok)
+                    head_bits=head[0]
+                except MigrationError as error:
+                    diagnostics.append(_diagnostic(error))
+                continue
+
+            if not quoted and head_bits=="001":
+                scan_node(item,resolver,diagnostics,quoted=True)
+                continue
+            if not quoted and head_bits=="0010" and idx==1:
+                scan_node(item,resolver,diagnostics,quoted=True)
+                continue
+            if not quoted and head_bits=="0011" and idx==1 and isinstance(item,ListNode):
+                scan_node(item,resolver,diagnostics,quoted=True)
+                continue
+            if not quoted and head_bits=="110":
+                scan_clause(item,resolver,diagnostics)
+                continue
+            scan_node(item,resolver,diagnostics,quoted=quoted)
+
+        if node.tail is not None:
+            scan_node(node.tail,resolver,diagnostics,quoted=True)
+        return
+
+    if isinstance(node,Quote):
+        scan_node(node.value,resolver,diagnostics,quoted=True)
+        return
+    if isinstance(node,String):
+        diagnostics.append(_diagnostic(MigrationError(
+            "string/text datum requires the deferred D7/Text7 classification pass",
+            node.tok,
+        )))
+        return
+    if isinstance(node,Atom):
+        try:
+            encode_atom_data(node)
+        except MigrationError as error:
+            diagnostics.append(_diagnostic(error))
+        return
+    raise TypeError(node)
+
+def scan_file(source: str,resolver):
+    stripped=strip_comments(source)
+    tokens=tokenize(stripped)
+    forms=Parser(tokens).parse_program()
+    diagnostics=[]
+    for form in forms:
+        scan_node(form,resolver,diagnostics,quoted=False)
+    return diagnostics
+
 def line_col(source: str,offset: int):
     line=source.count("\n",0,offset)+1
     prev=source.rfind("\n",0,offset)
@@ -526,7 +610,37 @@ def main():
         try:
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
-            output=migrate_file(source,resolver)
+            diagnostics=scan_file(source,resolver)
+            for k,v in resolver.counts.items():
+                totals[k]+=v
+
+            if diagnostics:
+                signal.alarm(0)
+                blocked+=1
+                unresolved=[]
+                for diag in diagnostics:
+                    item=dict(diag)
+                    if item.get("offset") is not None:
+                        line,col=line_col(source,item["offset"])
+                        item.update({"line":line,"column":col})
+                    unresolved.append(item)
+                first=unresolved[0]
+                rows.append({
+                    "path":str(rel),
+                    "status":"blocked",
+                    "reason":f"{len(unresolved)} unresolved pre-D7 item(s)",
+                    "token":first.get("token"),
+                    "line":first.get("line"),
+                    "column":first.get("column"),
+                    "passes":resolver.counts,
+                    "unresolved":unresolved,
+                })
+                continue
+
+            # Encoding is a second strict phase. It must not discover anything
+            # the full-file scan failed to classify.
+            output_resolver=Resolver(legacy,my,upper)
+            output=migrate_file(source,output_resolver)
             signal.alarm(0)
             if not output.strip():
                 rows.append({"path":str(rel),"status":"empty","passes":resolver.counts})
@@ -536,7 +650,6 @@ def main():
             target.write_text(output,encoding="ascii")
             destinations[dest]=str(rel)
             written+=1
-            for k,v in resolver.counts.items(): totals[k]+=v
             rows.append({"path":str(rel),"output":str(dest),"status":"written","passes":resolver.counts})
         except MigrationError as e:
             signal.alarm(0)
@@ -569,7 +682,7 @@ def main():
     args.report.parent.mkdir(parents=True,exist_ok=True)
     args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report["summary"],ensure_ascii=False))
-    return 0 if written else 2
+    return 0
 
 if __name__=="__main__":
     raise SystemExit(main())
