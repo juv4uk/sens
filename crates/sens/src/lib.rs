@@ -15,6 +15,10 @@ mod canonical_reader;
 pub mod compilation_artifact;
 pub mod compilation_artifact_producer;
 pub mod conformance_oracle;
+<<<<<<< HEAD
+pub mod fixpoint_checkpoint;
+=======
+>>>>>>> origin/main
 pub mod program_compiler;
 mod compiler_role;
 mod compiler_bootstrap;
