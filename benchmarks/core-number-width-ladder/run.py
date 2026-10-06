@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """#2512 — Core Number width-ladder model tournament.
 
-Research-only.  Tests whether D24/D48 can earn semantic Number-domain status
-independently of FPGA limb implementation.
+Owner-ratified width framing (2026-10-06):
+    Number24 -> Number48 -> Number96 -> Number192 -> ...
+
+This benchmark no longer asks whether 24/48 widths exist. They do.
+It still researches the semantics *inside* those carriers: signedness,
+two's-complement, overflow/widening, dyadic/rational layout, and FPGA mapping.
 
 Models:
 A. exact bounded signed integers with partial overflow;
