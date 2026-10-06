@@ -45,7 +45,7 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
 /// Direct D3/D4/D5 human-surface projection.
 ///
 /// This path consumes the exact-domain projection generated from
-/// lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp. It never consults a historical
+/// lib/domains/d1.lisp ... lib/domains/d5.lisp. It never consults a historical
 /// packed byte to recover domain identity.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
