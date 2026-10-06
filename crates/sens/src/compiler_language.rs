@@ -705,6 +705,147 @@ mod tests {
         Value::DomainIdentity(DomainIdentity::from_source_word(identity.source_word()))
     }
 
+    fn expr_program_data(expr: &Expr) -> Value {
+        match &expr.kind {
+            ExprKind::Number(value, exactness) => Value::Number(*value, *exactness),
+            ExprKind::Rational(value) => Value::Rational(value.clone()),
+            ExprKind::BinaryNumber(value) => Value::BinaryNumber(value.clone()),
+            ExprKind::NumericBuffer(value) => Value::NumericBuffer(value.clone()),
+            ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
+            ExprKind::String(value) => Value::String(value.clone()),
+            ExprKind::Symbol(value) => Value::Symbol(value.clone()),
+            ExprKind::List(items) => Value::list(items.iter().map(expr_program_data)),
+            ExprKind::Pair(head, tail) => Value::Pair(
+                Rc::new(expr_program_data(head)),
+                Rc::new(expr_program_data(tail)),
+            ),
+            ExprKind::DomainCall(identity, arguments) => {
+                let mut items = Vec::with_capacity(arguments.len() + 1);
+                items.push(Value::DomainIdentity((*identity).into()));
+                items.extend(arguments.iter().map(expr_program_data));
+                Value::list(items)
+            }
+            ExprKind::Sid(_) | ExprKind::Call(_, _) => {
+                panic!("current compiler program-data must not contain legacy Sid/Call")
+            }
+            ExprKind::Local { .. } => {
+                panic!("source-shaped compiler program-data must not contain resolved Local")
+            }
+        }
+    }
+
+    fn field_value<'a>(artifact: &'a Value, field: &str) -> &'a Value {
+        for entry in list_values(artifact).into_iter().skip(1) {
+            let parts = list_values(entry);
+            if parts.len() == 2
+                && matches!(parts[0], Value::Symbol(name) if name.as_ref() == field)
+            {
+                return parts[1];
+            }
+        }
+        panic!("artifact field {field} not found: {artifact}");
+    }
+
+    #[test]
+    fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
+        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let lowered = crate::lower_program(&parsed);
+        let wire = crate::wire_encode_program(&lowered);
+        let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
+        let program = Value::list(decoded.iter().map(expr_program_data));
+        let digest = sha256_hex(&wire);
+
+        let artifact = compiler_program_artifact_from_sens(program.clone(), &digest)
+            .expect("SENS whole-program artifact");
+        let repeated = compiler_program_artifact_from_sens(program, &digest)
+            .expect("deterministic repeated SENS whole-program artifact");
+        assert_eq!(artifact, repeated);
+
+        let rows = list_values(&artifact);
+        assert!(matches!(
+            rows.first(),
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-artifact/2"
+        ));
+        assert!(matches!(
+            field_value(&artifact, "program-wire-sha256"),
+            Value::String(found) if found.as_ref() == digest
+        ));
+        assert!(matches!(
+            field_value(&artifact, "required-capabilities"),
+            Value::Nil
+        ));
+        assert!(matches!(
+            field_value(&artifact, "artifact-status"),
+            Value::Symbol(status) if status.as_ref() == "canonical-backend-neutral"
+        ));
+
+        let requests = list_values(field_value(&artifact, "semantic-requests"));
+        assert!(!requests.is_empty(), "whole artifact must carry SENS-produced requests");
+        let roles = requests
+            .iter()
+            .map(|request| {
+                let request = list_values(request);
+                match request.get(1) {
+                    Some(Value::Symbol(role)) => role.to_string(),
+                    other => panic!("request has no symbolic role: {other:?}"),
+                }
+            })
+            .collect::<std::collections::HashSet<_>>();
+        for role in [
+            "quote-form",
+            "atom-predicate",
+            "selector-tail",
+            "selector-head",
+            "atom-equality",
+            "cond-form",
+            "pair-construct",
+            "lambda-form",
+            "define-form",
+        ] {
+            assert!(roles.contains(role), "whole artifact omitted role {role}");
+        }
+
+        let rendered = artifact.to_string().to_ascii_lowercase();
+        for forbidden in ["cuda", "ptx", "sass", "futhark", "graal", "install-target"] {
+            assert!(
+                !rendered.contains(forbidden),
+                "whole artifact leaked backend policy: {forbidden}"
+            );
+        }
+    }
+
+    #[test]
+    fn rejected_program_returns_sens_owned_error_artifact() {
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        let program = Value::list([Value::list([exact_value(d8)])]);
+        let digest = "00".repeat(32);
+        let artifact = compiler_program_artifact_from_sens(program, &digest)
+            .expect("semantic rejection is an artifact value, not a host traversal error");
+        let rows = list_values(&artifact);
+        assert!(matches!(
+            rows.first(),
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-error/1"
+        ));
+        assert!(matches!(
+            field_value(&artifact, "program-wire-sha256"),
+            Value::String(found) if found.as_ref() == digest
+        ));
+    }
+
+    #[test]
+    fn whole_program_artifact_rejects_non_digest_transport_metadata() {
+        let program = Value::Nil;
+        let error = compiler_program_artifact_from_sens(program, "not-a-sha")
+            .expect_err("malformed mechanical provenance must fail before SENS invocation");
+        assert!(
+            error
+                .to_string()
+                .contains("64 hexadecimal characters")
+        );
+    }
+
     #[test]
     fn sens_program_traversal_is_role_aware_and_quote_shields_domain_data() {
         let lambda = exact_value(d4(0b0010));
