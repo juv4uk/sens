@@ -16,7 +16,7 @@ fn machine_layer_has_explicit_one_way_authority_contract() {
     let contract = read("lib/machine/authority-boundary.lisp");
 
     for fact in [
-        "(semantic-authority lib/surface/semantic-registry.lisp)",
+        "(semantic-authority language-contract.lisp+ratified-domain-laws)",
         "(semantic-id-from-isa forbidden)",
         "(semantic-id-from-cpu-profile forbidden)",
         "(peer-surface-from-machine forbidden)",
