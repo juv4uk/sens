@@ -86,6 +86,19 @@ jobs:
           cargo test -p sens --lib \
             compiler_language::tests::direct_d8_domain_call_fails_closed_in_sens_program_traversal \
             -- --nocapture
+
+      - name: SENS whole-program compilation artifact
+        run: |
+          cargo test -p sens --lib \
+            compiler_language::tests::whole_program_artifact_wraps_real_wire_traversal_inside_sens \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::rejected_program_returns_sens_owned_error_artifact \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::whole_program_artifact_rejects_non_digest_transport_metadata \
+            -- --nocapture
+
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib

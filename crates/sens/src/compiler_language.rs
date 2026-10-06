@@ -12,11 +12,11 @@
 //! It must never decide identity -> role from domain coordinates.
 
 use crate::{
-    domain_identity_shape_mechanism, domain_identity_shape_or_empty_mechanism,
-    eval_parsed_expressions, eval_program, load_core_library,
-    sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
-    ErrorKind, Exactness,
-    Expr, ExprKind, LanguageError, Session, Span, Value,
+    canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
+    load_core_library, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
+    CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
+    Session, Span, Value,
 };
 use std::rc::Rc;
 
@@ -59,6 +59,9 @@ const PROGRAM_VALUE_NAME: &str = "__compiler_program_data";
 const D3_PROOF_VALUE_NAME: &str = "__compiler_d3_proof";
 const D4_PROOF_VALUE_NAME: &str = "__compiler_d4_proof";
 const PROVENANCE_VALUE_NAME: &str = "__compiler_program_provenance";
+const ARTIFACT_PROVENANCE_VALUE_NAME: &str = "__compiler_artifact_provenance";
+const PROGRAM_DIGEST_VALUE_NAME: &str = "__compiler_program_wire_sha256";
+const VALUE_DIGEST_MECHANISM_NAME: &str = "__compiler_canonical_value_sha256";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 
@@ -374,6 +377,29 @@ fn compiler_program_call() -> Expr {
     }
 }
 
+fn compiler_program_artifact_call() -> Expr {
+    Expr {
+        kind: ExprKind::List(Rc::from(
+            vec![
+                symbol("compiler-compile-program-artifact"),
+                symbol(SHAPE_OR_EMPTY_MECHANISM_NAME),
+                symbol(SHAPE_MECHANISM_NAME),
+                symbol(VALUE_DIGEST_MECHANISM_NAME),
+                symbol(PROGRAM_VALUE_NAME),
+                symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
+                symbol(D3_PROOF_VALUE_NAME),
+                symbol(D4_PROOF_VALUE_NAME),
+                symbol(PROVENANCE_VALUE_NAME),
+                symbol(ARTIFACT_PROVENANCE_VALUE_NAME),
+                symbol(PROGRAM_DIGEST_VALUE_NAME),
+            ]
+            .into_boxed_slice(),
+        )),
+        span: Span::default(),
+    }
+}
+
 fn decode_language_lowering_role(
     value: &Value,
 ) -> Result<Option<CompilerLoweringRole>, LanguageError> {
@@ -443,16 +469,10 @@ pub fn compiler_lowering_role_from_sens(
     decode_language_lowering_role(&result)
 }
 
-/// Execute the SENS-written recursive compiler traversal over canonical
-/// program-data.  The host adapter supplies representation mechanisms and
-/// provenance values once; it does not walk nodes or select compiler roles.
-///
-/// Return shape is owned by `lib/compiler-nucleus.lisp`:
-/// `(D1-success-bit request...)`.
-pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, LanguageError> {
-    let mut session = Session::default();
-    load_core_library(&mut session)?;
-
+fn install_compiler_program_bindings(
+    session: &mut Session,
+    program: Value,
+) -> Result<(), LanguageError> {
     session
         .environment
         .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
@@ -483,9 +503,76 @@ pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, Lang
             Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
         ]),
     );
+    Ok(())
+}
 
+/// Execute the SENS-written recursive compiler traversal over canonical
+/// program-data.  The host adapter supplies representation mechanisms and
+/// provenance values once; it does not walk nodes or select compiler roles.
+///
+/// Return shape is owned by `lib/compiler-nucleus.lisp`:
+/// `(D1-success-bit request...)`.
+pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, LanguageError> {
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+    install_compiler_program_bindings(&mut session, program)?;
     eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
+}
+
+/// Compose one backend-neutral whole-program artifact inside SENS.
+///
+/// `program_wire_sha256` is mechanical transport provenance for the exact
+/// canonical SW\\x01 bytes.  The host does not choose, iterate or serialize
+/// semantic requests; SENS performs traversal and artifact composition in one
+/// call.
+pub fn compiler_program_artifact_from_sens(
+    program: Value,
+    program_wire_sha256: &str,
+    sens_revision: &str,
+) -> Result<Value, LanguageError> {
+    if program_wire_sha256.len() != 64
+        || !program_wire_sha256
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+    {
+        return Err(invalid_projection(
+            "compiler program wire digest must be exactly 64 lowercase hexadecimal characters",
+        ));
+    }
+    if sens_revision.len() != 40
+        || !sens_revision
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+    {
+        return Err(invalid_projection(
+            "compiler SENS revision must be exactly 40 lowercase hexadecimal characters",
+        ));
+    }
+
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+    install_compiler_program_bindings(&mut session, program)?;
+    session.environment.define(
+        VALUE_DIGEST_MECHANISM_NAME,
+        canonical_value_sha256_mechanism(),
+    );
+    session.environment.define(
+        PROGRAM_DIGEST_VALUE_NAME,
+        Value::String(Rc::from(program_wire_sha256)),
+    );
+    session.environment.define(
+        ARTIFACT_PROVENANCE_VALUE_NAME,
+        Value::list([
+            Value::String(Rc::from(sens_revision)),
+            Value::String(Rc::from(COMPILER_AUTHORITY_PATH)),
+            Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
+            Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
+            Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
+        ]),
+    );
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
 }
 
 /// Backward-compatible three-role view used by the already-landed selector/pair
@@ -644,6 +731,208 @@ mod tests {
 
     fn exact_value(identity: CoreDomainIdentity) -> Value {
         Value::DomainIdentity(DomainIdentity::from_source_word(identity.source_word()))
+    }
+
+    fn expr_program_data(expr: &Expr) -> Value {
+        match &expr.kind {
+            ExprKind::Number(value, exactness) => Value::Number(*value, *exactness),
+            ExprKind::Rational(value) => Value::Rational(value.clone()),
+            ExprKind::BinaryNumber(value) => Value::BinaryNumber(value.clone()),
+            ExprKind::NumericBuffer(value) => Value::NumericBuffer(value.clone()),
+            ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
+            ExprKind::String(value) => Value::String(value.clone()),
+            ExprKind::Symbol(value) => Value::Symbol(value.clone()),
+            ExprKind::List(items) => Value::list(items.iter().map(expr_program_data)),
+            ExprKind::Pair(head, tail) => Value::Pair(
+                Rc::new(expr_program_data(head)),
+                Rc::new(expr_program_data(tail)),
+            ),
+            ExprKind::DomainCall(identity, arguments) => {
+                let mut items = Vec::with_capacity(arguments.len() + 1);
+                items.push(Value::DomainIdentity((*identity).into()));
+                items.extend(arguments.iter().map(expr_program_data));
+                Value::list(items)
+            }
+            ExprKind::Sid(_) | ExprKind::Call(_, _) => {
+                panic!("current compiler program-data must not contain legacy Sid/Call")
+            }
+            ExprKind::Local { .. } => {
+                panic!("source-shaped compiler program-data must not contain resolved Local")
+            }
+        }
+    }
+
+    fn field_value<'a>(artifact: &'a Value, field: &str) -> &'a Value {
+        for entry in list_values(artifact).into_iter().skip(1) {
+            let parts = list_values(entry);
+            if parts.len() == 2
+                && matches!(parts[0], Value::Symbol(name) if name.as_ref() == field)
+            {
+                return parts[1];
+            }
+        }
+        panic!("artifact field {field} not found: {artifact}");
+    }
+
+    #[test]
+    fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
+        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let lowered = crate::lower_program(&parsed);
+        let wire = crate::wire_encode_program(&lowered);
+        let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
+        let program = Value::list(decoded.iter().map(expr_program_data));
+        let digest = sha256_hex(&wire);
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+
+        let artifact = compiler_program_artifact_from_sens(program.clone(), &digest, revision)
+            .expect("SENS whole-program artifact");
+        let repeated = compiler_program_artifact_from_sens(program, &digest, revision)
+            .expect("deterministic repeated SENS whole-program artifact");
+        assert_eq!(artifact, repeated);
+
+        let rows = list_values(&artifact);
+        assert!(matches!(
+            rows.first(),
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-artifact/1"
+        ));
+        assert!(matches!(
+            field_value(&artifact, "program-wire-sha256"),
+            Value::String(found) if found.as_ref() == digest
+        ));
+        assert!(matches!(
+            field_value(&artifact, "artifact-kind"),
+            Value::Symbol(found) if found.as_ref() == "whole-program"
+        ));
+        let provenance = list_values(field_value(&artifact, "authority-provenance"));
+        assert_eq!(provenance.len(), 5);
+        assert!(matches!(
+            provenance[0],
+            Value::String(found) if found.as_ref() == revision
+        ));
+        assert!(matches!(
+            provenance[1],
+            Value::String(found) if found.as_ref() == COMPILER_AUTHORITY_PATH
+        ));
+        assert!(matches!(
+            provenance[2],
+            Value::String(found)
+                if found.as_ref() == sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        ));
+        assert!(matches!(
+            provenance[3],
+            Value::String(found) if found.as_ref() == COMPILER_CONTRACT_VERSION
+        ));
+        assert!(matches!(
+            provenance[4],
+            Value::String(found)
+                if found.as_ref() == sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
+        ));
+        assert!(matches!(
+            field_value(&artifact, "required-capabilities"),
+            Value::Nil
+        ));
+        assert!(matches!(
+            field_value(&artifact, "artifact-status"),
+            Value::Symbol(status) if status.as_ref() == "canonical-backend-neutral"
+        ));
+
+        let request_value = field_value(&artifact, "semantic-requests");
+        let requests = list_values(request_value);
+        assert!(!requests.is_empty(), "whole artifact must carry SENS-produced requests");
+        let expected_request_digest = match crate::eval::invoke_value(
+            &canonical_value_sha256_mechanism(),
+            &[request_value.clone()],
+            &crate::Environment::root(),
+            Span::default(),
+        )
+        .expect("representation-only request digest")
+        {
+            Value::String(value) => value.to_string(),
+            other => panic!("request digest mechanism returned non-string: {other}"),
+        };
+        assert!(matches!(
+            field_value(&artifact, "semantic-requests-sha256"),
+            Value::String(found) if found.as_ref() == expected_request_digest
+        ));
+        let roles = requests
+            .iter()
+            .map(|request| {
+                let request = list_values(request);
+                match request.get(1) {
+                    Some(Value::Symbol(role)) => role.to_string(),
+                    other => panic!("request has no symbolic role: {other:?}"),
+                }
+            })
+            .collect::<std::collections::HashSet<_>>();
+        for role in [
+            "quote-form",
+            "atom-predicate",
+            "selector-tail",
+            "selector-head",
+            "atom-equality",
+            "cond-form",
+            "pair-construct",
+            "lambda-form",
+            "define-form",
+        ] {
+            assert!(roles.contains(role), "whole artifact omitted role {role}");
+        }
+
+        let rendered = artifact.to_string().to_ascii_lowercase();
+        for forbidden in ["cuda", "ptx", "sass", "futhark", "graal", "install-target"] {
+            assert!(
+                !rendered.contains(forbidden),
+                "whole artifact leaked backend policy: {forbidden}"
+            );
+        }
+    }
+
+    #[test]
+    fn rejected_program_returns_sens_owned_error_artifact() {
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        let program = Value::list([Value::list([exact_value(d8)])]);
+        let digest = "00".repeat(32);
+        let artifact = compiler_program_artifact_from_sens(
+            program,
+            &digest,
+            "0123456789abcdef0123456789abcdef01234567",
+        )
+        .expect("semantic rejection is an artifact value, not a host traversal error");
+        let rows = list_values(&artifact);
+        assert!(matches!(
+            rows.first(),
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-error/1"
+        ));
+        assert!(matches!(
+            field_value(&artifact, "program-wire-sha256"),
+            Value::String(found) if found.as_ref() == digest
+        ));
+    }
+
+    #[test]
+    fn whole_program_artifact_rejects_non_digest_transport_metadata() {
+        let program = Value::Nil;
+        let error = compiler_program_artifact_from_sens(
+            program.clone(),
+            "not-a-sha",
+            "0123456789abcdef0123456789abcdef01234567",
+        )
+        .expect_err("malformed mechanical provenance must fail before SENS invocation");
+        assert!(
+            error
+                .to_string()
+                .contains("64 lowercase hexadecimal characters")
+        );
+
+        let error = compiler_program_artifact_from_sens(
+            program,
+            &"00".repeat(32),
+            "not-a-revision",
+        )
+        .expect_err("malformed SENS revision must fail before SENS invocation");
+        assert!(error.to_string().contains("40 lowercase hexadecimal characters"));
     }
 
     #[test]
