@@ -58,4 +58,5 @@ jobs:
           cargo test -p sens source_words::tests::same_numeric_payload_at_different_widths_never_collapses
           cargo test -p sens canonical_reader::tests::w3_through_w8_reach_ast_with_exact_domain_preserved
       - name: Record Lisp table-reader gap
-        run: echo "ordinary read-all width bridge tracked by #3946; acceptance witness is scripts/check-domain-table-readable.lisp"
+        run: |
+          echo "ordinary read-all width bridge tracked by #3946; acceptance witness is scripts/check-domain-table-readable.lisp"
