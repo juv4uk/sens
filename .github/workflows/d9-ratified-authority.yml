@@ -1,0 +1,43 @@
+name: D9 ratified authority
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d9-ratified.json"
+      - "knowledge/d9-v1-gauge-fixed-candidate.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "contracts/d9-ratification.lisp"
+      - "contracts/d1-d9-foundation-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "docs/language-core.md"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "scripts/check-d9-current-authority.py"
+      - "scripts/check-d1-d5-foundation.py"
+      - ".github/workflows/d9-ratified-authority.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d9-ratified.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "contracts/d9-ratification.lisp"
+      - "contracts/d1-d9-foundation-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d9-current-authority.py"
+      - ".github/workflows/d9-ratified-authority.yml"
+  workflow_dispatch:
+
+jobs:
+  authority:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify D9 current authority
+        run: python3 scripts/check-d9-current-authority.py
+      - name: Verify D1-D9 foundation
+        run: python3 scripts/check-d1-d5-foundation.py
