@@ -12,7 +12,8 @@
 //! It must never decide identity -> role from domain coordinates.
 
 use crate::{
-    domain_identity_shape_mechanism, domain_identity_shape_or_empty_mechanism,
+    canonical_compiler_value_sha256_mechanism, domain_identity_shape_mechanism,
+    domain_identity_shape_or_empty_mechanism,
     eval_parsed_expressions, eval_program, load_core_library,
     sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
     ErrorKind, Exactness,
@@ -60,6 +61,7 @@ const D3_PROOF_VALUE_NAME: &str = "__compiler_d3_proof";
 const D4_PROOF_VALUE_NAME: &str = "__compiler_d4_proof";
 const PROVENANCE_VALUE_NAME: &str = "__compiler_program_provenance";
 const PROGRAM_DIGEST_VALUE_NAME: &str = "__compiler_program_wire_sha256";
+const VALUE_HASH_MECHANISM_NAME: &str = "__compiler_canonical_value_sha256";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 
@@ -389,6 +391,7 @@ fn compiler_program_artifact_call() -> Expr {
                 symbol(D4_PROOF_VALUE_NAME),
                 symbol(PROVENANCE_VALUE_NAME),
                 symbol(PROGRAM_DIGEST_VALUE_NAME),
+                symbol(VALUE_HASH_MECHANISM_NAME),
             ]
             .into_boxed_slice(),
         )),
@@ -498,6 +501,10 @@ fn install_compiler_program_bindings(
             Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
             Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
         ]),
+    );
+    session.environment.define(
+        VALUE_HASH_MECHANISM_NAME,
+        canonical_compiler_value_sha256_mechanism(),
     );
     Ok(())
 }
