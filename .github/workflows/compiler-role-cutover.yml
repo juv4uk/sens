@@ -1,5 +1,4 @@
 name: Compiler role authority cutover
-# #3823 clean coverage retrigger; no semantic authority lives in this workflow.
 
 on:
   pull_request:
@@ -19,6 +18,9 @@ on:
       - "crates/sens/tests/compiler_nucleus_sens.rs"
       - "crates/sens/tests/compiler_selfhost_role_closure.rs"
       - "crates/sens/tests/compiler_selfhost_lowering_coverage.rs"
+      - "crates/xtask/src/compiler_export.rs"
+      - "crates/xtask/src/main.rs"
+      - "crates/xtask/tests/compiler_export_cli.rs"
       - ".github/workflows/compiler-role-cutover.yml"
   push:
     branches: [main]
@@ -56,8 +58,13 @@ jobs:
           --test compiler_nucleus_sens
           --test compiler_nucleus_diff
           --test compiler_selfhost_role_closure
-          --test compiler_selfhost_lowering_coverage
-          -- --nocapture
+      - name: Compiler semantic export CLI
+        run: cargo test -p xtask --test compiler_export_cli -- --nocapture
+      - name: Whole-nucleus lowering coverage when present
+        run: |
+          if test -f crates/sens/tests/compiler_selfhost_lowering_coverage.rs; then
+            cargo test -p sens --test compiler_selfhost_lowering_coverage -- --nocapture
+          fi
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib
