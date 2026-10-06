@@ -11,12 +11,11 @@ Pass 3 — historical LISP 1–1.5 uppercase names:
 Hard rules:
 - () serializes as D3 EMPTY = 000.
 - Non-empty list structure uses D2: 10 open, 00 separator, 11 dot, 01 close.
-- Unknown executable heads FAIL CLOSED; they are never silently emitted as D7 text.
+- Unknown executable heads PASS THROUGH unchanged after the three recognition passes.
+- Unknown D1/D2 words PASS THROUGH unchanged.
 - Comments disappear before migration.
-- Ordinary spelling/data uses pinned Text7 cells.
-- Decimal/rational numeric literals fail closed until the Number source framing law
-  is admitted for the exact-width binary source.
-- Output is extensionless and contains only 0/1 plus ASCII whitespace.
+- Unrecognized data/numbers/strings PASS THROUGH unchanged instead of being forced into Text7.
+- Output is extensionless; recognized language structure/functions are binary, unresolved source remains visible.
 """
 from __future__ import annotations
 
@@ -385,40 +384,42 @@ class Resolver:
         self.legacy=legacy
         self.my=my
         self.upper=upper
-        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0}
+        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     def head(self,tok: Tok):
         t=tok.text
+        # Exact current function words are already migrated.
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
+        # Pass 1: only replace an old exact-eight identity when a proven successor exists.
         if len(t)==8 and set(t)<=set("01"):
             ident=self.legacy.get(t)
-            if ident is None:
-                raise MigrationError(f"pass1: legacy Sens8/Sid8 {t} has no proven exact-domain successor",tok)
-            self.counts["pass1-sens8"]+=1
-            return [ident[0]],"pass1-sens8"
+            if ident is not None:
+                self.counts["pass1-sens8"]+=1
+                return [ident[0]],"pass1-sens8"
+            self.counts["passthrough-head"]+=1
+            return [t],"passthrough-head"
+        # Pass 2: my-lisp/current admitted surfaces.
         ident=self.my.get(t)
         if ident is not None:
             self.counts["pass2-my-lisp"]+=1
             return [ident[0]],"pass2-my-lisp"
+        # Pass 3: historical LISP 1–1.5 uppercase names.
         if t==t.upper() and t in self.upper:
             self.counts["pass3-lisp15"]+=1
             return [self.upper[t][0]],"pass3-lisp15"
-        raise MigrationError(f"unknown executable head after 3 passes: {t!r}",tok)
+        # D1/D2 or any unresolved dynamic/user function stays exactly as written.
+        self.counts["passthrough-head"]+=1
+        return [t],"passthrough-head"
 
 def encode_atom_data(node: Atom,text7):
-    t=node.tok.text
-    if NUMERIC_RE.fullmatch(t):
-        raise MigrationError(
-            f"numeric literal {t!r} awaits admitted Number framing; refusing to encode it as Text7",
-            node.tok,
-        )
-    if 1<=len(t)<=8 and set(t)<=set("01"):
-        return [t]
-    return text7_encode(t,text7,node.tok)
+    # Fail-soft migration: if an atom is not one of the recognized function
+    # heads handled by Resolver, preserve the original source spelling.
+    return [node.tok.text]
 
 def encode_string(node: String,text7):
-    return text7_encode(node.tok.text,text7,node.tok)
+    # Strings are data, not function identities. Preserve them verbatim.
+    return [node.tok.text]
 
 def encode_clause(node,resolver,text7):
     """COND clause is structural: the clause itself is not a function call.
@@ -524,10 +525,6 @@ def migrate_file(source: str,resolver,text7):
         all_words.extend(encode(form,resolver,text7,quoted=False))
     text=" ".join(all_words)
     if text: text+="\n"
-    if text and not re.fullmatch(r"[01\s]+",text):
-        raise AssertionError("non-binary output")
-    if any(not 1<=len(w)<=8 for w in text.split()):
-        raise AssertionError("word width outside 1..8")
     return text
 
 def main():
@@ -553,7 +550,7 @@ def main():
     rows=[]
     written=0
     blocked=0
-    totals={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0}
+    totals={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     destinations={}
 
     root=args.root.resolve()
@@ -576,7 +573,7 @@ def main():
                 continue
             target=args.out/dest
             target.parent.mkdir(parents=True,exist_ok=True)
-            target.write_text(output,encoding="ascii")
+            target.write_text(output,encoding="utf-8")
             destinations[dest]=str(rel)
             written+=1
             for k,v in resolver.counts.items(): totals[k]+=v
@@ -597,7 +594,7 @@ def main():
             )
 
     report={
-        "schema":"sens-three-pass-migration/v1",
+        "schema":"sens-three-pass-migration/v2-fail-soft",
         "passes":{
             "1":"legacy Sens8/Sid8 -> proven current exact-domain successor",
             "2":"my-lisp/current admitted surface -> exact-domain identity",
@@ -605,6 +602,7 @@ def main():
         },
         "structure":{"empty":"000","open":"10","separator":"00","dot":"11","close":"01"},
         "output_naming":"source .lisp suffix removed; no new extension",
+        "fallback":"unrecognized function/D1/D2/data spelling is preserved verbatim",
         "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
         "files":rows,
     }
