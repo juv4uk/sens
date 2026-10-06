@@ -22,10 +22,11 @@
 - `../lib/domains/d6.lisp`
 - `../lib/domains/d7.lisp`
 - `../lib/domains/d8.lisp`
+- `../lib/domains/d9.lisp`
 
 Колонки: `ук → укр → san → en → LISP → sym`.
 
-D7 має 126 semantic rows; `0100001` і `0101010` owner-reserved. D8 owner-ratified 256/256 під #3960. D9 owner-ratified 512/512 під #4008; нормативна machine-readable карта — `../knowledge/d9-ratified.json`.
+D7 має 126 semantic rows; `0100001` і `0101010` owner-reserved. D8 owner-ratified 256/256 під #3960. D9 owner-ratified 512/512 під #4008 і має canonical human table `../lib/domains/d9.lisp`; нормативна machine-readable карта — `../knowledge/d9-ratified.json`.
 
 ## Human surfaces
 
