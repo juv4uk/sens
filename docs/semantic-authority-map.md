@@ -35,11 +35,11 @@ exact binary number
 + admitted / proved law
 ```
 
-Current Core examples are exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, and owner-ratified D5/D6 domains. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
+Current Core examples are exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 126/128 under #3572, and D8 256/256 under #3960. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
 
 Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility, transport, backend, and provenance projections while #2817 migrates runtime consumers. They are not the universal current ontology.
 
-Human spellings in Ukrainian, English, Sanskrit, symbolic notation, and compatibility surfaces are **source/UI routing metadata**. A surface may route to an already-admitted domain-qualified semantic object; it does not own identity or meaning.
+Human spellings in Ukrainian, English, Sanskrit, symbolic notation, and compatibility surfaces are **source/UI routing metadata**. Current canonical human-readable projections live one domain per file in `lib/domains/d1.lisp` … `lib/domains/d8.lisp`, with columns `ук → укр → san → en → LISP → sym`. A surface may route to an already-admitted domain-qualified semantic object; it does not own identity or meaning. Historical `lib/surface/semantic-registry.lisp` remains compatibility/provenance only.
 
 The concrete empty proper list `()` is Core.D3 `000`. It is distinct from historical exact-eight-bit `00000000`, PredicateBit `0`, and Number zero even though their packed numeric payloads may look related.
 
@@ -74,7 +74,7 @@ Use these terms consistently:
 ```text
 semantic authority        = language-contract + ratified decisions + executable conformance
 SENS semantic object      = exact bits + exact domain + admitted/proved law
-surface                   = source/UI routing metadata
+surface                   = source/UI routing metadata; current human tables are lib/domains/dN.lisp
 reference implementation  = crates/sens (Rust)
 independent substrate      = another conformance/execution target
 ```
