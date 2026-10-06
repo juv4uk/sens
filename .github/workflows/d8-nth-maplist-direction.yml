@@ -1,0 +1,52 @@
+name: D8 NTH-MAPLIST direction research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d8-nth-maplist-direction/**"
+      - "docs/research/3744-d8-nth-maplist-direction.md"
+      - "docs/research/3744-d8-nth-maplist-direction.uk.md"
+      - "knowledge/d5-ratified.json"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-nth-maplist-direction.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "benchmarks/d8-nth-maplist-direction/**"
+      - "docs/research/3744-d8-nth-maplist-direction.md"
+      - "docs/research/3744-d8-nth-maplist-direction.uk.md"
+      - "knowledge/d5-ratified.json"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-nth-maplist-direction.yml"
+  workflow_dispatch:
+
+jobs:
+  typed-product-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run exhaustive traversal-direction witness
+        run: |
+          rm -rf /tmp/d8-nth-maplist-direction
+          python3 benchmarks/d8-nth-maplist-direction/run.py \
+            --out /tmp/d8-nth-maplist-direction
+      - name: Verify deterministic replay
+        run: |
+          rm -rf /tmp/d8-nth-maplist-direction-2
+          python3 benchmarks/d8-nth-maplist-direction/run.py \
+            --out /tmp/d8-nth-maplist-direction-2
+          cmp /tmp/d8-nth-maplist-direction/witness.json \
+              /tmp/d8-nth-maplist-direction-2/witness.json
+      - name: Publish report
+        if: always()
+        run: |
+          test ! -f /tmp/d8-nth-maplist-direction/report.md || \
+            cat /tmp/d8-nth-maplist-direction/report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d8-nth-maplist-direction
+          path: /tmp/d8-nth-maplist-direction/
+          retention-days: 14

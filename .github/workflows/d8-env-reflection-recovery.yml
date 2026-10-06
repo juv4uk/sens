@@ -1,0 +1,33 @@
+name: D8 ENV reflection recovery
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/d8_env_reflection_recovery.rs"
+      - "crates/sens/src/environment.rs"
+      - "crates/sens/src/eval/builtins.rs"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "docs/research/d8-recovery-candidate-map.uk.md"
+      - ".github/workflows/d8-env-reflection-recovery.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "crates/sens/tests/d8_env_reflection_recovery.rs"
+      - "crates/sens/src/environment.rs"
+      - "crates/sens/src/eval/builtins.rs"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "docs/research/d8-recovery-candidate-map.uk.md"
+      - ".github/workflows/d8-env-reflection-recovery.yml"
+  workflow_dispatch:
+
+jobs:
+  env-reflection-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Show Rust toolchain
+        run: rustc --version && cargo --version
+      - name: Run focused ENV recovery witness
+        run: cargo test -p sens --test d8_env_reflection_recovery
