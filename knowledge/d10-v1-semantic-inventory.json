@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 367,
+    "selected_semantic_candidates": 388,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 111,
-    "remaining_semantic_inventory": 657,
+    "unplaced_selected_candidates": 132,
+    "remaining_semantic_inventory": 636,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -464,6 +464,405 @@
       ],
       "source_name": "condition-is-or?",
       "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.102c3ce43e683d0c",
+      "semantic_name": "REMPROP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PROPERTY-LIST-ALGEBRA",
+      "behavior": "remove a named property from a symbol or property-list object and expose whether it existed",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-51"
+      ],
+      "historical_name": "REMPROP",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.11119ebfbc3d078a",
+      "semantic_name": "FILLARRAY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARRAY-MUTATION-ALGEBRA",
+      "behavior": "fill an array from list or array contents using the historical row-major fill law",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-89"
+      ],
+      "historical_name": "FILLARRAY",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.269ade4261beb5cf",
+      "semantic_name": "FUNCALL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HIGHER-ORDER-CALL-ALGEBRA",
+      "behavior": "call a function with separately supplied evaluated arguments rather than one argument list",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-11"
+      ],
+      "historical_name": "FUNCALL",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.30fae6df6e0e018c",
+      "semantic_name": "GETL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PROPERTY-LIST-ALGEBRA",
+      "behavior": "search a property list for the first property whose indicator belongs to a supplied indicator list",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-49"
+      ],
+      "historical_name": "GETL",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.32ef4b1cebec4d55",
+      "semantic_name": "SASSQ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ASSOCIATION-FALLBACK-ALGEBRA",
+      "behavior": "association-list lookup using EQ with an explicit zero-argument fallback function on miss",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-28"
+      ],
+      "historical_name": "SASSQ",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.3a93db0a6c226a0e",
+      "semantic_name": "INDEX",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRING-SEARCH-ALGEBRA",
+      "behavior": "return the position of the first occurrence of one string within another, or the historical no-match sentinel",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-82"
+      ],
+      "historical_name": "INDEX",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.682c422c24c3a722",
+      "semantic_name": "REMOB",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-INTERNING-MUTATION",
+      "behavior": "remove an interned symbol from the current intern table so future reads no longer reach it through that table",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-54"
+      ],
+      "historical_name": "REMOB",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.745bea1b0d24953f",
+      "semantic_name": "COPYSYMBOL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-IDENTITY-ALGEBRA",
+      "behavior": "construct a fresh uninterned symbol with the same print-name as a source symbol",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-55"
+      ],
+      "historical_name": "COPYSYMBOL",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.75f67fd5c67cf640",
+      "semantic_name": "INTERN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-INTERNING-ALGEBRA",
+      "behavior": "canonicalize a symbol by print-name in the current intern table, inserting it when absent",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-54"
+      ],
+      "historical_name": "INTERN",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.788703675f6ee596",
+      "semantic_name": "LISTARRAY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARRAY-PROJECTION-ALGEBRA",
+      "behavior": "materialize array elements as a list in storage/row-major order, optionally bounded by a count",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-90"
+      ],
+      "historical_name": "LISTARRAY",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.89d1d017be79c6bd",
+      "semantic_name": "MAKUNBOUND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-BINDING-ALGEBRA",
+      "behavior": "remove the current value binding from a symbol so that it becomes unbound",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-47"
+      ],
+      "historical_name": "MAKUNBOUND",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.9030b182953944a4",
+      "semantic_name": "SYMEVAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-BINDING-OBSERVATION",
+      "behavior": "retrieve the current value carried by a symbol selected at run time, signalling on an unbound/non-symbol argument",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-12/2-46"
+      ],
+      "historical_name": "SYMEVAL",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.958a7031fad15486",
+      "semantic_name": "CATCH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "NONLOCAL-CONTROL-ALGEBRA",
+      "behavior": "structured non-local exit scope that evaluates a form and intercepts a matching THROW value",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-40"
+      ],
+      "historical_name": "CATCH",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.99d317c76fbe2f3b",
+      "semantic_name": "MEMQ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IDENTITY-LIST-ALGEBRA",
+      "behavior": "search a list for an element using EQ identity comparison and return the matching tail",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-24"
+      ],
+      "historical_name": "MEMQ",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.b698846a8d261e38",
+      "semantic_name": "SETPLIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PROPERTY-LIST-MUTATION",
+      "behavior": "replace the complete property list associated with a symbol",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-51"
+      ],
+      "historical_name": "SETPLIST",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.c0fafcb70bae18de",
+      "semantic_name": "STORE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARRAY-MUTATION-ALGEBRA",
+      "behavior": "mutate the selected array cell with an evaluated value through an array reference",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-89"
+      ],
+      "historical_name": "STORE",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.c9b76144127fe569",
+      "semantic_name": "SASSOC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ASSOCIATION-FALLBACK-ALGEBRA",
+      "behavior": "association-list lookup using EQUAL with an explicit zero-argument fallback function on miss",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-27"
+      ],
+      "historical_name": "SASSOC",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.cbbf2982c40d934f",
+      "semantic_name": "DELQ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IDENTITY-LIST-MUTATION",
+      "behavior": "destructively remove top-level list occurrences using EQ identity comparison",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-25"
+      ],
+      "historical_name": "DELQ",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.d5ce244619643706",
+      "semantic_name": "SXHASH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURAL-HASH-ALGEBRA",
+      "behavior": "compute an equality-compatible hash of an S-expression such that EQUAL objects receive equal hash codes",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-25"
+      ],
+      "historical_name": "SXHASH",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.eff34e02df6fac9e",
+      "semantic_name": "PROGN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENTIAL-CONTROL",
+      "behavior": "evaluate a sequence of forms left-to-right and return the value of the last form",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-8"
+      ],
+      "historical_name": "PROGN",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.fbe1a64bc90a6d66",
+      "semantic_name": "ARRAYDIMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARRAY-SHAPE-ALGEBRA",
+      "behavior": "observe an array's declared element type and dimension bounds as a list",
+      "provenance": [
+        "#4039",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-89"
+      ],
+      "historical_name": "ARRAYDIMS",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
       "ratified_resident": false
     },
     {
@@ -6793,6 +7192,7 @@
     "knowledge/d10-recovery-v2.json",
     "knowledge/d10-library-harvest-v1.json",
     "knowledge/d10-forward-harvest-v1.json",
-    "knowledge/d10-knowledge-harvest-v1.json"
+    "knowledge/d10-knowledge-harvest-v1.json",
+    "knowledge/d10-historical-maclisp-v1.json"
   ]
 }
