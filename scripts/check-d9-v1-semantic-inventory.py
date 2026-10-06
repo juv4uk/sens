@@ -55,6 +55,12 @@ if surface_path.exists():
     surface_ids={r["stable_id"] for r in surface["rows"] if r["selected_d9_candidate"]}
     assert surface_ids <= unplaced_ids
 
+registry_path=root/"knowledge/d9-registry-harvest-v2.json"
+if registry_path.exists():
+    registry=json.loads(registry_path.read_text(encoding="utf-8"))
+    registry_ids={r["stable_id"] for r in registry["rows"] if r["selected_d9_candidate"]}
+    assert registry_ids <= unplaced_ids
+
 for name in ("APPLY","COMPOSE","REDUCE"):
     assert name not in {r["semantic_name"] for r in rows}
 
