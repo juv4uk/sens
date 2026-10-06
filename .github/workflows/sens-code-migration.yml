@@ -56,7 +56,7 @@ jobs:
       - name: Build three-pass source inventory
         run: |
           python3 scripts/classify-lisp-source-forms.py . \
-            --contract contracts/core1-historical-sid-map.lisp \
+            --historical-map contracts/core1-historical-sid-map.lisp \
             --summary-only \
             --json /tmp/lisp-source-forms.json \
             --tsv /tmp/lisp-source-forms.tsv
