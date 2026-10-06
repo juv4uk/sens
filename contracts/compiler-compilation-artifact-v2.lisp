@@ -14,7 +14,7 @@
   ; Canonical ordinary-SENS value shape:
   ;
   ; (compiler-compilation-artifact/2
-  ;   sens-compiler-program-data/1
+  ;   compiler-program-data/1
   ;   "<program-sha256>"
   ;   "<ordered-request-sequence-sha256>"
   ;   <provenance>
@@ -29,7 +29,12 @@
     (program-data-schema exact-symbol)
     (program-sha256 lowercase-hex-64)
     (request-sequence-sha256 lowercase-hex-64)
-    (provenance ordinary-sens-data)
+    (provenance
+      (sens-revision lowercase-hex-40)
+      (authority-path exact-string)
+      (authority-sha256 lowercase-hex-64)
+      (contract-version exact-string)
+      (compiler-nucleus-sha256 lowercase-hex-64))
     (ordered-requests ordinary-sens-data)
     (required-capabilities ordinary-sens-data)
     (artifact-status canonical-backend-neutral))
