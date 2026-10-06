@@ -7,7 +7,8 @@
 ; belongs to the closed Lisp-owned admission layer and is deliberately not
 ; re-exported from semantic lowering as a compatibility convenience.
 
-(00001001 x86-semantic-lowering-profile
+; Historical byte-SID projection retained only as compatibility/provenance.
+(00001001 x86-legacy-sid-lowering-profile-v1
   (00000001
     ((00000010 sequence "tag-test: TEST/AND/CMP")
      (00000011 direct "CMP/SETE")
