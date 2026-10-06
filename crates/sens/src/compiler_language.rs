@@ -655,12 +655,14 @@ mod tests {
             crate::Bit8::new(0b0000_0010).expect("D8 word"),
         ));
 
-        let program = Value::list([Value::list([
-            lambda,
-            Value::list([Value::Symbol(Rc::from("x"))]),
-            Value::list([quote, exact_value(d8)]),
+        let program = Value::list([
+            Value::list([
+                lambda,
+                Value::list([Value::Symbol(Rc::from("x"))]),
+                Value::list([quote, exact_value(d8)]),
+            ]),
             Value::list([atom, Value::Symbol(Rc::from("x"))]),
-        ])]);
+        ]);
 
         let result = compiler_program_requests_from_sens(program).expect("SENS program traversal");
         let rows = list_values(&result);
