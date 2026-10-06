@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 264,
-    "remaining_semantic_candidates": 760,
+    "selected_semantic_candidates": 265,
+    "remaining_semantic_candidates": 759,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 8,
+    "unplaced_selected_candidates": 9,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -81,5 +81,13 @@
       "donor_exhausted": true,
       "new_d10_candidates_added_by_this_audit": 0
     }
+  },
+  "recovery_v2": {
+    "artifact": "knowledge/d10-recovery-v2.json",
+    "source_hold_rows": 7,
+    "selected": 1,
+    "projection": 1,
+    "hold": 5,
+    "coordinates_assigned": 0
   }
 }
