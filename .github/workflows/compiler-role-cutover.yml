@@ -11,6 +11,8 @@ on:
       - "crates/sens/src/compiler_bootstrap.rs"
       - "crates/sens/src/compiler_role.rs"
       - "crates/sens/src/compiler_language.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/src/selfhost_lineage.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
