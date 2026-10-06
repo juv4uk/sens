@@ -34,6 +34,8 @@ def load_d6_authority():
         "SCAN": "101111",
         "ZIP": "111000",
         "UNZIP": "111001",
+        "DO": "110010",
+        "WHILE": "110011",
     }
     for name, coordinate in required.items():
         assert by_name[name] == coordinate
@@ -131,6 +133,16 @@ def run():
             "MERGED-MAIN",
             "PRODUCT-CANDIDATE-TYPED",
         ),
+        family(
+            "110011",
+            "110010",
+            "DO/WHILE × condition/projection",
+            "continue-while-true + apply-result",
+            "stop-when-true + return-state",
+            "#3779 / #3770",
+            "MERGED-MAIN",
+            "PRODUCT-CANDIDATE",
+        ),
     ]
 
     footprints = set()
@@ -142,15 +154,15 @@ def run():
         footprints |= current
 
     analyzed = selectors | footprints
-    assert len(footprints) == 16
-    assert len(analyzed) == 80
+    assert len(footprints) == 20
+    assert len(analyzed) == 84
 
     untouched = {
         f"{value:08b}"
         for value in range(CAPACITY)
         if f"{value:08b}" not in analyzed
     }
-    assert len(untouched) == 176
+    assert len(untouched) == 172
 
     fixed_novel = [item["fixed_novel"] for item in families]
     full_fixed = [
@@ -220,11 +232,12 @@ def run():
             ],
         },
         "non_conclusions": [
-            "80 analyzed coordinates do not mean 80 D8 residents.",
+            "84 analyzed coordinates do not mean 84 D8 residents.",
             "Generated meanings need not become primitives.",
             "Gauge-orbit meanings do not have fixed absolute middle coordinates.",
             "The REDUCE/SCAN fixed candidate is restricted to the nonempty protocol.",
             "The ZIP/UNZIP family is a typed product witness over its admitted equal-length lane.",
+            "The DO/WHILE family is a full-protocol product witness with zero admitted D8 coordinates.",
             "GREEN-UNMERGED evidence is counted as analyzed research, not merged authority.",
             "D8 remains unratified and fail-closed.",
         ],
