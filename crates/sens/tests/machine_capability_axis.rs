@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use sens::semantic_registry_export::semantic_id_for_admitted_surface;
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -22,44 +22,67 @@ fn session() -> Session {
 }
 
 #[test]
-fn current_semantic_ids_project_to_target_neutral_capabilities() {
-    assert_eq!(semantic_id_for_admitted_surface("+"), Some(sens::sens!(00001100)));
-    assert_eq!(semantic_id_for_admitted_surface("eq?"), Some(sens::sens!(00000011)));
-    assert_eq!(semantic_id_for_admitted_surface("cond"), Some(sens::sens!(00000111)));
-    assert_eq!(semantic_id_for_admitted_surface("cons"), Some(sens::sens!(00000100)));
-    assert_eq!(semantic_id_for_admitted_surface("car"), Some(sens::sens!(00000101)));
-    assert_eq!(semantic_id_for_admitted_surface("cdr"), Some(sens::sens!(00000110)));
+fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
+    let lowered = lower_program(&parse("(додати 2 3)").expect("PLUS source"));
+    let ExprKind::DomainCall(add_identity, _) = lowered[0].kind else {
+        panic!("current PLUS surface must lower to DomainCall");
+    };
+    assert_eq!((add_identity.width(), add_identity.packed_bits()), (5, 0b01010));
+
+    let lowered = lower_program(&parse("(перше '(a b))").expect("CAR source"));
+    let ExprKind::DomainCall(car_identity, _) = lowered[0].kind else {
+        panic!("current CAR surface must lower to DomainCall");
+    };
+    assert_eq!((car_identity.width(), car_identity.packed_bits()), (3, 0b100));
 
     let mut s = session();
     let add = eval_program(
-        r#"(machine-capabilities-for-sid 00001100)"#,
+        "(machine-capabilities-for-domain 01010)",
         &mut s,
     )
-    .expect("add capability lookup")
+    .expect("D5 PLUS capability lookup")
     .value
     .to_string();
     assert_eq!(add, "((integer-add bounded-u64))");
 
     let car = eval_program(
-        r#"(machine-capabilities-for-sid 00000101)"#,
+        "(machine-capabilities-for-domain 100)",
         &mut s,
     )
-    .expect("car capability lookup")
+    .expect("D3 CAR capability lookup")
     .value
     .to_string();
     assert_eq!(car, "((pair-field-load head bounded-u64))");
 
     let quoted_shadow = eval_program(
-        r#"(machine-capabilities-for-sid "00001100")"#,
+        r#"(machine-capabilities-for-domain "01010")"#,
         &mut s,
     )
-    .expect("quoted SID shadow must remain ordinary String data")
+    .expect("quoted domain shadow must remain ordinary String data")
     .value
     .to_string();
     assert_eq!(
         quoted_shadow, "()",
-        "String data must not act as machine-capability SID identity"
+        "String data must not act as exact-domain machine-capability identity"
     );
+}
+
+#[test]
+fn historical_sid_capability_lookup_is_compatibility_only() {
+    let mut s = session();
+    let legacy = eval_program(
+        "(machine-capabilities-for-sid 00001100)",
+        &mut s,
+    )
+    .expect("legacy ADD compatibility lookup")
+    .value
+    .to_string();
+    assert_eq!(legacy, "((integer-add bounded-u64))");
+
+    let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
+        .expect("capability axis source");
+    assert!(source.contains("machine-capability-legacy-sid-axis-v1"));
+    assert!(source.contains("New machine work must use"));
 }
 
 #[test]
