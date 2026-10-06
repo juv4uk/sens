@@ -1,9 +1,9 @@
-; Intel Core i5-6400 / Skylake execution projection for existing my-lisp identities.
+; Legacy Intel Core i5-6400 / Skylake SID8 compatibility projection.
 ;
-; This file is NOT a semantic registry and does not create language meaning.
-; `lib/surface/semantic-registry.lisp` remains the only authority for semantic
-; identities and human surfaces.  Each row here is keyed by an existing
-; semantic ID and records a plausible physical realization on this processor.
+; This file is NOT current semantic authority. It preserves the historical
+; byte-SID projection as compatibility/provenance only. Current exact-domain
+; machine rows live in lib/machine/profile/current-domain-x86-64.lisp and are
+; keyed by exact DomainIdentity values.
 ;
 ; The projection deliberately distinguishes a one/few-instruction fast path
 ; from a wider Lisp/runtime implementation.  For example `+` keeps arbitrary-
