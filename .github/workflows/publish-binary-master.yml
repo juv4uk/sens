@@ -5,6 +5,8 @@ on:
     branches:
       - codex/sens-code-migration-tools
     paths:
+      - "crates/sens/examples/binary_master_export.rs"
+      - "scripts/export-binary-master.sh"
       - "scripts/migrate-to-sens-codes.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
@@ -24,57 +26,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run migration scripts
+      - name: Export parse-lower-wire binary files
         shell: bash
         run: |
-          set +e
-          rm -rf /tmp/sens-mirror /tmp/sens-binary-out
-          mkdir -p /tmp/sens-mirror /tmp/sens-binary-out
-          python3 scripts/audit-sens-name-debt.py . \
-            --foundation knowledge/d1-d7-foundation.json \
-            --report /tmp/sens-name-debt.json
-          python3 scripts/migrate-to-sens-codes.py . \
-            --foundation knowledge/d1-d7-foundation.json \
-            --mirror /tmp/sens-mirror \
-            --report /tmp/sens-migration.json
-          echo "migration_rc=$?" >> "$GITHUB_ENV"
-          exit 0
+          bash scripts/export-binary-master.sh . /tmp/sens-binary-out
 
-      - name: Keep only canonical binary-only results
+      - name: Validate binary-only output
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re, shutil
-
-          src = Path("/tmp/sens-mirror")
-          dst = Path("/tmp/sens-binary-out")
-          dst.mkdir(parents=True, exist_ok=True)
-          accepted = []
-          rejected = []
-
-          for path in src.rglob("*"):
-              if not path.is_file():
-                  continue
-              try:
-                  text = path.read_text(encoding="utf-8")
-              except UnicodeDecodeError:
-                  rejected.append((str(path), "non-utf8"))
-                  continue
-              if text.strip() and re.fullmatch(r"[01\s]+", text):
-                  rel = path.relative_to(src)
-                  target = dst / rel
-                  target.parent.mkdir(parents=True, exist_ok=True)
-                  target.write_text(text, encoding="utf-8")
-                  accepted.append(str(rel))
-              else:
-                  rejected.append((str(path.relative_to(src)), "mixed/non-binary"))
-
-          print(f"accepted_binary_files={len(accepted)}")
-          print(f"rejected_mixed_files={len(rejected)}")
-          for p in accepted:
-              print(f"ACCEPT {p}")
-          Path("/tmp/binary-count").write_text(str(len(accepted)))
+          import re, sys
+          root = Path("/tmp/sens-binary-out")
+          files = [p for p in root.rglob("*") if p.is_file()]
+          bad = []
+          for p in files:
+              text = p.read_text(encoding="ascii")
+              if not text.strip() or not re.fullmatch(r"[01\s]+", text):
+                  bad.append(str(p.relative_to(root)))
+          print(f"validated_binary_files={len(files)}")
+          if bad:
+              print("REFUSE non-binary output:")
+              print("\n".join(bad))
+              sys.exit(1)
+          if not files:
+              print("REFUSE empty export")
+              sys.exit(1)
           PY
 
       - name: Publish binary-only tree to master
@@ -87,42 +64,41 @@ jobs:
 
           cd /tmp/sens-master
           git rm -r --ignore-unmatch . >/dev/null 2>&1 || true
-
-          if [ -d /tmp/sens-binary-out ]; then
-            cp -a /tmp/sens-binary-out/. .
-          fi
+          cp -a /tmp/sens-binary-out/. .
 
           python3 - <<'PY'
           from pathlib import Path
           import re, sys
-          root = Path(".")
-          bad = []
           files = []
-          for p in root.rglob("*"):
+          bad = []
+          for p in Path(".").rglob("*"):
               if not p.is_file() or ".git" in p.parts:
                   continue
               files.append(p)
               try:
-                  t = p.read_text(encoding="utf-8")
+                  text = p.read_text(encoding="ascii")
               except UnicodeDecodeError:
                   bad.append(str(p))
                   continue
-              if not t.strip() or not re.fullmatch(r"[01\s]+", t):
+              if not text.strip() or not re.fullmatch(r"[01\s]+", text):
                   bad.append(str(p))
+          print(f"validated_master_files={len(files)}")
           if bad:
-              print("REFUSE: non-binary files in master candidate:")
+              print("REFUSE non-binary files in master candidate:")
               print("\n".join(bad))
               sys.exit(1)
-          print(f"validated_master_files={len(files)}")
+          if not files:
+              print("REFUSE empty master candidate")
+              sys.exit(1)
           PY
 
           git add -A
           if git diff --cached --quiet; then
-            echo "No validated binary result changed master."
+            echo "No binary output changed master."
             exit 0
           fi
 
           git config user.name "sens-binary-publisher"
           git config user.email "sens-binary-publisher@users.noreply.github.com"
-          git commit -m "master: publish validated binary-only migration results"
+          git commit -m "master: publish parser-lowered SENS wire as binary-only files"
           git push origin HEAD:master
