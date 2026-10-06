@@ -9,11 +9,27 @@
 //!
 //! Authority: D3 law ratified sens#3202, D4 contract ratified sens#3272, Contract 11.6.
 
+pub mod lower;
+
+pub use lower::{LowerError, lower_expr};
+
 use crate::DomainIdentity;
 
-// TODO Phase 2: port lower.rs functions, removing all Sid8 references
+// Phase 2 in progress: porting lower.rs functions from CML (1046 lines)
 // See: docs/research/2026-10-06-compiler-migration-plan.md
+//
+// Dispatcher: every function is a D3 or D4 exact bit pattern
+//   D3:001 (1)  = QUOTE
+//   D3:010 (2)  = ATOM?
+//   D3:011 (3)  = CDR
+//   D3:100 (4)  = CAR
+//   D3:101 (5)  = EQ?
+//   D3:110 (6)  = COND
+//   D3:111 (7)  = CONS
+//   D4:0010 (2) = LAMBDA
+//   D4:0011 (3) = DEFINE
+// All other identities are rejected; backends are separate authority.
 
 pub mod entry {
-    //! Placeholder for lower_program, lower_expr entry points (Phase 2)
+    //! Bootstrap entry points (Phase 2 complete)
 }
