@@ -32,6 +32,7 @@ pub enum BinaryFrameError {
     UnexpectedEnd { index: usize },
     LengthOverflow { index: usize },
     ReservedExtension { index: usize },
+    UnsupportedDomainWidth { index: usize, width: usize },
     NonCanonicalNumber { index: usize },
     InvalidNumber { index: usize },
     UnexpectedClose { index: usize },
@@ -50,6 +51,7 @@ const TYPE_EXTENSION: [u8; 2] = [1, 1];
 
 const EXT_DOMAIN: [u8; 2] = [0, 0];
 const EXT_BINARY_NUMBER: [u8; 2] = [0, 1];
+const EXT_WIDE_DOMAIN: [u8; 2] = [1, 0];
 
 /// Encode one non-negative length as Elias-gamma(n+1).
 ///
@@ -89,6 +91,12 @@ fn append_fixed_bits(value: u8, width: usize, out: &mut Vec<u8>) {
     }
 }
 
+fn append_fixed_bits_u16(value: u16, width: usize, out: &mut Vec<u8>) {
+    for shift in (0..width).rev() {
+        out.push(((value >> shift) & 1) as u8);
+    }
+}
+
 pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameError> {
     let mut out = Vec::new();
 
@@ -104,9 +112,20 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
         BinaryFrame::Domain(identity) => {
             out.extend_from_slice(&CONTROL_ESCAPE);
             out.extend_from_slice(&TYPE_EXTENSION);
-            out.extend_from_slice(&EXT_DOMAIN);
-            append_fixed_bits((identity.width() - 1) as u8, 3, &mut out);
-            append_fixed_bits(identity.packed_bits(), identity.width(), &mut out);
+
+            if identity.width() <= 8 {
+                // Preserve the established D1-D8 wire byte-for-byte.
+                out.extend_from_slice(&EXT_DOMAIN);
+                append_fixed_bits((identity.width() - 1) as u8, 3, &mut out);
+                append_fixed_bits(identity.packed_bits() as u8, identity.width(), &mut out);
+            } else {
+                // W9 cannot be represented by the legacy 3-bit (width-1) tag.
+                // Use the explicit wide-domain extension with a prefix-free
+                // width field instead of wrapping/truncating the width.
+                out.extend_from_slice(&EXT_WIDE_DOMAIN);
+                encode_len_into(identity.width(), &mut out)?;
+                append_fixed_bits_u16(identity.packed_bits(), identity.width(), &mut out);
+            }
         }
         BinaryFrame::BinaryNumber(number) => {
             out.extend_from_slice(&CONTROL_ESCAPE);
@@ -237,6 +256,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
                     match [e0, e1] {
                         EXT_DOMAIN => decode_domain_identity(reader),
                         EXT_BINARY_NUMBER => decode_binary_number(reader, frame_start),
+                        EXT_WIDE_DOMAIN => decode_wide_domain_identity(reader, frame_start),
                         _ => Err(BinaryFrameError::ReservedExtension { index: type_start }),
                     }
                 },
@@ -245,6 +265,29 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
         }
         _ => unreachable!("read_bit returns only 0 or 1"),
     }
+}
+
+fn decode_wide_domain_identity(
+    reader: &mut BitReader<'_>,
+    frame_start: usize,
+) -> Result<BinaryFrame, BinaryFrameError> {
+    let width = reader.read_len()?;
+    if width != 9 {
+        return Err(BinaryFrameError::UnsupportedDomainWidth {
+            index: frame_start,
+            width,
+        });
+    }
+
+    let payload = reader.read_fixed_u16(width)?;
+    let word = crate::Bit9::new(payload).ok_or(BinaryFrameError::UnsupportedDomainWidth {
+        index: frame_start,
+        width,
+    })?;
+
+    Ok(BinaryFrame::Domain(
+        crate::BinarySourceWord::W9(word).domain_identity(),
+    ))
 }
 
 fn decode_binary_number(
@@ -387,6 +430,15 @@ impl<'a> BitReader<'a> {
         Ok(value)
     }
 
+    fn read_fixed_u16(&mut self, width: usize) -> Result<u16, BinaryFrameError> {
+        debug_assert!(width <= 16);
+        let mut value = 0u16;
+        for _ in 0..width {
+            value = (value << 1) | u16::from(self.read_bit()?);
+        }
+        Ok(value)
+    }
+
     fn read_bit_string(&mut self, width: usize) -> Result<String, BinaryFrameError> {
         if self.remaining() < width {
             return Err(BinaryFrameError::UnexpectedEnd {
@@ -451,6 +503,12 @@ impl fmt::Display for BinaryFrameError {
                 write!(
                     f,
                     "canonical Control2 extension 11 is reserved at bit {index}"
+                )
+            }
+            Self::UnsupportedDomainWidth { index, width } => {
+                write!(
+                    f,
+                    "canonical wide-domain frame at bit {index} does not admit width {width}"
                 )
             }
             Self::NonCanonicalNumber { index } => {
@@ -554,6 +612,41 @@ mod tests {
         // exact-domain witness.
         let legacy_wire = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
         assert_ne!(encode_binary_frame(&d8).unwrap().as_slice(), legacy_wire);
+    }
+
+    #[test]
+    fn d9_uses_explicit_wide_domain_extension_and_round_trips_high_bit() {
+        let d9 = BinaryFrame::Domain(
+            crate::BinarySourceWord::W9(crate::Bit9::new(0b1_00000001).unwrap())
+                .domain_identity(),
+        );
+        let encoded = encode_binary_frame(&d9).unwrap();
+
+        assert_eq!(&encoded[..6], &[1, 1, 1, 1, 1, 0]);
+        let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
+        assert_eq!(decoded, d9);
+        assert_eq!(consumed, encoded.len());
+
+        let d8 = BinaryFrame::Domain(
+            crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()).domain_identity(),
+        );
+        assert_eq!(&encode_binary_frame(&d8).unwrap()[..6], &[1, 1, 1, 1, 0, 0]);
+        assert_ne!(encode_binary_frame(&d9).unwrap(), encode_binary_frame(&d8).unwrap());
+    }
+
+    #[test]
+    fn wide_domain_extension_fails_closed_for_unadmitted_widths() {
+        let mut raw = Vec::new();
+        raw.extend_from_slice(&CONTROL_ESCAPE);
+        raw.extend_from_slice(&TYPE_EXTENSION);
+        raw.extend_from_slice(&EXT_WIDE_DOMAIN);
+        encode_len_into(10, &mut raw).unwrap();
+        raw.extend(std::iter::repeat_n(0, 10));
+
+        assert!(matches!(
+            decode_binary_frame(&raw),
+            Err(BinaryFrameError::UnsupportedDomainWidth { width: 10, .. })
+        ));
     }
 
     #[test]
