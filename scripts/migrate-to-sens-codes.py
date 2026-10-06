@@ -844,7 +844,8 @@ def binary_rewrite(
             ):
                 raise BinaryMigrationError(
                     f"numeric literal {token!r} belongs to Number, not Text7; "
-                    "canonical numeric source framing is not supplied by this migration"
+                    "ratified Number widths are 24 -> 48 -> 96 -> ...; "
+                    "numeric lowering is not yet supplied by this migration"
                 )
             else:
                 out.extend(encode_text7_spelling(token, text7_candidates))
