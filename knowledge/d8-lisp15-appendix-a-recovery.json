@@ -19,9 +19,9 @@
   ],
   "accounting": {
     "families": 30,
-    "d8_candidate_families": 11,
-    "unresolved_families": 4,
-    "no_slot_or_foreign_families": 15
+    "d8_candidate_families": 12,
+    "unresolved_families": 2,
+    "no_slot_or_foreign_families": 16
   },
   "rows": [
     {
@@ -484,11 +484,16 @@
       "behavior": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
       "current_relation": "current SENS lexical closure semantics do not provide this local observable",
       "necessity": "useful/foundational",
-      "law": "dynamic bind -> free refs see current SPECIAL cell -> unbind restores old value",
-      "classification": "UNRESOLVED-HIGH-PRIORITY",
+      "law": "dynamic bind/save -> free refs read current special cell -> scope exit restores previous value",
+      "classification": "D8-RECOVERY-CANDIDATE",
       "coordinate": null,
       "evidence": [
-        "#3934"
+        "#3945",
+        "LISP 1.5 Programmer's Manual compiler appendix",
+        "current lexical-capture tests/docs"
+      ],
+      "coordinates": [
+        "00001100"
       ]
     },
     {
@@ -499,10 +504,10 @@
       ],
       "attested_by": "LISP 1.5 compiler/manual 1962",
       "behavior": "a-list based communication between compiled and interpreted functions",
-      "current_relation": "part compiler bridge, part dynamic context protocol; must be separated from SPECIAL",
+      "current_relation": "historical compiled↔interpreted a-list bridge; no independent source semantic root beyond context communication established",
       "necessity": "mechanism/useful",
       "law": "compiler/interpreter communication via explicit a-list",
-      "classification": "UNRESOLVED",
+      "classification": "HISTORICAL-COMPILER-BRIDGE-NO-SLOT",
       "coordinate": null,
       "evidence": [
         "#3934"
