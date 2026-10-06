@@ -114,6 +114,14 @@ def main() -> int:
         all(row["coordinate_status"] == "DONOR-COORDINATE-NONAUTHORITATIVE" for row in historical),
         "historical donor coordinate accidentally promoted",
     )
+    require(
+        all(
+            row["stable_id"].startswith("d8.hist.")
+            and row["historical_donor_coordinate"] not in row["stable_id"]
+            for row in historical
+        ),
+        "historical stable_id leaks donor coordinate into gauge identity",
+    )
 
     require(
         "derived/generated residents are allowed" in inv["doctrine"],
