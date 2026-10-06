@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 256,
-    "remaining_semantic_candidates": 768,
+    "selected_semantic_candidates": 264,
+    "remaining_semantic_candidates": 760,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 0,
+    "unplaced_selected_candidates": 8,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -57,5 +57,13 @@
     "fix theorem-forced geometry only",
     "gauge-fix residual placement only after semantic inventory is complete",
     "owner ratification last"
-  ]
+  ],
+  "recovery_v1": {
+    "artifact": "knowledge/d10-recovery-v1.json",
+    "source_rows": 19,
+    "selected": 8,
+    "projection": 4,
+    "hold": 7,
+    "coordinates_assigned": 0
+  }
 }
