@@ -4,56 +4,41 @@
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
+from domain_tables import DOMAIN_TABLES, read_domain_tables
+
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRIES = (
-    ROOT / "lib/surface/domain-surfaces-d1-d4.lisp",
-    ROOT / "lib/surface/domain-surfaces-d5.lisp",
-)
-ROW = re.compile(
-    r'^\s*\(row\s+(D[1-5])\s+"([01]+)"\s+(\S+)\s+'
-    r'"([^"]+)"\s+"([^"]+)"\s+"([^"]+)"\s+(\S+)\s+(\S+)\)\s*$'
-)
-LANGUAGES = ("en", "uk", "sa")
+REGISTRIES = DOMAIN_TABLES
+LANGUAGES = ("en", "uk", "ukr", "san")
+LANGUAGE_ALIASES = {"sa": "san"}
 
 
-def rows() -> list[dict[str, str]]:
-    result: list[dict[str, str]] = []
-    for registry in REGISTRIES:
-        for line_number, line in enumerate(
-            registry.read_text(encoding="utf-8").splitlines(), 1
-        ):
-            if not line.lstrip().startswith("(row "):
-                continue
-            match = ROW.match(line)
-            if not match:
-                raise ValueError(
-                    f"{registry}:{line_number}: malformed D1-D5 surface row"
-                )
-            domain, bits, role, en, uk, sa, uk_status, sa_status = match.groups()
-            result.append(
-                {
-                    "domain": domain,
-                    "bits": bits,
-                    "role": role,
-                    "en": en,
-                    "uk": uk,
-                    "sa": sa,
-                    "uk_status": uk_status,
-                    "sa_status": sa_status,
-                }
-            )
+def rows() -> list[dict[str, str | None]]:
+    result: list[dict[str, str | None]] = []
+    for row in read_domain_tables(REGISTRIES[:5]):
+        result.append(
+            {
+                "domain": row.domain,
+                "bits": row.bits,
+                "role": row.role,
+                "en": row.en,
+                "uk": row.uk,
+                "ukr": row.ukr,
+                "san": row.san,
+            }
+        )
     if len(result) != 62:
         raise ValueError(f"expected 62 exact-domain rows (D1-D5), found {len(result)}")
     return result
 
 
 def translation_map(source_language: str, target_language: str) -> dict[str, str]:
+    source_language = LANGUAGE_ALIASES.get(source_language, source_language)
+    target_language = LANGUAGE_ALIASES.get(target_language, target_language)
     if source_language not in LANGUAGES or target_language not in LANGUAGES:
-        raise ValueError("languages must be one of: en, uk, sa")
+        raise ValueError("languages must be one of: en, uk, ukr, san (sa accepted as alias)")
     if source_language == target_language:
         raise ValueError("source and target surfaces must differ")
 
@@ -126,8 +111,8 @@ def self_test() -> None:
     sa = "(nirvacana f (phalana (x) (ādi x)))"
 
     assert translate_program(en, translation_map("en", "uk")) == uk
-    assert translate_program(uk, translation_map("uk", "sa")) == sa
-    assert translate_program(sa, translation_map("sa", "en")) == en
+    assert translate_program(uk, translation_map("uk", "san")) == sa
+    assert translate_program(sa, translation_map("san", "en")) == en
 
     # D5 witness: exact D5:01010 PLUS and D5:10110 TIMES.
     d5_en = "(plus 2 (times 3 4))"

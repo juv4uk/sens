@@ -369,7 +369,7 @@ C5 не є активним feature-front. Повертатися сюди ли�
 2. C4 user-facing host capability scope — explicit operational decision, then implementation if ratified
 3. C3 shrink Rust / grow Lisp only where duplicate semantic authority is measurably removed with parity evidence
 4. B4 external-provider adapter only when a concrete translator exists and passes the versioned corpus
-5. D8 clean-room generative research stays isolated and UNRATIFIED; no admission/callability from width alone
+5. D8 is owner-ratified 256/256 under #3960; runtime callability remains separate and fail-closed until mechanisms are admitted
 6. CML/FPGA vertical: core.lisp → unify.lisp → reason.lisp on an independent backend when it advances Advice Taker
 7. B5 performance — return only for a new measured workload/bottleneck
 ```

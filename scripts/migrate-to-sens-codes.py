@@ -31,6 +31,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+from domain_tables import read_domain_table
 from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
@@ -101,28 +102,15 @@ def _entry_index(code_map):
 
 
 def augment_code_map_with_domain_surfaces(code_map, paths):
-    """Add exact human spellings from domain surface projection files.
-
-    These files are projection-only, but each row names an exact (domain,bits)
-    identity. We use them only to recognize source spelling; semantic identity
-    still comes from the ratified foundation entry.
-    """
+    """Add exact human spellings from canonical per-domain tables."""
     by_identity = _entry_index(code_map)
     out = dict(code_map)
-    row = re.compile(
-        r'^\s*\(row\s+(D[1-8])\s+"([01]+)"\s+\S+\s+'
-        r'"([^"]*)"\s+"([^"]*)"\s+"([^"]*)"',
-        re.M,
-    )
     for path in paths:
-        text = path.read_text(encoding="utf-8")
-        for match in row.finditer(text):
-            domain, bits = match.group(1), match.group(2)
-            entry = by_identity.get((domain, bits))
+        for row in read_domain_table(path):
+            entry = by_identity.get((row.domain, row.bits))
             if entry is None:
                 continue
-            for surface in match.groups()[2:]:
-                surface = surface.strip()
+            for surface in (row.en, row.uk, row.ukr, row.san, row.lisp, row.sym):
                 if not surface:
                     continue
                 key = surface.upper()
@@ -923,10 +911,7 @@ def main():
         "--domain-surfaces",
         type=Path,
         nargs="*",
-        default=[
-            Path("lib/surface/domain-surfaces-d1-d4.lisp"),
-            Path("lib/surface/domain-surfaces-d5.lisp"),
-        ],
+        default=[Path(f"lib/domains/d{width}.lisp") for width in range(1, 7)],
         help="exact-domain surface projection files used to recognize function spellings",
     )
     parser.add_argument("--report", type=Path, default=Path("sens-code-migration-report.json"))

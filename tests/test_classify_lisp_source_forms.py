@@ -24,8 +24,8 @@ HIST = ROOT / "contracts" / "core1-historical-sid-map.lisp"
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 SURFACES = [
-    ROOT / "lib" / "surface" / "domain-surfaces-d1-d4.lisp",
-    ROOT / "lib" / "surface" / "domain-surfaces-d5.lisp",
+    ROOT / "lib" / "domains" / f"d{width}.lisp"
+    for width in range(1, 7)
 ]
 
 

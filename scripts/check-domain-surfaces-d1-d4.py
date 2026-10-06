@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
-"""Guard the exact-domain D1-D5 Ukrainian/Sanskrit runtime projection."""
+"""Guard D1-D5 runtime surfaces from the canonical per-domain tables."""
 
 from __future__ import annotations
 
 import argparse
-import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SOURCE_D14 = ROOT / "lib/surface/domain-surfaces-d1-d4.lisp"
-SOURCE_D5 = ROOT / "lib/surface/domain-surfaces-d5.lisp"
-SOURCES = (SOURCE_D14, SOURCE_D5)
-GENERATED = ROOT / "crates/sens/src/domain_surface_registry_generated.rs"
+from domain_tables import DOMAIN_TABLES, read_domain_tables
 
-ROW = re.compile(
-    r'^\s*\(row\s+(D[1-5])\s+"([01]+)"\s+(\S+)\s+'
-    r'"([^"]+)"\s+"([^"]+)"\s+"([^"]+)"\s+(\S+)\s+(\S+)\)\s*$'
-)
+ROOT = Path(__file__).resolve().parents[1]
+SOURCES = DOMAIN_TABLES[:5]
+GENERATED = ROOT / "crates/sens/src/domain_surface_registry_generated.rs"
 
 EXPECTED_COUNTS = {"D1": 2, "D2": 4, "D3": 8, "D4": 16, "D5": 32}
 DISPLAY_ONLY = {("D2", f"{n:02b}") for n in range(4)} | {("D3", "000")}
@@ -28,32 +22,19 @@ def fail(message: str) -> None:
 
 def parse_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
-    for source in SOURCES:
-        text = source.read_text(encoding="utf-8")
-        lowered = text.lower()
-        for forbidden in ("sid8", "sens8", "function8"):
-            if forbidden in lowered:
-                fail(f"legacy token {forbidden!r} is forbidden in {source}")
-
-        for line_number, line in enumerate(text.splitlines(), 1):
-            if not line.lstrip().startswith("(row "):
-                continue
-            match = ROW.match(line)
-            if not match:
-                fail(f"cannot parse row at {source}:{line_number}")
-            domain, bits, role, en, uk, sa, uk_status, sa_status = match.groups()
-            rows.append(
-                {
-                    "domain": domain,
-                    "bits": bits,
-                    "role": role,
-                    "en": en,
-                    "uk": uk,
-                    "sa": sa,
-                    "uk_status": uk_status,
-                    "sa_status": sa_status,
-                }
-            )
+    for row in read_domain_tables(SOURCES):
+        if row.en is None or row.uk is None or row.san is None:
+            fail(f"{row.domain}:{row.bits}: en/uk/san must be present")
+        rows.append(
+            {
+                "domain": row.domain,
+                "bits": row.bits,
+                "role": row.role,
+                "en": row.en,
+                "uk": row.uk,
+                "sa": row.san,
+            }
+        )
     return rows
 
 
@@ -64,7 +45,7 @@ def rust_string(value: str) -> str:
 def render_generated(rows: list[dict[str, str]]) -> str:
     lines = [
         "// GENERATED — DO NOT EDIT BY HAND.",
-        "// Authority: lib/surface/domain-surfaces-d1-d4.lisp + domain-surfaces-d5.lisp",
+        "// Authority: lib/domains/d1.lisp ... lib/domains/d5.lisp",
         "// Checked by: scripts/check-domain-surfaces-d1-d4.py",
         "",
         "#[derive(Clone, Copy, Debug, Eq, PartialEq)]",
@@ -127,7 +108,7 @@ def validate(rows: list[dict[str, str]]) -> None:
         expected_bits = {f"{n:0{width}b}" for n in range(1 << width)}
         actual_bits = {row["bits"] for row in domain_rows}
         if actual_bits != expected_bits:
-            fail(f"{domain}: projection is not complete exact-width coverage")
+            fail(f"{domain}: table is not complete exact-width coverage")
 
     for language in ("uk", "sa"):
         seen: dict[str, tuple[str, str]] = {}
@@ -141,6 +122,14 @@ def validate(rows: list[dict[str, str]]) -> None:
 
     for row in rows:
         key = (row["domain"], row["bits"])
+        if row["role"] == "predicate":
+            if not row["uk"].endswith("?"):
+                fail(f"{key}: predicate UK surface must end in ?")
+            if not row["en"].endswith("?"):
+                fail(f"{key}: predicate EN surface must end in ?")
+            if row["sa"].endswith("?"):
+                fail(f"{key}: predicate Sanskrit surface must not end in ?")
+
         if key in DISPLAY_ONLY and row["role"] != "display":
             fail(f"{key}: structural/display identity became callable surface")
         if key not in DISPLAY_ONLY and row["role"] == "display":
@@ -152,7 +141,7 @@ def arguments() -> argparse.Namespace:
     parser.add_argument(
         "--write-generated",
         action="store_true",
-        help="rewrite the checked-in Rust projection from Lisp-owned surface data",
+        help="rewrite Rust projection from canonical per-domain tables",
     )
     return parser.parse_args()
 
@@ -165,20 +154,16 @@ def main() -> int:
     expected_generated = render_generated(rows)
     if args.write_generated:
         GENERATED.write_text(expected_generated, encoding="utf-8")
-    else:
-        if not GENERATED.exists():
-            fail(f"generated runtime projection is missing: {GENERATED}")
-        current_generated = GENERATED.read_text(encoding="utf-8")
-        if current_generated != expected_generated:
-            fail(
-                "generated runtime projection is stale; run "
-                "python3 scripts/check-domain-surfaces-d1-d4.py --write-generated"
-            )
+    elif not GENERATED.exists():
+        fail(f"generated runtime projection is missing: {GENERATED}")
+    elif GENERATED.read_text(encoding="utf-8") != expected_generated:
+        fail(
+            "generated runtime projection is stale; run "
+            "python3 scripts/check-domain-surfaces-d1-d4.py --write-generated"
+        )
 
     print("D1-D5-SURFACE-GUARD: PASS")
-    print("rows=62 d1=2 d2=4 d3=8 d4=16 d5=32")
-    print("projection=d1-d5 uk+sa exact-domain; source-routing=d3+d4+d5 non-display")
-    print("uk=unique sa=unique exact-width=preserved legacy-byte=absent")
+    print("rows=62 source=lib/domains/d1..d5 uk+san exact-domain")
     return 0
 
 

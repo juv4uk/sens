@@ -31,7 +31,9 @@
       "residents": {
         "0": "NO",
         "1": "YES"
-      }
+      },
+      "sanskrit_name": "uttara1",
+      "name_gloss": "answer / exact yes-no predicate result"
     },
     "D2": {
       "width": 2,
@@ -41,7 +43,9 @@
         "11": "DOT",
         "00": "SEPARATOR",
         "01": "CLOSE"
-      }
+      },
+      "sanskrit_name": "racanā2",
+      "name_gloss": "structure / arrangement"
     },
     "D3": {
       "width": 3,
@@ -55,7 +59,9 @@
         "001": "QUOTE",
         "010": "ATOM",
         "011": "CDR"
-      }
+      },
+      "sanskrit_name": "bīja3",
+      "name_gloss": "seed / foundation"
     },
     "D4": {
       "width": 4,
@@ -77,7 +83,9 @@
         "0101": "NULL",
         "0110": "CDAR",
         "0111": "CDDR"
-      }
+      },
+      "sanskrit_name": "pravartana4",
+      "name_gloss": "commencement / setting the language in operation (bootstrap)"
     },
     "D5": {
       "width": 5,
@@ -121,7 +129,9 @@
         "MULTI-DELTA-FAMILY": 2,
         "LOCAL-ALGEBRA": 5,
         "SEMANTIC-GENERATOR": 5
-      }
+      },
+      "sanskrit_name": "vistāra5",
+      "name_gloss": "expansion / extended language"
     },
     "D6": {
       "width": 6,
@@ -198,7 +208,9 @@
         "PROVED-SELECTOR": 16,
         "OWNER-RATIFIED-LAW-ANCHORED": 16,
         "OWNER-RATIFIED-S4-GAUGE": 32
-      }
+      },
+      "sanskrit_name": "saṃghaṭana6",
+      "name_gloss": "combination / composition of broader algorithmic families"
     },
     "D7": {
       "width": 7,
@@ -361,5 +373,6 @@
     "D7 D14 hakardvitva evidence has zero D7 coordinate effect: 39/43 on 42 sounds, 43/43 only on the 43-node grammar path",
     "D8 remains research/unratified; width alone never grants semantic admission or callability"
   ],
-  "d8_entry_rule": "derive D8 only from this exact D1-D7 foundation plus independent D8 laws; historical D8/Sens8 maps are donor/provenance only"
+  "d8_entry_rule": "derive D8 only from this exact D1-D7 foundation plus independent D8 laws; historical D8/Sens8 maps are donor/provenance only",
+  "domain_name_rule": "Sanskrit names are human-readable domain labels derived from resident content; canonical semantic identity remains exact bits + exact domain + admitted/proved law."
 }

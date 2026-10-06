@@ -60,7 +60,7 @@ pub struct AuthorityBundle {
     /// Language contract (language-contract.lisp) SHA-256.
     pub language_contract_sha256: String,
 
-    /// Contract version (e.g., "11.6").
+    /// Contract version (e.g., "11.7").
     pub contract_version: String,
 
     /// D3 L1-L5 structural projection digest (SHA-256).
@@ -226,7 +226,7 @@ mod tests {
             authority_bundle: AuthorityBundle {
                 nucleus_source_sha256: "abc123".to_string(),
                 language_contract_sha256: "def456".to_string(),
-                contract_version: "11.6".to_string(),
+                contract_version: "11.7".to_string(),
                 d3_law_projection_sha256: "ghi789".to_string(),
                 d4_law_projection_sha256: "jkl012".to_string(),
                 ratified_laws: vec!["D3_BIJA3_LAW_3202".to_string()],

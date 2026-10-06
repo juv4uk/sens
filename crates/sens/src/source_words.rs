@@ -115,7 +115,7 @@ impl BinarySourceWord {
     }
 
     /// Lift an exact seven-bit source word into the typed D7 carrier.
-    /// Contract 11.6 ratifies D7 residency under #3572, but exact width alone
+    /// Contract 11.7 retains D7 residency under #3572, but exact width alone
     /// still does not select a D7 role or grant generic Core callability.
     pub const fn d7(self) -> Option<crate::SoundD7> {
         match self {
@@ -124,9 +124,9 @@ impl BinarySourceWord {
         }
     }
 
-    /// Lift an exact eight-bit source word into the transitional D8 research carrier.
-    /// This never converts through the historical Sens8 compatibility type and
-    /// does not admit D8 semantics while #3278 is active.
+    /// Lift an exact eight-bit source word into the owner-ratified D8 carrier (#3960).
+    /// This never converts through historical Sens8 compatibility identity;
+    /// runtime callability remains a separate mechanism decision.
     pub const fn d8(self) -> Option<crate::CoreD8> {
         match self {
             Self::W8(word) => Some(crate::CoreD8::from_word(word)),
@@ -136,8 +136,8 @@ impl BinarySourceWord {
 
     /// Total exact-width qualified lift for the W1→W8 carrier ladder.
     ///
-    /// Contract 11.6: D1-D7 have current semantic authority; D8 remains
-    /// research. Callability is a separate mechanism axis.
+    /// Contract 11.7: D1-D8 have current semantic authority.
+    /// Callability remains a separate mechanism axis.
     pub const fn domain_identity(self) -> crate::DomainIdentity {
         crate::DomainIdentity::from_source_word(self)
     }

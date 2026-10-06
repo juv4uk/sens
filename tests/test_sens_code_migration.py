@@ -26,8 +26,8 @@ TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
 DOMAIN_SURFACES = [
-    ROOT / "lib" / "surface" / "domain-surfaces-d1-d4.lisp",
-    ROOT / "lib" / "surface" / "domain-surfaces-d5.lisp",
+    ROOT / "lib" / "domains" / f"d{width}.lisp"
+    for width in range(1, 7)
 ]
 
 
@@ -106,7 +106,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         for surface, bits in [
             ("атом?", "010"),
             ("сполучити", "111"),
-            ("aṇu?", "010"),
+            ("aṇu", "010"),
             ("додати", "01010"),
         ]:
             converted, hits, _ = self.binary(f"({surface} x)\n")
