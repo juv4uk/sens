@@ -515,6 +515,35 @@ def source_files(root: Path):
 def extensionless(rel: Path):
     return rel.with_suffix("")
 
+def plan_extensionless_destinations(rels):
+    """Plan extensionless output names without file/directory collisions.
+
+    If foo.lisp coexists with foo/bar.lisp, plain "foo" cannot be both a file
+    and a directory. The file becomes "foo__file" (still extensionless).
+    """
+    rels=list(rels)
+    source_dirs=set()
+    for rel in rels:
+        parent=rel.parent
+        while parent != Path("."):
+            source_dirs.add(parent)
+            parent=parent.parent
+
+    planned={}
+    used={}
+    for rel in sorted(rels,key=lambda p:str(p)):
+        dest=extensionless(rel)
+        if dest in source_dirs or dest in used:
+            base=dest.with_name(dest.name+"__file")
+            dest=base
+            n=2
+            while dest in source_dirs or dest in used:
+                dest=base.with_name(base.name+str(n))
+                n+=1
+        planned[rel]=dest
+        used[dest]=rel
+    return planned
+
 def migrate_file(source: str,resolver,text7):
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
@@ -554,9 +583,11 @@ def main():
     destinations={}
 
     root=args.root.resolve()
-    for path in source_files(root):
-        rel=path.resolve().relative_to(root)
-        dest=extensionless(rel)
+    paths=list(source_files(root))
+    rels=[path.resolve().relative_to(root) for path in paths]
+    destination_plan=plan_extensionless_destinations(rels)
+    for path,rel in zip(paths,rels):
+        dest=destination_plan[rel]
         if dest in destinations:
             rows.append({"path":str(rel),"status":"blocked","reason":f"extensionless collision with {destinations[dest]}"})
             blocked+=1
@@ -601,7 +632,7 @@ def main():
             "3":"historical LISP 1-1.5 uppercase resident -> ratified D3-D6 identity",
         },
         "structure":{"empty":"000","open":"10","separator":"00","dot":"11","close":"01"},
-        "output_naming":"source .lisp suffix removed; no new extension",
+        "output_naming":"source .lisp suffix removed; no new extension; file/directory collisions use __file",
         "fallback":"unrecognized function/D1/D2/data spelling is preserved verbatim",
         "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
         "files":rows,
