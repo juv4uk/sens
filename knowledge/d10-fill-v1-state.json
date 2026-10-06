@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 388,
-    "remaining_semantic_candidates": 636,
+    "selected_semantic_candidates": 400,
+    "remaining_semantic_candidates": 624,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 132,
+    "unplaced_selected_candidates": 144,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -140,6 +140,15 @@
     "artifact": "knowledge/d10-historical-maclisp-v1.json",
     "source": "MacLisp Reference Manual 1975",
     "selected": 21,
+    "coordinates_assigned": 0,
+    "ownership": "CORE-OWNED-CANDIDATE",
+    "sens8_preservation": "UNCHANGED"
+  },
+  "historical_maclisp_v2": {
+    "artifact": "knowledge/d10-historical-maclisp-v2.json",
+    "selected": 12,
+    "projections": 9,
+    "held_or_excluded": 11,
     "coordinates_assigned": 0,
     "ownership": "CORE-OWNED-CANDIDATE",
     "sens8_preservation": "UNCHANGED"
