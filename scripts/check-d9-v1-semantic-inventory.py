@@ -73,6 +73,12 @@ if semantic_layer_path.exists():
     semantic_layer_ids={r["stable_id"] for r in semantic_layer["rows"] if r["selected_d9_candidate"]}
     assert semantic_layer_ids <= unplaced_ids
 
+world_quantity_path=root/"knowledge/d9-world-quantity-harvest-v1.json"
+if world_quantity_path.exists():
+    world_quantity=json.loads(world_quantity_path.read_text(encoding="utf-8"))
+    world_quantity_ids={r["stable_id"] for r in world_quantity["rows"] if r["selected_d9_candidate"]}
+    assert world_quantity_ids <= unplaced_ids
+
 for name in ("APPLY","COMPOSE","REDUCE"):
     assert name not in {r["semantic_name"] for r in rows}
 

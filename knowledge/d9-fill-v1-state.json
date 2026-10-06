@@ -23,8 +23,8 @@
     "width": 9,
     "capacity": 512,
     "dense_target": 512,
-    "selected_semantic_candidates": 313,
-    "remaining_semantic_candidates": 199,
+    "selected_semantic_candidates": 375,
+    "remaining_semantic_candidates": 137,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -66,10 +66,10 @@
   },
   "semantic_inventory": {
     "artifact": "knowledge/d9-v1-semantic-inventory.json",
-    "selected": 313,
+    "selected": 375,
     "law_forced_coordinates": 128,
-    "unplaced_selected": 185,
-    "remaining": 199
+    "unplaced_selected": 247,
+    "remaining": 137
   },
   "law_mining": {
     "artifact": "knowledge/d9-laws-v1.json",
@@ -109,5 +109,11 @@
     "selected": 65,
     "coordinates_assigned": 0,
     "internal_helpers_excluded": true
+  },
+  "world_quantity_harvest": {
+    "artifact": "knowledge/d9-world-quantity-harvest-v1.json",
+    "selected": 62,
+    "coordinates_assigned": 0,
+    "concrete_si_constants_excluded": true
   }
 }
