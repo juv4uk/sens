@@ -207,6 +207,8 @@ def _hit(head: Head, resolution: Resolution) -> Hit:
             if resolution.resolved
             else "ambiguous"
             if resolution.ambiguous
+            else "legacy-unmapped"
+            if resolution.legacy_unmapped
             else "unresolved"
         ),
         evidence=";".join(resolution.evidence),
