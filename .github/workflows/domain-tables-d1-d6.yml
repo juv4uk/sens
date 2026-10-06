@@ -1,0 +1,33 @@
+name: domain-tables-d1-d6
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d1-d7-foundation.json"
+      - "lib/surface/domain-surfaces-d1-d4.lisp"
+      - "lib/surface/domain-surfaces-d5.lisp"
+      - "lib/surface/semantic-registry.lisp"
+      - "scripts/generate-domain-tables-d1-d6.py"
+      - "docs/generated/domain-tables-d1-d6.md"
+      - ".github/workflows/domain-tables-d1-d6.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d1-d7-foundation.json"
+      - "lib/surface/domain-surfaces-d1-d4.lisp"
+      - "lib/surface/domain-surfaces-d5.lisp"
+      - "lib/surface/semantic-registry.lisp"
+      - "scripts/generate-domain-tables-d1-d6.py"
+      - "docs/generated/domain-tables-d1-d6.md"
+      - ".github/workflows/domain-tables-d1-d6.yml"
+
+jobs:
+  canonical-domain-tables:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check canonical D1-D6 tables
+        run: python3 scripts/generate-domain-tables-d1-d6.py
