@@ -4,8 +4,8 @@
   "authority": "#4012",
   "date": "2026-10-07",
   "foundation": {
-    "current_contract": "11.7",
-    "current_authority": "#3960",
+    "current_contract": "11.8",
+    "current_authority": "#4008",
     "current_domains": [
       "D1",
       "D2",
@@ -14,11 +14,13 @@
       "D5",
       "D6",
       "D7",
-      "D8"
+      "D8",
+      "D9"
     ],
-    "completed_parent_research_domain": "D9",
-    "d9_semantic_inventory_count": 512,
-    "d9_ratified": false,
+    "parent_domain": "D9",
+    "d9_occupancy": 512,
+    "d9_ratified": true,
+    "d9_ratified_map": "knowledge/d9-ratified.json",
     "research_domain": "D10"
   },
   "target": {
@@ -41,8 +43,8 @@
     "meaning_rule": "suffix 0 appends A/CAR; suffix 1 appends D/CDR"
   },
   "authority_boundary": {
-    "d9_inventory": "semantic donor evidence only",
-    "d9_unratified_coordinates": "NO D10 AUTHORITY",
+    "d9_coordinates": "NORMATIVE D9 parent identities under #4008",
+    "d9_to_d10_children": "NO AUTOMATIC SEMANTICS FROM WIDTH OR SUFFIX",
     "d9_selector_law": "MAY CROSS because independently proved",
     "legacy_sens8_sid8_function8": "NO D10 PLACEMENT AUTHORITY"
   },
