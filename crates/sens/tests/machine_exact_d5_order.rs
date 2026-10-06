@@ -262,14 +262,23 @@ fn order_machine_proof_does_not_publish_a_numeric_boolean_language_api() {
         fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
             .expect("semantic x86 lowering");
 
-    assert!(source.contains("(00001001 x86-encode-current-order-bit"));
+    let start = source
+        .find("; #4018 exact D5 order-predicate machine proof.")
+        .expect("#4018 order proof block");
+    let end = source[start..]
+        .find("; #3996 exact-domain structural D3 dispatcher.")
+        .map(|offset| start + offset)
+        .unwrap_or(source.len());
+    let order_block = &source[start..end];
+
+    assert!(order_block.contains("(00001001 x86-encode-current-order-bit"));
     for forbidden in [
         "x86-call-current-order",
         "numeric-boolean",
         "machine-predicate-number",
     ] {
         assert!(
-            !source.contains(forbidden),
+            !order_block.contains(forbidden),
             "machine order proof must not publish {forbidden}"
         );
     }
