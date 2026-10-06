@@ -274,10 +274,10 @@ mod tests {
     #[test]
     fn existing_selector_surfaces_project_to_ratified_d4() {
         for (surface, bits) in [
-            ("перше-від-першого", 0b1000),
-            ("перше-від-решти", 0b1001),
-            ("решта-від-першого", 0b0110),
-            ("решта-від-решти", 0b0111),
+            ("п-п", 0b1000),
+            ("п-р", 0b1001),
+            ("р-п", 0b0110),
+            ("р-р", 0b0111),
         ] {
             let identity = domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
@@ -336,7 +336,7 @@ mod tests {
     fn uk_sa_exact_domain_projection_does_not_need_a_legacy_byte_route() {
         for (surface, width, bits) in [
             ("aṇu", 3, 0b010),
-            ("решта-від-першого", 4, 0b0110),
+            ("р-п", 4, 0b0110),
             ("phalana", 4, 0b0010),
             ("saṅkalana", 4, 0b1111),
         ] {
@@ -350,7 +350,7 @@ mod tests {
         // is allowed: the exact-domain table owns the current route, as proved above;
         // historical byte presence must not be used as placement authority.
         assert_eq!(
-            registry_byte_for_surface("решта-від-першого")
+            registry_byte_for_surface("р-п")
                 .and_then(legacy_domain_identity_from_registry_byte),
             None,
             "CDAR must be admitted by D4 projection even without a legacy byte mapping"
@@ -362,7 +362,7 @@ mod tests {
         for (surface, bits) in [
             ("додати", 0b01010),
             ("зворот", 0b10100),
-            ("перше-від-решти-від-першого", 0b10010),
+            ("п-р-п", 0b10010),
         ] {
             let identity = direct_domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("D5 surface must resolve directly: {surface}"));
@@ -371,7 +371,7 @@ mod tests {
         }
 
         assert_eq!(
-            registry_byte_for_surface("перше-від-решти-від-першого")
+            registry_byte_for_surface("п-р-п")
                 .and_then(legacy_domain_identity_from_registry_byte),
             None,
             "D5 selector surface must not require the legacy byte registry"
