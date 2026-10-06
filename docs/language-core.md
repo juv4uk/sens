@@ -283,7 +283,7 @@ Shiva candidate D (`h/r/l` migration + відмова від двох ḹ-line i
 
 ---
 
-## D8 — exact eight-bit research space
+## D8 — full compact 256/256
 
 D8 наразі **UNRATIFIED / RESEARCH** (#3278, clean-room #3281).
 
