@@ -1,6 +1,0 @@
-; Синтетичний RED для #1347 з підтримуваним розширенням .сенс.
-; Мовне джерело СЕНС не може брати семантичну істину з Rust.
-
-(language-contract
-  (semantic-authority-source "crates/sens/src/eval/canon.rs")
-  (law function-meaning comes-from-host))

@@ -1,5 +1,0 @@
-(def ack (lambda (m n)
-  (cond ((eq m 0) (+ n 1))
-        ((eq n 0) (ack (- m 1) 1))
-        (t (ack (- m 1) (ack m (- n 1)))))))
-(print (ack 3 3))

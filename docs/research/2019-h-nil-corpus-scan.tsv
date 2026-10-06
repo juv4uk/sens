@@ -1,2 +1,0 @@
-metric	files	nil_call_head	quoted_nil_as_data	empty_list_token	sid_zero_mentions	scan_ms	verdict	quoted_hit_locs
-corpus_scan	134	0	2	5745	9	84.77	supports_H_NIL_conjecture	lib/core1-sid8-bootstrap-overlay.lisp:40;lib/core1.lisp:298

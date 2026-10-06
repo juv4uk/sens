@@ -1,9 +1,0 @@
-[package]
-name = "sens-semantic"
-version = "0.41.0"
-edition = "2021"
-license-file = "../../LICENSE"
-description = "EXPERIMENTAL Sanskrit/Paninian semantic layer for sens (not wired into the evaluator)"
-
-[dependencies]
-sens = { path = "../sens" }

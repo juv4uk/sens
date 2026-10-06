@@ -1,8 +1,0 @@
-invariant_id	layer	status	checker	notes
-D1-two-bit-domain	0	premise_witnessed	research-2018-layer0-check.py	0=NO 1=YES only
-D1-empty-not-predicate	0	premise_witnessed	research-2018-layer0-check.py	() not in D1
-racana2-width2-exhaust	0	premise_witnessed	research-2018-layer0-check.py	00,10,01,11
-racana2-disjoint-bija3	0	premise_witnessed	research-2018-layer0-check.py	width2 ≠ width3 codes
-word-boundary-roundtrip	0	premise_witnessed	research-2018-layer0-check.py	explicit widths
-word-internal-00-nosplit	0	premise_witnessed	research-2018-layer0-check.py	CONS 100 intact
-zero-pad-not-eos	0	respects_falsifier	#1980	not adopted as law

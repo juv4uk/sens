@@ -1,4 +1,0 @@
-candidate	rule_count	descendants_generated	rows_avoided	explicit_rows_needed	economy_ratio	admission
-flat_explicit_rows	0	0	0	6	0.0	donor_baseline
-CAR_CDR_suffix_0_1	2	6	6	2	3.0	pass_economy_and_semantic
-one_off_ATOM_NULL_style	1	1	1	1	1.0	semantic_maybe_economy_weak

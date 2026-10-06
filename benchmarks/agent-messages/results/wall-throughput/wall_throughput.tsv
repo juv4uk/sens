@@ -1,7 +1,0 @@
-form	mode	n	seed	reps	median_s	us_per_msg	msg_per_s	metric	host_note
-py-src	decode	1000	1	7	0.023200	23.200	43103.4	wall_clock	connector-sandbox-python
-py-src	full	1000	1	7	0.023200	23.200	43103.4	wall_clock	connector-sandbox-python
-py-json	decode	1000	1	7	0.002600	2.600	384615.4	wall_clock	connector-sandbox-python
-py-json	full	1000	1	7	0.007900	7.900	126582.3	wall_clock	connector-sandbox-python
-py-marshal	decode	1000	1	7	0.000700	0.700	1428571.4	wall_clock	connector-sandbox-python
-py-marshal	full	1000	1	7	0.001300	1.300	769230.8	wall_clock	connector-sandbox-python

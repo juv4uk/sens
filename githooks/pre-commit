@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# Версіонований pre-commit hook. .git/hooks/ сам по собі не версіюється
-# git-ом, тому цей файл активується один раз через:
-#   git config core.hooksPath githooks
-# (див. scripts/install-hooks.sh -- запустити один раз на клон).
-set -euo pipefail
-
-repo_root="$(git rev-parse --show-toplevel)"
-"$repo_root/scripts/check-bilingual-docs"

@@ -1,7 +1,0 @@
-case_id	i_refs	cpu	valgrind_version	guix_channels_sha	git_sha	note
-selector-carcdr-k10/u1.0/explicit-row/n1	1000	SYNTHETIC-cpu	SYNTHETIC-valgrind	SYNTHETIC-guix	SYNTHETIC-git	synthetic-not-evidence
-selector-carcdr-k10/u1.0/generator-lazy/n1	1011	SYNTHETIC-cpu	SYNTHETIC-valgrind	SYNTHETIC-guix	SYNTHETIC-git	synthetic-not-evidence
-selector-carcdr-k10/u1.0/compiled-route/n1	1022	SYNTHETIC-cpu	SYNTHETIC-valgrind	SYNTHETIC-guix	SYNTHETIC-git	synthetic-not-evidence
-selector-carcdr-k10/u1.0/explicit-row/n16	1033	SYNTHETIC-cpu	SYNTHETIC-valgrind	SYNTHETIC-guix	SYNTHETIC-git	synthetic-not-evidence
-selector-carcdr-k10/u1.0/generator-lazy/n16	1044	SYNTHETIC-cpu				synthetic-not-evidence (provenance deliberately missing)
-orphan/case/1	999	SYNTHETIC-cpu	SYNTHETIC-valgrind	SYNTHETIC-guix	SYNTHETIC-git	synthetic-not-evidence (orphan)

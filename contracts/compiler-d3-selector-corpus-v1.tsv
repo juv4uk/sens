@@ -1,7 +1,0 @@
-# compiler-d3-selector-corpus/1
-# Evidence corpus for sens#3758 / cml#494. Semantic authority remains language-contract.lisp + D3 law.
-# name	head_bits	source	program_sha256	expected_kind	expected
-car-nested-pair	100	10 100 00 10 111 00 10 111 00 000 00 000 01 00 000 01 01	0b36aad2d404292ab70ce7510f103d51dc5ec02ac9e8e7281dcddbe818c8deb3	value	(())
-cdr-nested-pair	011	10 011 00 10 111 00 10 111 00 000 00 000 01 00 000 01 01	17a11c9ff1293b881ff467321d415d46cfa1d3e7f3989993cefe3e8fc5b10b30	value	()
-car-empty-type-error	100	10 100 00 000 01	b8e53d5806cd119c392440fba9b3499eef39b61fdbd3eea21a1ec1c2d9dfa963	error	Type
-cdr-empty-type-error	011	10 011 00 000 01	648550c357e5ff5b7c737ef36e89329b93a7df0e9368fbe4f6d69e0de16f13c2	error	Type

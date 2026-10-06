@@ -1,6 +1,0 @@
-(evidence
-  (requirement "MYLISP-LINTER-THRESHOLDS")
-  (implementation "my-lisp")
-  (commit "2168f4f")
-  (status (quote passed))
-  (notes "Implemented lint-check in lib/linter.lisp to extract and compare AST metrics against thresholds. Added a cargo test gate (lint_gate.rs) that ensures all core .lisp files pass these thresholds on build. Fixed variadic parameters bug in collect-free-vars for defmacro and lambda that caused false positives."))

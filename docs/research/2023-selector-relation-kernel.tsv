@@ -1,5 +1,0 @@
-model	primitive_relation_kinds	stored_per_node_facts	family_law_facts	status
-K0-flat-explicit	3	20	2	PASS
-K1-parent+edge	3	12	2	PASS
-K2-parent-only	2	6	2	PASS
-K3-intrinsic-bits+family-law	1	0	2	PASS
