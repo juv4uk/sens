@@ -321,14 +321,39 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
     proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
     sem_rows=parse_semantic_rows(semantic_generated)
 
-    # A historical byte may also gain a proven successor through surface
-    # equivalence: one of its registry spellings is a current exact-domain
-    # spelling. This is not byte truncation.
+    # A historical byte may gain a successor through semantic-name
+    # equivalence.  Crucially, this is independent of the old byte value:
+    # the old registry spelling/historical name must resolve to one current
+    # owner-ratified D3-D6 label.
     for byte,surfaces in sem_rows.items():
         candidates={current[name] for _,name in surfaces if name in current}
+        for _namespace,name in surfaces:
+            by_role=residents.get(normalize_role(name))
+            if by_role is not None:
+                candidates.add(by_role)
         if len(candidates)==1:
             ident=next(iter(candidates))
-            proven_legacy.setdefault(byte,(ident[0],ident[1],"surface-equivalence-successor"))
+            proven_legacy.setdefault(byte,(ident[0],ident[1],"semantic-name-successor"))
+
+    # Historical Core1 rows provide independent name evidence for early SIDs,
+    # including rows that have no useful generated surface entry.
+    historical_rows=[]
+    if historical_map is not None:
+        hist_text="\n".join(
+            line.split(";",1)[0]
+            for line in historical_map.read_text(encoding="utf-8").splitlines()
+        )
+        historical_rows=list(HISTORICAL_ROW_RE.finditer(hist_text))
+        for m in historical_rows:
+            sid,my_name,historical,*_rest=m.groups()
+            candidates=set()
+            for name in (my_name,historical):
+                by_role=residents.get(normalize_role(name))
+                if by_role is not None:
+                    candidates.add(by_role)
+            if len(candidates)==1:
+                ident=next(iter(candidates))
+                proven_legacy.setdefault(sid,(ident[0],ident[1],"historical-name-successor"))
 
     # Preserve knowledge that an old function existed even when it has no
     # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
@@ -343,6 +368,9 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
         for _,name in surfaces:
             if name in current:
                 candidates.add(current[name])
+            by_role=residents.get(normalize_role(name))
+            if by_role is not None:
+                candidates.add(by_role)
         unique=next(iter(candidates)) if len(candidates)==1 else None
         for namespace,name in surfaces:
             # Uppercase historical names are reserved for pass 3.
@@ -350,21 +378,24 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                 if name not in my:
                     my[name]=unique
 
+    # Historical my-lisp spellings are also pass-2 evidence.
+    for m in historical_rows:
+        sid,my_name,historical,*_rest=m.groups()
+        ident=legacy.get(sid)
+        if my_name not in my:
+            my[my_name]=ident[:2] if ident is not None else None
+
     upper={name:ident for name,ident in residents.items()}
-    if historical_map is not None:
-        hist_text="\n".join(
-            line.split(";",1)[0]
-            for line in historical_map.read_text(encoding="utf-8").splitlines()
-        )
-        for m in HISTORICAL_ROW_RE.finditer(hist_text):
-            _sid,my_name,historical,*_rest=m.groups()
-            if not any(ch.isalpha() for ch in historical):
-                continue
-            key=historical.upper()
-            candidate=residents.get(normalize_role(historical))
-            if candidate is None:
-                candidate=residents.get(normalize_role(my_name))
-            upper.setdefault(key,candidate)
+    for m in historical_rows:
+        sid,my_name,historical,*_rest=m.groups()
+        if not any(ch.isalpha() for ch in historical):
+            continue
+        key=historical.upper()
+        ident=legacy.get(sid)
+        candidate=ident[:2] if ident is not None else None
+        # Do not let a similarly-spelled modern resident erase evidence that
+        # this specific historical function lacks a proven successor.
+        upper.setdefault(key,candidate)
 
     return legacy,my,upper
 
@@ -443,6 +474,11 @@ class Resolver:
             if ident is None:
                 raise MigrationError(
                     f"legacy-unmapped SID8/Sens8 {t}: no current D3-D6 resident",
+                    tok,
+                )
+            if ident[1]=="D3" and ident[0]==D3_EMPTY:
+                raise MigrationError(
+                    f"legacy SID8/Sens8 {t} resolves to structural EMPTY, not a callable head",
                     tok,
                 )
             self.counts["pass1-sens8"]+=1
