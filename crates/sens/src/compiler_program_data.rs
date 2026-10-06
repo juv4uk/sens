@@ -12,6 +12,16 @@ use std::{fmt, rc::Rc};
 
 pub const COMPILER_PROGRAM_DATA_SCHEMA: &str = "sens-compiler-program-data/1";
 
+pub const COMPILER_PROGRAM_DATA_CONTRACT: &str =
+    include_str!("../../../contracts/compiler-program-data-v1.lisp");
+
+pub fn compiler_program_data_contract_sha256() -> String {
+    sha256_source(COMPILER_PROGRAM_DATA_CONTRACT.as_bytes())
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct CompilerProgramData {
     pub forms: Vec<CompilerProgramNode>,
@@ -408,6 +418,17 @@ mod tests {
             identity: identity.into(),
             children,
         }
+    }
+
+    #[test]
+    fn versioned_contract_is_bound_to_the_exported_transport() {
+        assert!(COMPILER_PROGRAM_DATA_CONTRACT.contains(
+            "(schema . sens-compiler-program-data/1)"
+        ));
+        assert!(COMPILER_PROGRAM_DATA_CONTRACT.contains(
+            "(authority . representation-only)"
+        ));
+        assert_eq!(compiler_program_data_contract_sha256().len(), 64);
     }
 
     #[test]
