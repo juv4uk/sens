@@ -69,6 +69,7 @@ pub fn append_binary_source_word(packer: &mut BitPacker, word: BinarySourceWord)
         BinarySourceWord::W6(word) => packer.push(word),
         BinarySourceWord::W7(word) => packer.push(word),
         BinarySourceWord::W8(word) => packer.push(word),
+        BinarySourceWord::W9(word) => packer.push_w9(word),
     }
 }
 
@@ -103,6 +104,7 @@ fn read_binary_source_word(
         6 => BinarySourceWord::W6(packed.read::<6>(bit_offset)?),
         7 => BinarySourceWord::W7(packed.read::<7>(bit_offset)?),
         8 => BinarySourceWord::W8(packed.read::<8>(bit_offset)?),
+        9 => BinarySourceWord::W9(packed.read_w9(bit_offset)?),
         _ => return None,
     })
 }
@@ -116,14 +118,14 @@ fn read_binary_source_word(
 /// caller-owned boundary information. Standalone self-description belongs to
 /// the framing layer.
 ///
-/// The decode fails closed if any width is outside 1..=8 or if the supplied
+/// The decode fails closed if any width is outside 1..=9 or if the supplied
 /// widths do not consume the payload bit length exactly.
 pub fn unpack_binary_source_words(
     packed: &PackedBitstream,
     widths: &[usize],
 ) -> Option<Vec<BinarySourceWord>> {
     let expected_bits = widths.iter().try_fold(0usize, |total, &width| {
-        if !(1..=8).contains(&width) {
+        if !(1..=9).contains(&width) {
             return None;
         }
         total.checked_add(width)
@@ -209,6 +211,24 @@ mod tests {
     }
 
     #[test]
+    fn grammar_bound_w9_round_trips_without_byte_aliasing() {
+        let source = "100000001 000000001 111111111";
+        let tokens = parse_binary_source_words(source).unwrap();
+        let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
+        assert_eq!(widths, [9, 9, 9]);
+
+        let packed = pack_binary_source_tokens(&tokens);
+        assert_eq!(packed.bit_len(), 27);
+        assert_eq!(packed.byte_len(), 4);
+
+        let decoded = unpack_binary_source_words(&packed, &widths).unwrap();
+        assert_eq!(decoded, exact_words(&tokens));
+        assert_eq!(decoded[0].packed_bits(), 257);
+        assert_eq!(decoded[1].packed_bits(), 1);
+        assert_eq!(decoded[2].packed_bits(), 511);
+    }
+
+    #[test]
     fn packed_payload_does_not_claim_source_word_boundaries() {
         let split = parse_binary_source_words("0 00").unwrap();
         let single = parse_binary_source_words("000").unwrap();
@@ -266,7 +286,7 @@ mod tests {
         let packed = pack_binary_source_tokens(&tokens);
 
         assert!(unpack_binary_source_words(&packed, &[0, 3, 2]).is_none());
-        assert!(unpack_binary_source_words(&packed, &[9]).is_none());
+        assert!(unpack_binary_source_words(&packed, &[10]).is_none());
         assert!(unpack_binary_source_words(&packed, &[2, 3]).is_none());
         assert!(unpack_binary_source_words(&packed, &[2, 3, 3]).is_none());
     }
