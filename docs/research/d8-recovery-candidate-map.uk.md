@@ -16,21 +16,25 @@
 ## Provisional ladder
 
 ```text
-00000000  ERRORSET
-00000001  ERROR
-00000010  ENV-REFLECTION
-00000011  READ
-00000100  WRITE-TO-STRING
-00000101  SYMBOL->STRING
-00000110  STRING->SYMBOL
-00000111  VECTOR
-00001000  VECTOR-REF
-00001001  VECTOR-SET!
+00000000  RPLACA
+00000001  RPLACD
+00000010  ERRORSET
+00000011  ERROR
+00000100  ENV-REFLECTION
+00000101  READ
+00000110  WRITE-TO-STRING
+00000111  SYMBOL->STRING
+00001000  STRING->SYMBOL
+00001001  VECTOR
+00001010  VECTOR-REF
+00001011  VECTOR-SET!
 ```
 
 Це **candidate coordinates**, не ратифіковані residents.
 
-`ERRORSET` стоїть першим, бо він історично ранній (Lisp 1.5, 1961–1962), фундаментально додає локальне відновлення після помилки й має дуже короткий закон:
+`RPLACA/RPLACD` стоять першими: вони додають відсутню в elementary Lisp здатність змінювати вже існуючу pair-структуру, а їхній закон — простий CAR/CDR field axis.
+
+`ERRORSET` іде наступним, бо він історично ранній (Lisp 1.5, 1961–1962), фундаментально додає локальне відновлення після помилки й має дуже короткий закон:
 
 ```text
 success -> LIST(value)
@@ -140,10 +144,10 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   10
-provisional coordinates            00000000..00001001
+provisional D8 ladder candidates   12
+provisional coordinates            00000000..00001011
 ratified D8 residents              0
-resolved recovery no-slot          9
+resolved recovery no-slot          11
 unresolved recovery rows           2
 preserved positive law families    8
 preserved negative groups          4
@@ -245,3 +249,25 @@ VECTOR-REF(w,0) = 99
 ```
 
 Тобто pure persistent list rewrite не є тією самою семантикою без окремої shared mutable identity.
+
+## Mutable cons-cell recovery
+
+`RPLACA` / `RPLACD` підняті на початок provisional D8, бо це не convenience, а новий state law над самим базовим pair carrier.
+
+```text
+RPLACA(p,x): mutate CAR(p), return same p
+RPLACD(p,y): mutate CDR(p), return same p
+```
+
+Ключовий observable — aliasing:
+
+```text
+p = pair(a,b)
+q = p
+RPLACA(p,x)
+CAR(q) = x
+```
+
+`CONS(x, CDR(p))` може дати таке саме extensional значення нового pair, але не змінить `q`. Саме тому reconstruction != mutation.
+
+Дві операції утворюють просту CAR/CDR sibling-family; складний product search не потрібен.
