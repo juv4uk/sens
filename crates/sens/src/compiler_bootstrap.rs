@@ -6,7 +6,7 @@
 //! it to SENS code explicitly while #3808/#3809 move compiler-law execution
 //! into the language itself.
 
-use crate::{ErrorKind, Exactness, LanguageError, Value};
+use crate::{sha256_source, ErrorKind, Exactness, LanguageError, Value};
 use std::rc::Rc;
 
 /// Build an opt-in mechanism value that decomposes one exact DomainIdentity.
@@ -90,5 +90,70 @@ pub fn domain_identity_shape_or_empty_mechanism() -> Value {
             Value::Number(width as f64, Exactness::Exact),
             Value::list(bits),
         ]))
+    }))
+}
+
+fn put_canonical_len(out: &mut Vec<u8>, len: usize) {
+    out.extend_from_slice(&(len as u64).to_le_bytes());
+}
+
+fn encode_canonical_compiler_value(value: &Value, out: &mut Vec<u8>) -> Result<(), String> {
+    match value {
+        Value::Nil => out.push(0x00),
+        Value::DomainIdentity(identity) => {
+            out.push(0x01);
+            out.push(identity.width() as u8);
+            out.push(identity.packed_bits());
+        }
+        Value::Symbol(symbol) => {
+            out.push(0x02);
+            put_canonical_len(out, symbol.len());
+            out.extend_from_slice(symbol.as_bytes());
+        }
+        Value::String(text) => {
+            out.push(0x03);
+            put_canonical_len(out, text.len());
+            out.extend_from_slice(text.as_bytes());
+        }
+        Value::Pair(head, tail) => {
+            out.push(0x04);
+            encode_canonical_compiler_value(head, out)?;
+            encode_canonical_compiler_value(tail, out)?;
+        }
+        other => {
+            return Err(format!(
+                "canonical compiler-value hash does not admit runtime value: {other}"
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// Narrow representation-only SHA-256 capability for compiler evidence values.
+///
+/// The accepted value language is deliberately closed: NIL, exact
+/// DomainIdentity, Symbol, String and Pair.  These are sufficient for the
+/// proof-carrying compiler request sequence.  The mechanism has no knowledge
+/// of compiler roles, laws, proof ownership or backend mechanisms.
+pub fn canonical_compiler_value_sha256_mechanism() -> Value {
+    Value::host_function(Rc::new(|arguments, _environment, span| {
+        if arguments.len() != 1 {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!(
+                    "canonical compiler-value sha256 expects exactly 1 argument, got {}",
+                    arguments.len()
+                ),
+                span,
+            ));
+        }
+
+        let mut encoded = Vec::new();
+        encode_canonical_compiler_value(&arguments[0], &mut encoded).map_err(|message| {
+            LanguageError::new(ErrorKind::Type, message, span)
+        })?;
+        let digest = sha256_source(&encoded);
+        let hex = digest.iter().map(|byte| format!("{byte:02x}")).collect::<String>();
+        Ok(Value::String(Rc::from(hex)))
     }))
 }
