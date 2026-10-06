@@ -66,7 +66,7 @@ assert '(owner-reserved-pinned . ("0100001" "0101010"))' in contract
 assert '(candidate-occupancy . #d124)' in contract
 assert "(minor . 7)" in lang
 assert "Contract 11.7" in lang
-assert "D7 is owner-ratified 126/128 in #3572" in lang
+assert "Core.D7 is OWNER-RATIFIED 126/128 under #3572" in lang
 assert "D7  owner-ratified 126/128" in current
 assert "D8  full compact 256/256" in current
 
