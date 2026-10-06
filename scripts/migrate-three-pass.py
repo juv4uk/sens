@@ -26,6 +26,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 import re
+import signal
 
 SOURCE_EXTS = {".lisp"}
 SKIP_DIRS = {".git","target","node_modules","vendor","dist","build",".venv","venv","__pycache__"}
@@ -79,6 +80,12 @@ class MigrationError(Exception):
         super().__init__(message)
         self.message=message
         self.tok=tok
+
+class FileTimeout(MigrationError):
+    pass
+
+def _timeout_handler(signum, frame):
+    raise FileTimeout("per-file migration timeout")
 
 def strip_comments(source: str) -> str:
     """Remove ; and nested #| |# comments, preserving strings and newlines."""
@@ -560,7 +567,10 @@ def main():
         resolver=Resolver(legacy,my,upper)
         source=path.read_text(encoding="utf-8")
         try:
+            signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.alarm(5)
             output=migrate_file(source,resolver,text7)
+            signal.alarm(0)
             if not output.strip():
                 rows.append({"path":str(rel),"status":"empty","passes":resolver.counts})
                 continue
@@ -572,12 +582,19 @@ def main():
             for k,v in resolver.counts.items(): totals[k]+=v
             rows.append({"path":str(rel),"output":str(dest),"status":"written","passes":resolver.counts})
         except MigrationError as e:
+            signal.alarm(0)
             blocked+=1
             row={"path":str(rel),"status":"blocked","reason":e.message,"passes":resolver.counts}
             if e.tok:
                 line,col=line_col(source,e.tok.offset)
                 row.update({"token":e.tok.text,"line":line,"column":col})
             rows.append(row)
+
+        if (written + blocked) % 25 == 0:
+            print(
+                f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
+                flush=True,
+            )
 
     report={
         "schema":"sens-three-pass-migration/v1",
