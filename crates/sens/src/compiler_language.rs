@@ -20,6 +20,31 @@ use crate::{
 use std::rc::Rc;
 
 const COMPILER_NUCLEUS_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+const LANGUAGE_CONTRACT: &str = include_str!("../../../language-contract.lisp");
+
+pub const COMPILER_ROLE_LAW_REF: &str =
+    "lib/compiler-nucleus.lisp:compiler-lowering-role-from-laws";
+pub const COMPILER_D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp";
+pub const COMPILER_D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
+pub const COMPILER_AUTHORITY_PATH: &str = "language-contract.lisp";
+pub const COMPILER_CONTRACT_VERSION: &str = "11.6";
+
+/// SENS-owned semantic input for one current compiler identity.
+///
+/// This value contains only language authority facts. It deliberately contains
+/// no target/backend mechanism identifier and no repository checkout revision;
+/// a serializer may attach its exact source revision as transport provenance.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CompilerSemanticInput {
+    pub identity: CoreDomainIdentity,
+    pub lowering_role: CompilerLoweringRole,
+    pub authority_ref: &'static str,
+    pub proof_ref: &'static str,
+    pub semantic_status: &'static str,
+    pub authority_path: &'static str,
+    pub authority_sha256: String,
+    pub language_contract_version: &'static str,
+}
 const LAW_PROJECTION: &str =
     include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
 const LAW_AUTHORITY: &str = include_str!("../../../contracts/bija3-l1-l5-ratification.lisp");
@@ -395,6 +420,44 @@ pub fn compiler_lowering_role_from_sens(
 /// Backward-compatible three-role view used by the already-landed selector/pair
 /// compiler bridge. It delegates to the same full SENS-owned role law and never
 /// reconstructs identity-to-role meaning in Rust.
+/// Produce the canonical proof-carrying compiler semantic input for one exact
+/// current identity.
+///
+/// Role meaning and D3/D4 proof ownership are selected inside SENS. Downstream
+/// consumers may verify and bind a private mechanism, but must not reconstruct
+/// either fact from coordinates, names, or a legacy callable identity.
+pub fn compiler_semantic_input_from_sens(
+    identity: CoreDomainIdentity,
+) -> Result<Option<CompilerSemanticInput>, LanguageError> {
+    let Some(lowering_role) = compiler_lowering_role_from_sens(identity)? else {
+        return Ok(None);
+    };
+
+    let proof_ref = match lowering_role {
+        CompilerLoweringRole::LambdaForm | CompilerLoweringRole::DefineForm => {
+            COMPILER_D4_PROOF_REF
+        }
+        CompilerLoweringRole::QuoteForm
+        | CompilerLoweringRole::AtomPredicate
+        | CompilerLoweringRole::SelectorTail
+        | CompilerLoweringRole::SelectorHead
+        | CompilerLoweringRole::AtomEquality
+        | CompilerLoweringRole::CondForm
+        | CompilerLoweringRole::PairConstruct => COMPILER_D3_PROOF_REF,
+    };
+
+    Ok(Some(CompilerSemanticInput {
+        identity,
+        lowering_role,
+        authority_ref: COMPILER_ROLE_LAW_REF,
+        proof_ref,
+        semantic_status: "current",
+        authority_path: COMPILER_AUTHORITY_PATH,
+        authority_sha256: sha256_hex(LANGUAGE_CONTRACT.as_bytes()),
+        language_contract_version: COMPILER_CONTRACT_VERSION,
+    }))
+}
+
 pub fn compiler_execution_role_from_sens(
     identity: CoreDomainIdentity,
 ) -> Result<Option<CompilerExecutionRole>, LanguageError> {
