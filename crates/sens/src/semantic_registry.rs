@@ -131,7 +131,8 @@ pub(crate) fn surface_for_domain_identity(
     DOMAIN_SURFACE_ROWS
         .iter()
         .find(|row| {
-            usize::from(row.width) == identity.width() && row.bits == identity.packed_bits()
+            usize::from(row.width) == identity.width()
+                && u16::from(row.bits) == identity.packed_bits()
         })?
         .surfaces
         .iter()
