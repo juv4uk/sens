@@ -127,13 +127,17 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertTrue(out.startswith(f"10 {bits} "),source)
             self.assertEqual(resolver.counts["pass2-my-lisp"],1,source)
 
-    def test_d1_d2_head_words_pass_through_verbatim(self):
+    def test_d1_head_may_pass_but_d2_head_is_reserved_for_structure(self):
         out1,resolver1=self.migrate("(1 x)\n")
-        out2,resolver2=self.migrate("(10 x)\n")
         self.assertEqual(out1,"10 1 00 x 01\n")
-        self.assertEqual(out2,"10 10 00 x 01\n")
         self.assertEqual(resolver1.counts["passthrough-head"],1)
-        self.assertEqual(resolver2.counts["passthrough-head"],1)
+        with self.assertRaisesRegex(mod.MigrationError,"D2 word 10 is structural control only"):
+            self.migrate("(10 x)\n")
+
+    def test_d2_words_cannot_survive_as_ordinary_data(self):
+        for word in ("00","01","10","11"):
+            with self.assertRaisesRegex(mod.MigrationError,"structural control only"):
+                self.migrate(f"(CONS {word} x)\n")
 
     def test_numeric_literal_passes_through_verbatim(self):
         out,_=self.migrate("(CAR 25)\n")
@@ -150,6 +154,15 @@ class ThreePassMigrationTests(unittest.TestCase):
     def test_known_structure_and_function_convert_while_unknown_data_stays_visible(self):
         out,_=self.migrate("(CONS x y)\n")
         self.assertEqual(out,"10 111 00 x 00 y 01\n")
+
+    def test_all_emitted_structural_control_is_d2_and_empty_is_d3_value(self):
+        out,_=self.migrate("(CONS () (a . b))\n")
+        words=out.split()
+        controls=[word for word in words if len(word)==2]
+        self.assertTrue(controls)
+        self.assertTrue(all(word in {"00","01","10","11"} for word in controls))
+        self.assertIn("000",words)
+        self.assertEqual(out.count("000"),1)
 
     def test_extensionless_collision_gets_file_suffix_without_extension(self):
         plan=mod.plan_extensionless_destinations([
