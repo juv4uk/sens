@@ -44,9 +44,11 @@ class SensCodeMigrationTests(unittest.TestCase):
 
     def test_comments_strings_and_quoted_data_are_preserved(self):
         source = "; (CAR x)\n(foo \"CAR\")\n'(CAR (CDR x))\n(QUOTE (CAR x))\n"
+        expected = "; (CAR x)\n(foo \"CAR\")\n'(CAR (CDR x))\n(001 (CAR x))\n"
         converted, hits, blocked = mod.rewrite(source, self.code_map)
-        self.assertEqual(converted, source)
-        self.assertFalse(hits)
+        self.assertEqual(converted, expected)
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0].label, "QUOTE")
         self.assertFalse(blocked)
 
     def test_package_qualified_surface_is_preserved(self):
