@@ -1,0 +1,46 @@
+name: D8 EXPT reciprocal-sign research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d8-expt-recip-sign/**"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-expt-recip-sign.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "benchmarks/d8-expt-recip-sign/**"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-expt-recip-sign.yml"
+  workflow_dispatch:
+
+jobs:
+  falsifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run EXPT axis-collapse falsifier
+        run: |
+          rm -rf /tmp/d8-expt-recip-sign
+          python3 benchmarks/d8-expt-recip-sign/run.py \
+            --out /tmp/d8-expt-recip-sign
+      - name: Verify deterministic replay
+        run: |
+          rm -rf /tmp/d8-expt-recip-sign-2
+          python3 benchmarks/d8-expt-recip-sign/run.py \
+            --out /tmp/d8-expt-recip-sign-2
+          cmp /tmp/d8-expt-recip-sign/witness.json \
+              /tmp/d8-expt-recip-sign-2/witness.json
+      - name: Publish report
+        if: always()
+        run: |
+          test ! -f /tmp/d8-expt-recip-sign/report.md || \
+            cat /tmp/d8-expt-recip-sign/report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d8-expt-recip-sign
+          path: /tmp/d8-expt-recip-sign/
+          retention-days: 14
