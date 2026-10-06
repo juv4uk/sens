@@ -685,6 +685,45 @@ mod tests {
     }
 
     #[test]
+    fn same_payload_wrong_domain_with_wrong_shape_fails_closed() {
+        // D3:010 is AtomPredicate and one argument is valid.
+        let d3_program = Value::list([Value::list([
+            exact_value(d3(0b010)),
+            Value::Symbol(Rc::from("x")),
+        ])]);
+        let d3_result =
+            compiler_program_requests_from_sens(d3_program).expect("D3 atom traversal");
+        let d3_rows = list_values(&d3_result);
+        assert_eq!(d3_rows[0].as_predicate_bit(), Some(true));
+
+        // Same numeric payload under width 4 is D4:0010 LambdaForm.
+        // Reusing the one-child D3 source shape must fail rather than silently
+        // reinterpret the node as a valid lambda request.
+        let d4_program = Value::list([Value::list([
+            exact_value(d4(0b0010)),
+            Value::Symbol(Rc::from("x")),
+        ])]);
+        let d4_result =
+            compiler_program_requests_from_sens(d4_program).expect("normal fail-closed result");
+        let d4_rows = list_values(&d4_result);
+        assert_eq!(d4_rows.len(), 1);
+        assert_eq!(d4_rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn malformed_exact_d3_cond_clause_fails_closed_before_request_emission() {
+        let cond = exact_value(d3(0b110));
+        let malformed_clause = Value::list([Value::Symbol(Rc::from("test-only"))]);
+        let program = Value::list([Value::list([cond, malformed_clause])]);
+
+        let result =
+            compiler_program_requests_from_sens(program).expect("normal fail-closed result");
+        let rows = list_values(&result);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
     fn direct_d8_domain_call_fails_closed_in_sens_program_traversal() {
         let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
             crate::Bit8::new(0b0000_0010).expect("D8 word"),
