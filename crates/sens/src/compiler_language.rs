@@ -844,6 +844,115 @@ mod tests {
     }
 
     #[test]
+    fn whole_program_artifact_v2_is_sens_composed_and_digest_bound() {
+        let atom = exact_value(d3(0b010));
+        let program = Value::list([Value::list([
+            atom,
+            Value::Symbol(Rc::from("x")),
+        ])]);
+        let expected_program_digest =
+            sha256_hex(program.to_canonical_wire_string().as_bytes());
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+
+        let result = compiler_program_artifact_from_sens(program, revision)
+            .expect("whole-program SENS artifact");
+        let rows = list_values(&result);
+        assert_eq!(rows.len(), 2, "success bit plus one artifact");
+        assert_eq!(rows[0].as_predicate_bit(), Some(true));
+
+        let artifact = list_values(rows[1]);
+        assert_eq!(artifact.len(), 8);
+        assert!(matches!(
+            artifact[0],
+            Value::Symbol(name) if name.as_ref() == "compiler-compilation-artifact/2"
+        ));
+        assert!(matches!(
+            artifact[1],
+            Value::Symbol(name) if name.as_ref() == "compiler-program-data/1"
+        ));
+        assert!(matches!(
+            artifact[2],
+            Value::String(digest) if digest.as_ref() == expected_program_digest
+        ));
+
+        let requests = artifact[5];
+        let expected_requests_digest =
+            sha256_hex(requests.to_canonical_wire_string().as_bytes());
+        assert!(matches!(
+            artifact[3],
+            Value::String(digest) if digest.as_ref() == expected_requests_digest
+        ));
+
+        let provenance = list_values(artifact[4]);
+        assert_eq!(provenance.len(), 5);
+        assert!(matches!(
+            provenance[0],
+            Value::String(found) if found.as_ref() == revision
+        ));
+        assert!(matches!(
+            provenance[1],
+            Value::String(found) if found.as_ref() == COMPILER_AUTHORITY_PATH
+        ));
+        assert!(matches!(
+            provenance[2],
+            Value::String(found)
+                if found.as_ref() == sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        ));
+        assert!(matches!(
+            provenance[3],
+            Value::String(found) if found.as_ref() == COMPILER_CONTRACT_VERSION
+        ));
+        assert!(matches!(
+            provenance[4],
+            Value::String(found)
+                if found.as_ref() == sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
+        ));
+
+        assert!(matches!(artifact[6], Value::Nil));
+        assert!(matches!(
+            artifact[7],
+            Value::Symbol(name) if name.as_ref() == "canonical-backend-neutral"
+        ));
+
+        let wire = rows[1].to_canonical_wire_string().to_ascii_lowercase();
+        for forbidden in ["cuda", "ptx", "sass", "graal", "fpga", "install-target"] {
+            assert!(
+                !wire.contains(forbidden),
+                "whole-program artifact leaked backend/install policy: {forbidden}"
+            );
+        }
+    }
+
+    #[test]
+    fn whole_program_artifact_v2_keeps_d8_fail_closed() {
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        let program = Value::list([Value::list([exact_value(d8)])]);
+        let result = compiler_program_artifact_from_sens(
+            program,
+            "0123456789abcdef0123456789abcdef01234567",
+        )
+        .expect("normal fail-closed artifact result");
+
+        let rows = list_values(&result);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn whole_program_artifact_rejects_noncanonical_revision_provenance() {
+        let program = Value::list([]);
+        let error = compiler_program_artifact_from_sens(program, "NOT-A-SHA")
+            .expect_err("malformed revision provenance must fail before C1 artifact emission");
+        assert!(
+            error
+                .to_string()
+                .contains("40 lowercase hexadecimal characters")
+        );
+    }
+
+    #[test]
     fn current_nucleus_roles_are_derived_by_the_single_sens_owned_law() {
         let expected = [
             (d3(0b001), CompilerLoweringRole::QuoteForm),
