@@ -10,13 +10,14 @@
   "sources": [
     "knowledge/d9-selector-seed.json",
     "knowledge/d9-overflow-review-v1.json",
-    "knowledge/d9-surface-harvest-v1.json"
+    "knowledge/d9-surface-harvest-v1.json",
+    "knowledge/d9-registry-harvest-v2.json"
   ],
   "accounting": {
-    "selected_semantic_candidates": 168,
+    "selected_semantic_candidates": 250,
     "law_forced_coordinates": 128,
-    "unplaced_selected_candidates": 40,
-    "remaining_semantic_inventory": 344,
+    "unplaced_selected_candidates": 122,
+    "remaining_semantic_inventory": 262,
     "ratified_d9_residents": 0
   },
   "rules": [
@@ -28,6 +29,1544 @@
     "D9 remains unratified until explicit owner decision"
   ],
   "rows": [
+    {
+      "stable_id": "d9.registry.0124a207a302539a",
+      "semantic_name": "OCCURS-CHECK?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION",
+      "behavior": "test whether binding a logic variable would create a cyclic/infinite term",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "surface_source": "occurs-check?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.06a6b504db6519ff",
+      "semantic_name": "LOGIC-VAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION",
+      "behavior": "construct the explicit tagged representation of a logic variable",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "surface_source": "logic-var",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.0a1c6a547b1cdc68",
+      "semantic_name": "THREAD-LAST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "rewrite a form pipeline by threading the current value into last argument position",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "thread-last",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.0a9091b2f65d1e0c",
+      "semantic_name": "ANSWER-NOT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "negate an answer value within the language answer algebra",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "surface_source": "answer-not",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.11c7eaade066c3ee",
+      "semantic_name": "THREAD-FIRST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "rewrite a form pipeline by threading the current value into first argument position",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "thread-first",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.1370ac4ae3449ddb",
+      "semantic_name": "ANSWER-OR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "combine two answer values by answer-domain disjunction",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "surface_source": "answer-or",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.13a5fb03baa62833",
+      "semantic_name": "REASON",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "run the public backward-chaining reasoner and return substitution/proof pairs",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "reason",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.154cc405f1358509",
+      "semantic_name": "DIVMOD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "return quotient and remainder as one language result",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "divmod",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.164dfb3286350d15",
+      "semantic_name": "VEC-EMPTY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR",
+      "behavior": "construct the empty persistent vector",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "surface_source": "vec-empty",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.1c9c5258ff4b6de8",
+      "semantic_name": "TCP-WRITE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HOST-POLICY-WRAPPER",
+      "behavior": "public TCP write policy: encode text to bytes and preserve the public text result",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "surface_source": "tcp-write",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.22b0d361921f50f0",
+      "semantic_name": "CLAIM-REVIEW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "extract the review state carried by a claim",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "claim-review",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.2429e2ce0b9cade9",
+      "semantic_name": "CONTAINS-ATOM?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "test recursive occurrence of an atom in a list/term",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "contains-atom?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.285167c109332865",
+      "semantic_name": "VEC-COUNT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR",
+      "behavior": "return the persistent-vector element count",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "surface_source": "vec-count",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.28f086ce48c2c666",
+      "semantic_name": "VEC-NTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR",
+      "behavior": "retrieve a persistent-vector element by integer index",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "surface_source": "vec-nth",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.332a7fef0ef3da65",
+      "semantic_name": "SYMBOL?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "recognize the symbol value kind",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "symbol?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.3941ac29a2e770ff",
+      "semantic_name": "MONO-MS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive a millisecond monotonic view from the raw monotonic nanosecond observation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "mono-ms",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.3d489463368f6ec1",
+      "semantic_name": "SECOND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 2 of a linear sequence; distinct from pair-algebra CADR identity",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "surface_source": "second",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.3f87ea72bcd6432f",
+      "semantic_name": "UTC-NOW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive public UTC calendar meaning from a raw Unix clock observation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "utc-now",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.4126127128a2ff48",
+      "semantic_name": "PROVENANCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "construct recursive structured provenance for a proof node",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "provenance",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.42441b1a6684f500",
+      "semantic_name": "UNIFY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION",
+      "behavior": "unify two symbolic terms with substitutions and occurs-check discipline",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "surface_source": "unify",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.43d00f64f91dfecb",
+      "semantic_name": "TIMEZONE-NAME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "extract the name from an accepted timezone configuration",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "timezone-name",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.44698d12ffa6129f",
+      "semantic_name": "APPLY-SUBST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION",
+      "behavior": "apply a substitution recursively to a symbolic term",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "surface_source": "apply-subst",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.45e672b9fd41b877",
+      "semantic_name": "ANSWER-WEAKEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "weaken an answer while preserving the answer-domain structure",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "surface_source": "answer-weaken",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.460619bea7ba80c9",
+      "semantic_name": "PROVE-GOALS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "prove a conjunction of goals while threading one substitution/proof state",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "prove-goals",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.49d4c4e587080f05",
+      "semantic_name": "FIFTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 5 of a linear sequence",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "surface_source": "fifth",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.4d0cf5ca8f1952ad",
+      "semantic_name": "MODULE-CLAUSES-NOW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "project the current clause list from the append-only knowledge journal",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "module-clauses-now",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.4e63c22f091439b3",
+      "semantic_name": "MAP-GET",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP",
+      "behavior": "lookup a key in an immutable persistent map",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "surface_source": "map-get",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.50f5e9a4b45e59ae",
+      "semantic_name": "IS-FACT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "classify a knowledge clause as fact or rule using the knowledge-domain result",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "is-fact?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.544869bd0a600df8",
+      "semantic_name": "DEADLINE-FROM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "pure deadline arithmetic: add a delta to a supplied instant",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "deadline-from",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.5914cd1c5f84c05a",
+      "semantic_name": "REASON-EXPLAIN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "produce the public human-facing explanation of a reasoning result",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "reason-explain",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.639eb37e3668b808",
+      "semantic_name": "VEC-CONJ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR",
+      "behavior": "return a new persistent vector with one value appended",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "surface_source": "vec-conj",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.63da20ec868c6312",
+      "semantic_name": "COLLECT-FACTS-ABOUT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "collect current fact clauses whose heads contain the requested item",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "collect-facts-about",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.6485767e1d2e85b2",
+      "semantic_name": "MAP-INSERT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP",
+      "behavior": "return a new persistent map with a key/value binding while preserving the old map",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "surface_source": "map-insert",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.65daa370792be4a4",
+      "semantic_name": "ANSWER-EQ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "project the EQ observation into the answer-domain representation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "surface_source": "answer-eq",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.68cd2a8a7561ea30",
+      "semantic_name": "ELAPSED-NS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive elapsed nanoseconds from current monotonic observation and a start instant",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "elapsed-ns",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.6bee3f0f3cf1e72f",
+      "semantic_name": "OBSERVATION?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "recognize the public observation record shape",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "observation?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.6c7052cd7dd9e6cd",
+      "semantic_name": "EVIDENCE-OUTCOME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "extract the outcome field from an evidence record",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "evidence-outcome",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.73dc85d21ad84af2",
+      "semantic_name": "DEADLINE-REACHED?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "compare the current monotonic observation with a deadline",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "deadline-reached?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.783a01767dd57ba5",
+      "semantic_name": "ISQRT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "integer square root over the admitted integer domain",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "isqrt",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.7faa68ae075ffbfb",
+      "semantic_name": "CLAIM?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "recognize the public claim record shape",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "claim?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.8145864ef0ed7d4e",
+      "semantic_name": "PROCESS-RUN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HOST-POLICY-WRAPPER",
+      "behavior": "public process result policy: interpret raw captured bytes as UTF-8 and return exit/stdout/stderr language values",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "surface_source": "process-run",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.85d9dcce9fa87ce4",
+      "semantic_name": "WRITE-FILE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HOST-POLICY-WRAPPER",
+      "behavior": "public file-write policy: encode language text to bytes and return the supplied text after success",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "surface_source": "write-file",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.86e5cba8ffc91733",
+      "semantic_name": "INTENT-GOAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "extract the goal carried by an intent",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "intent-goal",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.8918e9b980da658f",
+      "semantic_name": "CHECK-CONFLICT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "test whether adding knowledge would contradict an already provable opposite",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "check-conflict?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.8bf60cc2d530d2ad",
+      "semantic_name": "VEC->LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR",
+      "behavior": "project a persistent vector to a list",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "surface_source": "vec->list",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.8c9b2d30a9bdc15f",
+      "semantic_name": "THIRD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 3 of a linear sequence",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "surface_source": "third",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.92a5cc385f6a1c16",
+      "semantic_name": "PROVE-GOAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "prove one goal against rules while threading substitutions and proof evidence",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "prove-goal",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.94d21dd37b9ca06d",
+      "semantic_name": "MAP-EMPTY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP",
+      "behavior": "construct the empty persistent map",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "surface_source": "map-empty",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.9e0ca504a0754d16",
+      "semantic_name": "MODULE-KNOWN?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "distinguish a known module from a never-known module even when its current clause list is empty",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "module-known?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.9f3f9b84470ccbd6",
+      "semantic_name": "REASON-IN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "perform backward reasoning in an explicit knowledge module",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "reason-in",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.a18f2cb10b7b4fb4",
+      "semantic_name": "MAP-CONTAINS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP",
+      "behavior": "test key membership in a persistent map",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "surface_source": "map-contains?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.a370d7f44e604932",
+      "semantic_name": "EXPLAIN-PROOF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "render/emit the structure of a proof tree",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "explain-proof",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.a7270e4f5fa11616",
+      "semantic_name": "TIMEZONE-OFFSET-SECONDS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "extract the offset seconds from an accepted timezone configuration",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "timezone-offset-seconds",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.a82c20c10b2f860f",
+      "semantic_name": "DEADLINE-AFTER-NS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "construct a deadline by adding a delta to the current monotonic observation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "deadline-after-ns",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.a83854bf7c8992f0",
+      "semantic_name": "SOURCE-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "classify proof provenance as fact or rule source",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "source-of",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.a8c698d2c67848d1",
+      "semantic_name": "DESCRIBE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "describe an item from the explicit knowledge module/fact projection",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "describe",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.aa5326e045b7b1ec",
+      "semantic_name": "FORWARD-IN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-REASONING",
+      "behavior": "perform forward inference in an explicit knowledge module",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "surface_source": "forward-in",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.aa8982c177311d6b",
+      "semantic_name": "TCP-READ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HOST-POLICY-WRAPPER",
+      "behavior": "public TCP read policy: decode raw connection bytes through language-owned UTF-8 semantics",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "surface_source": "tcp-read",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.afd746f9a01834e7",
+      "semantic_name": "VAR?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION",
+      "behavior": "recognize the explicit logic-variable representation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "surface_source": "var?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.b3b801c42234477d",
+      "semantic_name": "READ-FILE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HOST-POLICY-WRAPPER",
+      "behavior": "public file-read policy: decode host bytes using language-owned UTF-8 semantics",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "surface_source": "read-file",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.b45a9f06813de008",
+      "semantic_name": "DEADLINE-REACHED-AT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "pure predicate deciding whether a supplied instant reached a supplied deadline",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "deadline-reached-at?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.b4858b8a6fb392f3",
+      "semantic_name": "CLAIM-STATEMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "extract the statement carried by a claim",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "claim-statement",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.b6987b57ed285f51",
+      "semantic_name": "TIMEZONE-DETECT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "interpret raw host timezone declarations with language-owned precedence and result shape",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "timezone-detect",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.b728b963d6645d5f",
+      "semantic_name": "VEC-FROM-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-VECTOR",
+      "behavior": "construct a persistent vector from a list",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "surface_source": "vec-from-list",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.b7ef26f19ad23141",
+      "semantic_name": "UNIX-TIME-OBSERVATION->UTC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "validate a tagged raw Unix-time observation and convert it to UTC data",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "unix-time-observation->utc",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.b8de2f80376cea57",
+      "semantic_name": "GENSYM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "construct a fresh symbol distinct from previously generated symbols",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "gensym",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.bb3d4aec8b3f0fc6",
+      "semantic_name": "ANSWER-ATOM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "project the ATOM observation into the answer-domain representation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "surface_source": "answer-atom",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.bbadaec4a9934f10",
+      "semantic_name": "SUPPORTING-EVIDENCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "select evidence that supports a requested claim reference/outcome relation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "supporting-evidence",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.bcce8f1285154f67",
+      "semantic_name": "NUMBER->STRING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "render a number into its language text representation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "number->string",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.bd077936fac29859",
+      "semantic_name": "FOURTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 4 of a linear sequence",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "surface_source": "fourth",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.be78437329138581",
+      "semantic_name": "INTENT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "recognize the public intent record shape",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "intent?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.c4054f017744cadb",
+      "semantic_name": "OBSERVATION-STATEMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "extract the statement carried by an observation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "observation-statement",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.c517064fe689e3c7",
+      "semantic_name": "MAP->LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PERSISTENT-MAP",
+      "behavior": "project persistent-map entries into a language list representation",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "surface_source": "map->list",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.ca9d93fcb15f9a61",
+      "semantic_name": "IDENTITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-DERIVED",
+      "behavior": "return the supplied value unchanged",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "surface_source": "identity",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.ccc0c69f044d1c8f",
+      "semantic_name": "EVIDENCE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "recognize the public evidence record shape",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "evidence?",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.d8d746b6ff5ecd56",
+      "semantic_name": "MILLISECONDS-FROM-NANOSECONDS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive whole milliseconds from a non-negative nanosecond count",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "milliseconds-from-nanoseconds",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.d97702ee09ec7611",
+      "semantic_name": "WALK",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIFICATION",
+      "behavior": "dereference a logic variable through a substitution",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "surface_source": "walk",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.da781d31a51d6b8f",
+      "semantic_name": "EVIDENCE-METHOD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC",
+      "behavior": "extract the method field from an evidence record",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "surface_source": "evidence-method",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.dc43ea15bc82cfb2",
+      "semantic_name": "TCP-LISTEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HOST-POLICY-WRAPPER",
+      "behavior": "public listen policy: choose the language default bind address over the raw listen mechanism",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "surface_source": "tcp-listen",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.ed91c7da3b24cbff",
+      "semantic_name": "UTC-FROM-UNIX",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "pure conversion from exact Unix seconds/nanoseconds to UTC calendar data",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "utc-from-unix",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.f0797632a6cf7709",
+      "semantic_name": "ANSWER-AND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ANSWER-ALGEBRA",
+      "behavior": "combine two answer values by answer-domain conjunction",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "surface_source": "answer-and",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.registry.faea1cc5716dfa02",
+      "semantic_name": "INTERNET-TIME-SYNC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SEMANTIC-REGISTRY-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TIME-CALENDAR-DEADLINE",
+      "behavior": "interpret a raw bounded NTP observation into the public accepted/rejected internet-time result",
+      "provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "surface_source": "internet-time-sync",
+      "law_status": "SOURCE-OWNED-UNPLACED",
+      "ratified_resident": false
+    },
     {
       "stable_id": "d9.review.0364ee983da2300d",
       "semantic_name": "OPEN",
