@@ -19,7 +19,6 @@ DOMAIN_SURFACES=ROOT/"crates"/"sens"/"src"/"domain_surface_registry_generated.rs
 SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
 NECESSARY=ROOT/"crates"/"sens"/"src"/"eval"/"necessary_forms_generated.rs"
-TEXT7=ROOT/"crates"/"sens"/"src"/"text7_projection_generated.rs"
 
 class ThreePassMigrationTests(unittest.TestCase):
     @classmethod
@@ -28,61 +27,85 @@ class ThreePassMigrationTests(unittest.TestCase):
         cls.legacy,cls.my,cls.upper=mod.build_three_pass_maps(
             data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY
         )
-        cls.text7=mod.build_text7(data,TEXT7)
+
+    def resolver(self):
+        return mod.Resolver(self.legacy,self.my,self.upper)
 
     def migrate(self,source):
-        resolver=mod.Resolver(self.legacy,self.my,self.upper)
-        return mod.migrate_file(source,resolver,self.text7),resolver
+        resolver=self.resolver()
+        return mod.migrate_file(source,resolver),resolver
 
     def test_empty_list_is_compact_d3_empty(self):
         out,_=self.migrate("()\n")
         self.assertEqual(out,"000\n")
 
     def test_nonempty_list_uses_d2_structure(self):
-        out,_=self.migrate("(CAR x)\n")
-        self.assertTrue(out.startswith("10 100 00 "))
-        self.assertTrue(out.endswith(" 01\n"))
+        out,_=self.migrate("(CAR ())\n")
+        self.assertEqual(out,"10 100 00 000 01\n")
 
     def test_pass1_legacy_sid8_car(self):
-        out,resolver=self.migrate("(00000101 x)\n")
-        self.assertTrue(out.startswith("10 100 00 "))
+        out,resolver=self.migrate("(00000101 ())\n")
+        self.assertEqual(out,"10 100 00 000 01\n")
         self.assertEqual(resolver.counts["pass1-sens8"],1)
 
     def test_pass2_my_lisp_car(self):
-        out,resolver=self.migrate("(car x)\n")
-        self.assertTrue(out.startswith("10 100 00 "))
+        out,resolver=self.migrate("(car ())\n")
+        self.assertEqual(out,"10 100 00 000 01\n")
         self.assertEqual(resolver.counts["pass2-my-lisp"],1)
 
     def test_pass2_my_lisp_predicate_alias(self):
-        out,resolver=self.migrate("(atom? x)\n")
-        self.assertTrue(out.startswith("10 010 00 "))
+        out,resolver=self.migrate("(atom? ())\n")
+        self.assertEqual(out,"10 010 00 000 01\n")
         self.assertEqual(resolver.counts["pass2-my-lisp"],1)
 
-    def test_pass2_def_normalizes_to_define(self):
-        out,resolver=self.migrate("(def f (lambda (x) x))\n")
-        self.assertTrue(out.startswith("10 0011 00 "))
-        self.assertGreaterEqual(resolver.counts["pass2-my-lisp"],2)
+    def test_pass2_def_and_lambda_resolve_as_heads_without_using_d7(self):
+        resolver=self.resolver()
+        def_bits,_=resolver.head(mod.Tok("ATOM","def",0))
+        lambda_bits,_=resolver.head(mod.Tok("ATOM","lambda",0))
+        self.assertEqual(def_bits,["0011"])
+        self.assertEqual(lambda_bits,["0010"])
+        self.assertEqual(resolver.counts["pass2-my-lisp"],2)
 
     def test_pass3_lisp15_car(self):
-        out,resolver=self.migrate("(CAR x)\n")
-        self.assertTrue(out.startswith("10 100 00 "))
+        out,resolver=self.migrate("(CAR ())\n")
+        self.assertEqual(out,"10 100 00 000 01\n")
         self.assertEqual(resolver.counts["pass3-lisp15"],1)
 
     def test_pass3_lisp15_arithmetic(self):
-        out,resolver=self.migrate("(PLUS x y)\n")
-        self.assertTrue(out.startswith("10 01010 00 "))
+        out,resolver=self.migrate("(PLUS () ())\n")
+        self.assertEqual(out,"10 01010 00 000 00 000 01\n")
         self.assertEqual(resolver.counts["pass3-lisp15"],1)
 
     def test_comments_disappear(self):
-        a,_=self.migrate("; top\n(CAR #| nested #| inner |# body |# x)\n")
-        b,_=self.migrate("(CAR x)\n")
+        a,_=self.migrate("; top\n(CAR #| nested #| inner |# body |# ())\n")
+        b,_=self.migrate("(CAR ())\n")
         self.assertEqual(a,b)
 
-    def test_unknown_function_never_becomes_text7(self):
+    def test_unknown_function_never_becomes_data(self):
         with self.assertRaisesRegex(mod.MigrationError,"unknown executable head"):
-            self.migrate("(totally-unknown-function x)\n")
+            self.migrate("(totally-unknown-function ())\n")
 
-    def test_numeric_literal_blocks_instead_of_becoming_text(self):
+    def test_non_function_atom_blocks_until_d7_role_is_known(self):
+        with self.assertRaisesRegex(mod.MigrationError,"D7/Text7 is deferred"):
+            self.migrate("(CAR x)\n")
+
+    def test_full_file_scan_counts_all_three_pass_heads_before_d7(self):
+        resolver=self.resolver()
+        diagnostics=mod.scan_file(
+            "(00000101 x)\n(car y)\n(PLUS a b)\n",
+            resolver,
+        )
+        self.assertEqual(resolver.counts["pass1-sens8"],1)
+        self.assertEqual(resolver.counts["pass2-my-lisp"],1)
+        self.assertEqual(resolver.counts["pass3-lisp15"],1)
+        self.assertEqual(len(diagnostics),4)
+        self.assertTrue(all("D7/Text7 is deferred" in d["reason"] for d in diagnostics))
+
+    def test_string_blocks_until_d7_role_is_known(self):
+        with self.assertRaisesRegex(mod.MigrationError,"deferred D7/Text7"):
+            self.migrate('(CAR "text")\n')
+
+    def test_numeric_literal_blocks_for_number_framing(self):
         with self.assertRaisesRegex(mod.MigrationError,"Number framing"):
             self.migrate("(CAR 25)\n")
 
@@ -90,19 +113,25 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,_=self.migrate("'()\n")
         self.assertEqual(out,"10 001 00 000 01\n")
 
-    def test_dotted_pair_uses_d2_dot(self):
-        out,_=self.migrate("'(a . b)\n")
+    def test_dotted_pair_uses_d2_dot_without_d7(self):
+        out,_=self.migrate("'(000 . 000)\n")
         self.assertIn(" 11 ",out)
         self.assertRegex(out,r"^[01\s]+$")
 
     def test_output_is_only_exact_width_binary_words(self):
-        out,_=self.migrate("(CONS x y)\n")
+        out,_=self.migrate("(CONS () ())\n")
         self.assertRegex(out,r"^[01\s]+$")
         self.assertTrue(all(1<=len(word)<=8 for word in out.split()))
 
     def test_extensionless_output_name(self):
         self.assertEqual(str(mod.extensionless(Path("lib/foo.lisp"))),"lib/foo")
         self.assertEqual(str(mod.extensionless(Path("lib/sse4.1.lisp"))),"lib/sse4.1")
+
+    def test_three_pass_tool_contains_no_text7_encoder(self):
+        source=SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("build_text7",source)
+        self.assertNotIn("text7_encode",source)
+        self.assertNotIn("--text7",source)
 
 if __name__=="__main__":
     unittest.main()

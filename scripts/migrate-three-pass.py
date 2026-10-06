@@ -13,7 +13,8 @@ Hard rules:
 - Non-empty list structure uses D2: 10 open, 00 separator, 11 dot, 01 close.
 - Unknown executable heads FAIL CLOSED; they are never silently emitted as D7 text.
 - Comments disappear before migration.
-- Ordinary spelling/data uses pinned Text7 cells.
+- D7/Text7 is intentionally NOT used in these three passes.
+- Unclassified atoms and strings fail closed for a later text-vs-variable pass.
 - Decimal/rational numeric literals fail closed until the Number source framing law
   is admitted for the exact-width binary source.
 - Output is extensionless and contains only 0/1 plus ASCII whitespace.
@@ -159,7 +160,7 @@ def tokenize(source: str) -> list[Tok]:
             out.append(Tok("STRING",source[start:i],start))
             continue
         start=i
-        while i<n and (not source[i].isspace()) and source[i] not in "()'\"\`,": 
+        while i<n and (not source[i].isspace()) and source[i] not in "()'\"`,": 
             i+=1
         text=source[start:i]
         if text==".":
@@ -330,56 +331,6 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
     upper={name:ident for name,ident in residents.items()}
     return legacy,my,upper
 
-def extract_projection(text: str,name: str):
-    start=text.find(f"pub(crate) const {name}")
-    if start<0: raise MigrationError(f"missing Text7 projection {name}")
-    end=text.find("];",start)
-    sec=text[start:end]
-    out={}
-    rx=re.compile(r'^\s*\(("(?:\\.|[^"\\])*"),\s*Some\(&\[([^\]]*)\]\)\)',re.M)
-    for m in rx.finditer(sec):
-        spelling=ast.literal_eval(m.group(1))
-        vals=tuple(int(x.strip(),16) for x in m.group(2).split(",") if x.strip())
-        out[spelling]=vals
-    if not out: raise MigrationError(f"empty Text7 projection {name}")
-    return out
-
-def build_text7(data, projection_path: Path):
-    text=projection_path.read_text(encoding="utf-8")
-    slp=extract_projection(text,"SA_SLP1_ENCODE")
-    uk=extract_projection(text,"UK_ENCODE")
-    d7=data["domains"]["D7"]["residents"]
-    labels={label:bits for bits,label in d7.items()}
-    candidates={}
-    for source in (slp,uk):
-        for spelling,vals in source.items():
-            candidates.setdefault(spelling,tuple(f"{v:07b}" for v in vals))
-    for n in range(10):
-        candidates[str(n)]=(labels[f"text.digit.{n}"],)
-
-    # Longest-match projection, indexed by first source character. This keeps
-    # multi-character cells (e.g. Ukrainian дж/дз) deterministic without
-    # rescanning the full table for every character in large source trees.
-    buckets={}
-    for key,cells in candidates.items():
-        buckets.setdefault(key[0],[]).append((key,cells))
-    for rows in buckets.values():
-        rows.sort(key=lambda x:(-len(x[0]),x[0]))
-    return buckets
-
-def text7_encode(spelling: str,candidates,tok: Tok):
-    words=[]
-    i=0
-    while i<len(spelling):
-        rows=candidates.get(spelling[i],())
-        for key,cells in rows:
-            if spelling.startswith(key,i):
-                words.extend(cells); i+=len(key); break
-        else:
-            ch=spelling[i]
-            raise MigrationError(f"Text7 cannot encode {ch!r} U+{ord(ch):04X}",tok)
-    return words
-
 class Resolver:
     def __init__(self,legacy,my,upper):
         self.legacy=legacy
@@ -406,28 +357,36 @@ class Resolver:
             return [self.upper[t][0]],"pass3-lisp15"
         raise MigrationError(f"unknown executable head after 3 passes: {t!r}",tok)
 
-def encode_atom_data(node: Atom,text7):
+def encode_atom_data(node: Atom):
     t=node.tok.text
-    if NUMERIC_RE.fullmatch(t):
-        raise MigrationError(
-            f"numeric literal {t!r} awaits admitted Number framing; refusing to encode it as Text7",
-            node.tok,
-        )
+    # Exact-width binary source identity wins before decimal-looking syntax.
+    # Thus 000 is D3 EMPTY/domain data here, not decimal zero.
     if 1<=len(t)<=8 and set(t)<=set("01"):
         return [t]
-    return text7_encode(t,text7,node.tok)
+    if NUMERIC_RE.fullmatch(t):
+        raise MigrationError(
+            f"numeric literal {t!r} awaits admitted Number framing; refusing to guess its role",
+            node.tok,
+        )
+    raise MigrationError(
+        f"unclassified non-function atom {t!r}; D7/Text7 is deferred until text-vs-variable classification",
+        node.tok,
+    )
 
-def encode_string(node: String,text7):
-    return text7_encode(node.tok.text,text7,node.tok)
+def encode_string(node: String):
+    raise MigrationError(
+        "string/text datum requires the deferred D7/Text7 classification pass",
+        node.tok,
+    )
 
-def encode_clause(node,resolver,text7):
+def encode_clause(node,resolver):
     """COND clause is structural: the clause itself is not a function call.
 
     Nested list expressions inside it remain executable. Bare atoms at clause
     level (e.g. t) are data/control values, never function heads.
     """
     if not isinstance(node,ListNode):
-        return encode(node,resolver,text7,quoted=False)
+        return encode(node,resolver,quoted=False)
     if not node.items and node.tail is None:
         return [D3_EMPTY]
     words=[D2_OPEN]
@@ -435,16 +394,16 @@ def encode_clause(node,resolver,text7):
         if idx:
             words.append(D2_SEP)
         if isinstance(item,ListNode):
-            words.extend(encode(item,resolver,text7,quoted=False))
+            words.extend(encode(item,resolver,quoted=False))
         else:
-            words.extend(encode(item,resolver,text7,quoted=True))
+            words.extend(encode(item,resolver,quoted=True))
     if node.tail is not None:
         words.append(D2_DOT)
-        words.extend(encode(node.tail,resolver,text7,quoted=True))
+        words.extend(encode(node.tail,resolver,quoted=True))
     words.append(D2_CLOSE)
     return words
 
-def encode(node,resolver,text7,quoted=False):
+def encode(node,resolver,quoted=False):
     if isinstance(node,ListNode):
         if not node.items and node.tail is None:
             return [D3_EMPTY]
@@ -464,40 +423,124 @@ def encode(node,resolver,text7,quoted=False):
 
             # Explicit QUOTE: every datum is data, never an executable head.
             if not quoted and head_bits=="001":
-                words.extend(encode(item,resolver,text7,quoted=True))
+                words.extend(encode(item,resolver,quoted=True))
                 continue
 
             # LAMBDA: first argument is the parameter-list grammar.
             if not quoted and head_bits=="0010" and idx==1:
-                words.extend(encode(item,resolver,text7,quoted=True))
+                words.extend(encode(item,resolver,quoted=True))
                 continue
 
             # DEFINE: a shorthand signature (define (f x) body) is data at the
             # signature level. A plain name is already encoded as atom data.
             if not quoted and head_bits=="0011" and idx==1 and isinstance(item,ListNode):
-                words.extend(encode(item,resolver,text7,quoted=True))
+                words.extend(encode(item,resolver,quoted=True))
                 continue
 
             # COND: each clause is a grammar container, not a call itself.
             if not quoted and head_bits=="110":
-                words.extend(encode_clause(item,resolver,text7))
+                words.extend(encode_clause(item,resolver))
                 continue
 
-            words.extend(encode(item,resolver,text7,quoted=quoted))
+            words.extend(encode(item,resolver,quoted=quoted))
 
         if node.tail is not None:
             words.append(D2_DOT)
-            words.extend(encode(node.tail,resolver,text7,quoted=True))
+            words.extend(encode(node.tail,resolver,quoted=True))
         words.append(D2_CLOSE)
         return words
 
     if isinstance(node,Quote):
-        return [D2_OPEN,"001",D2_SEP,*encode(node.value,resolver,text7,quoted=True),D2_CLOSE]
+        return [D2_OPEN,"001",D2_SEP,*encode(node.value,resolver,quoted=True),D2_CLOSE]
     if isinstance(node,String):
-        return encode_string(node,text7)
+        return encode_string(node)
     if isinstance(node,Atom):
-        return encode_atom_data(node,text7)
+        return encode_atom_data(node)
     raise TypeError(node)
+
+def _diagnostic(error: MigrationError):
+    return {
+        "reason": error.message,
+        "token": error.tok.text if error.tok else None,
+        "offset": error.tok.offset if error.tok else None,
+    }
+
+def scan_clause(node,resolver,diagnostics):
+    if not isinstance(node,ListNode):
+        scan_node(node,resolver,diagnostics,quoted=False)
+        return
+    if not node.items and node.tail is None:
+        return
+    for item in node.items:
+        if isinstance(item,ListNode):
+            scan_node(item,resolver,diagnostics,quoted=False)
+        else:
+            scan_node(item,resolver,diagnostics,quoted=True)
+    if node.tail is not None:
+        scan_node(node.tail,resolver,diagnostics,quoted=True)
+
+def scan_node(node,resolver,diagnostics,quoted=False):
+    """Traverse the full AST without D7 so every resolvable head is counted.
+
+    Data/text problems are collected instead of aborting at the first one.
+    """
+    if isinstance(node,ListNode):
+        if not node.items and node.tail is None:
+            return
+
+        head_bits=None
+        for idx,item in enumerate(node.items):
+            if idx==0 and not quoted and isinstance(item,Atom):
+                try:
+                    head,_=resolver.head(item.tok)
+                    head_bits=head[0]
+                except MigrationError as error:
+                    diagnostics.append(_diagnostic(error))
+                continue
+
+            if not quoted and head_bits=="001":
+                scan_node(item,resolver,diagnostics,quoted=True)
+                continue
+            if not quoted and head_bits=="0010" and idx==1:
+                scan_node(item,resolver,diagnostics,quoted=True)
+                continue
+            if not quoted and head_bits=="0011" and idx==1 and isinstance(item,ListNode):
+                scan_node(item,resolver,diagnostics,quoted=True)
+                continue
+            if not quoted and head_bits=="110":
+                scan_clause(item,resolver,diagnostics)
+                continue
+            scan_node(item,resolver,diagnostics,quoted=quoted)
+
+        if node.tail is not None:
+            scan_node(node.tail,resolver,diagnostics,quoted=True)
+        return
+
+    if isinstance(node,Quote):
+        scan_node(node.value,resolver,diagnostics,quoted=True)
+        return
+    if isinstance(node,String):
+        diagnostics.append(_diagnostic(MigrationError(
+            "string/text datum requires the deferred D7/Text7 classification pass",
+            node.tok,
+        )))
+        return
+    if isinstance(node,Atom):
+        try:
+            encode_atom_data(node)
+        except MigrationError as error:
+            diagnostics.append(_diagnostic(error))
+        return
+    raise TypeError(node)
+
+def scan_file(source: str,resolver):
+    stripped=strip_comments(source)
+    tokens=tokenize(stripped)
+    forms=Parser(tokens).parse_program()
+    diagnostics=[]
+    for form in forms:
+        scan_node(form,resolver,diagnostics,quoted=False)
+    return diagnostics
 
 def line_col(source: str,offset: int):
     line=source.count("\n",0,offset)+1
@@ -514,14 +557,14 @@ def source_files(root: Path):
 def extensionless(rel: Path):
     return rel.with_suffix("")
 
-def migrate_file(source: str,resolver,text7):
+def migrate_file(source: str,resolver):
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
     forms=Parser(tokens).parse_program()
     all_words=[]
     for i,form in enumerate(forms):
         if i: all_words.append(D2_SEP)
-        all_words.extend(encode(form,resolver,text7,quoted=False))
+        all_words.extend(encode(form,resolver,quoted=False))
     text=" ".join(all_words)
     if text: text+="\n"
     if text and not re.fullmatch(r"[01\s]+",text):
@@ -539,7 +582,6 @@ def main():
     ap.add_argument("--semantic-generated",type=Path,required=True)
     ap.add_argument("--semantic-registry",type=Path,required=True)
     ap.add_argument("--necessary-forms",type=Path,required=True)
-    ap.add_argument("--text7",type=Path,required=True)
     ap.add_argument("--report",type=Path,required=True)
     args=ap.parse_args()
 
@@ -547,7 +589,6 @@ def main():
     legacy,my,upper=build_three_pass_maps(
         data,args.domain_surfaces,args.semantic_generated,args.semantic_registry,args.necessary_forms
     )
-    text7=build_text7(data,args.text7)
     args.out.mkdir(parents=True,exist_ok=True)
 
     rows=[]
@@ -569,7 +610,37 @@ def main():
         try:
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
-            output=migrate_file(source,resolver,text7)
+            diagnostics=scan_file(source,resolver)
+            for k,v in resolver.counts.items():
+                totals[k]+=v
+
+            if diagnostics:
+                signal.alarm(0)
+                blocked+=1
+                unresolved=[]
+                for diag in diagnostics:
+                    item=dict(diag)
+                    if item.get("offset") is not None:
+                        line,col=line_col(source,item["offset"])
+                        item.update({"line":line,"column":col})
+                    unresolved.append(item)
+                first=unresolved[0]
+                rows.append({
+                    "path":str(rel),
+                    "status":"blocked",
+                    "reason":f"{len(unresolved)} unresolved pre-D7 item(s)",
+                    "token":first.get("token"),
+                    "line":first.get("line"),
+                    "column":first.get("column"),
+                    "passes":resolver.counts,
+                    "unresolved":unresolved,
+                })
+                continue
+
+            # Encoding is a second strict phase. It must not discover anything
+            # the full-file scan failed to classify.
+            output_resolver=Resolver(legacy,my,upper)
+            output=migrate_file(source,output_resolver)
             signal.alarm(0)
             if not output.strip():
                 rows.append({"path":str(rel),"status":"empty","passes":resolver.counts})
@@ -579,7 +650,6 @@ def main():
             target.write_text(output,encoding="ascii")
             destinations[dest]=str(rel)
             written+=1
-            for k,v in resolver.counts.items(): totals[k]+=v
             rows.append({"path":str(rel),"output":str(dest),"status":"written","passes":resolver.counts})
         except MigrationError as e:
             signal.alarm(0)
@@ -605,13 +675,14 @@ def main():
         },
         "structure":{"empty":"000","open":"10","separator":"00","dot":"11","close":"01"},
         "output_naming":"source .lisp suffix removed; no new extension",
+        "d7_policy":"deferred: no D7/Text7 encoding occurs in passes 1-3; unresolved atoms/strings block",
         "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
         "files":rows,
     }
     args.report.parent.mkdir(parents=True,exist_ok=True)
     args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps(report["summary"],ensure_ascii=False))
-    return 0 if written else 2
+    return 0
 
 if __name__=="__main__":
     raise SystemExit(main())

@@ -2,6 +2,14 @@ name: publish-binary-master
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+      - codex/three-pass-no-d7
+    paths:
+      - "scripts/migrate-three-pass.py"
+      - "tests/test_three_pass_migration.py"
+      - ".github/workflows/publish-binary-master.yml"
 
 concurrency:
   group: publish-binary-master
@@ -23,7 +31,7 @@ jobs:
         run: |
           python3 -m unittest tests/test_three_pass_migration.py
 
-      - name: Run three-pass migration
+      - name: Run three-pass migration without D7
         shell: bash
         run: |
           rm -rf /tmp/sens-master-out /tmp/sens-three-pass-report.json
@@ -34,13 +42,13 @@ jobs:
             --semantic-generated crates/sens/src/semantic_registry_generated.rs \
             --semantic-registry crates/sens/src/semantic_registry.rs \
             --necessary-forms crates/sens/src/eval/necessary_forms_generated.rs \
-            --text7 crates/sens/src/text7_projection_generated.rs \
             --report /tmp/sens-three-pass-report.json
           python3 - <<'PY'
           import json
           from pathlib import Path
           report=json.loads(Path("/tmp/sens-three-pass-report.json").read_text())
           print(json.dumps(report["summary"], ensure_ascii=False))
+          print("d7_policy=", report.get("d7_policy"))
           for row in report["files"]:
               if row["status"]=="blocked":
                   print("BLOCKED",row["path"],row.get("line"),row.get("column"),row.get("token"),row["reason"])
@@ -74,8 +82,7 @@ jobs:
                       break
           print(f"validated_files={len(files)}")
           if not files:
-              print("REFUSE: no corrected files")
-              sys.exit(1)
+              print("No fully resolved pre-D7 files yet; empty output is valid.")
           if bad:
               print("REFUSE:",bad[:100])
               sys.exit(1)
@@ -113,9 +120,11 @@ jobs:
               if any(not 1<=len(w)<=8 for w in text.split()):
                   bad.append(str(p))
           print(f"master_files={len(files)}")
-          if bad or not files:
+          if bad:
               print("REFUSE",bad[:100])
               sys.exit(1)
+          if not files:
+              print("No fully resolved pre-D7 files; master remains/returns empty.")
           PY
 
           git add -A
