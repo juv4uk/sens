@@ -112,6 +112,16 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,_=self.migrate("(CONS x y)\n")
         self.assertEqual(out,"10 111 00 x 00 y 01\n")
 
+    def test_extensionless_collision_gets_file_suffix_without_extension(self):
+        plan=mod.plan_extensionless_destinations([
+            Path("tasks.lisp"),
+            Path("tasks/pending.lisp"),
+            Path("foo.lisp"),
+        ])
+        self.assertEqual(str(plan[Path("tasks.lisp")]),"tasks__file")
+        self.assertEqual(str(plan[Path("tasks/pending.lisp")]),"tasks/pending")
+        self.assertEqual(str(plan[Path("foo.lisp")]),"foo")
+
     def test_extensionless_output_name(self):
         self.assertEqual(str(mod.extensionless(Path("lib/foo.lisp"))),"lib/foo")
         self.assertEqual(str(mod.extensionless(Path("lib/sse4.1.lisp"))),"lib/sse4.1")
