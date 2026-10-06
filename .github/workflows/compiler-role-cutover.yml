@@ -48,9 +48,10 @@ concurrency:
 
 jobs:
   cutover:
-    # Rust/Python control-plane gate: use GitHub-hosted CPU capacity.
-    # Do not reserve GPU runners or depend on an online local guix label.
-    runs-on: ubuntu-latest
+    # Hosted runners are unavailable for this private repository.
+    # Use the known-live local GPU-labelled host, while keeping Rust/Python
+    # control-plane CPU pressure bounded below.
+    runs-on: [self-hosted, guix]
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
