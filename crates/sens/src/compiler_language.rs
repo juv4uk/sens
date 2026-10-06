@@ -59,6 +59,7 @@ const PROGRAM_VALUE_NAME: &str = "__compiler_program_data";
 const D3_PROOF_VALUE_NAME: &str = "__compiler_d3_proof";
 const D4_PROOF_VALUE_NAME: &str = "__compiler_d4_proof";
 const PROVENANCE_VALUE_NAME: &str = "__compiler_program_provenance";
+const PROGRAM_DIGEST_VALUE_NAME: &str = "__compiler_program_wire_sha256";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 
@@ -374,6 +375,27 @@ fn compiler_program_call() -> Expr {
     }
 }
 
+fn compiler_program_artifact_call() -> Expr {
+    Expr {
+        kind: ExprKind::List(Rc::from(
+            vec![
+                symbol("compiler-compile-program-artifact"),
+                symbol(SHAPE_OR_EMPTY_MECHANISM_NAME),
+                symbol(SHAPE_MECHANISM_NAME),
+                symbol(PROGRAM_VALUE_NAME),
+                symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
+                symbol(D3_PROOF_VALUE_NAME),
+                symbol(D4_PROOF_VALUE_NAME),
+                symbol(PROVENANCE_VALUE_NAME),
+                symbol(PROGRAM_DIGEST_VALUE_NAME),
+            ]
+            .into_boxed_slice(),
+        )),
+        span: Span::default(),
+    }
+}
+
 fn decode_language_lowering_role(
     value: &Value,
 ) -> Result<Option<CompilerLoweringRole>, LanguageError> {
@@ -443,16 +465,10 @@ pub fn compiler_lowering_role_from_sens(
     decode_language_lowering_role(&result)
 }
 
-/// Execute the SENS-written recursive compiler traversal over canonical
-/// program-data.  The host adapter supplies representation mechanisms and
-/// provenance values once; it does not walk nodes or select compiler roles.
-///
-/// Return shape is owned by `lib/compiler-nucleus.lisp`:
-/// `(D1-success-bit request...)`.
-pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, LanguageError> {
-    let mut session = Session::default();
-    load_core_library(&mut session)?;
-
+fn install_compiler_program_bindings(
+    session: &mut Session,
+    program: Value,
+) -> Result<(), LanguageError> {
     session
         .environment
         .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
@@ -483,9 +499,52 @@ pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, Lang
             Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
         ]),
     );
+    Ok(())
+}
 
+/// Execute the SENS-written recursive compiler traversal over canonical
+/// program-data.  The host adapter supplies representation mechanisms and
+/// provenance values once; it does not walk nodes or select compiler roles.
+///
+/// Return shape is owned by `lib/compiler-nucleus.lisp`:
+/// `(D1-success-bit request...)`.
+pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, LanguageError> {
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+    install_compiler_program_bindings(&mut session, program)?;
     eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
+}
+
+/// Compose one backend-neutral whole-program artifact inside SENS.
+///
+/// `program_wire_sha256` is mechanical transport provenance for the exact
+/// canonical SW\\x01 bytes.  The host does not choose, iterate or serialize
+/// semantic requests; SENS performs traversal and artifact composition in one
+/// call.
+pub fn compiler_program_artifact_from_sens(
+    program: Value,
+    program_wire_sha256: &str,
+) -> Result<Value, LanguageError> {
+    if program_wire_sha256.len() != 64
+        || !program_wire_sha256
+            .bytes()
+            .all(|byte| byte.is_ascii_hexdigit())
+    {
+        return Err(invalid_projection(
+            "compiler program wire digest must be exactly 64 hexadecimal characters",
+        ));
+    }
+
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+    install_compiler_program_bindings(&mut session, program)?;
+    session.environment.define(
+        PROGRAM_DIGEST_VALUE_NAME,
+        Value::String(Rc::from(program_wire_sha256)),
+    );
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
 }
 
 /// Backward-compatible three-role view used by the already-landed selector/pair
