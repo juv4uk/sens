@@ -1,0 +1,452 @@
+{
+  "schema": "d8-v2-overflow-ledger/v1",
+  "status": "PRESERVED-NOT-DELETED",
+  "authority": "#3953",
+  "selected_inventory": "knowledge/d8-v2-semantic-inventory.json",
+  "overflow_count": 34,
+  "rule": "Overflow means not selected in the first dense 256 candidate inventory. It is not deletion, falsification, or permanent exclusion.",
+  "rows": [
+    {
+      "semantic_name": "COMPILE-FILE",
+      "decision": "HOLDOUT",
+      "reason": "Host/resource/tooling boundary is weaker than kept Core-semantic candidates in the first dense 256 cut.",
+      "source_provenance": [
+        "Lisp 1.5 / Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00000011",
+      "category": "system",
+      "behavior": "compile a whole expression stream into executable code",
+      "parent_d6": "000000"
+    },
+    {
+      "semantic_name": "OPEN",
+      "decision": "HOLDOUT",
+      "reason": "Host/resource/tooling boundary is weaker than kept Core-semantic candidates in the first dense 256 cut.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00000100",
+      "category": "stream",
+      "behavior": "open a named file or stream object for reading or writing",
+      "parent_d6": "000001"
+    },
+    {
+      "semantic_name": "CLOSE",
+      "decision": "HOLDOUT",
+      "reason": "Host/resource/tooling boundary is weaker than kept Core-semantic candidates in the first dense 256 cut.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00000101",
+      "category": "stream",
+      "behavior": "close an open stream and release its resource",
+      "parent_d6": "000001"
+    },
+    {
+      "semantic_name": "WITH-OPEN-FILE",
+      "decision": "HOLDOUT",
+      "reason": "Host/resource/tooling boundary is weaker than kept Core-semantic candidates in the first dense 256 cut.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00000110",
+      "category": "stream",
+      "behavior": "open, bind lexically and close on scope exit",
+      "parent_d6": "000001"
+    },
+    {
+      "semantic_name": "DRIBBLE",
+      "decision": "HOLDOUT",
+      "reason": "Host/resource/tooling boundary is weaker than kept Core-semantic candidates in the first dense 256 cut.",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00000111",
+      "category": "stream",
+      "behavior": "tee the console input/output transcript into a file",
+      "parent_d6": "000001"
+    },
+    {
+      "semantic_name": "APPLY",
+      "decision": "LOWER-COLLISION-HOLDOUT",
+      "reason": "Lower-domain semantic-name collision; hold out until exact semantic identity/refinement is resolved.",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00001100",
+      "category": "abstraction",
+      "behavior": "apply a function to a computed argument list",
+      "parent_d6": "000011"
+    },
+    {
+      "semantic_name": "COMPOSE",
+      "decision": "LOWER-COLLISION-HOLDOUT",
+      "reason": "Lower-domain semantic-name collision; hold out until exact semantic identity/refinement is resolved.",
+      "source_provenance": [
+        "Functional Lisp tradition",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00001101",
+      "category": "abstraction",
+      "behavior": "build the mathematical composition of two functions",
+      "parent_d6": "000011"
+    },
+    {
+      "semantic_name": "FFI-CALL",
+      "decision": "HOLDOUT",
+      "reason": "Host/resource/tooling boundary is weaker than kept Core-semantic candidates in the first dense 256 cut.",
+      "source_provenance": [
+        "Lisp Machine FFI",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00001111",
+      "category": "abstraction",
+      "behavior": "call a foreign procedure across a typed ABI boundary",
+      "parent_d6": "000011"
+    },
+    {
+      "semantic_name": "THE",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00010010",
+      "category": "special-form",
+      "behavior": "declare a value's type for compilation without checking",
+      "parent_d6": "000100"
+    },
+    {
+      "semantic_name": "ARGLIST",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00010100",
+      "category": "special-form",
+      "behavior": "access the evaluated variadic argument list",
+      "parent_d6": "000101"
+    },
+    {
+      "semantic_name": "&WHOLE",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00010111",
+      "category": "special-form",
+      "behavior": "bind the entire original argument list",
+      "parent_d6": "000101"
+    },
+    {
+      "semantic_name": "GENERATE-EXPANSION",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00011000",
+      "category": "macro",
+      "behavior": "the macro's own one-step expansion function",
+      "parent_d6": "000110"
+    },
+    {
+      "semantic_name": "MACRO-FUNCTION",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00011001",
+      "category": "macro",
+      "behavior": "access the expansion function of a macro name",
+      "parent_d6": "000110"
+    },
+    {
+      "semantic_name": "COMPILER-MACRO",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00011011",
+      "category": "macro",
+      "behavior": "compiler-time rewrite hook attached to an operator name",
+      "parent_d6": "000110"
+    },
+    {
+      "semantic_name": "SYMBOL-MACRO",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00011100",
+      "category": "macro",
+      "behavior": "a name-level macro that yields a form without evaluation",
+      "parent_d6": "000111"
+    },
+    {
+      "semantic_name": "DEFINE-SYMBOL-MACRO",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00011101",
+      "category": "macro",
+      "behavior": "declare a symbol macro at a name",
+      "parent_d6": "000111"
+    },
+    {
+      "semantic_name": "DEFINE-COMPILER-MACRO",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00011110",
+      "category": "macro",
+      "behavior": "declare a compiler macro at a name",
+      "parent_d6": "000111"
+    },
+    {
+      "semantic_name": "BACKQUANTIZE",
+      "decision": "HOLDOUT",
+      "reason": "Compiler/surface/meta facility held out behind stronger language-semantic candidates; provenance preserved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00011111",
+      "category": "macro",
+      "behavior": "splice a list of forms into a surrounding form",
+      "parent_d6": "000111"
+    },
+    {
+      "semantic_name": "DEFSTRUCT",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00111101",
+      "category": "state",
+      "behavior": "define a structure type with constructor and accessors",
+      "parent_d6": "001111"
+    },
+    {
+      "semantic_name": "DEFTYPE",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00111110",
+      "category": "state",
+      "behavior": "define a named type specifier",
+      "parent_d6": "001111"
+    },
+    {
+      "semantic_name": "DEFINE-CONDITION",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "00111111",
+      "category": "state",
+      "behavior": "define a named condition type for the condition system",
+      "parent_d6": "001111"
+    },
+    {
+      "semantic_name": "LDB",
+      "decision": "HOLDOUT",
+      "reason": "Machine/carrier-oriented operation held out pending Core-Math / typed-word decision.",
+      "source_provenance": [
+        "Lisp Machine",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "01000110",
+      "category": "bit-operation",
+      "behavior": "load an arbitrary bit field from an integer",
+      "parent_d6": "010001"
+    },
+    {
+      "semantic_name": "MASK-FIELD",
+      "decision": "HOLDOUT",
+      "reason": "Machine/carrier-oriented operation held out pending Core-Math / typed-word decision.",
+      "source_provenance": [
+        "Lisp Machine",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "01000111",
+      "category": "bit-operation",
+      "behavior": "extract a bit field masked to its width",
+      "parent_d6": "010001"
+    },
+    {
+      "semantic_name": "COUNT-LEADING-ZEROS",
+      "decision": "HOLDOUT",
+      "reason": "Machine/carrier-oriented operation held out pending Core-Math / typed-word decision.",
+      "source_provenance": [
+        "Lisp Machine",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "01011011",
+      "category": "bit-operation",
+      "behavior": "count leading zero bits of an integer",
+      "parent_d6": "010110"
+    },
+    {
+      "semantic_name": "ERROR-IF-NOT-ERROR",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "01100101",
+      "category": "control",
+      "behavior": "transfer control only when an error is being handled",
+      "parent_d6": "011001"
+    },
+    {
+      "semantic_name": "DEHANDLER",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "01101111",
+      "category": "control",
+      "behavior": "remove the innermost condition handler",
+      "parent_d6": "011011"
+    },
+    {
+      "semantic_name": "REDUCE",
+      "decision": "LOWER-COLLISION-HOLDOUT",
+      "reason": "Lower-domain semantic-name collision; hold out until exact semantic identity/refinement is resolved.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "01110110",
+      "category": "sequence",
+      "behavior": "fold a binary function over a sequence",
+      "parent_d6": "011101"
+    },
+    {
+      "semantic_name": "ROW-MAJOR-AREF",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "10001101",
+      "category": "sequence",
+      "behavior": "retrieve an element by row-major index",
+      "parent_d6": "100011"
+    },
+    {
+      "semantic_name": "SCHAR",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "10001111",
+      "category": "sequence",
+      "behavior": "the character denoted by a code, any type",
+      "parent_d6": "100011"
+    },
+    {
+      "semantic_name": "BOOLE",
+      "decision": "HOLDOUT",
+      "reason": "Machine/carrier-oriented operation held out pending Core-Math / typed-word decision.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "10010010",
+      "category": "bit-operation",
+      "behavior": "bitwise operation selected by a boolean operation code",
+      "parent_d6": "100100"
+    },
+    {
+      "semantic_name": "TABLESPACE",
+      "decision": "HOLDOUT",
+      "reason": "Host/resource/tooling boundary is weaker than kept Core-semantic candidates in the first dense 256 cut.",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "11100110",
+      "category": "system",
+      "behavior": "number of cells in a hash table",
+      "parent_d6": "111001"
+    },
+    {
+      "semantic_name": "COLLECTION",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "11101011",
+      "category": "set-operation",
+      "behavior": "collect the elements of a set, list or sequence",
+      "parent_d6": "111010"
+    },
+    {
+      "semantic_name": "NUNION",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "11101100",
+      "category": "set-operation",
+      "behavior": "destructive union sharing structure where possible",
+      "parent_d6": "111011"
+    },
+    {
+      "semantic_name": "NRECONC",
+      "decision": "HOLDOUT",
+      "reason": "Late/specialized capability held out by D6 preference order; not rejected or deleted.",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "historical_donor_coordinate": "11101101",
+      "category": "set-operation",
+      "behavior": "destructive reconciliation of two ordered lists",
+      "parent_d6": "111011"
+    }
+  ]
+}
