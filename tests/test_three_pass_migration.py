@@ -104,10 +104,9 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,_=self.migrate("'()\n")
         self.assertEqual(out,"10 001 00 000 01\n")
 
-    def test_dotted_pair_uses_d2_dot(self):
+    def test_dotted_pair_uses_d2_dot_and_preserves_unknown_data(self):
         out,_=self.migrate("'(a . b)\n")
-        self.assertIn(" 11 ",out)
-        self.assertRegex(out,r"^[01\s]+$")
+        self.assertEqual(out,"10 001 00 10 a 11 b 01 01\n")
 
     def test_known_structure_and_function_convert_while_unknown_data_stays_visible(self):
         out,_=self.migrate("(CONS x y)\n")
