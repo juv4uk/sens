@@ -29,12 +29,13 @@ EXACT_ROW = re.compile(
     r'^\\s*\\(row\\s+(D[1-5])\\s+"([01]+)"\\s+(\\S+)\\s+'
     r'"([^"]+)"\\s+"([^"]+)"\\s+"([^"]+)"\\s+(\\S+)\\s+(\\S+)\\)\\s*$'
 )
+ATOM_TOKEN = r'(\\(\\)|"[^"]*"|[^()\\s]+)'
 LEGACY_ROW = re.compile(
     r'^\\s*\\([01]{8}\\s+'
-    r'\\(en\\s+([^)]+)\\)\\s+'
-    r'\\(ук\\s+([^)]+)\\)\\s+'
-    r'\\(укр\\s+([^)]+)\\)\\s+'
-    r'\\(sa\\s+([^)]+)\\)'
+    + r'\\(en\\s+' + ATOM_TOKEN + r'\\)\\s+'
+    + r'\\(ук\\s+' + ATOM_TOKEN + r'\\)\\s+'
+    + r'\\(укр\\s+' + ATOM_TOKEN + r'\\)\\s+'
+    + r'\\(sa\\s+' + ATOM_TOKEN + r'\\)'
 )
 
 HEADER = "| bits | ук | укр | san | eng | LISP | SUM |"
