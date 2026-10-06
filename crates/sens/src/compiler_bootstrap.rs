@@ -54,3 +54,41 @@ pub fn domain_identity_shape_mechanism() -> Value {
         ]))
     }))
 }
+
+/// Build an opt-in representation predicate/decomposer for compiler program-data.
+///
+/// For an exact DomainIdentity this returns the same `(width bits)` shape as
+/// `domain_identity_shape_mechanism`. Every other value returns NIL instead
+/// of raising a type error. This is intentionally representation-only: it
+/// does not admit a domain, choose a compiler role, select proof, or choose a
+/// backend mechanism.
+pub fn domain_identity_shape_or_empty_mechanism() -> Value {
+    Value::host_function(Rc::new(|arguments, _environment, span| {
+        if arguments.len() != 1 {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!(
+                    "domain identity shape-or-empty mechanism expects exactly 1 argument, got {}",
+                    arguments.len()
+                ),
+                span,
+            ));
+        }
+
+        let Some(identity) = arguments[0].as_domain_identity() else {
+            return Ok(Value::Nil);
+        };
+
+        let width = identity.width();
+        let packed = identity.packed_bits();
+        let bits = (0..width).map(|index| {
+            let shift = width - 1 - index;
+            Value::predicate_bit(((packed >> shift) & 1) == 1)
+        });
+
+        Ok(Value::list([
+            Value::Number(width as f64, Exactness::Exact),
+            Value::list(bits),
+        ]))
+    }))
+}
