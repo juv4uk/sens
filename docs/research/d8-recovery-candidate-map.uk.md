@@ -21,6 +21,8 @@
 00000010  ENV-REFLECTION
 00000011  READ
 00000100  WRITE-TO-STRING
+00000101  SYMBOL->STRING
+00000110  STRING->SYMBOL
 ```
 
 Це **candidate coordinates**, не ратифіковані residents.
@@ -135,8 +137,8 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   5
-provisional coordinates            00000000..00000100
+provisional D8 ladder candidates   7
+provisional coordinates            00000000..00000110
 ratified D8 residents              0
 resolved recovery no-slot          9
 unresolved recovery rows           2
@@ -195,3 +197,23 @@ WRITE(READ(t)) = canonicalize(t)
 Current mechanism використовує `Value::String`, а канонічний текстовий домен D7 — Text7/UPC-7. Тому обидва кандидати залишаються provisional до явного D7↔reader/writer bridge. Unicode/String representation не є D8 identity.
 
 `READ-ALL` поки класифіковано як derived wrapper над тим самим reader mechanism; `PRINT` і `PRINC` лишаються host/transcript mechanisms.
+
+## Symbol ↔ text recovery
+
+Окремо від parser/serializer існує міст імені символу:
+
+```text
+SYMBOL->STRING(STRING->SYMBOL(s)) = s
+STRING->SYMBOL(SYMBOL->STRING(sym)) = sym
+```
+
+Це не просто `READ`. Контрприклад:
+
+```text
+STRING->SYMBOL("strange symbol")  -> один Symbol з таким точним ім'ям
+READ("strange symbol")            -> два top-level forms / InvalidForm
+```
+
+Історичні `PNAME`, `INTERN`, `OBLIST`, `REMOB` зберігаються окремо. Поточний `STRING->SYMBOL` не оголошується тотожним історичному `INTERN` без доказу symbol-table identity.
+
+Як і READ/WRITE, ця пара provisional до явного мосту з D7/Text7.
