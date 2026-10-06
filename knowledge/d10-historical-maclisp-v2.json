@@ -1,0 +1,388 @@
+{
+  "schema": "d10-historical-maclisp-v2/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4042",
+  "date": "2026-10-07",
+  "foundation": "#4008 / Contract 11.8 / D1-D9",
+  "source": {
+    "citation": "MacLisp Reference Manual, December 17, 1975",
+    "url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+    "rule": "historical semantics and page provenance only; no address or SUBR/FSUBR/LSUBR placement authority"
+  },
+  "accounting": {
+    "selected_d10_candidates": 12,
+    "current_projections": 9,
+    "explicit_boundary_holds": 11,
+    "d10_selected_before_harvest": 388,
+    "d10_selected_after_harvest": 400,
+    "law_forced_coordinates": 256,
+    "unplaced_selected_after_harvest": 144,
+    "d10_remaining_after_harvest": 624,
+    "ratified_d10_residents": 0
+  },
+  "selected": [
+    {
+      "stable_id": "d10.hist.maclisp2.8640e315ce28e457",
+      "semantic_name": "MAKNAM",
+      "historical_name": "MAKNAM",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-80",
+      "behavior": "construct a fresh uninterned symbol whose print-name is assembled from a supplied character/code list",
+      "relation_class": "SYMBOL-CONSTRUCTION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.f19feec5b438e912",
+      "semantic_name": "IMPLODE",
+      "historical_name": "IMPLODE",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-80",
+      "behavior": "construct an interned symbol whose print-name is assembled from a supplied character/code list",
+      "relation_class": "SYMBOL-CONSTRUCTION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.98f32b7f660f5166",
+      "semantic_name": "READLIST",
+      "historical_name": "READLIST",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-80",
+      "behavior": "read an S-expression from a supplied character/code list using the language reader semantics",
+      "relation_class": "READER-REPRESENTATION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.c61f02c101efc659",
+      "semantic_name": "EXPLODE",
+      "historical_name": "EXPLODE",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-80/2-81",
+      "behavior": "convert a value's escaped readable printed representation into a list of character objects",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.0a58b93efe66e566",
+      "semantic_name": "EXPLODEC",
+      "historical_name": "EXPLODEC",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-81",
+      "behavior": "convert a value's unescaped PRINC-like printed representation into a list of character objects",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.96a3f62f67b534ab",
+      "semantic_name": "EXPLODEN",
+      "historical_name": "EXPLODEN",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-81",
+      "behavior": "convert a value's unescaped PRINC-like printed representation into a list of numeric character codes",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.da21f2a4677b28bb",
+      "semantic_name": "FLATSIZE",
+      "historical_name": "FLATSIZE",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-81",
+      "behavior": "return the number of characters in the escaped readable printed representation of a value",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.ef4b3d2bd0b0d6a4",
+      "semantic_name": "FLATC",
+      "historical_name": "FLATC",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-81",
+      "behavior": "return the number of characters in the unescaped PRINC-like printed representation of a value",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.0c799fc7a78221ef",
+      "semantic_name": "MAPATOMS",
+      "historical_name": "MAPATOMS",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-95",
+      "behavior": "apply a function to every symbol in a selected/current intern table without exposing the table's bucket representation",
+      "relation_class": "SYMBOL-INTERNING-ENUMERATION",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.00b186a751f2bf41",
+      "semantic_name": "MAKE-ARRAY",
+      "historical_name": "ARRAY/*ARRAY",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-85..2-88",
+      "behavior": "construct an n-dimensional array with explicit element kind and dimensions, abstracting away historical pointer/property-list naming mechanics",
+      "relation_class": "ARRAY-CONSTRUCTION-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.9971e13cc99f7894",
+      "semantic_name": "REARRAY",
+      "historical_name": "*REARRAY",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-86..2-89",
+      "behavior": "reshape an existing array while preserving existing elements in row-major traversal order and initializing any new tail cells according to element kind",
+      "relation_class": "ARRAY-RESHAPE-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.e66815545f1c1352",
+      "semantic_name": "SORTCAR",
+      "historical_name": "SORTCAR",
+      "historical_era": "MacLisp-1975",
+      "primary_source": "MacLisp Reference Manual, 17 Dec 1975",
+      "primary_source_url": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "printed_page": "2-30",
+      "behavior": "destructively sort a list/array of non-atomic items by applying the comparison predicate to the CAR/key of each item",
+      "relation_class": "KEYED-SORT-ALGEBRA",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "historical_address_authority": "NONE",
+      "implementation_class_authority": "NONE",
+      "ratified_resident": false
+    }
+  ],
+  "projections": [
+    {
+      "historical_name": "ASCII",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "D8 CODE-CHAR",
+      "reason": "historical ASCII code -> character object is the current code-to-character projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "GET_PNAME",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "D8 SYMBOL->STRING",
+      "reason": "historical print-name observation is the current symbol-name text projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "CATENATE",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "D9 STRING-APPEND",
+      "reason": "historical string concatenation is covered by current string append semantics",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "STRINGLENGTH",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "D9 STRING-LENGTH",
+      "reason": "historical string length is the current string length law",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "SUBSTR",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "D9 STRING-SLICE",
+      "reason": "historical substring extraction is covered by current string slicing semantics after index convention normalization",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "GETCHAR",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "SYMBOL->STRING + SCHAR",
+      "reason": "historical nth pname character is a composition of current symbol-name observation and simple-string character access",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "GETCHARN",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "GETCHAR + D8 CHAR-CODE",
+      "reason": "historical nth pname numeric character code is current character access followed by code projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "SAMEPNAMEP",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "SYMBOL->STRING + equality",
+      "reason": "historical same-print-name predicate is a representation-name comparison",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "historical_name": "ALPHALESSP",
+      "decision": "CURRENT-PROJECTION",
+      "selected_d10_candidate": false,
+      "current_projection": "SYMBOL->STRING + D8 STRING<",
+      "reason": "historical pname ordering is current name projection followed by string ordering",
+      "legacy_coordinate_authority": "NONE"
+    }
+  ],
+  "excluded_or_held": [
+    {
+      "historical_name": "SUBRCALL",
+      "decision": "MECHANISM-NO-CORE-SLOT",
+      "reason": "explicit compiled-subroutine calling convention"
+    },
+    {
+      "historical_name": "LSUBRCALL",
+      "decision": "MECHANISM-NO-CORE-SLOT",
+      "reason": "explicit list-subroutine calling convention"
+    },
+    {
+      "historical_name": "ARRAYCALL",
+      "decision": "MECHANISM-NO-CORE-SLOT",
+      "reason": "typed low-level array calling/access mechanism"
+    },
+    {
+      "historical_name": "DUMPARRAYS",
+      "decision": "HOST-CAPABILITY-HOLD",
+      "reason": "system-dependent file persistence boundary"
+    },
+    {
+      "historical_name": "LOADARRAYS",
+      "decision": "HOST-CAPABILITY-HOLD",
+      "reason": "system-dependent file persistence boundary"
+    },
+    {
+      "historical_name": "FIX",
+      "decision": "CORE-MATH-OR-CARRIER-HOLD",
+      "reason": "historical fixed/floating conversion carrier semantics"
+    },
+    {
+      "historical_name": "FLOATP",
+      "decision": "CORE-MATH-OR-CARRIER-HOLD",
+      "reason": "historical machine numeric carrier predicate"
+    },
+    {
+      "historical_name": "BIGP",
+      "decision": "CORE-MATH-OR-CARRIER-HOLD",
+      "reason": "historical machine numeric carrier predicate"
+    },
+    {
+      "historical_name": "COS",
+      "decision": "CORE-MATH-HOLD",
+      "reason": "numeric transcendental operation belongs to the separate math bridge review"
+    },
+    {
+      "historical_name": "RANDOM",
+      "decision": "NONDETERMINISM-HOLD",
+      "reason": "requires an explicit randomness/source law"
+    },
+    {
+      "historical_name": "SIGNP",
+      "decision": "CURRENT-PROJECTION-REVIEW",
+      "reason": "parameterized sign test is expressible through current comparison predicates; no new slot in this tranche"
+    }
+  ],
+  "preservation": {
+    "sens8": "UNCHANGED-PRESERVED-PROVENANCE",
+    "first_maclisp_tranche": "knowledge/d10-historical-maclisp-v1.json"
+  }
+}

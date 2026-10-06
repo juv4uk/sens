@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 388,
+    "selected_semantic_candidates": 400,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 132,
-    "remaining_semantic_inventory": 636,
+    "unplaced_selected_candidates": 144,
+    "remaining_semantic_inventory": 624,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -861,6 +861,234 @@
         "2-89"
       ],
       "historical_name": "ARRAYDIMS",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.00b186a751f2bf41",
+      "semantic_name": "MAKE-ARRAY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARRAY-CONSTRUCTION-ALGEBRA",
+      "behavior": "construct an n-dimensional array with explicit element kind and dimensions, abstracting away historical pointer/property-list naming mechanics",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-85..2-88"
+      ],
+      "historical_name": "ARRAY/*ARRAY",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.0a58b93efe66e566",
+      "semantic_name": "EXPLODEC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "behavior": "convert a value's unescaped PRINC-like printed representation into a list of character objects",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-81"
+      ],
+      "historical_name": "EXPLODEC",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.0c799fc7a78221ef",
+      "semantic_name": "MAPATOMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-INTERNING-ENUMERATION",
+      "behavior": "apply a function to every symbol in a selected/current intern table without exposing the table's bucket representation",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-95"
+      ],
+      "historical_name": "MAPATOMS",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.8640e315ce28e457",
+      "semantic_name": "MAKNAM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-CONSTRUCTION-ALGEBRA",
+      "behavior": "construct a fresh uninterned symbol whose print-name is assembled from a supplied character/code list",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-80"
+      ],
+      "historical_name": "MAKNAM",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.96a3f62f67b534ab",
+      "semantic_name": "EXPLODEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "behavior": "convert a value's unescaped PRINC-like printed representation into a list of numeric character codes",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-81"
+      ],
+      "historical_name": "EXPLODEN",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.98f32b7f660f5166",
+      "semantic_name": "READLIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "READER-REPRESENTATION-ALGEBRA",
+      "behavior": "read an S-expression from a supplied character/code list using the language reader semantics",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-80"
+      ],
+      "historical_name": "READLIST",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.9971e13cc99f7894",
+      "semantic_name": "REARRAY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARRAY-RESHAPE-ALGEBRA",
+      "behavior": "reshape an existing array while preserving existing elements in row-major traversal order and initializing any new tail cells according to element kind",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-86..2-89"
+      ],
+      "historical_name": "*REARRAY",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.c61f02c101efc659",
+      "semantic_name": "EXPLODE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "behavior": "convert a value's escaped readable printed representation into a list of character objects",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-80/2-81"
+      ],
+      "historical_name": "EXPLODE",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.da21f2a4677b28bb",
+      "semantic_name": "FLATSIZE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "behavior": "return the number of characters in the escaped readable printed representation of a value",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-81"
+      ],
+      "historical_name": "FLATSIZE",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.e66815545f1c1352",
+      "semantic_name": "SORTCAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KEYED-SORT-ALGEBRA",
+      "behavior": "destructively sort a list/array of non-atomic items by applying the comparison predicate to the CAR/key of each item",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-30"
+      ],
+      "historical_name": "SORTCAR",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.ef4b3d2bd0b0d6a4",
+      "semantic_name": "FLATC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PRINT-REPRESENTATION-ALGEBRA",
+      "behavior": "return the number of characters in the unescaped PRINC-like printed representation of a value",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-81"
+      ],
+      "historical_name": "FLATC",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.f19feec5b438e912",
+      "semantic_name": "IMPLODE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-MACLISP-RECOVERY-V2",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-CONSTRUCTION-ALGEBRA",
+      "behavior": "construct an interned symbol whose print-name is assembled from a supplied character/code list",
+      "provenance": [
+        "#4042",
+        "MacLisp Reference Manual, 17 Dec 1975",
+        "2-80"
+      ],
+      "historical_name": "IMPLODE",
       "ownership": "CORE-OWNED-CANDIDATE",
       "law_status": "PRIMARY-SOURCE-ATTESTED-UNPLACED",
       "ratified_resident": false
@@ -7193,6 +7421,7 @@
     "knowledge/d10-library-harvest-v1.json",
     "knowledge/d10-forward-harvest-v1.json",
     "knowledge/d10-knowledge-harvest-v1.json",
-    "knowledge/d10-historical-maclisp-v1.json"
+    "knowledge/d10-historical-maclisp-v1.json",
+    "knowledge/d10-historical-maclisp-v2.json"
   ]
 }
