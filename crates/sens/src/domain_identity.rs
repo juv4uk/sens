@@ -3,8 +3,9 @@
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
-//! - D1-D8 мають чинну семантичну authority згідно з Contract 11.7.
-//! - D5 ратифікований #3305, D6 #3393, D7 #3572, D8 #3960.
+//! - D1-D9 мають чинну семантичну authority згідно з Contract 11.8.
+//! - D5 #3305, D6 #3393, D7 #3572, D8 #3960, D9 #4008.
+//! - Цей Rust carrier поки матеріалізує лише W1-W8; D9 fail-closed до W9 cut.
 //! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
 //!   відсутній механізм може fail-closed навіть для ратифікованого resident.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
@@ -89,8 +90,9 @@ impl DomainIdentity {
     /// D3/D4/D5 зараз мають admitted Core-operation projection. D6 є
     /// OWNER-RATIFIED 64/64 під #3393, але на цій межі ще не має загального
     /// callable projection: відсутній механізм лишається fail-closed і не
-    /// скасовує D6 semantic identity. D8 так само OWNER-RATIFIED #3960,
-    /// але без окремого mechanism admission тут не стає callable автоматично.
+    /// скасовує D6 semantic identity. D8 так само OWNER-RATIFIED #3960.
+    /// D9 OWNER-RATIFIED #4008, але цей W1-W8 carrier ще не матеріалізує D9;
+    /// відсутній W9/mechanism support fail-closed і не скасовує D9 residency.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
@@ -297,7 +299,7 @@ mod tests {
             assert!(DomainIdentity::from_source_word(source).core_operation().is_none());
         }
 
-        // Contract 11.7 / #3393: D6 semantic identity is current.
+        // Contract 11.8 / #3393: D6 semantic identity is current.
         // Водночас generic callable mechanism для D6 тут навмисно не
         // приписується автоматично: semantic residency != mechanism admission.
         let d6_word = Bit6::new(1).unwrap();

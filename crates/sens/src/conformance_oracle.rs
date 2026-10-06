@@ -111,7 +111,7 @@ pub struct ConformanceCorpus {
 /// Authority facts for the corpus.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AuthorityInfo {
-    /// Language-contract.lisp version (e.g., "11.7").
+    /// Language-contract.lisp version (e.g., "11.8").
     pub contract_version: String,
 
     /// Contract SHA-256.
@@ -120,7 +120,7 @@ pub struct AuthorityInfo {
     /// SENS repository commit SHA.
     pub upstream_sha: String,
 
-    /// Domain laws referenced (D1-D8 ratification refs).
+    /// Domain laws referenced (D1-D9 ratification refs).
     pub ratified_laws: Vec<String>,
 }
 
@@ -188,7 +188,7 @@ mod tests {
     fn observable_serializes_to_json() {
         let observable = CanonicalObservable {
             case_id: "d3-001-quote-empty".to_string(),
-            contract: "11.7".to_string(),
+            contract: "11.8".to_string(),
             upstream_sha: "abc123".to_string(),
             program_digest: "def456".to_string(),
             identity_trace_digest: "ghi789".to_string(),

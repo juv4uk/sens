@@ -1,4 +1,4 @@
-name: D1 D8 foundation authority
+name: D1 D9 foundation authority
 
 on:
   pull_request:
@@ -9,12 +9,16 @@ on:
       - "knowledge/d7-ratified.json"
       - "knowledge/d1-d8-foundation.json"
       - "knowledge/d8-ratified.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "knowledge/d9-ratified.json"
       - "contracts/d1-d5-foundation-ratification.lisp"
       - "contracts/d1-d6-foundation-ratification.lisp"
       - "contracts/d1-d7-foundation-ratification.lisp"
       - "contracts/d7-ratification.lisp"
       - "contracts/d1-d8-foundation-ratification.lisp"
       - "contracts/d8-ratification.lisp"
+      - "contracts/d1-d9-foundation-ratification.lisp"
+      - "contracts/d9-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d1-d5-foundation.py"
@@ -28,12 +32,16 @@ on:
       - "knowledge/d7-ratified.json"
       - "knowledge/d1-d8-foundation.json"
       - "knowledge/d8-ratified.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "knowledge/d9-ratified.json"
       - "contracts/d1-d5-foundation-ratification.lisp"
       - "contracts/d1-d6-foundation-ratification.lisp"
       - "contracts/d1-d7-foundation-ratification.lisp"
       - "contracts/d7-ratification.lisp"
       - "contracts/d1-d8-foundation-ratification.lisp"
       - "contracts/d8-ratification.lisp"
+      - "contracts/d1-d9-foundation-ratification.lisp"
+      - "contracts/d9-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d1-d5-foundation.py"

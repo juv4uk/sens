@@ -55,8 +55,8 @@ require_literal docs/semantic-authority-map.uk.md 'Історичні exact-eigh
 
 
 # Contract/domain status and canonical human table entry-points.
-require_literal README.md 'Contract **11.7**'
-require_literal README.md 'owner-ratified #3960'
+require_literal README.md 'Contract **11.8**'
+require_literal README.md 'owner-ratified #4008'
 require_literal README.md 'lib/domains/d1.lisp'
 require_literal README.md 'lib/domains/d8.lisp'
 require_literal docs/README.md 'lib/domains/d1.lisp'

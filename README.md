@@ -24,7 +24,7 @@
 
 ## Що таке SENS
 
-SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **Contract 11.7 і owner-ratified драбина точних доменів D1–D8**: D7 має 126/128 semantic residents із двома owner-reserved координатами, D8 — 256/256.
+SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **Contract 11.8 і owner-ratified драбина точних доменів D1–D9**: D7 має 126/128 semantic residents із двома owner-reserved координатами, D8 — 256/256, D9 — 512/512.
 
 Історично проєкт розвивався під робочою назвою `my-lisp`. Старі матеріали зберігаються як provenance розвитку ідей, але не визначають чинну семантичну модель.
 
@@ -54,7 +54,7 @@ D1 1  ≠  D2 01  ≠  D3 001  ≠  D4 0001
 
 Width входить в identity, але **width сам по собі не створює значення**.
 
-Поточний машинно-читаний контракт: [`language-contract.lisp`](language-contract.lisp), Contract **11.7**.
+Поточний машинно-читаний контракт: [`language-contract.lisp`](language-contract.lisp), Contract **11.8**.
 
 Докладний опис парадигми: [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md).
 
@@ -84,7 +84,7 @@ SENS намагається робити навпаки:
 
 Тобто мова має **рости**, а не просто накопичувати записи.
 
-Це важлива різниця. **Сам факт, що бітова координата механічно представна в певній ширині, не надає їй meaning.** Для current D1–D8 meaning/occupancy задають уже ратифіковані domain laws; для майбутніх або research-доменів стан **UNKNOWN** лишається чесним і корисним — він означає, що admission law ще не знайдений або не прийнятий.
+Це важлива різниця. **Сам факт, що бітова координата механічно представна в певній ширині, не надає їй meaning.** Для current D1–D9 meaning/occupancy задають уже ратифіковані domain laws; для майбутніх або research-доменів стан **UNKNOWN** лишається чесним і корисним — він означає, що admission law ще не знайдений або не прийнятий.
 
 ### Конкретний приклад: селектори
 
@@ -245,7 +245,7 @@ resident отримав точну кімнату
 
 ---
 
-## D1–D8: одна драбина, різні закони
+## D1–D9: одна драбина, різні закони
 
 | Домен | Ширина | Поточна роль |
 |---|---:|---|
@@ -257,6 +257,7 @@ resident отримав точну кімнату
 | **D6** | 6 бітів | typed domain; ширша область для доведених незалежних факторів |
 | **D7** | 7 бітів | owner-ratified #3572, 126/128: Sound7/Text7 + окремі role laws; 2 координати owner-reserved/pinned |
 | **D8** | 8 бітів | owner-ratified #3960, 256/256 semantic residents; callability окрема від residency |
+| **D9** | 9 бітів | owner-ratified #4008, 512/512 semantic residents; 128 law-forced + 384 owner-ratified gauge |
 
 ### Канонічні таблиці доменів
 
@@ -463,7 +464,7 @@ exact domain identity
 нсд            найбільший-спільний-дільник
 ```
 
-Маркери `?` і `!` синхронізуються в `ук/укр/en`; `san` їх не використовує. Усі чинні semantic residents D1–D8 мають заповнені `ук`, `укр` і `san`.
+Маркери `?` і `!` синхронізуються в `ук/укр/en`; `san` їх не використовує. Усі чинні semantic residents D1–D9 мають заповнені `ук`, `укр` і `san`.
 
 Surface може бути зручним, красивим і читабельним. Але машинна семантика має пережити повне перейменування surface без зміни програми.
 
@@ -505,8 +506,8 @@ Common Lisp, Prolog, Datalog, CLIPS, C, WASM, FPGA чи інший substrate м�
 
 ## Що вже є в репозиторії
 
-- Contract 11.7 з domain-qualified identity;
-- owner-ratified драбина D1–D8; D7 126/128, D8 256/256;
+- Contract 11.8 з domain-qualified identity;
+- owner-ratified драбина D1–D9; D7 126/128, D8 256/256, D9 512/512;
 - exact-width carrier/packing механізми;
 - D1 PredicateBit;
 - D2 structural grammar;
@@ -515,6 +516,7 @@ Common Lisp, Prolog, Datalog, CLIPS, C, WASM, FPGA чи інший substrate м�
 - D5/D6 ratified domain laws і executable guards;
 - D7 owner-ratified 126/128 Sound7/Text7 domain + окрема LocalOrdinal role;
 - D8 owner-ratified 256/256 під #3960 із окремою runtime-callability віссю;
+- D9 owner-ratified 512/512 під #4008: 128 law-forced selector coordinates + 384 owner-ratified S4 gauge;
 - selector generation witnesses;
 - domain graph / factor / residue / closure experiments;
 - one-way migration guard, який забороняє новому exact-width коду повертатися до старої flat-identity моделі;
@@ -601,8 +603,8 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 1. [`docs/README.md`](docs/README.md) — карта актуальної документації;
 2. [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) — навіщо існують домени і як мова росте;
-3. [`language-contract.lisp`](language-contract.lisp) — машинна конституція Contract 11.7;
-4. [`lib/domains/`](lib/domains) — канонічні human-readable таблиці D1–D8, один домен = один файл;
+3. [`language-contract.lisp`](language-contract.lisp) — машинна конституція Contract 11.8;
+4. [`lib/domains/`](lib/domains) — канонічні human-readable таблиці D1–D9, один домен = один файл;
 5. [`docs/language-core.md`](docs/language-core.md) — точна domain identity;
 6. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — порядок семантичної влади;
 7. [`docs/uk-surface-naming.md`](docs/uk-surface-naming.md) — правила `ук/укр`, `?`, `!`, selector-скорочень;
@@ -627,7 +629,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · short summary
 
-SENS is an experimental language whose current Contract 11.7 ratifies exact-width domains D1–D8. D7 has 126/128 admitted residents with two owner-reserved coordinates; D8 is owner-ratified 256/256 under #3960.
+SENS is an experimental language whose current Contract 11.8 ratifies exact-width domains D1–D9. D7 has 126/128 admitted residents with two owner-reserved coordinates; D8 is owner-ratified 256/256 under #3960; D9 is owner-ratified 512/512 under #4008.
 
 Its central idea is not “smaller opcodes”. A canonical semantic object is:
 
@@ -643,7 +645,7 @@ Start with [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) and [`lang
 
 ## Deutsch · Kurzfassung
 
-SENS ist eine experimentelle Sprache mit ratifizierten Exact-Width-Domänen D1–D8. D7 enthält 126/128 semantische Residents; D8 ist unter #3960 vollständig mit 256/256 Residents ratifiziert.
+SENS ist eine experimentelle Sprache mit ratifizierten Exact-Width-Domänen D1–D9. D7 enthält 126/128 semantische Residents; D8 ist unter #3960 vollständig mit 256/256 Residents ratifiziert.
 
 Ein kanonisches semantisches Objekt besteht aus:
 

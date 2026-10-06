@@ -73,14 +73,14 @@ pub struct CompilationArtifact {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ContractAuthority {
     /// language-contract.lisp version/digest.
-    pub contract_version: String,  // e.g., "11.7"
+    pub contract_version: String,  // e.g., "11.8"
     pub contract_sha256: String,
 
     /// Ratified domain laws used.
     /// e.g., ["D3_BIJA3_LAW_3202", "D4_BOOTSTRAP_LAW_3272"]
     pub ratified_domain_laws: Vec<String>,
 
-    /// D1-D8 authority proof references.
+    /// D1-D9 authority proof references.
     pub authority_proof_refs: Vec<String>,
 }
 
@@ -167,7 +167,7 @@ mod tests {
             version: (1, 0),
             source_digest: "abc123".to_string(),
             contract: ContractAuthority {
-                contract_version: "11.7".to_string(),
+                contract_version: "11.8".to_string(),
                 contract_sha256: "def456".to_string(),
                 ratified_domain_laws: vec!["D3_BIJA3_LAW_3202".to_string()],
                 authority_proof_refs: vec!["contracts/bija3-l1-l5-ratification.lisp".to_string()],

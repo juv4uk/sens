@@ -7,11 +7,11 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
 ## Authority order (highest wins)
 
 1. **Machine-readable language authority**
-   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.7 D1–D8 foundation contract.
+   - [`language-contract.lisp`](language-contract.lisp) — current Contract 11.8 D1–D9 foundation contract.
    - [`lib/domains/d1.lisp`](lib/domains/d1.lisp) … [`lib/domains/d8.lisp`](lib/domains/d8.lisp) — canonical human-readable domain tables, **one domain per file**, columns `ук → укр → san → en → LISP → sym`, where `ук` is the compact coding surface and `укр` is the expanded Ukrainian explanation. Surface markers are synchronized across programming surfaces: predicates use `?` in `ук/укр/en`, destructive operations use `!` in `ук/укр/en`; `san` does not use these punctuation markers. D7 has 126 semantic rows and omits owner-reserved `0100001` / `0101010`; no aggregate cross-domain table is authoritative.
    - [`lib/surface/semantic-registry.lisp`](lib/surface/semantic-registry.lisp) — transitional source/UI routing metadata. Existing exact-eight-bit rows are compatibility projections while #2817 migrates canonical identity to exact domains. A spelling is never semantic identity and does not own meaning.
    - [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) and other admitted executable conformance fixtures — behavior evidence independent of one host implementation.
-   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1–D8 under owner foundation #3960. D7 is owner-ratified 126/128; D8 is owner-ratified 256/256. Exact carriers remain mechanically representable independently of semantic admission. Historical Sens8/Sid8 is compatibility/provenance only.
+   - SENS no longer has one universal 256-slot function ontology. Canonical identity is `exact bits + exact domain + admitted/proved law`. Exact widths W1-W8 remain mechanically representable; current ratified semantic Core domains are D1–D9 under owner foundation #4008. D7 is owner-ratified 126/128; D8 is owner-ratified 256/256; D9 is owner-ratified 512/512. Exact carriers remain mechanically representable independently of semantic admission. Historical Sens8/Sid8 is compatibility/provenance only.
 2. **Ratified ADRs and accepted decisions** — [`docs/adr/`](docs/adr) records scoped decisions. McCarthy/Lisp names in historical ADRs describe provenance or Core1 compatibility; they do not create a second current function ontology.
 3. **Reference implementation and substrates**
    - [`crates/sens`](crates/sens) — current Rust reference crate. Rust owns implementation mechanisms, not language meaning.
@@ -42,9 +42,10 @@ D5  full compact 32/32 — owner-ratified #3331 via #3305/#3330; canonical map i
 D6  full compact 64/64 — owner-ratified #3393; canonical map in knowledge/d6-ratified.json
 D7  owner-ratified 126/128 — #3572; canonical map in knowledge/d7-ratified.json; 0100001 and 0101010 owner-reserved/pinned
 D8  full compact 256/256 — owner-ratified #3960; canonical map in knowledge/d8-ratified.json — clean-room rebuild #3281
+D9  full compact 512/512 — owner-ratified #4008; canonical map in knowledge/d9-ratified.json
 ```
 
-Owner foundation ratification #3960 extends the current chain through D8: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 #3572, D8 #3960. #3572 remains the historical D1–D7 foundation cut; D8 is owner-ratified 256/256 under #3960. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
+Owner foundation ratification #4008 extends the current chain through D9: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 #3572, D8 #3960, D9 #4008. #3960 remains the historical D1–D8 foundation cut; D9 is owner-ratified 512/512 under #4008. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
 Equal packed bits in two domains do not imply equal identity. In particular owner-ratified Core.D8 is not historical Sens8 merely because both occupy eight physical bits. D7 Sound/Text residency is ratified under #3572, while LocalOrdinal remains a separate W7 role; neither inherits selector/callable law from width. Width alone does not mint meaning or callability. Ukrainian, English, Sanskrit, symbolic, and compatibility spellings remain source/UI projections only.
 
