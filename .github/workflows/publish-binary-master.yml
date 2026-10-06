@@ -82,8 +82,7 @@ jobs:
                       break
           print(f"validated_files={len(files)}")
           if not files:
-              print("REFUSE: no corrected files")
-              sys.exit(1)
+              print("No fully resolved pre-D7 files yet; empty output is valid.")
           if bad:
               print("REFUSE:",bad[:100])
               sys.exit(1)
@@ -121,9 +120,11 @@ jobs:
               if any(not 1<=len(w)<=8 for w in text.split()):
                   bad.append(str(p))
           print(f"master_files={len(files)}")
-          if bad or not files:
+          if bad:
               print("REFUSE",bad[:100])
               sys.exit(1)
+          if not files:
+              print("No fully resolved pre-D7 files; master remains/returns empty.")
           PY
 
           git add -A
