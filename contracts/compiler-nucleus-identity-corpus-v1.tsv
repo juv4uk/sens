@@ -1,0 +1,13 @@
+# compiler-nucleus-identity-corpus/1
+# Transport fixture inventory for the current compiler nucleus closure.
+# Semantic role is deliberately absent: compiler-export must ask the executable SENS law.
+# fixture_id	domain	bits
+nucleus-d3-001	D3	001
+nucleus-d3-010	D3	010
+nucleus-d3-011	D3	011
+nucleus-d3-100	D3	100
+nucleus-d3-101	D3	101
+nucleus-d3-110	D3	110
+nucleus-d3-111	D3	111
+nucleus-d4-0010	D4	0010
+nucleus-d4-0011	D4	0011
