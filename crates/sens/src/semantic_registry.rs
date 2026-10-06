@@ -335,7 +335,7 @@ mod tests {
     #[test]
     fn uk_sa_exact_domain_projection_does_not_need_a_legacy_byte_route() {
         for (surface, width, bits) in [
-            ("aṇu?", 3, 0b010),
+            ("aṇu", 3, 0b010),
             ("решта-від-першого", 4, 0b0110),
             ("phalana", 4, 0b0010),
             ("saṅkalana", 4, 0b1111),
@@ -347,7 +347,7 @@ mod tests {
         }
 
         assert_eq!(
-            registry_byte_for_surface("aṇu?")
+            registry_byte_for_surface("aṇu")
                 .and_then(legacy_domain_identity_from_registry_byte),
             None,
             "new Sanskrit ATOM spelling must not depend on a historical byte"
