@@ -37,7 +37,7 @@
 
 Історичні exact-eight-bit Sens8/Sid8/Function8 лишаються обмеженими compatibility, transport, backend і provenance-проєкціями, поки #2817 мігрує runtime-споживачів. Вони більше не є універсальною чинною онтологією.
 
-Українські, англійські, санскритські, символьні та compatibility-написання — лише **source/UI routing metadata**. Написання може маршрутизувати до вже допущеного domain-qualified semantic object, але не володіє його ідентичністю чи значенням. Поточні канонічні human-readable проєкції D1–D8 лежать по одному домену на файл у `lib/domains/d1.lisp` … `lib/domains/d8.lisp`; D9 має нормативну machine-readable карту `knowledge/d9-ratified.json`. Колонки D1–D8: `ук → укр → san → en → LISP → sym`. Історичний `lib/surface/semantic-registry.lisp` лишається compatibility/provenance.
+Українські, англійські, санскритські, символьні та compatibility-написання — лише **source/UI routing metadata**. Написання може маршрутизувати до вже допущеного domain-qualified semantic object, але не володіє його ідентичністю чи значенням. Поточні канонічні human-readable проєкції D1–D9 лежать по одному домену на файл у `lib/domains/d1.lisp` … `lib/domains/d9.lisp`; D9 зберігає нормативну machine-readable identity-карту `knowledge/d9-ratified.json`. Колонки D1–D9: `ук → укр → san → en → LISP → sym`. Human table D9 не означає W9 runtime-підтримку чи Core ownership — це окремі осі. Історичний `lib/surface/semantic-registry.lisp` лишається compatibility/provenance.
 
 Конкретний порожній список `()` — Core.D3 `000`. Він відмінний від історичного exact-eight-bit `00000000`, PredicateBit `0` і Number zero, навіть коли їхні packed numeric payloads виглядають споріднено.
 

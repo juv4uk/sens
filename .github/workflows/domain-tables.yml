@@ -3,10 +3,11 @@ name: domain-tables
 on:
   pull_request:
     paths:
-      - "knowledge/d1-d8-foundation.json"
+      - "knowledge/d1-d9-foundation.json"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
+      - "knowledge/d9-ratified.json"
       - "lib/domains/d1.lisp"
       - "lib/domains/d2.lisp"
       - "lib/domains/d3.lisp"
@@ -15,6 +16,7 @@ on:
       - "lib/domains/d6.lisp"
       - "lib/domains/d7.lisp"
       - "lib/domains/d8.lisp"
+      - "lib/domains/d9.lisp"
       - "scripts/domain_tables.py"
       - "scripts/check-domain-tables.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
@@ -30,10 +32,11 @@ on:
   push:
     branches: [main]
     paths:
-      - "knowledge/d1-d8-foundation.json"
+      - "knowledge/d1-d9-foundation.json"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
+      - "knowledge/d9-ratified.json"
       - "lib/domains/d1.lisp"
       - "lib/domains/d2.lisp"
       - "lib/domains/d3.lisp"
@@ -42,6 +45,7 @@ on:
       - "lib/domains/d6.lisp"
       - "lib/domains/d7.lisp"
       - "lib/domains/d8.lisp"
+      - "lib/domains/d9.lisp"
       - "scripts/domain_tables.py"
       - "scripts/check-domain-tables.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
@@ -68,6 +72,8 @@ jobs:
         run: python3 scripts/check-domain-surfaces-d5.py
       - name: Check human-surface translation
         run: python3 scripts/translate-domain-program.py --self-test
+      - name: Check D9 ratified authority
+        run: python3 scripts/check-d9-current-authority.py
       - name: Prove exact-width substrate preserves domain address
         run: |
           cargo test -p sens source_words::tests::same_numeric_payload_at_different_widths_never_collapses
@@ -80,4 +86,4 @@ jobs:
           cargo test -p sens sanskrit_presentation_projects_domain_identities_inside_lists
       - name: Record Lisp table-reader gap
         run: |
-          echo "ordinary read-all width bridge tracked by #3946; canonical human tables are lib/domains/d1.lisp..d8.lisp"
+          echo "ordinary read-all width bridge tracked by #3946; canonical human tables are lib/domains/d1.lisp..d9.lisp; Rust D9 runtime remains fail-closed pending W9 #4038"

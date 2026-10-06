@@ -7,12 +7,13 @@ import json
 import re
 from pathlib import Path
 
-from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, read_domain_table
+from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, D9_TABLE, read_domain_table
 
 ROOT = Path(__file__).resolve().parents[1]
-FOUNDATION = ROOT / "knowledge/d1-d8-foundation.json"
+FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
 D7_AUTHORITY = ROOT / "knowledge/d7-ratified.json"
 D8_AUTHORITY = ROOT / "knowledge/d8-ratified.json"
+D9_AUTHORITY = ROOT / "knowledge/d9-ratified.json"
 
 
 def fail(message: str) -> None:
@@ -51,9 +52,9 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
         if not en_matches_resident(row.en, resident):
             fail(f"{domain}:{row.bits}: en {row.en!r} does not match resident {resident!r}")
 
-        if width == 8:
+        if width in {8, 9}:
             if row.lisp != resident:
-                fail(f"D8:{row.bits}: LISP {row.lisp!r} must preserve ratified resident {resident!r}")
+                fail(f"D{width}:{row.bits}: LISP {row.lisp!r} must preserve ratified resident {resident!r}")
         elif require_human and row.lisp is None and domain not in {"D2"}:
             fail(f"{domain}:{row.bits}: missing LISP")
 
@@ -139,7 +140,7 @@ def validate_compact_uk(rows) -> None:
             if row.en is None or not row.en.endswith("!"):
                 fail(f"{row.domain}:{row.bits}: destructive en surface must end in !")
 
-        if row.lisp and re.fullmatch(r"C[AD]{2,6}R", row.lisp.upper()):
+        if row.lisp and re.fullmatch(r"C[AD]{2,7}R", row.lisp.upper()):
             path = row.lisp.upper()[1:-1]
             expected = "-".join("п" if ch == "A" else "р" for ch in path)
             if row.uk != expected:
@@ -183,6 +184,18 @@ def main() -> int:
     all_rows.extend(d8_rows)
     total += 256
 
+    d9_authority = json.loads(D9_AUTHORITY.read_text(encoding="utf-8"))
+    if d9_authority.get("status") != "owner-ratified" or d9_authority.get("authority") != "#4008":
+        fail("D9 authority is not owner-ratified #4008")
+    d9_rows = validate_dense_table(
+        D9_TABLE,
+        9,
+        d9_authority["residents"],
+        require_human=True,
+    )
+    all_rows.extend(d9_rows)
+    total += 512
+
     validate_compact_uk(all_rows)
 
     for attr in ("uk", "ukr", "san"):
@@ -198,16 +211,17 @@ def main() -> int:
                 )
             seen[value] = key
 
-    if total != 508:
-        fail(f"expected D1-D8 current residents total 508 rows, found {total}")
+    if total != 1020:
+        fail(f"expected D1-D9 current residents total 1020 rows, found {total}")
 
     print("DOMAIN-TABLES: PASS")
-    print("files=8 layout=one-domain-per-file")
-    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:126,d8:256 total=508")
+    print("files=9 layout=one-domain-per-file")
+    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:126,d8:256,d9:512 total=1020")
     print("d7-reserved=0100001,0101010")
     print("missing-uk=0 missing-ukr=0 missing-san=0")
     print("surface-collisions=0 namespaces=uk,ukr,san")
     print("uk-style=compact ukr-style=expanded selectors=п/р mutation=! in uk,ukr,en predicate=? in uk,ukr,en")
+    print("d9-runtime=W9-carrier-separate-fail-closed-#4038")
     print("columns=ук->укр->san->en->LISP->sym")
     return 0
 

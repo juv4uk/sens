@@ -63,7 +63,7 @@ D7  7 bits
 D8  8 bits
 ```
 
-Поточна owner-ratified картина: D1–D6 dense, D7 126/128 під #3572 із двома owner-reserved coordinates, D8 256/256 під #3960. Для human-readable projections у репозиторії справді є окремі `lib/domains/d1.lisp … d8.lisp`, але **таблиця не є законом домену** — вона лише показує вже admitted identity через human surfaces.
+Поточна owner-ratified картина: D1–D6 dense, D7 126/128 під #3572 із двома owner-reserved coordinates, D8 256/256 під #3960, D9 512/512 під #4008. Для human-readable projections у репозиторії справді є окремі `lib/domains/d1.lisp … d9.lisp`, але **таблиця не є законом домену** — вона лише показує вже admitted identity через human surfaces.
 
 Ємність Dn дорівнює `2^n`, але **capacity ≠ occupancy**.
 
