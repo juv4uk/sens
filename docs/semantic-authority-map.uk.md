@@ -33,11 +33,11 @@
 + допущений / доведений закон
 ```
 
-Поточні Core-приклади — exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap та owner-ратифіковані D5/D6. Однаковий packed numeric payload у двох доменах не означає однакової семантичної ідентичності, а сама ширина не надає occupancy чи callability.
+Поточні Core-приклади — exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ратифіковані D5/D6, D7 126/128 під #3572 і D8 256/256 під #3960. Однаковий packed numeric payload у двох доменах не означає однакової семантичної ідентичності, а сама ширина не надає occupancy чи callability.
 
 Історичні exact-eight-bit Sens8/Sid8/Function8 лишаються обмеженими compatibility, transport, backend і provenance-проєкціями, поки #2817 мігрує runtime-споживачів. Вони більше не є універсальною чинною онтологією.
 
-Українські, англійські, санскритські, символьні та compatibility-написання — лише **source/UI routing metadata**. Написання може маршрутизувати до вже допущеного domain-qualified semantic object, але не володіє його ідентичністю чи значенням.
+Українські, англійські, санскритські, символьні та compatibility-написання — лише **source/UI routing metadata**. Написання може маршрутизувати до вже допущеного domain-qualified semantic object, але не володіє його ідентичністю чи значенням. Поточні канонічні human-readable проєкції лежать по одному домену на файл у `lib/domains/d1.lisp` … `lib/domains/d8.lisp`, з колонками `ук → укр → san → en → LISP → sym`. Історичний `lib/surface/semantic-registry.lisp` лишається compatibility/provenance.
 
 Конкретний порожній список `()` — Core.D3 `000`. Він відмінний від історичного exact-eight-bit `00000000`, PredicateBit `0` і Number zero, навіть коли їхні packed numeric payloads виглядають споріднено.
 
@@ -70,7 +70,7 @@ Rust може містити parser, evaluator, closure, macro, lowering та ho
 ```text
 семантична влада       = language-contract + ратифіковані рішення + executable conformance
 семантичний об'єкт СЕНС = exact bits + exact domain + admitted/proved law
-surface                 = source/UI routing metadata
+surface                 = source/UI routing metadata; current human tables = lib/domains/dN.lisp
 референсна реалізація  = crates/sens (Rust)
 незалежний субстрат    = інша ціль conformance/execution
 ```
