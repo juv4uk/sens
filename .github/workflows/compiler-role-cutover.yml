@@ -1,4 +1,5 @@
 name: Compiler role authority cutover
+# zero-dependency core repair gate; serialization stays outside semantic core.
 
 on:
   pull_request:
