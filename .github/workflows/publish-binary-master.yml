@@ -1,138 +1,16 @@
 name: publish-binary-master
 
 on:
-  push:
-    branches:
-      - codex/sens-code-migration-tools
-    paths:
-      - "scripts/migrate-to-sens-codes.py"
-      - "tests/test_sens_code_migration.py"
-      - "knowledge/d1-d7-foundation.json"
-      - "crates/sens/src/text7_projection_generated.rs"
-      - ".github/workflows/publish-binary-master.yml"
   workflow_dispatch:
 
-concurrency:
-  group: publish-binary-master
-  cancel-in-progress: true
-
-permissions:
-  contents: write
+# PAUSED 2026-10-06.
+# Binary publication is intentionally manual until the three-pass classifier
+# (legacy SID8/SENS8 -> my-lisp -> historical Lisp 1/1.5 uppercase)
+# has classified the source corpus and a replacement converter is proved.
 
 jobs:
-  publish:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+  paused:
+    runs-on: ubuntu-latest
+    if: ${{ false }}
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Test exact-width source migration
-        shell: bash
-        run: |
-          python3 -m unittest tests/test_sens_code_migration.py
-
-      - name: Build comment-free binary source mirror
-        shell: bash
-        run: |
-          rm -rf /tmp/sens-binary-out /tmp/sens-binary-report.json
-          python3 scripts/migrate-to-sens-codes.py . \
-            --foundation knowledge/d1-d7-foundation.json \
-            --text7-projection crates/sens/src/text7_projection_generated.rs \
-            --binary-mirror /tmp/sens-binary-out \
-            --report /tmp/sens-binary-report.json
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          report = json.loads(Path("/tmp/sens-binary-report.json").read_text())
-          print(json.dumps(report["summary"], ensure_ascii=False))
-          blocked = [
-              row for row in report["files"]
-              if row["status"] == "blocked"
-          ]
-          print(f"blocked_files={len(blocked)}")
-          for row in blocked[:100]:
-              print("BLOCKED", row["path"], row["blockers"])
-          PY
-
-      - name: Validate exact-width visible binary files
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re, sys
-          root = Path("/tmp/sens-binary-out")
-          files = [p for p in root.rglob("*") if p.is_file()]
-          bad = []
-          for p in files:
-              try:
-                  text = p.read_text(encoding="ascii")
-              except UnicodeDecodeError:
-                  bad.append((str(p.relative_to(root)), "non-ascii"))
-                  continue
-              if not text.strip() or not re.fullmatch(r"[01\s]+", text):
-                  bad.append((str(p.relative_to(root)), "non-binary"))
-                  continue
-              for word in text.split():
-                  if not (1 <= len(word) <= 8):
-                      bad.append((str(p.relative_to(root)), f"word-width={len(word)}"))
-                      break
-          print(f"validated_binary_files={len(files)}")
-          if bad:
-              for item in bad[:100]:
-                  print("REFUSE", item)
-              sys.exit(1)
-          if not files:
-              print("REFUSE empty export")
-              sys.exit(1)
-          PY
-
-      - name: Publish only corrected binary files to master
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin master
-          rm -rf /tmp/sens-master
-          git worktree prune
-          git worktree add -f --detach /tmp/sens-master origin/master
-
-          cd /tmp/sens-master
-          git rm -r --ignore-unmatch . >/dev/null 2>&1 || true
-          cp -a /tmp/sens-binary-out/. .
-
-          python3 - <<'PY'
-          from pathlib import Path
-          import re, sys
-          files = [p for p in Path(".").rglob("*") if p.is_file() and ".git" not in p.parts]
-          bad = []
-          for p in files:
-              try:
-                  text = p.read_text(encoding="ascii")
-              except UnicodeDecodeError:
-                  bad.append(str(p))
-                  continue
-              if not text.strip() or not re.fullmatch(r"[01\s]+", text):
-                  bad.append(str(p))
-                  continue
-              if any(not (1 <= len(word) <= 8) for word in text.split()):
-                  bad.append(str(p))
-          print(f"validated_master_files={len(files)}")
-          if bad:
-              print("REFUSE non-canonical files:")
-              print("\n".join(bad[:100]))
-              sys.exit(1)
-          if not files:
-              print("REFUSE empty master candidate")
-              sys.exit(1)
-          PY
-
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No binary source changed master."
-            exit 0
-          fi
-
-          git config user.name "sens-binary-publisher"
-          git config user.email "sens-binary-publisher@users.noreply.github.com"
-          git commit -m "master: publish exact-width comment-free SENS source"
-          git push origin HEAD:master
+      - run: echo "binary master publication paused pending three-pass classification"
