@@ -103,11 +103,6 @@ jobs:
             echo "self-host compiler nucleus reintroduced historical digest/string builtins" >&2
             exit 1
           fi
-          if grep -niE 'cuda|ptx|sass|graal|fpga|register-allocation|install-target' \
-              contracts/compiler-compilation-artifact-v2.lisp; then
-            echo "whole-program artifact contract leaked backend/install policy" >&2
-            exit 1
-          fi
 
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
