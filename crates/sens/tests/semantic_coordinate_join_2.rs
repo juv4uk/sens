@@ -193,7 +193,7 @@ fn remaining_bounded_scope_preserves_asymmetric_coordinates() {
     assert!(add_math.contains("exact-rational-sum"));
     assert_eq!(
         machine_coordinate(&mut session, "01010"),
-        "((integer-add bounded-u64))"
+        "((integer-add bounded-u32-inputs u64-result))"
     );
     assert_eq!(kernel_statuses_for_sid(&kernel_source, sens::sens!(00001100)), None);
 
