@@ -129,6 +129,17 @@ fn encode_canonical_compiler_value(value: &Value, out: &mut Vec<u8>) -> Result<(
     Ok(())
 }
 
+/// Canonical binary representation for proof-carrying compiler evidence.
+///
+/// This is the exact representation hashed by `canonical_value_sha256_mechanism`.
+/// It admits only NIL, exact DomainIdentity, Symbol, String and Pair, and owns
+/// no compiler meaning or backend policy.
+pub fn compiler_evidence_canonical_bytes(value: &Value) -> Result<Vec<u8>, String> {
+    let mut encoded = Vec::new();
+    encode_canonical_compiler_value(value, &mut encoded)?;
+    Ok(encoded)
+}
+
 /// Narrow representation-only SHA-256 over compiler-evidence values.
 ///
 /// SENS chooses the value to hash. The mechanism admits only the ordinary
@@ -148,8 +159,7 @@ pub fn canonical_value_sha256_mechanism() -> Value {
             ));
         }
 
-        let mut encoded = Vec::new();
-        encode_canonical_compiler_value(&arguments[0], &mut encoded)
+        let encoded = compiler_evidence_canonical_bytes(&arguments[0])
             .map_err(|message| LanguageError::new(ErrorKind::Type, message, span))?;
         let digest = sha256_source(&encoded)
             .iter()
