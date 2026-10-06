@@ -1,4 +1,4 @@
-use sens::{lower_program, parse, wire_decode_program, wire_encode_program};
+use sens::{lower_program, parse, wire_decode_program, wire_encode_program, Expr, ExprKind};
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -38,6 +38,17 @@ fn collect(root: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
     Ok(())
 }
 
+fn wire_supported(expr: &Expr) -> bool {
+    match &expr.kind {
+        ExprKind::NumericBuffer(_) => false,
+        ExprKind::List(items)
+        | ExprKind::Call(_, items)
+        | ExprKind::DomainCall(_, items) => items.iter().all(wire_supported),
+        ExprKind::Pair(head, tail) => wire_supported(head) && wire_supported(tail),
+        _ => true,
+    }
+}
+
 fn bits(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len() * 9);
     for (i, byte) in bytes.iter().enumerate() {
@@ -69,6 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut exported = 0usize;
     let mut parse_failed = 0usize;
     let mut empty = 0usize;
+    let mut wire_unsupported = 0usize;
 
     for path in sources {
         let source = match fs::read_to_string(&path) {
@@ -93,6 +105,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         let lowered = lower_program(&parsed);
+        if !lowered.iter().all(wire_supported) {
+            wire_unsupported += 1;
+            eprintln!("SKIP_WIRE_UNSUPPORTED {}: lowered AST contains runtime-only NumericBuffer", path.display());
+            continue;
+        }
         let wire = wire_encode_program(&lowered);
         let decoded = wire_decode_program(&wire)
             .ok_or_else(|| format!("wire decode failed after encode: {}", path.display()))?;
@@ -117,7 +134,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("EXPORT {} -> {}", rel.display(), target.strip_prefix(&dest)?.display());
     }
 
-    println!("SUMMARY exported={exported} parse_failed={parse_failed} empty={empty}");
+    println!("SUMMARY exported={exported} parse_failed={parse_failed} empty={empty} wire_unsupported={wire_unsupported}");
     if exported == 0 {
         return Err("no parseable source files exported".into());
     }
