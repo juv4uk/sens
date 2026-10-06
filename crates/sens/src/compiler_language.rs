@@ -55,6 +55,12 @@ const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-rat
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
+const PROGRAM_VALUE_NAME: &str = "__compiler_program_ast";
+const D3_PROOF_VALUE_NAME: &str = "__compiler_d3_proof_ref";
+const D4_PROOF_VALUE_NAME: &str = "__compiler_d4_proof_ref";
+const PROVENANCE_VALUE_NAME: &str = "__compiler_program_provenance";
+const SOURCE_DIGEST_VALUE_NAME: &str = "__compiler_program_source_digest";
+const AUTHORITY_DIGEST_VALUE_NAME: &str = "__compiler_program_authority_digest";
 
 fn invalid_projection(message: impl Into<String>) -> LanguageError {
     LanguageError::new(ErrorKind::InvalidForm, message, Span::default())
@@ -415,6 +421,189 @@ pub fn compiler_lowering_role_from_sens(
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_lowering_role(&result)
+}
+
+fn transport_symbol(name: &str) -> Value {
+    Value::Symbol(Rc::from(name))
+}
+
+fn compiler_program_transport_node(expr: &Expr) -> Result<Value, LanguageError> {
+    let node = match &expr.kind {
+        ExprKind::DomainCall(identity, arguments) => Value::list([
+            transport_symbol("domain-call"),
+            Value::DomainIdentity((*identity).into()),
+            Value::list(
+                arguments
+                    .iter()
+                    .map(compiler_program_transport_node)
+                    .collect::<Result<Vec<_>, _>>()?,
+            ),
+        ]),
+        ExprKind::List(items) => Value::list([
+            transport_symbol("list"),
+            Value::list(
+                items
+                    .iter()
+                    .map(compiler_program_transport_node)
+                    .collect::<Result<Vec<_>, _>>()?,
+            ),
+        ]),
+        ExprKind::Pair(head, tail) => Value::list([
+            transport_symbol("pair"),
+            compiler_program_transport_node(head)?,
+            compiler_program_transport_node(tail)?,
+        ]),
+        ExprKind::Number(value, exactness) => Value::list([
+            transport_symbol("atom"),
+            Value::Number(*value, *exactness),
+        ]),
+        ExprKind::Rational(value) => {
+            Value::list([transport_symbol("atom"), Value::Rational(value.clone())])
+        }
+        ExprKind::BinaryNumber(value) => Value::list([
+            transport_symbol("atom"),
+            Value::BinaryNumber(value.clone()),
+        ]),
+        ExprKind::NumericBuffer(value) => Value::list([
+            transport_symbol("atom"),
+            Value::NumericBuffer(value.clone()),
+        ]),
+        ExprKind::DomainIdentity(identity) => Value::list([
+            transport_symbol("atom"),
+            Value::DomainIdentity(*identity),
+        ]),
+        ExprKind::String(value) => Value::list([
+            transport_symbol("atom"),
+            Value::String(value.clone()),
+        ]),
+        ExprKind::Symbol(value) => Value::list([
+            transport_symbol("atom"),
+            Value::Symbol(value.clone()),
+        ]),
+        ExprKind::Sid(_) | ExprKind::Call(_, _) => {
+            return Err(invalid_projection(
+                "legacy Sid8/Call cannot enter current compiler program transport",
+            ));
+        }
+        ExprKind::Local { .. } => {
+            return Err(invalid_projection(
+                "resolved lexical Local cannot enter source-level compiler program transport",
+            ));
+        }
+    };
+    Ok(node)
+}
+
+fn compiler_program_transport(expressions: &[Expr]) -> Result<Value, LanguageError> {
+    Ok(Value::list(
+        expressions
+            .iter()
+            .map(compiler_program_transport_node)
+            .collect::<Result<Vec<_>, _>>()?,
+    ))
+}
+
+fn compiler_program_call() -> Expr {
+    Expr {
+        kind: ExprKind::List(Rc::from(
+            vec![
+                symbol("compiler-compile-program"),
+                symbol(SHAPE_MECHANISM_NAME),
+                symbol(PROGRAM_VALUE_NAME),
+                symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
+                symbol(D3_PROOF_VALUE_NAME),
+                symbol(D4_PROOF_VALUE_NAME),
+                symbol(PROVENANCE_VALUE_NAME),
+                symbol(SOURCE_DIGEST_VALUE_NAME),
+                symbol(AUTHORITY_DIGEST_VALUE_NAME),
+            ]
+            .into_boxed_slice(),
+        )),
+        span: Span::default(),
+    }
+}
+
+fn result_head_symbol(value: &Value) -> Option<&str> {
+    let Value::Pair(head, _) = value else {
+        return None;
+    };
+    let Value::Symbol(name) = head.as_ref() else {
+        return None;
+    };
+    Some(name.as_ref())
+}
+
+fn compiler_program_artifact_from_transport(
+    program: Value,
+    source_digest: String,
+    provenance: Value,
+) -> Result<Value, LanguageError> {
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+
+    session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    session.environment.define(PROGRAM_VALUE_NAME, program);
+    session.environment.define(
+        D3_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D3_PROOF_REF)),
+    );
+    session.environment.define(
+        D4_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D4_PROOF_REF)),
+    );
+    session
+        .environment
+        .define(PROVENANCE_VALUE_NAME, provenance);
+    session.environment.define(
+        SOURCE_DIGEST_VALUE_NAME,
+        Value::String(Rc::from(source_digest)),
+    );
+    session.environment.define(
+        AUTHORITY_DIGEST_VALUE_NAME,
+        Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
+    );
+
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    let value = eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value;
+    match result_head_symbol(&value) {
+        Some("compiler-compilation-artifact/2") => Ok(value),
+        Some("compiler-compilation-error/1") => Err(invalid_projection(format!(
+            "SENS whole-program compiler rejected canonical program transport: {value}"
+        ))),
+        _ => Err(invalid_projection(format!(
+            "SENS whole-program compiler returned malformed artifact: {value}"
+        ))),
+    }
+}
+
+/// Compile one exact current SENS program through the SENS-written whole-program
+/// compiler body.
+///
+/// Rust owns only source parsing/lowering and representation transport into the
+/// canonical AST shape. All compiler-role selection, source-shape admission,
+/// request ordering and artifact composition execute inside the SENS compiler
+/// nucleus.
+pub fn compiler_program_artifact_from_sens(
+    source: &str,
+    provenance: Value,
+) -> Result<Value, LanguageError> {
+    let parsed = crate::parse(source)?;
+    let lowered = crate::lower_program(&parsed);
+    let program = compiler_program_transport(&lowered)?;
+    compiler_program_artifact_from_transport(
+        program,
+        sha256_hex(source.as_bytes()),
+        provenance,
+    )
 }
 
 /// Backward-compatible three-role view used by the already-landed selector/pair
