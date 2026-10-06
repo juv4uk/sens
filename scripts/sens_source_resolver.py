@@ -21,15 +21,11 @@ from pathlib import Path
 import re
 from typing import Iterable
 
+from domain_tables import read_domain_table
+
 HISTORICAL_ROW_RE = re.compile(
     r"^\s*\(row\s+([01]{8})\s+([^\s()]+)\s+([^\s()]+)\s+"
     r"([^\s()]+)\s+([^\s()]+)\s+([^\s()]+)\s*\)",
-    re.MULTILINE,
-)
-
-DOMAIN_SURFACE_RE = re.compile(
-    r'^\s*\(row\s+(D[1-8])\s+"([01]+)"\s+(\S+)\s+'
-    r'"([^"]*)"\s+"([^"]*)"\s+"([^"]*)"',
     re.MULTILINE,
 )
 
@@ -152,16 +148,11 @@ def load_domain_surfaces(
 ) -> dict[str, set[CurrentIdentity]]:
     out: dict[str, set[CurrentIdentity]] = {}
     for path in paths:
-        text = path.read_text(encoding="utf-8")
-        for match in DOMAIN_SURFACE_RE.finditer(text):
-            domain, bits, role, en, uk, sa = match.groups()
-            width = int(domain[1:])
-            identity = current_by_word.get((width, bits))
+        for row in read_domain_table(path):
+            identity = current_by_word.get((row.width, row.bits))
             if identity is None:
                 continue
-            # D2 display labels and D3 EMPTY display are not callable surfaces,
-            # but keeping them in the surface index is useful to resolve values.
-            for spelling in (en, uk, sa):
+            for spelling in (row.en, row.uk, row.ukr, row.san, row.lisp, row.sym):
                 if spelling:
                     out.setdefault(spelling, set()).add(identity)
     return out
