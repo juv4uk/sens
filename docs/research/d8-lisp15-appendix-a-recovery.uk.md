@@ -34,6 +34,7 @@ host/tooling/machine/D7/Core-Math? → зберегти, але не Core D8
 00001001 VECTOR
 00001010 VECTOR-REF
 00001011 VECTOR-SET!
+00001100 SPECIAL-BINDING
 ```
 
 Це **не ратифіковані residents**. Координати можна переставляти під час recovery; семантичні рядки не можна мовчки втрачати.
@@ -67,7 +68,9 @@ host/tooling/machine/D7/Core-Math? → зберегти, але не Core D8
 
 ### SPECIAL / COMMON
 
-Це не можна автоматично списати на compiler flags. Lisp 1.5 описує `SPECIAL` cell із save/restore при binding і free-variable lookup через поточну cell; `COMMON` використовує a-list для communication compiled↔interpreted. Це окрема binding-policy recovery тема.
+`SPECIAL` пройшов дешевий recovery: його dynamic bind/save/restore закон observably відрізняється від current lexical capture, тому provisional `SPECIAL-BINDING = 00001100`.
+
+`COMMON` не отримує другий слот: історично це a-list bridge для communication compiled↔interpreted; окремого source-level root понад context communication поки не доведено.
 
 ## Збережені старі D8 дослідження
 
@@ -77,9 +80,9 @@ host/tooling/machine/D7/Core-Math? → зберегти, але не Core D8
 
 ```text
 historical semantic families   30
-D8 candidate families          11
-unresolved families             4
-no-slot / foreign families     15
+D8 candidate families          12
+unresolved families             2
+no-slot / foreign families     16
 ratified D8 residents           0
 ```
 
