@@ -1,4 +1,7 @@
-use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, lower_program, parse, Bit5, CoreD5,
+    DomainIdentity, Expr, ExprKind, Session, Span,
+};
 use std::fs;
 use std::path::PathBuf;
 
@@ -12,6 +15,26 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
     eval_program(&source, session)
         .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+}
+
+fn exact_d5_call(bits: u8, args: &str, session: &mut Session) -> String {
+    let mut parsed = parse(&format!("(__d5_probe__ {args})")).expect("probe payload");
+    let mut form = parsed.remove(0);
+    let ExprKind::List(items) = form.kind else {
+        panic!("probe list");
+    };
+    let mut items = items.to_vec();
+    items[0] = Expr {
+        kind: ExprKind::DomainIdentity(DomainIdentity::D5(CoreD5::from_word(
+            Bit5::new(bits).expect("D5 bits"),
+        ))),
+        span: Span::default(),
+    };
+    form.kind = ExprKind::List(items.into());
+    eval_parsed_expressions(&[form], session)
+        .expect("exact D5 call")
+        .value
+        .to_string()
 }
 
 fn machine_session() -> Session {
@@ -89,20 +112,18 @@ fn exact_d5_semantics_are_proved_before_machine_fast_paths() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
 
-    for (form, expected) in [
-        ("(01011 9 4)", "5"),
-        ("(01011 1 2)", "-1"),
-        ("(10110 6 7)", "42"),
+    for (bits, args, expected) in [
+        (0b01011, "9 4", "5"),
+        (0b01011, "1 2", "-1"),
+        (0b10110, "6 7", "42"),
         (
-            "(10110 18446744073709551615 2)",
+            0b10110,
+            "18446744073709551615 2",
             "36893488147419103230",
         ),
     ] {
-        let actual = eval_program(form, &mut session)
-            .unwrap_or_else(|error| panic!("exact D5 form failed: {form}: {error}"))
-            .value
-            .to_string();
-        assert_eq!(actual, expected, "exact semantics for {form}");
+        let actual = exact_d5_call(bits, args, &mut session);
+        assert_eq!(actual, expected, "exact D5:{bits:05b} semantics");
     }
 }
 
@@ -113,11 +134,11 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     for (identity, expected_capability) in [
         (
             "01011",
-            "((integer-subtract bounded-u64 exact-result-guarded))",
+            "((integer-subtract bounded-u64 no-underflow))",
         ),
         (
             "10110",
-            "((integer-multiply bounded-u64 exact-result-guarded))",
+            "((integer-multiply bounded-u32-inputs u64-result))",
         ),
     ] {
         let capability = eval_program(
@@ -211,8 +232,8 @@ fn current_profile_only_admits_difference_and_times_after_witnesses_exist() {
     let profile = fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
         .expect("current exact-domain machine profile");
 
-    assert!(profile.contains("(01011 fast-path \"SUB / bounded-u64, exact-result guard\")"));
-    assert!(profile.contains("(10110 fast-path \"IMUL / bounded-u64, exact-result guard\")"));
+    assert!(profile.contains("(01011 fast-path \"SUB / u64, left>=right\")"));
+    assert!(profile.contains("(10110 fast-path \"IMUL / u32 inputs -> exact u64 result\")"));
     assert!(!profile.contains("00001101 fast-path"));
     assert!(!profile.contains("00001110 fast-path"));
 }
