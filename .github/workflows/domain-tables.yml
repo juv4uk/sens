@@ -5,6 +5,7 @@ on:
     paths:
       - "knowledge/d1-d8-foundation.json"
       - "knowledge/d5-ratified.json"
+      - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
       - "lib/domains/d1.lisp"
       - "lib/domains/d2.lisp"
@@ -12,6 +13,7 @@ on:
       - "lib/domains/d4.lisp"
       - "lib/domains/d5.lisp"
       - "lib/domains/d6.lisp"
+      - "lib/domains/d7.lisp"
       - "lib/domains/d8.lisp"
       - "scripts/domain_tables.py"
       - "scripts/check-domain-tables.py"
@@ -30,6 +32,7 @@ on:
     paths:
       - "knowledge/d1-d8-foundation.json"
       - "knowledge/d5-ratified.json"
+      - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
       - "lib/domains/d1.lisp"
       - "lib/domains/d2.lisp"
@@ -37,6 +40,7 @@ on:
       - "lib/domains/d4.lisp"
       - "lib/domains/d5.lisp"
       - "lib/domains/d6.lisp"
+      - "lib/domains/d7.lisp"
       - "lib/domains/d8.lisp"
       - "scripts/domain_tables.py"
       - "scripts/check-domain-tables.py"
@@ -76,4 +80,4 @@ jobs:
           cargo test -p sens sanskrit_presentation_projects_domain_identities_inside_lists
       - name: Record Lisp table-reader gap
         run: |
-          echo "ordinary read-all width bridge tracked by #3946; canonical human tables include lib/domains/d8.lisp"
+          echo "ordinary read-all width bridge tracked by #3946; canonical human tables are lib/domains/d1.lisp..d8.lisp"
