@@ -137,8 +137,8 @@ pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::parse_canonical_binary;
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
-    canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
-    domain_identity_shape_or_empty_mechanism,
+    canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
+    domain_identity_shape_mechanism, domain_identity_shape_or_empty_mechanism,
 };
 pub use compiler_language::{
     compiler_execution_role_from_sens, compiler_lowering_role_from_sens,
