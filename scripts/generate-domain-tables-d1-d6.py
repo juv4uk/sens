@@ -151,6 +151,7 @@ def render(projection: dict) -> str:
         "**Authority:** `knowledge/d1-d7-foundation.json` (#3572).",
         "",
         "Human projection source: `knowledge/domain-table-projection-d1-d6.json`.",
+        "Exact surface sources: `lib/surface/domain-surfaces-d1-d4.lisp`, `domain-surfaces-d5.lisp`, `domain-surfaces-d6.lisp`.",
         "Exact identity remains `bits + domain + ratified law`.",
         "",
         "Canonical surface order: **ук → укр → san → eng → LISP → SUM**.",
