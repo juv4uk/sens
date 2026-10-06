@@ -391,7 +391,7 @@ def normalize_legacy_surface(name: str) -> str:
 def build_legacy_sid_map(registry_path: Path, code_map):
     text = registry_path.read_text(encoding="utf-8")
     rows = re.findall(
-        r"^\\s*\\(([01]{8})\\s+\\(en\\s+([^)]+)\\)",
+        r"^\s*\(([01]{8})\s+\(en\s+([^)]+)\)",
         text,
         flags=re.M,
     )
