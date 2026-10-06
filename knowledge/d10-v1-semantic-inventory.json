@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 330,
+    "selected_semantic_candidates": 367,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 74,
-    "remaining_semantic_inventory": 694,
+    "unplaced_selected_candidates": 111,
+    "remaining_semantic_inventory": 657,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -463,6 +463,635 @@
         "lib/forward.lisp"
       ],
       "source_name": "condition-is-or?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.01a15c89ef056f03",
+      "semantic_name": "MAKE-CLAIM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "construct a claim record from its explicit semantic fields",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "make-claim",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.02b539a1876ef014",
+      "semantic_name": "OBSERVATION-SOURCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the source carried by an observation record",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "observation-source",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.065ff6c037cda600",
+      "semantic_name": "CHECK-CONFLICT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "compute the explicit conflict result for a proposed knowledge clause",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "check-conflict",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0b9406e2c91bc7b5",
+      "semantic_name": "ADVICE-NEGATIVE-HEAD-CONFLICT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "compute the conflict relation induced by a negative knowledge head",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "advice-negative-head-conflict",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0d9b5d35f817a690",
+      "semantic_name": "ADVICE-ALL-DECISION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "classify a batch of proposed advice clauses under the Advice Taker boundary",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "advice-all-decision",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0ddb077d9f3510d5",
+      "semantic_name": "INTENT-REQUIRES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the required-capability set carried by an intent",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "intent-requires",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0ffd261daf815c3f",
+      "semantic_name": "MODULE-JOURNAL-EVENTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "select the journal events belonging to one knowledge module",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "module-journal-events",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.1cf280cba4d5c6a6",
+      "semantic_name": "ADVICE-DECISION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "classify one proposed clause as accepted, conflicting, or rejected under the Advice Taker boundary",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "advice-decision",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.26cef044cf3539f7",
+      "semantic_name": "INTENT-CAPABILITIES-SATISFIED?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "test whether an intent's explicit capability requirements are satisfied by the supplied capability set",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "intent-capabilities-satisfied?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.280389ace9a9d7e5",
+      "semantic_name": "KNOWLEDGE-PACKAGE-ENTRIES-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate every entry in a versioned knowledge package",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-package-entries-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.2c3e5a5392de9409",
+      "semantic_name": "KNOWLEDGE-CLAUSE-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate one clause against the admitted knowledge-clause grammar",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-clause-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.45369b21a80b3c99",
+      "semantic_name": "CLAUSES->TELL-EVENTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "convert a clause sequence into explicit tell-journal events",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "clauses->tell-events",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.476a5d13244efd9e",
+      "semantic_name": "MODULE-JOURNAL-HAS-MODULE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "test whether a knowledge journal contains any event for a named module",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "module-journal-has-module?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.4aba51353ffe338c",
+      "semantic_name": "APPLY-JOURNAL-EVENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "apply one tell/retract journal event to an explicit clause set",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "apply-journal-event",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.58252b08812d5f7e",
+      "semantic_name": "OPPOSITE-KNOWLEDGE-HEAD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "compute the explicit positive/negative opposite of a knowledge head",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "opposite-knowledge-head",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.5d12503b3a4eafef",
+      "semantic_name": "MAKE-INTENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "construct an intent record from its explicit semantic fields",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "make-intent",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.789a0b4818ce6303",
+      "semantic_name": "KNOWLEDGE-PACKAGE-FIELD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "retrieve a named field from a versioned knowledge package",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-package-field",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.7a0e31e730db56b0",
+      "semantic_name": "EVIDENCE-CLAIM-REF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the claim reference carried by an evidence record",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "evidence-claim-ref",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.7f63897ae35ce464",
+      "semantic_name": "KNOWLEDGE-CLAUSES-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate a batch of knowledge clauses",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-clauses-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.7fecac9e596977c7",
+      "semantic_name": "MAKE-KNOWLEDGE-PACKAGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "construct the explicit versioned knowledge-package data shape",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "make-knowledge-package",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.83302489268459c7",
+      "semantic_name": "KNOWLEDGE-TERMS-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate every term in a knowledge term collection",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-terms-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.891bc9722190ee5d",
+      "semantic_name": "ADVICE-BATCH-CONFLICT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "find the conflict carried by a proposed batch of advice clauses",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "advice-batch-conflict",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.a692d520b4a43804",
+      "semantic_name": "RESULT-NOT-HEAD?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-SHAPE-VALIDATION",
+      "behavior": "test whether a reasoning goal/result head is the explicit negation form",
+      "provenance": [
+        "#4030",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-not-head?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.a7e206d384237270",
+      "semantic_name": "KNOWLEDGE-TERM-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate one knowledge term against the admitted term grammar",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-term-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.a7e3aaefbaf29ee4",
+      "semantic_name": "KNOWLEDGE-PROPER-LIST?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "test the proper-list shape required by knowledge protocol values",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-proper-list?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.aa4b7e3f4a78b990",
+      "semantic_name": "MAKE-EVIDENCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "construct an evidence record from its explicit semantic fields",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "make-evidence",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.b136bcbe1da26b01",
+      "semantic_name": "INTENT-STOP-ON",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the stop condition carried by an intent",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "intent-stop-on",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.b511e52114cb33b9",
+      "semantic_name": "EVIDENCE-SOURCE-REF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the source reference carried by an evidence record",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "evidence-source-ref",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.cc2a52e60bbb9647",
+      "semantic_name": "KNOWLEDGE-PACKAGE-DECISION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "classify a knowledge package as admissible or rejected without mutating knowledge state",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-package-decision",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.cc9b9cfcd0fb18d1",
+      "semantic_name": "MAKE-OBSERVATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "construct an observation record from its explicit semantic fields",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "make-observation",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.cd4bae7128135b89",
+      "semantic_name": "KNOWLEDGE-NOT-HEAD?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "test whether a knowledge head is the explicit negation form",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-not-head?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.e16499916ff26cdb",
+      "semantic_name": "KNOWLEDGE-GOAL-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate one goal against the admitted knowledge-goal grammar",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-goal-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.ef2680c0a2be25a7",
+      "semantic_name": "RESULT-PROPER-LIST?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-SHAPE-VALIDATION",
+      "behavior": "test whether a reasoning result uses a proper-list representation",
+      "provenance": [
+        "#4030",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-proper-list?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.f879dbd07a26a666",
+      "semantic_name": "KNOWLEDGE-GOALS-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate a collection/conjunction of knowledge goals",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "knowledge-goals-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.fa417329836bc401",
+      "semantic_name": "ADVICE-CONFLICT-PROOF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "produce the structured conflict evidence for a proposed advice clause when conflict exists",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "source_name": "advice-conflict-proof",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.fc81b6ac5b1f4b1a",
+      "semantic_name": "SOURCE-REF?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "test whether a value has the admitted source-reference shape",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "source-ref?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.ff7b880c9be99434",
+      "semantic_name": "INTENT-PRODUCES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EPISTEMIC-RECORD-ALGEBRA",
+      "behavior": "retrieve the produced-result declaration carried by an intent",
+      "provenance": [
+        "#4030",
+        "lib/epistemic.lisp"
+      ],
+      "source_name": "intent-produces",
       "law_status": "SOURCE-DEFINED-UNPLACED",
       "ratified_resident": false
     },
@@ -6163,6 +6792,7 @@
     "knowledge/d10-recovery-v1.json",
     "knowledge/d10-recovery-v2.json",
     "knowledge/d10-library-harvest-v1.json",
-    "knowledge/d10-forward-harvest-v1.json"
+    "knowledge/d10-forward-harvest-v1.json",
+    "knowledge/d10-knowledge-harvest-v1.json"
   ]
 }
