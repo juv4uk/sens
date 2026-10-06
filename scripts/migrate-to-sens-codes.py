@@ -385,6 +385,8 @@ def _extract_projection(text: str, name: str) -> dict[str, tuple[int, ...]]:
 def build_text7_encoder(foundation, generated_projection: Path):
     generated = generated_projection.read_text(encoding="utf-8")
     slp = _extract_projection(generated, "SA_SLP1_ENCODE")
+    iast = _extract_projection(generated, "SA_IAST_ENCODE")
+    deva = _extract_projection(generated, "SA_DEVA_ENCODE")
     uk = _extract_projection(generated, "UK_ENCODE")
 
     d7 = foundation["domains"]["D7"]["residents"]
@@ -403,6 +405,8 @@ def build_text7_encoder(foundation, generated_projection: Path):
         "#": "sign.hash",
         "&": "sign.ampersand",
         "'": "sign.apostrophe",
+        "(": "sign.left-paren",
+        ")": "sign.right-paren",
         "*": "sign.star",
         "+": "sign.plus",
         ",": "sign.comma",
@@ -420,6 +424,13 @@ def build_text7_encoder(foundation, generated_projection: Path):
         "_": "sign.underscore",
         "`": "sign.backquote",
         "|": "sign.pipe",
+        "…": "text.punctuation.ellipsis",
+        "«": "text.punctuation.left-guillemet",
+        "»": "text.punctuation.right-guillemet",
+        "—": "text.punctuation.em-dash",
+        "–": "text.punctuation.en-dash",
+        "“": "text.punctuation.left-double-quotation-mark",
+        "”": "text.punctuation.right-double-quotation-mark",
     }
     punctuation = {ch: by_label[label] for ch, label in punctuation_labels.items()}
 
@@ -428,6 +439,16 @@ def build_text7_encoder(foundation, generated_projection: Path):
         k: tuple(f"{v:07b}" for v in vals)
         for k, vals in slp.items()
         if k.isalpha() and all(ord(ch) < 128 for ch in k)
+    }
+    iast_unicode = {
+        k: tuple(f"{v:07b}" for v in vals)
+        for k, vals in iast.items()
+        if any(ord(ch) >= 128 for ch in k)
+    }
+    deva_unicode = {
+        k: tuple(f"{v:07b}" for v in vals)
+        for k, vals in deva.items()
+        if any(ord(ch) >= 128 for ch in k)
     }
     cyrillic = {
         k: tuple(f"{v:07b}" for v in vals)
@@ -439,6 +460,8 @@ def build_text7_encoder(foundation, generated_projection: Path):
     candidates.update({k: (bits,) for k, bits in digits.items()})
     candidates.update({k: (bits,) for k, bits in punctuation.items()})
     candidates.update(latin)
+    candidates.update(iast_unicode)
+    candidates.update(deva_unicode)
     candidates.update(cyrillic)
 
     # Longest spelling first: e.g. Ukrainian дж/дз must stay one Text7 cell.
