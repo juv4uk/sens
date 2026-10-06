@@ -95,6 +95,22 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertEqual(hits[0].pass_number, 3)
         self.assertEqual(hits[0].sid8, "10101111")
 
+
+    def test_uppercase_define_preserves_both_legacy_sid_candidates(self):
+        hits = self.classify("(DEFINE foo x)\n")
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0].pass_number, 3)
+        self.assertEqual(
+            set(hits[0].sid8.split("|")),
+            {"00001001", "00001011"},
+        )
+
+    def test_comment_between_open_paren_and_head_is_ignored(self):
+        hits = self.classify("( ; comment before head\n car x)\n")
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0].pass_number, 2)
+        self.assertEqual(hits[0].token, "car")
+
     def test_unknown_eight_bit_head_is_still_pass1_unmapped(self):
         hits = self.classify("(11111111 x)\n")
         self.assertEqual(len(hits), 1)
