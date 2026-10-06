@@ -197,38 +197,23 @@ fn lisp_owned_encoder_is_part_of_the_vertical_boundary_proof() {
 }
 
 #[test]
-#[ignore = "legacy-transition: hard-coded pre-rebuild ADD SID; keep machine lowering mechanics, not obsolete semantic numbering"]
-fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wrappers() {
-    let sid = sens::semantic_registry_export::semantic_id_for_admitted_surface("додати")
-        .expect("ADD semantic surface must remain admitted");
-    assert_eq!(
-        sens::semantic_registry_export::semantic_id_bits(sid),
-        "00001100"
-    );
+fn exact_d5_plus_lowers_to_admitted_x86_bytes_without_legacy_sid_join() {
+    use sens::{lower_program, parse, ExprKind};
+
+    let lowered = lower_program(&parse("(додати 2 3)").expect("current PLUS source"));
+    let ExprKind::DomainCall(identity, _) = lowered[0].kind else {
+        panic!("current PLUS surface must lower to exact DomainCall");
+    };
+    assert_eq!((identity.width(), identity.packed_bits()), (5, 0b01010));
 
     let lowering_path = repo_root().join("lib/machine/lowering/semantic-x86-64.lisp");
     let lowering_source = fs::read_to_string(&lowering_path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", lowering_path.display()));
 
     assert!(
-        lowering_source.contains("(def x86-lower-add-u64-forms"),
-        "semantic lowerer must expose structured machine forms"
+        lowering_source.contains("(00001001 x86-encode-current-binary-u64"),
+        "current exact-domain CPU entry must exist"
     );
-    assert!(
-        !lowering_source.contains("(x86-encode-mov-r64-imm64 (quote rbx) right)"),
-        "native proof lowering must not clobber callee-saved RBX"
-    );
-    for forbidden in [
-        "(def x86-lower-add-u64\n",
-        "(def x86-lower-cons-car-u64\n",
-        "(def x86-lower-cons-cdr-u64\n",
-        "(x86-encode-program\n",
-    ] {
-        assert!(
-            !lowering_source.contains(forbidden),
-            "legacy byte-level lowering path must be retired: {forbidden}"
-        );
-    }
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before target lowering");
@@ -237,25 +222,42 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
     eval_program(&lowering_source, &mut session)
         .expect("semantic x86-64 lowering must load as ordinary sens");
 
-    let forms = eval_program("(x86-lower-add-u64-forms 2 3)", &mut session)
-        .expect("semantic ADD proof lowering must produce structured machine forms")
-        .value
-        .to_string();
+    let forms = eval_program(
+        "(x86-lower-current-binary-u64-forms 01010 2 3)",
+        &mut session,
+    )
+    .expect("exact D5 PLUS must produce structured machine forms")
+    .value
+    .to_string();
     assert_eq!(
         forms,
         "((mov-r64-imm64 rax 2) (mov-r64-imm64 rcx 3) (add-r64-r64 rax rcx) (ret))"
     );
 
     let bytes = eval_program(
-        "(x86-encode-admitted-program (x86-lower-add-u64-forms 2 3))",
+        "(x86-encode-current-binary-u64 01010 2 3)",
         &mut session,
     )
-    .expect("structured semantic forms must materialize bytes only through admission")
+    .expect("exact D5 PLUS must materialize bytes through admission")
     .value
     .to_string();
     assert_eq!(
         bytes,
         "(72 184 2 0 0 0 0 0 0 0 72 185 3 0 0 0 0 0 0 0 72 1 200 195)"
+    );
+
+    let unsupported = eval_program(
+        "(x86-encode-current-binary-u64 101 2 3)",
+        &mut session,
+    )
+    .expect("non-D5 binary route fails closed as named data")
+    .value
+    .to_string();
+    assert_eq!(unsupported, "unsupported-current-domain-binary-u64");
+
+    assert!(
+        !lowering_source.contains("machine-capabilities-for-sid"),
+        "current byte materialization must not join through legacy SID capability lookup"
     );
 }
 
