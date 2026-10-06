@@ -63,7 +63,7 @@ fn current_eq_and_cond_surfaces_lower_to_exact_d3_identities() {
         panic!("COND first clause must remain structured");
     };
     assert!(matches!(
-        first_clause[0].kind,
+        &first_clause[0].kind,
         ExprKind::DomainCall(identity, _)
             if identity.width() == 3 && identity.packed_bits() == 0b101
     ));
