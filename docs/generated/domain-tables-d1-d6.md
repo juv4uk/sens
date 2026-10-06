@@ -1,164 +1,134 @@
-# Domain tables D1–D6
+# Exact-width domain table
 
-**Authority:** `knowledge/d1-d7-foundation.json` (#3572).
+Width of the binary key identifies the domain; no domain or resident label is repeated in a row.
 
-**Machine-readable projection:** `lib/generated/domain-table-d1-d6.lisp`.
+Columns: **ук → укр → san → en → LISP → sym**. Empty/missing: `()`.
 
-Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
-Empty/missing surface marker: `()`.
-
-## uttara1 (D1)
-
-| bits | ук | укр | san | eng | LISP | SUM |
+| bits | ук | укр | san | en | LISP | sym |
 |---|---|---|---|---|---|---|
-| `0` | `ні` | `ні` | `na` | `no` | `NIL` | `uttara1:0=NO` |
-| `1` | `так` | `так` | `ām` | `yes` | `T` | `uttara1:1=YES` |
-
-## racanā2 (D2)
-
-| bits | ук | укр | san | eng | LISP | SUM |
-|---|---|---|---|---|---|---|
-| `00` | `пропуск` | `пропуск` | `antarāla` | `separator` | `()` | `racanā2:00=SEPARATOR` |
-| `01` | `закрити` | `закрити` | `samāpana` | `close` | `()` | `racanā2:01=CLOSE` |
-| `10` | `відкрити` | `відкрити` | `udghāṭana` | `open` | `()` | `racanā2:10=OPEN` |
-| `11` | `крапка` | `крапка` | `bindu` | `dot` | `()` | `racanā2:11=DOT` |
-
-## bīja3 (D3)
-
-| bits | ук | укр | san | eng | LISP | SUM |
-|---|---|---|---|---|---|---|
-| `000` | `порожнє` | `порожнє` | `śūnya` | `empty` | `NIL` | `bīja3:000=EMPTY` |
-| `001` | `як-є` | `як-є` | `svarūpa` | `quote` | `QUOTE` | `bīja3:001=QUOTE` |
-| `010` | `атом?` | `атом?` | `aṇu?` | `atom` | `ATOM` | `bīja3:010=ATOM` |
-| `011` | `решта` | `решта` | `śeṣa` | `cdr` | `CDR` | `bīja3:011=CDR` |
-| `100` | `перше` | `перше` | `ādi` | `car` | `CAR` | `bīja3:100=CAR` |
-| `101` | `тотожне?` | `тотожне?` | `abheda?` | `eq` | `EQ` | `bīja3:101=EQ` |
-| `110` | `за-умовою` | `за-умовою` | `krama` | `cond` | `COND` | `bīja3:110=COND` |
-| `111` | `сполучити` | `сполучити` | `saṃyuj` | `cons` | `CONS` | `bīja3:111=CONS` |
-
-## pravartana4 (D4)
-
-| bits | ук | укр | san | eng | LISP | SUM |
-|---|---|---|---|---|---|---|
-| `0000` | `застосувати` | `застосувати` | `prayoga` | `apply` | `APPLY` | `pravartana4:0000=APPLY` |
-| `0001` | `обчислити` | `обчислити` | `vicāraṇa` | `eval` | `EVAL` | `pravartana4:0001=EVAL` |
-| `0010` | `функція` | `функція` | `phalana` | `lambda` | `LAMBDA` | `pravartana4:0010=LAMBDA` |
-| `0011` | `визначити` | `визначити` | `nirvacana` | `define` | `DEFINE` | `pravartana4:0011=DEFINE` |
-| `0100` | `не` | `не` | `niṣedha` | `not` | `NOT` | `pravartana4:0100=NOT` |
-| `0101` | `порожнє?` | `порожнє?` | `śūnya?` | `null` | `NULL` | `pravartana4:0101=NULL` |
-| `0110` | `решта-від-першого` | `решта-від-першого` | `śeṣa-ādi` | `cdar` | `CDAR` | `pravartana4:0110=CDAR` |
-| `0111` | `решта-від-решти` | `решта-від-решти` | `śeṣa-śeṣa` | `cddr` | `CDDR` | `pravartana4:0111=CDDR` |
-| `1000` | `перше-від-першого` | `перше-від-першого` | `ādi-ādi` | `caar` | `CAAR` | `pravartana4:1000=CAAR` |
-| `1001` | `перше-від-решти` | `перше-від-решти` | `ādi-śeṣa` | `cadr` | `CADR` | `pravartana4:1001=CADR` |
-| `1010` | `знайти` | `знайти` | `anveṣaṇa` | `lookup` | `LOOKUP` | `pravartana4:1010=LOOKUP` |
-| `1011` | `зв'язати` | `зв'язати` | `bandha` | `bind` | `BIND` | `pravartana4:1011=BIND` |
-| `1100` | `обчислити-умови` | `обчислити-умови` | `krama-vicāraṇa` | `evcon` | `EVCON` | `pravartana4:1100=EVCON` |
-| `1101` | `обчислити-список` | `обчислити-список` | `śreṇī-vicāraṇa` | `evlis` | `EVLIS` | `pravartana4:1101=EVLIS` |
-| `1110` | `список` | `список` | `śreṇī` | `list` | `LIST` | `pravartana4:1110=LIST` |
-| `1111` | `приєднати` | `приєднати` | `saṅkalana` | `append` | `APPEND` | `pravartana4:1111=APPEND` |
-
-## vistāra5 (D5)
-
-| bits | ук | укр | san | eng | LISP | SUM |
-|---|---|---|---|---|---|---|
-| `00000` | `обчислити-як-є` | `обчислити-як-є` | `svarūpa-vicāraṇa` | `evalquote` | `EVALQUOTE` | `vistāra5:00000=EVALQUOTE` |
-| `00001` | `функція-значення` | `функція-значення` | `phalana-rūpa` | `function` | `FUNCTION` | `vistāra5:00001=FUNCTION` |
-| `00010` | `необчислений-вираз` | `необчислений-вираз` | `avicārita-rūpa` | `fexpr` | `FEXPR` | `vistāra5:00010=FEXPR` |
-| `00011` | `макрос` | `макрос` | `vistāra-rūpa` | `macro` | `MACRO` | `vistāra5:00011=MACRO` |
-| `00100` | `мітка` | `мітка` | `cihna` | `label` | `LABEL` | `vistāra5:00100=LABEL` |
-| `00101` | `програма` | `програма` | `kāryakrama` | `prog` | `PROG` | `vistāra5:00101=PROG` |
-| `00110` | `встановити` | `встановити` | `sthāpana` | `set` | `SET` | `vistāra5:00110=SET` |
-| `00111` | `встановити-ім'я` | `встановити-ім'я` | `nāma-sthāpana` | `setq` | `SETQ` | `vistāra5:00111=SETQ` |
-| `01000` | `нуль?` | `нуль?` | `saṅkhyā-śūnya?` | `zerop` | `ZEROP` | `vistāra5:01000=ZEROP` |
-| `01001` | `число?` | `число?` | `saṅkhyā?` | `numberp` | `NUMBERP` | `vistāra5:01001=NUMBERP` |
-| `01010` | `додати` | `додати` | `yoga` | `plus` | `PLUS` | `vistāra5:01010=PLUS` |
-| `01011` | `відняти` | `відняти` | `viyoga` | `difference` | `DIFFERENCE` | `vistāra5:01011=DIFFERENCE` |
-| `01100` | `решта-від-першого-від-першого` | `решта-від-першого-від-першого` | `śeṣa-ādi-ādi` | `cdaar` | `CDAAR` | `vistāra5:01100=CDAAR` |
-| `01101` | `решта-від-першого-від-решти` | `решта-від-першого-від-решти` | `śeṣa-ādi-śeṣa` | `cdadr` | `CDADR` | `vistāra5:01101=CDADR` |
-| `01110` | `решта-від-решти-від-першого` | `решта-від-решти-від-першого` | `śeṣa-śeṣa-ādi` | `cddar` | `CDDAR` | `vistāra5:01110=CDDAR` |
-| `01111` | `решта-від-решти-від-решти` | `решта-від-решти-від-решти` | `śeṣa-śeṣa-śeṣa` | `cdddr` | `CDDDR` | `vistāra5:01111=CDDDR` |
-| `10000` | `перше-від-першого-від-першого` | `перше-від-першого-від-першого` | `ādi-ādi-ādi` | `caaar` | `CAAAR` | `vistāra5:10000=CAAAR` |
-| `10001` | `перше-від-першого-від-решти` | `перше-від-першого-від-решти` | `ādi-ādi-śeṣa` | `caadr` | `CAADR` | `vistāra5:10001=CAADR` |
-| `10010` | `перше-від-решти-від-першого` | `перше-від-решти-від-першого` | `ādi-śeṣa-ādi` | `cadar` | `CADAR` | `vistāra5:10010=CADAR` |
-| `10011` | `перше-від-решти-від-решти` | `перше-від-решти-від-решти` | `ādi-śeṣa-śeṣa` | `caddr` | `CADDR` | `vistāra5:10011=CADDR` |
-| `10100` | `зворот` | `зворот` | `viloma` | `reverse` | `REVERSE` | `vistāra5:10100=REVERSE` |
-| `10101` | `зворот-до` | `зворот-до` | `viloma-saṅkalana` | `reverse-onto` | `REVERSE-ONTO` | `vistāra5:10101=REVERSE-ONTO` |
-| `10110` | `помножити` | `помножити` | `guṇana` | `times` | `TIMES` | `vistāra5:10110=TIMES` |
-| `10111` | `частка` | `частка` | `bhāga` | `quotient` | `QUOTIENT` | `vistāra5:10111=QUOTIENT` |
-| `11000` | `перейти` | `перейти` | `gamana` | `go` | `GO` | `vistāra5:11000=GO` |
-| `11001` | `повернути` | `повернути` | `nivartana` | `return` | `RETURN` | `vistāra5:11001=RETURN` |
-| `11010` | `менше?` | `менше?` | `hīna?` | `lessp` | `LESSP` | `vistāra5:11010=LESSP` |
-| `11011` | `більше?` | `більше?` | `adhika?` | `greaterp` | `GREATERP` | `vistāra5:11011=GREATERP` |
-| `11100` | `знайти-за-ключем` | `знайти-за-ключем` | `saṃbandha` | `assoc` | `ASSOC` | `vistāra5:11100=ASSOC` |
-| `11101` | `значення-у-списку?` | `значення-у-списку?` | `sambaddha?` | `member` | `MEMBER` | `vistāra5:11101=MEMBER` |
-| `11110` | `спарувати` | `спарувати` | `yugma-bandha` | `pairlis` | `PAIRLIS` | `vistāra5:11110=PAIRLIS` |
-| `11111` | `замінити` | `замінити` | `ādeśa` | `subst` | `SUBST` | `vistāra5:11111=SUBST` |
-
-## saṃghaṭana6 (D6)
-
-| bits | ук | укр | san | eng | LISP | SUM |
-|---|---|---|---|---|---|---|
-| `000000` | `довжина` | `довжина` | `pramāṇa` | `length` | `LENGTH` | `saṃghaṭana6:000000=LENGTH` |
-| `000001` | `()` | `()` | `()` | `length-onto` | `LENGTH-ONTO` | `saṃghaṭana6:000001=LENGTH-ONTO` |
-| `000010` | `найменше-у-списку` | `найменше-у-списку` | `()` | `min-list` | `MIN-LIST` | `saṃghaṭana6:000010=MIN-LIST` |
-| `000011` | `найбільше-у-списку` | `найбільше-у-списку` | `()` | `max-list` | `MAX-LIST` | `saṃghaṭana6:000011=MAX-LIST` |
-| `000100` | `елемент-списку-за-індексом` | `елемент-списку-за-індексом` | `kramāṅka` | `nth` | `NTH` | `saṃghaṭana6:000100=NTH` |
-| `000101` | `відобразити-залишки` | `відобразити-залишки` | `()` | `maplist` | `MAPLIST` | `saṃghaṭana6:000101=MAPLIST` |
-| `000110` | `()` | `()` | `()` | `macroexpand-1` | `MACROEXPAND-1` | `saṃghaṭana6:000110=MACROEXPAND-1` |
-| `000111` | `()` | `()` | `()` | `macroexpand` | `MACROEXPAND` | `saṃghaṭana6:000111=MACROEXPAND` |
-| `001000` | `нехай` | `нехай` | `()` | `let` | `LET` | `saṃghaṭana6:001000=LET` |
-| `001001` | `нехай*` | `нехай*` | `()` | `let*` | `LET*` | `saṃghaṭana6:001001=LET*` |
-| `001010` | `підставити-пари` | `підставити-пари` | `()` | `sublis` | `SUBLIS` | `saṃghaṭana6:001010=SUBLIS` |
-| `001011` | `()` | `()` | `()` | `compose` | `COMPOSE` | `saṃghaṭana6:001011=COMPOSE` |
-| `001100` | `()` | `()` | `()` | `rassoc` | `RASSOC` | `saṃghaṭana6:001100=RASSOC` |
-| `001101` | `()` | `()` | `()` | `acons` | `ACONS` | `saṃghaṭana6:001101=ACONS` |
-| `001110` | `()` | `()` | `()` | `add1` | `ADD1` | `saṃghaṭana6:001110=ADD1` |
-| `001111` | `()` | `()` | `()` | `sub1` | `SUB1` | `saṃghaṭana6:001111=SUB1` |
-| `010000` | `()` | `()` | `()` | `evenp` | `EVENP` | `saṃghaṭana6:010000=EVENP` |
-| `010001` | `()` | `()` | `()` | `oddp` | `ODDP` | `saṃghaṭana6:010001=ODDP` |
-| `010010` | `()` | `()` | `()` | `neg` | `NEG` | `saṃghaṭana6:010010=NEG` |
-| `010011` | `модуль` | `модуль` | `rūpa` | `abs` | `ABS` | `saṃghaṭana6:010011=ABS` |
-| `010100` | `остача` | `остача` | `avasiṣṭa` | `remainder` | `REMAINDER` | `saṃghaṭana6:010100=REMAINDER` |
-| `010101` | `()` | `()` | `()` | `gcd` | `GCD` | `saṃghaṭana6:010101=GCD` |
-| `010110` | `()` | `()` | `()` | `recip` | `RECIP` | `saṃghaṭana6:010110=RECIP` |
-| `010111` | `()` | `()` | `()` | `expt` | `EXPT` | `saṃghaṭana6:010111=EXPT` |
-| `011000` | `решта-від-першого-від-першого-від-першого` | `решта-від-першого-від-першого-від-першого` | `śeṣa-ādi-ādi-ādi` | `cdaaar` | `CDAAAR` | `saṃghaṭana6:011000=CDAAAR` |
-| `011001` | `решта-від-першого-від-першого-від-решти` | `решта-від-першого-від-першого-від-решти` | `śeṣa-ādi-ādi-śeṣa` | `cdaadr` | `CDAADR` | `saṃghaṭana6:011001=CDAADR` |
-| `011010` | `решта-від-першого-від-решти-від-першого` | `решта-від-першого-від-решти-від-першого` | `śeṣa-ādi-śeṣa-ādi` | `cdadar` | `CDADAR` | `saṃghaṭana6:011010=CDADAR` |
-| `011011` | `решта-від-першого-від-решти-від-решти` | `решта-від-першого-від-решти-від-решти` | `śeṣa-ādi-śeṣa-śeṣa` | `cdaddr` | `CDADDR` | `saṃghaṭana6:011011=CDADDR` |
-| `011100` | `решта-від-решти-від-першого-від-першого` | `решта-від-решти-від-першого-від-першого` | `śeṣa-śeṣa-ādi-ādi` | `cddaar` | `CDDAAR` | `saṃghaṭana6:011100=CDDAAR` |
-| `011101` | `решта-від-решти-від-першого-від-решти` | `решта-від-решти-від-першого-від-решти` | `śeṣa-śeṣa-ādi-śeṣa` | `cddadr` | `CDDADR` | `saṃghaṭana6:011101=CDDADR` |
-| `011110` | `решта-від-решти-від-решти-від-першого` | `решта-від-решти-від-решти-від-першого` | `śeṣa-śeṣa-śeṣa-ādi` | `cdddar` | `CDDDAR` | `saṃghaṭana6:011110=CDDDAR` |
-| `011111` | `решта-від-решти-від-решти-від-решти` | `решта-від-решти-від-решти-від-решти` | `śeṣa-śeṣa-śeṣa-śeṣa` | `cddddr` | `CDDDDR` | `saṃghaṭana6:011111=CDDDDR` |
-| `100000` | `перше-від-першого-від-першого-від-першого` | `перше-від-першого-від-першого-від-першого` | `ādi-ādi-ādi-ādi` | `caaaar` | `CAAAAR` | `saṃghaṭana6:100000=CAAAAR` |
-| `100001` | `перше-від-першого-від-першого-від-решти` | `перше-від-першого-від-першого-від-решти` | `ādi-ādi-ādi-śeṣa` | `caaadr` | `CAAADR` | `saṃghaṭana6:100001=CAAADR` |
-| `100010` | `перше-від-першого-від-решти-від-першого` | `перше-від-першого-від-решти-від-першого` | `ādi-ādi-śeṣa-ādi` | `caadar` | `CAADAR` | `saṃghaṭana6:100010=CAADAR` |
-| `100011` | `перше-від-першого-від-решти-від-решти` | `перше-від-першого-від-решти-від-решти` | `ādi-ādi-śeṣa-śeṣa` | `caaddr` | `CAADDR` | `saṃghaṭana6:100011=CAADDR` |
-| `100100` | `перше-від-решти-від-першого-від-першого` | `перше-від-решти-від-першого-від-першого` | `ādi-śeṣa-ādi-ādi` | `cadaar` | `CADAAR` | `saṃghaṭana6:100100=CADAAR` |
-| `100101` | `перше-від-решти-від-першого-від-решти` | `перше-від-решти-від-першого-від-решти` | `ādi-śeṣa-ādi-śeṣa` | `cadadr` | `CADADR` | `saṃghaṭana6:100101=CADADR` |
-| `100110` | `перше-від-решти-від-решти-від-першого` | `перше-від-решти-від-решти-від-першого` | `ādi-śeṣa-śeṣa-ādi` | `caddar` | `CADDAR` | `saṃghaṭana6:100110=CADDAR` |
-| `100111` | `перше-від-решти-від-решти-від-решти` | `перше-від-решти-від-решти-від-решти` | `ādi-śeṣa-śeṣa-śeṣa` | `cadddr` | `CADDDR` | `saṃghaṭana6:100111=CADDDR` |
-| `101000` | `відобразити` | `відобразити` | `āvartana` | `map` | `MAP` | `saṃghaṭana6:101000=MAP` |
-| `101001` | `відсіяти` | `відсіяти` | `kalpana` | `filter` | `FILTER` | `saṃghaṭana6:101001=FILTER` |
-| `101010` | `()` | `()` | `()` | `map-onto` | `MAP-ONTO` | `saṃghaṭana6:101010=MAP-ONTO` |
-| `101011` | `()` | `()` | `()` | `filter-onto` | `FILTER-ONTO` | `saṃghaṭana6:101011=FILTER-ONTO` |
-| `101100` | `()` | `()` | `()` | `curry` | `CURRY` | `saṃghaṭana6:101100=CURRY` |
-| `101101` | `()` | `()` | `()` | `flip` | `FLIP` | `saṃghaṭana6:101101=FLIP` |
-| `101110` | `згорнути` | `згорнути` | `saṅgraha` | `reduce` | `REDUCE` | `saṃghaṭana6:101110=REDUCE` |
-| `101111` | `()` | `()` | `()` | `scan` | `SCAN` | `saṃghaṭana6:101111=SCAN` |
-| `110000` | `()` | `()` | `()` | `take` | `TAKE` | `saṃghaṭana6:110000=TAKE` |
-| `110001` | `()` | `()` | `()` | `drop` | `DROP` | `saṃghaṭana6:110001=DROP` |
-| `110010` | `()` | `()` | `()` | `do` | `DO` | `saṃghaṭana6:110010=DO` |
-| `110011` | `()` | `()` | `()` | `while` | `WHILE` | `saṃghaṭana6:110011=WHILE` |
-| `110100` | `не-більше?` | `не-більше?` | `na-adhika?` | `leq` | `LEQ` | `saṃghaṭana6:110100=LEQ` |
-| `110101` | `найменше` | `найменше` | `alpatara` | `min` | `MIN` | `saṃghaṭana6:110101=MIN` |
-| `110110` | `не-менше?` | `не-менше?` | `na-hīna?` | `geq` | `GEQ` | `saṃghaṭana6:110110=GEQ` |
-| `110111` | `найбільше` | `найбільше` | `brhattara` | `max` | `MAX` | `saṃghaṭana6:110111=MAX` |
-| `111000` | `()` | `()` | `()` | `zip` | `ZIP` | `saṃghaṭana6:111000=ZIP` |
-| `111001` | `()` | `()` | `()` | `unzip` | `UNZIP` | `saṃghaṭana6:111001=UNZIP` |
-| `111010` | `()` | `()` | `()` | `intersection` | `INTERSECTION` | `saṃghaṭana6:111010=INTERSECTION` |
-| `111011` | `()` | `()` | `()` | `union` | `UNION` | `saṃghaṭana6:111011=UNION` |
-| `111100` | `()` | `()` | `()` | `any` | `ANY` | `saṃghaṭana6:111100=ANY` |
-| `111101` | `()` | `()` | `()` | `all` | `ALL` | `saṃghaṭana6:111101=ALL` |
-| `111110` | `()` | `()` | `()` | `integerp` | `INTEGERP` | `saṃghaṭana6:111110=INTEGERP` |
-| `111111` | `()` | `()` | `()` | `rationalp` | `RATIONALP` | `saṃghaṭana6:111111=RATIONALP` |
+| `0` | `no` | `no` | `ні` | `no` | `NIL` | `()` |
+| `1` | `yes` | `yes` | `так` | `yes` | `T` | `()` |
+| `00` | `separator` | `separator` | `пропуск` | `separator` | `()` | `()` |
+| `01` | `close` | `close` | `закрити` | `close` | `()` | `()` |
+| `10` | `open` | `open` | `відкрити` | `open` | `()` | `()` |
+| `11` | `dot` | `dot` | `крапка` | `dot` | `()` | `()` |
+| `000` | `empty` | `empty` | `порожнє` | `empty` | `NIL` | `()` |
+| `001` | `quote` | `як-є` | `як-є` | `quote` | `QUOTE` | `як-є` |
+| `010` | `atom` | `atom` | `атом?` | `atom` | `ATOM` | `()` |
+| `011` | `cdr` | `решта` | `решта` | `cdr` | `CDR` | `решта` |
+| `100` | `car` | `перше` | `перше` | `car` | `CAR` | `перше` |
+| `101` | `eq` | `eq` | `тотожне?` | `eq` | `EQ` | `()` |
+| `110` | `cond` | `за-умовою` | `за-умовою` | `cond` | `COND` | `за-умовою` |
+| `111` | `cons` | `сполучити` | `сполучити` | `cons` | `CONS` | `сполучити` |
+| `0000` | `apply` | `застосувати` | `застосувати` | `apply` | `APPLY` | `застосувати` |
+| `0001` | `eval` | `обчислити` | `обчислити` | `eval` | `EVAL` | `обчислити` |
+| `0010` | `lambda` | `функція` | `функція` | `lambda` | `LAMBDA` | `функція` |
+| `0011` | `define` | `визначити` | `визначити` | `define` | `DEFINE` | `визначити` |
+| `0100` | `not` | `not` | `не` | `not` | `NOT` | `()` |
+| `0101` | `null` | `null` | `порожнє?` | `null` | `NULL` | `()` |
+| `0110` | `cdar` | `cdar` | `решта-від-першого` | `cdar` | `CDAR` | `()` |
+| `0111` | `cddr` | `cddr` | `решта-від-решти` | `cddr` | `CDDR` | `решта-від-решти` |
+| `1000` | `caar` | `caar` | `перше-від-першого` | `caar` | `CAAR` | `перше-від-першого` |
+| `1001` | `cadr` | `cadr` | `перше-від-решти` | `cadr` | `CADR` | `перше-від-решти` |
+| `1010` | `lookup` | `lookup` | `знайти` | `lookup` | `LOOKUP` | `()` |
+| `1011` | `bind` | `bind` | `зв'язати` | `bind` | `BIND` | `()` |
+| `1100` | `evcon` | `evcon` | `обчислити-умови` | `evcon` | `EVCON` | `()` |
+| `1101` | `evlis` | `evlis` | `обчислити-список` | `evlis` | `EVLIS` | `()` |
+| `1110` | `list` | `список` | `список` | `list` | `LIST` | `список` |
+| `1111` | `append` | `приєднати` | `приєднати` | `append` | `APPEND` | `приєднати` |
+| `00000` | `evalquote` | `evalquote` | `обчислити-як-є` | `evalquote` | `EVALQUOTE` | `()` |
+| `00001` | `function` | `function` | `функція-значення` | `function` | `FUNCTION` | `()` |
+| `00010` | `fexpr` | `fexpr` | `необчислений-вираз` | `fexpr` | `FEXPR` | `()` |
+| `00011` | `macro` | `macro` | `макрос` | `macro` | `MACRO` | `()` |
+| `00100` | `label` | `мітка` | `мітка` | `label` | `LABEL` | `мітка` |
+| `00101` | `prog` | `prog` | `програма` | `prog` | `PROG` | `()` |
+| `00110` | `set` | `set` | `встановити` | `set` | `SET` | `()` |
+| `00111` | `setq` | `setq` | `встановити-ім'я` | `setq` | `SETQ` | `()` |
+| `01000` | `zerop` | `zerop` | `нуль?` | `zerop` | `ZEROP` | `()` |
+| `01001` | `numberp` | `numberp` | `число?` | `numberp` | `NUMBERP` | `()` |
+| `01010` | `plus` | `додати` | `додати` | `plus` | `PLUS` | `додати` |
+| `01011` | `difference` | `відняти` | `відняти` | `difference` | `DIFFERENCE` | `відняти` |
+| `01100` | `cdaar` | `cdaar` | `решта-від-першого-від-першого` | `cdaar` | `CDAAR` | `()` |
+| `01101` | `cdadr` | `cdadr` | `решта-від-першого-від-решти` | `cdadr` | `CDADR` | `()` |
+| `01110` | `cddar` | `cddar` | `решта-від-решти-від-першого` | `cddar` | `CDDAR` | `()` |
+| `01111` | `cdddr` | `cdddr` | `решта-від-решти-від-решти` | `cdddr` | `CDDDR` | `()` |
+| `10000` | `caaar` | `caaar` | `перше-від-першого-від-першого` | `caaar` | `CAAAR` | `()` |
+| `10001` | `caadr` | `caadr` | `перше-від-першого-від-решти` | `caadr` | `CAADR` | `()` |
+| `10010` | `cadar` | `cadar` | `перше-від-решти-від-першого` | `cadar` | `CADAR` | `()` |
+| `10011` | `caddr` | `caddr` | `перше-від-решти-від-решти` | `caddr` | `CADDR` | `()` |
+| `10100` | `reverse` | `зворот` | `зворот` | `reverse` | `REVERSE` | `зворот` |
+| `10101` | `reverse-onto` | `reverse-onto` | `зворот-до` | `reverse-onto` | `REVERSE-ONTO` | `()` |
+| `10110` | `times` | `помножити` | `помножити` | `times` | `TIMES` | `помножити` |
+| `10111` | `quotient` | `частка` | `частка` | `quotient` | `QUOTIENT` | `частка` |
+| `11000` | `go` | `go` | `перейти` | `go` | `GO` | `()` |
+| `11001` | `return` | `return` | `повернути` | `return` | `RETURN` | `()` |
+| `11010` | `lessp` | `lessp` | `менше?` | `lessp` | `LESSP` | `()` |
+| `11011` | `greaterp` | `greaterp` | `більше?` | `greaterp` | `GREATERP` | `()` |
+| `11100` | `assoc` | `знайти-за-ключем` | `знайти-за-ключем` | `assoc` | `ASSOC` | `знайти-за-ключем` |
+| `11101` | `member` | `member` | `значення-у-списку?` | `member` | `MEMBER` | `()` |
+| `11110` | `pairlis` | `pairlis` | `спарувати` | `pairlis` | `PAIRLIS` | `()` |
+| `11111` | `subst` | `замінити` | `замінити` | `subst` | `SUBST` | `замінити` |
+| `000000` | `length` | `довжина` | `довжина` | `length` | `LENGTH` | `довжина` |
+| `000001` | `length-onto` | `length-onto` | `()` | `length-onto` | `LENGTH-ONTO` | `()` |
+| `000010` | `min-list` | `найменше-у-списку` | `найменше-у-списку` | `min-list` | `MIN-LIST` | `найменше-у-списку` |
+| `000011` | `max-list` | `найбільше-у-списку` | `найбільше-у-списку` | `max-list` | `MAX-LIST` | `найбільше-у-списку` |
+| `000100` | `nth` | `елемент-списку-за-індексом` | `елемент-списку-за-індексом` | `nth` | `NTH` | `елемент-списку-за-індексом` |
+| `000101` | `maplist` | `відобразити-залишки` | `відобразити-залишки` | `maplist` | `MAPLIST` | `відобразити-залишки` |
+| `000110` | `macroexpand-1` | `macroexpand-1` | `()` | `macroexpand-1` | `MACROEXPAND-1` | `()` |
+| `000111` | `macroexpand` | `macroexpand` | `()` | `macroexpand` | `MACROEXPAND` | `()` |
+| `001000` | `let` | `нехай` | `нехай` | `let` | `LET` | `нехай` |
+| `001001` | `let*` | `нехай*` | `нехай*` | `let*` | `LET*` | `нехай-послідовно` |
+| `001010` | `sublis` | `підставити-пари` | `підставити-пари` | `sublis` | `SUBLIS` | `підставити-пари` |
+| `001011` | `compose` | `compose` | `()` | `compose` | `COMPOSE` | `()` |
+| `001100` | `rassoc` | `rassoc` | `()` | `rassoc` | `RASSOC` | `()` |
+| `001101` | `acons` | `acons` | `()` | `acons` | `ACONS` | `()` |
+| `001110` | `add1` | `add1` | `()` | `add1` | `ADD1` | `()` |
+| `001111` | `sub1` | `sub1` | `()` | `sub1` | `SUB1` | `()` |
+| `010000` | `evenp` | `evenp` | `()` | `evenp` | `EVENP` | `()` |
+| `010001` | `oddp` | `oddp` | `()` | `oddp` | `ODDP` | `()` |
+| `010010` | `neg` | `neg` | `()` | `neg` | `NEG` | `()` |
+| `010011` | `abs` | `модуль` | `модуль` | `abs` | `ABS` | `модуль` |
+| `010100` | `remainder` | `remainder` | `остача` | `remainder` | `REMAINDER` | `()` |
+| `010101` | `gcd` | `gcd` | `()` | `gcd` | `GCD` | `()` |
+| `010110` | `recip` | `recip` | `()` | `recip` | `RECIP` | `()` |
+| `010111` | `expt` | `expt` | `()` | `expt` | `EXPT` | `()` |
+| `011000` | `cdaaar` | `cdaaar` | `решта-від-першого-від-першого-від-першого` | `cdaaar` | `CDAAAR` | `()` |
+| `011001` | `cdaadr` | `cdaadr` | `решта-від-першого-від-першого-від-решти` | `cdaadr` | `CDAADR` | `()` |
+| `011010` | `cdadar` | `cdadar` | `решта-від-першого-від-решти-від-першого` | `cdadar` | `CDADAR` | `()` |
+| `011011` | `cdaddr` | `cdaddr` | `решта-від-першого-від-решти-від-решти` | `cdaddr` | `CDADDR` | `()` |
+| `011100` | `cddaar` | `cddaar` | `решта-від-решти-від-першого-від-першого` | `cddaar` | `CDDAAR` | `()` |
+| `011101` | `cddadr` | `cddadr` | `решта-від-решти-від-першого-від-решти` | `cddadr` | `CDDADR` | `()` |
+| `011110` | `cdddar` | `cdddar` | `решта-від-решти-від-решти-від-першого` | `cdddar` | `CDDDAR` | `()` |
+| `011111` | `cddddr` | `cddddr` | `решта-від-решти-від-решти-від-решти` | `cddddr` | `CDDDDR` | `()` |
+| `100000` | `caaaar` | `caaaar` | `перше-від-першого-від-першого-від-першого` | `caaaar` | `CAAAAR` | `()` |
+| `100001` | `caaadr` | `caaadr` | `перше-від-першого-від-першого-від-решти` | `caaadr` | `CAAADR` | `()` |
+| `100010` | `caadar` | `caadar` | `перше-від-першого-від-решти-від-першого` | `caadar` | `CAADAR` | `()` |
+| `100011` | `caaddr` | `caaddr` | `перше-від-першого-від-решти-від-решти` | `caaddr` | `CAADDR` | `()` |
+| `100100` | `cadaar` | `cadaar` | `перше-від-решти-від-першого-від-першого` | `cadaar` | `CADAAR` | `()` |
+| `100101` | `cadadr` | `cadadr` | `перше-від-решти-від-першого-від-решти` | `cadadr` | `CADADR` | `()` |
+| `100110` | `caddar` | `caddar` | `перше-від-решти-від-решти-від-першого` | `caddar` | `CADDAR` | `()` |
+| `100111` | `cadddr` | `cadddr` | `перше-від-решти-від-решти-від-решти` | `cadddr` | `CADDDR` | `перше-після-трьох-решт` |
+| `101000` | `map` | `відобразити` | `відобразити` | `map` | `MAP` | `відобразити` |
+| `101001` | `filter` | `відсіяти` | `відсіяти` | `filter` | `FILTER` | `відсіяти` |
+| `101010` | `map-onto` | `map-onto` | `()` | `map-onto` | `MAP-ONTO` | `()` |
+| `101011` | `filter-onto` | `filter-onto` | `()` | `filter-onto` | `FILTER-ONTO` | `()` |
+| `101100` | `curry` | `curry` | `()` | `curry` | `CURRY` | `()` |
+| `101101` | `flip` | `flip` | `()` | `flip` | `FLIP` | `()` |
+| `101110` | `reduce` | `згорнути` | `згорнути` | `reduce` | `REDUCE` | `згорнути` |
+| `101111` | `scan` | `scan` | `()` | `scan` | `SCAN` | `()` |
+| `110000` | `take` | `take` | `()` | `take` | `TAKE` | `()` |
+| `110001` | `drop` | `drop` | `()` | `drop` | `DROP` | `()` |
+| `110010` | `do` | `do` | `()` | `do` | `DO` | `()` |
+| `110011` | `while` | `while` | `()` | `while` | `WHILE` | `()` |
+| `110100` | `leq` | `leq` | `не-більше?` | `leq` | `LEQ` | `()` |
+| `110101` | `min` | `найменше` | `найменше` | `min` | `MIN` | `найменше` |
+| `110110` | `geq` | `geq` | `не-менше?` | `geq` | `GEQ` | `()` |
+| `110111` | `max` | `найбільше` | `найбільше` | `max` | `MAX` | `найбільше` |
+| `111000` | `zip` | `zip` | `()` | `zip` | `ZIP` | `()` |
+| `111001` | `unzip` | `unzip` | `()` | `unzip` | `UNZIP` | `()` |
+| `111010` | `intersection` | `intersection` | `()` | `intersection` | `INTERSECTION` | `()` |
+| `111011` | `union` | `union` | `()` | `union` | `UNION` | `()` |
+| `111100` | `any` | `any` | `()` | `any` | `ANY` | `()` |
+| `111101` | `all` | `all` | `()` | `all` | `ALL` | `()` |
+| `111110` | `integerp` | `integerp` | `()` | `integerp` | `INTEGERP` | `()` |
+| `111111` | `rationalp` | `rationalp` | `()` | `rationalp` | `RATIONALP` | `()` |
