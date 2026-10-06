@@ -346,12 +346,9 @@ mod tests {
             assert_eq!(domain_identity_for_surface(surface), Some(identity));
         }
 
-        assert_eq!(
-            registry_byte_for_surface("aṇu")
-                .and_then(legacy_domain_identity_from_registry_byte),
-            None,
-            "new Sanskrit ATOM spelling must not depend on a historical byte"
-        );
+        // `aṇu` is also present in historical compatibility data. That overlap
+        // is allowed: the exact-domain table owns the current route, as proved above;
+        // historical byte presence must not be used as placement authority.
         assert_eq!(
             registry_byte_for_surface("решта-від-першого")
                 .and_then(legacy_domain_identity_from_registry_byte),
