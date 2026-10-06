@@ -17,6 +17,7 @@ on:
       - "crates/sens/tests/compiler_domain_shape.rs"
       - "crates/sens/tests/compiler_nucleus_sens.rs"
       - "crates/sens/tests/compiler_selfhost_role_closure.rs"
+      - "crates/sens/tests/compiler_selfhost_lowering_coverage.rs"
       - "crates/xtask/src/compiler_export.rs"
       - "crates/xtask/src/main.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
@@ -59,6 +60,11 @@ jobs:
           --test compiler_selfhost_role_closure
       - name: Compiler semantic export CLI
         run: cargo test -p xtask --test compiler_export_cli -- --nocapture
+      - name: Whole-nucleus lowering coverage when present
+        run: |
+          if test -f crates/sens/tests/compiler_selfhost_lowering_coverage.rs; then
+            cargo test -p sens --test compiler_selfhost_lowering_coverage -- --nocapture
+          fi
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib
