@@ -1,4 +1,4 @@
-name: D1 D7 foundation authority
+name: D1 D8 foundation authority
 
 on:
   pull_request:
@@ -7,10 +7,14 @@ on:
       - "knowledge/d1-d6-foundation.json"
       - "knowledge/d1-d7-foundation.json"
       - "knowledge/d7-ratified.json"
+      - "knowledge/d1-d8-foundation.json"
+      - "knowledge/d8-ratified.json"
       - "contracts/d1-d5-foundation-ratification.lisp"
       - "contracts/d1-d6-foundation-ratification.lisp"
       - "contracts/d1-d7-foundation-ratification.lisp"
       - "contracts/d7-ratification.lisp"
+      - "contracts/d1-d8-foundation-ratification.lisp"
+      - "contracts/d8-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d1-d5-foundation.py"
@@ -22,17 +26,21 @@ on:
       - "knowledge/d1-d6-foundation.json"
       - "knowledge/d1-d7-foundation.json"
       - "knowledge/d7-ratified.json"
+      - "knowledge/d1-d8-foundation.json"
+      - "knowledge/d8-ratified.json"
       - "contracts/d1-d5-foundation-ratification.lisp"
       - "contracts/d1-d6-foundation-ratification.lisp"
       - "contracts/d1-d7-foundation-ratification.lisp"
       - "contracts/d7-ratification.lisp"
+      - "contracts/d1-d8-foundation-ratification.lisp"
+      - "contracts/d8-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d1-d5-foundation.py"
 
 jobs:
   foundation:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     steps:
       - uses: actions/checkout@v5
       - run: python3 scripts/check-d1-d5-foundation.py
