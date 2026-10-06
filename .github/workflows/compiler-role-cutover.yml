@@ -18,6 +18,8 @@ on:
       - "crates/sens/tests/compiler_nucleus_sens.rs"
       - "crates/sens/tests/compiler_selfhost_role_closure.rs"
       - "crates/sens/tests/compiler_selfhost_lowering_coverage.rs"
+      - "contracts/compiler-program-data-v1.lisp"
+      - "crates/sens/tests/compiler_program_data.rs"
       - "crates/xtask/src/compiler_export.rs"
       - "crates/xtask/src/main.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
@@ -65,6 +67,9 @@ jobs:
           if test -f crates/sens/tests/compiler_selfhost_lowering_coverage.rs; then
             cargo test -p sens --test compiler_selfhost_lowering_coverage -- --nocapture
           fi
+
+      - name: Selfhost program-data wire
+        run: cargo test -p sens --test compiler_program_data -- --nocapture
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib
