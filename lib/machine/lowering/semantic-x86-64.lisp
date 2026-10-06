@@ -252,3 +252,28 @@
          (00000001 unsupported-current-domain-binary-u64))
         (t
          (x86-encode-admitted-program forms))))))
+
+
+; #3996 exact-domain structural D3 dispatcher.
+; These are bounded native-call witnesses only. They do not claim a general
+; allocator, escaping pair ABI, GC, or arbitrary first-class native pair value.
+(00001001 x86-lower-current-structural-u64-forms
+  (00001000 (identity left right)
+    (00000111
+      ((00100010 identity 111)
+       (x86-lower-bounded-pair-store-u64-forms left right))
+      ((00100010 identity 100)
+       (x86-lower-cons-car-u64-forms left right))
+      ((00100010 identity 011)
+       (x86-lower-cons-cdr-u64-forms left right))
+      (t
+       (00000001 unsupported-current-domain-structural-u64)))))
+
+(00001001 x86-encode-current-structural-u64
+  (00001000 (identity left right)
+    (10011100 ((forms (x86-lower-current-structural-u64-forms identity left right)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-structural-u64))
+         (00000001 unsupported-current-domain-structural-u64))
+        (t
+         (x86-encode-admitted-program-or-reject forms))))))
