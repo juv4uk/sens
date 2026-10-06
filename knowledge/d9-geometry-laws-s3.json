@@ -1,0 +1,149 @@
+{
+  "schema": "d9-geometry-laws-s3/v1",
+  "status": "RESEARCH-S3",
+  "authority": "#4003",
+  "date": "2026-10-07",
+  "semantic_inventory": "knowledge/d9-v1-semantic-inventory.json",
+  "geometry_state": "knowledge/d9-v1-geometry-state.json",
+  "accounting": {
+    "families_tested": 7,
+    "semantic_members_covered": 38,
+    "proved_families": 7,
+    "fixed_coordinate_consequences": 0,
+    "orbit_coordinate_consequences": 0,
+    "none_coordinate_consequences": 7,
+    "ratified_d9_residents": 0
+  },
+  "theorem_boundary": "A semantic equation that is invariant under arbitrary permutations of all involved UNPLACED coordinates cannot determine absolute D9 placement under current evidence.",
+  "families": [
+    {
+      "family": "PERSISTENT-VECTOR-ROUNDTRIP",
+      "members": [
+        "VEC-FROM-LIST",
+        "VEC->LIST",
+        "VEC-COUNT",
+        "VEC-NTH",
+        "VEC-CONJ"
+      ],
+      "law": "VEC->LIST(VEC-FROM-LIST(xs)) = xs; count/nth/conj agree with list semantics while preserving the original vector.",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "coordinate_permutation_attack": {
+        "result": "INVARIANT",
+        "statement": "Arbitrary permutations of the involved UNPLACED coordinates preserve the semantic witness because the tested law depends only on semantic values/relations and references no D9 coordinate."
+      }
+    },
+    {
+      "family": "PERSISTENT-MAP-COHERENCE",
+      "members": [
+        "MAP-EMPTY",
+        "MAP-INSERT",
+        "MAP-GET",
+        "MAP-CONTAINS?",
+        "MAP->LIST"
+      ],
+      "law": "After MAP-INSERT(k,v,m), MAP-GET(k)=v and MAP-CONTAINS?(k)=true while m remains unchanged.",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "coordinate_permutation_attack": {
+        "result": "INVARIANT",
+        "statement": "Arbitrary permutations of the involved UNPLACED coordinates preserve the semantic witness because the tested law depends only on semantic values/relations and references no D9 coordinate."
+      }
+    },
+    {
+      "family": "UTF8-UNICODE-ROUNDTRIP",
+      "members": [
+        "UTF8-DECODE",
+        "UTF8-VALID?",
+        "UNICODE-SCALARS->STRING",
+        "UTF8-DECODE-STRING",
+        "UTF8-ENCODE-STRING"
+      ],
+      "law": "For valid Unicode scalars/strings, UTF-8 encode followed by decode returns the same scalar/string content; invalid byte sequences are rejected by UTF8-VALID?.",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "coordinate_permutation_attack": {
+        "result": "INVARIANT",
+        "statement": "Arbitrary permutations of the involved UNPLACED coordinates preserve the semantic witness because the tested law depends only on semantic values/relations and references no D9 coordinate."
+      }
+    },
+    {
+      "family": "CONTROLLED-TEXT-KNOWLEDGE-ROUNDTRIP",
+      "members": [
+        "UNDERSTAND-IS",
+        "UNDERSTAND-RELATION",
+        "NARRATE-FACT"
+      ],
+      "law": "For supported controlled fact shapes, NARRATE-FACT(UNDERSTAND-*(words)) reproduces the original controlled word sequence.",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "coordinate_permutation_attack": {
+        "result": "INVARIANT",
+        "statement": "Arbitrary permutations of the involved UNPLACED coordinates preserve the semantic witness because the tested law depends only on semantic values/relations and references no D9 coordinate."
+      }
+    },
+    {
+      "family": "CONTENT-STORE-COHERENCE",
+      "members": [
+        "EMPTY-CONTENT-STORE",
+        "CONTENT-STORE-PUT",
+        "CONTENT-STORE-GET",
+        "CONTENT-STORE-CONTAINS?",
+        "CONTENT-STORE-SIZE"
+      ],
+      "law": "PUT followed by GET/CONTAINS is coherent; reinserting identical content replaces the same canonical address rather than increasing store size.",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "coordinate_permutation_attack": {
+        "result": "INVARIANT",
+        "statement": "Arbitrary permutations of the involved UNPLACED coordinates preserve the semantic witness because the tested law depends only on semantic values/relations and references no D9 coordinate."
+      }
+    },
+    {
+      "family": "RESULT-STATUS-CONSTRUCTOR-PROJECTION",
+      "members": [
+        "MAKE-PROVED",
+        "MAKE-UNKNOWN",
+        "MAKE-PARTIAL",
+        "MAKE-BLOCKED",
+        "MAKE-DISPUTED",
+        "MAKE-INVALID",
+        "RESULT-STATUS",
+        "RESULT-PAYLOAD"
+      ],
+      "law": "Each result constructor has a distinct canonical status tag; RESULT-STATUS and RESULT-PAYLOAD recover constructor tag/payload without collapse.",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "coordinate_permutation_attack": {
+        "result": "INVARIANT",
+        "statement": "Arbitrary permutations of the involved UNPLACED coordinates preserve the semantic witness because the tested law depends only on semantic values/relations and references no D9 coordinate."
+      }
+    },
+    {
+      "family": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "members": [
+        "MAKE-DIMENSION",
+        "DIMENSION-BASE",
+        "DIMENSION-EXPONENT",
+        "UNIT-PRODUCT",
+        "UNIT-QUOTIENT",
+        "QUANTITY-PRODUCT",
+        "QUANTITY-QUOTIENT"
+      ],
+      "law": "Unit product adds exact dimension exponents, quotient subtracts them, zero exponents cancel, and quantity arithmetic applies the same unit algebra to exact values.",
+      "result": "PROVED",
+      "placement_consequence": "NONE",
+      "coordinate_permutation_attack": {
+        "result": "INVARIANT",
+        "statement": "Arbitrary permutations of the involved UNPLACED coordinates preserve the semantic witness because the tested law depends only on semantic values/relations and references no D9 coordinate."
+      }
+    }
+  ],
+  "conclusion": {
+    "geometry_change": "NONE",
+    "fixed_coordinates_remain": 128,
+    "free_coordinates_remain": 384,
+    "unplaced_meanings_remain": 384,
+    "next_step": "If no stronger coordinate-sensitive law is recovered, emit a deterministic S4 gauge representative over the residual 384-coordinate equivalence class."
+  }
+}
