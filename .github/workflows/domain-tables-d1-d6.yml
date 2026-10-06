@@ -30,4 +30,23 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check canonical D1-D6 tables
-        run: python3 scripts/generate-domain-tables-d1-d6.py
+        id: check
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/generate-domain-tables-d1-d6.py > domain-table-check.log 2>&1
+          code=$?
+          echo "$code" > domain-table-exit-code.txt
+          cat domain-table-check.log
+          exit 0
+      - name: Upload diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: domain-table-check
+          path: |
+            domain-table-check.log
+            domain-table-exit-code.txt
+      - name: Enforce result
+        shell: bash
+        run: test "$(cat domain-table-exit-code.txt)" = "0"
