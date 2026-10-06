@@ -5,6 +5,7 @@
 //! xtask — machine-evidence generators only; repository policy checks
 //! (formerly `cargo xtask verify`) now live in `scripts/verify-repo.lisp`.
 
+pub mod compiler_export;
 pub mod encoder_coverage;
 pub mod external_oracle;
 pub mod xed_import;
@@ -14,6 +15,7 @@ use std::process::ExitCode;
 fn main() -> ExitCode {
     let mut args = std::env::args().skip(1);
     match args.next().as_deref() {
+        Some("compiler-export") => run_compiler_export(args),
         Some("external-oracle") => run_external_oracle(args),
         Some("import-xed-evidence") => run_import_xed_evidence(args),
         Some("generate-encoder-coverage") => run_generate_encoder_coverage(args),
@@ -29,9 +31,44 @@ fn main() -> ExitCode {
     }
 }
 
+fn run_compiler_export(mut args: impl Iterator<Item = String>) -> ExitCode {
+    let repo_root = locate_repo_root();
+    let mut fixture: Option<String> = None;
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--fixture" => {
+                let Some(value) = args.next() else {
+                    eprintln!("--fixture requires a compiler corpus fixture name");
+                    return ExitCode::FAILURE;
+                };
+                fixture = Some(value);
+            }
+            other => {
+                eprintln!("unknown compiler-export option: {other}");
+                eprintln!("  available: --fixture <name>");
+                return ExitCode::FAILURE;
+            }
+        }
+    }
+
+    match compiler_export::run(
+        &repo_root,
+        compiler_export::ExportOptions { fixture },
+    ) {
+        Ok(rendered) => {
+            print!("{rendered}");
+            ExitCode::SUCCESS
+        }
+        Err(error) => {
+            eprintln!("compiler export failed: {error}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
 fn print_usage() {
     eprintln!(
-        "usage: cargo xtask <external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
+        "usage: cargo xtask <compiler-export [--fixture NAME]|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
     );
 }
 
