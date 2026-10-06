@@ -6,7 +6,7 @@
 //! it to SENS code explicitly while #3808/#3809 move compiler-law execution
 //! into the language itself.
 
-use crate::{ErrorKind, Exactness, LanguageError, Value};
+use crate::{sha256_source, ErrorKind, Exactness, LanguageError, Value};
 use std::rc::Rc;
 
 /// Build an opt-in mechanism value that decomposes one exact DomainIdentity.
@@ -90,5 +90,33 @@ pub fn domain_identity_shape_or_empty_mechanism() -> Value {
             Value::Number(width as f64, Exactness::Exact),
             Value::list(bits),
         ]))
+    }))
+}
+
+/// Build one representation-only canonical-value SHA-256 mechanism.
+///
+/// SENS code decides which already-constructed value is hashed. The mechanism
+/// only serializes that value through the existing canonical wire renderer and
+/// hashes the resulting UTF-8 bytes. It owns no compiler role, proof, domain
+/// meaning, or backend/install policy.
+pub fn canonical_value_sha256_mechanism() -> Value {
+    Value::host_function(Rc::new(|arguments, _environment, span| {
+        if arguments.len() != 1 {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!(
+                    "canonical-value sha256 mechanism expects exactly 1 argument, got {}",
+                    arguments.len()
+                ),
+                span,
+            ));
+        }
+
+        let wire = arguments[0].to_canonical_wire_string();
+        let digest = sha256_source(wire.as_bytes())
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>();
+        Ok(Value::String(Rc::from(digest)))
     }))
 }
