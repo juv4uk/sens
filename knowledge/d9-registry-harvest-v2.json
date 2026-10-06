@@ -1,0 +1,2503 @@
+{
+  "schema": "d9-registry-harvest-v2/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#3979",
+  "date": "2026-10-06",
+  "source": "lib/surface/semantic-registry.lisp",
+  "excluded_prior_source": "lib/surface/function-signatures.lisp",
+  "foundation": "#3960 / Contract 11.7",
+  "coordinate_policy": "All historical registry 8-bit IDs are deliberately erased from this artifact. No source coordinate participates in D9 identity, stable IDs, selection, or placement.",
+  "accounting": {
+    "named_registry_rows": 182,
+    "prior_signature_names": 57,
+    "reviewed_rows_beyond_signatures": 132,
+    "selected_d9_candidates": 82,
+    "lower_domain_or_current_projection": 44,
+    "internal_no_slot": 4,
+    "hold_semantic_review": 2,
+    "d9_selected_before_harvest": 168,
+    "d9_selected_after_harvest": 250,
+    "d9_remaining_after_harvest": 262,
+    "ratified_d9_residents": 0
+  },
+  "families": [
+    {
+      "family": "GENERIC-DERIVED",
+      "selected_count": 8,
+      "source_provenance": [
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "members": [
+        "ISQRT",
+        "SYMBOL?",
+        "NUMBER->STRING",
+        "IDENTITY",
+        "GENSYM",
+        "THREAD-FIRST",
+        "THREAD-LAST",
+        "DIVMOD"
+      ]
+    },
+    {
+      "family": "SEQUENCE-ORDINAL",
+      "selected_count": 4,
+      "source_provenance": [
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "members": [
+        "SECOND",
+        "THIRD",
+        "FOURTH",
+        "FIFTH"
+      ]
+    },
+    {
+      "family": "TIME-CALENDAR-DEADLINE",
+      "selected_count": 14,
+      "source_provenance": [
+        "lib/time.lisp"
+      ],
+      "members": [
+        "UTC-NOW",
+        "UTC-FROM-UNIX",
+        "UNIX-TIME-OBSERVATION->UTC",
+        "MILLISECONDS-FROM-NANOSECONDS",
+        "MONO-MS",
+        "TIMEZONE-NAME",
+        "TIMEZONE-DETECT",
+        "TIMEZONE-OFFSET-SECONDS",
+        "DEADLINE-REACHED?",
+        "DEADLINE-REACHED-AT?",
+        "ELAPSED-NS",
+        "DEADLINE-FROM",
+        "DEADLINE-AFTER-NS",
+        "INTERNET-TIME-SYNC"
+      ]
+    },
+    {
+      "family": "PERSISTENT-MAP",
+      "selected_count": 5,
+      "source_provenance": [
+        "lib/persistent-map.lisp"
+      ],
+      "members": [
+        "MAP-EMPTY",
+        "MAP-GET",
+        "MAP-INSERT",
+        "MAP-CONTAINS?",
+        "MAP->LIST"
+      ]
+    },
+    {
+      "family": "PERSISTENT-VECTOR",
+      "selected_count": 6,
+      "source_provenance": [
+        "lib/persistent-vector.lisp"
+      ],
+      "members": [
+        "VEC-EMPTY",
+        "VEC-CONJ",
+        "VEC-COUNT",
+        "VEC-NTH",
+        "VEC->LIST",
+        "VEC-FROM-LIST"
+      ]
+    },
+    {
+      "family": "KNOWLEDGE-REASONING",
+      "selected_count": 16,
+      "source_provenance": [
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "members": [
+        "IS-FACT?",
+        "DESCRIBE",
+        "COLLECT-FACTS-ABOUT",
+        "CONTAINS-ATOM?",
+        "FORWARD-IN",
+        "REASON-IN",
+        "CHECK-CONFLICT?",
+        "MODULE-KNOWN?",
+        "MODULE-CLAUSES-NOW",
+        "PROVE-GOAL",
+        "PROVE-GOALS",
+        "EXPLAIN-PROOF",
+        "SOURCE-OF",
+        "PROVENANCE",
+        "REASON",
+        "REASON-EXPLAIN"
+      ]
+    },
+    {
+      "family": "UNIFICATION",
+      "selected_count": 6,
+      "source_provenance": [
+        "lib/unify.lisp"
+      ],
+      "members": [
+        "UNIFY",
+        "LOGIC-VAR",
+        "VAR?",
+        "APPLY-SUBST",
+        "WALK",
+        "OCCURS-CHECK?"
+      ]
+    },
+    {
+      "family": "EPISTEMIC",
+      "selected_count": 11,
+      "source_provenance": [
+        "lib/epistemic.lisp"
+      ],
+      "members": [
+        "CLAIM?",
+        "CLAIM-STATEMENT",
+        "CLAIM-REVIEW",
+        "EVIDENCE?",
+        "EVIDENCE-METHOD",
+        "EVIDENCE-OUTCOME",
+        "OBSERVATION?",
+        "OBSERVATION-STATEMENT",
+        "INTENT?",
+        "INTENT-GOAL",
+        "SUPPORTING-EVIDENCE"
+      ]
+    },
+    {
+      "family": "HOST-POLICY-WRAPPER",
+      "selected_count": 6,
+      "source_provenance": [
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "members": [
+        "PROCESS-RUN",
+        "TCP-READ",
+        "TCP-WRITE",
+        "TCP-LISTEN",
+        "READ-FILE",
+        "WRITE-FILE"
+      ]
+    },
+    {
+      "family": "ANSWER-ALGEBRA",
+      "selected_count": 6,
+      "source_provenance": [
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "members": [
+        "ANSWER-NOT",
+        "ANSWER-AND",
+        "ANSWER-OR",
+        "ANSWER-WEAKEN",
+        "ANSWER-ATOM",
+        "ANSWER-EQ"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "stable_id": "d9.registry.a5c0590db6f268b5",
+      "surface": "plus",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:01010 PLUS"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.e7a1c2dafdd722a2",
+      "surface": "difference",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:01011 DIFFERENCE"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.29338c6c39286cb5",
+      "surface": "times",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:10110 TIMES"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.d1376826789a1830",
+      "surface": "divide",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D8:11110110 DIVIDE"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.e71fb2190541727b",
+      "surface": "abs",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:010011 ABS"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.07f4431917564077",
+      "surface": "min",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:110101 MIN"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.080f5119176d1ff9",
+      "surface": "max",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:110111 MAX"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.0808591917670ee3",
+      "surface": "mod",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D8:00101100 MOD"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.e0ac1861b18414d0",
+      "surface": "quotient",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:10111 QUOTIENT"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.9614cf190fc8d7cf",
+      "surface": "sqrt",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D8:00001110 SQRT"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.783a01767dd57ba5",
+      "surface": "isqrt",
+      "semantic_name": "ISQRT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "integer square root over the admitted integer domain",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.fff15da580027a5a",
+      "surface": "min-list",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:000010 MIN-LIST"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.765d9e0ba4dcc984",
+      "surface": "max-list",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:000011 MAX-LIST"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.95d307c696d9622f",
+      "surface": "largest-chunk",
+      "decision": "INTERNAL-NO-SLOT",
+      "selected_d9_candidate": false,
+      "lower_identity": null,
+      "family": "INTERNAL-HELPER",
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "documented internal arithmetic helper, not a public D9 semantic identity"
+    },
+    {
+      "stable_id": "d9.registry.4349ecec9b020e65",
+      "surface": "lessp?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5 LESSP"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.78edf44891a21bbc",
+      "surface": "greaterp?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5 GREATERP"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.f4a0dd82af14bcd6",
+      "surface": "equalp?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D9 NUMERIC-EQUALITY"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.8aa4093d862edc1c",
+      "surface": "not-greaterp?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6 LEQ"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.c3b966bbd0351945",
+      "surface": "not-lessp?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6 GEQ"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.8aae7c89bb6a509b",
+      "surface": "nondecreasing-from?",
+      "decision": "INTERNAL-NO-SLOT",
+      "selected_d9_candidate": false,
+      "lower_identity": null,
+      "family": "INTERNAL-HELPER",
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "documented internal ordered-sequence helper"
+    },
+    {
+      "stable_id": "d9.registry.3b4211bbebbc9277",
+      "surface": "nonincreasing-from?",
+      "decision": "INTERNAL-NO-SLOT",
+      "selected_d9_candidate": false,
+      "lower_identity": null,
+      "family": "INTERNAL-HELPER",
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "documented internal ordered-sequence helper"
+    },
+    {
+      "stable_id": "d9.registry.3bf941bad158f3cf",
+      "surface": "not?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4 NOT"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.2feda66ef082c2b0",
+      "surface": "equal?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D8 EQUAL"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.332a7fef0ef3da65",
+      "surface": "symbol?",
+      "semantic_name": "SYMBOL?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "recognize the symbol value kind",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.bf779aad69748141",
+      "surface": "list",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4:1110 LIST"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.ea11573f1af59eb5",
+      "surface": "length",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:000000 LENGTH"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.3e7fe942f71f1e61",
+      "surface": "append",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4:1111 APPEND"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.c95b3c1f3263ab65",
+      "surface": "reverse",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:10100 REVERSE"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.2105e41925467715",
+      "surface": "nth",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:000100 NTH"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.79d5e0675e3991b4",
+      "surface": "member?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5 MEMBER"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.c91983bcc1eb5d84",
+      "surface": "assoc",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:11100 ASSOC"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.0369250deb889a31",
+      "surface": "pair",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D8:11111101 PAIR"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.3d489463368f6ec1",
+      "surface": "second",
+      "semantic_name": "SECOND",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 2 of a linear sequence; distinct from pair-algebra CADR identity",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.8c9b2d30a9bdc15f",
+      "surface": "third",
+      "semantic_name": "THIRD",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 3 of a linear sequence",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.bd077936fac29859",
+      "surface": "fourth",
+      "semantic_name": "FOURTH",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 4 of a linear sequence",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.49d4c4e587080f05",
+      "surface": "fifth",
+      "semantic_name": "FIFTH",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "SEQUENCE-ORDINAL",
+      "behavior": "return ordinal element 5 of a linear sequence",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b5206a90e843ddfe",
+      "surface": "caar",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4:1000 CAAR"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.b5316490e85246ff",
+      "surface": "cadr",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4:1001 CADR"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.ce54d590f6525240",
+      "surface": "cddr",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4:0111 CDDR"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.b06323dafc7dceff",
+      "surface": "cadddr",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:100111 CADDDR"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.080f5919176d2d91",
+      "surface": "map",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:101000 MAP",
+        "D8:11000101 MAP"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.8ed8bca89377d4f7",
+      "surface": "filter",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:101001 FILTER"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.2f92df0bac03dce7",
+      "surface": "reduce",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:101110 REDUCE"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.bcce8f1285154f67",
+      "surface": "number->string",
+      "semantic_name": "NUMBER->STRING",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "render a number into its language text representation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.078a93d551c16ce0",
+      "surface": "digit->string",
+      "decision": "INTERNAL-NO-SLOT",
+      "selected_d9_candidate": false,
+      "lower_identity": null,
+      "family": "INTERNAL-HELPER",
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "documented internal number-to-string helper"
+    },
+    {
+      "stable_id": "d9.registry.3f87ea72bcd6432f",
+      "surface": "utc-now",
+      "semantic_name": "UTC-NOW",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive public UTC calendar meaning from a raw Unix clock observation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.ed91c7da3b24cbff",
+      "surface": "utc-from-unix",
+      "semantic_name": "UTC-FROM-UNIX",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "pure conversion from exact Unix seconds/nanoseconds to UTC calendar data",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b7ef26f19ad23141",
+      "surface": "unix-time-observation->utc",
+      "semantic_name": "UNIX-TIME-OBSERVATION->UTC",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "validate a tagged raw Unix-time observation and convert it to UTC data",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.d8d746b6ff5ecd56",
+      "surface": "milliseconds-from-nanoseconds",
+      "semantic_name": "MILLISECONDS-FROM-NANOSECONDS",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive whole milliseconds from a non-negative nanosecond count",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.3941ac29a2e770ff",
+      "surface": "mono-ms",
+      "semantic_name": "MONO-MS",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive a millisecond monotonic view from the raw monotonic nanosecond observation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.43d00f64f91dfecb",
+      "surface": "timezone-name",
+      "semantic_name": "TIMEZONE-NAME",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "extract the name from an accepted timezone configuration",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b6987b57ed285f51",
+      "surface": "timezone-detect",
+      "semantic_name": "TIMEZONE-DETECT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "interpret raw host timezone declarations with language-owned precedence and result shape",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.a7270e4f5fa11616",
+      "surface": "timezone-offset-seconds",
+      "semantic_name": "TIMEZONE-OFFSET-SECONDS",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "extract the offset seconds from an accepted timezone configuration",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.73dc85d21ad84af2",
+      "surface": "deadline-reached?",
+      "semantic_name": "DEADLINE-REACHED?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "compare the current monotonic observation with a deadline",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b45a9f06813de008",
+      "surface": "deadline-reached-at?",
+      "semantic_name": "DEADLINE-REACHED-AT?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "pure predicate deciding whether a supplied instant reached a supplied deadline",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.68cd2a8a7561ea30",
+      "surface": "elapsed-ns",
+      "semantic_name": "ELAPSED-NS",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "derive elapsed nanoseconds from current monotonic observation and a start instant",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.544869bd0a600df8",
+      "surface": "deadline-from",
+      "semantic_name": "DEADLINE-FROM",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "pure deadline arithmetic: add a delta to a supplied instant",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.a82c20c10b2f860f",
+      "surface": "deadline-after-ns",
+      "semantic_name": "DEADLINE-AFTER-NS",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "construct a deadline by adding a delta to the current monotonic observation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.faea1cc5716dfa02",
+      "surface": "internet-time-sync",
+      "semantic_name": "INTERNET-TIME-SYNC",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "TIME-CALENDAR-DEADLINE",
+      "behavior": "interpret a raw bounded NTP observation into the public accepted/rejected internet-time result",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/time.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.94d21dd37b9ca06d",
+      "surface": "map-empty",
+      "semantic_name": "MAP-EMPTY",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-MAP",
+      "behavior": "construct the empty persistent map",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.4e63c22f091439b3",
+      "surface": "map-get",
+      "semantic_name": "MAP-GET",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-MAP",
+      "behavior": "lookup a key in an immutable persistent map",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.6485767e1d2e85b2",
+      "surface": "map-insert",
+      "semantic_name": "MAP-INSERT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-MAP",
+      "behavior": "return a new persistent map with a key/value binding while preserving the old map",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.a18f2cb10b7b4fb4",
+      "surface": "map-contains?",
+      "semantic_name": "MAP-CONTAINS?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-MAP",
+      "behavior": "test key membership in a persistent map",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.c517064fe689e3c7",
+      "surface": "map->list",
+      "semantic_name": "MAP->LIST",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-MAP",
+      "behavior": "project persistent-map entries into a language list representation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-map.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.164dfb3286350d15",
+      "surface": "vec-empty",
+      "semantic_name": "VEC-EMPTY",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-VECTOR",
+      "behavior": "construct the empty persistent vector",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.639eb37e3668b808",
+      "surface": "vec-conj",
+      "semantic_name": "VEC-CONJ",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-VECTOR",
+      "behavior": "return a new persistent vector with one value appended",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.285167c109332865",
+      "surface": "vec-count",
+      "semantic_name": "VEC-COUNT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-VECTOR",
+      "behavior": "return the persistent-vector element count",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.28f086ce48c2c666",
+      "surface": "vec-nth",
+      "semantic_name": "VEC-NTH",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-VECTOR",
+      "behavior": "retrieve a persistent-vector element by integer index",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.8bf60cc2d530d2ad",
+      "surface": "vec->list",
+      "semantic_name": "VEC->LIST",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-VECTOR",
+      "behavior": "project a persistent vector to a list",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b728b963d6645d5f",
+      "surface": "vec-from-list",
+      "semantic_name": "VEC-FROM-LIST",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "PERSISTENT-VECTOR",
+      "behavior": "construct a persistent vector from a list",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/persistent-vector.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.50f5e9a4b45e59ae",
+      "surface": "is-fact?",
+      "semantic_name": "IS-FACT?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "classify a knowledge clause as fact or rule using the knowledge-domain result",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.a8c698d2c67848d1",
+      "surface": "describe",
+      "semantic_name": "DESCRIBE",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "describe an item from the explicit knowledge module/fact projection",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.63da20ec868c6312",
+      "surface": "collect-facts-about",
+      "semantic_name": "COLLECT-FACTS-ABOUT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "collect current fact clauses whose heads contain the requested item",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.2429e2ce0b9cade9",
+      "surface": "contains-atom?",
+      "semantic_name": "CONTAINS-ATOM?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "test recursive occurrence of an atom in a list/term",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.aa5326e045b7b1ec",
+      "surface": "forward-in",
+      "semantic_name": "FORWARD-IN",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "perform forward inference in an explicit knowledge module",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.9f3f9b84470ccbd6",
+      "surface": "reason-in",
+      "semantic_name": "REASON-IN",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "perform backward reasoning in an explicit knowledge module",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.8918e9b980da658f",
+      "surface": "check-conflict?",
+      "semantic_name": "CHECK-CONFLICT?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "test whether adding knowledge would contradict an already provable opposite",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.9e0ca504a0754d16",
+      "surface": "module-known?",
+      "semantic_name": "MODULE-KNOWN?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "distinguish a known module from a never-known module even when its current clause list is empty",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.4d0cf5ca8f1952ad",
+      "surface": "module-clauses-now",
+      "semantic_name": "MODULE-CLAUSES-NOW",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "project the current clause list from the append-only knowledge journal",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.92a5cc385f6a1c16",
+      "surface": "prove-goal",
+      "semantic_name": "PROVE-GOAL",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "prove one goal against rules while threading substitutions and proof evidence",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.460619bea7ba80c9",
+      "surface": "prove-goals",
+      "semantic_name": "PROVE-GOALS",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "prove a conjunction of goals while threading one substitution/proof state",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.a370d7f44e604932",
+      "surface": "explain-proof",
+      "semantic_name": "EXPLAIN-PROOF",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "render/emit the structure of a proof tree",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.a83854bf7c8992f0",
+      "surface": "source-of",
+      "semantic_name": "SOURCE-OF",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "classify proof provenance as fact or rule source",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.4126127128a2ff48",
+      "surface": "provenance",
+      "semantic_name": "PROVENANCE",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "construct recursive structured provenance for a proof node",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.13a5fb03baa62833",
+      "surface": "reason",
+      "semantic_name": "REASON",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "run the public backward-chaining reasoner and return substitution/proof pairs",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.5914cd1c5f84c05a",
+      "surface": "reason-explain",
+      "semantic_name": "REASON-EXPLAIN",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "KNOWLEDGE-REASONING",
+      "behavior": "produce the public human-facing explanation of a reasoning result",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/knowledge.lisp",
+        "lib/reason.lisp",
+        "lib/forward.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.42441b1a6684f500",
+      "surface": "unify",
+      "semantic_name": "UNIFY",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "UNIFICATION",
+      "behavior": "unify two symbolic terms with substitutions and occurs-check discipline",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.06a6b504db6519ff",
+      "surface": "logic-var",
+      "semantic_name": "LOGIC-VAR",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "UNIFICATION",
+      "behavior": "construct the explicit tagged representation of a logic variable",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.afd746f9a01834e7",
+      "surface": "var?",
+      "semantic_name": "VAR?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "UNIFICATION",
+      "behavior": "recognize the explicit logic-variable representation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.44698d12ffa6129f",
+      "surface": "apply-subst",
+      "semantic_name": "APPLY-SUBST",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "UNIFICATION",
+      "behavior": "apply a substitution recursively to a symbolic term",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.d97702ee09ec7611",
+      "surface": "walk",
+      "semantic_name": "WALK",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "UNIFICATION",
+      "behavior": "dereference a logic variable through a substitution",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.0124a207a302539a",
+      "surface": "occurs-check?",
+      "semantic_name": "OCCURS-CHECK?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "UNIFICATION",
+      "behavior": "test whether binding a logic variable would create a cyclic/infinite term",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/unify.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.7faa68ae075ffbfb",
+      "surface": "claim?",
+      "semantic_name": "CLAIM?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "recognize the public claim record shape",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b4858b8a6fb392f3",
+      "surface": "claim-statement",
+      "semantic_name": "CLAIM-STATEMENT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "extract the statement carried by a claim",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.22b0d361921f50f0",
+      "surface": "claim-review",
+      "semantic_name": "CLAIM-REVIEW",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "extract the review state carried by a claim",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.ccc0c69f044d1c8f",
+      "surface": "evidence?",
+      "semantic_name": "EVIDENCE?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "recognize the public evidence record shape",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.da781d31a51d6b8f",
+      "surface": "evidence-method",
+      "semantic_name": "EVIDENCE-METHOD",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "extract the method field from an evidence record",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.6c7052cd7dd9e6cd",
+      "surface": "evidence-outcome",
+      "semantic_name": "EVIDENCE-OUTCOME",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "extract the outcome field from an evidence record",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.6bee3f0f3cf1e72f",
+      "surface": "observation?",
+      "semantic_name": "OBSERVATION?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "recognize the public observation record shape",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.c4054f017744cadb",
+      "surface": "observation-statement",
+      "semantic_name": "OBSERVATION-STATEMENT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "extract the statement carried by an observation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.be78437329138581",
+      "surface": "intent?",
+      "semantic_name": "INTENT?",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "recognize the public intent record shape",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.86e5cba8ffc91733",
+      "surface": "intent-goal",
+      "semantic_name": "INTENT-GOAL",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "extract the goal carried by an intent",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.bbadaec4a9934f10",
+      "surface": "supporting-evidence",
+      "semantic_name": "SUPPORTING-EVIDENCE",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "EPISTEMIC",
+      "behavior": "select evidence that supports a requested claim reference/outcome relation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/epistemic.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.ca9d93fcb15f9a61",
+      "surface": "identity",
+      "semantic_name": "IDENTITY",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "return the supplied value unchanged",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b8de2f80376cea57",
+      "surface": "gensym",
+      "semantic_name": "GENSYM",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "construct a fresh symbol distinct from previously generated symbols",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.e6f79719051ff286",
+      "surface": "and",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D8:11110101 AND"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.08b05407b5565ca4",
+      "surface": "or",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D8:11111100 OR"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.127284191dcc577a",
+      "surface": "let",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:001000 LET"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.24edc6ada2385cf0",
+      "surface": "let*",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:001001 LET*"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.11c7eaade066c3ee",
+      "surface": "thread-first",
+      "semantic_name": "THREAD-FIRST",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "rewrite a form pipeline by threading the current value into first argument position",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.0a1c6a547b1cdc68",
+      "surface": "thread-last",
+      "semantic_name": "THREAD-LAST",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "rewrite a form pipeline by threading the current value into last argument position",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.8145864ef0ed7d4e",
+      "surface": "process-run",
+      "semantic_name": "PROCESS-RUN",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "HOST-POLICY-WRAPPER",
+      "behavior": "public process result policy: interpret raw captured bytes as UTF-8 and return exit/stdout/stderr language values",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.aa8982c177311d6b",
+      "surface": "tcp-read",
+      "semantic_name": "TCP-READ",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "HOST-POLICY-WRAPPER",
+      "behavior": "public TCP read policy: decode raw connection bytes through language-owned UTF-8 semantics",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.1c9c5258ff4b6de8",
+      "surface": "tcp-write",
+      "semantic_name": "TCP-WRITE",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "HOST-POLICY-WRAPPER",
+      "behavior": "public TCP write policy: encode text to bytes and preserve the public text result",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.dc43ea15bc82cfb2",
+      "surface": "tcp-listen",
+      "semantic_name": "TCP-LISTEN",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "HOST-POLICY-WRAPPER",
+      "behavior": "public listen policy: choose the language default bind address over the raw listen mechanism",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.b3b801c42234477d",
+      "surface": "read-file",
+      "semantic_name": "READ-FILE",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "HOST-POLICY-WRAPPER",
+      "behavior": "public file-read policy: decode host bytes using language-owned UTF-8 semantics",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.85d9dcce9fa87ce4",
+      "surface": "write-file",
+      "semantic_name": "WRITE-FILE",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "HOST-POLICY-WRAPPER",
+      "behavior": "public file-write policy: encode language text to bytes and return the supplied text after success",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.758dd15dbe722aad",
+      "surface": "invoke",
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "lower_identity": null,
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/semantic-lineage-core-v1.lisp",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "post-semantics mechanism selection / island dispatch; changing execution mechanism must not mint a Core meaning"
+    },
+    {
+      "stable_id": "d9.registry.ee885e7447d3d73c",
+      "surface": "binary",
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "lower_identity": null,
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/semantic-lineage-core-v1.lisp",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "registry spelling is insufficiently specified as an independent semantic law"
+    },
+    {
+      "stable_id": "d9.registry.39f7fcec8fcb623d",
+      "surface": "label",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:00100 LABEL"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.2ab8239a31420c21",
+      "surface": "null?",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4 NULL"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Semantic surface alias/projection over an already admitted current identity."
+    },
+    {
+      "stable_id": "d9.registry.6bc5d8b4660f1b72",
+      "surface": "subst",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D5:11111 SUBST"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.d3364e89c77b249f",
+      "surface": "sublis",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:001010 SUBLIS"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.d56c225e4124ee5d",
+      "surface": "maplist",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D6:000101 MAPLIST"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.f74a76a458bf1fbb",
+      "surface": "apply",
+      "decision": "LOWER-DOMAIN-OR-CURRENT-PROJECTION",
+      "selected_d9_candidate": false,
+      "lower_identity": [
+        "D4:0000 APPLY"
+      ],
+      "family": null,
+      "behavior": null,
+      "source_provenance": [
+        "#3979",
+        "knowledge/d1-d8-foundation.json"
+      ],
+      "d9_coordinate": null,
+      "reason": "Exact current resident-name match; the registry surface does not create a second D9 meaning."
+    },
+    {
+      "stable_id": "d9.registry.154cc405f1358509",
+      "surface": "divmod",
+      "semantic_name": "DIVMOD",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "GENERIC-DERIVED",
+      "behavior": "return quotient and remainder as one language result",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "lib/core.lisp",
+        "lib/surface/uk-inventory.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.0a9091b2f65d1e0c",
+      "surface": "answer-not",
+      "semantic_name": "ANSWER-NOT",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "ANSWER-ALGEBRA",
+      "behavior": "negate an answer value within the language answer algebra",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.f0797632a6cf7709",
+      "surface": "answer-and",
+      "semantic_name": "ANSWER-AND",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "ANSWER-ALGEBRA",
+      "behavior": "combine two answer values by answer-domain conjunction",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.1370ac4ae3449ddb",
+      "surface": "answer-or",
+      "semantic_name": "ANSWER-OR",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "ANSWER-ALGEBRA",
+      "behavior": "combine two answer values by answer-domain disjunction",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.45e672b9fd41b877",
+      "surface": "answer-weaken",
+      "semantic_name": "ANSWER-WEAKEN",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "ANSWER-ALGEBRA",
+      "behavior": "weaken an answer while preserving the answer-domain structure",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.bb3d4aec8b3f0fc6",
+      "surface": "answer-atom",
+      "semantic_name": "ANSWER-ATOM",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "ANSWER-ALGEBRA",
+      "behavior": "project the ATOM observation into the answer-domain representation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    },
+    {
+      "stable_id": "d9.registry.65daa370792be4a4",
+      "surface": "answer-eq",
+      "semantic_name": "ANSWER-EQ",
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "lower_identity": null,
+      "family": "ANSWER-ALGEBRA",
+      "behavior": "project the EQ observation into the answer-domain representation",
+      "source_provenance": [
+        "#3979",
+        "lib/surface/semantic-registry.lisp",
+        "contracts/core4-predicate-answer-scale.lisp",
+        "lib/core.lisp"
+      ],
+      "d9_coordinate": null,
+      "reason": "Language-owned observable semantics are distinct from current D1-D8 and the current D9 inventory; selected without reusing the registry's legacy coordinate."
+    }
+  ]
+}
