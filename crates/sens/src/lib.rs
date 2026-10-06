@@ -19,6 +19,7 @@ mod domain_words;
 mod domain_identity;
 mod packed_bits;
 mod binary_framing;
+mod gpu_execution_packet;
 mod environment;
 mod error;
 pub(crate) mod eval;
@@ -139,6 +140,9 @@ pub use packed_bits::{BitPacker, PackedBitstream};
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     BinaryFrame, BinaryFrameError,
+};
+pub use gpu_execution_packet::{
+    GpuExecutionPacketError, GpuExecutionPacketV1, GpuOutputRequest,
 };
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
