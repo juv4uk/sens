@@ -28,6 +28,7 @@
 00001001  VECTOR
 00001010  VECTOR-REF
 00001011  VECTOR-SET!
+00001100  SPECIAL-BINDING
 ```
 
 Це **candidate coordinates**, не ратифіковані residents.
@@ -144,8 +145,8 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   12
-provisional coordinates            00000000..00001011
+provisional D8 ladder candidates   13
+provisional coordinates            00000000..00001100
 ratified D8 residents              0
 resolved recovery no-slot          11
 unresolved recovery rows           2
@@ -271,3 +272,18 @@ CAR(q) = x
 `CONS(x, CDR(p))` може дати таке саме extensional значення нового pair, але не змінить `q`. Саме тому reconstruction != mutation.
 
 Дві операції утворюють просту CAR/CDR sibling-family; складний product search не потрібен.
+
+## SPECIAL dynamic-binding recovery
+
+Lisp 1.5 `SPECIAL` не зводиться до compiler flag: його observable law — dynamic cell.
+
+```text
+bind SPECIAL x=2
+free reference x inside nested call -> 2
+leave dynamic binding
+free reference x -> previous value restored
+```
+
+Current SENS має lexical capture: caller-shadow не retarget-ить captured free variable. Тому `SPECIAL-BINDING` збережено як provisional D8 root `00001100`.
+
+`COMMON/UNCOMMON` не дублюють цей слот: вони лишаються історичним compiled↔interpreted a-list bridge, доки окремий semantic root не буде доведено.
