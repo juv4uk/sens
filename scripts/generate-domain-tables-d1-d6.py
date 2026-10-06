@@ -27,7 +27,8 @@ ROW = re.compile(
     + '(' + TOKEN + r')\s+'
     + '(' + TOKEN + r')\s+'
     + '(' + TOKEN + r')\s+'
-    + r'(\S+)\s+(\S+)\)\s*
+    + r'(\S+)\s+(\S+)\)\s*$'
+)
 DONOR = re.compile(
     r'^\s*\([01]{8}\s+'
     + r'\(en\s+(' + TOKEN + r')\)\s+'
