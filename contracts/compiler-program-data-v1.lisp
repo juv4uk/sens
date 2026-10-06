@@ -19,26 +19,35 @@
   ;   (<node> ...))
   ;
   ; Node forms:
-  ;   (domain-call <exact-domain-identity> (<node> ...))
-  ;   (local <exact-depth> <exact-index>)
-  ;   (literal <ordinary-sens-atom>)
+  ;   (domain-call "<width>" "<exact-bits>" (<node> ...))
+  ;   (local "<depth>" "<index>")
+  ;   (domain-value "<width>" "<exact-bits>")
+  ;   (symbol "<exact-symbol-text>")
+  ;   (string "<exact-string-text>")
   ;   (list (<node> ...))
   ;   (pair <node> <node>)
   ;
-  ; "domain-call" is a transport shape, not semantic admission. The exact
-  ; DomainIdentity is preserved even when downstream compiler semantics reject
-  ; it (for example D8 research identity).
+  ; Width/bits are strings on the serialized boundary deliberately. Ordinary
+  ; SENS read/write must not reinterpret 001 as numeric 1 or detach leading
+  ; zeroes from the domain width. A host adapter may mechanically reconstruct
+  ; DomainIdentity(width,bits), but may not select compiler meaning/role.
+  ;
+  ; "domain-call" is a transport shape, not semantic admission. D8 is therefore
+  ; representable here and remains rejectable by compiler semantics downstream.
 
   (node-vocabulary
-    (domain-call exact-domain-identity ordered-children)
+    (domain-call exact-domain-width exact-domain-bits ordered-children)
     (local lexical-depth lexical-index)
-    (literal number rational binary-number domain-identity string symbol)
+    (domain-value exact-domain-width exact-domain-bits)
+    (symbol exact-text)
+    (string exact-text)
     (list ordered-children)
     (pair head tail))
 
   (invariants
     (domain-width-preserved . yes)
     (child-order-preserved . yes)
+    (ordinary-sens-data . yes)
     (d8-transport-representable . yes)
     (d8-admission-implied . no)
     (sid8-sens8-substitution . no)
@@ -47,7 +56,9 @@
 
   ; Same packed payload under different widths remains different transport data.
   (width-fixture
-    (d3 . 001)
-    (d4 . 0001)
+    (d3-width . "3")
+    (d3-bits . "001")
+    (d4-width . "4")
+    (d4-bits . "0001")
     (same-packed-payload . yes)
     (same-identity . no)))
