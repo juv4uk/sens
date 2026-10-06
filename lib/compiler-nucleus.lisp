@@ -385,6 +385,58 @@
   (функція (request)
     (перше (решта request))))
 
+; Validate source shape only after SENS has already derived the abstract role.
+; This is deliberately role -> arity/shape, never domain-bits -> shape.
+(визначити compiler-exactly-one
+  (функція (arguments)
+    (за-умовою
+      ((атом? arguments) (compiler-false ()))
+      ((тотожне? (решта arguments) ()) (compiler-true ()))
+      ((compiler-true ()) (compiler-false ())))))
+
+(визначити compiler-exactly-two
+  (функція (arguments)
+    (за-умовою
+      ((атом? arguments) (compiler-false ()))
+      ((атом? (решта arguments)) (compiler-false ()))
+      ((тотожне? (решта (решта arguments)) ()) (compiler-true ()))
+      ((compiler-true ()) (compiler-false ())))))
+
+; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
+(визначити compiler-cond-clauses-valid
+  (функція (clauses)
+    (за-умовою
+      ((атом? clauses) (compiler-true ()))
+      ((compiler-exactly-two (перше clauses))
+       (compiler-cond-clauses-valid (решта clauses)))
+      ((compiler-true ()) (compiler-false ())))))
+
+(визначити compiler-role-shape-valid
+  (функція (request arguments)
+    (за-умовою
+      ((атом? request) (compiler-false ()))
+      ((тотожне? (compiler-request-role request) (як-є quote-form))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є atom-predicate))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є selector-tail))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є selector-head))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є atom-equality))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є pair-construct))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є lambda-form))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є define-form))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є cond-form))
+       (за-умовою
+         ((атом? arguments) (compiler-false ()))
+         ((compiler-true ()) (compiler-cond-clauses-valid arguments))))
+      ((compiler-true ()) (compiler-false ())))))
+
 ; Program traversal policy is semantic and therefore SENS-owned.
 ; QUOTE payload is data.  LAMBDA parameters and DEFINE name are data.
 ; Other admitted forms recursively compile every argument position.
@@ -401,14 +453,17 @@
 
 (визначити compiler-domain-result
   (функція
-    (request child-result)
+    (request arguments child-result)
     (за-умовою
       ((атом? request) (compiler-result-fail))
-      ((compiler-result-success child-result)
-       (compiler-result-ok
-         (сполучити
-           request
-           (compiler-result-requests child-result))))
+      ((compiler-role-shape-valid request arguments)
+       (за-умовою
+         ((compiler-result-success child-result)
+          (compiler-result-ok
+            (сполучити
+              request
+              (compiler-result-requests child-result))))
+         ((compiler-true ()) (compiler-result-fail))))
       ((compiler-true ()) (compiler-result-fail)))))
 
 (визначити compiler-program-list
@@ -462,6 +517,7 @@
            d3-proof
            d4-proof
            provenance)
+         (решта node)
          (compiler-program-list
            shape-or-empty
            decompose
