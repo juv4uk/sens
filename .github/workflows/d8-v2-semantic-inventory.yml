@@ -1,0 +1,33 @@
+name: D8 semantic inventory 256
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d8-v2-semantic-inventory.json"
+      - "knowledge/d8-v2-overflow-ledger.json"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "knowledge/d8-donor-2934-historical-full-map.json"
+      - "scripts/check-d8-v2-semantic-inventory.py"
+      - ".github/workflows/d8-v2-semantic-inventory.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d8-v2-semantic-inventory.json"
+      - "knowledge/d8-v2-overflow-ledger.json"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "knowledge/d8-donor-2934-historical-full-map.json"
+      - "scripts/check-d8-v2-semantic-inventory.py"
+      - ".github/workflows/d8-v2-semantic-inventory.yml"
+  workflow_dispatch:
+
+jobs:
+  semantic-inventory:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner presence
+        run: |
+          nvidia-smi || true
+      - name: Verify D8 dense semantic inventory
+        run: python3 scripts/check-d8-v2-semantic-inventory.py
