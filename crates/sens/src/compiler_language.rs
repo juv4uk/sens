@@ -863,7 +863,7 @@ mod tests {
             "(synthetic D4 same-payload witness)",
         )
         .expect("unsupported D4 identity returns fail-closed language value");
-        assert!(matches!(wrong_domain, Value::Symbol(name) if name.as_ref() == "compiler-failure"));
+        assert!(matches!(wrong_domain, Value::Symbol(ref name) if name.as_ref() == "compiler-failure"));
 
         let d8 = domain_call(
             CoreDomainIdentity::D8(crate::CoreD8::from_word(
@@ -876,7 +876,7 @@ mod tests {
             "(synthetic D8 witness)",
         )
         .expect("D8 returns fail-closed language value");
-        assert!(matches!(d8_result, Value::Symbol(name) if name.as_ref() == "compiler-failure"));
+        assert!(matches!(d8_result, Value::Symbol(ref name) if name.as_ref() == "compiler-failure"));
     }
 
     #[test]
