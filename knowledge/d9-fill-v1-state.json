@@ -23,8 +23,8 @@
     "width": 9,
     "capacity": 512,
     "dense_target": 512,
-    "selected_semantic_candidates": 128,
-    "remaining_semantic_candidates": 384,
+    "selected_semantic_candidates": 148,
+    "remaining_semantic_candidates": 364,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -56,5 +56,12 @@
     "D8 parent coordinate plus one bit is geometry only unless a local law proves semantics",
     "Sens8/Sid8/Function8 coordinates have zero D9 placement authority",
     "D9 remains research until an explicit owner ratification"
-  ]
+  ],
+  "overflow_review": {
+    "artifact": "knowledge/d9-overflow-review-v1.json",
+    "source_rows": 34,
+    "selected": 20,
+    "hold": 11,
+    "rejected_exact_lower_duplicate": 3
+  }
 }
