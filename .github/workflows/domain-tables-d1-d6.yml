@@ -5,10 +5,8 @@ on:
     paths:
       - "knowledge/d1-d7-foundation.json"
       - "knowledge/domain-table-projection-d1-d6.json"
-      - "knowledge/domain-table-projection-d1-d6.json"
       - "lib/surface/domain-surfaces-d1-d4.lisp"
       - "lib/surface/domain-surfaces-d5.lisp"
-      - "lib/surface/semantic-registry.lisp"
       - "scripts/generate-domain-tables-d1-d6.py"
       - "docs/generated/domain-tables-d1-d6.md"
       - ".github/workflows/domain-tables-d1-d6.yml"
@@ -16,9 +14,9 @@ on:
     branches: [main]
     paths:
       - "knowledge/d1-d7-foundation.json"
+      - "knowledge/domain-table-projection-d1-d6.json"
       - "lib/surface/domain-surfaces-d1-d4.lisp"
       - "lib/surface/domain-surfaces-d5.lisp"
-      - "lib/surface/semantic-registry.lisp"
       - "scripts/generate-domain-tables-d1-d6.py"
       - "docs/generated/domain-tables-d1-d6.md"
       - ".github/workflows/domain-tables-d1-d6.yml"
