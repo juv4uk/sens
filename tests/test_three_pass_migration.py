@@ -78,13 +78,27 @@ class ThreePassMigrationTests(unittest.TestCase):
         b,_=self.migrate("(CAR x)\n")
         self.assertEqual(a,b)
 
-    def test_unknown_function_never_becomes_text7(self):
-        with self.assertRaisesRegex(mod.MigrationError,"unknown executable head"):
-            self.migrate("(totally-unknown-function x)\n")
+    def test_unknown_function_passes_through_verbatim(self):
+        out,resolver=self.migrate("(totally-unknown-function x)\n")
+        self.assertEqual(out,"10 totally-unknown-function 00 x 01\n")
+        self.assertEqual(resolver.counts["passthrough-head"],1)
 
-    def test_numeric_literal_blocks_instead_of_becoming_text(self):
-        with self.assertRaisesRegex(mod.MigrationError,"Number framing"):
-            self.migrate("(CAR 25)\n")
+    def test_unresolved_sid8_passes_through_verbatim(self):
+        out,resolver=self.migrate("(11111111 x)\n")
+        self.assertEqual(out,"10 11111111 00 x 01\n")
+        self.assertEqual(resolver.counts["passthrough-head"],1)
+
+    def test_d1_d2_head_words_pass_through_verbatim(self):
+        out1,resolver1=self.migrate("(1 x)\n")
+        out2,resolver2=self.migrate("(10 x)\n")
+        self.assertEqual(out1,"10 1 00 x 01\n")
+        self.assertEqual(out2,"10 10 00 x 01\n")
+        self.assertEqual(resolver1.counts["passthrough-head"],1)
+        self.assertEqual(resolver2.counts["passthrough-head"],1)
+
+    def test_numeric_literal_passes_through_verbatim(self):
+        out,_=self.migrate("(CAR 25)\n")
+        self.assertEqual(out,"10 100 00 25 01\n")
 
     def test_quote_of_empty_is_quote_plus_000(self):
         out,_=self.migrate("'()\n")
@@ -95,10 +109,9 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn(" 11 ",out)
         self.assertRegex(out,r"^[01\s]+$")
 
-    def test_output_is_only_exact_width_binary_words(self):
+    def test_known_structure_and_function_convert_while_unknown_data_stays_visible(self):
         out,_=self.migrate("(CONS x y)\n")
-        self.assertRegex(out,r"^[01\s]+$")
-        self.assertTrue(all(1<=len(word)<=8 for word in out.split()))
+        self.assertEqual(out,"10 111 00 x 00 y 01\n")
 
     def test_extensionless_output_name(self):
         self.assertEqual(str(mod.extensionless(Path("lib/foo.lisp"))),"lib/foo")
