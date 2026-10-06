@@ -1,0 +1,668 @@
+{
+  "schema": "d9-overflow-review-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#3965",
+  "date": "2026-10-06",
+  "parent": "#3964",
+  "source": "knowledge/d8-v2-overflow-ledger.json",
+  "foundation": "#3960 / Contract 11.7",
+  "rule": "Review D8 overflow against the ratified D1-D8 foundation. Name equality alone is not duplication; exact semantic duplication rejects a row. Clear distinct language-visible semantics may enter the D9 semantic inventory unplaced. Ambiguous or boundary-dependent rows remain HOLD rather than guessed.",
+  "accounting": {
+    "source_rows": 34,
+    "selected_d9_candidates": 20,
+    "hold_semantic_review": 11,
+    "reject_exact_lower_duplicate": 3,
+    "d9_selected_before_review": 128,
+    "d9_selected_after_review": 148,
+    "d9_remaining_after_review": 364,
+    "ratified_d9_residents": 0
+  },
+  "rows": [
+    {
+      "stable_id": "d9.review.345d22eb27a40ba0",
+      "semantic_name": "COMPILE-FILE",
+      "category": "system",
+      "behavior": "compile a whole expression stream into executable code",
+      "source_provenance": [
+        "Lisp 1.5 / Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000000",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Compiler/tooling semantics cross the host-artifact boundary; keep provenance until the language-visible result contract is stated independently of host compiler mechanism."
+    },
+    {
+      "stable_id": "d9.review.0364ee983da2300d",
+      "semantic_name": "OPEN",
+      "category": "stream",
+      "behavior": "open a named file or stream object for reading or writing",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.1621e2bb444e196a",
+      "semantic_name": "CLOSE",
+      "category": "stream",
+      "behavior": "close an open stream and release its resource",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.7d4262ddb5101167",
+      "semantic_name": "WITH-OPEN-FILE",
+      "category": "stream",
+      "behavior": "open, bind lexically and close on scope exit",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.bb917ffbcc0a55e0",
+      "semantic_name": "DRIBBLE",
+      "category": "stream",
+      "behavior": "tee the console input/output transcript into a file",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.7e1106be18e5a5e4",
+      "semantic_name": "APPLY",
+      "category": "abstraction",
+      "behavior": "apply a function to a computed argument list",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#2934"
+      ],
+      "d8_overflow_decision": "LOWER-COLLISION-HOLDOUT",
+      "historical_parent_d6": "000011",
+      "exact_lower_duplicate": true,
+      "lower_identity": "D4:0000 APPLY",
+      "language_visible": true,
+      "decision": "REJECT-EXACT-LOWER-DUPLICATE",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Exact lower-domain semantic duplicate: apply a function to a computed argument list is already the current D4 APPLY identity."
+    },
+    {
+      "stable_id": "d9.review.e1b2a2d8541d57a8",
+      "semantic_name": "COMPOSE",
+      "category": "abstraction",
+      "behavior": "build the mathematical composition of two functions",
+      "source_provenance": [
+        "Functional Lisp tradition",
+        "#2934"
+      ],
+      "d8_overflow_decision": "LOWER-COLLISION-HOLDOUT",
+      "historical_parent_d6": "000011",
+      "exact_lower_duplicate": true,
+      "lower_identity": "D6:001011 COMPOSE",
+      "language_visible": true,
+      "decision": "REJECT-EXACT-LOWER-DUPLICATE",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Exact lower-domain semantic duplicate: mathematical function composition is already the current D6 COMPOSE identity."
+    },
+    {
+      "stable_id": "d9.review.3bc92ae4c4d1f1dd",
+      "semantic_name": "FFI-CALL",
+      "category": "abstraction",
+      "behavior": "call a foreign procedure across a typed ABI boundary",
+      "source_provenance": [
+        "Lisp Machine FFI",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000011",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.e2db3461918644b0",
+      "semantic_name": "THE",
+      "category": "special-form",
+      "behavior": "declare a value's type for compilation without checking",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000100",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Compile-time declaration with intentionally no runtime check; keep until its observable semantic law is stated independently of optimization/tooling behavior."
+    },
+    {
+      "stable_id": "d9.review.9443748470add6d9",
+      "semantic_name": "ARGLIST",
+      "category": "special-form",
+      "behavior": "access the evaluated variadic argument list",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000101",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.476f359358f384ab",
+      "semantic_name": "&WHOLE",
+      "category": "special-form",
+      "behavior": "bind the entire original argument list",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000101",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.e8a162e05c7571e7",
+      "semantic_name": "GENERATE-EXPANSION",
+      "category": "macro",
+      "behavior": "the macro's own one-step expansion function",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000110",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Potential semantic overlap with current D6 MACROEXPAND-1 / macro-expansion machinery; requires exact higher-order distinction proof."
+    },
+    {
+      "stable_id": "d9.review.6b06443e9bf925a7",
+      "semantic_name": "MACRO-FUNCTION",
+      "category": "macro",
+      "behavior": "access the expansion function of a macro name",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000110",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.7537894f89a67cbe",
+      "semantic_name": "COMPILER-MACRO",
+      "category": "macro",
+      "behavior": "compiler-time rewrite hook attached to an operator name",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000110",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.64db395c20b8cedf",
+      "semantic_name": "SYMBOL-MACRO",
+      "category": "macro",
+      "behavior": "a name-level macro that yields a form without evaluation",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000111",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.b1fb10409833516e",
+      "semantic_name": "DEFINE-SYMBOL-MACRO",
+      "category": "macro",
+      "behavior": "declare a symbol macro at a name",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000111",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.79ca622ff9fca1d4",
+      "semantic_name": "DEFINE-COMPILER-MACRO",
+      "category": "macro",
+      "behavior": "declare a compiler macro at a name",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000111",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.1733b8c28e221915",
+      "semantic_name": "BACKQUANTIZE",
+      "category": "macro",
+      "behavior": "splice a list of forms into a surrounding form",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "000111",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Historical label/behavior is too underspecified for exact identity; requires primary-source clarification before selection."
+    },
+    {
+      "stable_id": "d9.review.e11b2f44569bd044",
+      "semantic_name": "DEFSTRUCT",
+      "category": "state",
+      "behavior": "define a structure type with constructor and accessors",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "001111",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.e44e9b93029bb356",
+      "semantic_name": "DEFTYPE",
+      "category": "state",
+      "behavior": "define a named type specifier",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "001111",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.d8c2ce0fed701331",
+      "semantic_name": "DEFINE-CONDITION",
+      "category": "state",
+      "behavior": "define a named condition type for the condition system",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "001111",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.1b5390830f9fa161",
+      "semantic_name": "LDB",
+      "category": "bit-operation",
+      "behavior": "load an arbitrary bit field from an integer",
+      "source_provenance": [
+        "Lisp Machine",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "010001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Typed-word/Core-Math boundary is unresolved for arbitrary bit-field extraction."
+    },
+    {
+      "stable_id": "d9.review.86c0d878e7a78a24",
+      "semantic_name": "MASK-FIELD",
+      "category": "bit-operation",
+      "behavior": "extract a bit field masked to its width",
+      "source_provenance": [
+        "Lisp Machine",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "010001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Typed-word/Core-Math boundary is unresolved for masked bit-field extraction."
+    },
+    {
+      "stable_id": "d9.review.53c17575840e787f",
+      "semantic_name": "COUNT-LEADING-ZEROS",
+      "category": "bit-operation",
+      "behavior": "count leading zero bits of an integer",
+      "source_provenance": [
+        "Lisp Machine",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "010110",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Typed-word/Core-Math boundary is unresolved for machine-word width and exact integer semantics."
+    },
+    {
+      "stable_id": "d9.review.b69642a1c58485bb",
+      "semantic_name": "ERROR-IF-NOT-ERROR",
+      "category": "control",
+      "behavior": "transfer control only when an error is being handled",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "011001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.2be63d1ed50b2af8",
+      "semantic_name": "DEHANDLER",
+      "category": "control",
+      "behavior": "remove the innermost condition handler",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "011011",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.7d36ebdf0a4bf717",
+      "semantic_name": "REDUCE",
+      "category": "sequence",
+      "behavior": "fold a binary function over a sequence",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "LOWER-COLLISION-HOLDOUT",
+      "historical_parent_d6": "011101",
+      "exact_lower_duplicate": true,
+      "lower_identity": "D6:101110 REDUCE",
+      "language_visible": true,
+      "decision": "REJECT-EXACT-LOWER-DUPLICATE",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Exact lower-domain semantic duplicate: fold/reduce over a sequence is already the current D6 REDUCE identity."
+    },
+    {
+      "stable_id": "d9.review.94630545116f9ad9",
+      "semantic_name": "ROW-MAJOR-AREF",
+      "category": "sequence",
+      "behavior": "retrieve an element by row-major index",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "100011",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.e7f1f2e2c01c70e9",
+      "semantic_name": "SCHAR",
+      "category": "sequence",
+      "behavior": "the character denoted by a code, any type",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "100011",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Recorded behavior is inconsistent with the standard SCHAR name; primary-source semantic clarification required."
+    },
+    {
+      "stable_id": "d9.review.d4e0f7b865b64326",
+      "semantic_name": "BOOLE",
+      "category": "bit-operation",
+      "behavior": "bitwise operation selected by a boolean operation code",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "100100",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Operation-code-selected bitwise semantics depend on an explicit typed-word/boolean-op carrier law."
+    },
+    {
+      "stable_id": "d9.review.6b7c3da8bf17b16d",
+      "semantic_name": "TABLESPACE",
+      "category": "system",
+      "behavior": "number of cells in a hash table",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "111001",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "System/hash-table capacity introspection is language-visible but highly implementation-sensitive; hold until an abstract table-capacity law is fixed."
+    },
+    {
+      "stable_id": "d9.review.18a8d6e464581573",
+      "semantic_name": "COLLECTION",
+      "category": "set-operation",
+      "behavior": "collect the elements of a set, list or sequence",
+      "source_provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "111010",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "HOLD-SEMANTIC-REVIEW",
+      "selected_d9_candidate": false,
+      "d9_coordinate": null,
+      "reason": "Behavior 'collect elements' is too broad and may collapse with existing sequence/set conversion semantics; needs exact domain/result law."
+    },
+    {
+      "stable_id": "d9.review.795b7e18545ed97c",
+      "semantic_name": "NUNION",
+      "category": "set-operation",
+      "behavior": "destructive union sharing structure where possible",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "111011",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    },
+    {
+      "stable_id": "d9.review.bbcd3b98a8c2a4f1",
+      "semantic_name": "NRECONC",
+      "category": "set-operation",
+      "behavior": "destructive reconciliation of two ordered lists",
+      "source_provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "d8_overflow_decision": "HOLDOUT",
+      "historical_parent_d6": "111011",
+      "exact_lower_duplicate": false,
+      "lower_identity": null,
+      "language_visible": true,
+      "decision": "SELECT-D9-CANDIDATE",
+      "selected_d9_candidate": true,
+      "d9_coordinate": null,
+      "reason": "Language-visible semantics are distinct from current D1-D8 by the present review; preserve as an unplaced D9 semantic candidate. Coordinate remains unknown."
+    }
+  ]
+}

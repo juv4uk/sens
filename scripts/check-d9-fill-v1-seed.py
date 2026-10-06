@@ -74,15 +74,14 @@ assert state["authority"]=="#3964"
 assert state["foundation"]["authority"]=="#3960"
 assert state["foundation"]["current_domains"]==["D1","D2","D3","D4","D5","D6","D7","D8"]
 assert state["foundation"]["research_domain"]=="D9"
-assert state["target"]=={
-    "domain":"D9",
-    "width":9,
-    "capacity":512,
-    "dense_target":512,
-    "selected_semantic_candidates":128,
-    "remaining_semantic_candidates":384,
-    "ratified_residents":0,
-}
+target=state["target"]
+assert target["domain"]=="D9"
+assert target["width"]==9
+assert target["capacity"]==512
+assert target["dense_target"]==512
+assert target["selected_semantic_candidates"]>=128
+assert target["remaining_semantic_candidates"]==512-target["selected_semantic_candidates"]
+assert target["ratified_residents"]==0
 assert state["recovery_queue"]["automatic_admission"] is False
 
 assert "(minor . 7)" in lang
