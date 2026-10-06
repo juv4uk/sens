@@ -6,10 +6,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from domain_tables import DOMAIN_TABLES, D8_TABLE, read_domain_table
+from domain_tables import DOMAIN_TABLES, D7_TABLE, D8_TABLE, read_domain_table
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d8-foundation.json"
+D7_AUTHORITY = ROOT / "knowledge/d7-ratified.json"
 D8_AUTHORITY = ROOT / "knowledge/d8-ratified.json"
 
 
@@ -33,8 +34,6 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
     if actual_bits != expected_bits:
         fail(f"{domain}: rows must be ordered exact-width 0..{expected_count - 1}")
 
-    missing_uk = 0
-    missing_san = 0
     for row in rows:
         resident = residents.get(row.bits)
         if resident is None:
@@ -51,11 +50,6 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
         elif require_human and row.lisp is None and domain not in {"D2"}:
             fail(f"{domain}:{row.bits}: missing LISP")
 
-        if row.uk is None:
-            missing_uk += 1
-        if row.san is None:
-            missing_san += 1
-
         if require_human:
             for attr in ("uk", "ukr", "san"):
                 if getattr(row, attr) is None:
@@ -70,7 +64,38 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
             if row.san is not None and row.san.endswith("?"):
                 fail(f"{domain}:{row.bits}: predicate san must not end in ?")
 
-    return rows, missing_uk, missing_san
+    return rows
+
+
+def validate_d7(authority: dict):
+    if authority.get("status") != "owner-ratified" or authority.get("authority") != "#3572":
+        fail("D7 authority is not owner-ratified #3572")
+
+    rows = read_domain_table(D7_TABLE)
+    residents = authority["residents"]
+    if len(rows) != 126:
+        fail(f"D7: expected 126 rows, found {len(rows)}")
+
+    reserved = set(authority["reserved_coordinates"])
+    actual_bits = [row.bits for row in rows]
+    expected_bits = sorted(residents, key=lambda bits: int(bits, 2))
+
+    if actual_bits != expected_bits:
+        fail("D7: rows must match ratified resident coordinates exactly")
+    if any(bits in reserved for bits in actual_bits):
+        fail("D7: owner-reserved pinned coordinate appeared as a semantic row")
+
+    for row in rows:
+        resident = residents[row.bits]
+        if row.en is None or row.en.casefold() != resident.casefold():
+            fail(f"D7:{row.bits}: en {row.en!r} does not match resident {resident!r}")
+        if row.lisp is not None:
+            fail(f"D7:{row.bits}: LISP must stay () because D7 is sound/text, not a Lisp operator")
+        for attr in ("uk", "ukr", "san"):
+            if getattr(row, attr) is None:
+                fail(f"D7:{row.bits}: missing {attr}")
+
+    return rows
 
 
 def main() -> int:
@@ -80,14 +105,19 @@ def main() -> int:
 
     for width, path in enumerate(DOMAIN_TABLES, start=1):
         residents = foundation["domains"][f"D{width}"]["residents"]
-        rows, _, _ = validate_dense_table(path, width, residents, require_human=True)
+        rows = validate_dense_table(path, width, residents, require_human=True)
         all_rows.extend(rows)
         total += 1 << width
+
+    d7_authority = json.loads(D7_AUTHORITY.read_text(encoding="utf-8"))
+    d7_rows = validate_d7(d7_authority)
+    all_rows.extend(d7_rows)
+    total += 126
 
     d8_authority = json.loads(D8_AUTHORITY.read_text(encoding="utf-8"))
     if d8_authority.get("status") != "owner-ratified" or d8_authority.get("authority") != "#3960":
         fail("D8 authority is not owner-ratified #3960")
-    d8_rows, missing_uk, missing_san = validate_dense_table(
+    d8_rows = validate_dense_table(
         D8_TABLE,
         8,
         d8_authority["residents"],
@@ -101,7 +131,7 @@ def main() -> int:
         for row in all_rows:
             value = getattr(row, attr)
             previous = seen.get(value)
-            key = (row.domain, row.bits, row.lisp)
+            key = (row.domain, row.bits, row.en)
             if previous is not None and previous != key:
                 fail(
                     f"{attr}: duplicate surface {value!r} for "
@@ -109,13 +139,14 @@ def main() -> int:
                 )
             seen[value] = key
 
-    if total != 382:
-        fail(f"expected D1-D6 + D8 total 382 rows, found {total}")
+    if total != 508:
+        fail(f"expected D1-D8 current residents total 508 rows, found {total}")
 
     print("DOMAIN-TABLES: PASS")
-    print("files=7 layout=one-domain-per-file current-human-tables=D1-D6,D8")
-    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d8:256 total=382")
-    print(f"d8-missing-uk={missing_uk} d8-missing-san={missing_san} d8-missing-ukr=0")
+    print("files=8 layout=one-domain-per-file")
+    print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:126,d8:256 total=508")
+    print("d7-reserved=0100001,0101010")
+    print("missing-uk=0 missing-ukr=0 missing-san=0")
     print("surface-collisions=0 namespaces=uk,ukr,san")
     print("columns=ук->укр->san->en->LISP->sym")
     return 0
