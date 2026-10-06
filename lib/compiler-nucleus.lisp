@@ -306,3 +306,163 @@
       (compiler-role-from-l1-l5 decompose identity law)
       proof-ref
       provenance)))
+
+
+; #3839 — whole-program compiler traversal.
+;
+; Program data is the source-shaped tree ratified by compiler-program-data/1:
+; exact DomainCall nodes are ordinary lists whose head is an exact
+; DomainIdentity.  SHAPE-OR-EMPTY is a representation-only host mechanism:
+; DomainIdentity -> (width bits), every other value -> ().
+;
+; The traversal owns semantic request selection in SENS and returns:
+;   (D1-success-bit request...)
+; so an unsupported exact-domain node cannot be confused with an empty
+; subtree.  Backend lowering/installation remains outside this program.
+
+(визначити compiler-request-from-laws
+  (функція (decompose identity d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-law-width d3-law))
+       (compiler-request-from-role
+         identity
+         identity
+         (compiler-lowering-role-from-l1-l5 decompose identity d3-law)
+         d3-proof
+         provenance))
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-d4-law-width d4-law))
+       (compiler-request-from-role
+         identity
+         identity
+         (compiler-role-from-d4-bootstrap decompose identity d4-law)
+         d4-proof
+         provenance))
+      ((compiler-true identity) ()))))
+
+(визначити compiler-result-ok
+  (функція (requests)
+    (сполучити (compiler-true ()) requests)))
+
+(визначити compiler-result-fail
+  (функція ()
+    (сполучити (compiler-false ()) ())))
+
+(визначити compiler-result-success
+  (функція (result)
+    (перше result)))
+
+(визначити compiler-result-requests
+  (функція (result)
+    (решта result)))
+
+(визначити compiler-append
+  (функція (left right)
+    (за-умовою
+      ((атом? left) right)
+      ((compiler-true ())
+       (сполучити
+         (перше left)
+         (compiler-append (решта left) right))))))
+
+(визначити compiler-merge-results
+  (функція (left right)
+    (за-умовою
+      ((compiler-result-success left)
+       (за-умовою
+         ((compiler-result-success right)
+          (compiler-result-ok
+            (compiler-append
+              (compiler-result-requests left)
+              (compiler-result-requests right))))
+         ((compiler-true ()) (compiler-result-fail))))
+      ((compiler-true ()) (compiler-result-fail)))))
+
+(визначити compiler-domain-result
+  (функція
+    (request child-result)
+    (за-умовою
+      ((атом? request) (compiler-result-fail))
+      ((compiler-result-success child-result)
+       (compiler-result-ok
+         (сполучити
+           request
+           (compiler-result-requests child-result))))
+      ((compiler-true ()) (compiler-result-fail)))))
+
+(визначити compiler-program-list
+  (функція
+    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((атом? nodes) (compiler-result-ok ()))
+      ((compiler-true ())
+       (compiler-merge-results
+         (compiler-program-node
+           shape-or-empty
+           decompose
+           (перше nodes)
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance)
+         (compiler-program-list
+           shape-or-empty
+           decompose
+           (решта nodes)
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance))))))
+
+(визначити compiler-program-node
+  (функція
+    (shape-or-empty decompose node d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((атом? node) (compiler-result-ok ()))
+      ((атом? (shape-or-empty (перше node)))
+       (compiler-program-list
+         shape-or-empty
+         decompose
+         node
+         d3-law
+         d4-law
+         d3-proof
+         d4-proof
+         provenance))
+      ((compiler-true ())
+       (compiler-domain-result
+         (compiler-request-from-laws
+           decompose
+           (перше node)
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance)
+         (compiler-program-list
+           shape-or-empty
+           decompose
+           (решта node)
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance))))))
+
+(визначити compiler-compile-program
+  (функція
+    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof provenance)
+    (compiler-program-list
+      shape-or-empty
+      decompose
+      program
+      d3-law
+      d4-law
+      d3-proof
+      d4-proof
+      provenance)))
