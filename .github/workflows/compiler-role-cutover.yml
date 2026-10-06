@@ -20,6 +20,7 @@ on:
       - "crates/sens/tests/compiler_selfhost_lowering_coverage.rs"
       - "contracts/compiler-program-data-v1.lisp"
       - "crates/sens/tests/compiler_program_data.rs"
+      - "crates/sens/src/lib.rs"
       - "crates/xtask/src/compiler_export.rs"
       - "crates/xtask/src/main.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
@@ -70,6 +71,21 @@ jobs:
 
       - name: Selfhost program-data wire
         run: cargo test -p sens --test compiler_program_data -- --nocapture
+
+      - name: SENS recursive program compiler traversal
+        run: |
+          cargo test -p sens --lib \
+            compiler_language::tests::sens_program_traversal_is_role_aware_and_quote_shields_domain_data \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::same_payload_wrong_domain_with_wrong_shape_fails_closed \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::malformed_exact_d3_cond_clause_fails_closed_before_request_emission \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::direct_d8_domain_call_fails_closed_in_sens_program_traversal \
+            -- --nocapture
       - name: Stale projection is bootstrap failure, not semantic diff
         run: >-
           cargo test -p sens --lib

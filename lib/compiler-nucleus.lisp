@@ -306,3 +306,246 @@
       (compiler-role-from-l1-l5 decompose identity law)
       proof-ref
       provenance)))
+
+
+; #3839 — whole-program compiler traversal.
+;
+; Program data is the source-shaped tree ratified by compiler-program-data/1:
+; exact DomainCall nodes are ordinary lists whose head is an exact
+; DomainIdentity.  SHAPE-OR-EMPTY is a representation-only host mechanism:
+; DomainIdentity -> (width bits), every other value -> ().
+;
+; The traversal owns semantic request selection in SENS and returns:
+;   (D1-success-bit request...)
+; so an unsupported exact-domain node cannot be confused with an empty
+; subtree.  Backend lowering/installation remains outside this program.
+
+(визначити compiler-request-from-laws
+  (функція (decompose identity d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-law-width d3-law))
+       (compiler-request-from-role
+         identity
+         identity
+         (compiler-lowering-role-from-l1-l5 decompose identity d3-law)
+         d3-proof
+         provenance))
+      ((тотожне?
+         (compiler-shape-width (decompose identity))
+         (compiler-d4-law-width d4-law))
+       (compiler-request-from-role
+         identity
+         identity
+         (compiler-role-from-d4-bootstrap decompose identity d4-law)
+         d4-proof
+         provenance))
+      ((compiler-true identity) ()))))
+
+(визначити compiler-result-ok
+  (функція (requests)
+    (сполучити (compiler-true ()) requests)))
+
+(визначити compiler-result-fail
+  (функція ()
+    (сполучити (compiler-false ()) ())))
+
+(визначити compiler-result-success
+  (функція (result)
+    (перше result)))
+
+(визначити compiler-result-requests
+  (функція (result)
+    (решта result)))
+
+(визначити compiler-append
+  (функція (left right)
+    (за-умовою
+      ((атом? left) right)
+      ((compiler-true ())
+       (сполучити
+         (перше left)
+         (compiler-append (решта left) right))))))
+
+(визначити compiler-merge-results
+  (функція (left right)
+    (за-умовою
+      ((compiler-result-success left)
+       (за-умовою
+         ((compiler-result-success right)
+          (compiler-result-ok
+            (compiler-append
+              (compiler-result-requests left)
+              (compiler-result-requests right))))
+         ((compiler-true ()) (compiler-result-fail))))
+      ((compiler-true ()) (compiler-result-fail)))))
+
+(визначити compiler-request-role
+  (функція (request)
+    (перше (решта request))))
+
+; Validate source shape only after SENS has already derived the abstract role.
+; This is deliberately role -> arity/shape, never domain-bits -> shape.
+(визначити compiler-exactly-one
+  (функція (arguments)
+    (за-умовою
+      ((атом? arguments) (compiler-false ()))
+      ((тотожне? (решта arguments) ()) (compiler-true ()))
+      ((compiler-true ()) (compiler-false ())))))
+
+(визначити compiler-exactly-two
+  (функція (arguments)
+    (за-умовою
+      ((атом? arguments) (compiler-false ()))
+      ((атом? (решта arguments)) (compiler-false ()))
+      ((тотожне? (решта (решта arguments)) ()) (compiler-true ()))
+      ((compiler-true ()) (compiler-false ())))))
+
+; Exact D3 COND is a non-empty sequence of two-part (test expression) clauses.
+(визначити compiler-cond-clauses-valid
+  (функція (clauses)
+    (за-умовою
+      ((атом? clauses) (compiler-true ()))
+      ((compiler-exactly-two (перше clauses))
+       (compiler-cond-clauses-valid (решта clauses)))
+      ((compiler-true ()) (compiler-false ())))))
+
+(визначити compiler-role-shape-valid
+  (функція (request arguments)
+    (за-умовою
+      ((атом? request) (compiler-false ()))
+      ((тотожне? (compiler-request-role request) (як-є quote-form))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є atom-predicate))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є selector-tail))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є selector-head))
+       (compiler-exactly-one arguments))
+      ((тотожне? (compiler-request-role request) (як-є atom-equality))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є pair-construct))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є lambda-form))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є define-form))
+       (compiler-exactly-two arguments))
+      ((тотожне? (compiler-request-role request) (як-є cond-form))
+       (за-умовою
+         ((атом? arguments) (compiler-false ()))
+         ((compiler-true ()) (compiler-cond-clauses-valid arguments))))
+      ((compiler-true ()) (compiler-false ())))))
+
+; Program traversal policy is semantic and therefore SENS-owned.
+; QUOTE payload is data.  LAMBDA parameters and DEFINE name are data.
+; Other admitted forms recursively compile every argument position.
+(визначити compiler-domain-children
+  (функція (request arguments)
+    (за-умовою
+      ((атом? request) ())
+      ((тотожне? (compiler-request-role request) (як-є quote-form)) ())
+      ((тотожне? (compiler-request-role request) (як-є lambda-form))
+       (решта arguments))
+      ((тотожне? (compiler-request-role request) (як-є define-form))
+       (решта arguments))
+      ((compiler-true ()) arguments))))
+
+(визначити compiler-domain-result
+  (функція
+    (request arguments child-result)
+    (за-умовою
+      ((атом? request) (compiler-result-fail))
+      ((compiler-role-shape-valid request arguments)
+       (за-умовою
+         ((compiler-result-success child-result)
+          (compiler-result-ok
+            (сполучити
+              request
+              (compiler-result-requests child-result))))
+         ((compiler-true ()) (compiler-result-fail))))
+      ((compiler-true ()) (compiler-result-fail)))))
+
+(визначити compiler-program-list
+  (функція
+    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((атом? nodes) (compiler-result-ok ()))
+      ((compiler-true ())
+       (compiler-merge-results
+         (compiler-program-node
+           shape-or-empty
+           decompose
+           (перше nodes)
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance)
+         (compiler-program-list
+           shape-or-empty
+           decompose
+           (решта nodes)
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance))))))
+
+(визначити compiler-program-node
+  (функція
+    (shape-or-empty decompose node d3-law d4-law d3-proof d4-proof provenance)
+    (за-умовою
+      ((атом? node) (compiler-result-ok ()))
+      ((атом? (shape-or-empty (перше node)))
+       (compiler-program-list
+         shape-or-empty
+         decompose
+         node
+         d3-law
+         d4-law
+         d3-proof
+         d4-proof
+         provenance))
+      ((compiler-true ())
+       (compiler-domain-result
+         (compiler-request-from-laws
+           decompose
+           (перше node)
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance)
+         (решта node)
+         (compiler-program-list
+           shape-or-empty
+           decompose
+           (compiler-domain-children
+             (compiler-request-from-laws
+               decompose
+               (перше node)
+               d3-law
+               d4-law
+               d3-proof
+               d4-proof
+               provenance)
+             (решта node))
+           d3-law
+           d4-law
+           d3-proof
+           d4-proof
+           provenance))))))
+
+(визначити compiler-compile-program
+  (функція
+    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof provenance)
+    (compiler-program-list
+      shape-or-empty
+      decompose
+      program
+      d3-law
+      d4-law
+      d3-proof
+      d4-proof
+      provenance)))

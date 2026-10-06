@@ -12,7 +12,8 @@
 //! It must never decide identity -> role from domain coordinates.
 
 use crate::{
-    domain_identity_shape_mechanism, eval_parsed_expressions, eval_program, load_core_library,
+    domain_identity_shape_mechanism, domain_identity_shape_or_empty_mechanism,
+    eval_parsed_expressions, eval_program, load_core_library,
     sha256_source, CompilerExecutionRole, CompilerLoweringRole, CoreDomainIdentity, DomainIdentity,
     ErrorKind, Exactness,
     Expr, ExprKind, LanguageError, Session, Span, Value,
@@ -53,6 +54,11 @@ const D4_LAW_PROJECTION: &str =
 const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-ratification.lisp");
 
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
+const SHAPE_OR_EMPTY_MECHANISM_NAME: &str = "__compiler_domain_shape_or_empty_mechanism";
+const PROGRAM_VALUE_NAME: &str = "__compiler_program_data";
+const D3_PROOF_VALUE_NAME: &str = "__compiler_d3_proof";
+const D4_PROOF_VALUE_NAME: &str = "__compiler_d4_proof";
+const PROVENANCE_VALUE_NAME: &str = "__compiler_program_provenance";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 
@@ -348,6 +354,26 @@ fn language_role_call(identity: CoreDomainIdentity) -> Expr {
     }
 }
 
+fn compiler_program_call() -> Expr {
+    Expr {
+        kind: ExprKind::List(Rc::from(
+            vec![
+                symbol("compiler-compile-program"),
+                symbol(SHAPE_OR_EMPTY_MECHANISM_NAME),
+                symbol(SHAPE_MECHANISM_NAME),
+                symbol(PROGRAM_VALUE_NAME),
+                symbol(LAW_VALUE_NAME),
+                symbol(D4_LAW_VALUE_NAME),
+                symbol(D3_PROOF_VALUE_NAME),
+                symbol(D4_PROOF_VALUE_NAME),
+                symbol(PROVENANCE_VALUE_NAME),
+            ]
+            .into_boxed_slice(),
+        )),
+        span: Span::default(),
+    }
+}
+
 fn decode_language_lowering_role(
     value: &Value,
 ) -> Result<Option<CompilerLoweringRole>, LanguageError> {
@@ -415,6 +441,51 @@ pub fn compiler_lowering_role_from_sens(
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_lowering_role(&result)
+}
+
+/// Execute the SENS-written recursive compiler traversal over canonical
+/// program-data.  The host adapter supplies representation mechanisms and
+/// provenance values once; it does not walk nodes or select compiler roles.
+///
+/// Return shape is owned by `lib/compiler-nucleus.lisp`:
+/// `(D1-success-bit request...)`.
+pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, LanguageError> {
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+
+    session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    session.environment.define(
+        SHAPE_OR_EMPTY_MECHANISM_NAME,
+        domain_identity_shape_or_empty_mechanism(),
+    );
+    session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    session.environment.define(PROGRAM_VALUE_NAME, program);
+    session.environment.define(
+        D3_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D3_PROOF_REF)),
+    );
+    session.environment.define(
+        D4_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D4_PROOF_REF)),
+    );
+    session.environment.define(
+        PROVENANCE_VALUE_NAME,
+        Value::list([
+            Value::String(Rc::from(COMPILER_AUTHORITY_PATH)),
+            Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
+            Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
+        ]),
+    );
+
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
 }
 
 /// Backward-compatible three-role view used by the already-landed selector/pair
@@ -554,6 +625,115 @@ mod tests {
                 .expect("D8 must fail closed as no compiler input")
                 .is_none()
         );
+    }
+
+    fn list_values(value: &Value) -> Vec<&Value> {
+        let mut out = Vec::new();
+        let mut cursor = value;
+        loop {
+            match cursor {
+                Value::Nil => return out,
+                Value::Pair(head, tail) => {
+                    out.push(head.as_ref());
+                    cursor = tail.as_ref();
+                }
+                other => panic!("expected proper list, got {other}"),
+            }
+        }
+    }
+
+    fn exact_value(identity: CoreDomainIdentity) -> Value {
+        Value::DomainIdentity(DomainIdentity::from_source_word(identity.source_word()))
+    }
+
+    #[test]
+    fn sens_program_traversal_is_role_aware_and_quote_shields_domain_data() {
+        let lambda = exact_value(d4(0b0010));
+        let quote = exact_value(d3(0b001));
+        let atom = exact_value(d3(0b010));
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+
+        let program = Value::list([Value::list([
+            lambda,
+            Value::list([Value::Symbol(Rc::from("x"))]),
+            Value::list([quote, exact_value(d8)]),
+            Value::list([atom, Value::Symbol(Rc::from("x"))]),
+        ])]);
+
+        let result = compiler_program_requests_from_sens(program).expect("SENS program traversal");
+        let rows = list_values(&result);
+        assert_eq!(
+            rows[0].as_predicate_bit(),
+            Some(true),
+            "quoted D8 data must not be traversed as a compiler call"
+        );
+        assert_eq!(rows.len(), 4, "success bit plus Lambda/Quote/Atom requests");
+
+        let observed_roles = rows[1..]
+            .iter()
+            .map(|request| {
+                let request = list_values(request);
+                match request[1] {
+                    Value::Symbol(role) => role.to_string(),
+                    other => panic!("request role must be symbolic, got {other}"),
+                }
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(observed_roles, ["lambda-form", "quote-form", "atom-predicate"]);
+    }
+
+    #[test]
+    fn same_payload_wrong_domain_with_wrong_shape_fails_closed() {
+        // D3:010 is AtomPredicate and one argument is valid.
+        let d3_program = Value::list([Value::list([
+            exact_value(d3(0b010)),
+            Value::Symbol(Rc::from("x")),
+        ])]);
+        let d3_result =
+            compiler_program_requests_from_sens(d3_program).expect("D3 atom traversal");
+        let d3_rows = list_values(&d3_result);
+        assert_eq!(d3_rows[0].as_predicate_bit(), Some(true));
+
+        // Same numeric payload under width 4 is D4:0010 LambdaForm.
+        // Reusing the one-child D3 source shape must fail rather than silently
+        // reinterpret the node as a valid lambda request.
+        let d4_program = Value::list([Value::list([
+            exact_value(d4(0b0010)),
+            Value::Symbol(Rc::from("x")),
+        ])]);
+        let d4_result =
+            compiler_program_requests_from_sens(d4_program).expect("normal fail-closed result");
+        let d4_rows = list_values(&d4_result);
+        assert_eq!(d4_rows.len(), 1);
+        assert_eq!(d4_rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn malformed_exact_d3_cond_clause_fails_closed_before_request_emission() {
+        let cond = exact_value(d3(0b110));
+        let malformed_clause = Value::list([Value::Symbol(Rc::from("test-only"))]);
+        let program = Value::list([Value::list([cond, malformed_clause])]);
+
+        let result =
+            compiler_program_requests_from_sens(program).expect("normal fail-closed result");
+        let rows = list_values(&result);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn direct_d8_domain_call_fails_closed_in_sens_program_traversal() {
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        let program = Value::list([Value::list([exact_value(d8)])]);
+
+        let result = compiler_program_requests_from_sens(program).expect("normal fail-closed result");
+        let rows = list_values(&result);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].as_predicate_bit(), Some(false));
     }
 
     #[test]
