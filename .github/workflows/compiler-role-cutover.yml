@@ -45,6 +45,15 @@ jobs:
     runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     steps:
       - uses: actions/checkout@v5
+      - name: Core library must remain dependency-clean and buildable
+        run: |
+          test -z "$(sed -n '/^\[dependencies\]/,/^\[/p' crates/sens/Cargo.toml | sed '1d;$d' | sed '/^[[:space:]]*$/d')" || {
+            echo "sens core acquired a runtime dependency" >&2
+            sed -n '/^\[dependencies\]/,/^\[/p' crates/sens/Cargo.toml >&2
+            exit 1
+          }
+          cargo check -p sens --lib
+
       - name: D4 bootstrap projection must match ratified authority
         run: python3 scripts/generate-d4-bootstrap-compiler-structure.py --check
       - name: Production path must not import Rust role oracle
