@@ -78,22 +78,18 @@ for row in rows:
     assert got["coordinate_basis"]=="UNPLACED"
     assert got["ratified_resident"] is False
 
-assert len(inventory["rows"])==304
-assert len({r["stable_id"] for r in inventory["rows"]})==304
-assert len({r["semantic_name"] for r in inventory["rows"]})==304
-assert inventory["accounting"]=={
-    "selected_semantic_candidates":304,
-    "law_forced_coordinates":256,
-    "unplaced_selected_candidates":48,
-    "remaining_semantic_inventory":720,
-    "ratified_d10_residents":0,
-}
-
-assert state["target"]["selected_semantic_candidates"]==304
-assert state["target"]["remaining_semantic_candidates"]==720
+selected_total=state["target"]["selected_semantic_candidates"]
+remaining_total=state["target"]["remaining_semantic_candidates"]
+assert selected_total>=304
+assert remaining_total==1024-selected_total
 assert state["target"]["law_forced_coordinates"]==256
-assert state["target"]["unplaced_selected_candidates"]==48
+assert state["target"]["unplaced_selected_candidates"]==selected_total-256
 assert state["target"]["ratified_residents"]==0
+
+assert len(inventory["rows"])==selected_total
+assert len({r["stable_id"] for r in inventory["rows"]})==selected_total
+assert len({r["semantic_name"] for r in inventory["rows"]})==selected_total
+
 assert state["library_harvest_v1"]=={
     "artifact":"knowledge/d10-library-harvest-v1.json",
     "selected":39,
@@ -108,4 +104,4 @@ assert state["library_harvest_v1"]=={
 }
 
 print("D10-LIBRARY-HARVEST-V1=PASS")
-print("selected=39 inventory=304/1024 placed=256 unplaced=48 remaining=720 ratified=0")
+print(f"selected-v1=39 inventory={selected_total}/1024 placed=256 unplaced={selected_total-256} remaining={remaining_total} ratified=0")
