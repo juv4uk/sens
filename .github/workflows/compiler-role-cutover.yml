@@ -50,7 +50,7 @@ jobs:
   cutover:
     # Rust/Python control-plane gate: do not reserve the GPU-labelled runner.
     # Keep CPU pressure bounded while the real CUDA lane runs in parallel.
-    runs-on: [self-hosted, guix]
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
