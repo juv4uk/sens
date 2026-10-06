@@ -372,7 +372,7 @@ def _extract_projection(text: str, name: str) -> dict[str, tuple[int, ...]]:
         raise BinaryMigrationError(f"unterminated Text7 projection {name}")
     section = text[start:end]
     result = {}
-    row = re.compile(r'^\s*("(?:\\.|[^"\\])*"),\s*Some\(&\[([^\]]*)\]\)', re.M)
+    row = re.compile(r'^\s*\(("(?:\\.|[^"\\])*"),\s*Some\(&\[([^\]]*)\]\)\)', re.M)
     for match in row.finditer(section):
         spelling = ast.literal_eval(match.group(1))
         values = tuple(int(x.strip(), 16) for x in match.group(2).split(",") if x.strip())
