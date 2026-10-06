@@ -32,7 +32,9 @@
 
 Це **candidate coordinates**, не ратифіковані residents.
 
-`ERRORSET` стоїть першим, бо він історично ранній (Lisp 1.5, 1961–1962), фундаментально додає локальне відновлення після помилки й має дуже короткий закон:
+`RPLACA/RPLACD` стоять першими: вони додають відсутню в elementary Lisp здатність змінювати вже існуючу pair-структуру, а їхній закон — простий CAR/CDR field axis.
+
+`ERRORSET` іде наступним, бо він історично ранній (Lisp 1.5, 1961–1962), фундаментально додає локальне відновлення після помилки й має дуже короткий закон:
 
 ```text
 success -> LIST(value)
@@ -145,7 +147,7 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 provisional D8 ladder candidates   12
 provisional coordinates            00000000..00001011
 ratified D8 residents              0
-resolved recovery no-slot          9
+resolved recovery no-slot          11
 unresolved recovery rows           2
 preserved positive law families    8
 preserved negative groups          4
