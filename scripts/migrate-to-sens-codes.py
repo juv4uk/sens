@@ -86,6 +86,88 @@ def build_map(data, domains):
     return out
 
 
+def _entry_index(code_map):
+    out = {}
+    for entry in code_map.values():
+        out[(entry.domain, entry.bits)] = entry
+    return out
+
+
+def augment_code_map_with_domain_surfaces(code_map, paths):
+    """Add exact human spellings from domain surface projection files.
+
+    These files are projection-only, but each row names an exact (domain,bits)
+    identity. We use them only to recognize source spelling; semantic identity
+    still comes from the ratified foundation entry.
+    """
+    by_identity = _entry_index(code_map)
+    out = dict(code_map)
+    row = re.compile(
+        r'^\s*\(row\s+(D[1-8])\s+"([01]+)"\s+\S+\s+'
+        r'"([^"]*)"\s+"([^"]*)"\s+"([^"]*)"',
+        re.M,
+    )
+    for path in paths:
+        text = path.read_text(encoding="utf-8")
+        for match in row.finditer(text):
+            domain, bits = match.group(1), match.group(2)
+            entry = by_identity.get((domain, bits))
+            if entry is None:
+                continue
+            for surface in match.groups()[2:]:
+                surface = surface.strip()
+                if not surface:
+                    continue
+                key = surface.upper()
+                previous = out.get(key)
+                if previous is not None and previous != entry:
+                    raise BinaryMigrationError(
+                        f"surface {surface!r} maps to both "
+                        f"{previous.domain}:{previous.bits} and {entry.domain}:{entry.bits}"
+                    )
+                out[key] = entry
+    return out
+
+
+def augment_code_map_with_registry_aliases(code_map, registry_path):
+    """Add legacy/UI aliases only when their English row resolves to one exact entry.
+
+    This never derives exact identity from the historical byte. The byte row is
+    used only as a bag of synonymous spellings after the row's English spelling
+    has independently resolved to a current exact-domain entry.
+    """
+    text = registry_path.read_text(encoding="utf-8")
+    out = dict(code_map)
+
+    normalized = {}
+    for surface, entry in out.items():
+        normalized.setdefault(normalize_legacy_surface(surface), set()).add(entry)
+
+    row_re = re.compile(r'^\s*\(([01]{8})\s+((?:\([^\n]*\)\s*)+)\)', re.M)
+    field_re = re.compile(r'\((en|ук|укр|sa|sym)\s+([^)]*)\)')
+
+    for row_match in row_re.finditer(text):
+        fields = field_re.findall(row_match.group(2))
+        en_values = [value.strip() for ns, value in fields if ns == "en"]
+        if len(en_values) != 1 or en_values[0] == "()":
+            continue
+        candidates = normalized.get(normalize_legacy_surface(en_values[0]), set())
+        if len(candidates) != 1:
+            continue
+        entry = next(iter(candidates))
+        for _ns, value in fields:
+            value = value.strip()
+            if not value or value == "()":
+                continue
+            key = value.upper()
+            previous = out.get(key)
+            if previous is not None and previous != entry:
+                continue
+            out[key] = entry
+
+    return out
+
+
 def line_col(text, offset):
     line = text.count("\n", 0, offset) + 1
     last = text.rfind("\n", 0, offset)
@@ -583,6 +665,17 @@ def binary_rewrite(text, code_map, text7_candidates, legacy_sid_map=None):
             continue
 
         if ch == "(":
+            # Canonical empty list is D3 EMPTY=000, not OPEN+CLOSE.
+            j = i + 1
+            while j < len(source) and source[j].isspace():
+                j += 1
+            if j < len(source) and source[j] == ")":
+                begin_item()
+                out.append("000")
+                i = j + 1
+                pending_quote = False
+                continue
+
             begin_item()
             parent_quoted = bool(frames and (frames[-1]["quoted"] or frames[-1]["quote_children"]))
             frames.append({
@@ -780,6 +873,16 @@ def main():
         default=Path("lib/surface/semantic-registry.lisp"),
         help="pinned legacy SID8 surface registry used only for exact D3-D6 migration",
     )
+    parser.add_argument(
+        "--domain-surfaces",
+        type=Path,
+        nargs="*",
+        default=[
+            Path("lib/surface/domain-surfaces-d1-d4.lisp"),
+            Path("lib/surface/domain-surfaces-d5.lisp"),
+        ],
+        help="exact-domain surface projection files used to recognize function spellings",
+    )
     parser.add_argument("--report", type=Path, default=Path("sens-code-migration-report.json"))
     args = parser.parse_args()
 
@@ -789,6 +892,8 @@ def main():
 
     foundation, digest = load_foundation(args.foundation)
     code_map = build_map(foundation, args.domains)
+    code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
+    code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
     text7_candidates = (
         build_text7_encoder(foundation, args.text7_projection)
         if args.binary_mirror
