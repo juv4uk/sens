@@ -103,7 +103,13 @@ fn encode_canonical_compiler_value(value: &Value, out: &mut Vec<u8>) -> Result<(
         Value::DomainIdentity(identity) => {
             out.push(0x01);
             out.push(identity.width() as u8);
-            out.push(identity.packed_bits());
+            if identity.width() <= 8 {
+                // Preserve existing compiler-hash bytes for D1-D8.
+                out.push(identity.packed_bits() as u8);
+            } else {
+                // W9 must never be truncated to the historical byte lane.
+                out.extend_from_slice(&identity.packed_bits().to_le_bytes());
+            }
         }
         Value::Symbol(symbol) => {
             out.push(0x02);
