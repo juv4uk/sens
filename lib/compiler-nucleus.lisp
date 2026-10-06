@@ -561,7 +561,7 @@
     (сполучити name (сполучити value ()))))
 
 (визначити compiler-artifact-from-result
-  (функція (program-wire-sha256 provenance result)
+  (функція (canonical-sha256 program-wire-sha256 provenance result)
     (за-умовою
       ((compiler-result-success result)
        (сполучити
@@ -572,21 +572,25 @@
              program-wire-sha256)
            (сполучити
              (compiler-artifact-field
-               (як-є authority-provenance)
-               provenance)
+               (як-є semantic-requests-sha256)
+               (canonical-sha256 (compiler-result-requests result)))
              (сполучити
                (compiler-artifact-field
-                 (як-є semantic-requests)
-                 (compiler-result-requests result))
+                 (як-є authority-provenance)
+                 provenance)
                (сполучити
                  (compiler-artifact-field
-                   (як-є required-capabilities)
-                   ())
+                   (як-є semantic-requests)
+                   (compiler-result-requests result))
                  (сполучити
                    (compiler-artifact-field
-                     (як-є artifact-status)
-                     (як-є canonical-backend-neutral))
-                   ())))))))
+                     (як-є required-capabilities)
+                     ())
+                   (сполучити
+                     (compiler-artifact-field
+                       (як-є artifact-status)
+                       (як-є canonical-backend-neutral))
+                     ()))))))))
       ((compiler-true ())
        (сполучити
          (як-є compiler-compilation-error/1)
@@ -602,8 +606,9 @@
 
 (визначити compiler-compile-program-artifact
   (функція
-    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof provenance program-wire-sha256)
+    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof provenance program-wire-sha256 canonical-sha256)
     (compiler-artifact-from-result
+      canonical-sha256
       program-wire-sha256
       provenance
       (compiler-compile-program
