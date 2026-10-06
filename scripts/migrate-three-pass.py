@@ -349,13 +349,23 @@ def build_text7(data, projection_path: Path):
             candidates.setdefault(spelling,tuple(f"{v:07b}" for v in vals))
     for n in range(10):
         candidates[str(n)]=(labels[f"text.digit.{n}"],)
-    return sorted(candidates.items(),key=lambda x:(-len(x[0]),x[0]))
+
+    # Longest-match projection, indexed by first source character. This keeps
+    # multi-character cells (e.g. Ukrainian дж/дз) deterministic without
+    # rescanning the full table for every character in large source trees.
+    buckets={}
+    for key,cells in candidates.items():
+        buckets.setdefault(key[0],[]).append((key,cells))
+    for rows in buckets.values():
+        rows.sort(key=lambda x:(-len(x[0]),x[0]))
+    return buckets
 
 def text7_encode(spelling: str,candidates,tok: Tok):
     words=[]
     i=0
     while i<len(spelling):
-        for key,cells in candidates:
+        rows=candidates.get(spelling[i],())
+        for key,cells in rows:
             if spelling.startswith(key,i):
                 words.extend(cells); i+=len(key); break
         else:
