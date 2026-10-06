@@ -11,10 +11,14 @@ use sens::{
 use std::path::Path;
 
 const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
-const D3_LAW: &str = include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
-const D4_LAW: &str =
-    include_str!("../../../knowledge/d4-bootstrap-compiler-structure-projection.json");
-const D3_CORPUS: &str = include_str!("../../../contracts/compiler-d3-selector-corpus-v1.tsv");
+const LANGUAGE_CONTRACT: &str = include_str!("../../../language-contract.lisp");
+const CORPUS: &str =
+    include_str!("../../../contracts/compiler-nucleus-identity-corpus-v1.tsv");
+
+const COMPILER_ROLE_LAW_REF: &str =
+    "lib/compiler-nucleus.lisp:compiler-lowering-role-from-laws";
+const D3_PROOF_REF: &str = "contracts/bija3-l1-l5-ratification.lisp";
+const D4_PROOF_REF: &str = "contracts/d4-bootstrap-ratification.lisp";
 
 #[derive(Debug, Clone)]
 pub struct ExportOptions {
@@ -28,23 +32,8 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .collect()
 }
 
-fn quoted_field(source: &str, key: &str) -> Result<String, String> {
-    let marker = format!("\"{}\": \"", key);
-    let start = source
-        .find(&marker)
-        .ok_or_else(|| format!("missing generated projection field {key}"))?
-        + marker.len();
-    let tail = &source[start..];
-    let end = tail
-        .find('"')
-        .ok_or_else(|| format!("unterminated generated projection field {key}"))?;
-    Ok(tail[..end].to_string())
-}
-
-fn authority_digest() -> Result<String, String> {
-    let d3 = quoted_field(D3_LAW, "sha256")?;
-    let d4 = quoted_field(D4_LAW, "sha256")?;
-    Ok(sha256_hex(format!("{d3}\n{d4}").as_bytes()))
+fn authority_digest() -> String {
+    sha256_hex(LANGUAGE_CONTRACT.as_bytes())
 }
 
 fn current_commit(repo_root: &Path) -> Result<String, String> {
@@ -81,123 +70,86 @@ fn role_name(role: CompilerLoweringRole) -> &'static str {
     }
 }
 
-fn d3(raw: u8) -> Result<CoreDomainIdentity, String> {
-    Ok(CoreDomainIdentity::D3(Bija3::from_word(
-        Bit3::new(raw).ok_or_else(|| format!("invalid D3 value {raw}"))?,
-    )))
+fn parse_identity(domain: &str, bits: &str) -> Result<CoreDomainIdentity, String> {
+    if !bits.bytes().all(|b| matches!(b, b'0' | b'1')) {
+        return Err(format!("invalid compiler identity bits {bits:?}"));
+    }
+
+    match domain {
+        "D3" => {
+            if bits.len() != 3 {
+                return Err(format!("D3 compiler identity requires 3 bits, got {bits:?}"));
+            }
+            let raw = u8::from_str_radix(bits, 2)
+                .map_err(|_| format!("invalid D3 compiler identity {bits:?}"))?;
+            Ok(CoreDomainIdentity::D3(Bija3::from_word(
+                Bit3::new(raw).ok_or_else(|| format!("invalid D3 value {raw}"))?,
+            )))
+        }
+        "D4" => {
+            if bits.len() != 4 {
+                return Err(format!("D4 compiler identity requires 4 bits, got {bits:?}"));
+            }
+            let raw = u8::from_str_radix(bits, 2)
+                .map_err(|_| format!("invalid D4 compiler identity {bits:?}"))?;
+            Ok(CoreDomainIdentity::D4(CoreD4::from_word(
+                Bit4::new(raw).ok_or_else(|| format!("invalid D4 value {raw}"))?,
+            )))
+        }
+        other => Err(format!(
+            "unsupported compiler export domain {other:?}; only current D3/D4 are admitted"
+        )),
+    }
 }
 
-fn d4(raw: u8) -> Result<CoreDomainIdentity, String> {
-    Ok(CoreDomainIdentity::D4(CoreD4::from_word(
-        Bit4::new(raw).ok_or_else(|| format!("invalid D4 value {raw}"))?,
-    )))
-}
-
-/// Enumerate candidate exact identities, but admit meaning only through the
-/// executable SENS-owned compiler law.
-fn current_role_rows() -> Result<Vec<(String, CoreDomainIdentity)>, String> {
+fn parse_fixture_rows(
+    fixture: Option<&str>,
+) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
     let mut rows = Vec::new();
-
-    for raw in 0u8..8 {
-        let identity = d3(raw)?;
-        if let Some(role) = compiler_lowering_role_from_sens(identity)
-            .map_err(|error| format!("SENS D3 role derivation failed for {raw:03b}: {error}"))?
-        {
-            rows.push((
-                format!("role-d3-{raw:03b}-{}", role_name(role)),
-                identity,
-            ));
-        }
-    }
-
-    for raw in 0u8..16 {
-        let identity = d4(raw)?;
-        if let Some(role) = compiler_lowering_role_from_sens(identity)
-            .map_err(|error| format!("SENS D4 role derivation failed for {raw:04b}: {error}"))?
-        {
-            rows.push((
-                format!("role-d4-{raw:04b}-{}", role_name(role)),
-                identity,
-            ));
-        }
-    }
-
-    if rows.len() != 9 {
-        return Err(format!(
-            "current compiler role closure exported {} rows, expected 9",
-            rows.len()
-        ));
-    }
-    Ok(rows)
-}
-
-/// Preserve the original D3 corpus fixture selector as a compatibility
-/// convenience. The role is still re-derived through the SENS law.
-fn legacy_d3_fixture(name: &str) -> Result<Option<(String, CoreDomainIdentity)>, String> {
-    for line in D3_CORPUS.lines() {
+    for line in CORPUS.lines() {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
         }
         let fields: Vec<_> = line.split('\t').collect();
-        if fields.len() != 6 {
+        if fields.len() != 3 {
             return Err(format!(
-                "compiler corpus row has {} fields, expected 6: {line}",
+                "compiler nucleus corpus row has {} fields, expected 3: {line}",
                 fields.len()
             ));
         }
-        if fields[0] != name {
-            continue;
-        }
 
-        let bits = fields[1];
-        if bits.len() != 3 || !bits.bytes().all(|b| matches!(b, b'0' | b'1')) {
-            return Err(format!("unsupported D3 fixture bits {bits:?}"));
+        let name = fields[0].to_string();
+        if let Some(requested) = fixture {
+            if requested != name {
+                continue;
+            }
         }
-        let raw =
-            u8::from_str_radix(bits, 2).map_err(|_| format!("invalid D3 fixture bits {bits:?}"))?;
-        return Ok(Some((name.to_string(), d3(raw)?)));
+        rows.push((name, parse_identity(fields[1], fields[2])?));
     }
-    Ok(None)
+
+    if rows.is_empty() {
+        return Err(match fixture {
+            Some(name) => format!("compiler corpus fixture not found: {name}"),
+            None => "compiler corpus is empty".into(),
+        });
+    }
+    Ok(rows)
 }
 
-fn requested_rows(fixture: Option<&str>) -> Result<Vec<(String, CoreDomainIdentity)>, String> {
-    let all = current_role_rows()?;
-    let Some(requested) = fixture else {
-        return Ok(all);
-    };
-
-    if let Some(row) = legacy_d3_fixture(requested)? {
-        return Ok(vec![row]);
-    }
-
-    let selected: Vec<_> = all
-        .into_iter()
-        .filter(|(fixture_id, _)| fixture_id == requested)
-        .collect();
-    if selected.is_empty() {
-        return Err(format!("compiler corpus fixture not found: {requested}"));
-    }
-    Ok(selected)
-}
-
-fn identity_transport(
-    identity: CoreDomainIdentity,
-) -> Result<(&'static str, String, &'static str, &'static str), String> {
+fn identity_transport(identity: CoreDomainIdentity) -> (&'static str, String, &'static str) {
     match identity {
-        CoreDomainIdentity::D3(word) => Ok((
+        CoreDomainIdentity::D3(word) => (
             "D3",
             format!("{:03b}", word.word().packed_bits()),
-            "knowledge/bija3-l1-l5-structure-projection.json",
-            "contracts/bija3-l1-l5-ratification.lisp",
-        )),
-        CoreDomainIdentity::D4(word) => Ok((
+            D3_PROOF_REF,
+        ),
+        CoreDomainIdentity::D4(word) => (
             "D4",
             format!("{:04b}", word.word().packed_bits()),
-            "knowledge/d4-bootstrap-compiler-structure-projection.json",
-            "contracts/d4-bootstrap-ratification.lisp",
-        )),
-        _ => Err("compiler semantic export admits only current D3/D4 nucleus identities".into()),
+            D4_PROOF_REF,
+        ),
+        _ => unreachable!("compiler export corpus admits only current D3/D4"),
     }
 }
 
@@ -207,21 +159,21 @@ fn render_request(
     role: CompilerLoweringRole,
     source_commit: &str,
     authority: &str,
-) -> Result<String, String> {
-    let (domain, bits, authority_ref, proof_ref) = identity_transport(identity)?;
-    Ok(format!(
-        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (identity . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{authority_ref}\") (proof-ref . \"{proof_ref}\") (semantic-status . current)))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (provenance . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"{authority_ref}\") (authority-sha256 . \"{authority}\") (compiler-nucleus-sha256 . \"{}\") (contract . 11.6))))",
+) -> String {
+    let (domain, bits, proof_ref) = identity_transport(identity);
+    format!(
+        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (identity . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{COMPILER_ROLE_LAW_REF}\") (proof-ref . \"{proof_ref}\") (semantic-status . current)))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (provenance . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"language-contract.lisp\") (authority-sha256 . \"{authority}\") (compiler-nucleus-sha256 . \"{}\") (contract . 11.6))))",
         role_name(role),
         sha256_hex(NUCLEUS.as_bytes())
-    ))
+    )
 }
 
 pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
     let root = Path::new(repo_root);
     let source_commit = current_commit(root)?;
-    let authority = authority_digest()?;
+    let authority = authority_digest();
 
-    let rows = requested_rows(options.fixture.as_deref())?;
+    let rows = parse_fixture_rows(options.fixture.as_deref())?;
     let mut rendered = Vec::with_capacity(rows.len());
     for (name, identity) in rows {
         let role = compiler_lowering_role_from_sens(identity)
@@ -234,8 +186,42 @@ pub fn run(repo_root: &str, options: ExportOptions) -> Result<String, String> {
             role,
             &source_commit,
             &authority,
-        )?);
+        ));
     }
 
     Ok(format!("{}\n", rendered.join("\n\n")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn identity_parser_preserves_width_and_rejects_other_domains() {
+        assert!(matches!(
+            parse_identity("D3", "010").unwrap(),
+            CoreDomainIdentity::D3(_)
+        ));
+        assert!(matches!(
+            parse_identity("D4", "0010").unwrap(),
+            CoreDomainIdentity::D4(_)
+        ));
+        assert!(parse_identity("D4", "010").is_err());
+        assert!(parse_identity("D8", "00000010").is_err());
+    }
+
+    #[test]
+    fn corpus_is_identity_only_and_covers_nine_current_roles() {
+        let rows = parse_fixture_rows(None).unwrap();
+        assert_eq!(rows.len(), 9);
+        let roles = rows
+            .into_iter()
+            .map(|(_, identity)| {
+                compiler_lowering_role_from_sens(identity)
+                    .unwrap()
+                    .expect("every nucleus identity must have a SENS-owned role")
+            })
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(roles.len(), 9);
+    }
 }
