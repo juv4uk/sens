@@ -514,6 +514,87 @@ pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, Lang
     Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
 }
 
+fn canonical_revision(value: &str) -> Result<&str, LanguageError> {
+    if value.len() == 40
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+    {
+        Ok(value)
+    } else {
+        Err(invalid_projection(
+            "SENS revision provenance must be exactly 40 lowercase hexadecimal characters",
+        ))
+    }
+}
+
+fn compiler_program_provenance(sens_revision: &str) -> Result<Value, LanguageError> {
+    let revision = canonical_revision(sens_revision)?;
+    Ok(Value::list([
+        Value::String(Rc::from(revision)),
+        Value::String(Rc::from(COMPILER_AUTHORITY_PATH)),
+        Value::String(Rc::from(sha256_hex(LANGUAGE_CONTRACT.as_bytes()))),
+        Value::String(Rc::from(COMPILER_CONTRACT_VERSION)),
+        Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
+    ]))
+}
+
+/// Bootstrap parity witness for the SENS-owned whole-program compilation
+/// artifact.  This adapter installs only representation mechanisms and opaque
+/// provenance.  Traversal, request selection, digest selection and artifact
+/// composition execute inside `lib/compiler-nucleus.lisp`.
+///
+/// Executable C1 must expose the same SENS operation through #3840/#630 rather
+/// than calling this Rust helper.
+pub fn compiler_program_artifact_from_sens(
+    program: Value,
+    sens_revision: &str,
+) -> Result<Value, LanguageError> {
+    if !COMPILATION_ARTIFACT_V2_CONTRACT
+        .contains("(schema . compiler-compilation-artifact/2)")
+    {
+        return Err(invalid_projection(
+            "whole-program compilation artifact v2 contract is missing its schema",
+        ));
+    }
+
+    let mut session = Session::default();
+    load_core_library(&mut session)?;
+
+    session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    session.environment.define(
+        SHAPE_OR_EMPTY_MECHANISM_NAME,
+        domain_identity_shape_or_empty_mechanism(),
+    );
+    session
+        .environment
+        .define(DIGEST_MECHANISM_NAME, canonical_value_sha256_mechanism());
+    session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    session.environment.define(PROGRAM_VALUE_NAME, program);
+    session.environment.define(
+        D3_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D3_PROOF_REF)),
+    );
+    session.environment.define(
+        D4_PROOF_VALUE_NAME,
+        Value::String(Rc::from(COMPILER_D4_PROOF_REF)),
+    );
+    session.environment.define(
+        PROVENANCE_VALUE_NAME,
+        compiler_program_provenance(sens_revision)?,
+    );
+
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
+}
+
 /// Backward-compatible three-role view used by the already-landed selector/pair
 /// compiler bridge. It delegates to the same full SENS-owned role law and never
 /// reconstructs identity-to-role meaning in Rust.
