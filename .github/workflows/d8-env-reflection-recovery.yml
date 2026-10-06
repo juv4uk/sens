@@ -27,6 +27,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Show Rust toolchain
+        run: rustc --version && cargo --version
       - name: Run focused ENV recovery witness
         run: cargo test -p sens --test d8_env_reflection_recovery
