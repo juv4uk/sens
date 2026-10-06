@@ -1,6 +1,6 @@
 # Нова парадигма SENS: домени, закони і генеративний ріст
 
-**Статус:** пояснювальний документ до Contract 11
+**Статус:** пояснювальний документ до Contract 11.7
 
 **Семантична влада:** цей текст не замінює `language-contract.lisp` і ратифіковані domain laws.
 
@@ -48,7 +48,7 @@ exact binary object
 
 ---
 
-## 3. D1–D8 — не вісім таблиць
+## 3. D1–D8 — не просто вісім таблиць
 
 Ратифікована драбина:
 
@@ -62,6 +62,8 @@ D6  6 bits
 D7  7 bits
 D8  8 bits
 ```
+
+Поточна owner-ratified картина: D1–D6 dense, D7 126/128 під #3572 із двома owner-reserved coordinates, D8 256/256 під #3960. Для human-readable projections у репозиторії справді є окремі `lib/domains/d1.lisp … d8.lisp`, але **таблиця не є законом домену** — вона лише показує вже admitted identity через human surfaces.
 
 Ємність Dn дорівнює `2^n`, але **capacity ≠ occupancy**.
 

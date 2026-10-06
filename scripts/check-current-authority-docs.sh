@@ -9,6 +9,9 @@ docs=(
   CURRENT.md
   docs/semantic-authority-map.md
   docs/semantic-authority-map.uk.md
+  docs/README.md
+  docs/ukrainian-api.md
+  docs/program-surface-translator.md
 )
 
 for path in "${docs[@]}"; do
@@ -49,6 +52,22 @@ require_literal docs/semantic-authority-map.md 'Canonical semantic identity is d
 require_literal docs/semantic-authority-map.md 'Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility'
 require_literal docs/semantic-authority-map.uk.md 'Канонічна семантична ідентичність є доменно-кваліфікованою'
 require_literal docs/semantic-authority-map.uk.md 'Історичні exact-eight-bit Sens8/Sid8/Function8 лишаються обмеженими compatibility'
+
+
+# Contract/domain status and canonical human table entry-points.
+require_literal README.md 'Contract **11.7**'
+require_literal README.md 'owner-ratified #3960'
+require_literal README.md 'lib/domains/d1.lisp'
+require_literal README.md 'lib/domains/d8.lisp'
+require_literal docs/README.md 'lib/domains/d1.lisp'
+require_literal docs/README.md 'lib/domains/d8.lisp'
+require_literal docs/ukrainian-api.md 'lib/domains/d1.lisp'
+require_literal docs/ukrainian-api.md 'exact `(domain,bits)`'
+require_literal docs/program-surface-translator.md 'exact (domain,bits) row'
+
+# Flat byte-SID material may exist as compatibility/provenance, never as current authority.
+forbid_literal docs/ukrainian-api.md '**Семантична authority:** `lib/surface/semantic-registry.lisp`'
+forbid_literal docs/program-surface-translator.md 'numeric semantic identity'
 
 # Старий flat-256 текст більше не може з'являтися у чинних authority docs.
 forbid_literal CURRENT.md 'Those exact eight-bit forms are the 256 SENS functions'

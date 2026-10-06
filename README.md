@@ -14,6 +14,7 @@
 [![CI](https://github.com/juv4uk/sens/actions/workflows/ci.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/ci.yml)
 [![WASM](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml)
 [![Surface drift](https://github.com/juv4uk/sens/actions/workflows/surface-drift-check.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/surface-drift-check.yml)
+[![Domain tables](https://github.com/juv4uk/sens/actions/workflows/domain-tables.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/domain-tables.yml)
 
 **Українська — перша мова проєкту.** Англійська й німецька — допоміжні.
 
@@ -23,7 +24,7 @@
 
 ## Що таке SENS
 
-SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **ратифікована драбина точних доменів D1–D7; D8 лишається research**.
+SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **Contract 11.7 і owner-ratified драбина точних доменів D1–D8**: D7 має 126/128 semantic residents із двома owner-reserved координатами, D8 — 256/256.
 
 Історично проєкт розвивався під робочою назвою `my-lisp`. Старі матеріали зберігаються як provenance розвитку ідей, але не визначають чинну семантичну модель.
 
@@ -53,7 +54,7 @@ D1 1  ≠  D2 01  ≠  D3 001  ≠  D4 0001
 
 Width входить в identity, але **width сам по собі не створює значення**.
 
-Поточний машинно-читаний контракт: [`language-contract.lisp`](language-contract.lisp), Contract **11.1**.
+Поточний машинно-читаний контракт: [`language-contract.lisp`](language-contract.lisp), Contract **11.7**.
 
 Докладний опис парадигми: [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md).
 
@@ -83,7 +84,7 @@ SENS намагається робити навпаки:
 
 Тобто мова має **рости**, а не просто накопичувати записи.
 
-Це важлива різниця. Координата, яка синтаксично поміщається в D5 або D8, ще нічого не означає. Стан **UNKNOWN** — чесний і корисний: він говорить, що закон ще не знайдений або не доведений.
+Це важлива різниця. **Сам факт, що бітова координата механічно представна в певній ширині, не надає їй meaning.** Для current D1–D8 meaning/occupancy задають уже ратифіковані domain laws; для майбутніх або research-доменів стан **UNKNOWN** лишається чесним і корисним — він означає, що admission law ще не знайдений або не прийнятий.
 
 ### Конкретний приклад: селектори
 
@@ -110,7 +111,7 @@ suffix 1 → compose CDR
 0111  CDDR
 ```
 
-Цей закон **не продовжується автоматично у D5+**: новий префікс CAR уже перетинається з ратифікованими D5-резидентами (зокрема `D5:10000 = APPEND`). Глибші селектори потребують окремо доведеного, безконфліктного закону.
+Цей конкретний D4-закон **не надає автоматичної влади D5+**. Глибші selector-family у D5, D6 і D8 допускаються лише там, де для них є окремо прийнята карта/закон і немає конфлікту з уже ратифікованими residents. Схожість бітового рисунка сама по собі нічого не ратифікує.
 
 Це і є бажаний тип росту SENS: **корені + доведений закон → відтворювана родина**, але лише в межах, де закон пройшов falsifier і не суперечить іншим ратифікованим доменам.
 
@@ -130,7 +131,7 @@ SENS
   +-- D5: будинок на 32 кімнати
   +-- D6: будинок на 64 кімнати
   +-- D7: будинок на 128 кімнат
-  +-- D8: будинок на 256 кімнат — поки research
+  +-- D8: будинок на 256 кімнат, 256/256 ратифіковано
 ```
 
 У домені `Dn` є рівно `2^n` можливих адрес. Але сама адреса ще не створює мешканця. **Закон домену визначає, хто має право жити в кімнаті і що цей мешканець означає.**
@@ -216,9 +217,9 @@ D7 → 128 кімнат, 126/128 admitted; 2 координати зарезер
 
 D5 і D6 вже містять ширші функціональні родини та локальні algebra/generator laws. D7 переважно є Sound7/Text7-доменом: його мешканці — не «ще більше opcode-ів Core», а об'єкти власного семантичного будинку.
 
-### D8 — будинок, який ще проєктується
+### D8 — повний восьмибітний будинок
 
-D8 механічно має 256 можливих восьмибітових адрес, але **Core.D8 ще не ратифікований**.
+D8 має 256 можливих восьмибітових адрес і **owner-ratified 256/256 semantic residents під #3960**. Це не робить усі 256 residents автоматично callable: semantic residency і runtime mechanism лишаються різними осями.
 
 Тому правильна картина не така:
 
@@ -255,7 +256,39 @@ resident отримав точну кімнату
 | **D5** | 5 бітів | typed domain; резиденти визначаються власними законами |
 | **D6** | 6 бітів | typed domain; ширша область для доведених незалежних факторів |
 | **D7** | 7 бітів | owner-ratified #3572, 126/128: Sound7/Text7 + окремі role laws; 2 координати owner-reserved/pinned |
-| **D8** | 8 бітів | exact-width research carrier; ще не ратифікований semantic domain |
+| **D8** | 8 бітів | owner-ratified #3960, 256/256 semantic residents; callability окрема від residency |
+
+### Канонічні таблиці доменів
+
+Human surfaces живуть **по одному домену на файл**:
+
+```text
+lib/domains/d1.lisp
+lib/domains/d2.lisp
+lib/domains/d3.lisp
+lib/domains/d4.lisp
+lib/domains/d5.lisp
+lib/domains/d6.lisp
+lib/domains/d7.lisp
+lib/domains/d8.lisp
+```
+
+У кожному файлі порядок колонок однаковий:
+
+```text
+ук → укр → san → en → LISP → sym
+```
+
+- `ук` — компактна українська програмна поверхня;
+- `укр` — повна українська розшифровка;
+- `san` — санскритська surface без програмних маркерів `?` / `!`;
+- `en` — англійська програмна surface;
+- `LISP` — історичне/reference Lisp spelling, якщо воно доречне;
+- `sym` — символічна/гліфова projection, якщо вона є.
+
+Маркери синхронні в програмних поверхнях: **предикати мають `?` у `ук/укр/en`**, destructive/in-place операції мають **`!` у `ук/укр/en`**. D7 містить 126 semantic rows; `0100001` і `0101010` owner-reserved і навмисно не отримують фальшивої семантики.
+
+Ці таблиці — human-readable projections над уже ратифікованими exact-domain identities. Вони не замінюють domain law і не створюють semantic identity самі.
 
 Важливо розрізняти п'ять речей:
 
@@ -414,21 +447,34 @@ exact domain identity
 
 Тому українська, англійська, санскритська й символічна поверхні не створюють чотири різні функції.
 
-Українська — головна surface-мова проєкту. Наприклад:
+Українська — головна surface-мова проєкту. У current domain tables дві українські колонки мають різні ролі:
 
-```lisp
-(визначити квадрат
-  (функція (число)
-    (помножити число число)))
+```text
+ук   = коротке програмне ім'я
+укр  = повна українська розшифровка
 ```
+
+Скорочення мають бути передбачуваними, а не телеграфними. Ми скорочуємо **структуру**, не калічимо корені слів: `п/р` для selector-path (`п=перше`, `р=решта`), `?` для предикатів, `!` для destructive/in-place операцій, усталені `нсд/нск` для математичних назв. Наприклад:
+
+```text
+ук             укр
+п-р            перше-від-решти
+видалити!      видалити-на-місці!
+нсд            найбільший-спільний-дільник
+```
+
+Маркери `?` і `!` синхронізуються в `ук/укр/en`; `san` їх не використовує. Усі чинні semantic residents D1–D8 мають заповнені `ук`, `укр` і `san`.
 
 Surface може бути зручним, красивим і читабельним. Але машинна семантика має пережити повне перейменування surface без зміни програми.
 
 Деталі:
 
+- [`docs/uk-surface-naming.md`](docs/uk-surface-naming.md)
 - [`docs/ukrainian-api.md`](docs/ukrainian-api.md)
 - [`docs/program-surface-translator.md`](docs/program-surface-translator.md)
-- [`lib/surface/uk-acceptance.lisp`](lib/surface/uk-acceptance.lisp)
+- [`docs/domain-surfaces-d7.md`](docs/domain-surfaces-d7.md)
+- [`docs/domain-surfaces-d8.md`](docs/domain-surfaces-d8.md)
+- [`lib/domains/`](lib/domains)
 
 ---
 
@@ -459,8 +505,8 @@ Common Lisp, Prolog, Datalog, CLIPS, C, WASM, FPGA чи інший substrate м�
 
 ## Що вже є в репозиторії
 
-- Contract 11 з domain-qualified identity;
-- ратифікована драбина D1–D7; D8 — research;
+- Contract 11.7 з domain-qualified identity;
+- owner-ratified драбина D1–D8; D7 126/128, D8 256/256;
 - exact-width carrier/packing механізми;
 - D1 PredicateBit;
 - D2 structural grammar;
@@ -468,7 +514,7 @@ Common Lisp, Prolog, Datalog, CLIPS, C, WASM, FPGA чи інший substrate м�
 - D4 bootstrap;
 - D5/D6 ratified domain laws і executable guards;
 - D7 owner-ratified 126/128 Sound7/Text7 domain + окрема LocalOrdinal role;
-- D8 як окремий exact-width research domain candidate;
+- D8 owner-ratified 256/256 під #3960 із окремою runtime-callability віссю;
 - selector generation witnesses;
 - domain graph / factor / residue / closure experiments;
 - one-way migration guard, який забороняє новому exact-width коду повертатися до старої flat-identity моделі;
@@ -553,13 +599,15 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 Якщо ви бачите SENS уперше:
 
-1. [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) — навіщо існують домени і як мова росте;
-2. [`language-contract.lisp`](language-contract.lisp) — машинна конституція;
-3. [`docs/language-core.md`](docs/language-core.md) — точна domain identity;
-4. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — порядок семантичної влади;
-5. [`scripts/research-2322-generative-domain-forecast.py`](scripts/research-2322-generative-domain-forecast.py) — приклад генеративного закону;
-6. [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) — observable conformance;
-7. [`AGENTS.md`](AGENTS.md) — правила роботи агентів.
+1. [`docs/README.md`](docs/README.md) — карта актуальної документації;
+2. [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) — навіщо існують домени і як мова росте;
+3. [`language-contract.lisp`](language-contract.lisp) — машинна конституція Contract 11.7;
+4. [`lib/domains/`](lib/domains) — канонічні human-readable таблиці D1–D8, один домен = один файл;
+5. [`docs/language-core.md`](docs/language-core.md) — точна domain identity;
+6. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — порядок семантичної влади;
+7. [`docs/uk-surface-naming.md`](docs/uk-surface-naming.md) — правила `ук/укр`, `?`, `!`, selector-скорочень;
+8. [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) — observable conformance;
+9. [`AGENTS.md`](AGENTS.md) — правила роботи агентів.
 
 Для історії й research-археології дивіться `docs/research/` та `docs/archive/`, але датований документ не переважає чинний контракт.
 
@@ -579,7 +627,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 ## English · short summary
 
-SENS is an experimental language whose current constitution ratifies exact-width domains D1–D7; D8 remains research.
+SENS is an experimental language whose current Contract 11.7 ratifies exact-width domains D1–D8. D7 has 126/128 admitted residents with two owner-reserved coordinates; D8 is owner-ratified 256/256 under #3960.
 
 Its central idea is not “smaller opcodes”. A canonical semantic object is:
 
@@ -595,7 +643,7 @@ Start with [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) and [`lang
 
 ## Deutsch · Kurzfassung
 
-SENS ist eine experimentelle Sprache mit ratifizierten Exact-Width-Domänen D1–D7; D8 bleibt Forschung.
+SENS ist eine experimentelle Sprache mit ratifizierten Exact-Width-Domänen D1–D8. D7 enthält 126/128 semantische Residents; D8 ist unter #3960 vollständig mit 256/256 Residents ratifiziert.
 
 Ein kanonisches semantisches Objekt besteht aus:
 
