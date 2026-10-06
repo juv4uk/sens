@@ -17,7 +17,8 @@
 
 ```text
 00000000  ERRORSET
-00000001  ENV-REFLECTION
+00000001  ERROR
+00000010  ENV-REFLECTION
 ```
 
 Це **candidate coordinates**, не ратифіковані residents.
@@ -30,6 +31,8 @@ error   -> EMPTY
 ```
 
 Звичайний D1–D7 `COND` не може перехопити помилку, яка не стала значенням. Тому error boundary є окремою capability.
+
+`ERROR` — сусідня рання capability: навмисно сигналізувати language error із payload. Вона відрізняється від випадкової помилки типу неправильного `CAR`: програма явно заявляє про failure, а не маскує його під чужу partiality.
 
 `ENV-REFLECTION` відділяється від самого evaluator environment:
 
@@ -130,8 +133,8 @@ NTH-right / MAPLIST-right  <- traversal-direction composition
 ## Поточний accounting
 
 ```text
-provisional D8 ladder candidates   2
-provisional coordinates            00000000, 00000001
+provisional D8 ladder candidates   3
+provisional coordinates            00000000, 00000001, 00000010
 ratified D8 residents              0
 resolved recovery no-slot          9
 unresolved recovery rows           2
@@ -141,7 +144,7 @@ preserved negative groups          4
 
 ## Наступне правило заповнення
 
-Після `ERRORSET` і `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
+Після `ERRORSET`, `ERROR` і `ENV-REFLECTION` новий D8 slot видаємо тільки тоді, коли:
 
 ```text
 capability не представлена D1-D7

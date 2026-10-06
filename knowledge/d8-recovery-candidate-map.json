@@ -42,6 +42,23 @@
     },
     {
       "ladder_coordinate": "00000001",
+      "candidate": "ERROR",
+      "surfaces": [
+        "ERROR",
+        "error"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "Lisp 1.5 manual / early error-processing lineage, 1961–1962",
+      "simple_law": "intentional language failure producer carrying explicit payload/provenance",
+      "evidence": [
+        "#3931",
+        "LISP 1.5 Programmer's Manual §6.3 and evaluator/list definitions"
+      ],
+      "reason": "Current SENS has accidental/runtime LanguageError outcomes but no language operation whose intended meaning is to signal an error with an explicit payload."
+    },
+    {
+      "ladder_coordinate": "00000010",
       "candidate": "ENV-REFLECTION",
       "surfaces": [
         "ENV",
@@ -322,12 +339,13 @@
       "status": "PRESERVED-IN-MAIN"
     }
   ],
-  "next_fill_rule": "After ERRORSET and ENV-REFLECTION, continue recovery/chronology; spend no D8 slot on lower-domain compositions or machine-only mechanisms.",
+  "next_fill_rule": "Preserve ERRORSET/ERROR as the early failure-control family and ENV reflection as the next provisional candidate; continue full pre-1963 recovery before allocating later-history slots.",
   "accounting": {
-    "provisional_d8_ladder_candidates": 2,
+    "provisional_d8_ladder_candidates": 3,
     "provisional_coordinates": [
       "00000000",
-      "00000001"
+      "00000001",
+      "00000010"
     ],
     "resolved_recovery_no_slot": 9,
     "unresolved_recovery_rows": 2,
