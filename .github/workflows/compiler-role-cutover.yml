@@ -44,11 +44,14 @@ on:
 
 jobs:
   cutover:
-    # Rust/Python control-plane gate: keep the local GPU host free for real CUDA work.
-    runs-on: ubuntu-latest
+    # Rust/Python control-plane gate: do not reserve the GPU-labelled runner.
+    # Keep CPU pressure bounded while the real CUDA lane runs in parallel.
+    runs-on: [self-hosted, guix]
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
       - name: D4 bootstrap projection must match ratified authority
         run: python3 scripts/generate-d4-bootstrap-compiler-structure.py --check
       - name: Production path must not import Rust role oracle
