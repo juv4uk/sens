@@ -88,7 +88,7 @@ fn parse_identity(bits: &str) -> Result<CoreDomainIdentity, String> {
     let raw = u8::from_str_radix(bits, 2)
         .map_err(|_| format!("invalid D3 head bits {bits:?}"))?;
     Ok(CoreDomainIdentity::D3(Bija3::from_word(
-        Bit3::new(raw).map_err(|_| format!("invalid D3 value {raw}"))?,
+        Bit3::new(raw).ok_or_else(|| format!("invalid D3 value {raw}"))?,
     )))
 }
 
