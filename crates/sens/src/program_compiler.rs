@@ -47,8 +47,8 @@ pub fn compile_program_to_artifact(
 
     // Authority bundle
     let authority = crate::compilation_artifact::ContractAuthority {
-        contract_version: "11.7".to_string(),
-        contract_sha256: "contract-11-7-sha256".to_string(),
+        contract_version: "11.8".to_string(),
+        contract_sha256: "contract-11-8-sha256".to_string(),
         ratified_domain_laws: vec![
             "D3_BIJA3_LAW_3202".to_string(),
             "D4_BOOTSTRAP_LAW_3272".to_string(),
