@@ -18,6 +18,7 @@ SURFACE_SOURCES = (
 )
 
 COLUMNS = ["ук", "укр", "san", "eng", "LISP", "SUM"]
+EMPTY_MARKER = "()"
 HEADER = "| bits | ук | укр | san | eng | LISP | SUM |"
 DIVIDER = "|---|---|---|---|---|---|---|"
 
@@ -52,6 +53,8 @@ def validate(
 ) -> None:
     if projection.get("columns") != COLUMNS:
         fail(f"column order must be {COLUMNS!r}")
+    if projection.get("empty_marker") != EMPTY_MARKER:
+        fail(f"empty marker must be {EMPTY_MARKER!r}")
 
     domains = projection.get("domains")
     if not isinstance(domains, list) or len(domains) != 6:
@@ -122,7 +125,7 @@ def validate(
 
 def cell(value: object) -> str:
     if value is None or value == "":
-        return "—"
+        return EMPTY_MARKER
     return str(value)
 
 
