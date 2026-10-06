@@ -13,13 +13,14 @@
     "knowledge/d9-surface-harvest-v1.json",
     "knowledge/d9-library-harvest-v1.json",
     "knowledge/d9-registry-tail-v1.json",
-    "knowledge/d9-semantic-layer-harvest-v1.json"
+    "knowledge/d9-semantic-layer-harvest-v1.json",
+    "knowledge/d9-world-quantity-harvest-v1.json"
   ],
   "accounting": {
-    "selected_semantic_candidates": 313,
+    "selected_semantic_candidates": 375,
     "law_forced_coordinates": 128,
-    "unplaced_selected_candidates": 185,
-    "remaining_semantic_inventory": 199,
+    "unplaced_selected_candidates": 247,
+    "remaining_semantic_inventory": 137,
     "ratified_d9_residents": 0
   },
   "rules": [
@@ -3293,6 +3294,1060 @@
       ],
       "source_name": "thread-first",
       "source_binding": "->",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.04ffc75c9edeb104",
+      "semantic_name": "SCIENTIFIC-CONSTANT-NAME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the name of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-name",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.06c4043fa3c68841",
+      "semantic_name": "UNIT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "test whether a value is a valid unit",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "unit?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.09327f61a9cf6170",
+      "semantic_name": "UNIT-PRODUCT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "multiply units by adding exact dimension exponents",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "unit-product",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.09f849e5b37fbd5d",
+      "semantic_name": "QUANTITY?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "test whether a value is a valid quantity",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "quantity?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.0ae2ebe088c3c5c6",
+      "semantic_name": "ADVICE-DECISION-IN-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "compute an advice admission decision against an explicit world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "advice-decision-in-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.0af138793a9bf977",
+      "semantic_name": "WORLD-METADATA",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "project world metadata",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-metadata",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.0e08143c7b3d7fb8",
+      "semantic_name": "EMPTY-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "construct the empty root world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "empty-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.0e384511b5eb1f82",
+      "semantic_name": "SCIENTIFIC-CONSTANT-KIND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the kind of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-kind",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.12eecc46dc944cac",
+      "semantic_name": "WORLD-RETRACT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "return a world with a knowledge clause retracted",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-retract",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.1e28edbacea63d62",
+      "semantic_name": "WORLD-DEPTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "return the ancestry depth of a world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-depth",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.231d77e0fa653597",
+      "semantic_name": "MAKE-DIMENSION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "construct a base-dimension/exponent pair",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "make-dimension",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.28d95271fbc4d130",
+      "semantic_name": "DIMENSION-EXPONENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the exact exponent of a dimension",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "dimension-exponent",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.2f695b1bd0eec08a",
+      "semantic_name": "UNIT-QUOTIENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "divide units by subtracting exact dimension exponents",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "unit-quotient",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.337c7c5d8115153c",
+      "semantic_name": "MAKE-QUANTITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "construct an exact quantity from value and unit",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "make-quantity",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.3d2a090ba3a307c7",
+      "semantic_name": "DIMENSION?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "test whether a value is a valid dimension entry",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "dimension?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.3f8825e7b97672b4",
+      "semantic_name": "MAKE-UNIT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "construct a unit from its normalized dimension list",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "make-unit",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.4331f2a7d60e914f",
+      "semantic_name": "SCIENTIFIC-CONSTANT-STATUS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the epistemic/definition status of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-status",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.439f15c8bfdd0138",
+      "semantic_name": "QUANTITY-PRODUCT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "multiply quantity values and their units exactly",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "quantity-product",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.45a1489a36250c15",
+      "semantic_name": "WORLD-JOURNAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "project the append-only world journal",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-journal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.50be95b8c6ae63ad",
+      "semantic_name": "WORLD-TELL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "return a world with a knowledge clause asserted",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-tell",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.5b61e265b870b179",
+      "semantic_name": "WORLD-CLAUSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "materialize current clauses of a named module in a world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-clauses",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.5e2ae45f990b60f7",
+      "semantic_name": "SCIENTIFIC-CONSTANT-VALUE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the numeric value of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-value",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.5e5ab66e1e4497d4",
+      "semantic_name": "ADVISE-ALL-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "return the world produced by a batch of admitted advice",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "advise-all-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.5f50b2eaa4968866",
+      "semantic_name": "SCIENTIFIC-CONSTANT-UNIT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the unit of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-unit",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.62f999f115c7e4c9",
+      "semantic_name": "TELL-KNOWLEDGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "assert knowledge through the world abstraction",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "tell-knowledge",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.645f9ba518a7892d",
+      "semantic_name": "ADVICE-ALL-DECISION-IN-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "compute an admission decision for a batch of advice against an explicit world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "advice-all-decision-in-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.6eb706106a13281b",
+      "semantic_name": "UNIT-DIMENSIONS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the normalized dimension list of a unit",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "unit-dimensions",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.6eb88cda7436ae43",
+      "semantic_name": "SCIENCE-SOURCE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "test whether a value is a valid scientific-source descriptor",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "science-source?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.7a379f3e011ba6a1",
+      "semantic_name": "IMPORT-KNOWLEDGE-PACKAGE-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "import a knowledge package into an explicit world and return the resulting world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "import-knowledge-package-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.7a59699e203803fc",
+      "semantic_name": "WORLD-AT-DEPTH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "return the ancestor world at a requested depth",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-at-depth",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.7e827cadb6648130",
+      "semantic_name": "WORLD-MODULE-KNOWN?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "test whether a named knowledge module exists in a world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-module-known?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.8005e0ac088fb54a",
+      "semantic_name": "MAKE-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "construct a world value from parent, journal and metadata",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "make-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.8186d0fa231deedb",
+      "semantic_name": "WORLD-CONTENT-ADDRESS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "compute the canonical content address of a world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-content-address",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.81fac2d2fbecd177",
+      "semantic_name": "QUANTITY-QUOTIENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "divide quantity values and their units exactly",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "quantity-quotient",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.839887e9065937c3",
+      "semantic_name": "WORLD-MODULE-EVENTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "collect the journal events belonging to a named knowledge module",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-module-events",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.85e61e5e7a7318af",
+      "semantic_name": "WORLD-DIFF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "compute journal/state differences between related worlds",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-diff",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.8957c76e56dd25d0",
+      "semantic_name": "DEFMODULE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "define a named knowledge module in the current world abstraction",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "defmodule",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.8a3b41c2049f34d5",
+      "semantic_name": "SCIENTIFIC-CONSTANT->CLAUSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project a valid scientific constant into ordinary knowledge clauses without mutating the knowledge journal",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant->clauses",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.8e6b8637d6920fdc",
+      "semantic_name": "QUANTITY-VALUE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the numeric value of a quantity",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "quantity-value",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.8f4cab367b5f7cf5",
+      "semantic_name": "REASON-IN-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "run reasoning against a named module in an explicit world value",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "reason-in-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.9760d44ecdadbf68",
+      "semantic_name": "WORLD-COMMON-ANCESTOR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "compute the nearest common ancestor of two related worlds when one exists",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-common-ancestor",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.9f9fb29b9e4ba5ad",
+      "semantic_name": "FORWARD-IN-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "run forward reasoning against a named module in an explicit world value",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "forward-in-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.a2163e474a958730",
+      "semantic_name": "DIMENSION-BASE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the base identifier of a dimension",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "dimension-base",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.a5ef2a64755f8448",
+      "semantic_name": "SCIENTIFIC-CONSTANT-QUANTITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the quantity of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-quantity",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.adddac55698b4687",
+      "semantic_name": "MAKE-SCIENTIFIC-CONSTANT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "construct a scientific-constant record from name, quantity, status, kind, system and source",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "make-scientific-constant",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.b9904eee9891c744",
+      "semantic_name": "SCIENTIFIC-CONSTANT-KIND-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "test whether a scientific-constant kind is an admitted physical or mathematical kind",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-kind-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.c03b346c783c0695",
+      "semantic_name": "WORLD-ADDRESS-CONTENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "project the compact content used to address a world",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-address-content",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.c4e59950c95a2c14",
+      "semantic_name": "MAKE-WORLD-KNOWLEDGE-PACKAGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "construct a portable knowledge package from world state",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "make-world-knowledge-package",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.d064b313981bff6c",
+      "semantic_name": "SCIENTIFIC-CONSTANT-STATUS-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "test whether a scientific-constant status is an admitted exact/derived/measured status",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-status-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.d1b250c2822bee65",
+      "semantic_name": "WORLD-TELL-ALL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "return a world with a batch of knowledge clauses asserted",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-tell-all",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.d3e1d631d625f850",
+      "semantic_name": "WORLD-BRANCH-DIFF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "compute branch-specific differences relative to a common ancestor",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-branch-diff",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.d4bd2ae7d1f32801",
+      "semantic_name": "MAKE-SCIENCE-SOURCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "construct a scientific-source descriptor from authority and edition",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "make-science-source",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.dbdb75859765ae9d",
+      "semantic_name": "SCIENTIFIC-CONSTANT-SOURCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the source descriptor of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-source",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.dd05c425600fc1e7",
+      "semantic_name": "ADVISE-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "return the world produced by one admitted advice operation",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "advise-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.de8ceea0aa91ba60",
+      "semantic_name": "WORLD-PARENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "project the parent world link",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-parent",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.e52b412df34974ff",
+      "semantic_name": "QUANTITY-UNIT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the unit of a quantity",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "quantity-unit",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.e5b9e747228876fc",
+      "semantic_name": "WORLD?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "test whether a value has canonical world shape",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.e6f1b737d1d25b87",
+      "semantic_name": "WORLD-RECORD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "append a world event while preserving immutable ancestry",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "world-record",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.e819707e686862b4",
+      "semantic_name": "RETRACT-KNOWLEDGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "retract knowledge through the world abstraction",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "retract-knowledge",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.ef11fb1a73a7834f",
+      "semantic_name": "SCIENTIFIC-CONSTANT-SYSTEM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "project the system identifier of a scientific constant",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant-system",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.f1d8653bb037cb30",
+      "semantic_name": "SCIENTIFIC-CONSTANT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-QUANTITY-UNIT-ALGEBRA",
+      "behavior": "test whether a value is a valid scientific-constant record",
+      "provenance": [
+        "#3992",
+        "lib/quantity.lisp"
+      ],
+      "source_name": "scientific-constant?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.worldqty.fbbda2516f8a26d2",
+      "semantic_name": "KNOWLEDGE-CONTENT-ADDRESS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORLD-QUANTITY-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-HISTORY-KNOWLEDGE-ALGEBRA",
+      "behavior": "compute a canonical content address for language knowledge data",
+      "provenance": [
+        "#3992",
+        "lib/world.lisp"
+      ],
+      "source_name": "knowledge-content-address",
       "law_status": "SOURCE-DEFINED-UNPLACED",
       "ratified_resident": false
     },
