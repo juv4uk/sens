@@ -8,16 +8,16 @@ occupancy authority.
 ```text
 D8 capacity                              256
 selector candidate coordinates            64
-four product-family footprints            16
-analyzed unique coordinate positions      80
-untouched coordinate positions           176
+five product-family footprints            20
+analyzed unique coordinate positions      84
+untouched coordinate positions           172
 
-fixed novel candidates, full protocol       2
+fixed novel candidates, full protocol       3
 fixed novel candidate, protocol-bounded      1
 fixed novel candidate, typed                 1
-gauge-unresolved novel semantics             4
-fixed lower-domain duplicate coordinates     4
-gauge orbits                                 4
+gauge-unresolved novel semantics             5
+fixed lower-domain duplicate coordinates     5
+gauge orbits                                 5
 falsified second-axis hypotheses             5
 ```
 
@@ -88,6 +88,20 @@ Footprint:
 This is a typed product witness over the equal-length ZIP/UNZIP lane.
 #3712 is merged into main; this family is merged research evidence, not D8 occupancy authority.
 
+### DO/WHILE × condition/projection — #3779
+
+Footprint:
+
+```text
+11001100 11001101 11001110 11001111
+```
+
+- `11001100`: lower-domain WHILE duplicate;
+- middle `01/10`: DO duplicate + generated continue-while-true/apply-result, gauge unresolved;
+- `11001111`: generated fixed candidate stop-when-true/return-state.
+
+The bounded three-state witness covers 5832 schemas: 972 terminate in all four corners and 432 have four pairwise-distinct global semantic tables. #3779 is merged research evidence; it admits zero D8 coordinates.
+
 ## Falsified axes
 
 #3670 records five rejected hypotheses:
@@ -107,6 +121,6 @@ python3 benchmarks/d8-research-ledger/run.py \
   --out /tmp/d8-research-ledger
 ```
 
-The artifact contains all 64 selector candidate coordinates, four product
-footprints, all 176 untouched coordinates, gauge metadata, evidence merge
+The artifact contains all 64 selector candidate coordinates, five product
+footprints, all 172 untouched coordinates, gauge metadata, evidence merge
 state, and the current falsifier list.
