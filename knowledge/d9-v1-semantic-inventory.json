@@ -12,13 +12,14 @@
     "knowledge/d9-overflow-review-v1.json",
     "knowledge/d9-surface-harvest-v1.json",
     "knowledge/d9-library-harvest-v1.json",
-    "knowledge/d9-registry-tail-v1.json"
+    "knowledge/d9-registry-tail-v1.json",
+    "knowledge/d9-semantic-layer-harvest-v1.json"
   ],
   "accounting": {
-    "selected_semantic_candidates": 248,
+    "selected_semantic_candidates": 313,
     "law_forced_coordinates": 128,
-    "unplaced_selected_candidates": 120,
-    "remaining_semantic_inventory": 264,
+    "unplaced_selected_candidates": 185,
+    "remaining_semantic_inventory": 199,
     "ratified_d9_residents": 0
   },
   "rules": [
@@ -30,6 +31,1111 @@
     "D9 remains unratified until explicit owner decision"
   ],
   "rows": [
+    {
+      "stable_id": "d9.api.01f2519991001e25",
+      "semantic_name": "GUARD-EVIDENCE-STATUS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "test whether guard evidence status is confirmed/partial/unresolved/broken",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "guard-evidence-status?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.0f2c161319e12044",
+      "semantic_name": "NARRATE-ANSWER",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "render a grounded answer together with its proof-derived explanation",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "narrate-answer",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.1fd12bce36491031",
+      "semantic_name": "TRANSLATION-ADMISSION-PAYLOAD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "extract the payload admitted by a successful translation review",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-admission-payload",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.20a73e9db776cbef",
+      "semantic_name": "TRANSLATION-EVIDENCE-ENTRY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "construct a durable evidence entry from a qualifying translation review",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-evidence-entry",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.217b699c0c4d5534",
+      "semantic_name": "RESULT-TAGGED?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "test whether a value uses one of the canonical result-status tags",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-tagged?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.260e1e7d1904c1a4",
+      "semantic_name": "TRANSLATION-STATUS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project the status field from a translation proposal envelope",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-status",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.26cef518802ae7db",
+      "semantic_name": "GUARD-UNKNOWN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "construct an explicit unknown guard finding when evidence is missing",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "guard-unknown",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.27c93f8f62b1dbe1",
+      "semantic_name": "MAKE-DISPUTED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "construct a disputed reasoning outcome containing conflicting evidence",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "make-disputed",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.2a0e6d8c1e10b089",
+      "semantic_name": "GUARD-UNKNOWN-ROUTES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "return the canonical routing choices for an unknown guard decision",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "guard-unknown-routes",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.2dd01e9c833c65c9",
+      "semantic_name": "UTF8-DECODE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UTF8-UNICODE-ALGEBRA",
+      "behavior": "decode a list of UTF-8 bytes into Unicode scalar values with explicit validity semantics",
+      "provenance": [
+        "#3990",
+        "lib/utf8.lisp"
+      ],
+      "source_name": "utf8-decode",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.2eb2f8dc7bcbd923",
+      "semantic_name": "UTF8-DECODE-STRING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UTF8-UNICODE-ALGEBRA",
+      "behavior": "decode UTF-8 encoded string data into the language string/scalar representation",
+      "provenance": [
+        "#3990",
+        "lib/utf8.lisp"
+      ],
+      "source_name": "utf8-decode-string",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.3127dd5858498ece",
+      "semantic_name": "UNDERSTAND-IS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE",
+      "behavior": "convert a controlled 'X is a Y' text shape into a knowledge clause",
+      "provenance": [
+        "#3990",
+        "lib/understand.lisp"
+      ],
+      "source_name": "understand-is",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.3301886fa5483d19",
+      "semantic_name": "UNDERSTAND-RELATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE",
+      "behavior": "convert a controlled relational word-list shape into a knowledge clause",
+      "provenance": [
+        "#3990",
+        "lib/understand.lisp"
+      ],
+      "source_name": "understand-relation",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.35853ca9e83b9ccd",
+      "semantic_name": "MAKE-INVALID",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "construct an invalid reasoning outcome with reason and payload",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "make-invalid",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.3b4371c142ab62e2",
+      "semantic_name": "TRANSLATION-EVIDENCE-NEXT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "append a new translation evidence entry to the immutable evidence sequence",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-evidence-next",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.3e08c3b9cfd17141",
+      "semantic_name": "PROVENANCE-RULE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "project the rule field from a provenance record",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "provenance-rule",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.3fddc626d99e6f98",
+      "semantic_name": "REASON-OBSERVE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "observe positive and opposite proofs without collapsing proved/disputed/invalid outcomes",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "reason-observe",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.41c2b74aba373430",
+      "semantic_name": "GUARD-DECISION?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "test whether a guard decision is one of allow/warn/reject/unknown",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "guard-decision?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.434d44cdf8b08fde",
+      "semantic_name": "TRANSLATION-REVIEW-WITH-EVIDENCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "review a translation proposal and return the updated explicit evidence state",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-review-with-evidence",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.44cd1e4e597cb45f",
+      "semantic_name": "GUARD-REFERENCE-FIELD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "lookup a field in a generic guard reference record",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "guard-reference-field",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.4c9c68853f781e78",
+      "semantic_name": "TRANSLATION-SOURCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project the original source text from a translation proposal envelope",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-source",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.509016e9f0c08df2",
+      "semantic_name": "UTF8-ENCODE-STRING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UTF8-UNICODE-ALGEBRA",
+      "behavior": "encode a language string into canonical UTF-8 byte data",
+      "provenance": [
+        "#3990",
+        "lib/utf8.lisp"
+      ],
+      "source_name": "utf8-encode-string",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.526c661f225741d7",
+      "semantic_name": "PROVENANCE-GOAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "project the goal field from a provenance record",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "provenance-goal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.5628393e0b23db99",
+      "semantic_name": "CONTENT-STORE-SIZE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA",
+      "behavior": "return the number of stored address/value entries",
+      "provenance": [
+        "#3990",
+        "lib/content-store.lisp"
+      ],
+      "source_name": "content-store-size",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.60f543adb54f5382",
+      "semantic_name": "NARRATE-FACT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "convert a supported knowledge fact into a controlled text-shaped word list",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "narrate-fact",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.69f66acf3e3a141a",
+      "semantic_name": "RESULT-STATUS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "project the status tag from a canonical reasoning outcome",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-status",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.6e9ee1401ac78353",
+      "semantic_name": "MAKE-TRANSLATION-REVIEW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "construct a canonical translation review record",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "make-translation-review",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.6f012d42d3d64d34",
+      "semantic_name": "NARRATE-PROVENANCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "render provenance into a controlled because/and explanation",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "narrate-provenance",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.735af35d19b2a478",
+      "semantic_name": "PROVENANCE-DERIVED-FROM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "project child derivations from a provenance record",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "provenance-derived-from",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.740d379669e9026a",
+      "semantic_name": "RESULT-GOAL?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "validate the canonical shape of a reasoning goal including explicit negation",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-goal?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.76e5623953425bce",
+      "semantic_name": "CONTENT-STORE-CONTAINS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA",
+      "behavior": "test whether a canonical content address exists in the store",
+      "provenance": [
+        "#3990",
+        "lib/content-store.lisp"
+      ],
+      "source_name": "content-store-contains?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.7a12f0dcea9ca352",
+      "semantic_name": "UNDERSTAND-UNIVERSAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE",
+      "behavior": "convert a supported universal controlled-language form into knowledge structure",
+      "provenance": [
+        "#3990",
+        "lib/understand.lisp"
+      ],
+      "source_name": "understand-universal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.7d97d5c97a14983e",
+      "semantic_name": "CONTENT-STORE-GET",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA",
+      "behavior": "lookup a value by canonical content address",
+      "provenance": [
+        "#3990",
+        "lib/content-store.lisp"
+      ],
+      "source_name": "content-store-get",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.801c8f86deeee90a",
+      "semantic_name": "EMPTY-CONTENT-STORE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA",
+      "behavior": "construct an empty immutable content-addressed store",
+      "provenance": [
+        "#3990",
+        "lib/content-store.lisp"
+      ],
+      "source_name": "empty-content-store",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.84c8b48a85e356bf",
+      "semantic_name": "UNICODE-SCALARS->STRING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UTF8-UNICODE-ALGEBRA",
+      "behavior": "construct a language string from valid Unicode scalar values",
+      "provenance": [
+        "#3990",
+        "lib/utf8.lisp"
+      ],
+      "source_name": "unicode-scalars->string",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.86487bdddec74f09",
+      "semantic_name": "TRANSLATION-REVIEW-CODE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project the review code from a translation review",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-review-code",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.89158d799d454286",
+      "semantic_name": "MAKE-GUARD-FINDING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "construct a complete guard finding from state, contract, delta, impact, guidance and evidence",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "make-guard-finding",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.8e79e8c25cf9711a",
+      "semantic_name": "TRANSLATION-REVIEW-PROPOSAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project the reviewed proposal from a translation review",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-review-proposal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.8ecda37e003ad0e5",
+      "semantic_name": "NARRATE-OUTCOME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "render a canonical result-status outcome while preserving its explicit status",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "narrate-outcome",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.99da7575158284eb",
+      "semantic_name": "MAKE-BLOCKED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "construct a blocked reasoning outcome with a known blocking reason",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "make-blocked",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.a26d7fde5d1653e5",
+      "semantic_name": "TRANSLATION-REVIEW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "validate and classify a translation proposal without granting semantic authority to the external translator",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-review",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.a4390de338f2066f",
+      "semantic_name": "PROVENANCE-SOURCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "project the source field from a provenance record",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "provenance-source",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.a4f3edf2b7cad936",
+      "semantic_name": "UNDERSTAND-QUERY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE",
+      "behavior": "translate a supported controlled word-list query into a reasoning goal",
+      "provenance": [
+        "#3990",
+        "lib/understand.lisp"
+      ],
+      "source_name": "understand-query",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.a51e0640263050c4",
+      "semantic_name": "UTF8-VALID?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UTF8-UNICODE-ALGEBRA",
+      "behavior": "test whether a byte sequence is valid UTF-8",
+      "provenance": [
+        "#3990",
+        "lib/utf8.lisp"
+      ],
+      "source_name": "utf8-valid?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.a56223e9013a910e",
+      "semantic_name": "TRANSLATION-KIND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project the proposal kind from a translation proposal envelope",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-kind",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.a8797c1333bae877",
+      "semantic_name": "CONTENT-STORE-PUT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA",
+      "behavior": "return a store with content inserted under its canonical content address",
+      "provenance": [
+        "#3990",
+        "lib/content-store.lisp"
+      ],
+      "source_name": "content-store-put",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.a9376137778e6f38",
+      "semantic_name": "TRANSLATION-PAYLOAD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project the semantic payload from a translation proposal envelope",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-payload",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.abe128a00160f8fb",
+      "semantic_name": "TRANSLATION-REVIEW-DETAIL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project explanatory detail from a translation review",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-review-detail",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.b2558d12ef7a9ce3",
+      "semantic_name": "UNDERSTAND-QUERY-RELATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE",
+      "behavior": "translate a controlled relational query form into a reasoning goal",
+      "provenance": [
+        "#3990",
+        "lib/understand.lisp"
+      ],
+      "source_name": "understand-query-relation",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.b8883b7b0855c0c7",
+      "semantic_name": "UNDERSTAND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE",
+      "behavior": "translate a supported controlled word-list statement into knowledge structure",
+      "provenance": [
+        "#3990",
+        "lib/understand.lisp"
+      ],
+      "source_name": "understand",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.bd0100a28f4bea5a",
+      "semantic_name": "RESULT-PAYLOAD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "project the payload tail from a canonical reasoning outcome",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-payload",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.be45c3dd173ef501",
+      "semantic_name": "GUARD-SYNC-WINDOW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "classify a synchronization transaction across freeze/sync/drift phases",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "guard-sync-window",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.c5b5b4d9fcb78773",
+      "semantic_name": "REASON-IN-OBSERVE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "observe a reasoning question within a named knowledge module with explicit blocked/invalid outcomes",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "reason-in-observe",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.c5f66697d860f704",
+      "semantic_name": "MAKE-UNKNOWN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "construct an explicit unknown reasoning outcome",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "make-unknown",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.c8acae01e1775162",
+      "semantic_name": "GUARD-COMPARE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GUARD-DECISION-ALGEBRA",
+      "behavior": "compare expected and observed semantic state and classify preserved invariant versus contract drift",
+      "provenance": [
+        "#3990",
+        "lib/guard.lisp"
+      ],
+      "source_name": "guard-compare",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.d28c3b2e2321ce28",
+      "semantic_name": "TRANSLATION-ADMITTABLE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "test whether a translation review admits its proposal into the explicit advice boundary",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-admittable?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.d760df142156d533",
+      "semantic_name": "NARRATE-DERIVATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURE-TO-NARRATION",
+      "behavior": "render a derivation list into controlled explanatory structure",
+      "provenance": [
+        "#3990",
+        "lib/narrate.lisp"
+      ],
+      "source_name": "narrate-derivation",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.d7e833e30bc1c68a",
+      "semantic_name": "UNDERSTAND-QUERY-IS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTROLLED-TEXT-TO-KNOWLEDGE",
+      "behavior": "translate a controlled 'is' query form into a reasoning goal",
+      "provenance": [
+        "#3990",
+        "lib/understand.lisp"
+      ],
+      "source_name": "understand-query-is",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.db02157927365016",
+      "semantic_name": "RESULT-NEGATED-GOAL?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "test whether a canonical reasoning goal is explicitly negated",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-negated-goal?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.dbc435508604aad7",
+      "semantic_name": "TRANSLATION-EVIDENCE-WORTHY?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "test whether a translation review should produce a durable evidence entry",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-evidence-worthy?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.e28da836fbdcb26c",
+      "semantic_name": "TRANSLATION-REVIEW-STATUS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TRANSLATION-BOUNDARY-ALGEBRA",
+      "behavior": "project the admission status from a translation review",
+      "provenance": [
+        "#3990",
+        "lib/translation.lisp"
+      ],
+      "source_name": "translation-review-status",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.e3bee4bb7abf0f15",
+      "semantic_name": "MAKE-PROVED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "construct a proved reasoning outcome from a statement and proof results",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "make-proved",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.efb34792999e32ad",
+      "semantic_name": "RESULT-OPPOSITE-GOAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "construct the logical opposite of a canonical reasoning goal",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "result-opposite-goal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.f1b8cce0694bb442",
+      "semantic_name": "CONTENT-STORE-PUT-WORLD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CONTENT-ADDRESS-STORE-ALGEBRA",
+      "behavior": "store a world by its canonical world-content address and compact world content",
+      "provenance": [
+        "#3990",
+        "lib/content-store.lisp"
+      ],
+      "source_name": "content-store-put-world",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.api.f491d675b0b5712e",
+      "semantic_name": "MAKE-PARTIAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CANONICAL-SEMANTIC-LAYER-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "RESULT-STATUS-ALGEBRA",
+      "behavior": "construct a partial reasoning outcome with value and bound",
+      "provenance": [
+        "#3990",
+        "lib/result-status.lisp"
+      ],
+      "source_name": "make-partial",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
     {
       "stable_id": "d9.lib.0c2e7f48fb1458be",
       "semantic_name": "DEADLINE-AFTER-NS",

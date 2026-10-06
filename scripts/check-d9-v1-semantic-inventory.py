@@ -67,6 +67,12 @@ if tail_path.exists():
     tail_ids={r["stable_id"] for r in tail["rows"] if r["selected_d9_candidate"]}
     assert tail_ids <= unplaced_ids
 
+semantic_layer_path=root/"knowledge/d9-semantic-layer-harvest-v1.json"
+if semantic_layer_path.exists():
+    semantic_layer=json.loads(semantic_layer_path.read_text(encoding="utf-8"))
+    semantic_layer_ids={r["stable_id"] for r in semantic_layer["rows"] if r["selected_d9_candidate"]}
+    assert semantic_layer_ids <= unplaced_ids
+
 for name in ("APPLY","COMPOSE","REDUCE"):
     assert name not in {r["semantic_name"] for r in rows}
 
