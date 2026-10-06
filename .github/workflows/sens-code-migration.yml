@@ -20,9 +20,9 @@ on:
 
 jobs:
   migration-tests:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Test manifest-driven migration
         run: |
           set +e
