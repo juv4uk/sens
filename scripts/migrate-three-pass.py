@@ -134,8 +134,8 @@ def tokenize(source: str) -> list[Tok]:
             out.append(Tok("RP",")",i)); i+=1; continue
         if ch=="'":
             out.append(Tok("QUOTE","'",i)); i+=1; continue
-        if ch=="\`":
-            raise MigrationError("backquote syntax has no admitted migration law",Tok("BACKQUOTE","\`",i))
+        if ch=="`":
+            raise MigrationError("backquote syntax has no admitted migration law",Tok("BACKQUOTE","`",i))
         if ch==",":
             raise MigrationError("comma/unquote syntax has no admitted migration law",Tok("COMMA",",",i))
         if ch=='"':
@@ -403,24 +403,77 @@ def encode_atom_data(node: Atom,text7):
 def encode_string(node: String,text7):
     return text7_encode(node.tok.text,text7,node.tok)
 
+def encode_clause(node,resolver,text7):
+    """COND clause is structural: the clause itself is not a function call.
+
+    Nested list expressions inside it remain executable. Bare atoms at clause
+    level (e.g. t) are data/control values, never function heads.
+    """
+    if not isinstance(node,ListNode):
+        return encode(node,resolver,text7,quoted=False)
+    if not node.items and node.tail is None:
+        return [D3_EMPTY]
+    words=[D2_OPEN]
+    for idx,item in enumerate(node.items):
+        if idx:
+            words.append(D2_SEP)
+        if isinstance(item,ListNode):
+            words.extend(encode(item,resolver,text7,quoted=False))
+        else:
+            words.extend(encode(item,resolver,text7,quoted=True))
+    if node.tail is not None:
+        words.append(D2_DOT)
+        words.extend(encode(node.tail,resolver,text7,quoted=True))
+    words.append(D2_CLOSE)
+    return words
+
 def encode(node,resolver,text7,quoted=False):
     if isinstance(node,ListNode):
         if not node.items and node.tail is None:
             return [D3_EMPTY]
+
         words=[D2_OPEN]
+        head_bits=None
+
         for idx,item in enumerate(node.items):
             if idx:
                 words.append(D2_SEP)
+
             if idx==0 and not quoted and isinstance(item,Atom):
                 head,_=resolver.head(item.tok)
+                head_bits=head[0]
                 words.extend(head)
-            else:
-                words.extend(encode(item,resolver,text7,quoted=quoted))
+                continue
+
+            # Explicit QUOTE: every datum is data, never an executable head.
+            if not quoted and head_bits=="001":
+                words.extend(encode(item,resolver,text7,quoted=True))
+                continue
+
+            # LAMBDA: first argument is the parameter-list grammar.
+            if not quoted and head_bits=="0010" and idx==1:
+                words.extend(encode(item,resolver,text7,quoted=True))
+                continue
+
+            # DEFINE: a shorthand signature (define (f x) body) is data at the
+            # signature level. A plain name is already encoded as atom data.
+            if not quoted and head_bits=="0011" and idx==1 and isinstance(item,ListNode):
+                words.extend(encode(item,resolver,text7,quoted=True))
+                continue
+
+            # COND: each clause is a grammar container, not a call itself.
+            if not quoted and head_bits=="110":
+                words.extend(encode_clause(item,resolver,text7))
+                continue
+
+            words.extend(encode(item,resolver,text7,quoted=quoted))
+
         if node.tail is not None:
             words.append(D2_DOT)
             words.extend(encode(node.tail,resolver,text7,quoted=True))
         words.append(D2_CLOSE)
         return words
+
     if isinstance(node,Quote):
         return [D2_OPEN,"001",D2_SEP,*encode(node.value,resolver,text7,quoted=True),D2_CLOSE]
     if isinstance(node,String):
