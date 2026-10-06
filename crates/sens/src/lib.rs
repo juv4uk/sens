@@ -15,6 +15,7 @@ mod canonical_reader;
 pub mod compilation_artifact;
 pub mod compilation_artifact_producer;
 pub mod conformance_oracle;
+pub mod program_compiler;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
