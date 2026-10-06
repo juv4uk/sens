@@ -100,6 +100,33 @@ class ThreePassMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped Lisp 1-1.5 function"):
             self.migrate("(EQUAL a b)\n")
 
+    def test_old_functions_with_current_successors_move_by_semantic_role(self):
+        cases=[
+            ("(00100001 x)\n","0100","pass1-sens8"),   # NOT
+            ("(00101000 x)\n","000000","pass1-sens8"), # LENGTH
+            ("(00110111 f xs)\n","101000","pass1-sens8"), # MAP
+            ("(00111001 f z xs)\n","101110","pass1-sens8"), # REDUCE
+            ("(10011100 ((x 1)) x)\n","001000","pass1-sens8"), # LET
+            ("(10011101 ((x 1)) x)\n","001001","pass1-sens8"), # LET*
+        ]
+        for source,bits,counter in cases:
+            out,resolver=self.migrate(source)
+            self.assertTrue(out.startswith(f"10 {bits} "),source)
+            self.assertEqual(resolver.counts[counter],1,source)
+
+    def test_my_lisp_functions_with_current_successors_are_not_legacy_unmapped(self):
+        for source,bits in [
+            ("(not? x)\n","0100"),
+            ("(length xs)\n","000000"),
+            ("(map f xs)\n","101000"),
+            ("(reduce f z xs)\n","101110"),
+            ("(let ((x 1)) x)\n","001000"),
+            ("(let* ((x 1)) x)\n","001001"),
+        ]:
+            out,resolver=self.migrate(source)
+            self.assertTrue(out.startswith(f"10 {bits} "),source)
+            self.assertEqual(resolver.counts["pass2-my-lisp"],1,source)
+
     def test_d1_d2_head_words_pass_through_verbatim(self):
         out1,resolver1=self.migrate("(1 x)\n")
         out2,resolver2=self.migrate("(10 x)\n")
