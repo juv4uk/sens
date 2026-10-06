@@ -1,7 +1,7 @@
 ; #3989 — current exact-domain x86-64 machine projection.
 ;
 ; This is the current semantic->machine projection for already-witnessed
-; Contract 11.7 residents. Keys are exact domain literals; their width is part
+; Contract 11.8 residents. Keys are exact domain literals; their width is part
 ; of identity. This file does not infer meaning from a historical SID8 byte.
 ;
 ; It is intentionally small. Rows are admitted only when an existing machine
@@ -11,7 +11,9 @@
   (target x86-64)
   (cpu intel-core-i5-6400)
   (rows
-    (01010 fast-path "ADD / bounded-u64")          ; D5 PLUS
+    (01010 fast-path "ADD / bounded-u64, exact-result guard")     ; D5 PLUS
+    (01011 fast-path "SUB / bounded-u64, exact-result guard")     ; D5 DIFFERENCE
+    (10110 fast-path "IMUL / bounded-u64, exact-result guard")    ; D5 TIMES
     (101 direct "CMP/SETE")                        ; D3 EQ
     (110 control "CMP+Jcc")                        ; D3 COND
     (111 runtime "STORE-pair-head+tail")           ; D3 CONS
