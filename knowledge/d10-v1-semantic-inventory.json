@@ -6,13 +6,7 @@
   "domain": "D10",
   "width": 10,
   "capacity": 1024,
-  "current_foundation": "#3960 / Contract 11.7 / D1-D8",
-  "parent_research": {
-    "domain": "D9",
-    "inventory_count": 512,
-    "ratified": false,
-    "selector_law_crossing_only": true
-  },
+  "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
     "selected_semantic_candidates": 256,
     "law_forced_coordinates": 256,
@@ -22,8 +16,8 @@
   },
   "rules": [
     "semantic selection is separate from coordinate placement",
-    "only independently proved D9 selector geometry crosses into D10",
-    "unratified D9 non-selector coordinates have zero D10 authority",
+    "D9 parent identities are ratified, but only independently proved D9→D10 semantic generator laws create D10 children",
+    "ratified D9 coordinates identify D9 parents but do not imply D10 child semantics",
     "derivable does not imply excluded",
     "exact D1-D9 semantic duplicates are forbidden",
     "Sens8/Sid8/Function8 coordinates have zero D10 placement authority",
@@ -4894,5 +4888,13 @@
       "parent_semantic_name": "CADDDDDDR",
       "ratified_resident": false
     }
-  ]
+  ],
+  "parent_domain": {
+    "domain": "D9",
+    "ratified": true,
+    "authority": "#4008",
+    "normative_map": "knowledge/d9-ratified.json",
+    "occupancy": 512,
+    "selector_law_crossing_only": true
+  }
 }
