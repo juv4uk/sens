@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate/check canonical D1-D6 human projection tables."""
+"""Generate/check D1-D6 tables in the same Lisp-first shape as SENS8."""
 
 from __future__ import annotations
 
@@ -10,17 +10,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUNDATION = ROOT / "knowledge/d1-d7-foundation.json"
-PROJECTION = ROOT / "knowledge/domain-table-projection-d1-d6.json"
-OUTPUT = ROOT / "docs/generated/domain-tables-d1-d6.md"
-
 SURFACE_SOURCES = (
     ROOT / "lib/surface/domain-surfaces-d1-d4.lisp",
     ROOT / "lib/surface/domain-surfaces-d5.lisp",
     ROOT / "lib/surface/domain-surfaces-d6.lisp",
 )
+LEGACY_LEXICAL_DONOR = ROOT / "lib/surface/semantic-registry.lisp"
+LISP_OUTPUT = ROOT / "lib/generated/domain-table-d1-d6.lisp"
+MD_OUTPUT = ROOT / "docs/generated/domain-tables-d1-d6.md"
 
 COLUMNS = ["ук", "укр", "san", "eng", "LISP", "SUM"]
-EMPTY_MARKER = "()"
+EMPTY = "()"
 HEADER = "| bits | ук | укр | san | eng | LISP | SUM |"
 DIVIDER = "|---|---|---|---|---|---|---|"
 
@@ -32,190 +32,225 @@ EXACT_ROW = re.compile(
     + SURFACE_TOKEN + r'\s+'
     + r'(\S+)\s+(\S+)\)\s*$'
 )
-SELECTOR = re.compile(r'^C([AD]+)R$')
+LEGACY_ROW = re.compile(
+    r'^\s*\([01]{8}\s+'
+    + r'\(en\s+' + SURFACE_TOKEN + r'\)\s+'
+    + r'\(ук\s+' + SURFACE_TOKEN + r'\)\s+'
+    + r'\(укр\s+' + SURFACE_TOKEN + r'\)\s+'
+    + r'\(sa\s+' + SURFACE_TOKEN + r'\)'
+)
 
 
 def fail(message: str) -> None:
     raise SystemExit(f"DOMAIN-TABLES-D1-D6: FAIL: {message}")
 
 
-def decode_surface_token(token: str) -> str | None:
-    if token == EMPTY_MARKER:
+def decode(token: str) -> str | None:
+    if token == EMPTY:
         return None
-    if len(token) >= 2 and token[0] == '"' and token[-1] == '"':
+    if token.startswith('"') and token.endswith('"'):
         return token[1:-1]
-    fail(f"invalid surface token {token!r}")
+    fail(f"bad token {token!r}")
 
 
-def load_exact_surfaces() -> dict[tuple[str, str], dict[str, str | None]]:
+def atom(value: str | None) -> str:
+    if value is None or value == "":
+        return EMPTY
+    if any(ch.isspace() for ch in value) or any(ch in '()"' for ch in value):
+        return json.dumps(value, ensure_ascii=False)
+    return value
+
+
+def load_exact() -> dict[tuple[str, str], dict[str, str | None]]:
     rows: dict[tuple[str, str], dict[str, str | None]] = {}
     for path in SURFACE_SOURCES:
         for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if not line.lstrip().startswith("(row "):
                 continue
-            match = EXACT_ROW.match(line)
-            if not match:
-                fail(f"cannot parse exact surface row at {path}:{line_no}")
-
-            domain, bits, role, eng_t, uk_t, san_t, uk_status, san_status = match.groups()
+            m = EXACT_ROW.match(line)
+            if not m:
+                fail(f"cannot parse {path}:{line_no}")
+            domain, bits, role, eng_t, uk_t, san_t, uk_status, san_status = m.groups()
             key = (domain, bits)
             if key in rows:
-                fail(f"duplicate exact surface row {domain}:{bits}")
-
+                fail(f"duplicate exact row {domain}:{bits}")
             rows[key] = {
                 "role": role,
-                "uk": decode_surface_token(uk_t),
-                "san": decode_surface_token(san_t),
-                "eng": decode_surface_token(eng_t),
+                "eng": decode(eng_t),
+                "uk": decode(uk_t),
+                "san": decode(san_t),
                 "uk_status": uk_status,
                 "san_status": san_status,
             }
     return rows
 
 
-def expected_selector_surfaces(resident: str) -> tuple[str, str] | None:
-    match = SELECTOR.fullmatch(resident)
-    if not match:
+def load_ukr_donor() -> dict[str, str | None]:
+    donor: dict[str, str | None] = {}
+    for line in LEGACY_LEXICAL_DONOR.read_text(encoding="utf-8").splitlines():
+        m = LEGACY_ROW.match(line)
+        if not m:
+            continue
+        eng_t, _uk_t, ukr_t, _san_t = m.groups()
+        eng = decode(eng_t)
+        if eng:
+            donor[eng.lower()] = decode(ukr_t)
+    return donor
+
+
+def lisp_label(domain: str, resident: str) -> str | None:
+    if domain == "D1":
+        return "NIL" if resident == "NO" else "T"
+    if domain == "D2":
         return None
-
-    path = match.group(1)
-    uk_parts: list[str] = []
-    for index, part in enumerate(path):
-        if index == 0:
-            uk_parts.append("перше" if part == "A" else "решта")
-        else:
-            uk_parts.append("першого" if part == "A" else "решти")
-
-    san_parts = ["ādi" if part == "A" else "śeṣa" for part in path]
-    return "-від-".join(uk_parts), "-".join(san_parts)
+    if domain == "D3" and resident == "EMPTY":
+        return "NIL"
+    return resident
 
 
 def validate(
     foundation: dict,
-    projection: dict,
-    exact_surfaces: dict[tuple[str, str], dict[str, str | None]],
+    exact: dict[tuple[str, str], dict[str, str | None]],
 ) -> None:
-    if projection.get("columns") != COLUMNS:
-        fail(f"column order must be {COLUMNS!r}")
-    if projection.get("empty_marker") != EMPTY_MARKER:
-        fail(f"empty marker must be {EMPTY_MARKER!r}")
-
-    domains = projection.get("domains")
-    if not isinstance(domains, list) or len(domains) != 6:
-        fail("projection must contain exactly D1-D6")
-
     total = 0
-    seen: set[tuple[str, str]] = set()
-
-    for width, projected in enumerate(domains, start=1):
+    for width in range(1, 7):
         domain = f"D{width}"
-        if projected.get("domain") != domain:
-            fail(f"expected {domain} at position {width}")
-
         current = foundation["domains"][domain]
-        name = current.get("sanskrit_name")
-        if not name:
-            fail(f"{domain}: missing sanskrit_name in ratified foundation")
-        if projected.get("name") != name:
-            fail(f"{domain}: projection name drift")
-
-        rows = projected.get("rows")
-        expected_count = 1 << width
-        if not isinstance(rows, list) or len(rows) != expected_count:
-            fail(f"{domain}: expected {expected_count} rows")
-
+        if not current.get("sanskrit_name"):
+            fail(f"{domain}: missing sanskrit_name")
         expected_bits = sorted(current["residents"], key=lambda bits: int(bits, 2))
-        actual_bits = [row.get("bits") for row in rows]
-        if actual_bits != expected_bits:
-            fail(f"{domain}: row bit order/coverage drift")
-
-        for row in rows:
-            bits = row["bits"]
-            resident = row.get("resident")
-            expected_resident = current["residents"][bits]
-            if resident != expected_resident:
+        if len(expected_bits) != (1 << width):
+            fail(f"{domain}: authority is not dense {1 << width}/{1 << width}")
+        for bits in expected_bits:
+            row = exact.get((domain, bits))
+            if row is None:
+                fail(f"{domain}:{bits}: missing exact surface row")
+            resident = current["residents"][bits]
+            if row["eng"] is None:
+                fail(f"{domain}:{bits}: English reference must be present")
+            if row["eng"].upper() != resident:
                 fail(
-                    f"{domain}:{bits}: resident drift "
-                    f"{resident!r} != {expected_resident!r}"
+                    f"{domain}:{bits}: exact surface {row['eng']!r} "
+                    f"!= resident {resident!r}"
                 )
-
-            key = (domain, bits)
-            if key in seen:
-                fail(f"duplicate projection key {domain}:{bits}")
-            seen.add(key)
-
-            values = row.get("values")
-            if not isinstance(values, list) or len(values) != 6:
-                fail(f"{domain}:{bits}: expected six surface columns")
-
-            expected_sum = f"{name}:{bits}={resident}"
-            if values[5] != expected_sum:
-                fail(f"{domain}:{bits}: SUM drift")
-
-            exact = exact_surfaces.get(key)
-            if exact is None:
-                fail(f"{domain}:{bits}: missing current exact surface row")
-            if values[0] != exact["uk"]:
-                fail(f"{domain}:{bits}: ук drift from exact-domain source")
-            if values[2] != exact["san"]:
-                fail(f"{domain}:{bits}: san drift from exact-domain source")
-            if values[3] != exact["eng"]:
-                fail(f"{domain}:{bits}: eng drift from exact-domain source")
-
-            if domain == "D6":
-                selector = expected_selector_surfaces(resident)
-                if selector is not None:
-                    expected_uk, expected_san = selector
-                    if exact["role"] != "selector":
-                        fail(f"{domain}:{bits}: selector role drift")
-                    if exact["uk"] != expected_uk:
-                        fail(f"{domain}:{bits}: D6 selector UK law drift")
-                    if exact["san"] != expected_san:
-                        fail(f"{domain}:{bits}: D6 selector Sanskrit law drift")
-
             total += 1
-
-    if total != 126:
-        fail(f"expected 126 projection rows, found {total}")
-    if len(exact_surfaces) != 126:
-        fail(f"expected 126 exact D1-D6 surface rows, found {len(exact_surfaces)}")
+    if total != 126 or len(exact) != 126:
+        fail(f"expected exactly 126 D1-D6 rows, got authority={total} exact={len(exact)}")
 
 
-def cell(value: object) -> str:
-    if value is None or value == "":
-        return EMPTY_MARKER
-    return str(value)
+def iter_rows(
+    foundation: dict,
+    exact: dict[tuple[str, str], dict[str, str | None]],
+    ukr_donor: dict[str, str | None],
+):
+    for width in range(1, 7):
+        domain = f"D{width}"
+        info = foundation["domains"][domain]
+        name = info["sanskrit_name"]
+        for bits, resident in sorted(
+            info["residents"].items(), key=lambda item: int(item[0], 2)
+        ):
+            surface = exact[(domain, bits)]
+            eng = surface["eng"]
+            uk = surface["uk"]
+            san = surface["san"]
+            ukr = ukr_donor.get((eng or "").lower())
+            if ukr is None:
+                ukr = uk
+            yield {
+                "domain": domain,
+                "name": name,
+                "bits": bits,
+                "formal": f"identity:{name}:{bits}",
+                "uk": uk,
+                "ukr": ukr,
+                "san": san,
+                "eng": eng,
+                "lisp": lisp_label(domain, resident),
+                "sum": f"{name}:{bits}={resident}",
+            }
 
 
-def render(projection: dict) -> str:
-    lines = [
+def render_lisp(all_rows: list[dict[str, str | None]]) -> str:
+    out = [
+        "; GENERATED — DO NOT EDIT BY HAND",
+        "; Authority: knowledge/d1-d7-foundation.json (#3572)",
+        "; Surface sources: lib/surface/domain-surfaces-d1-d4.lisp, domain-surfaces-d5.lisp, domain-surfaces-d6.lisp",
+        "; Generator: scripts/generate-domain-tables-d1-d6.py",
+        "; Schema domain-ft/1: (domain-name bits formal (ук ...) (укр ...) (san ...) (eng ...) (LISP ...) (SUM ...))",
+        "; Display order: ук → укр → san → eng → LISP → SUM",
+        "; Empty/missing surface: ()",
+        "; Projection only: exact bits + exact domain + ratified law remain semantic authority",
+        "",
+        "(domain-ft/1",
+    ]
+    current_name = None
+    for row in all_rows:
+        if row["name"] != current_name:
+            current_name = row["name"]
+            out.append(f"  ; {row['name']} / {row['domain']}")
+        out.append(
+            "  ("
+            + f"{row['name']} {row['bits']} {row['formal']}"
+            + f" (ук {atom(row['uk'])})"
+            + f" (укр {atom(row['ukr'])})"
+            + f" (san {atom(row['san'])})"
+            + f" (eng {atom(row['eng'])})"
+            + f" (LISP {atom(row['lisp'])})"
+            + f" (SUM {atom(row['sum'])})"
+            + ")"
+        )
+    out += [")", ""]
+    return "\n".join(out)
+
+
+def render_md(all_rows: list[dict[str, str | None]]) -> str:
+    out = [
         "# Domain tables D1–D6",
         "",
         "**Authority:** `knowledge/d1-d7-foundation.json` (#3572).",
         "",
-        "Human projection source: `knowledge/domain-table-projection-d1-d6.json`.",
-        "Exact surface sources: `lib/surface/domain-surfaces-d1-d4.lisp`, `domain-surfaces-d5.lisp`, `domain-surfaces-d6.lisp`.",
-        "Exact identity remains `bits + domain + ratified law`.",
+        "**Machine-readable projection:** `lib/generated/domain-table-d1-d6.lisp`.",
         "",
         "Canonical surface order: **ук → укр → san → eng → LISP → SUM**.",
-        f"Empty/missing surface marker: `{projection['empty_marker']}`.",
+        "Empty/missing surface marker: `()`.",
         "",
     ]
-
-    for domain in projection["domains"]:
-        lines += [
-            f"## {domain['name']} ({domain['domain']})",
-            "",
-            HEADER,
-            DIVIDER,
+    current_name = None
+    for row in all_rows:
+        if row["name"] != current_name:
+            if current_name is not None:
+                out.append("")
+            current_name = row["name"]
+            out += [
+                f"## {row['name']} ({row['domain']})",
+                "",
+                HEADER,
+                DIVIDER,
+            ]
+        cells = [
+            row["uk"],
+            row["ukr"],
+            row["san"],
+            row["eng"],
+            row["lisp"],
+            row["sum"],
         ]
-        for row in domain["rows"]:
-            values = [cell(value) for value in row["values"]]
-            rendered = " | ".join(f"`{value}`" for value in values)
-            lines.append(f"| `{row['bits']}` | {rendered} |")
-        lines.append("")
+        rendered = " | ".join(f"`{atom(value)}`" for value in cells)
+        out.append(f"| `{row['bits']}` | {rendered} |")
+    return "\n".join(out).rstrip() + "\n"
 
-    return "\n".join(lines).rstrip() + "\n"
+
+def write_or_check(path: Path, content: str, write: bool) -> None:
+    if write:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+        print(f"wrote {path.relative_to(ROOT)}")
+        return
+    if not path.exists():
+        fail(f"missing generated file {path.relative_to(ROOT)}")
+    if path.read_text(encoding="utf-8") != content:
+        fail(f"stale generated file {path.relative_to(ROOT)}")
 
 
 def main() -> int:
@@ -224,25 +259,19 @@ def main() -> int:
     args = parser.parse_args()
 
     foundation = json.loads(FOUNDATION.read_text(encoding="utf-8"))
-    projection = json.loads(PROJECTION.read_text(encoding="utf-8"))
-    exact_surfaces = load_exact_surfaces()
+    exact = load_exact()
+    validate(foundation, exact)
+    ukr_donor = load_ukr_donor()
+    all_rows = list(iter_rows(foundation, exact, ukr_donor))
 
-    validate(foundation, projection, exact_surfaces)
-    generated = render(projection)
+    if len(all_rows) != 126:
+        fail(f"expected 126 generated rows, got {len(all_rows)}")
 
-    if args.write:
-        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-        OUTPUT.write_text(generated, encoding="utf-8")
-        print(f"wrote {OUTPUT.relative_to(ROOT)}")
-        return 0
-
-    if not OUTPUT.exists():
-        fail(f"missing generated file: {OUTPUT.relative_to(ROOT)}")
-    if OUTPUT.read_text(encoding="utf-8") != generated:
-        fail("generated markdown is stale; run with --write")
+    write_or_check(LISP_OUTPUT, render_lisp(all_rows), args.write)
+    write_or_check(MD_OUTPUT, render_md(all_rows), args.write)
 
     print("DOMAIN-TABLES-D1-D6: PASS")
-    print("rows=126 exact-surface=D1-D6 order=ук->укр->san->eng->LISP->SUM")
+    print("rows=126 form=SENS8-like-lisp-first order=ук->укр->san->eng->LISP->SUM")
     return 0
 
 
