@@ -1,6 +1,6 @@
 {
   "schema": "d9-v1-semantic-inventory/v1",
-  "status": "RESEARCH-UNRATIFIED-PARTIAL",
+  "status": "RESEARCH-UNRATIFIED-COMPLETE",
   "authority": "#3964 / #3965",
   "date": "2026-10-06",
   "domain": "D9",
@@ -14,13 +14,14 @@
     "knowledge/d9-library-harvest-v1.json",
     "knowledge/d9-registry-tail-v1.json",
     "knowledge/d9-semantic-layer-harvest-v1.json",
-    "knowledge/d9-world-quantity-harvest-v1.json"
+    "knowledge/d9-world-quantity-harvest-v1.json",
+    "knowledge/d9-final-semantic-fill-v1.json"
   ],
   "accounting": {
-    "selected_semantic_candidates": 375,
+    "selected_semantic_candidates": 512,
     "law_forced_coordinates": 128,
-    "unplaced_selected_candidates": 247,
-    "remaining_semantic_inventory": 137,
+    "unplaced_selected_candidates": 384,
+    "remaining_semantic_inventory": 0,
     "ratified_d9_residents": 0
   },
   "rules": [
@@ -1134,6 +1135,2335 @@
         "lib/result-status.lisp"
       ],
       "source_name": "make-partial",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.06932134b7a7d6e9",
+      "semantic_name": "CLIPS-IMPORT-FORMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-import-forms",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-import-forms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.0c77b566dd12de39",
+      "semantic_name": "CANON-LAW-STATUS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-status",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-status",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.0de30854a5298af1",
+      "semantic_name": "LINT-GLOBALS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-globals",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-globals",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.12317452e5147d6d",
+      "semantic_name": "CLIPS-IMPORT-FILE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-import-file",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-import-file",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.12b69ee4a29344b1",
+      "semantic_name": "APPEND-NEW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: append-new",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "append-new",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.15008dc310b24ce3",
+      "semantic_name": "CANON-LAW-CDR-CONS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-cdr-cons",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-cdr-cons",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.156825a410f86ae1",
+      "semantic_name": "LINT-FORM-HEAD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-form-head",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-form-head",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.15b41003a0e3d87b",
+      "semantic_name": "RETRACT-FACT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-fact",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-fact",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.15cc14f70b3b7c25",
+      "semantic_name": "PROCESS-RUN-TEXT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PROCESS-TEXT-ADAPTERS",
+      "behavior": "language-level process result/text adapter semantic operation: process-run-text",
+      "provenance": [
+        "#3995",
+        "lib/process.lisp"
+      ],
+      "source_name": "process-run-text",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.16c4247e60f00dde",
+      "semantic_name": "FS-JOURNAL-UNBIND-EVENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-journal-unbind-event",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-journal-unbind-event",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.1a4145b6b2f9e985",
+      "semantic_name": "RETRACT-FACT-TMS!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-fact-tms!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-fact-tms!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.1ded893eeb792a23",
+      "semantic_name": "FIRE-RULES-ON-WORKING-MEMORY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rules-on-working-memory",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rules-on-working-memory",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.1eac707c04d9e99d",
+      "semantic_name": "RUN-JTMS!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: run-jtms!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run-jtms!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.245f7164d5739689",
+      "semantic_name": "FIRE-RULES-ON-FACTS-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rules-on-facts-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rules-on-facts-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.278871f126ee24a9",
+      "semantic_name": "FIRE-RULES-JTMS-MULTI",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rules-jtms-multi",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rules-jtms-multi",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.29974643287170d4",
+      "semantic_name": "FS-OBJECTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-objects",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-objects",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.2c4679dcb7a603a5",
+      "semantic_name": "PROCESS-PUBLIC-EXIT-CODE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PROCESS-TEXT-ADAPTERS",
+      "behavior": "language-level process result/text adapter semantic operation: process-public-exit-code",
+      "provenance": [
+        "#3995",
+        "lib/process.lisp"
+      ],
+      "source_name": "process-public-exit-code",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.2c513b2d0d075095",
+      "semantic_name": "ASSERT-FACT-JTMS!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: assert-fact-jtms!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "assert-fact-jtms!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.2e722b82bc6ad787",
+      "semantic_name": "CLIPS-TEMPLATES-FROM-FORMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-templates-from-forms",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-templates-from-forms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.3078283206f2a41e",
+      "semantic_name": "FS-OBJECT-ADDRESSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-object-addresses",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-object-addresses",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.347f3eedf8cb61c9",
+      "semantic_name": "CLIPS-TEMPLATE-SLOT-ORDER",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-template-slot-order",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-template-slot-order",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.34a7c0bcc67b45ee",
+      "semantic_name": "FS-BINDINGS-FROM-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-bindings-from-list",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-bindings-from-list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.3520c4cbdddc4be9",
+      "semantic_name": "CANON-LAW-VIOLATED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-violated",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-violated",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.39a66f1ed64f182d",
+      "semantic_name": "CLIPS-IMPORT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-import",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-import",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.3c2e4adc792e443e",
+      "semantic_name": "FS-JOURNAL-APPEND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-journal-append",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-journal-append",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.3d3c8e3b4ab245af",
+      "semantic_name": "RETRACT-FACTS-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-facts-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-facts-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.411dcc8fd399caae",
+      "semantic_name": "FS-EMPTY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-empty",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-empty",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.41927a9a4bf45629",
+      "semantic_name": "DEPENDENTS-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: dependents-of",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "dependents-of",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.42d9d249cf8607e5",
+      "semantic_name": "FIRE-RULE-ON-WORKING-MEMORY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule-on-working-memory",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-on-working-memory",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.4569f94536ebd42f",
+      "semantic_name": "CLIPS-VAR-TERM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-var-term",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-var-term",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.461bf1d9bf901b4e",
+      "semantic_name": "FS-ROOT-PACKAGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-root-package",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-root-package",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.474c40340fc0231a",
+      "semantic_name": "FS-UNBIND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-unbind",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-unbind",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.48f8828db6ad0fdf",
+      "semantic_name": "LINT-SIZE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-size",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-size",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.498fb86f6733f23f",
+      "semantic_name": "ADD-NEW-ENTRIES-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: add-new-entries-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "add-new-entries-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.49918841af1d0cf9",
+      "semantic_name": "CLIPS-SLOT-NAME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-slot-name",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-slot-name",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.4c98d01981bccd52",
+      "semantic_name": "FS-BUILD-OBJECT-STORE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-build-object-store",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-build-object-store",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.4e6255fe1c608686",
+      "semantic_name": "FS-JOURNAL-ROOT-COMMIT-EVENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-journal-root-commit-event",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-journal-root-commit-event",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.4f19632c87a39b31",
+      "semantic_name": "CLIPS-DEFTEMPLATE-SLOTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-deftemplate-slots",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-deftemplate-slots",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.54805edca9cf69f0",
+      "semantic_name": "FS-JOURNAL-WRITE-EVENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-journal-write-event",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-journal-write-event",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.55e20f71256b9c41",
+      "semantic_name": "RUN-TMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: run-tms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run-tms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.5637cc81a60e55c6",
+      "semantic_name": "TCP-READ-BYTES->TEXT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS",
+      "behavior": "language-level TCP adapter semantic operation: tcp-read-bytes->text",
+      "provenance": [
+        "#3995",
+        "lib/tcp.lisp"
+      ],
+      "source_name": "tcp-read-bytes->text",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.5754f4230f72cad1",
+      "semantic_name": "CLIPS-DEFTEMPLATE-NAME",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-deftemplate-name",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-deftemplate-name",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.5be5791a8dc1163c",
+      "semantic_name": "FS-JOURNAL-EVENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-journal-event",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-journal-event",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.5d9bfd85d24689f5",
+      "semantic_name": "RETRACT-FACTS-TMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-facts-tms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-facts-tms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.5f3508469d1970dd",
+      "semantic_name": "RUN-JTMS-MULTI!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: run-jtms-multi!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run-jtms-multi!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.60027ece880a6065",
+      "semantic_name": "REMOVE-ENTRY-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: remove-entry-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "remove-entry-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.6031813a2c434b27",
+      "semantic_name": "ASSERT-FACT!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: assert-fact!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "assert-fact!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.63eafa8213562a4b",
+      "semantic_name": "PRUNE-JUSTIFICATIONS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: prune-justifications",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "prune-justifications",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.69845f321e1fda93",
+      "semantic_name": "CLIPS-FACTS->CLAUSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-facts->clauses",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-facts->clauses",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.6bde08dcbab6e589",
+      "semantic_name": "CANON-LAW-EQ-REFLEXIVE-ATOM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-eq-reflexive-atom",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-eq-reflexive-atom",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.6f725028147dee52",
+      "semantic_name": "FS-DESERIALIZE-ROOT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-deserialize-root",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-deserialize-root",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.701602017e99f2cb",
+      "semantic_name": "CLIPS-VAR?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-var?",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-var?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.7406c30981656ec3",
+      "semantic_name": "CANON-LAW-RESULT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-result",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-result",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.756f68ddc3cb9d31",
+      "semantic_name": "CANON-LAW-CDR-IMPROPER",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-cdr-improper",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-cdr-improper",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.760e14fd67c739ed",
+      "semantic_name": "CLIPS-SLOT-NAMES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-slot-names",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-slot-names",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.76cc13f3edbe33e9",
+      "semantic_name": "CANON-LAW-SYMBOLIC-SURFACE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-symbolic-surface",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-symbolic-surface",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.780ec32ecc7e713b",
+      "semantic_name": "CANON-EMPTY-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-empty-list",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-empty-list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.7860a6aafda51f47",
+      "semantic_name": "MAKE-JUSTIFIED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: make-justified",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "make-justified",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.786f866b997c5175",
+      "semantic_name": "AXIOM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: axiom",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "axiom",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.78e86b4c271d1d8c",
+      "semantic_name": "FS-SERIALIZE-JOURNAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-serialize-journal",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-serialize-journal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.794d0c1a6e307f01",
+      "semantic_name": "ASSERT-FACTS!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: assert-facts!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "assert-facts!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.7a36147bff1c61b9",
+      "semantic_name": "FIRE-RULE-ON-FACTS-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule-on-facts-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-on-facts-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.7c76fecb9e1f1aee",
+      "semantic_name": "FS-JOURNAL-BIND-EVENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-journal-bind-event",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-journal-bind-event",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.7e58b6ce64afb0c9",
+      "semantic_name": "CANON-LAW-CDR-PROPER",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-cdr-proper",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-cdr-proper",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.7f482cfe2e0fd006",
+      "semantic_name": "FS-BINDINGS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-bindings",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-bindings",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.7fe48551079dbcd2",
+      "semantic_name": "FS-WRITE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-write",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-write",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.80456f9df5c80f05",
+      "semantic_name": "PRUNE-ENTRY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: prune-entry",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "prune-entry",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.825e13ac2f53405b",
+      "semantic_name": "RUN-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: run-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.82bfae08d2f2712b",
+      "semantic_name": "FIRE-RULE-JTMS-MULTI",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule-jtms-multi",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-jtms-multi",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.82d9f80c5f1357c1",
+      "semantic_name": "LINT-CHECK",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-check",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-check",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.82f3b27bc04c8029",
+      "semantic_name": "CANON-LAW-ATOM-CONS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-atom-cons",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-atom-cons",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.84d2f535766f1f41",
+      "semantic_name": "PROCESS-RESULT->TEXT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PROCESS-TEXT-ADAPTERS",
+      "behavior": "language-level process result/text adapter semantic operation: process-result->text",
+      "provenance": [
+        "#3995",
+        "lib/process.lisp"
+      ],
+      "source_name": "process-result->text",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.8663f3c358bcab1f",
+      "semantic_name": "CLIPS-DEFRULE->CLAUSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-defrule->clauses",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-defrule->clauses",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.89843c64e2498aad",
+      "semantic_name": "SUPPORTS-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: supports-of",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "supports-of",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.8a1a0dc22359f4cd",
+      "semantic_name": "RUN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: run",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.8dca5377acfc8446",
+      "semantic_name": "FS-ROOT-ADDRESS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-root-address",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-root-address",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.905c5fe279dffa79",
+      "semantic_name": "CLIPS-CONVERT-TEMPLATE-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-convert-template-list",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-convert-template-list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.90af58f27b8a1739",
+      "semantic_name": "LINT-ALL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-all",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-all",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.9419bf633735dcff",
+      "semantic_name": "CLIPS-CONVERT-TEMPLATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-convert-template",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-convert-template",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.97209380bceeb9f1",
+      "semantic_name": "CLIPS-DEFFACTS->CLAUSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-deffacts->clauses",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-deffacts->clauses",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.9824302ae0049f85",
+      "semantic_name": "ADD-NEW-JUSTIFIED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: add-new-justified",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "add-new-justified",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.98bd844939863065",
+      "semantic_name": "LINT-EFFECTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-effects",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-effects",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.994fe17713ae3f95",
+      "semantic_name": "JUSTIFICATIONS-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: justifications-of",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "justifications-of",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.99eabfcc51bed5d7",
+      "semantic_name": "CANON-CONFORMANCE-FROM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-conformance-from",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-conformance-from",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.9bc4959f20b2db3a",
+      "semantic_name": "FS-REVISION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-revision",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-revision",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.a060b9164dae54c6",
+      "semantic_name": "FS-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-list",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.a1e134e734d9c4ae",
+      "semantic_name": "FS-SERIALIZE-OBJECT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-serialize-object",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-serialize-object",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.a3de446bcd0bfa3e",
+      "semantic_name": "FS-SERIALIZE-ROOT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-serialize-root",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-serialize-root",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.a40bf004ebe99cd1",
+      "semantic_name": "MAP-FACT-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: map-fact-of",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "map-fact-of",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.a754f119ad0108f9",
+      "semantic_name": "LINT-HEAD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-head",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-head",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.a7c66ab016197669",
+      "semantic_name": "CANON-CONFORMANCE-RESULT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-conformance-result",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-conformance-result",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.a83fb61a8682d6b5",
+      "semantic_name": "CANON-LAW-CAR-CONS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-car-cons",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-car-cons",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.acd417f42849fd11",
+      "semantic_name": "JUSTIFIED-MEMBER?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: justified-member?",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "justified-member?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.ae3554e64518985d",
+      "semantic_name": "RETRACT-FACT!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-fact!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-fact!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.af44130cec6f5a95",
+      "semantic_name": "FIRE-RULE-TMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule-tms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-tms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.b1a71f490c017265",
+      "semantic_name": "CLIPS-FORM->CLAUSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-form->clauses",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-form->clauses",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.b3755fa5474136cc",
+      "semantic_name": "FS-CONTAINS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-contains?",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-contains?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.b50f19eea3cdcc86",
+      "semantic_name": "FS-OBJECT-PACKAGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-object-package",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-object-package",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.b74938a674987365",
+      "semantic_name": "PRUNE-ALL-ENTRIES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: prune-all-entries",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "prune-all-entries",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.b807a391b81f7ced",
+      "semantic_name": "LINT-NESTING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-nesting",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-nesting",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.b81997133f7a8df1",
+      "semantic_name": "RUN-TMS!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: run-tms!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run-tms!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.be8a3bcfb8e92ff0",
+      "semantic_name": "TCP-LISTEN-ON",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS",
+      "behavior": "language-level TCP adapter semantic operation: tcp-listen-on",
+      "provenance": [
+        "#3995",
+        "lib/tcp.lisp"
+      ],
+      "source_name": "tcp-listen-on",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.bed10723f9b74c9d",
+      "semantic_name": "RETRACT-FACT-TMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-fact-tms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-fact-tms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.bfb32b79721e0946",
+      "semantic_name": "FS-RECONSTRUCT-ROOT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-reconstruct-root",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-reconstruct-root",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.c2c94ed3059bcdef",
+      "semantic_name": "REMOVE-JUSTIFIED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: remove-justified",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "remove-justified",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.c2cc8305536934c9",
+      "semantic_name": "FIRE-RULES-ON-FACTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rules-on-facts",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rules-on-facts",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.c47e8d74c17f265d",
+      "semantic_name": "FACT-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fact-of",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fact-of",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.c493dbd0a2df5469",
+      "semantic_name": "CANON-LAW-COND-FIRST-MATCH-SHORT-CIRCUIT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-cond-first-match-short-circuit",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-cond-first-match-short-circuit",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.c5211ec032e39c7d",
+      "semantic_name": "UNSUPPORTED-FACTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: unsupported-facts",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "unsupported-facts",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.c5b1acc3df4500fd",
+      "semantic_name": "DROP-UNSUPPORTED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: drop-unsupported",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "drop-unsupported",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.c9978c8fac5faa2e",
+      "semantic_name": "FS-PACKAGE-FIELD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-package-field",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-package-field",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.cb3f86c7be0f8835",
+      "semantic_name": "FIRE-RULE-ON-FACTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule-on-facts",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-on-facts",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.cc440d3261e7b8d9",
+      "semantic_name": "CANON-LAW-CDR-DOTTED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-cdr-dotted",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-cdr-dotted",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.ccb136e58a687993",
+      "semantic_name": "RUN-JTMS-MULTI",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: run-jtms-multi",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "run-jtms-multi",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.ccd94b33a97f9826",
+      "semantic_name": "FS-READ",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-read",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-read",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.d0964dbf73fbaf01",
+      "semantic_name": "CLIPS-DEFTEMPLATE-FORM?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-deftemplate-form?",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-deftemplate-form?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.d17d9be0640dc063",
+      "semantic_name": "FIRE-RULE-ON-FACTS-TMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule-on-facts-tms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-on-facts-tms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.d4248d1f74bb5f50",
+      "semantic_name": "TCP-WRITE-TEXT->BYTES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS",
+      "behavior": "language-level TCP adapter semantic operation: tcp-write-text->bytes",
+      "provenance": [
+        "#3995",
+        "lib/tcp.lisp"
+      ],
+      "source_name": "tcp-write-text->bytes",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.d4a592348bb26122",
+      "semantic_name": "FS-JOURNAL-REPLAY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-journal-replay",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-journal-replay",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.d91adfec9856d659",
+      "semantic_name": "CLIPS-FACT-CLAUSE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-fact-clause",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-fact-clause",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.da9fecc626a1483d",
+      "semantic_name": "RETRACT-FACT-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-fact-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-fact-jtms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.dc7c1f07f01acb2e",
+      "semantic_name": "FS-DESERIALIZE-JOURNAL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-deserialize-journal",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-deserialize-journal",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.dcd1fdaf875aa011",
+      "semantic_name": "CANON-LAW-EMPTY-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-empty-list",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-empty-list",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.de92b718f7f4e8fd",
+      "semantic_name": "CANON-LAW-QUOTE-SUPPRESSES-EVALUATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-quote-suppresses-evaluation",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-quote-suppresses-evaluation",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.df971523c5541627",
+      "semantic_name": "RETRACT-FACT-JTMS!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: retract-fact-jtms!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "retract-fact-jtms!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.e02e23aa57def6b9",
+      "semantic_name": "CANON-CONFORMS?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-conforms?",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-conforms?",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.eb2dd45e0b5cbb7d",
+      "semantic_name": "COLLECT-FREE-VARS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: collect-free-vars",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "collect-free-vars",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.f381652e78148815",
+      "semantic_name": "ADD-JUSTIFICATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: add-justification",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "add-justification",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.f3b4e53f3653c0c9",
+      "semantic_name": "LINT-COMPLEXITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LINTER-SEMANTICS",
+      "behavior": "public structural/effect/free-variable/global lint semantic operation: lint-complexity",
+      "provenance": [
+        "#3995",
+        "lib/linter.lisp"
+      ],
+      "source_name": "lint-complexity",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.f82f705740d76031",
+      "semantic_name": "FIRE-RULES-ON-FACTS-TMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rules-on-facts-tms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rules-on-facts-tms",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.f9b10859736403dd",
+      "semantic_name": "ASSERT-FACT-TMS!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: assert-fact-tms!",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "assert-fact-tms!",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.fa33ebc344c1e901",
+      "semantic_name": "CANON-LAW-SATISFIED",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CANON-CONFORMANCE-ALGEBRA",
+      "behavior": "explicit Canon law, result or conformance semantic operation: canon-law-satisfied",
+      "provenance": [
+        "#3995",
+        "lib/canon.lisp"
+      ],
+      "source_name": "canon-law-satisfied",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.fbbfc0d59ed17f14",
+      "semantic_name": "TCP-WRITE-VIA-RAW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TCP-LANGUAGE-ADAPTERS",
+      "behavior": "language-level TCP adapter semantic operation: tcp-write-via-raw",
+      "provenance": [
+        "#3995",
+        "lib/tcp.lisp"
+      ],
+      "source_name": "tcp-write-via-raw",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.fc3b55890f85f2da",
+      "semantic_name": "FS-DESERIALIZE-OBJECT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "IMMUTABLE-LISP-FS-ALGEBRA",
+      "behavior": "public immutable Lisp filesystem/object/journal semantic operation: fs-deserialize-object",
+      "provenance": [
+        "#3995",
+        "lib/lisp-fs.lisp"
+      ],
+      "source_name": "fs-deserialize-object",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.fd1424d4abb71da7",
+      "semantic_name": "CLIPS-CONVERT-VARS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CLIPS-IMPORT-SEMANTICS",
+      "behavior": "public CLIPS-to-language structural conversion/import semantic operation: clips-convert-vars",
+      "provenance": [
+        "#3995",
+        "lib/clips-import.lisp"
+      ],
+      "source_name": "clips-convert-vars",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.fe97e6919d606c8d",
+      "semantic_name": "FIRE-RULE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule",
+      "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.final.fea3dca51dec0973",
+      "semantic_name": "FIRE-RULE-JTMS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "FINAL-SEMANTIC-FILL",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FORWARD-TMS-JTMS-ALGEBRA",
+      "behavior": "public forward-chaining, truth-maintenance or justification-maintenance semantic operation: fire-rule-jtms",
+      "provenance": [
+        "#3995",
+        "lib/forward.lisp"
+      ],
+      "source_name": "fire-rule-jtms",
       "law_status": "SOURCE-DEFINED-UNPLACED",
       "ratified_resident": false
     },
