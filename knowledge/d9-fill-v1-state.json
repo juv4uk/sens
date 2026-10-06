@@ -70,5 +70,15 @@
     "law_forced_coordinates": 128,
     "unplaced_selected": 20,
     "remaining": 364
+  },
+  "law_mining": {
+    "artifact": "knowledge/d9-laws-v1.json",
+    "witness": "scripts/research-d9-laws-1.py",
+    "reviewed_non_selector_candidates": 20,
+    "proved_family_members": 7,
+    "proved_distinct_independent": 1,
+    "underdetermined": 12,
+    "coordinate_assignments": 0,
+    "ratification_effect": "NONE"
   }
 }
