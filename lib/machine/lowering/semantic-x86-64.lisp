@@ -251,21 +251,30 @@
 
 
 ; #3989/#4001 current exact-domain D5 arithmetic entry.
-; The exact D5 operation itself computes the semantic result first. Native u64
-; forms are selected only when both inputs and that exact result are integers
-; in [0, 2^64-1]. Overflow, underflow, negative results and rational values
-; fail closed to exact-d5-fallback-required; they never inherit modulo-u64
-; machine semantics.
-(00001001 x86-current-d5-exact-binary-result
-  (00001000 (identity left right)
+; Exact D5 semantic identity chooses the operation. The machine fast path then
+; applies a deliberately conservative numeric guard that cannot change exact
+; language meaning:
+;   PLUS/TIMES: both exact-integer inputs in u32 => result is guaranteed u64;
+;   DIFFERENCE: both exact-integer inputs in u64 and left >= right.
+; Anything outside those proved rectangles fails closed to the exact Lisp/Q
+; fallback. Historical SID8 values and human spellings never participate.
+(00001001 x86-current-d5-u32-inputs?
+  (00001000 (left right)
     (00000111
-      ((00100010 identity 01010) (01010 left right))
-      ((00100010 identity 01011) (01011 left right))
-      ((00100010 identity 10110) (10110 left right))
-      (t (00000001 unsupported-current-domain-binary-u64)))))
+      ((x86-admission-exact-integer? left)
+       (00000111
+         ((x86-admission-within-inclusive-integer-range?
+            left 0 4294967295)
+          (00000111
+            ((x86-admission-exact-integer? right)
+             (x86-admission-within-inclusive-integer-range?
+               right 0 4294967295))
+            (t (00000001 ()))))
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
-(00001001 x86-current-d5-u64-fast-path-safe?
-  (00001000 (identity left right)
+(00001001 x86-current-d5-difference-u64-safe?
+  (00001000 (left right)
     (00000111
       ((x86-admission-exact-integer? left)
        (00000111
@@ -276,18 +285,11 @@
              (00000111
                ((x86-admission-within-inclusive-integer-range?
                   right 0 18446744073709551615)
-                (10011100
-                  ((result
-                     (x86-current-d5-exact-binary-result
-                       identity left right)))
-                  (00000111
-                    ((00100010 result
-                       (00000001 unsupported-current-domain-binary-u64))
-                     (00000001 ()))
-                    ((x86-admission-exact-integer? result)
-                     (x86-admission-within-inclusive-integer-range?
-                       result 0 18446744073709551615))
-                    (t (00000001 ())))))
+                ; Exact-Q >= returns D1 1/0. Compare explicitly because 0 is
+                ; itself a value and must never become generic truthiness.
+                (00000111
+                  ((00011110 left right) 1 t)
+                  ((00011110 left right) 0 (00000001 ()))))
                (t (00000001 ()))))
             (t (00000001 ()))))
          (t (00000001 ()))))
@@ -296,22 +298,23 @@
 (00001001 x86-lower-current-binary-u64-forms
   (00001000 (identity left right)
     (00000111
-      ((00100010
-         (x86-current-d5-exact-binary-result identity left right)
-         (00000001 unsupported-current-domain-binary-u64))
-       (00000001 unsupported-current-domain-binary-u64))
-      ((x86-current-d5-u64-fast-path-safe? identity left right)
+      ((00100010 identity 01010)
        (00000111
-         ((00100010 identity 01010)
+         ((x86-current-d5-u32-inputs? left right)
           (x86-lower-add-u64-forms left right))
-         ((00100010 identity 01011)
+         (t (00000001 exact-d5-fallback-required))))
+      ((00100010 identity 01011)
+       (00000111
+         ((x86-current-d5-difference-u64-safe? left right)
           (x86-lower-difference-u64-forms left right))
-         ((00100010 identity 10110)
+         (t (00000001 exact-d5-fallback-required))))
+      ((00100010 identity 10110)
+       (00000111
+         ((x86-current-d5-u32-inputs? left right)
           (x86-lower-times-u64-forms left right))
-         (t
-          (00000001 unsupported-current-domain-binary-u64))))
+         (t (00000001 exact-d5-fallback-required))))
       (t
-       (00000001 exact-d5-fallback-required)))))
+       (00000001 unsupported-current-domain-binary-u64)))))
 
 (00001001 x86-encode-current-binary-u64
   (00001000 (identity left right)
@@ -323,7 +326,6 @@
          (00000001 exact-d5-fallback-required))
         (t
          (x86-encode-admitted-program forms))))))
-
 
 ; #3996 exact-domain structural D3 dispatcher.
 ; These are bounded native-call witnesses only. They do not claim a general
