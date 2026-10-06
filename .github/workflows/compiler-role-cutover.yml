@@ -51,7 +51,7 @@ jobs:
     # Hosted runners are unavailable for this private repository.
     # Use the known-live local GPU-labelled host, while keeping Rust/Python
     # control-plane CPU pressure bounded below.
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: [self-hosted, guix]
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
