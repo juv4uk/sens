@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 256,
+    "selected_semantic_candidates": 264,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 0,
-    "remaining_semantic_inventory": 768,
+    "unplaced_selected_candidates": 8,
+    "remaining_semantic_inventory": 760,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -24,6 +24,142 @@
     "D10 remains unratified until explicit owner decision"
   ],
   "rows": [
+    {
+      "stable_id": "d10.recovery.37ea896b2d33d921",
+      "semantic_name": "NTP-QUERY-RAW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-OBSERVATION-BOUNDARY",
+      "behavior": "Perform one bounded NTP query and return raw protocol fields",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "source_name": "ntp-query-raw",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.55fdf410b6e198cb",
+      "semantic_name": "UNIX-TIME-NOW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-OBSERVATION-BOUNDARY",
+      "behavior": "Observe the host wall clock as raw Unix seconds and nanoseconds",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "source_name": "unix-time-now",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.566101e22c0dc780",
+      "semantic_name": "BOOLE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "BOOLEAN-INTEGER-ALGEBRA",
+      "behavior": "bitwise operation selected by a boolean operation code",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-overflow-review-v1.json"
+      ],
+      "source_name": "BOOLE",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.91f8375bccc065bd",
+      "semantic_name": "TIMEZONE-DECLARATIONS-RAW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-OBSERVATION-BOUNDARY",
+      "behavior": "Observe raw TZ and /etc/timezone declaration candidates",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "source_name": "timezone-declarations-raw",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.a1fe04a8fb42b80f",
+      "semantic_name": "COMPILE-FILE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "COMPILATION-STREAM-ALGEBRA",
+      "behavior": "compile a whole expression stream into executable code",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-overflow-review-v1.json"
+      ],
+      "source_name": "COMPILE-FILE",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.bd77582d6d45d144",
+      "semantic_name": "LDB",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "BIT-FIELD-ALGEBRA",
+      "behavior": "load an arbitrary bit field from an integer",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-overflow-review-v1.json"
+      ],
+      "source_name": "LDB",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.cf0d799baca24634",
+      "semantic_name": "MONO-NS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "WORLD-OBSERVATION-BOUNDARY",
+      "behavior": "Return a monotonic nanosecond counter as an exact integer",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "source_name": "mono-ns",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.da8e5dccbde8b276",
+      "semantic_name": "MASK-FIELD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D9-HOLD-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "BIT-FIELD-ALGEBRA",
+      "behavior": "extract a bit field masked to its width",
+      "provenance": [
+        "#4016",
+        "knowledge/d9-overflow-review-v1.json"
+      ],
+      "source_name": "MASK-FIELD",
+      "law_status": "RECOVERED-UNPLACED",
+      "ratified_resident": false
+    },
     {
       "stable_id": "d10.sel.0fd3c5995167d8e4",
       "semantic_name": "CDAAAAAAAR",
@@ -4896,5 +5032,8 @@
     "normative_map": "knowledge/d9-ratified.json",
     "occupancy": 512,
     "selector_law_crossing_only": true
-  }
+  },
+  "sources": [
+    "knowledge/d10-recovery-v1.json"
+  ]
 }

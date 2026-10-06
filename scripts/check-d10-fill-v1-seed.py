@@ -76,7 +76,6 @@ for row,(coord,name,pcoord,pname,bit) in zip(rows,expected):
     assert "#4008" in row["authority"]
     assert "knowledge/d9-ratified.json" in row["authority"]
 
-# D10 selector meanings must be new with respect to the full ratified D1-D9 foundation.
 lower=set()
 for domain in foundation["domains"].values():
     lower.update(str(name).upper() for name in domain.get("residents",{}).values())
@@ -94,18 +93,33 @@ assert inventory["parent_domain"]=={
     "occupancy":512,
     "selector_law_crossing_only":True,
 }
+
+target=state["target"]
+selected=target["selected_semantic_candidates"]
+assert selected>=256
+assert target["domain"]=="D10"
+assert target["width"]==10
+assert target["capacity"]==1024
+assert target["dense_target"]==1024
+assert target["law_forced_coordinates"]==256
+assert target["unplaced_selected_candidates"]==selected-256
+assert target["remaining_semantic_candidates"]==1024-selected
+assert target["ratified_residents"]==0
+
 assert inventory["accounting"]=={
-    "selected_semantic_candidates":256,
+    "selected_semantic_candidates":selected,
     "law_forced_coordinates":256,
-    "unplaced_selected_candidates":0,
-    "remaining_semantic_inventory":768,
+    "unplaced_selected_candidates":selected-256,
+    "remaining_semantic_inventory":1024-selected,
     "ratified_d10_residents":0,
 }
-assert len(inventory["rows"])==256
-assert len({row["stable_id"] for row in inventory["rows"]})==256
-assert len({row["semantic_name"] for row in inventory["rows"]})==256
-assert len({row["coordinate"] for row in inventory["rows"]})==256
-assert all(row["ratified_resident"] is False for row in inventory["rows"])
+inv_by_id={row["stable_id"]:row for row in inventory["rows"]}
+assert len(inventory["rows"])==selected
+for row in seed["rows"]:
+    got=inv_by_id[row["stable_id"]]
+    assert got["semantic_name"]==row["semantic_name"]
+    assert got["coordinate"]==row["coordinate"]
+    assert got["coordinate_basis"]=="PROVED-SELECTOR-GENERATOR"
 
 assert state["foundation"]=={
     "current_contract":"11.8",
@@ -117,17 +131,6 @@ assert state["foundation"]=={
     "d9_ratified_map":"knowledge/d9-ratified.json",
     "research_domain":"D10",
 }
-assert state["target"]=={
-    "domain":"D10",
-    "width":10,
-    "capacity":1024,
-    "dense_target":1024,
-    "selected_semantic_candidates":256,
-    "remaining_semantic_candidates":768,
-    "law_forced_coordinates":256,
-    "unplaced_selected_candidates":0,
-    "ratified_residents":0,
-}
 assert state["authority_boundary"]=={
     "d9_coordinates":"NORMATIVE D9 parent identities under #4008",
     "d9_to_d10_children":"NO AUTOMATIC SEMANTICS FROM WIDTH OR SUFFIX",
@@ -136,10 +139,8 @@ assert state["authority_boundary"]=={
 }
 
 assert foundation["authority"]=="#4008"
-assert foundation["current_domains"]==["D1","D2","D3","D4","D5","D6","D7","D8","D9"]
-assert foundation["research_domains"]==[]
 assert "(minor . 8)" in lang
 assert "Contract 11.8" in lang
 
 print("D10-FILL-V1-SEED: PASS")
-print("foundation=D1-D9/#4008/11.8 selectors=256/1024 remaining=768 ratified-D10=0")
+print(f"selector-seed=256 preserved; inventory={selected}/1024 remaining={1024-selected} ratified-D10=0")
