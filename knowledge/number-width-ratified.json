@@ -1,0 +1,37 @@
+{
+  "schema": "sens-number-width-ladder/v1",
+  "status": "owner-ratified",
+  "authority": "#2490 owner override 2026-10-06",
+  "date": "2026-10-06",
+  "semantic_space": "Number",
+  "separate_from": [
+    "D1-D8",
+    "Predicate1",
+    "Structure2",
+    "Text7",
+    "function domains"
+  ],
+  "first_width_bits": 24,
+  "growth_law": "width(n) = 24 * 2^n",
+  "ratified_prefix_bits": [
+    24,
+    48,
+    96,
+    192
+  ],
+  "rules": [
+    "Number starts at 24 bits.",
+    "Each next canonical Number tier doubles the previous width.",
+    "Numeric source tokens are Number values, never Text7 digit sequences.",
+    "D7 text digits remain text encoding only and do not carry arithmetic Number identity.",
+    "Number width is language-level semantic framing, not a D1-D8 function-domain coordinate.",
+    "Migration must fail closed when a numeric literal cannot yet be encoded into a ratified Number tier."
+  ],
+  "not_yet_ratified": [
+    "signedness",
+    "two's-complement or other polarity encoding",
+    "integer versus rational field layout",
+    "overflow versus automatic widening semantics",
+    "decimal literal lowering law"
+  ]
+}
