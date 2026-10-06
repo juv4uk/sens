@@ -10,6 +10,6 @@ Canonical column order:
 
 `ук → укр → san → en → LISP → sym`
 
-D8 residency is 256/256. Missing human projections remain explicit as `()`; they do not affect D8 semantic residency or imply runtime callability.
+D8 residency is 256/256. D8 human projection is now complete: 256/256 rows have `ук`, `укр`, and `san`. Surface terminology remains a projection and does not affect D8 semantic residency or imply runtime callability.
 
 This document intentionally does **not** duplicate the 256 rows.
