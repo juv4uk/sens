@@ -1,0 +1,790 @@
+{
+  "schema": "d8-recovery-candidate-map/v1",
+  "status": "research-provisional-not-ratified",
+  "authority": [
+    "#3920",
+    "#3921",
+    "#3923",
+    "#3924"
+  ],
+  "principle_order": [
+    "necessity",
+    "historical-priority",
+    "simple-mathematical-logical-law",
+    "recovery-of-missed-evidence"
+  ],
+  "guards": [
+    "D8 remains unratified",
+    "candidate coordinate is not resident identity",
+    "Sens8/Function8 is not a donor table",
+    "ratified D1-D7 are not silently reshuffled",
+    "research geometric coordinates are preserved separately from ladder placement"
+  ],
+  "provisional_ladder_candidates": [
+    {
+      "ladder_coordinate": "00000000",
+      "candidate": "RPLACA",
+      "surfaces": [
+        "RPLACA",
+        "mutable CAR/head replacement"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "Lisp 1.5 basic list-structure operator",
+      "simple_law": "mutate CAR field of existing pair; return same pair identity; all aliases observe new head",
+      "evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ],
+      "reason": "Current D1-D7 can reconstruct a new pair but cannot mutate an existing pair cell observed through aliases."
+    },
+    {
+      "ladder_coordinate": "00000001",
+      "candidate": "RPLACD",
+      "surfaces": [
+        "RPLACD",
+        "mutable CDR/tail replacement"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "Lisp 1.5 basic list-structure operator",
+      "simple_law": "mutate CDR field of existing pair; return same pair identity; all aliases observe new tail",
+      "evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ],
+      "reason": "Current D1-D7 can reconstruct a new pair but cannot mutate an existing pair cell observed through aliases."
+    },
+    {
+      "ladder_coordinate": "00000010",
+      "candidate": "ERRORSET",
+      "surfaces": [
+        "ERRORSET",
+        "errorset",
+        "ERRSET (secondary/later spelling)"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "Lisp 1.5 lineage, Memo 26 / manual §6.4, 1961–1962",
+      "simple_law": "success -> LIST(value); trapped language error -> EMPTY; evaluation continues outside boundary",
+      "evidence": [
+        "#3929",
+        "LISP 1.5 Programmer's Manual §6.4",
+        "Memo 26 Errorset"
+      ],
+      "reason": "Current D1-D7 can produce/fail with language errors but has no language-level local error boundary that converts failure into a recoverable control result."
+    },
+    {
+      "ladder_coordinate": "00000011",
+      "candidate": "ERROR",
+      "surfaces": [
+        "ERROR",
+        "error"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "Lisp 1.5 manual / early error-processing lineage, 1961–1962",
+      "simple_law": "intentional language failure producer carrying explicit payload/provenance",
+      "evidence": [
+        "#3931",
+        "LISP 1.5 Programmer's Manual §6.3 and evaluator/list definitions"
+      ],
+      "reason": "Current SENS has accidental/runtime LanguageError outcomes but no language operation whose intended meaning is to signal an error with an explicit payload."
+    },
+    {
+      "ladder_coordinate": "00000100",
+      "candidate": "ENV-REFLECTION",
+      "surfaces": [
+        "ENV",
+        "ALIST/ENV (historical-concept alias only)"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "environment/a-list concept is foundational in early evaluator lineage; first-class ENV reflection is current-SENS and must not be backdated",
+      "simple_law": "visible binding enumeration + lexical lookup coherence + shadowing",
+      "evidence": [
+        "#3924",
+        "docs/FUNCTIONS.md",
+        "NOTE-FOR-SAKSHI.md",
+        "crates/sens/src/eval/builtins.rs"
+      ],
+      "current_runtime_provenance": {
+        "compatibility_sid8": "01001110",
+        "note": "implementation provenance only; not D8 placement authority"
+      },
+      "reason": "Current language exposes zero-argument environment reflection while D1-D7 has no resident for first-class environment enumeration."
+    },
+    {
+      "ladder_coordinate": "00000101",
+      "candidate": "READ",
+      "surfaces": [
+        "READ",
+        "read"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "early Lisp reader lineage; exact source/date delegated to #3934",
+      "simple_law": "text containing exactly one form -> structural datum without evaluation",
+      "evidence": [
+        "#3937",
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ],
+      "ratification_blocker": "Current mechanism consumes Value::String; canonical D7 text carrier bridge must be explicit before D8 ratification.",
+      "reason": "D1-D7 structure does not contain a general parser from text to Lisp data."
+    },
+    {
+      "ladder_coordinate": "00000110",
+      "candidate": "WRITE-TO-STRING",
+      "surfaces": [
+        "WRITE-TO-STRING",
+        "write-to-string"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "VERY-HIGH",
+      "historical_priority": "early Lisp print/reader lineage; current pure canonical serializer surface is modern",
+      "simple_law": "READ(WRITE(x)) = x on admitted readable values; WRITE(READ(t)) canonicalizes t",
+      "evidence": [
+        "#3937",
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/src/value.rs"
+      ],
+      "ratification_blocker": "Canonical output currently materializes as Value::String; bridge to D7 text identity must be specified.",
+      "reason": "Canonical structural serialization is not derivable from D1-D7 without a structure-to-text boundary."
+    },
+    {
+      "ladder_coordinate": "00000111",
+      "candidate": "SYMBOL->STRING",
+      "surfaces": [
+        "SYMBOL->STRING",
+        "symbol->string"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "early Lisp symbol print-name lineage; current surface is modern",
+      "simple_law": "SYMBOL->STRING(STRING->SYMBOL(s)) = s",
+      "evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ],
+      "ratification_blocker": "Bridge must target canonical D7 text, not Value::String implementation.",
+      "reason": "Exact symbol-name observation is distinct from general serialization."
+    },
+    {
+      "ladder_coordinate": "00001000",
+      "candidate": "STRING->SYMBOL",
+      "surfaces": [
+        "STRING->SYMBOL",
+        "string->symbol"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "related to PNAME/INTERN/OBLIST lineage, but not claimed identical to historical INTERN",
+      "simple_law": "STRING->SYMBOL(SYMBOL->STRING(sym)) = sym",
+      "evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ],
+      "ratification_blocker": "D7 text bridge and distinction from historical interning must remain explicit.",
+      "reason": "Can materialize symbol names that are not a single readable token, so it is not derivable from READ alone."
+    },
+    {
+      "ladder_coordinate": "00001001",
+      "candidate": "VECTOR",
+      "surfaces": [
+        "VECTOR",
+        "ARRAY (historical family provenance)"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "Lisp 1.5 ARRAY family; current SENS vector carrier",
+      "simple_law": "construct finite indexed aggregate from ordered values",
+      "evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs",
+        "Lisp 1.5 ARRAY lineage"
+      ],
+      "reason": "D1-D7 pair/list structure does not itself construct the current opaque indexed aggregate carrier."
+    },
+    {
+      "ladder_coordinate": "00001010",
+      "candidate": "VECTOR-REF",
+      "surfaces": [
+        "VECTOR-REF",
+        "array indexed observation"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "Lisp 1.5 ARRAY indexed access lineage",
+      "simple_law": "REF(VECTOR(x0..xn), i) = xi for in-range i",
+      "evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs"
+      ],
+      "reason": "CAR/CDR/list selectors do not observe an opaque vector cell by numeric index."
+    },
+    {
+      "ladder_coordinate": "00001011",
+      "candidate": "VECTOR-SET!",
+      "surfaces": [
+        "VECTOR-SET!",
+        "array cell update"
+      ],
+      "status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "necessity": "HIGH",
+      "historical_priority": "historical mutable ARRAY storage; current alias-visible vector mutation",
+      "simple_law": "after SET(v,i,x), every alias of v observes REF(v,i)=x while other cells are unchanged",
+      "evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs"
+      ],
+      "reason": "Alias-visible in-place update is not reproduced by a pure persistent list rewrite without importing shared mutable identity."
+    }
+  ],
+  "recovered_no_slot": [],
+  "unresolved_recovery": [
+    {
+      "candidate": "LOGOR/LOGAND/LOGXOR/LEFTSHIFT",
+      "status": "CORE-MATH-OR-MECHANISM-REVIEW",
+      "reason": "early and algebraically simple, but historical 36-bit carrier semantics may belong outside Core",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ]
+    },
+    {
+      "candidate": "FIXP/FLOATP",
+      "status": "MACHINE-CARRIER-REVIEW-NO-CORE-SLOT",
+      "reason": "historical fixed/floating predicates expose machine numeric carrier classes. Current Core exact-rational semantics must not inherit those classes without a separate typed bridge.",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ]
+    }
+  ],
+  "preserved_positive_research": [
+    {
+      "family": "TAKE/DROP × edge",
+      "source": "#3667",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "TAKE-right",
+        "DROP-right"
+      ],
+      "geometric_coordinates": [
+        "11000001/11000010 gauge orbit",
+        "11000011 fixed"
+      ],
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "right forms generated by REVERSE conjugation",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "family": "ANY/ALL × predicate polarity",
+      "source": "#3668",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "ANY(NOT p)",
+        "ALL(NOT p)"
+      ],
+      "geometric_coordinates": [
+        "11110001/11110010 gauge orbit",
+        "11110011 fixed"
+      ],
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "polarity forms generated with current NOT",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "family": "REDUCE/SCAN × direction",
+      "source": "#3704",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "REDUCE-right",
+        "SCAN-right"
+      ],
+      "geometric_coordinates": [
+        "10111001/10111010 gauge orbit",
+        "10111011 fixed"
+      ],
+      "protocol_limit": "nonempty-list for SCAN",
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "right-direction forms generated from existing list-direction transforms; keep protocol-bound witness",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "family": "ZIP/UNZIP × orientation",
+      "source": "#3712",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "ZIP-swapped",
+        "UNZIP-swapped"
+      ],
+      "geometric_coordinates": [
+        "11100001/11100010 gauge orbit",
+        "11100011 fixed"
+      ],
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "orientation variants generated from existing pair/list orientation transforms",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "family": "DO/WHILE × condition/projection",
+      "source": "#3779",
+      "merge_state": "merged-main",
+      "novel_semantics": [
+        "continue-while-true+apply-result",
+        "stop-when-true+return-state"
+      ],
+      "geometric_coordinates": [
+        "11001101/11001110 gauge orbit",
+        "11001111 fixed"
+      ],
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "product corners generated from existing condition/projection protocol",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "family": "NEG/ABS × RECIP",
+      "source": "#3783 recovered",
+      "merge_state": "replay-in-recovery-branch",
+      "novel_semantics": [
+        "NEG∘RECIP",
+        "ABS∘RECIP"
+      ],
+      "geometric_coordinates": [
+        "01001001/01001010 gauge orbit",
+        "01001011 fixed"
+      ],
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "compositions of current NEG/ABS with RECIP",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "family": "RASSOC/ACONS × association orientation",
+      "source": "#3783 recovered",
+      "merge_state": "replay-in-recovery-branch",
+      "novel_semantics": [
+        "orientation-derived association semantics"
+      ],
+      "geometric_coordinates": "preserved in witness",
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "orientation-generated association semantics",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "family": "NTH/MAPLIST × traversal direction",
+      "source": "#3783 recovered",
+      "merge_state": "replay-in-recovery-branch",
+      "novel_semantics": [
+        "NTH-right",
+        "MAPLIST-right"
+      ],
+      "geometric_coordinates": "preserved in witness",
+      "ladder_coordinates": null,
+      "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "derivation": "right-oriented forms generated by REVERSE/traversal conjugation",
+      "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
+      "correction": "#3949"
+    }
+  ],
+  "preserved_negative_research": [
+    {
+      "family": "CURRY/FLIP × swapped arguments",
+      "source": "#3778 recovered",
+      "status": "DEPENDENT-AXIS-REJECTED"
+    },
+    {
+      "family": "INTEGERP/RATIONALP × sign",
+      "source": "#3778 recovered",
+      "status": "UNOBSERVABLE-AXIS-REJECTED"
+    },
+    {
+      "family": "RECIP/EXPT × reciprocal-base/exponent-sign",
+      "source": "#3778 recovered",
+      "status": "DEPENDENT-AXES-REJECTED"
+    },
+    {
+      "family": "five earlier second-axis falsifiers",
+      "source": "#3670",
+      "status": "PRESERVED-IN-MAIN"
+    }
+  ],
+  "next_fill_rule": "Preserve both historical/recovery and structural/geometric candidate lanes. Derivability lowers priority but does not exclude residency; only exact duplicates, pure aliases, mechanism-only rows, or falsified candidates are NO-SLOT.",
+  "accounting": {
+    "provisional_d8_ladder_candidates": 12,
+    "provisional_coordinates": [
+      "00000000",
+      "00000001",
+      "00000010",
+      "00000011",
+      "00000100",
+      "00000101",
+      "00000110",
+      "00000111",
+      "00001000",
+      "00001001",
+      "00001010",
+      "00001011"
+    ],
+    "resolved_recovery_no_slot": 0,
+    "unresolved_recovery_rows": 2,
+    "preserved_positive_law_families": 8,
+    "preserved_negative_falsifier_groups": 4,
+    "ratified_d8_residents": 0,
+    "reopened_derived_or_protocol_candidates": 11,
+    "structural_geometric_candidate_families": 8,
+    "selector_structural_candidate_coordinates": 64,
+    "total_structural_coordinates_represented": 84
+  },
+  "policy_correction": {
+    "issue": "#3949",
+    "rule": "derivable does not imply no-slot",
+    "exclusion_only_for": [
+      "EXACT-SEMANTIC-DUPLICATE",
+      "PURE-SURFACE-ALIAS",
+      "IMPLEMENTATION-MECHANISM-NO-USER-VISIBLE-DELTA",
+      "FALSIFIED"
+    ],
+    "two_lanes": [
+      "HISTORICAL/RECOVERY-LADDER",
+      "STRUCTURAL/GEOMETRIC-LADDER"
+    ]
+  },
+  "reopened_residency_candidates": [
+    {
+      "candidate": "EQUAL",
+      "surfaces": [
+        "EQUAL",
+        "equal?"
+      ],
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "structural equality is recursively definable from lower-domain structure/equality operations",
+      "evidence": [
+        "lib/core.lisp",
+        "contracts/primitive-budget-audit-734.lisp",
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ],
+      "previous_status": "DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "PAIR",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "ordinary recursive pair/list construction from D3 structure operators",
+      "evidence": [
+        "#2286",
+        "#2300",
+        "docs/research/2344-post-d4-historical-ledger.json"
+      ],
+      "previous_status": "DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "AND",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "language-owned short-circuit macro over existing control and syntax construction",
+      "evidence": [
+        "lib/core.lisp"
+      ],
+      "previous_status": "DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "OR",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "language-owned short-circuit macro over existing control and syntax construction",
+      "evidence": [
+        "lib/core.lisp"
+      ],
+      "previous_status": "DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "DIVIDE",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "historical combined quotient+remainder interface; test carrier-specific delta before any slot",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json"
+      ],
+      "previous_status": "DERIVED/FOREIGN-REVIEW-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "ONEP",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "ONEP(x) = ZEROP(DIFFERENCE(x,1)) on the current numeric law lane; historical carrier tolerances remain provenance, not a new Core identity.",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json",
+        "D5:01000 ZEROP",
+        "D5:01011 DIFFERENCE"
+      ],
+      "previous_status": "DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "MINUSP",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "MINUSP(x) = LESSP(x,0) on the current numeric law lane.",
+      "evidence": [
+        "docs/research/2715-memo24-arithmetic-comparison.json",
+        "D5:11010 LESSP"
+      ],
+      "previous_status": "DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "FSUBR",
+      "status": "HISTORICAL-PROTOCOL-RESIDENCY-OPEN",
+      "reason": "FSUBR shares the proved raw-operands + explicit-caller-environment special-call protocol with FEXPR; interpreted-vs-subroutine implementation does not earn a separate semantic resident.",
+      "evidence": [
+        "#2343",
+        "#2522",
+        "#2530",
+        "#2591",
+        "docs/research/2344-post-d4-historical-ledger.json"
+      ],
+      "previous_status": "HISTORICAL-MECHANISM-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "TRANSFORMER/HART-MACRO",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "D5 already owns MACRO as the syntactic expansion/re-evaluation family. Hart timing/packaging differences remain preserved protocol evidence but do not by themselves require a second Core resident.",
+      "evidence": [
+        "D5:00011 MACRO",
+        "#2567",
+        "#2588",
+        "#2591",
+        "#2616",
+        "knowledge/d5-ratified.json"
+      ],
+      "previous_status": "LOWER-DOMAIN-FAMILY-COVERED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "MAKE-VECTOR",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "constructor convenience over VECTOR plus generation of n EMPTY values; no independent indexed-storage observable",
+      "evidence": [
+        "#3933"
+      ],
+      "previous_status": "DERIVED-NO-SLOT",
+      "correction": "#3949"
+    },
+    {
+      "candidate": "VECTOR-LENGTH",
+      "status": "DERIVED/GENERATED-RESIDENCY-OPEN",
+      "reason": "extent is a property of the finite indexed carrier; after ERRORSET recovery it is also observationally derivable by first failing VECTOR-REF index, with success wrapped as singleton even for EMPTY cells",
+      "evidence": [
+        "#3933",
+        "#3929"
+      ],
+      "previous_status": "DERIVED-NO-SLOT-CONDITIONAL",
+      "correction": "#3949"
+    }
+  ],
+  "structural_geometric_lane": [
+    {
+      "family": "TAKE/DROP × edge",
+      "source": "#3667",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": [
+        "11000001/11000010 gauge orbit",
+        "11000011 fixed"
+      ],
+      "novel_semantics": [
+        "TAKE-right",
+        "DROP-right"
+      ],
+      "protocol_limit": null,
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    },
+    {
+      "family": "ANY/ALL × predicate polarity",
+      "source": "#3668",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": [
+        "11110001/11110010 gauge orbit",
+        "11110011 fixed"
+      ],
+      "novel_semantics": [
+        "ANY(NOT p)",
+        "ALL(NOT p)"
+      ],
+      "protocol_limit": null,
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    },
+    {
+      "family": "REDUCE/SCAN × direction",
+      "source": "#3704",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": [
+        "10111001/10111010 gauge orbit",
+        "10111011 fixed"
+      ],
+      "novel_semantics": [
+        "REDUCE-right",
+        "SCAN-right"
+      ],
+      "protocol_limit": "nonempty-list for SCAN",
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    },
+    {
+      "family": "ZIP/UNZIP × orientation",
+      "source": "#3712",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": [
+        "11100001/11100010 gauge orbit",
+        "11100011 fixed"
+      ],
+      "novel_semantics": [
+        "ZIP-swapped",
+        "UNZIP-swapped"
+      ],
+      "protocol_limit": null,
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    },
+    {
+      "family": "DO/WHILE × condition/projection",
+      "source": "#3779",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": [
+        "11001101/11001110 gauge orbit",
+        "11001111 fixed"
+      ],
+      "novel_semantics": [
+        "continue-while-true+apply-result",
+        "stop-when-true+return-state"
+      ],
+      "protocol_limit": null,
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    },
+    {
+      "family": "NEG/ABS × RECIP",
+      "source": "#3783 recovered",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": [
+        "01001001/01001010 gauge orbit",
+        "01001011 fixed"
+      ],
+      "novel_semantics": [
+        "NEG∘RECIP",
+        "ABS∘RECIP"
+      ],
+      "protocol_limit": null,
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    },
+    {
+      "family": "RASSOC/ACONS × association orientation",
+      "source": "#3783 recovered",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": "preserved in witness",
+      "novel_semantics": [
+        "orientation-derived association semantics"
+      ],
+      "protocol_limit": null,
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    },
+    {
+      "family": "NTH/MAPLIST × traversal direction",
+      "source": "#3783 recovered",
+      "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+      "geometric_coordinates": "preserved in witness",
+      "novel_semantics": [
+        "NTH-right",
+        "MAPLIST-right"
+      ],
+      "protocol_limit": null,
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+    }
+  ],
+  "selector_structural_lane": {
+    "evidence": "#3646",
+    "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
+    "count": 64,
+    "coordinates": [
+      "01100000",
+      "01100001",
+      "01100010",
+      "01100011",
+      "01100100",
+      "01100101",
+      "01100110",
+      "01100111",
+      "01101000",
+      "01101001",
+      "01101010",
+      "01101011",
+      "01101100",
+      "01101101",
+      "01101110",
+      "01101111",
+      "01110000",
+      "01110001",
+      "01110010",
+      "01110011",
+      "01110100",
+      "01110101",
+      "01110110",
+      "01110111",
+      "01111000",
+      "01111001",
+      "01111010",
+      "01111011",
+      "01111100",
+      "01111101",
+      "01111110",
+      "01111111",
+      "10000000",
+      "10000001",
+      "10000010",
+      "10000011",
+      "10000100",
+      "10000101",
+      "10000110",
+      "10000111",
+      "10001000",
+      "10001001",
+      "10001010",
+      "10001011",
+      "10001100",
+      "10001101",
+      "10001110",
+      "10001111",
+      "10010000",
+      "10010001",
+      "10010010",
+      "10010011",
+      "10010100",
+      "10010101",
+      "10010110",
+      "10010111",
+      "10011000",
+      "10011001",
+      "10011010",
+      "10011011",
+      "10011100",
+      "10011101",
+      "10011110",
+      "10011111"
+    ],
+    "ancestry": "current D6 selector × W2; D7 excluded",
+    "correction": "#3949",
+    "note": "Restored as first-class D8 candidate evidence. Generated ancestry does not itself exclude residency."
+  }
+}

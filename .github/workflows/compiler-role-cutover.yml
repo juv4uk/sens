@@ -12,6 +12,7 @@ on:
       - "crates/sens/src/compiler_bootstrap.rs"
       - "crates/sens/src/compiler_role.rs"
       - "crates/sens/src/compiler_language.rs"
+      - "crates/sens/src/gpu_execution_packet.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
@@ -38,13 +39,24 @@ on:
       - "crates/sens/src/compiler_bootstrap.rs"
       - "crates/sens/src/compiler_role.rs"
       - "crates/sens/src/compiler_language.rs"
+      - "crates/sens/src/gpu_execution_packet.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
 
+concurrency:
+  group: compiler-role-cutover-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cutover:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    # Hosted runners are unavailable for this private repository.
+    # Use the known-live local GPU-labelled host, while keeping Rust/Python
+    # control-plane CPU pressure bounded below.
+    runs-on: [self-hosted, guix]
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
       - name: D4 bootstrap projection must match ratified authority

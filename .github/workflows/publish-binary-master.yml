@@ -1,0 +1,131 @@
+name: publish-binary-master
+
+on:
+  push:
+    branches:
+      - codex/sens-code-migration-tools
+    paths:
+      - "scripts/migrate-three-pass.py"
+      - "tests/test_three_pass_migration.py"
+      - "contracts/core1-historical-sid-map.lisp"
+      - ".github/workflows/publish-binary-master.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: publish-binary-master
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Test three-pass migration
+        shell: bash
+        run: |
+          python3 -m unittest tests/test_three_pass_migration.py
+
+      - name: Run three-pass migration
+        shell: bash
+        run: |
+          rm -rf /tmp/sens-master-out /tmp/sens-three-pass-report.json
+          python3 scripts/migrate-three-pass.py . \
+            --out /tmp/sens-master-out \
+            --foundation knowledge/d1-d7-foundation.json \
+            --domain-surfaces crates/sens/src/domain_surface_registry_generated.rs \
+            --semantic-generated crates/sens/src/semantic_registry_generated.rs \
+            --semantic-registry crates/sens/src/semantic_registry.rs \
+            --necessary-forms crates/sens/src/eval/necessary_forms_generated.rs \
+            --historical-map contracts/core1-historical-sid-map.lisp \
+            --text7 crates/sens/src/text7_projection_generated.rs \
+            --report /tmp/sens-three-pass-report.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path("/tmp/sens-three-pass-report.json").read_text())
+          print(json.dumps(report["summary"], ensure_ascii=False))
+          for row in report["files"]:
+              if row["status"]=="blocked":
+                  print("BLOCKED",row["path"],row.get("line"),row.get("column"),row.get("token"),row["reason"])
+          PY
+
+      - name: Validate extensionless migration output
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+          root=Path("/tmp/sens-master-out")
+          files=[p for p in root.rglob("*") if p.is_file()]
+          bad=[]
+          for p in files:
+              rel=p.relative_to(root)
+              if rel.name.endswith(".lisp"):
+                  bad.append((str(rel),"source extension survived"))
+                  continue
+              try:
+                  text=p.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  bad.append((str(rel),"invalid utf-8"))
+                  continue
+              if not text.strip():
+                  bad.append((str(rel),"empty output"))
+          print(f"validated_files={len(files)}")
+          if not files:
+              print("REFUSE: no corrected files")
+              sys.exit(1)
+          if bad:
+              print("REFUSE:",bad[:100])
+              sys.exit(1)
+          PY
+
+      - name: Publish corrected extensionless files to master
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin master
+          rm -rf /tmp/sens-master
+          git worktree prune
+          git worktree add -f --detach /tmp/sens-master origin/master
+          cd /tmp/sens-master
+          git rm -r --ignore-unmatch . >/dev/null 2>&1 || true
+          cp -a /tmp/sens-master-out/. .
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+          bad=[]
+          files=[]
+          for p in Path(".").rglob("*"):
+              if not p.is_file() or ".git" in p.parts:
+                  continue
+              files.append(p)
+              if p.name.endswith(".lisp"):
+                  bad.append(str(p)); continue
+              try:
+                  text=p.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  bad.append(str(p)); continue
+              if not text.strip():
+                  bad.append(str(p))
+          print(f"master_files={len(files)}")
+          if bad or not files:
+              print("REFUSE",bad[:100])
+              sys.exit(1)
+          PY
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No corrected files changed master."
+            exit 0
+          fi
+          git config user.name "sens-three-pass-migrator"
+          git config user.email "sens-three-pass-migrator@users.noreply.github.com"
+          git commit -m "master: publish three-pass migration; legacy-unmapped files excluded"
+          git push origin HEAD:master
