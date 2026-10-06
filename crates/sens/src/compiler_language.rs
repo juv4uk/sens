@@ -767,6 +767,11 @@ mod tests {
         let repeated = compiler_program_artifact_from_sens(program, &digest)
             .expect("deterministic repeated SENS whole-program artifact");
         assert_eq!(artifact, repeated);
+        assert_eq!(
+            field_value(&artifact, "semantic-requests-sha256"),
+            field_value(&repeated, "semantic-requests-sha256"),
+            "same SENS-produced request sequence must have a deterministic digest"
+        );
 
         let rows = list_values(&artifact);
         assert!(matches!(
@@ -776,6 +781,11 @@ mod tests {
         assert!(matches!(
             field_value(&artifact, "program-wire-sha256"),
             Value::String(found) if found.as_ref() == digest
+        ));
+        assert!(matches!(
+            field_value(&artifact, "semantic-requests-sha256"),
+            Value::String(found)
+                if found.len() == 64 && found.bytes().all(|byte| byte.is_ascii_hexdigit())
         ));
         assert!(matches!(
             field_value(&artifact, "required-capabilities"),
