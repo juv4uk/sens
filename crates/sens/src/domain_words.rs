@@ -22,6 +22,7 @@
 //! ```
 
 use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
+use crate::Bit9;
 
 /// Exact one-bit carrier for the SENS predicate-result domain.
 ///
@@ -180,6 +181,24 @@ impl CoreD8 {
     }
 }
 
+/// Exact nine-bit carrier for owner-ratified D9 semantic identity (#4008).
+///
+/// This proves only exact D9 membership. It deliberately grants no callable
+/// mechanism and never routes through SID8/Function8.
+#[repr(transparent)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub struct CoreD9(Bit9);
+
+impl CoreD9 {
+    pub const fn from_word(word: Bit9) -> Self {
+        Self(word)
+    }
+
+    pub const fn word(self) -> Bit9 {
+        self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -226,6 +245,11 @@ mod tests {
             let word = Bit8::new(raw).unwrap();
             assert!(CoreD8::from_word(word).word() == word);
         }
+
+        for raw in 0..=511 {
+            let word = Bit9::new(raw).unwrap();
+            assert!(CoreD9::from_word(word).word() == word);
+        }
     }
 
     #[test]
@@ -238,5 +262,6 @@ mod tests {
         assert_eq!(size_of::<CoreD6>(), 1);
         assert_eq!(size_of::<SoundD7>(), 1);
         assert_eq!(size_of::<CoreD8>(), 1);
+        assert_eq!(size_of::<CoreD9>(), 2);
     }
 }
