@@ -100,15 +100,15 @@ Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
 |---|---|---|---|---|---|---|
 | `000000` | `довжина` | `довжина` | `pramāṇa` | `length` | `LENGTH` | `saṃghaṭana6:000000=LENGTH` |
 | `000001` | `—` | `—` | `—` | `length-onto` | `LENGTH-ONTO` | `saṃghaṭana6:000001=LENGTH-ONTO` |
-| `000010` | `найменше-у-списку` | `найменше-у-списку` | `(` | `min-list` | `MIN-LIST` | `saṃghaṭana6:000010=MIN-LIST` |
-| `000011` | `найбільше-у-списку` | `найбільше-у-списку` | `(` | `max-list` | `MAX-LIST` | `saṃghaṭana6:000011=MAX-LIST` |
+| `000010` | `найменше-у-списку` | `найменше-у-списку` | `—` | `min-list` | `MIN-LIST` | `saṃghaṭana6:000010=MIN-LIST` |
+| `000011` | `найбільше-у-списку` | `найбільше-у-списку` | `—` | `max-list` | `MAX-LIST` | `saṃghaṭana6:000011=MAX-LIST` |
 | `000100` | `елемент-списку-за-індексом` | `елемент-списку-за-індексом` | `kramāṅka` | `nth` | `NTH` | `saṃghaṭana6:000100=NTH` |
-| `000101` | `відобразити-залишки` | `відобразити-залишки` | `(` | `maplist` | `MAPLIST` | `saṃghaṭana6:000101=MAPLIST` |
+| `000101` | `відобразити-залишки` | `відобразити-залишки` | `—` | `maplist` | `MAPLIST` | `saṃghaṭana6:000101=MAPLIST` |
 | `000110` | `—` | `—` | `—` | `macroexpand-1` | `MACROEXPAND-1` | `saṃghaṭana6:000110=MACROEXPAND-1` |
 | `000111` | `—` | `—` | `—` | `macroexpand` | `MACROEXPAND` | `saṃghaṭana6:000111=MACROEXPAND` |
-| `001000` | `нехай` | `нехай` | `(` | `let` | `LET` | `saṃghaṭana6:001000=LET` |
-| `001001` | `нехай*` | `нехай-послідовно` | `(` | `let*` | `LET*` | `saṃghaṭana6:001001=LET*` |
-| `001010` | `підставити-пари` | `підставити-пари` | `(` | `sublis` | `SUBLIS` | `saṃghaṭana6:001010=SUBLIS` |
+| `001000` | `нехай` | `нехай` | `—` | `let` | `LET` | `saṃghaṭana6:001000=LET` |
+| `001001` | `нехай*` | `нехай-послідовно` | `—` | `let*` | `LET*` | `saṃghaṭana6:001001=LET*` |
+| `001010` | `підставити-пари` | `підставити-пари` | `—` | `sublis` | `SUBLIS` | `saṃghaṭana6:001010=SUBLIS` |
 | `001011` | `—` | `—` | `—` | `compose` | `COMPOSE` | `saṃghaṭana6:001011=COMPOSE` |
 | `001100` | `—` | `—` | `—` | `rassoc` | `RASSOC` | `saṃghaṭana6:001100=RASSOC` |
 | `001101` | `—` | `—` | `—` | `acons` | `ACONS` | `saṃghaṭana6:001101=ACONS` |
@@ -137,7 +137,7 @@ Canonical surface order: **ук → укр → san → eng → LISP → SUM**.
 | `100100` | `—` | `—` | `—` | `cadaar` | `CADAAR` | `saṃghaṭana6:100100=CADAAR` |
 | `100101` | `—` | `—` | `—` | `cadadr` | `CADADR` | `saṃghaṭana6:100101=CADADR` |
 | `100110` | `—` | `—` | `—` | `caddar` | `CADDAR` | `saṃghaṭana6:100110=CADDAR` |
-| `100111` | `—` | `—` | `—` | `cadddr` | `CADDDR` | `saṃghaṭana6:100111=CADDDR` |
+| `100111` | `—` | `перше-після-трьох-решт` | `—` | `cadddr` | `CADDDR` | `saṃghaṭana6:100111=CADDDR` |
 | `101000` | `відобразити` | `відобразити` | `āvartana` | `map` | `MAP` | `saṃghaṭana6:101000=MAP` |
 | `101001` | `відсіяти` | `відсіяти` | `kalpana` | `filter` | `FILTER` | `saṃghaṭana6:101001=FILTER` |
 | `101010` | `—` | `—` | `—` | `map-onto` | `MAP-ONTO` | `saṃghaṭana6:101010=MAP-ONTO` |
