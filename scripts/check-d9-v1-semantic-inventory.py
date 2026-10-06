@@ -9,7 +9,7 @@ inventory=json.loads((root/"knowledge/d9-v1-semantic-inventory.json").read_text(
 state=json.loads((root/"knowledge/d9-fill-v1-state.json").read_text(encoding="utf-8"))
 
 assert inventory["schema"]=="d9-v1-semantic-inventory/v1"
-assert inventory["status"]=="RESEARCH-UNRATIFIED-PARTIAL"
+assert inventory["status"] in {"RESEARCH-UNRATIFIED-PARTIAL","RESEARCH-UNRATIFIED-COMPLETE"}
 assert inventory["domain"]=="D9" and inventory["width"]==9 and inventory["capacity"]==512
 
 target=state["target"]
@@ -79,16 +79,27 @@ if world_quantity_path.exists():
     world_quantity_ids={r["stable_id"] for r in world_quantity["rows"] if r["selected_d9_candidate"]}
     assert world_quantity_ids <= unplaced_ids
 
+final_fill_path=root/"knowledge/d9-final-semantic-fill-v1.json"
+if final_fill_path.exists():
+    final_fill=json.loads(final_fill_path.read_text(encoding="utf-8"))
+    final_fill_ids={r["stable_id"] for r in final_fill["rows"] if r["selected_d9_candidate"]}
+    assert final_fill_ids <= unplaced_ids
+
 for name in ("APPLY","COMPOSE","REDUCE"):
     assert name not in {r["semantic_name"] for r in rows}
 
-assert state["semantic_inventory"]=={
-    "artifact":"knowledge/d9-v1-semantic-inventory.json",
-    "selected":selected_count,
-    "law_forced_coordinates":128,
-    "unplaced_selected":selected_count-128,
-    "remaining":remaining,
-}
+semantic_state=state["semantic_inventory"]
+assert semantic_state["artifact"]=="knowledge/d9-v1-semantic-inventory.json"
+assert semantic_state["selected"]==selected_count
+assert semantic_state["law_forced_coordinates"]==128
+assert semantic_state["unplaced_selected"]==selected_count-128
+assert semantic_state["remaining"]==remaining
+if selected_count==512:
+    assert inventory["status"]=="RESEARCH-UNRATIFIED-COMPLETE"
+    assert semantic_state["complete"] is True
+    assert remaining==0
+else:
+    assert inventory["status"]=="RESEARCH-UNRATIFIED-PARTIAL"
 
 print("D9-V1-SEMANTIC-INVENTORY: PASS")
 print(f"selected={selected_count}/512 placed=128 unplaced={selected_count-128} remaining={remaining} ratified=0")
