@@ -6,10 +6,11 @@
 //! of the compiler self-hosting cycle: from trusted bootstrap (C0) through
 //! first generation (C1) through second generation (C2).
 //!
-//! The lineage is versioned, machine-readable, and mechanically verifiable.
+//! The lineage is versioned, machine-readable core data and mechanically verifiable.
+//!
+//! Serialization belongs to tooling/host adapters so the capability-free core
+//! does not acquire a runtime serde dependency.
 
-use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 /// Semantic versioning for lineage schema.
 pub const LINEAGE_VERSION_MAJOR: u32 = 1;
@@ -20,7 +21,7 @@ pub const LINEAGE_VERSION_MINOR: u32 = 0;
 /// Records all authority facts and artifact digests needed to verify
 /// that a compiler can compile itself. This is the executable proof
 /// of fixed-point existence (sens#3760).
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SelfhostLineage {
     /// Schema version (major.minor).
     pub version: (u32, u32),
@@ -51,7 +52,7 @@ pub struct SelfhostLineage {
 }
 
 /// Immutable authority facts shared across all generations.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AuthorityBundle {
     /// SENS source (lib/compiler-nucleus.lisp) SHA-256.
     pub nucleus_source_sha256: String,
@@ -77,7 +78,7 @@ pub struct AuthorityBundle {
 }
 
 /// C0: The trusted bootstrap compiler.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BootstrapCompiler {
     /// Name/version of C0 (e.g., "CML-C0-v1.0", "GCC-native-C").
     pub name: String,
@@ -99,7 +100,7 @@ pub struct BootstrapCompiler {
 }
 
 /// One compiler generation (C1 or C2).
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CompilerGeneration {
     /// Name (e.g., "C1", "C2").
     pub name: String,
@@ -130,7 +131,7 @@ pub struct CompilerGeneration {
 }
 
 /// Equivalence criterion and result.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EquivalenceResult {
     /// Method used (strongest available).
     /// Options: "byte-identical", "normalized-ir", "semantic+corpus"
@@ -154,7 +155,7 @@ pub struct EquivalenceResult {
 }
 
 /// Semantic corpus parity for exact-domain operations.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CorpusParity {
     /// Number of test cases in corpus.
     pub test_count: u32,
@@ -170,7 +171,7 @@ pub struct CorpusParity {
 }
 
 /// Proof that C0 does not reuse pre-existing C1/C2.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FreshBootstrapProof {
     /// Was a clean build environment used? (e.g., isolated container).
     pub clean_environment: bool,
@@ -195,7 +196,7 @@ pub struct FreshBootstrapProof {
 }
 
 /// Optional metadata.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct LineageMetadata {
     /// Who/what orchestrated this run (e.g., "sens-ci", "manual").
     pub orchestrator: Option<String>,
@@ -218,7 +219,7 @@ mod tests {
     }
 
     #[test]
-    fn lineage_serializes_to_json() {
+    fn lineage_schema_is_plain_core_data_and_preserves_authority() {
         let lineage = SelfhostLineage {
             version: (1, 0),
             recorded_at: "2026-10-06T12:00:00Z".to_string(),
@@ -280,15 +281,17 @@ mod tests {
             },
             metadata: LineageMetadata {
                 orchestrator: Some("sens-ci".to_string()),
-                ci_reference: Some("PR#3852".to_string()),
+                ci_reference: Some("sens#3822".to_string()),
                 notes: Some("Fixed-point verification".to_string()),
             },
         };
 
-        let json = serde_json::to_string(&lineage).expect("serialize");
-        let deserialized: SelfhostLineage =
-            serde_json::from_str(&json).expect("deserialize");
-        assert_eq!(lineage, deserialized);
+        assert_eq!(lineage.version, (LINEAGE_VERSION_MAJOR, LINEAGE_VERSION_MINOR));
+        assert_eq!(lineage.authority_bundle.contract_version, "11.6");
+        assert_eq!(lineage.generation_c1.produced_by, "C0");
+        assert_eq!(lineage.generation_c2.produced_by, "C1");
+        assert!(lineage.fresh_bootstrap_proof.no_c1_reuse);
+        assert!(lineage.fresh_bootstrap_proof.c2_input_identical);
     }
 
     #[test]
