@@ -12,8 +12,9 @@
 //! It must never decide identity -> role from domain coordinates.
 
 use crate::{
-    domain_identity_shape_mechanism, eval_parsed_expressions, eval_program, load_core_library,
-    lower_program, parse, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
+    domain_identity_predicate_mechanism, domain_identity_shape_mechanism,
+    eval_parsed_expressions, eval_program, load_core_library, lower_program, parse, sha256_source,
+    wire_decode_program, wire_encode_program, CompilerExecutionRole, CompilerLoweringRole,
     CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
     Session, Span, Value,
 };
@@ -53,6 +54,7 @@ const D4_LAW_PROJECTION: &str =
 const D4_LAW_AUTHORITY: &str = include_str!("../../../contracts/d4-bootstrap-ratification.lisp");
 
 const SHAPE_MECHANISM_NAME: &str = "__compiler_domain_shape_mechanism";
+const DOMAIN_PREDICATE_MECHANISM_NAME: &str = "__compiler_domain_identity_predicate";
 const LAW_VALUE_NAME: &str = "__compiler_l1_l5_law";
 const D4_LAW_VALUE_NAME: &str = "__compiler_d4_bootstrap_law";
 const PROGRAM_AST_VALUE_NAME: &str = "__compiler_program_ast";
@@ -408,6 +410,10 @@ pub fn compiler_lowering_role_from_sens(
     session
         .environment
         .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    session.environment.define(
+        DOMAIN_PREDICATE_MECHANISM_NAME,
+        domain_identity_predicate_mechanism(),
+    );
     session
         .environment
         .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
@@ -462,58 +468,70 @@ pub fn compiler_semantic_input_from_sens(
     }))
 }
 
-fn compiler_ast_transport_node(expr: &Expr) -> Result<Value, LanguageError> {
-    let children = |items: &[Expr]| -> Result<Value, LanguageError> {
-        Ok(Value::list([
-            Value::Symbol(Rc::from("children")),
-            Value::list(
-                items
-                    .iter()
-                    .map(compiler_ast_transport_node)
-                    .collect::<Result<Vec<_>, _>>()?,
-            ),
-        ]))
-    };
-
+fn compiler_program_data_expr_value(expr: &Expr) -> Result<Value, LanguageError> {
     match &expr.kind {
-        ExprKind::DomainCall(identity, arguments) => Ok(Value::list([
-            Value::Symbol(Rc::from("domain-call")),
-            Value::DomainIdentity(DomainIdentity::from_source_word(identity.source_word())),
-            Value::list(
+        ExprKind::Number(value, exactness) => Ok(Value::Number(*value, *exactness)),
+        ExprKind::Rational(value) => Ok(Value::Rational(value.clone())),
+        ExprKind::BinaryNumber(value) => Ok(Value::BinaryNumber(value.clone())),
+        ExprKind::NumericBuffer(value) => Ok(Value::NumericBuffer(value.clone())),
+        ExprKind::DomainIdentity(identity) => Ok(Value::DomainIdentity(*identity)),
+        ExprKind::String(value) => Ok(Value::String(value.clone())),
+        ExprKind::Symbol(value) => Ok(Value::Symbol(value.clone())),
+        ExprKind::List(items) => Ok(Value::list(
+            items
+                .iter()
+                .map(compiler_program_data_expr_value)
+                .collect::<Result<Vec<_>, _>>()?,
+        )),
+        ExprKind::Pair(head, tail) => Ok(Value::Pair(
+            Rc::new(compiler_program_data_expr_value(head)?),
+            Rc::new(compiler_program_data_expr_value(tail)?),
+        )),
+        ExprKind::DomainCall(identity, arguments) => {
+            // Canonical SW1 decode currently exposes DomainCall as a source-shaped
+            // list. Keep this mechanical fallback so representation stays total
+            // if an in-memory caller bypasses the round-trip.
+            let mut values = Vec::with_capacity(arguments.len() + 1);
+            values.push(Value::DomainIdentity(DomainIdentity::from_source_word(
+                identity.source_word(),
+            )));
+            values.extend(
                 arguments
                     .iter()
-                    .map(compiler_ast_transport_node)
+                    .map(compiler_program_data_expr_value)
                     .collect::<Result<Vec<_>, _>>()?,
-            ),
-        ])),
-        ExprKind::List(items) => children(items),
-        ExprKind::Pair(head, tail) => children(&[(**head).clone(), (**tail).clone()]),
+            );
+            Ok(Value::list(values))
+        }
         ExprKind::Sid(_) | ExprKind::Call(_, _) => Err(LanguageError::new(
             ErrorKind::InvalidForm,
-            "legacy Sid8/Call cannot enter current compiler-program AST transport",
+            "legacy Sid8/Call cannot enter compiler-program-data/1",
             expr.span,
         )),
-        ExprKind::Number(_, _)
-        | ExprKind::Rational(_)
-        | ExprKind::BinaryNumber(_)
-        | ExprKind::NumericBuffer(_)
-        | ExprKind::DomainIdentity(_)
-        | ExprKind::String(_)
-        | ExprKind::Symbol(_)
-        | ExprKind::Local { .. } => Ok(Value::Nil),
+        ExprKind::Local { .. } => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "resolved lexical Local cannot enter source-shaped compiler-program-data/1",
+            expr.span,
+        )),
     }
 }
 
-fn compiler_program_ast_transport(expressions: &[Expr]) -> Result<Value, LanguageError> {
-    Ok(Value::list([
-        Value::Symbol(Rc::from("children")),
-        Value::list(
-            expressions
-                .iter()
-                .map(compiler_ast_transport_node)
-                .collect::<Result<Vec<_>, _>>()?,
-        ),
-    ]))
+fn compiler_program_data_value(expressions: &[Expr]) -> Result<Value, LanguageError> {
+    let wire = wire_encode_program(expressions);
+    let decoded = wire_decode_program(&wire).ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            "canonical compiler-program-data/1 SW1 round-trip failed",
+            Span::default(),
+        )
+    })?;
+
+    Ok(Value::list(
+        decoded
+            .iter()
+            .map(compiler_program_data_expr_value)
+            .collect::<Result<Vec<_>, _>>()?,
+    ))
 }
 
 fn compiler_program_provenance_value(source: &str) -> Value {
@@ -531,6 +549,7 @@ fn compiler_program_artifact_call() -> Expr {
             vec![
                 symbol("compiler-compile-program"),
                 symbol(SHAPE_MECHANISM_NAME),
+                symbol(DOMAIN_PREDICATE_MECHANISM_NAME),
                 symbol(PROGRAM_AST_VALUE_NAME),
                 symbol(LAW_VALUE_NAME),
                 symbol(D4_LAW_VALUE_NAME),
@@ -574,7 +593,7 @@ fn compiler_program_artifact_from_expressions(
     );
     session.environment.define(
         PROGRAM_AST_VALUE_NAME,
-        compiler_program_ast_transport(lowered)?,
+        compiler_program_data_value(lowered)?,
     );
 
     eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
@@ -584,9 +603,9 @@ fn compiler_program_artifact_from_expressions(
 /// Compile one exact current SENS source bundle into the backend-neutral
 /// whole-program request artifact by executing the SENS-written compiler body.
 ///
-/// Rust owns only parser -> canonical AST-data transport and the bootstrap
-/// installation of already-generated structural-law values. It never chooses
-/// an identity's compiler role or proof.
+/// Rust owns only parse/lower -> canonical compiler-program-data/1 SW1
+/// encode/decode transport and bootstrap installation of generated structural
+/// laws. It never chooses an identity's compiler role, proof, or traversal policy.
 pub fn compiler_program_artifact_from_sens(source: &str) -> Result<Value, LanguageError> {
     let parsed = parse(source)?;
     let lowered = lower_program(&parsed);
@@ -722,6 +741,24 @@ mod tests {
             return None;
         }
         list_values(outer[1])
+    }
+
+    #[test]
+    fn whole_program_adapter_reuses_ratified_sw1_and_contains_no_second_ast_tags() {
+        let source = include_str!("compiler_language.rs");
+        assert!(source.contains("wire_encode_program(expressions)"));
+        assert!(source.contains("wire_decode_program(&wire)"));
+        assert!(source.contains("domain_identity_predicate_mechanism()"));
+
+        for forbidden in [
+            ["Value::Symbol(Rc::from(", "\"domain-call\""].concat(),
+            ["Value::Symbol(Rc::from(", "\"children\""].concat(),
+        ] {
+            assert!(
+                !source.contains(&forbidden),
+                "compiler bootstrap adapter invented a second AST wire tag: {forbidden}"
+            );
+        }
     }
 
     #[test]
