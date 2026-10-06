@@ -15,7 +15,6 @@ on:
       - "contracts/core1-historical-sid-map.lisp"
       - "knowledge/d1-d7-foundation.json"
       - ".github/workflows/sens-code-migration.yml"
-      - ".github/workflows/sens-code-migration.yml"
   push:
     branches: [main]
     paths:
@@ -30,6 +29,7 @@ on:
       - "tests/test_three_pass_migration.py"
       - "contracts/core1-historical-sid-map.lisp"
       - "knowledge/d1-d7-foundation.json"
+      - ".github/workflows/sens-code-migration.yml"
 
 concurrency:
   group: sens-code-migration-${{ github.event.pull_request.number || github.ref }}
