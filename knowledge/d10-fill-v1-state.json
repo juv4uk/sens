@@ -65,5 +65,21 @@
     "projection": 4,
     "hold": 7,
     "coordinates_assigned": 0
+  },
+  "donor_audits": {
+    "sens8": {
+      "artifact": "knowledge/sens8-current-coverage-v1.json",
+      "authority": "#4021",
+      "total_cells": 256,
+      "named_rows": 182,
+      "named_rows_accounted": 182,
+      "direct_current": 153,
+      "current_projection_or_derived": 20,
+      "d10_recovery_candidates": 4,
+      "internal_no_slot": 4,
+      "mechanism_hold": 1,
+      "donor_exhausted": true,
+      "new_d10_candidates_added_by_this_audit": 0
+    }
   }
 }

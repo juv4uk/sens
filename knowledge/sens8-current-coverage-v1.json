@@ -1,0 +1,3122 @@
+{
+  "schema": "sens8-current-coverage-v1/v1",
+  "status": "AUDIT-COMPLETE",
+  "authority": "#4021",
+  "date": "2026-10-07",
+  "source": "lib/generated/function-table.lisp",
+  "current_foundation": "#4008 / Contract 11.8 / D1-D9",
+  "d10_status": "RESEARCH-UNRATIFIED",
+  "doctrine": {
+    "statement": "Sens8/Function8 is exhausted as semantic donor evidence when every old cell has a current disposition. Legacy coordinates have zero current placement authority.",
+    "placement_authority": "NONE",
+    "current_identity": "exact domain + exact current coordinate + current admitted/owner-ratified law"
+  },
+  "accounting": {
+    "total_legacy_cells": 256,
+    "named_legacy_semantic_rows": 182,
+    "unnamed_legacy_identity_cells": 1,
+    "blank_unused_cells": 73,
+    "direct_current_identity": 153,
+    "current_projection_or_derived": 20,
+    "internal_no_semantic_slot": 4,
+    "d10_recovery_candidates": 4,
+    "mechanism_hold": 1,
+    "named_rows_accounted": 182,
+    "identity_bearing_or_assigned_including_unnamed_zero": 183,
+    "donor_coverage_percent": 100
+  },
+  "semantic_summary": {
+    "current_ratified_coverage_or_projection": 173,
+    "current_ratified_coverage_or_projection_percent_of_named": 95.05,
+    "language_visible_rows_recovered_or_covered": 177,
+    "language_visible_rows_recovered_or_covered_note": "177 = 153 direct current + 20 current projection/derived + 4 D10 recovery candidates",
+    "nonresident_rows_by_design": 5,
+    "nonresident_rows_by_design_note": "4 internal helpers + 1 mechanism HOLD"
+  },
+  "rows": [
+    {
+      "legacy_code": "00000000",
+      "legacy_identity": "identity:00000000",
+      "legacy_name": null,
+      "classification": "UNNAMED-LEGACY-IDENTITY",
+      "current_target": null,
+      "evidence": [],
+      "reason": "legacy identity-bearing zero cell has no English semantic surface; no semantic meaning to recover",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00000001",
+      "legacy_identity": "identity:00000001/surface:quote",
+      "legacy_name": "quote",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D3:001 QUOTE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00000010",
+      "legacy_identity": "identity:00000010/surface:atom?",
+      "legacy_name": "atom?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D3:010 ATOM",
+      "evidence": [
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "compatibility predicate surface for current D3 ATOM",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00000011",
+      "legacy_identity": "identity:00000011/surface:eq?",
+      "legacy_name": "eq?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D3:101 EQ",
+      "evidence": [
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "compatibility predicate surface for current D3 EQ",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00000100",
+      "legacy_identity": "identity:00000100/surface:cons",
+      "legacy_name": "cons",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D3:111 CONS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00000101",
+      "legacy_identity": "identity:00000101/surface:car",
+      "legacy_name": "car",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D3:100 CAR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00000110",
+      "legacy_identity": "identity:00000110/surface:cdr",
+      "legacy_name": "cdr",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D3:011 CDR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00000111",
+      "legacy_identity": "identity:00000111/surface:cond",
+      "legacy_name": "cond",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D3:110 COND",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001000",
+      "legacy_identity": "identity:00001000/surface:lambda",
+      "legacy_name": "lambda",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:0010 LAMBDA",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001001",
+      "legacy_identity": "identity:00001001/surface:define",
+      "legacy_name": "define",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:0011 DEFINE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001010",
+      "legacy_identity": "identity:00001010/surface:defmacro",
+      "legacy_name": "defmacro",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D5:00011 MACRO + D4:0011 DEFINE",
+      "evidence": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "surface packaging over admitted macro-definition semantics; no independent resident required",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001011",
+      "legacy_identity": "identity:00001011/surface:def",
+      "legacy_name": "def",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D4:0011 DEFINE",
+      "evidence": [
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "compatibility surface alias",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001100",
+      "legacy_identity": "identity:00001100/surface:plus",
+      "legacy_name": "plus",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:01010 PLUS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001101",
+      "legacy_identity": "identity:00001101/surface:difference",
+      "legacy_name": "difference",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:01011 DIFFERENCE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001110",
+      "legacy_identity": "identity:00001110/surface:times",
+      "legacy_name": "times",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:10110 TIMES",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00001111",
+      "legacy_identity": "identity:00001111/surface:divide",
+      "legacy_name": "divide",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11110110 DIVIDE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010000",
+      "legacy_identity": "identity:00010000/surface:abs",
+      "legacy_name": "abs",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:010011 ABS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010001",
+      "legacy_identity": "identity:00010001/surface:min",
+      "legacy_name": "min",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:110101 MIN",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010010",
+      "legacy_identity": "identity:00010010/surface:max",
+      "legacy_name": "max",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:110111 MAX",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010011",
+      "legacy_identity": "identity:00010011/surface:mod",
+      "legacy_name": "mod",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:00101100 MOD",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010100",
+      "legacy_identity": "identity:00010100/surface:quotient",
+      "legacy_name": "quotient",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:10111 QUOTIENT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010101",
+      "legacy_identity": "identity:00010101/surface:sqrt",
+      "legacy_name": "sqrt",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:00001110 SQRT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010110",
+      "legacy_identity": "identity:00010110/surface:isqrt",
+      "legacy_name": "isqrt",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111010 ISQRT | D9:110111010 ISQRT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00010111",
+      "legacy_identity": "identity:00010111/surface:min-list",
+      "legacy_name": "min-list",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:000010 MIN-LIST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011000",
+      "legacy_identity": "identity:00011000/surface:max-list",
+      "legacy_name": "max-list",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:000011 MAX-LIST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011001",
+      "legacy_identity": "identity:00011001/surface:largest-chunk",
+      "legacy_name": "largest-chunk",
+      "classification": "INTERNAL-NO-SEMANTIC-SLOT",
+      "current_target": null,
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "documented internal helper, not a semantic resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011010",
+      "legacy_identity": "identity:00011010/surface:lessp?",
+      "legacy_name": "lessp?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D5:11010 LESSP",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "predicate surface projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011011",
+      "legacy_identity": "identity:00011011/surface:greaterp?",
+      "legacy_name": "greaterp?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D5:11011 GREATERP",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "predicate surface projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011100",
+      "legacy_identity": "identity:00011100/surface:equalp?",
+      "legacy_name": "equalp?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D8:11110111 EQUAL",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "current general equality projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011101",
+      "legacy_identity": "identity:00011101/surface:not-greaterp?",
+      "legacy_name": "not-greaterp?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D6:110100 LEQ",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "non-greater-than is current LEQ projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011110",
+      "legacy_identity": "identity:00011110/surface:not-lessp?",
+      "legacy_name": "not-lessp?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D6:110110 GEQ",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "non-less-than is current GEQ projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00011111",
+      "legacy_identity": "identity:00011111/surface:nondecreasing-from?",
+      "legacy_name": "nondecreasing-from?",
+      "classification": "INTERNAL-NO-SEMANTIC-SLOT",
+      "current_target": null,
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "documented internal helper, not a semantic resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100000",
+      "legacy_identity": "identity:00100000/surface:nonincreasing-from?",
+      "legacy_name": "nonincreasing-from?",
+      "classification": "INTERNAL-NO-SEMANTIC-SLOT",
+      "current_target": null,
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "documented internal helper, not a semantic resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100001",
+      "legacy_identity": "identity:00100001/surface:not?",
+      "legacy_name": "not?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D4:0100 NOT",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "predicate surface projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100010",
+      "legacy_identity": "identity:00100010/surface:equal?",
+      "legacy_name": "equal?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D8:11110111 EQUAL",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "current structural/general equality projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100011",
+      "legacy_identity": "identity:00100011/surface:symbol?",
+      "legacy_name": "symbol?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101100 SYMBOL? | D9:110101100 SYMBOL?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100100",
+      "legacy_identity": "identity:00100100/surface:string?",
+      "legacy_name": "string?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110100110 STRINGP",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100101",
+      "legacy_identity": "identity:00100101/surface:string<?",
+      "legacy_name": "string<?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D8:10110001 STRING<",
+      "evidence": [
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "surface projection to current string ordering semantic",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100110",
+      "legacy_identity": "identity:00100110/surface:numeric-buffer?",
+      "legacy_name": "numeric-buffer?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011011 NUMERIC-BUFFERP",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00100111",
+      "legacy_identity": "identity:00100111/surface:list",
+      "legacy_name": "list",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:1110 LIST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101000",
+      "legacy_identity": "identity:00101000/surface:length",
+      "legacy_name": "length",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:000000 LENGTH",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101001",
+      "legacy_identity": "identity:00101001/surface:append",
+      "legacy_name": "append",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:1111 APPEND",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101010",
+      "legacy_identity": "identity:00101010/surface:reverse",
+      "legacy_name": "reverse",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:10100 REVERSE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101011",
+      "legacy_identity": "identity:00101011/surface:nth",
+      "legacy_name": "nth",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:000100 NTH",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101100",
+      "legacy_identity": "identity:00101100/surface:member?",
+      "legacy_name": "member?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D5:11101 MEMBER",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "predicate surface projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101101",
+      "legacy_identity": "identity:00101101/surface:assoc",
+      "legacy_name": "assoc",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:11100 ASSOC",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101110",
+      "legacy_identity": "identity:00101110/surface:pair",
+      "legacy_name": "pair",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11111101 PAIR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00101111",
+      "legacy_identity": "identity:00101111/surface:second",
+      "legacy_name": "second",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D4:1001 CADR",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "current registry-tail authority classifies SECOND as current lower selector projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110000",
+      "legacy_identity": "identity:00110000/surface:third",
+      "legacy_name": "third",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D5:10011 CADDR",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "current registry-tail authority classifies THIRD as current lower selector projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110001",
+      "legacy_identity": "identity:00110001/surface:fourth",
+      "legacy_name": "fourth",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D6:100111 CADDDR",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "current registry-tail authority classifies FOURTH as current lower selector projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110010",
+      "legacy_identity": "identity:00110010/surface:fifth",
+      "legacy_name": "fifth",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110101 FIFTH | D9:110110101 FIFTH",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110011",
+      "legacy_identity": "identity:00110011/surface:caar",
+      "legacy_name": "caar",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:1000 CAAR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110100",
+      "legacy_identity": "identity:00110100/surface:cadr",
+      "legacy_name": "cadr",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:1001 CADR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110101",
+      "legacy_identity": "identity:00110101/surface:cddr",
+      "legacy_name": "cddr",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:0111 CDDR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110110",
+      "legacy_identity": "identity:00110110/surface:cadddr",
+      "legacy_name": "cadddr",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:100111 CADDDR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00110111",
+      "legacy_identity": "identity:00110111/surface:map",
+      "legacy_name": "map",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:101000 MAP | D8:11000101 MAP",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111000",
+      "legacy_identity": "identity:00111000/surface:filter",
+      "legacy_name": "filter",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:101001 FILTER",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111001",
+      "legacy_identity": "identity:00111001/surface:reduce",
+      "legacy_name": "reduce",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:101110 REDUCE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111010",
+      "legacy_identity": "identity:00111010/surface:string-append",
+      "legacy_name": "string-append",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011110 STRING-APPEND | D9:110011110 STRING-APPEND",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111011",
+      "legacy_identity": "identity:00111011/surface:string-length",
+      "legacy_name": "string-length",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110100010 STRING-LENGTH | D9:110100010 STRING-LENGTH",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111100",
+      "legacy_identity": "identity:00111100/surface:string-empty?",
+      "legacy_name": "string-empty?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011100 STRING-EMPTY? | D9:110011100 STRING-EMPTY?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111101",
+      "legacy_identity": "identity:00111101/surface:string-prefix?",
+      "legacy_name": "string-prefix?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101010 STRING-PREFIX? | D9:110101010 STRING-PREFIX?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111110",
+      "legacy_identity": "identity:00111110/surface:string-contains?",
+      "legacy_name": "string-contains?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101000 STRING-CONTAINS? | D9:110101000 STRING-CONTAINS?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "00111111",
+      "legacy_identity": "identity:00111111/surface:string-first",
+      "legacy_name": "string-first",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101011 STRING-FIRST | D9:110101011 STRING-FIRST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000000",
+      "legacy_identity": "identity:01000000/surface:string-rest",
+      "legacy_name": "string-rest",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011101 STRING-REST | D9:110011101 STRING-REST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000001",
+      "legacy_identity": "identity:01000001/surface:string-slice",
+      "legacy_name": "string-slice",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110100011 STRING-SLICE | D9:110100011 STRING-SLICE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000010",
+      "legacy_identity": "identity:01000010/surface:symbol->string",
+      "legacy_name": "symbol->string",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11101110 SYMBOL->STRING",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000011",
+      "legacy_identity": "identity:01000011/surface:string->symbol",
+      "legacy_name": "string->symbol",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11101101 STRING->SYMBOL",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000100",
+      "legacy_identity": "identity:01000100/surface:codepoint->string",
+      "legacy_name": "codepoint->string",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D8:00000000 CODE-CHAR",
+      "evidence": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "projection under current one-character immutable-string representation",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000101",
+      "legacy_identity": "identity:01000101/surface:string->codepoint",
+      "legacy_name": "string->codepoint",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D8:11100000 CHAR-CODE",
+      "evidence": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "projection under current one-character immutable-string representation",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000110",
+      "legacy_identity": "identity:01000110/surface:number->string",
+      "legacy_name": "number->string",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111001 NUMBER->STRING | D9:110111001 NUMBER->STRING",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01000111",
+      "legacy_identity": "identity:01000111/surface:digit->string",
+      "legacy_name": "digit->string",
+      "classification": "INTERNAL-NO-SEMANTIC-SLOT",
+      "current_target": null,
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "documented internal helper, not a semantic resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001000",
+      "legacy_identity": "identity:01001000/surface:print",
+      "legacy_name": "print",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11011011 PRINT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001001",
+      "legacy_identity": "identity:01001001/surface:princ",
+      "legacy_name": "princ",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11010110 PRINC",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001010",
+      "legacy_identity": "identity:01001010/surface:read",
+      "legacy_name": "read",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11101010 READ",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001011",
+      "legacy_identity": "identity:01001011/surface:read-all",
+      "legacy_name": "read-all",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101001 READ-ALL | D9:110101001 READ-ALL",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001100",
+      "legacy_identity": "identity:01001100/surface:write-to-string",
+      "legacy_name": "write-to-string",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11110100 WRITE-TO-STRING",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001101",
+      "legacy_identity": "identity:01001101/surface:eval",
+      "legacy_name": "eval",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:0001 EVAL",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001110",
+      "legacy_identity": "identity:01001110/surface:env",
+      "legacy_name": "env",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D8:11100111 ENV-REFLECTION",
+      "evidence": [
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "surface projection to current environment reflection semantic",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01001111",
+      "legacy_identity": "identity:01001111/surface:vector",
+      "legacy_name": "vector",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11101111 VECTOR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010000",
+      "legacy_identity": "identity:01010000/surface:make-vector",
+      "legacy_name": "make-vector",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11111001 MAKE-VECTOR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010001",
+      "legacy_identity": "identity:01010001/surface:vector-length",
+      "legacy_name": "vector-length",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11111111 VECTOR-LENGTH",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010010",
+      "legacy_identity": "identity:01010010/surface:vector-ref",
+      "legacy_name": "vector-ref",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11110000 VECTOR-REF",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010011",
+      "legacy_identity": "identity:01010011/surface:vector-set!",
+      "legacy_name": "vector-set!",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11110010 VECTOR-SET!",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010100",
+      "legacy_identity": "identity:01010100/surface:i32-buffer",
+      "legacy_name": "i32-buffer",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011001 I32-BUFFER | D9:110011001 I32-BUFFER",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010101",
+      "legacy_identity": "identity:01010101/surface:f32-buffer",
+      "legacy_name": "f32-buffer",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110100001 F32-BUFFER | D9:110100001 F32-BUFFER",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010110",
+      "legacy_identity": "identity:01010110/surface:numeric-buffer-type",
+      "legacy_name": "numeric-buffer-type",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110100000 NUMERIC-BUFFER-TYPE | D9:110100000 NUMERIC-BUFFER-TYPE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01010111",
+      "legacy_identity": "identity:01010111/surface:numeric-buffer-length",
+      "legacy_name": "numeric-buffer-length",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011010 NUMERIC-BUFFER-LENGTH | D9:110011010 NUMERIC-BUFFER-LENGTH",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011000",
+      "legacy_identity": "identity:01011000/surface:numeric-buffer-ref",
+      "legacy_name": "numeric-buffer-ref",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110100111 NUMERIC-BUFFER-REF | D9:110100111 NUMERIC-BUFFER-REF",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011001",
+      "legacy_identity": "identity:01011001/surface:numeric-buffer-map",
+      "legacy_name": "numeric-buffer-map",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011111 NUMERIC-BUFFER-MAP | D9:110011111 NUMERIC-BUFFER-MAP",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011010",
+      "legacy_identity": "identity:01011010/surface:mono-ns",
+      "legacy_name": "mono-ns",
+      "classification": "D10-RECOVERY-CANDIDATE",
+      "current_target": "D10 candidate MONO-NS",
+      "evidence": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "survived D9 as a language-visible raw observation and is already selected as an unplaced D10 research candidate",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011011",
+      "legacy_identity": "identity:01011011/surface:unix-time-now",
+      "legacy_name": "unix-time-now",
+      "classification": "D10-RECOVERY-CANDIDATE",
+      "current_target": "D10 candidate UNIX-TIME-NOW",
+      "evidence": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "survived D9 as a language-visible raw observation and is already selected as an unplaced D10 research candidate",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011100",
+      "legacy_identity": "identity:01011100/surface:ntp-query-raw",
+      "legacy_name": "ntp-query-raw",
+      "classification": "D10-RECOVERY-CANDIDATE",
+      "current_target": "D10 candidate NTP-QUERY-RAW",
+      "evidence": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "survived D9 as a language-visible raw observation and is already selected as an unplaced D10 research candidate",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011101",
+      "legacy_identity": "identity:01011101/surface:timezone-declarations-raw",
+      "legacy_name": "timezone-declarations-raw",
+      "classification": "D10-RECOVERY-CANDIDATE",
+      "current_target": "D10 candidate TIMEZONE-DECLARATIONS-RAW",
+      "evidence": [
+        "#4016",
+        "knowledge/d9-surface-harvest-v1.json"
+      ],
+      "reason": "survived D9 as a language-visible raw observation and is already selected as an unplaced D10 research candidate",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011110",
+      "legacy_identity": "identity:01011110/surface:utc-now",
+      "legacy_name": "utc-now",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011110 UTC-NOW | D9:101011110 UTC-NOW",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01011111",
+      "legacy_identity": "identity:01011111/surface:utc-from-unix",
+      "legacy_name": "utc-from-unix",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110110 UTC-FROM-UNIX | D9:101110110 UTC-FROM-UNIX",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100000",
+      "legacy_identity": "identity:01100000/surface:unix-time-observation->utc",
+      "legacy_name": "unix-time-observation->utc",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101011 UNIX-TIME-OBSERVATION->UTC | D9:101101011 UNIX-TIME-OBSERVATION->UTC",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100001",
+      "legacy_identity": "identity:01100001/surface:milliseconds-from-nanoseconds",
+      "legacy_name": "milliseconds-from-nanoseconds",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111110 MILLISECONDS-FROM-NANOSECONDS | D9:101111110 MILLISECONDS-FROM-NANOSECONDS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100010",
+      "legacy_identity": "identity:01100010/surface:mono-ms",
+      "legacy_name": "mono-ms",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111001 MONO-MS | D9:101111001 MONO-MS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100011",
+      "legacy_identity": "identity:01100011/surface:timezone-name",
+      "legacy_name": "timezone-name",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110001 TIMEZONE-NAME | D9:101110001 TIMEZONE-NAME",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100100",
+      "legacy_identity": "identity:01100100/surface:timezone-detect",
+      "legacy_name": "timezone-detect",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101001111 TIMEZONE-DETECT | D9:101001111 TIMEZONE-DETECT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100101",
+      "legacy_identity": "identity:01100101/surface:timezone-offset-seconds",
+      "legacy_name": "timezone-offset-seconds",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111101 TIMEZONE-OFFSET-SECONDS | D9:101111101 TIMEZONE-OFFSET-SECONDS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100110",
+      "legacy_identity": "identity:01100110/surface:deadline-reached?",
+      "legacy_name": "deadline-reached?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101000 DEADLINE-REACHED? | D9:101101000 DEADLINE-REACHED?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01100111",
+      "legacy_identity": "identity:01100111/surface:deadline-reached-at?",
+      "legacy_name": "deadline-reached-at?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101001101 DEADLINE-REACHED-AT? | D9:101001101 DEADLINE-REACHED-AT?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101000",
+      "legacy_identity": "identity:01101000/surface:elapsed-ns",
+      "legacy_name": "elapsed-ns",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010101 ELAPSED-NS | D9:101010101 ELAPSED-NS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101001",
+      "legacy_identity": "identity:01101001/surface:deadline-from",
+      "legacy_name": "deadline-from",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110000000 DEADLINE-FROM | D9:110000000 DEADLINE-FROM",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101010",
+      "legacy_identity": "identity:01101010/surface:deadline-after-ns",
+      "legacy_name": "deadline-after-ns",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101001010 DEADLINE-AFTER-NS | D9:101001010 DEADLINE-AFTER-NS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101011",
+      "legacy_identity": "identity:01101011/surface:internet-time-sync",
+      "legacy_name": "internet-time-sync",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110000001 INTERNET-TIME-SYNC | D9:110000001 INTERNET-TIME-SYNC",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101100",
+      "legacy_identity": "identity:01101100/surface:map-empty",
+      "legacy_name": "map-empty",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100011 MAP-EMPTY | D9:101100011 MAP-EMPTY",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101101",
+      "legacy_identity": "identity:01101101/surface:map-get",
+      "legacy_name": "map-get",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100101 MAP-GET | D9:101100101 MAP-GET",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101110",
+      "legacy_identity": "identity:01101110/surface:map-insert",
+      "legacy_name": "map-insert",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101110 MAP-INSERT | D9:101101110 MAP-INSERT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01101111",
+      "legacy_identity": "identity:01101111/surface:map-contains?",
+      "legacy_name": "map-contains?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100010 MAP-CONTAINS? | D9:101100010 MAP-CONTAINS?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110000",
+      "legacy_identity": "identity:01110000/surface:map->list",
+      "legacy_name": "map->list",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101001100 MAP->LIST | D9:101001100 MAP->LIST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110001",
+      "legacy_identity": "identity:01110001/surface:vec-empty",
+      "legacy_name": "vec-empty",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101101 VEC-EMPTY | D9:101101101 VEC-EMPTY",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110010",
+      "legacy_identity": "identity:01110010/surface:vec-conj",
+      "legacy_name": "vec-conj",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011101 VEC-CONJ | D9:101011101 VEC-CONJ",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110011",
+      "legacy_identity": "identity:01110011/surface:vec-count",
+      "legacy_name": "vec-count",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010111 VEC-COUNT | D9:101010111 VEC-COUNT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110100",
+      "legacy_identity": "identity:01110100/surface:vec-nth",
+      "legacy_name": "vec-nth",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110000010 VEC-NTH | D9:110000010 VEC-NTH",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110101",
+      "legacy_identity": "identity:01110101/surface:vec->list",
+      "legacy_name": "vec->list",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011000 VEC->LIST | D9:101011000 VEC->LIST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110110",
+      "legacy_identity": "identity:01110110/surface:vec-from-list",
+      "legacy_name": "vec-from-list",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111011 VEC-FROM-LIST | D9:101111011 VEC-FROM-LIST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01110111",
+      "legacy_identity": "identity:01110111/surface:is-fact?",
+      "legacy_name": "is-fact?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011111 IS-FACT? | D9:101011111 IS-FACT?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111000",
+      "legacy_identity": "identity:01111000/surface:describe",
+      "legacy_name": "describe",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011100 DESCRIBE | D9:101011100 DESCRIBE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111001",
+      "legacy_identity": "identity:01111001/surface:collect-facts-about",
+      "legacy_name": "collect-facts-about",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011001 COLLECT-FACTS-ABOUT | D9:101011001 COLLECT-FACTS-ABOUT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111010",
+      "legacy_identity": "identity:01111010/surface:contains-atom?",
+      "legacy_name": "contains-atom?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110011 CONTAINS-ATOM? | D9:101110011 CONTAINS-ATOM?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111011",
+      "legacy_identity": "identity:01111011/surface:forward-in",
+      "legacy_name": "forward-in",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111100 FORWARD-IN | D9:101111100 FORWARD-IN",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111100",
+      "legacy_identity": "identity:01111100/surface:reason-in",
+      "legacy_name": "reason-in",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111010 REASON-IN | D9:101111010 REASON-IN",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111101",
+      "legacy_identity": "identity:01111101/surface:check-conflict?",
+      "legacy_name": "check-conflict?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100000 CHECK-CONFLICT? | D9:101100000 CHECK-CONFLICT?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111110",
+      "legacy_identity": "identity:01111110/surface:module-known?",
+      "legacy_name": "module-known?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010010 MODULE-KNOWN? | D9:101010010 MODULE-KNOWN?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "01111111",
+      "legacy_identity": "identity:01111111/surface:module-clauses-now",
+      "legacy_name": "module-clauses-now",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110000011 MODULE-CLAUSES-NOW | D9:110000011 MODULE-CLAUSES-NOW",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000000",
+      "legacy_identity": "identity:10000000/surface:prove-goal",
+      "legacy_name": "prove-goal",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011011 PROVE-GOAL | D9:101011011 PROVE-GOAL",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000001",
+      "legacy_identity": "identity:10000001/surface:prove-goals",
+      "legacy_name": "prove-goals",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010001 PROVE-GOALS | D9:101010001 PROVE-GOALS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000010",
+      "legacy_identity": "identity:10000010/surface:explain-proof",
+      "legacy_name": "explain-proof",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101001011 EXPLAIN-PROOF | D9:101001011 EXPLAIN-PROOF",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000011",
+      "legacy_identity": "identity:10000011/surface:source-of",
+      "legacy_name": "source-of",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110000 SOURCE-OF | D9:101110000 SOURCE-OF",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000100",
+      "legacy_identity": "identity:10000100/surface:provenance",
+      "legacy_name": "provenance",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101111 PROVENANCE | D9:101101111 PROVENANCE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000101",
+      "legacy_identity": "identity:10000101/surface:reason",
+      "legacy_name": "reason",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101001110 REASON | D9:101001110 REASON",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000110",
+      "legacy_identity": "identity:10000110/surface:reason-explain",
+      "legacy_name": "reason-explain",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100111 REASON-EXPLAIN | D9:101100111 REASON-EXPLAIN",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10000111",
+      "legacy_identity": "identity:10000111/surface:unify",
+      "legacy_name": "unify",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010000 UNIFY | D9:101010000 UNIFY",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001000",
+      "legacy_identity": "identity:10001000/surface:logic-var",
+      "legacy_name": "logic-var",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110010 LOGIC-VAR | D9:101110010 LOGIC-VAR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001001",
+      "legacy_identity": "identity:10001001/surface:var?",
+      "legacy_name": "var?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100100 VAR? | D9:101100100 VAR?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001010",
+      "legacy_identity": "identity:10001010/surface:apply-subst",
+      "legacy_name": "apply-subst",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101001 APPLY-SUBST | D9:101101001 APPLY-SUBST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001011",
+      "legacy_identity": "identity:10001011/surface:walk",
+      "legacy_name": "walk",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110100 WALK | D9:101110100 WALK",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001100",
+      "legacy_identity": "identity:10001100/surface:occurs-check?",
+      "legacy_name": "occurs-check?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110101 OCCURS-CHECK? | D9:101110101 OCCURS-CHECK?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001101",
+      "legacy_identity": "identity:10001101/surface:claim?",
+      "legacy_name": "claim?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101110111 CLAIM? | D9:101110111 CLAIM?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001110",
+      "legacy_identity": "identity:10001110/surface:claim-statement",
+      "legacy_name": "claim-statement",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100110 CLAIM-STATEMENT | D9:101100110 CLAIM-STATEMENT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10001111",
+      "legacy_identity": "identity:10001111/surface:claim-review",
+      "legacy_name": "claim-review",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101010 CLAIM-REVIEW | D9:101101010 CLAIM-REVIEW",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010000",
+      "legacy_identity": "identity:10010000/surface:evidence?",
+      "legacy_name": "evidence?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010110 EVIDENCE? | D9:101010110 EVIDENCE?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010001",
+      "legacy_identity": "identity:10010001/surface:evidence-method",
+      "legacy_name": "evidence-method",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010011 EVIDENCE-METHOD | D9:101010011 EVIDENCE-METHOD",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010010",
+      "legacy_identity": "identity:10010010/surface:evidence-outcome",
+      "legacy_name": "evidence-outcome",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111111 EVIDENCE-OUTCOME | D9:101111111 EVIDENCE-OUTCOME",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010011",
+      "legacy_identity": "identity:10010011/surface:observation?",
+      "legacy_name": "observation?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101011010 OBSERVATION? | D9:101011010 OBSERVATION?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010100",
+      "legacy_identity": "identity:10010100/surface:observation-statement",
+      "legacy_name": "observation-statement",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101111000 OBSERVATION-STATEMENT | D9:101111000 OBSERVATION-STATEMENT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010101",
+      "legacy_identity": "identity:10010101/surface:intent?",
+      "legacy_name": "intent?",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101101100 INTENT? | D9:101101100 INTENT?",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010110",
+      "legacy_identity": "identity:10010110/surface:intent-goal",
+      "legacy_name": "intent-goal",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101010100 INTENT-GOAL | D9:101010100 INTENT-GOAL",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10010111",
+      "legacy_identity": "identity:10010111/surface:supporting-evidence",
+      "legacy_name": "supporting-evidence",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:101100001 SUPPORTING-EVIDENCE | D9:101100001 SUPPORTING-EVIDENCE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011000",
+      "legacy_identity": "identity:10011000/surface:identity",
+      "legacy_name": "identity",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101110 IDENTITY | D9:110101110 IDENTITY",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011001",
+      "legacy_identity": "identity:10011001/surface:gensym",
+      "legacy_name": "gensym",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111000 GENSYM | D9:110111000 GENSYM",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011010",
+      "legacy_identity": "identity:10011010/surface:and",
+      "legacy_name": "and",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11110101 AND",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011011",
+      "legacy_identity": "identity:10011011/surface:or",
+      "legacy_name": "or",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D8:11111100 OR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011100",
+      "legacy_identity": "identity:10011100/surface:let",
+      "legacy_name": "let",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:001000 LET",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011101",
+      "legacy_identity": "identity:10011101/surface:let*",
+      "legacy_name": "let*",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:001001 LET*",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011110",
+      "legacy_identity": "identity:10011110/surface:thread-first",
+      "legacy_name": "thread-first",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:111000001 THREAD-FIRST | D9:111000001 THREAD-FIRST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10011111",
+      "legacy_identity": "identity:10011111/surface:thread-last",
+      "legacy_name": "thread-last",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110000 THREAD-LAST | D9:110110000 THREAD-LAST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100000",
+      "legacy_identity": "identity:10100000/surface:json-parse",
+      "legacy_name": "json-parse",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110100100 JSON-PARSE | D9:110100100 JSON-PARSE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100001",
+      "legacy_identity": "identity:10100001/surface:sha256-hex",
+      "legacy_name": "sha256-hex",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110011000 SHA256-HEX | D9:110011000 SHA256-HEX",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100010",
+      "legacy_identity": "identity:10100010/surface:process-run",
+      "legacy_name": "process-run",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101111 PROCESS-RUN | D9:110101111 PROCESS-RUN",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100011",
+      "legacy_identity": "identity:10100011/surface:tcp-read",
+      "legacy_name": "tcp-read",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111110 TCP-READ | D9:110111110 TCP-READ",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100100",
+      "legacy_identity": "identity:10100100/surface:tcp-write",
+      "legacy_name": "tcp-write",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110011 TCP-WRITE | D9:110110011 TCP-WRITE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100101",
+      "legacy_identity": "identity:10100101/surface:tcp-listen",
+      "legacy_name": "tcp-listen",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111101 TCP-LISTEN | D9:110111101 TCP-LISTEN",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100110",
+      "legacy_identity": "identity:10100110/surface:read-file",
+      "legacy_name": "read-file",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110111 READ-FILE | D9:110110111 READ-FILE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10100111",
+      "legacy_identity": "identity:10100111/surface:write-file",
+      "legacy_name": "write-file",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111100 WRITE-FILE | D9:110111100 WRITE-FILE",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101000",
+      "legacy_identity": "identity:10101000/surface:invoke",
+      "legacy_name": "invoke",
+      "classification": "MECHANISM-HOLD",
+      "current_target": null,
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "post-semantics invocation/mechanism selector; no independent language semantic law admitted",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101001",
+      "legacy_identity": "identity:10101001/surface:binary",
+      "legacy_name": "binary",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110110 BINARY | D9:110110110 BINARY",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101010",
+      "legacy_identity": "identity:10101010/surface:label",
+      "legacy_name": "label",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:00100 LABEL",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101011",
+      "legacy_identity": "identity:10101011/surface:null?",
+      "legacy_name": "null?",
+      "classification": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D4:0101 NULL",
+      "evidence": [
+        "knowledge/d9-registry-tail-v1.json"
+      ],
+      "reason": "predicate surface projection",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101100",
+      "legacy_identity": "identity:10101100/surface:subst",
+      "legacy_name": "subst",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D5:11111 SUBST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101101",
+      "legacy_identity": "identity:10101101/surface:sublis",
+      "legacy_name": "sublis",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:001010 SUBLIS",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101110",
+      "legacy_identity": "identity:10101110/surface:maplist",
+      "legacy_name": "maplist",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D6:000101 MAPLIST",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10101111",
+      "legacy_identity": "identity:10101111/surface:apply",
+      "legacy_name": "apply",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D4:0000 APPLY",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "case-insensitive legacy English name matches a current owner-ratified D1-D9 resident identity",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110000",
+      "legacy_identity": "identity:10110000/surface:divmod",
+      "legacy_name": "divmod",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111111 DIVMOD | D9:110111111 DIVMOD",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110001",
+      "legacy_identity": "identity:10110001/surface:answer-not",
+      "legacy_name": "answer-not",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110111011 ANSWER-NOT | D9:110111011 ANSWER-NOT",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110010",
+      "legacy_identity": "identity:10110010/surface:answer-and",
+      "legacy_name": "answer-and",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110100 ANSWER-AND | D9:110110100 ANSWER-AND",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110011",
+      "legacy_identity": "identity:10110011/surface:answer-or",
+      "legacy_name": "answer-or",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110010 ANSWER-OR | D9:110110010 ANSWER-OR",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110100",
+      "legacy_identity": "identity:10110100/surface:answer-weaken",
+      "legacy_name": "answer-weaken",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110101101 ANSWER-WEAKEN | D9:110101101 ANSWER-WEAKEN",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110101",
+      "legacy_identity": "identity:10110101/surface:answer-atom",
+      "legacy_name": "answer-atom",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:111000000 ANSWER-ATOM | D9:111000000 ANSWER-ATOM",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110110",
+      "legacy_identity": "identity:10110110/surface:answer-eq",
+      "legacy_name": "answer-eq",
+      "classification": "DIRECT-CURRENT-IDENTITY",
+      "current_target": "D9:110110001 ANSWER-EQ | D9:110110001 ANSWER-EQ",
+      "evidence": [
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-v1-semantic-inventory.json"
+      ],
+      "reason": "legacy English name is preserved as a source projection of an owner-ratified D9 resident",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10110111",
+      "legacy_identity": "identity:10110111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111000",
+      "legacy_identity": "identity:10111000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111001",
+      "legacy_identity": "identity:10111001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111010",
+      "legacy_identity": "identity:10111010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111011",
+      "legacy_identity": "identity:10111011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111100",
+      "legacy_identity": "identity:10111100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111101",
+      "legacy_identity": "identity:10111101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111110",
+      "legacy_identity": "identity:10111110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "10111111",
+      "legacy_identity": "identity:10111111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000000",
+      "legacy_identity": "identity:11000000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000001",
+      "legacy_identity": "identity:11000001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000010",
+      "legacy_identity": "identity:11000010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000011",
+      "legacy_identity": "identity:11000011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000100",
+      "legacy_identity": "identity:11000100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000101",
+      "legacy_identity": "identity:11000101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000110",
+      "legacy_identity": "identity:11000110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11000111",
+      "legacy_identity": "identity:11000111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001000",
+      "legacy_identity": "identity:11001000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001001",
+      "legacy_identity": "identity:11001001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001010",
+      "legacy_identity": "identity:11001010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001011",
+      "legacy_identity": "identity:11001011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001100",
+      "legacy_identity": "identity:11001100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001101",
+      "legacy_identity": "identity:11001101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001110",
+      "legacy_identity": "identity:11001110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11001111",
+      "legacy_identity": "identity:11001111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010000",
+      "legacy_identity": "identity:11010000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010001",
+      "legacy_identity": "identity:11010001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010010",
+      "legacy_identity": "identity:11010010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010011",
+      "legacy_identity": "identity:11010011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010100",
+      "legacy_identity": "identity:11010100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010101",
+      "legacy_identity": "identity:11010101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010110",
+      "legacy_identity": "identity:11010110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11010111",
+      "legacy_identity": "identity:11010111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011000",
+      "legacy_identity": "identity:11011000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011001",
+      "legacy_identity": "identity:11011001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011010",
+      "legacy_identity": "identity:11011010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011011",
+      "legacy_identity": "identity:11011011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011100",
+      "legacy_identity": "identity:11011100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011101",
+      "legacy_identity": "identity:11011101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011110",
+      "legacy_identity": "identity:11011110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11011111",
+      "legacy_identity": "identity:11011111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100000",
+      "legacy_identity": "identity:11100000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100001",
+      "legacy_identity": "identity:11100001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100010",
+      "legacy_identity": "identity:11100010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100011",
+      "legacy_identity": "identity:11100011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100100",
+      "legacy_identity": "identity:11100100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100101",
+      "legacy_identity": "identity:11100101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100110",
+      "legacy_identity": "identity:11100110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11100111",
+      "legacy_identity": "identity:11100111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101000",
+      "legacy_identity": "identity:11101000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101001",
+      "legacy_identity": "identity:11101001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101010",
+      "legacy_identity": "identity:11101010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101011",
+      "legacy_identity": "identity:11101011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101100",
+      "legacy_identity": "identity:11101100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101101",
+      "legacy_identity": "identity:11101101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101110",
+      "legacy_identity": "identity:11101110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11101111",
+      "legacy_identity": "identity:11101111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110000",
+      "legacy_identity": "identity:11110000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110001",
+      "legacy_identity": "identity:11110001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110010",
+      "legacy_identity": "identity:11110010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110011",
+      "legacy_identity": "identity:11110011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110100",
+      "legacy_identity": "identity:11110100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110101",
+      "legacy_identity": "identity:11110101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110110",
+      "legacy_identity": "identity:11110110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11110111",
+      "legacy_identity": "identity:11110111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111000",
+      "legacy_identity": "identity:11111000",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111001",
+      "legacy_identity": "identity:11111001",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111010",
+      "legacy_identity": "identity:11111010",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111011",
+      "legacy_identity": "identity:11111011",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111100",
+      "legacy_identity": "identity:11111100",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111101",
+      "legacy_identity": "identity:11111101",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111110",
+      "legacy_identity": "identity:11111110",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    },
+    {
+      "legacy_code": "11111111",
+      "legacy_identity": "identity:11111111",
+      "legacy_name": null,
+      "classification": "BLANK-UNUSED-CELL",
+      "current_target": null,
+      "evidence": [],
+      "reason": "no English semantic surface assigned in the historical Function8 table",
+      "legacy_coordinate_authority": "NONE"
+    }
+  ]
+}
