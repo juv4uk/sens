@@ -1,6 +1,6 @@
 {
   "schema": "domain-table-projection-d1-d6/v1",
-  "status": "human-projection-only",
+  "status": "superseded-intermediate",
   "authority": "knowledge/d1-d7-foundation.json#3572",
   "identity_rule": "projection never mints identity; exact bits + exact domain + ratified law remain authoritative",
   "columns": [
@@ -1567,5 +1567,7 @@
       ]
     }
   ],
-  "empty_marker": "()"
+  "empty_marker": "()",
+  "superseded_by": "lib/generated/domain-table-d1-d6.lisp",
+  "note": "No longer read by the D1-D6 table generator or CI; retained only as branch provenance during migration."
 }
