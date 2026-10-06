@@ -1,5 +1,5 @@
 ; Semantic -> x86-64 lowering projection.
-; Language meaning remains owned by Contract 11.7 + ratified exact-domain laws.
+; Language meaning remains owned by Contract 11.8 + ratified exact-domain laws.
 ; ISA identity/encoding remains owned by lib/machine/isa + lib/machine/encoding.
 ; Rows here only say how an already-existing semantic identity may be realized.
 ;
@@ -93,6 +93,25 @@
       (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
       (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
       (00100111 (00000001 add-r64-r64) (00000001 rax) (00000001 rcx))
+      (00100111 (00000001 ret)))))
+
+; #4001 bounded exact-D5 DIFFERENCE/TIMES witnesses. These routines only
+; describe machine forms. Selection is guarded below by exact D5 evaluation,
+; so SUB/IMUL are used only when inputs and the exact result all fit u64.
+(00001001 x86-lower-difference-u64-forms
+  (00001000 (left right)
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+      (00100111 (00000001 sub-r64-r64) (00000001 rax) (00000001 rcx))
+      (00100111 (00000001 ret)))))
+
+(00001001 x86-lower-times-u64-forms
+  (00001000 (left right)
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+      (00100111 (00000001 imul-r64-r64) (00000001 rax) (00000001 rcx))
       (00100111 (00000001 ret)))))
 
 ; #196 bounded conditional-growth witness for existing EQ + COND semantics.
@@ -231,18 +250,68 @@
       x86-pair-cell-bytes)))
 
 
-; #3989 current exact-domain CPU entry for the first migrated binary slice.
-; The caller passes an exact DomainIdentity value. No historical SID8 byte and
-; no surface spelling participates in dispatch. For now the only admitted
-; binary-u64 current route is D5:01010 PLUS, whose bounded integer fast path is
-; already witnessed by x86-lower-add-u64-forms.
+; #3989/#4001 current exact-domain D5 arithmetic entry.
+; The exact D5 operation itself computes the semantic result first. Native u64
+; forms are selected only when both inputs and that exact result are integers
+; in [0, 2^64-1]. Overflow, underflow, negative results and rational values
+; fail closed to exact-d5-fallback-required; they never inherit modulo-u64
+; machine semantics.
+(00001001 x86-current-d5-exact-binary-result
+  (00001000 (identity left right)
+    (00000111
+      ((00100010 identity 01010) (01010 left right))
+      ((00100010 identity 01011) (01011 left right))
+      ((00100010 identity 10110) (10110 left right))
+      (t (00000001 unsupported-current-domain-binary-u64)))))
+
+(00001001 x86-current-d5-u64-fast-path-safe?
+  (00001000 (identity left right)
+    (00000111
+      ((x86-admission-exact-integer? left)
+       (00000111
+         ((x86-admission-within-inclusive-integer-range?
+            left 0 18446744073709551615)
+          (00000111
+            ((x86-admission-exact-integer? right)
+             (00000111
+               ((x86-admission-within-inclusive-integer-range?
+                  right 0 18446744073709551615)
+                (10011100
+                  ((result
+                     (x86-current-d5-exact-binary-result
+                       identity left right)))
+                  (00000111
+                    ((00100010 result
+                       (00000001 unsupported-current-domain-binary-u64))
+                     (00000001 ()))
+                    ((x86-admission-exact-integer? result)
+                     (x86-admission-within-inclusive-integer-range?
+                       result 0 18446744073709551615))
+                    (t (00000001 ())))))
+               (t (00000001 ()))))
+            (t (00000001 ()))))
+         (t (00000001 ()))))
+      (t (00000001 ())))))
+
 (00001001 x86-lower-current-binary-u64-forms
   (00001000 (identity left right)
     (00000111
-      ((00100010 identity 01010)
-       (x86-lower-add-u64-forms left right))
+      ((00100010
+         (x86-current-d5-exact-binary-result identity left right)
+         (00000001 unsupported-current-domain-binary-u64))
+       (00000001 unsupported-current-domain-binary-u64))
+      ((x86-current-d5-u64-fast-path-safe? identity left right)
+       (00000111
+         ((00100010 identity 01010)
+          (x86-lower-add-u64-forms left right))
+         ((00100010 identity 01011)
+          (x86-lower-difference-u64-forms left right))
+         ((00100010 identity 10110)
+          (x86-lower-times-u64-forms left right))
+         (t
+          (00000001 unsupported-current-domain-binary-u64))))
       (t
-       (00000001 unsupported-current-domain-binary-u64)))))
+       (00000001 exact-d5-fallback-required)))))
 
 (00001001 x86-encode-current-binary-u64
   (00001000 (identity left right)
@@ -250,6 +319,8 @@
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-binary-u64))
          (00000001 unsupported-current-domain-binary-u64))
+        ((00100010 forms (00000001 exact-d5-fallback-required))
+         (00000001 exact-d5-fallback-required))
         (t
          (x86-encode-admitted-program forms))))))
 
