@@ -499,6 +499,24 @@ def build_legacy_sid_map(registry_path: Path, code_map):
     return out
 
 
+def build_registry_surface_sid_map(registry_path: Path):
+    """Map every admitted human/symbol surface spelling to its 8-bit function code."""
+    text = registry_path.read_text(encoding="utf-8")
+    out = {}
+    for sid, fields in _registry_rows(text):
+        for _namespace, value in fields:
+            if not value or value == "()":
+                continue
+            key = value.upper()
+            previous = out.get(key)
+            if previous is not None and previous != sid:
+                raise BinaryMigrationError(
+                    f"registry surface {value!r} maps to both {previous} and {sid}"
+                )
+            out[key] = sid
+    return out
+
+
 def build_text7_encoder(foundation, generated_projection: Path):
     generated = generated_projection.read_text(encoding="utf-8")
     slp = _extract_projection(generated, "SA_SLP1_ENCODE")
@@ -609,11 +627,18 @@ def _emit_item(out, words, need_separator):
     out.extend(words)
 
 
-def binary_rewrite(text, code_map, text7_candidates, legacy_sid_map=None):
+def binary_rewrite(
+    text,
+    code_map,
+    text7_candidates,
+    legacy_sid_map=None,
+    registry_surface_sid_map=None,
+):
     """Encode one source file as exact-width visible binary SENS words."""
     source = strip_comments(text)
     shadowed = {row["label"] for row in shadowing(source, code_map)}
     legacy_sid_map = legacy_sid_map or {}
+    registry_surface_sid_map = registry_surface_sid_map or {}
     current_words = {
         (entry.width, entry.bits): entry
         for entry in code_map.values()
@@ -775,10 +800,38 @@ def binary_rewrite(text, code_map, text7_candidates, legacy_sid_map=None):
         elif binary_head:
             if len(token) == 8:
                 migrated = legacy_sid_map.get(token)
-                if migrated is None:
-                    raise BinaryMigrationError(
-                        f"legacy 8-bit call head {token} has no admitted D3-D6 migration"
-                    )
+                if migrated is not None:
+                    out.append(migrated.bits)
+                    line, col = line_col(source, start)
+                    hits.append(Hit(
+                        line,
+                        col,
+                        migrated.label,
+                        migrated.bits,
+                        migrated.domain,
+                    ))
+                else:
+                    # Known compatibility function code: keep the exact W8
+                    # identity rather than misclassifying it as Text7.
+                    out.append(token)
+                    line, col = line_col(source, start)
+                    hits.append(Hit(
+                        line,
+                        col,
+                        token,
+                        token,
+                        "W8-COMPAT",
+                    ))
+            elif (len(token), token) in current_words:
+                out.append(token)
+            else:
+                raise BinaryMigrationError(
+                    f"binary call head {token} is not a current D3-D6 resident"
+                )
+        elif is_head and not quoted and upper in registry_surface_sid_map:
+            sid = registry_surface_sid_map[upper]
+            migrated = legacy_sid_map.get(sid)
+            if migrated is not None:
                 out.append(migrated.bits)
                 line, col = line_col(source, start)
                 hits.append(Hit(
@@ -788,12 +841,16 @@ def binary_rewrite(text, code_map, text7_candidates, legacy_sid_map=None):
                     migrated.bits,
                     migrated.domain,
                 ))
-            elif (len(token), token) in current_words:
-                out.append(token)
             else:
-                raise BinaryMigrationError(
-                    f"binary call head {token} is not a current D3-D6 resident"
-                )
+                out.append(sid)
+                line, col = line_col(source, start)
+                hits.append(Hit(
+                    line,
+                    col,
+                    token,
+                    sid,
+                    "W8-COMPAT",
+                ))
         else:
             out.extend(encode_text7_spelling(token, text7_candidates))
 
@@ -891,6 +948,11 @@ def main():
         if args.binary_mirror
         else None
     )
+    registry_surface_sid_map = (
+        build_registry_surface_sid_map(args.semantic_registry)
+        if args.binary_mirror
+        else None
+    )
 
     root = args.root.resolve()
     rows = []
@@ -909,6 +971,7 @@ def main():
                     code_map,
                     text7_candidates,
                     legacy_sid_map,
+                    registry_surface_sid_map,
                 )
                 if not converted.strip():
                     status = "empty"
