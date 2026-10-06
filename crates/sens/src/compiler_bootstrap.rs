@@ -129,6 +129,17 @@ fn encode_canonical_compiler_value(value: &Value, out: &mut Vec<u8>) -> Result<(
     Ok(())
 }
 
+/// Canonical binary representation for proof-carrying compiler evidence.
+///
+/// This is the exact representation hashed by `canonical_value_sha256_mechanism`.
+/// It admits only NIL, exact DomainIdentity, Symbol, String and Pair, and owns
+/// no compiler meaning or backend policy.
+pub fn compiler_evidence_canonical_bytes(value: &Value) -> Result<Vec<u8>, String> {
+    let mut encoded = Vec::new();
+    encode_canonical_compiler_value(value, &mut encoded)?;
+    Ok(encoded)
+}
+
 /// Narrow representation-only SHA-256 over compiler-evidence values.
 ///
 /// SENS chooses the value to hash. The mechanism admits only the ordinary
@@ -148,8 +159,7 @@ pub fn canonical_value_sha256_mechanism() -> Value {
             ));
         }
 
-        let mut encoded = Vec::new();
-        encode_canonical_compiler_value(&arguments[0], &mut encoded)
+        let encoded = compiler_evidence_canonical_bytes(&arguments[0])
             .map_err(|message| LanguageError::new(ErrorKind::Type, message, span))?;
         let digest = sha256_source(&encoded)
             .iter()
@@ -157,4 +167,39 @@ pub fn canonical_value_sha256_mechanism() -> Value {
             .collect::<String>();
         Ok(Value::String(Rc::from(digest)))
     }))
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compiler_evidence_binary_layout_is_stable() {
+        let identity = crate::CoreDomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b010).expect("D3 word")),
+        );
+        let value = Value::list([
+            Value::DomainIdentity(identity.into()),
+            Value::Symbol(Rc::from("x")),
+            Value::String(Rc::from("ok")),
+        ]);
+
+        let encoded =
+            compiler_evidence_canonical_bytes(&value).expect("compiler evidence encoding");
+
+        assert_eq!(
+            encoded,
+            vec![
+                0x04,
+                0x01, 0x03, 0x02,
+                0x04,
+                0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, b'x',
+                0x04,
+                0x03, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, b'o', b'k',
+                0x00,
+            ],
+            "compiler evidence encoding is a cross-substrate digest ABI"
+        );
+    }
 }
