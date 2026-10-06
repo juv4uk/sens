@@ -1,0 +1,2379 @@
+{
+  "schema": "d9-v1-semantic-inventory/v1",
+  "status": "RESEARCH-UNRATIFIED-PARTIAL",
+  "authority": "#3964 / #3965",
+  "date": "2026-10-06",
+  "domain": "D9",
+  "width": 9,
+  "capacity": 512,
+  "foundation": "#3960 / Contract 11.7",
+  "sources": [
+    "knowledge/d9-selector-seed.json",
+    "knowledge/d9-overflow-review-v1.json"
+  ],
+  "accounting": {
+    "selected_semantic_candidates": 148,
+    "law_forced_coordinates": 128,
+    "unplaced_selected_candidates": 20,
+    "remaining_semantic_inventory": 364,
+    "ratified_d9_residents": 0
+  },
+  "rules": [
+    "semantic selection is separate from coordinate placement",
+    "derivable does not imply excluded",
+    "exact D1-D8 semantic duplicates are excluded",
+    "human-name equality alone does not prove semantic duplication",
+    "unplaced selected candidates consume semantic-inventory capacity but no coordinate authority",
+    "D9 remains unratified until explicit owner decision"
+  ],
+  "rows": [
+    {
+      "stable_id": "d9.review.0364ee983da2300d",
+      "semantic_name": "OPEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "open a named file or stream object for reading or writing",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.1621e2bb444e196a",
+      "semantic_name": "CLOSE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "close an open stream and release its resource",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.2be63d1ed50b2af8",
+      "semantic_name": "DEHANDLER",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "remove the innermost condition handler",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.3bc92ae4c4d1f1dd",
+      "semantic_name": "FFI-CALL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "call a foreign procedure across a typed ABI boundary",
+      "provenance": [
+        "Lisp Machine FFI",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.476f359358f384ab",
+      "semantic_name": "&WHOLE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "bind the entire original argument list",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.64db395c20b8cedf",
+      "semantic_name": "SYMBOL-MACRO",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "a name-level macro that yields a form without evaluation",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.6b06443e9bf925a7",
+      "semantic_name": "MACRO-FUNCTION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "access the expansion function of a macro name",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.7537894f89a67cbe",
+      "semantic_name": "COMPILER-MACRO",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "compiler-time rewrite hook attached to an operator name",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.795b7e18545ed97c",
+      "semantic_name": "NUNION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "destructive union sharing structure where possible",
+      "provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.79ca622ff9fca1d4",
+      "semantic_name": "DEFINE-COMPILER-MACRO",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "declare a compiler macro at a name",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.7d4262ddb5101167",
+      "semantic_name": "WITH-OPEN-FILE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "open, bind lexically and close on scope exit",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.9443748470add6d9",
+      "semantic_name": "ARGLIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "access the evaluated variadic argument list",
+      "provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.94630545116f9ad9",
+      "semantic_name": "ROW-MAJOR-AREF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "retrieve an element by row-major index",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.b1fb10409833516e",
+      "semantic_name": "DEFINE-SYMBOL-MACRO",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "declare a symbol macro at a name",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.b69642a1c58485bb",
+      "semantic_name": "ERROR-IF-NOT-ERROR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "transfer control only when an error is being handled",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.bb917ffbcc0a55e0",
+      "semantic_name": "DRIBBLE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "tee the console input/output transcript into a file",
+      "provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.bbcd3b98a8c2a4f1",
+      "semantic_name": "NRECONC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "destructive reconciliation of two ordered lists",
+      "provenance": [
+        "MacLisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.d8c2ce0fed701331",
+      "semantic_name": "DEFINE-CONDITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "define a named condition type for the condition system",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.e11b2f44569bd044",
+      "semantic_name": "DEFSTRUCT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "define a structure type with constructor and accessors",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.review.e44e9b93029bb356",
+      "semantic_name": "DEFTYPE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "D8-OVERFLOW-RECOVERY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HISTORICAL-CAPABILITY",
+      "behavior": "define a named type specifier",
+      "provenance": [
+        "Common Lisp",
+        "#2934"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.38666895d53a035b",
+      "semantic_name": "CDAAAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.38711e95d5438d22",
+      "semantic_name": "CDAAAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.63aee395edbc0000",
+      "semantic_name": "CDAAAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.63a53595edb436d1",
+      "semantic_name": "CDAAAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.7e5ffab155a495fe",
+      "semantic_name": "CDAAADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.7e70f4b155b2feff",
+      "semantic_name": "CDAAADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9863b7b1646331d1",
+      "semantic_name": "CDAAADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.986d65b1646afb00",
+      "semantic_name": "CDAAADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011000111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.386e11082ea9d794",
+      "semantic_name": "CDAADAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.387f13082eb84e2d",
+      "semantic_name": "CDAADAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.50bece083bf6dee7",
+      "semantic_name": "CDAADADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.50adb4083be83f86",
+      "semantic_name": "CDAADADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4707a731d3ecf951",
+      "semantic_name": "CDAADDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.47115531d3f4c280",
+      "semantic_name": "CDAADDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2d03ea31c52e5d7e",
+      "semantic_name": "CDAADDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDAADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2d14e431c53cc67f",
+      "semantic_name": "CDAADDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011001111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDAADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.28e8efddfb7eb652",
+      "semantic_name": "CDADAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.28deb9ddfb76060b",
+      "semantic_name": "CDADAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.fd9ff4dde2fbe02d",
+      "semantic_name": "CDADAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.fd8ef2dde2ed6994",
+      "semantic_name": "CDADAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.37821e07a0c12757",
+      "semantic_name": "CDADADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.37714407a0b2f4b6",
+      "semantic_name": "CDADADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1d7ee10792036504",
+      "semantic_name": "CDADADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1d8fe3079211db9d",
+      "semantic_name": "CDADADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011010111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2636cb96bcec5119",
+      "semantic_name": "CDADDAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.26411996bcf52a28",
+      "semantic_name": "CDADDAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0c338e96ae2e8ec6",
+      "semantic_name": "CDADDADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0c44a896ae3d2e27",
+      "semantic_name": "CDADDADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.15eab56d1638745c",
+      "semantic_name": "CDADDDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.15fbb76d1646eaf5",
+      "semantic_name": "CDADDDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2fedf26d24f636af",
+      "semantic_name": "CDADDDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDADDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.2fdcf86d24e7cdae",
+      "semantic_name": "CDADDDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011011111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDADDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.cd120c5e61848320",
+      "semantic_name": "CDDAAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.cd07de5e617be071",
+      "semantic_name": "CDDAAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a1c9115e4901acfb",
+      "semantic_name": "CDDAAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a1d3475e490a5d42",
+      "semantic_name": "CDDAAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dbd5824555187a15",
+      "semantic_name": "CDDAADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dbc48045550a037c",
+      "semantic_name": "CDDAADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.071e9d456d9b869a",
+      "semantic_name": "CDDAADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.071447456d929ff3",
+      "semantic_name": "CDDAADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011100111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bc506a9a91980e2f",
+      "semantic_name": "CDDADAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bc3f709a9189a52e",
+      "semantic_name": "CDDADAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a24d2d9a82da4bdc",
+      "semantic_name": "CDDADADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a25e2f9a82e8c275",
+      "semantic_name": "CDDADADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.adb71c70ec5566ca",
+      "semantic_name": "CDDADDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.adad0670ec4cece3",
+      "semantic_name": "CDDADDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.826e8170d3d333c5",
+      "semantic_name": "CDDADDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.825d7f70d3c4bd2c",
+      "semantic_name": "CDDADDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011101111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.33000d18b0b0c7c1",
+      "semantic_name": "CDDDAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.330abb18b0ba43f0",
+      "semantic_name": "CDDDAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.18fd5018a1f3deee",
+      "semantic_name": "CDDDAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.190e4a18a20247ef",
+      "semantic_name": "CDDDAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.22b3b6ef09fc7e44",
+      "semantic_name": "CDDDADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.22c4b8ef0a0af4dd",
+      "semantic_name": "CDDDADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3cb6f3ef18ba4097",
+      "semantic_name": "CDDDADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3ca619ef18ac0df6",
+      "semantic_name": "CDDDADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011110111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dc97358894afb1fa",
+      "semantic_name": "CDDDDAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.dc8d5f8894a7a4d3",
+      "semantic_name": "CDDDDAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.b14e9a887c2d7ef5",
+      "semantic_name": "CDDDDADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.b13d98887c1f085c",
+      "semantic_name": "CDDDDADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.ece3c3b23b645a9f",
+      "semantic_name": "CDDDDDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.ecd2c9b23b55f19e",
+      "semantic_name": "CDDDDDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d2e006b22ca5becc",
+      "semantic_name": "CDDDDDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CDDDDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d2f108b22cb43565",
+      "semantic_name": "CDDDDDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "011111111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CDDDDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.59add05bbe501cee",
+      "semantic_name": "CAAAAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.59beca5bbe5e85ef",
+      "semantic_name": "CAAAAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.73b08d5bcd0d05c1",
+      "semantic_name": "CAAAAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.73bb3b5bcd1681f0",
+      "semantic_name": "CAAAAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bd2efe4525e3c88b",
+      "semantic_name": "CAAAADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bd39344525ec78d2",
+      "semantic_name": "CAAAADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.e877b9453e6631f0",
+      "semantic_name": "CAAAADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.e86d0b453e5cb5c1",
+      "semantic_name": "CAAAADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100000111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.48ec6e97ee6414bd",
+      "semantic_name": "CAAADAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.48db6c97ee559e24",
+      "semantic_name": "CAAADAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.7435299806e67e22",
+      "semantic_name": "CAAADADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.742a739806dcf45b",
+      "semantic_name": "CAAADADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a28b8b0facfb108",
+      "semantic_name": "CAAADDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a1deab0fac5fe79",
+      "semantic_name": "CAAADDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0ee01db0e24d7e03",
+      "semantic_name": "CAAADDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAAADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0eea33b0e255f7ea",
+      "semantic_name": "CAAADDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100001111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAAADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d4d90ba9b5e9e4cf",
+      "semantic_name": "CAADAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.d4c811a9b5db7bce",
+      "semantic_name": "CAADAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bad54ea9a72b48fc",
+      "semantic_name": "CAADAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.bae650a9a739bf95",
+      "semantic_name": "CAADAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.c7f2bd801218d1ea",
+      "semantic_name": "CAADADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.c7e8a78012105803",
+      "semantic_name": "CAADADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9ca9a27ff995c565",
+      "semantic_name": "CAADADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9c98a07ff9874ecc",
+      "semantic_name": "CAADADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100010111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a57ad6ff9d4d5c0",
+      "semantic_name": "CAADDAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3a4cff6ff9cb5991",
+      "semantic_name": "CAADDAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0f0f326fe152d91b",
+      "semantic_name": "CAADDADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.0f18e86fe15aafe2",
+      "semantic_name": "CAADDADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4acea356eedb3ab5",
+      "semantic_name": "CAADDDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4abda156eeccc41c",
+      "semantic_name": "CAADDDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.76173e57075d6dba",
+      "semantic_name": "CAADDDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CAADDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.760c68570753ad93",
+      "semantic_name": "CAADDDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100011111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CAADDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a09d90336a33ce11",
+      "semantic_name": "CADAAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.a0a83e336a3d4a40",
+      "semantic_name": "CADAAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADAAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.869ad3335b76e53e",
+      "semantic_name": "CADAAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.86abcd335b854e3f",
+      "semantic_name": "CADAAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADAAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9204fa09c4f25f54",
+      "semantic_name": "CADAADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.9215fc09c500d5ed",
+      "semantic_name": "CADAADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADAADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.adbab709d520dca7",
+      "semantic_name": "CADAADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.ada99d09d5123d46",
+      "semantic_name": "CADAADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100100111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADAADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4e91b47834c6044a",
+      "semantic_name": "CADADAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4e879e7834bd8a63",
+      "semantic_name": "CADADAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADADAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.234919781c43d145",
+      "semantic_name": "CADADADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.233817781c355aac",
+      "semantic_name": "CADADADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADADADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.5d2b02a1da08abaf",
+      "semantic_name": "CADADDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.5d1a08a1d9fa42ae",
+      "semantic_name": "CADADDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADADDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4327c5a1cb4ae95c",
+      "semantic_name": "CADADDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4338c7a1cb595ff5",
+      "semantic_name": "CADADDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100101111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADADDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3c624f791c78b130",
+      "semantic_name": "CADDAAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.3c58a1791c70e801",
+      "semantic_name": "CADDAAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDAAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1119947903f647cb",
+      "semantic_name": "CADDAADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.1123ca7903fef812",
+      "semantic_name": "CADDAADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDAADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4cd90560117ea965",
+      "semantic_name": "CADDADAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4cc80360117032cc",
+      "semantic_name": "CADDADADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDADAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.782220602a01b5ea",
+      "semantic_name": "CADDADDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.78180a6029f93c03",
+      "semantic_name": "CADDADDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100110111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDADDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.82116db7c1fd92ff",
+      "semantic_name": "CADDDAAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111000",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.820073b7c1ef29fe",
+      "semantic_name": "CADDDAADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111001",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDAAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.665b30b7b1ce3c2c",
+      "semantic_name": "CADDDADAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111010",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.666c32b7b1dcb2c5",
+      "semantic_name": "CADDDADDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111011",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDADR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.73785f8e1cbb585a",
+      "semantic_name": "CADDDDAAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111100",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.736e098e1cb271b3",
+      "semantic_name": "CADDDDADR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111101",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDDAR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.4830448e0439fed5",
+      "semantic_name": "CADDDDDAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111110",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CAR after the D8 selector path represented by CADDDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d9.sel.481f428e042b883c",
+      "semantic_name": "CADDDDDDR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SELECTOR-GENERATOR",
+      "coordinate": "100111111",
+      "coordinate_basis": "PROVED-SELECTOR-GENERATOR",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "behavior": "compose CDR after the D8 selector path represented by CADDDDDR",
+      "provenance": [
+        "#3960",
+        "#3964",
+        "knowledge/d8-ratified.json"
+      ],
+      "ratified_resident": false
+    }
+  ]
+}

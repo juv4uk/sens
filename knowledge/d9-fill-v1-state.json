@@ -63,5 +63,12 @@
     "selected": 20,
     "hold": 11,
     "rejected_exact_lower_duplicate": 3
+  },
+  "semantic_inventory": {
+    "artifact": "knowledge/d9-v1-semantic-inventory.json",
+    "selected": 148,
+    "law_forced_coordinates": 128,
+    "unplaced_selected": 20,
+    "remaining": 364
   }
 }
