@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "benchmarks/d8-do-while-product/**"
+      - "docs/research/3770-d8-do-while-product.uk.md"
       - "knowledge/d6-ratified.json"
       - ".github/workflows/d8-do-while-product.yml"
   push:
