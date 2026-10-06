@@ -113,10 +113,10 @@ def validate_compact_uk(rows) -> None:
         if "-на-місці" in row.uk:
             fail(f"{row.domain}:{row.bits}: compact uk must use ! instead of -на-місці")
 
-        if row.uk.startswith("звук-") or row.uk.startswith("текст-"):
+        if row.domain == "D7" and (row.uk.startswith("звук-") or row.uk.startswith("текст-")):
             fail(f"{row.domain}:{row.bits}: compact uk must omit redundant D7 context prefix")
 
-        if row.uk.startswith("український-"):
+        if row.domain == "D7" and row.uk.startswith("український-"):
             fail(f"{row.domain}:{row.bits}: compact uk should use the stable укр- prefix")
 
         if row.ukr and "на-місці" in row.ukr and not row.uk.endswith("!"):
