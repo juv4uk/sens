@@ -5,9 +5,9 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 d=json.loads((root/"knowledge/d8-ratified.json").read_text(encoding="utf-8"))
 source=json.loads((root/"knowledge/d8-v2-gauge-fixed-candidate.json").read_text(encoding="utf-8"))
-foundation=json.loads((root/"knowledge/d1-d8-foundation.json").read_text(encoding="utf-8"))
+foundation=json.loads((root/"knowledge/d1-d9-foundation.json").read_text(encoding="utf-8"))
 contract=(root/"contracts/d8-ratification.lisp").read_text(encoding="utf-8")
-foundation_contract=(root/"contracts/d1-d8-foundation-ratification.lisp").read_text(encoding="utf-8")
+foundation_contract=(root/"contracts/d1-d9-foundation-ratification.lisp").read_text(encoding="utf-8")
 lang=(root/"language-contract.lisp").read_text(encoding="utf-8")
 current=(root/"CURRENT.md").read_text(encoding="utf-8")
 domain_identity=(root/"crates/sens/src/domain_identity.rs").read_text(encoding="utf-8")
@@ -36,8 +36,8 @@ assert basis.count("owner-ratified-product-invariant")==8
 assert basis.count("owner-ratified-orbit-gauge-choice")==7
 assert basis.count("owner-ratified-s4-gauge-choice")==177
 
-assert foundation["authority"]=="#3960"
-assert foundation["current_domains"]==["D1","D2","D3","D4","D5","D6","D7","D8"]
+assert foundation["authority"]=="#4008"
+assert foundation["current_domains"]==["D1","D2","D3","D4","D5","D6","D7","D8","D9"]
 assert foundation["research_domains"]==[]
 assert foundation["domains"]["D8"]["residents"]==d["residents"]
 
@@ -46,10 +46,10 @@ assert "(width . #d8)" in contract
 assert "(capacity . #d256)" in contract
 assert "(occupancy . #d256)" in contract
 assert "(distinct-residents . #d256)" in contract
-assert "(current-domains . (D1 D2 D3 D4 D5 D6 D7 D8))" in foundation_contract
+assert "(current-domains . (D1 D2 D3 D4 D5 D6 D7 D8 D9))" in foundation_contract
 
-assert "(minor . 7)" in lang
-assert "Contract 11.7" in lang
+assert "(minor . 8)" in lang
+assert "Contract 11.8" in lang
 assert "Core.D8 is OWNER-RATIFIED 256/256 under #3960" in lang
 assert "D8  full compact 256/256" in current
 
