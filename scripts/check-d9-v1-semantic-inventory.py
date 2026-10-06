@@ -55,6 +55,12 @@ if surface_path.exists():
     surface_ids={r["stable_id"] for r in surface["rows"] if r["selected_d9_candidate"]}
     assert surface_ids <= unplaced_ids
 
+library_path=root/"knowledge/d9-library-harvest-v1.json"
+if library_path.exists():
+    library=json.loads(library_path.read_text(encoding="utf-8"))
+    library_ids={r["stable_id"] for r in library["rows"] if r["selected_d9_candidate"]}
+    assert library_ids <= unplaced_ids
+
 for name in ("APPLY","COMPOSE","REDUCE"):
     assert name not in {r["semantic_name"] for r in rows}
 

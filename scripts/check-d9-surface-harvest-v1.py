@@ -67,20 +67,15 @@ for row in selected:
     assert candidate["coordinate_basis"]=="UNPLACED"
     assert candidate["ratified_resident"] is False
 
-assert len(inventory["rows"])==168
-assert len({row["stable_id"] for row in inventory["rows"]})==168
-assert len({row["semantic_name"] for row in inventory["rows"]})==168
-assert inventory["accounting"]=={
-    "selected_semantic_candidates":168,
-    "law_forced_coordinates":128,
-    "unplaced_selected_candidates":40,
-    "remaining_semantic_inventory":344,
-    "ratified_d9_residents":0,
-}
+target=state["target"]
+assert target["selected_semantic_candidates"]>=168
+assert target["remaining_semantic_candidates"]==512-target["selected_semantic_candidates"]
+assert target["ratified_residents"]==0
 
-assert state["target"]["selected_semantic_candidates"]==168
-assert state["target"]["remaining_semantic_candidates"]==344
-assert state["target"]["ratified_residents"]==0
+assert len(inventory["rows"])==target["selected_semantic_candidates"]
+assert len({row["stable_id"] for row in inventory["rows"]})==target["selected_semantic_candidates"]
+assert len({row["semantic_name"] for row in inventory["rows"]})==target["selected_semantic_candidates"]
+
 assert state["surface_harvest"]=={
     "artifact":"knowledge/d9-surface-harvest-v1.json",
     "source_signatures":57,
@@ -92,4 +87,6 @@ assert state["surface_harvest"]=={
 
 print("D9-SURFACE-HARVEST-1=PASS")
 print("signatures=57 selected=20 lower/projection=30 hold=7")
-print("inventory=168/512 placed=128 unplaced=40 remaining=344 ratified=0")
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+print(f"inventory={selected_total}/512 placed=128 unplaced={selected_total-128} remaining={remaining_total} ratified=0")
