@@ -17,6 +17,7 @@ SPEC.loader.exec_module(mod)
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
+REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 
 
 class SensCodeMigrationTests(unittest.TestCase):
@@ -26,6 +27,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         cls.data = data
         cls.code_map = mod.build_map(data, ["D3", "D4", "D5", "D6"])
         cls.text7 = mod.build_text7_encoder(data, TEXT7)
+        cls.legacy = mod.build_legacy_sid_map(REGISTRY, cls.code_map)
 
     def test_current_d3_authority_is_used(self):
         self.assertEqual(self.code_map["CAR"].bits, "100")
@@ -53,6 +55,45 @@ class SensCodeMigrationTests(unittest.TestCase):
         )
         self.assertEqual([hit.label for hit in hits], ["CONS", "CAR", "CDR"])
         self.assertFalse(shadowed)
+
+    def test_legacy_sid8_call_heads_migrate_to_current_domains(self):
+        cases = {
+            "00000101": ("100", "CAR"),
+            "00001001": ("0011", "DEFINE"),
+            "00001100": ("01010", "PLUS"),
+            "00110111": ("101000", "MAP"),
+        }
+        for sid8, (current, label) in cases.items():
+            converted, hits, _ = mod.binary_rewrite(
+                f"({sid8} x)\n",
+                self.code_map,
+                self.text7,
+                self.legacy,
+            )
+            self.assertTrue(
+                converted.startswith(f"10 {current} 00 "),
+                (sid8, converted),
+            )
+            self.assertEqual(hits[0].label, label)
+
+    def test_unmapped_legacy_sid8_call_head_fails_closed(self):
+        # Legacy PRINT has no ratified D3-D6 coordinate in the current foundation.
+        with self.assertRaises(mod.BinaryMigrationError):
+            mod.binary_rewrite(
+                "(01001000 x)\n",
+                self.code_map,
+                self.text7,
+                self.legacy,
+            )
+
+    def test_current_exact_width_head_is_preserved(self):
+        converted, _, _ = mod.binary_rewrite(
+            "(100 x)\n",
+            self.code_map,
+            self.text7,
+            self.legacy,
+        )
+        self.assertTrue(converted.startswith("10 100 00 "))
 
     def test_comments_are_absent_and_do_not_change_binary_output(self):
         commented = """; outside
