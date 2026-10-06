@@ -377,14 +377,15 @@
       "source": "#3783 recovered",
       "merge_state": "replay-in-recovery-branch",
       "novel_semantics": [
-        "orientation-derived association semantics"
+        "ACONS-SWAPPED"
       ],
       "geometric_coordinates": "preserved in witness",
       "ladder_coordinates": null,
       "ladder_disposition": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
       "derivation": "orientation-generated association semantics",
       "previous_ladder_disposition": "GENERATED/DERIVED-NO-SLOT",
-      "correction": "#3949"
+      "correction": "#3949",
+      "precise_name_recovered_from": "#3741"
     },
     {
       "family": "NTH/MAPLIST × traversal direction",
@@ -695,10 +696,11 @@
       "status": "STRUCTURAL-D8-CANDIDATE-RESIDENCY-OPEN",
       "geometric_coordinates": "preserved in witness",
       "novel_semantics": [
-        "orientation-derived association semantics"
+        "ACONS-SWAPPED"
       ],
       "protocol_limit": null,
-      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency."
+      "note": "Structural/geometric evidence remains first-class; no automatic exclusion from D8 residency.",
+      "precise_name_recovered_from": "#3741"
     },
     {
       "family": "NTH/MAPLIST × traversal direction",

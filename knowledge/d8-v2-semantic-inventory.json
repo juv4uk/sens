@@ -34,7 +34,7 @@
   },
   "rows": [
     {
-      "stable_id": "d8.sel.10100000",
+      "stable_id": "d8.sel.10000000",
       "semantic_name": "CAAAAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -47,16 +47,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100000"
+        "10000000"
       ],
       "historical_donor_coordinate": "10100000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10100001",
+      "stable_id": "d8.sel.10000001",
       "semantic_name": "CAAAAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -69,16 +69,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100001"
+        "10000001"
       ],
       "historical_donor_coordinate": "10100001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10100010",
+      "stable_id": "d8.sel.10000010",
       "semantic_name": "CAAAADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -91,16 +91,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100010"
+        "10000010"
       ],
       "historical_donor_coordinate": "10100010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10100011",
+      "stable_id": "d8.sel.10000011",
       "semantic_name": "CAAAADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -113,16 +113,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100011"
+        "10000011"
       ],
       "historical_donor_coordinate": "10100011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10100100",
+      "stable_id": "d8.sel.10000100",
       "semantic_name": "CAAADAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -135,16 +135,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100100"
+        "10000100"
       ],
       "historical_donor_coordinate": "10100100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10100101",
+      "stable_id": "d8.sel.10000101",
       "semantic_name": "CAAADADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -157,16 +157,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100101"
+        "10000101"
       ],
       "historical_donor_coordinate": "10100101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10100110",
+      "stable_id": "d8.sel.10000110",
       "semantic_name": "CAAADDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -179,16 +179,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100110"
+        "10000110"
       ],
       "historical_donor_coordinate": "10100110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10100111",
+      "stable_id": "d8.sel.10000111",
       "semantic_name": "CAAADDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -201,16 +201,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10100111"
+        "10000111"
       ],
       "historical_donor_coordinate": "10100111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10100111 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101000",
+      "stable_id": "d8.sel.10001000",
       "semantic_name": "CAADAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -223,16 +223,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101000"
+        "10001000"
       ],
       "historical_donor_coordinate": "10101000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101001",
+      "stable_id": "d8.sel.10001001",
       "semantic_name": "CAADAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -245,16 +245,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101001"
+        "10001001"
       ],
       "historical_donor_coordinate": "10101001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101010",
+      "stable_id": "d8.sel.10001010",
       "semantic_name": "CAADADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -267,16 +267,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101010"
+        "10001010"
       ],
       "historical_donor_coordinate": "10101010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101011",
+      "stable_id": "d8.sel.10001011",
       "semantic_name": "CAADADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -289,16 +289,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101011"
+        "10001011"
       ],
       "historical_donor_coordinate": "10101011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101100",
+      "stable_id": "d8.sel.10001100",
       "semantic_name": "CAADDAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -311,16 +311,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101100"
+        "10001100"
       ],
       "historical_donor_coordinate": "10101100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101101",
+      "stable_id": "d8.sel.10001101",
       "semantic_name": "CAADDADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -333,16 +333,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101101"
+        "10001101"
       ],
       "historical_donor_coordinate": "10101101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101110",
+      "stable_id": "d8.sel.10001110",
       "semantic_name": "CAADDDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -355,16 +355,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101110"
+        "10001110"
       ],
       "historical_donor_coordinate": "10101110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10101111",
+      "stable_id": "d8.sel.10001111",
       "semantic_name": "CAADDDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -377,16 +377,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10101111"
+        "10001111"
       ],
       "historical_donor_coordinate": "10101111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10101111 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110000",
+      "stable_id": "d8.sel.10010000",
       "semantic_name": "CADAAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -399,16 +399,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110000"
+        "10010000"
       ],
       "historical_donor_coordinate": "10110000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110001",
+      "stable_id": "d8.sel.10010001",
       "semantic_name": "CADAAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -421,16 +421,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110001"
+        "10010001"
       ],
       "historical_donor_coordinate": "10110001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110010",
+      "stable_id": "d8.sel.10010010",
       "semantic_name": "CADAADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -443,16 +443,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110010"
+        "10010010"
       ],
       "historical_donor_coordinate": "10110010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110011",
+      "stable_id": "d8.sel.10010011",
       "semantic_name": "CADAADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -465,16 +465,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110011"
+        "10010011"
       ],
       "historical_donor_coordinate": "10110011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110100",
+      "stable_id": "d8.sel.10010100",
       "semantic_name": "CADADAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -487,16 +487,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110100"
+        "10010100"
       ],
       "historical_donor_coordinate": "10110100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110101",
+      "stable_id": "d8.sel.10010101",
       "semantic_name": "CADADADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -509,16 +509,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110101"
+        "10010101"
       ],
       "historical_donor_coordinate": "10110101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110110",
+      "stable_id": "d8.sel.10010110",
       "semantic_name": "CADADDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -531,16 +531,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110110"
+        "10010110"
       ],
       "historical_donor_coordinate": "10110110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10110111",
+      "stable_id": "d8.sel.10010111",
       "semantic_name": "CADADDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -553,16 +553,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10110111"
+        "10010111"
       ],
       "historical_donor_coordinate": "10110111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10110111 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111000",
+      "stable_id": "d8.sel.10011000",
       "semantic_name": "CADDAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -575,16 +575,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111000"
+        "10011000"
       ],
       "historical_donor_coordinate": "10111000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111001",
+      "stable_id": "d8.sel.10011001",
       "semantic_name": "CADDAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -597,16 +597,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111001"
+        "10011001"
       ],
       "historical_donor_coordinate": "10111001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111010",
+      "stable_id": "d8.sel.10011010",
       "semantic_name": "CADDADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -619,16 +619,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111010"
+        "10011010"
       ],
       "historical_donor_coordinate": "10111010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111011",
+      "stable_id": "d8.sel.10011011",
       "semantic_name": "CADDADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -641,16 +641,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111011"
+        "10011011"
       ],
       "historical_donor_coordinate": "10111011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111100",
+      "stable_id": "d8.sel.10011100",
       "semantic_name": "CADDDAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -663,16 +663,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111100"
+        "10011100"
       ],
       "historical_donor_coordinate": "10111100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111101",
+      "stable_id": "d8.sel.10011101",
       "semantic_name": "CADDDADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -685,16 +685,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111101"
+        "10011101"
       ],
       "historical_donor_coordinate": "10111101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111110",
+      "stable_id": "d8.sel.10011110",
       "semantic_name": "CADDDDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -707,16 +707,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111110"
+        "10011110"
       ],
       "historical_donor_coordinate": "10111110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.10111111",
+      "stable_id": "d8.sel.10011111",
       "semantic_name": "CADDDDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -729,16 +729,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "10111111"
+        "10011111"
       ],
       "historical_donor_coordinate": "10111111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 10111111 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000000",
+      "stable_id": "d8.sel.01100000",
       "semantic_name": "CDAAAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -751,16 +751,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000000"
+        "01100000"
       ],
       "historical_donor_coordinate": "11000000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000001",
+      "stable_id": "d8.sel.01100001",
       "semantic_name": "CDAAAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -773,16 +773,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000001"
+        "01100001"
       ],
       "historical_donor_coordinate": "11000001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000010",
+      "stable_id": "d8.sel.01100010",
       "semantic_name": "CDAAADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -795,16 +795,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000010"
+        "01100010"
       ],
       "historical_donor_coordinate": "11000010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000011",
+      "stable_id": "d8.sel.01100011",
       "semantic_name": "CDAAADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -817,16 +817,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000011"
+        "01100011"
       ],
       "historical_donor_coordinate": "11000011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000100",
+      "stable_id": "d8.sel.01100100",
       "semantic_name": "CDAADAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -839,16 +839,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000100"
+        "01100100"
       ],
       "historical_donor_coordinate": "11000100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000101",
+      "stable_id": "d8.sel.01100101",
       "semantic_name": "CDAADADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -861,16 +861,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000101"
+        "01100101"
       ],
       "historical_donor_coordinate": "11000101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000110",
+      "stable_id": "d8.sel.01100110",
       "semantic_name": "CDAADDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -883,16 +883,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000110"
+        "01100110"
       ],
       "historical_donor_coordinate": "11000110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11000111",
+      "stable_id": "d8.sel.01100111",
       "semantic_name": "CDAADDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -905,16 +905,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11000111"
+        "01100111"
       ],
       "historical_donor_coordinate": "11000111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11000111 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001000",
+      "stable_id": "d8.sel.01101000",
       "semantic_name": "CDADAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -927,16 +927,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001000"
+        "01101000"
       ],
       "historical_donor_coordinate": "11001000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001001",
+      "stable_id": "d8.sel.01101001",
       "semantic_name": "CDADAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -949,16 +949,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001001"
+        "01101001"
       ],
       "historical_donor_coordinate": "11001001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001010",
+      "stable_id": "d8.sel.01101010",
       "semantic_name": "CDADADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -971,16 +971,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001010"
+        "01101010"
       ],
       "historical_donor_coordinate": "11001010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001011",
+      "stable_id": "d8.sel.01101011",
       "semantic_name": "CDADADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -993,16 +993,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001011"
+        "01101011"
       ],
       "historical_donor_coordinate": "11001011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001100",
+      "stable_id": "d8.sel.01101100",
       "semantic_name": "CDADDAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1015,16 +1015,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001100"
+        "01101100"
       ],
       "historical_donor_coordinate": "11001100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001101",
+      "stable_id": "d8.sel.01101101",
       "semantic_name": "CDADDADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1037,16 +1037,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001101"
+        "01101101"
       ],
       "historical_donor_coordinate": "11001101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001110",
+      "stable_id": "d8.sel.01101110",
       "semantic_name": "CDADDDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1059,16 +1059,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001110"
+        "01101110"
       ],
       "historical_donor_coordinate": "11001110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11001111",
+      "stable_id": "d8.sel.01101111",
       "semantic_name": "CDADDDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1081,16 +1081,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11001111"
+        "01101111"
       ],
       "historical_donor_coordinate": "11001111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11001111 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010000",
+      "stable_id": "d8.sel.01110000",
       "semantic_name": "CDDAAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1103,16 +1103,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010000"
+        "01110000"
       ],
       "historical_donor_coordinate": "11010000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010001",
+      "stable_id": "d8.sel.01110001",
       "semantic_name": "CDDAAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1125,16 +1125,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010001"
+        "01110001"
       ],
       "historical_donor_coordinate": "11010001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010010",
+      "stable_id": "d8.sel.01110010",
       "semantic_name": "CDDAADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1147,16 +1147,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010010"
+        "01110010"
       ],
       "historical_donor_coordinate": "11010010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010011",
+      "stable_id": "d8.sel.01110011",
       "semantic_name": "CDDAADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1169,16 +1169,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010011"
+        "01110011"
       ],
       "historical_donor_coordinate": "11010011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010100",
+      "stable_id": "d8.sel.01110100",
       "semantic_name": "CDDADAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1191,16 +1191,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010100"
+        "01110100"
       ],
       "historical_donor_coordinate": "11010100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010101",
+      "stable_id": "d8.sel.01110101",
       "semantic_name": "CDDADADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1213,16 +1213,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010101"
+        "01110101"
       ],
       "historical_donor_coordinate": "11010101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010110",
+      "stable_id": "d8.sel.01110110",
       "semantic_name": "CDDADDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1235,16 +1235,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010110"
+        "01110110"
       ],
       "historical_donor_coordinate": "11010110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11010111",
+      "stable_id": "d8.sel.01110111",
       "semantic_name": "CDDADDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1257,16 +1257,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11010111"
+        "01110111"
       ],
       "historical_donor_coordinate": "11010111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11010111 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011000",
+      "stable_id": "d8.sel.01111000",
       "semantic_name": "CDDDAAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1279,16 +1279,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011000"
+        "01111000"
       ],
       "historical_donor_coordinate": "11011000",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011000 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011001",
+      "stable_id": "d8.sel.01111001",
       "semantic_name": "CDDDAADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1301,16 +1301,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011001"
+        "01111001"
       ],
       "historical_donor_coordinate": "11011001",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011001 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011010",
+      "stable_id": "d8.sel.01111010",
       "semantic_name": "CDDDADAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1323,16 +1323,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011010"
+        "01111010"
       ],
       "historical_donor_coordinate": "11011010",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011010 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011011",
+      "stable_id": "d8.sel.01111011",
       "semantic_name": "CDDDADDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1345,16 +1345,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011011"
+        "01111011"
       ],
       "historical_donor_coordinate": "11011011",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011011 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011100",
+      "stable_id": "d8.sel.01111100",
       "semantic_name": "CDDDDAAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1367,16 +1367,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011100"
+        "01111100"
       ],
       "historical_donor_coordinate": "11011100",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011100 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011101",
+      "stable_id": "d8.sel.01111101",
       "semantic_name": "CDDDDADR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1389,16 +1389,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011101"
+        "01111101"
       ],
       "historical_donor_coordinate": "11011101",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011101 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011110",
+      "stable_id": "d8.sel.01111110",
       "semantic_name": "CDDDDDAR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1411,16 +1411,16 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011110"
+        "01111110"
       ],
       "historical_donor_coordinate": "11011110",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011110 preserved separately and has zero placement authority."
     },
     {
-      "stable_id": "d8.sel.11011111",
+      "stable_id": "d8.sel.01111111",
       "semantic_name": "CDDDDDDR",
       "source_class": "SELECTOR-LAW",
       "source_provenance": [
@@ -1433,13 +1433,13 @@
       "decision": "KEEP-IN-256",
       "coordinate_status": "LAW-FORCED-CANDIDATE",
       "coordinate_evidence": [
-        "11011111"
+        "01111111"
       ],
       "historical_donor_coordinate": "11011111",
       "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
       "derivability": "GENERATED",
       "necessity": "HIGH",
-      "notes": "Preserved from prior D8 selector work; D8 remains unratified."
+      "notes": "Current selector coordinate from #3646/#3673 under D3 roots CDR=011, CAR=100. Historical #2934 donor coordinate 11011111 preserved separately and has zero placement authority."
     },
     {
       "stable_id": "d8.recovery.rplaca",
@@ -2220,8 +2220,8 @@
       "notes": "Prior D8 structural research preserved."
     },
     {
-      "stable_id": "d8.struct.06.00.orientation-derived-association-semantics",
-      "semantic_name": "orientation-derived association semantics",
+      "stable_id": "d8.struct.06.00.acons-swapped",
+      "semantic_name": "ACONS-SWAPPED",
       "source_class": "STRUCTURAL-GEOMETRIC",
       "source_provenance": [
         "#3783 recovered",
@@ -2238,7 +2238,7 @@
       "lower_domain_comparison": "Generated/refined from RASSOC/ACONS × association orientation; derivability does not exclude residency.",
       "derivability": "GENERATED/STRUCTURAL",
       "necessity": "HIGH",
-      "notes": "Prior D8 structural research preserved."
+      "notes": "Prior D8 structural research preserved. Precise name recovered from #3741; previous generic label retained only in git history."
     },
     {
       "stable_id": "d8.struct.07.00.nth-right",
