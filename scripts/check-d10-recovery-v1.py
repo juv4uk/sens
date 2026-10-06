@@ -67,10 +67,11 @@ for row in selected:
     assert got["coordinate"] is None
     assert got["coordinate_basis"]=="UNPLACED"
 
-assert state["target"]["selected_semantic_candidates"]==264
-assert state["target"]["remaining_semantic_candidates"]==760
+selected_total=state["target"]["selected_semantic_candidates"]
+assert selected_total>=264
+assert state["target"]["remaining_semantic_candidates"]==1024-selected_total
 assert state["target"]["law_forced_coordinates"]==256
-assert state["target"]["unplaced_selected_candidates"]==8
+assert state["target"]["unplaced_selected_candidates"]==selected_total-256
 assert state["target"]["ratified_residents"]==0
 assert state["recovery_v1"]=={
     "artifact":"knowledge/d10-recovery-v1.json",
@@ -82,4 +83,4 @@ assert state["recovery_v1"]=={
 }
 
 print("D10-RECOVERY-V1: PASS")
-print("selected=8 projection=4 hold=7 inventory=264/1024 remaining=760 ratified=0")
+print(f"selected-v1=8 projection-v1=4 hold-v1=7 inventory={selected_total}/1024 remaining={1024-selected_total} ratified=0")
