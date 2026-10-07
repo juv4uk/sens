@@ -934,10 +934,35 @@ def binary_rewrite(
         resolved_label = None
 
         if is_head and not quoted:
-            if resolver is None:
-                raise BinaryMigrationError(
-                    "history-aware SourceResolver is required for binary migration"
-                )
+            # Canonical Contract source is already binary-authoritative. A bare
+            # binary token must be resolved by exact (domain,bits) first; never
+            # reinterpret a valid W8/D8 coordinate as historical SID8->D3/D4.
+            if contract_authority and re.fullmatch(r"[01]+", token):
+                exact = binary_authority.get((len(token), token))
+                if exact is None:
+                    raise BinaryMigrationError(
+                        f"unadmitted exact binary executable head {token!r}"
+                    )
+                if exact.domain not in CONTRACT_CALL_DOMAINS or exact.label == "EMPTY":
+                    raise BinaryMigrationError(
+                        f"non-callable authority resident used as executable head: "
+                        f"{exact.domain}:{exact.bits}"
+                    )
+                out.append(exact.bits)
+                resolved_label = exact.label
+                line, col = line_col(source, start)
+                hits.append(Hit(
+                    line,
+                    col,
+                    exact.label,
+                    exact.bits,
+                    exact.domain,
+                ))
+            else:
+                if resolver is None:
+                    raise BinaryMigrationError(
+                        "history-aware SourceResolver is required for binary migration"
+                    )
             resolution = resolver.resolve_head(token)
             if not resolution.resolved:
                 detail = (
