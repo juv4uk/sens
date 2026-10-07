@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, re
+import json
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 harvest=json.loads((root/"knowledge/d10-library-harvest-v1.json").read_text(encoding="utf-8"))
@@ -17,44 +17,34 @@ assert len(rows)==39 and len({r["stable_id"] for r in rows})==39
 assert all(r["coordinate"] is None for r in rows)
 
 inv_by_id={r["stable_id"]:r for r in inventory["rows"]}
-moved1={r["stable_id"]:r for r in ledger1["rows"]}
-moved2={r["stable_id"]:r for r in ledger2["rows"]}
-present=0
-reclassified_v1=0
-reclassified_v2=0
+historical1={r["stable_id"]:r for r in ledger1["rows"]}
+historical2={r["stable_id"]:r for r in ledger2["rows"]}
+
+# #4162 restores every language-visible row previously removed only for
+# package/domain ownership.  Historical ledgers remain immutable provenance.
 for row in rows:
-    in_core=row["stable_id"] in inv_by_id
-    in_v1=row["stable_id"] in moved1
-    in_v2=row["stable_id"] in moved2
-    assert sum((in_core,in_v1,in_v2))==1
-    if in_core:
-        present+=1
-    elif in_v1:
-        got=moved1[row["stable_id"]]
-        assert got["semantic_name"]==row["semantic_name"]
-        assert got["decision"]=="RECLASSIFIED-NONCORE"
-        reclassified_v1+=1
-    else:
-        got=moved2[row["stable_id"]]
-        assert got["semantic_name"]==row["semantic_name"]
-        assert got["decision"]=="RECLASSIFIED-NONCORE"
-        reclassified_v2+=1
-assert present==18
-assert reclassified_v1==6
-assert reclassified_v2==15
+    got=inv_by_id[row["stable_id"]]
+    assert got["semantic_name"]==row["semantic_name"]
+    assert got["coordinate"] is None
+    assert got["coordinate_basis"]=="UNPLACED"
+    assert got["ratified_resident"] is False
+
+assert sum(r["stable_id"] in historical1 for r in rows)==6
+assert sum(r["stable_id"] in historical2 for r in rows)==15
+assert len(rows)==39
 
 target=state["target"]
 selected_total=target["selected_semantic_candidates"]
 remaining_total=target["remaining_semantic_candidates"]
-assert selected_total>=256
-assert remaining_total==1024-selected_total
+assert selected_total==504
+assert remaining_total==520
 assert target["law_forced_coordinates"]==256
-assert target["unplaced_selected_candidates"]==selected_total-256
+assert target["unplaced_selected_candidates"]==248
 assert target["ratified_residents"]==0
 assert len(inventory["rows"])==selected_total
 assert len({r["stable_id"] for r in inventory["rows"]})==selected_total
 assert len({r["semantic_name"] for r in inventory["rows"]})==selected_total
 
-assert state["library_harvest_v1"]["selected"]==39
 print("D10-LIBRARY-HARVEST-V1=PASS")
-print(f"harvest=39 core=18 reclassified-v1=6 reclassified-v2=15 inventory={selected_total}/1024 remaining={remaining_total}")
+print("harvest=39 selected=39 historical-cleanup-v1=6 historical-cleanup-v2=15")
+print("inventory=504/1024 remaining=520 ratified=0")
