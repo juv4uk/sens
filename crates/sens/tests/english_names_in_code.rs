@@ -32,6 +32,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 fn repo_root() -> PathBuf {
@@ -115,7 +116,33 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
 }
 
 fn ratchet_enforced_kind(kind: &str) -> bool {
-    !matches!(kind, "rust-test-instrument" | "lisp-evidence")
+    !matches!(
+        kind,
+        "rust-test-instrument" | "lisp-evidence" | "rust-contract-data" | "rust-evidence-data"
+    )
+}
+
+fn rust_nonsemantic_data_kind(
+    rel: &str,
+    line_text: &str,
+    literal: &str,
+) -> Option<&'static str> {
+    let source = literal.trim_start();
+
+    if rel == "crates/xtask/src/compiler_export.rs"
+        && source.starts_with("(compiler-semantic-request")
+    {
+        return Some("rust-contract-data");
+    }
+
+    if rel == "crates/sens/src/gpu_oracle.rs"
+        && literal == "numeric-buffer-map"
+        && line_text.contains("forbidden_legacy_operation: \"numeric-buffer-map\".to_string()")
+    {
+        return Some("rust-evidence-data");
+    }
+
+    None
 }
 
 fn files() -> Vec<(PathBuf, String)> {
@@ -324,14 +351,18 @@ fn places() -> Vec<Place> {
         let Ok(text) = fs::read_to_string(&path) else { continue };
         if rel.ends_with(".rs") {
             for (line, literal) in rust_strings(&text) {
+                let line_text = text.lines().nth(line.saturating_sub(1)).unwrap_or("");
+                let data_kind = rust_nonsemantic_data_kind(&rel, line_text, &literal);
                 if names.contains(literal.as_str()) {
-                    let kind = classified_kind(&rel, &text, "rust");
+                    let kind =
+                        data_kind.unwrap_or_else(|| classified_kind(&rel, &text, "rust"));
                     out.push((kind, rel.clone(), line, literal));
                 } else if rust_literal_has_lisp_source(&literal) {
                     for (l, token, data) in lisp_tokens(&literal, line) {
                         if names.contains(&token) {
                             let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
-                            let kind = classified_kind(&rel, &text, base_kind);
+                            let kind =
+                                data_kind.unwrap_or_else(|| classified_kind(&rel, &text, base_kind));
                             out.push((kind, rel.clone(), l, token));
                         }
                     }
@@ -359,6 +390,111 @@ fn counts(places: &[Place]) -> BTreeMap<String, usize> {
         *out.entry(format!("{kind}\t{file}\t{name}")).or_insert(0) += 1;
     }
     out
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct DebtMetrics {
+    sites: usize,
+    files: usize,
+}
+
+fn debt_metrics(places: &[Place]) -> DebtMetrics {
+    let enforced: Vec<&Place> = places
+        .iter()
+        .filter(|(kind, _, _, _)| ratchet_enforced_kind(kind))
+        .collect();
+    let files: BTreeSet<&str> = enforced.iter().map(|(_, file, _, _)| file.as_str()).collect();
+    DebtMetrics {
+        sites: enforced.len(),
+        files: files.len(),
+    }
+}
+
+fn baseline_entry_enforced(key: &str) -> bool {
+    let mut fields = key.splitn(3, '\t');
+    let Some(kind) = fields.next() else { return false };
+    let Some(file) = fields.next() else { return false };
+    let _name = fields.next();
+
+    if !ratchet_enforced_kind(kind) || is_table_source(file) {
+        return false;
+    }
+    if file.starts_with("crates/")
+        && file.contains("/tests/")
+        && file.ends_with(".rs")
+        && !rust_test_is_semantic_authority(file)
+    {
+        return false;
+    }
+    if !file.ends_with(".rs") {
+        let text = fs::read_to_string(repo_root().join(file)).unwrap_or_default();
+        if explicit_nonsemantic_lisp_evidence(&text) {
+            return false;
+        }
+    }
+    true
+}
+
+fn baseline_debt_metrics(baseline: &BTreeMap<String, usize>) -> DebtMetrics {
+    let mut sites = 0usize;
+    let mut files = BTreeSet::new();
+    for (key, count) in baseline {
+        if !baseline_entry_enforced(key) {
+            continue;
+        }
+        sites += *count;
+        if let Some((_, rest)) = key.split_once('\t') {
+            if let Some((file, _)) = rest.split_once('\t') {
+                files.insert(file);
+            }
+        }
+    }
+    DebtMetrics {
+        sites,
+        files: files.len(),
+    }
+}
+
+fn emit_debt_metric(
+    current: DebtMetrics,
+    baseline: DebtMetrics,
+    growth_sites: usize,
+    growth_files: usize,
+    growth_keys: usize,
+) {
+    let delta_sites = current.sites as isize - baseline.sites as isize;
+    let delta_files = current.files as isize - baseline.files as isize;
+    let line = format!(
+        "semantic-migration-debt-v1 remaining_sites={} remaining_files={} baseline_sites={} baseline_files={} delta_sites={:+} delta_files={:+} growth_sites={} growth_files={} growth_keys={}",
+        current.sites,
+        current.files,
+        baseline.sites,
+        baseline.files,
+        delta_sites,
+        delta_files,
+        growth_sites,
+        growth_files,
+        growth_keys,
+    );
+    eprintln!("{line}");
+
+    if let Ok(path) = std::env::var("GITHUB_STEP_SUMMARY") {
+        if let Ok(mut out) = fs::OpenOptions::new().create(true).append(true).open(path) {
+            let _ = writeln!(
+                out,
+                "### Semantic migration debt\n\n- remaining executable-English sites: **{}**\n- production files: **{}**\n- classifier-normalized baseline: **{} sites / {} files**\n- delta: **{:+} sites / {:+} files**\n- ratchet growth: **{} sites / {} files / {} keys**\n",
+                current.sites,
+                current.files,
+                baseline.sites,
+                baseline.files,
+                delta_sites,
+                delta_files,
+                growth_sites,
+                growth_files,
+                growth_keys,
+            );
+        }
+    }
 }
 
 fn baseline_path() -> PathBuf {
@@ -414,7 +550,12 @@ fn english_names_in_code_never_grow() {
     }
     let baseline = read_baseline();
     assert!(!baseline.is_empty(), "бази немає: SENS_BASELINE_UPDATE=1 cargo test ...");
+    let current_debt = debt_metrics(&places);
+    let baseline_debt = baseline_debt_metrics(&baseline);
     let mut grown = Vec::new();
+    let mut growth_sites = 0usize;
+    let mut growth_files = BTreeSet::new();
+    let mut growth_keys = 0usize;
     for (key, count) in &current {
         let base = baseline.get(key).copied().unwrap_or(0);
         if *count > base {
@@ -425,9 +566,19 @@ fn english_names_in_code_never_grow() {
                 .filter(|(k, f, _, n)| *k == kind && f == file && n == name)
                 .map(|(_, _, l, _)| l.to_string())
                 .collect();
+            growth_sites += *count - base;
+            growth_files.insert(file.to_owned());
+            growth_keys += 1;
             grown.push(format!("{file}:{} {name} ({kind}): {base} -> {count}", lines.join(",")));
         }
     }
+    emit_debt_metric(
+        current_debt,
+        baseline_debt,
+        growth_sites,
+        growth_files.len(),
+        growth_keys,
+    );
     eprintln!("{}", summary(&places));
     assert!(
         grown.is_empty(),
@@ -499,8 +650,77 @@ fn scanners_find_names_in_lisp_and_rust() {
         "production Core1 data that drives compatibility must remain enforced"
     );
 
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/xtask/src/compiler_export.rs",
+            "",
+            "(compiler-semantic-request\n  (identity . ((domain . D3) (bits . 001))))",
+        ),
+        Some("rust-contract-data"),
+        "the canonical compiler export record is contract data, not executable Lisp"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/other.rs",
+            "",
+            "(compiler-semantic-request\n  (identity . car))",
+        ),
+        None,
+        "the same record-shaped text in another production file must not be exempt"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/xtask/src/compiler_export.rs",
+            "",
+            "(car x)",
+        ),
+        None,
+        "ordinary embedded Lisp in compiler_export remains enforced"
+    );
+
+    let gpu_evidence =
+        "forbidden_legacy_operation: \"numeric-buffer-map\".to_string()";
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/gpu_oracle.rs",
+            gpu_evidence,
+            "numeric-buffer-map",
+        ),
+        Some("rust-evidence-data"),
+        "the forbidden legacy operation name is negative-control evidence"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/gpu_oracle.rs",
+            "let operation = \"numeric-buffer-map\";",
+            "numeric-buffer-map",
+        ),
+        None,
+        "the same surface outside the named negative-control field remains enforced"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/other.rs",
+            gpu_evidence,
+            "numeric-buffer-map",
+        ),
+        None,
+        "the negative-control exemption is path-specific"
+    );
+
     let rust = rust_strings("let a = \"car\"; // \"cdr\"\nlet c = '\"'; let s = r#\"(cons 1 ())\"#;");
     let literals: Vec<&str> = rust.iter().map(|(_, s)| s.as_str()).collect();
     assert_eq!(literals, ["car", "(cons 1 ())"]);
     assert_eq!(rust[1].0, 2);
+
+    let metric_fixture = vec![
+        ("rust", "lib/a.rs".to_owned(), 1, "car".to_owned()),
+        ("rust-test-instrument", "crates/sens/tests/a.rs".to_owned(), 1, "car".to_owned()),
+        ("lisp", "lib/b.lisp".to_owned(), 1, "cdr".to_owned()),
+    ];
+    assert_eq!(
+        debt_metrics(&metric_fixture),
+        DebtMetrics { sites: 2, files: 2 },
+        "migration debt counts only classifier-enforced production sites"
+    );
 }
