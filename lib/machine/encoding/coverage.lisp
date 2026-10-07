@@ -6,7 +6,7 @@
 ; explicit, justified gap. There is no third, silent outcome (#176).
 
 (x86-encoder-coverage/1
-  (form-count #b10010010111)
+  (form-count #b10010011000)
   (partial-count #b100000)
   (coverage
     (iclass "AAA")
@@ -3508,6 +3508,11 @@
     (extension X86-BASE)
     (status partial)
     (reason "x86-encode-test-r64-r64 covers the register/register form (0x85 /r) only, reusing ADD's group-1 shape"))
+  (coverage
+    (iclass "TZCNT")
+    (extension BMI1)
+    (status not-yet-implemented)
+    (reason "VEX-prefix encoding not yet implemented"))
   (coverage
     (iclass "UCOMISD")
     (extension SSE2)
