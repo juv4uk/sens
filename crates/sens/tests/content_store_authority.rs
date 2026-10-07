@@ -18,6 +18,13 @@ fn store_session() -> Session {
     session
 }
 
+
+fn observe(session: &mut Session, source: &str) -> String {
+    eval_program(source, session)
+        .expect("content-store observation must execute")
+        .value
+        .to_string()
+}
 #[test]
 fn core4_bootstrap_binds_let_macro_to_exact_d6_slot() {
     let mut session = store_session();
