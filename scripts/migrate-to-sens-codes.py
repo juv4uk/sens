@@ -35,6 +35,7 @@ from domain_tables import read_domain_table
 from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
+CURRENT_AUTHORITY_DOMAINS = tuple(f"D{width}" for width in range(1, 10))
 LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
 BINARY_MASTER_EXTS = {".lisp"}
 SKIP_DIRS = {
@@ -171,6 +172,70 @@ def augment_code_map_with_registry_aliases(code_map, registry_path):
             out[key] = entry
 
     return out
+
+
+def build_exact_authority_index(foundation):
+    """Build the sole exact-width semantic index used by strict authority mode."""
+    out = {}
+    for domain in CURRENT_AUTHORITY_DOMAINS:
+        desc = foundation.get("domains", {}).get(domain)
+        if desc is None:
+            raise BinaryMigrationError(f"missing current authority domain {domain}")
+
+        width = int(desc["width"])
+        if domain != f"D{width}":
+            raise BinaryMigrationError(
+                f"{domain}: authority width is inconsistent with domain name"
+            )
+
+        residents = desc.get("residents", {})
+        for bits, label in residents.items():
+            if len(bits) != width or set(bits) - {"0", "1"}:
+                raise BinaryMigrationError(
+                    f"{domain}: invalid exact-width authority word {bits!r}"
+                )
+            key = (width, bits)
+            if key in out:
+                raise BinaryMigrationError(
+                    f"duplicate current authority coordinate {domain}:{bits}"
+                )
+            out[key] = Entry(domain, width, bits, str(label), str(
+                desc.get("authority", foundation.get("authority", "unknown"))
+            ))
+
+    d7 = foundation["domains"]["D7"]
+    d7_reserved = set(d7.get("reserved_coordinates", foundation.get(
+        "d7_reserved_coordinates", []
+    )))
+    for bits in d7_reserved:
+        if bits in d7.get("residents", {}):
+            raise BinaryMigrationError(
+                f"D7: reserved coordinate {bits} is also a resident"
+            )
+
+    return out
+
+
+def validate_contract_binary_output(rendered, authority_index):
+    """Fail closed unless every emitted word is an admitted exact-width word."""
+    if set(rendered) - {"0", "1", " ", "\n", "\t", "\r"}:
+        raise BinaryMigrationError("canonical authority output contains non-binary text")
+
+    for word in rendered.split():
+        if not re.fullmatch(r"[01]+", word):
+            raise BinaryMigrationError(f"canonical authority emitted invalid word {word!r}")
+
+        width = len(word)
+        if width > 9:
+            raise BinaryMigrationError(
+                f"canonical authority emitted word wider than W9: {word!r}"
+            )
+
+        if (width, word) not in authority_index:
+            raise BinaryMigrationError(
+                f"canonical authority emitted unadmitted exact word "
+                f"{width}:{word}"
+            )
 
 
 def line_col(text, offset):
@@ -629,12 +694,16 @@ def binary_rewrite(
     legacy_sid_map=None,
     registry_surface_sid_map=None,
     resolver: SourceResolver | None = None,
+    *,
+    contract_authority=False,
+    authority_index=None,
 ):
     """Encode one source file as exact-width visible binary SENS words."""
     source = strip_comments(text)
     shadowed = {row["label"] for row in shadowing(source, code_map)}
     legacy_sid_map = legacy_sid_map or {}
     registry_surface_sid_map = registry_surface_sid_map or {}
+    authority_index = authority_index or {}
     current_words = {
         (entry.width, entry.bits): entry
         for entry in code_map.values()
@@ -770,6 +839,12 @@ def binary_rewrite(
         if not token:
             raise BinaryMigrationError(f"cannot tokenize character {source[i]!r} at offset {i}")
 
+        if contract_authority and re.fullmatch(r"#b[01]+", token, re.IGNORECASE):
+            raise BinaryMigrationError(
+                f"binary reader wrapper {token!r} is not canonical source; "
+                "use the exact-width word directly"
+            )
+
         begin_item()
         frame = frames[-1] if frames else None
         is_head = bool(frame and frame["head"])
@@ -794,6 +869,18 @@ def binary_rewrite(
                 )
             identity = resolution.current
             assert identity is not None
+            if contract_authority:
+                authority_entry = authority_index.get((identity.width, identity.bits))
+                if authority_entry is None or authority_entry.domain != identity.domain:
+                    raise BinaryMigrationError(
+                        f"resolved head {token!r} is outside current Contract 11.8 "
+                        f"authority: {identity.domain}:{identity.bits}"
+                    )
+                if identity.domain not in CALL_DOMAINS:
+                    raise BinaryMigrationError(
+                        f"non-callable authority resident used as executable head: "
+                        f"{identity.domain}:{identity.bits}"
+                    )
             if identity.label == "EMPTY":
                 raise BinaryMigrationError(
                     "structural EMPTY/000 cannot be used as a callable head"
@@ -809,10 +896,33 @@ def binary_rewrite(
                 identity.domain,
             ))
         else:
-            # Explicit legacy SID values are semantic identities even outside a
-            # call head; migrate them by named historical evidence rather than
-            # spelling their eight digits as Text7.
-            if re.fullmatch(r"[01]{8}", token):
+            # Exact-width binary source words are semantic data in strict
+            # authority mode. W8 is special: a bare eight-bit token can also be
+            # legacy SID8, so do not silently choose one interpretation.
+            if contract_authority and re.fullmatch(r"[01]{1,9}", token):
+                width = len(token)
+                if width == 8:
+                    if resolver is not None:
+                        legacy_resolution = resolver.resolve_head(token)
+                        if legacy_resolution.resolved:
+                            raise BinaryMigrationError(
+                                f"ambiguous W8 token {token!r}: it is both a current "
+                                "D8 coordinate and legacy SID8 evidence"
+                            )
+                    if (width, token) not in authority_index:
+                        raise BinaryMigrationError(
+                            f"unadmitted current D8 coordinate {token!r}"
+                        )
+                    out.append(token)
+                else:
+                    if (width, token) not in authority_index:
+                        raise BinaryMigrationError(
+                            f"unadmitted exact-width binary word {token!r}"
+                        )
+                    out.append(token)
+            # Explicit legacy SID values remain migration evidence in the
+            # normal binary mirror, but never become output identity.
+            elif re.fullmatch(r"[01]{8}", token):
                 if resolver is None:
                     raise BinaryMigrationError(
                         "history-aware SourceResolver is required for SID data migration"
@@ -890,6 +1000,15 @@ def main():
         help="write comment-free exact-width visible-binary SENS source mirror",
     )
     parser.add_argument(
+        "--contract-authority",
+        action="store_true",
+        help=(
+            "strict Contract 11.8 authority mode for --binary-mirror: "
+            "foundation is the sole semantic coordinate source and every emitted "
+            "word must be an admitted exact-width D1-D9 word"
+        ),
+    )
+    parser.add_argument(
         "--text7-projection",
         type=Path,
         default=Path("crates/sens/src/text7_projection_generated.rs"),
@@ -920,11 +1039,20 @@ def main():
     selected_modes = sum(bool(x) for x in (args.apply, args.mirror, args.binary_mirror))
     if selected_modes > 1:
         parser.error("--apply, --mirror and --binary-mirror are mutually exclusive")
+    if args.contract_authority and not args.binary_mirror:
+        parser.error("--contract-authority requires --binary-mirror")
+    if args.contract_authority and (args.apply or args.mirror):
+        parser.error("--contract-authority cannot be combined with --apply or --mirror")
 
     foundation, digest = load_foundation(args.foundation)
+    authority_index = (
+        build_exact_authority_index(foundation)
+        if args.contract_authority else None
+    )
     code_map = build_map(foundation, args.domains)
-    code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
-    code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
+    if not args.contract_authority:
+        code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
+        code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
     resolver = build_resolver(
         historical_map=args.historical_map,
         foundation=args.foundation,
@@ -966,7 +1094,12 @@ def main():
                     legacy_sid_map,
                     registry_surface_sid_map,
                     resolver,
+                    contract_authority=args.contract_authority,
+                    authority_index=authority_index,
                 )
+                if args.contract_authority:
+                    validate_contract_binary_output(converted, authority_index)
+
                 if not converted.strip():
                     status = "empty"
                 else:
@@ -1028,9 +1161,15 @@ def main():
         "domains": args.domains,
         "root": str(root),
         "mode": mode,
+        "contract_authority_mode": bool(args.contract_authority),
         "binary_source_rule": (
-            "D2 structure + exact D3-D6 callable heads + D7/Text7 spelling; comments absent"
-            if args.binary_mirror else None
+            "D1-D9 exact-width authority words + D2 structure + D7/Text7 spelling; "
+            "comments absent; no SID8 semantic output"
+            if args.contract_authority
+            else (
+                "D2 structure + exact D3-D6 callable heads + D7/Text7 spelling; comments absent"
+                if args.binary_mirror else None
+            )
         ),
         "summary": {
             "files_seen": len(rows),
