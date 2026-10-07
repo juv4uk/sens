@@ -31,17 +31,7 @@ pub enum DomainIdentity {
 
 impl DomainIdentity {
     pub const fn width(self) -> usize {
-        match self {
-            Self::D1(_) => 1,
-            Self::D2(_) => 2,
-            Self::D3(_) => 3,
-            Self::D4(_) => 4,
-            Self::D5(_) => 5,
-            Self::D6(_) => 6,
-            Self::D7(_) => 7,
-            Self::D8(_) => 8,
-            Self::D9(_) => 9,
-        }
+        self.source_word().width()
     }
 
     /// Mechanical payload wide enough for every current exact domain.
@@ -154,13 +144,7 @@ pub enum CoreDomainIdentity {
 
 impl CoreDomainIdentity {
     pub const fn width(self) -> usize {
-        match self {
-            Self::D3(_) => 3,
-            Self::D4(_) => 4,
-            Self::D5(_) => 5,
-            Self::D6(_) => 6,
-            Self::D8(_) => 8,
-        }
+        self.source_word().width()
     }
 
     pub const fn packed_bits(self) -> u8 {
