@@ -244,7 +244,7 @@ fn car_provenance_sid_keeps_math_kernel_history_while_machine_uses_exact_d3() {
     assert!(!math.contains("common-lisp"));
 
     let machine = eval_program(
-        r#"(machine-capabilities-for-domain 100)"#,
+        r#"(machine-capabilities-for-domain 3 4)"#,
         &mut session,
     )
     .expect("CAR machine capability coordinate")
