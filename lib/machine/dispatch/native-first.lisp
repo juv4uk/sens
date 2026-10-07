@@ -118,3 +118,43 @@
 ;   (DomainIdentity arg...)
 ; The caller supplies a representation-only SHAPE-OR-EMPTY mechanism:
 ;   DomainIdentity -> (width (PredicateBit...))
+  any other value -> ()
+;
+; This block never matches CAR/CONS by spelling and never relies on a raw W3
+; source token whose leading zero/width could be lost by the ordinary reader.
+
+(00001001 native-first-domain-true
+  (00001000 (seed)
+    (00000010 seed)))
+
+(00001001 native-first-domain-false
+  (00001000 (seed)
+    (00000010 (00000100 seed ()))))
+
+(00001001 native-first-domain-key3-shape?
+  (00001000 (shape bit0 bit1 bit2)
+    (00000111
+      ((00000010 shape)
+       (native-first-domain-false ()))
+      ((00000011 (00000101 shape) 3)
+       (native-first-domain-key3-bits?
+         (00000101 (00000110 shape))
+         bit0 bit1 bit2))
+      ((native-first-domain-true ())
+       (native-first-domain-false ())))))
+
+(00001001 native-first-domain-key3-bits?
+  (00001000 (bits bit0 bit1 bit2)
+    (00000111
+      ((00000011 (00000101 bits) bit0)
+       (00000111
+         ((00000011 (00000101 (00000110 bits)) bit1)
+          (00000011
+            (00000101 (00000110 (00000110 bits)))
+            bit2))
+         ((native-first-domain-true ())
+          (native-first-domain-false ()))))
+      ((native-first-domain-true ())
+       (native-first-domain-false ())))))
+
+(00001001 native-first-domain-d3-car?
