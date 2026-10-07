@@ -1,0 +1,22 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "human-wire",
+  "wing": "Transport / human wire",
+  "roles": [
+    "MEASUREMENT",
+    "FALSIFIER"
+  ],
+  "question": "For the same complete binary frame, what timing cost and error behavior arise under several direct human transport encodings?",
+  "claim": "MECHANISM/human-factors benchmark only; it creates no SENS semantic domain and keeps payload, framing, timing, and error classes separate.",
+  "witness": [
+    "README.md",
+    "model.py",
+    "timing.py",
+    "receiver.py",
+    "trial.py"
+  ],
+  "status": "MECHANISM",
+  "generation": "unknown",
+  "axis": "transport/human-wire",
+  "reproduce": "python3 benchmarks/human-wire/model.py --hex 00ff --payload-bits 8 --json"
+}
