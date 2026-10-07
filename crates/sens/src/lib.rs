@@ -35,6 +35,8 @@ mod environment;
 mod error;
 pub(crate) mod eval;
 mod language_items;
+mod mixed_source;
+pub use mixed_source::parse_mixed_exact_domain;
 mod parser;
 mod presentation;
 mod semantic_registry;
