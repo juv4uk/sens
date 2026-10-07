@@ -1,0 +1,14 @@
+name: diag-4320-fs-text-baseline
+
+on:
+  push:
+    branches:
+      - diag/4320-fs-text-baseline
+
+jobs:
+  fs-text:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test -p sens-host --test fs_text read_file_rejects_invalid_utf8_without_lossy_replacement -- --nocapture
