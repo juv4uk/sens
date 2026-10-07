@@ -1,0 +1,86 @@
+{
+  "schema": "compiler-selfhost-lineage-report/1",
+  "status": "pass",
+  "source": {
+    "sens_source_sha": "69d4bb7f8390e431b479eb17ea68dcefb80d04f9",
+    "compiler_nucleus_sha256": "ce12207e51256d6b99d0c0dd4aeb3afc9444bec9b710a165a73fed8e12181091",
+    "language_contract_sha256": "177d532d24c1f0738a934152f65c7f01f90b5593c8dbfe519e31148c0aa80c40",
+    "structural_law_projection_sha256": "3ce5bb4e042bfec446199a9c77787d0a022109e9a6d6442a4f93b50f68e34e9a"
+  },
+  "c0": {
+    "implementation_sha": "6f597de86847896cde005e0e93bdf24c5e80039c",
+    "cml_sha": "6f597de86847896cde005e0e93bdf24c5e80039c",
+    "backend": "cml.c/current-domain",
+    "target": "x86_64-linux-gnu",
+    "abi_profile": "SW1+compiler-evidence-canonical/1"
+  },
+  "fresh_bootstrap": {
+    "preexisting_c1_read": false,
+    "preexisting_c2_read": false,
+    "c0_produced_c1": true,
+    "c1_produced_c2": true
+  },
+  "generations": {
+    "c1": {
+      "produced": true,
+      "executable": true,
+      "artifact_sha256": "04f42b9015784a42f6f0fe415fb4b441d4bdbe71c7182ca7fc3240a322ff0ce3",
+      "normalized_sha256": "c142995c434d600cf0751c563309d05883498507bcc32a3546cef495532d892e"
+    },
+    "c2": {
+      "produced": true,
+      "executable": true,
+      "artifact_sha256": "04f42b9015784a42f6f0fe415fb4b441d4bdbe71c7182ca7fc3240a322ff0ce3",
+      "normalized_sha256": "c142995c434d600cf0751c563309d05883498507bcc32a3546cef495532d892e"
+    }
+  },
+  "equivalence": {
+    "attempts": [
+      {
+        "method": "byte-identical-artifact",
+        "status": "pass",
+        "reason": null
+      },
+      {
+        "method": "normalized-ir-or-artifact-identical",
+        "status": "unavailable",
+        "reason": "stronger byte-identical executable artifact criterion already passed"
+      },
+      {
+        "method": "canonical-lowering-and-executable-corpus-identical",
+        "status": "unavailable",
+        "reason": "stronger byte-identical executable artifact criterion already passed"
+      }
+    ],
+    "selected_method": "byte-identical-artifact"
+  },
+  "d8_admitted": false,
+  "legacy_core1_sid8_substitution": false,
+  "failure_category": null,
+  "evidence": {
+    "cml_merge_sha": "0a9925cc3a6c2de4284a6c27fc5f5c4b41e4a24b",
+    "cml_pr": 660,
+    "cml_issue": 655,
+    "sens_lineage_issue": 3822,
+    "sens_fixpoint_issue": 3760,
+    "gcc_version": "13.3.0",
+    "gcc_target": "x86_64-linux-gnu",
+    "c1_evidence_sha256": "dfb7ed75eefa5dfcb7afe2a9d2c8563aef9c9a2a5b7c0c2bb048a95c960973ad",
+    "semantic_requests_sha256": "22942f9aca477f5aa62246e687164d4e52216c71a3cf4f0ceca03d0e42e2d52e",
+    "c1_c_source_sha256": "c142995c434d600cf0751c563309d05883498507bcc32a3546cef495532d892e",
+    "c2_c_source_sha256": "c142995c434d600cf0751c563309d05883498507bcc32a3546cef495532d892e",
+    "c1_executable_sha256": "04f42b9015784a42f6f0fe415fb4b441d4bdbe71c7182ca7fc3240a322ff0ce3",
+    "c2_executable_sha256": "04f42b9015784a42f6f0fe415fb4b441d4bdbe71c7182ca7fc3240a322ff0ce3",
+    "c1_executable_size": 92248,
+    "c1_output_sha256": "dfb7ed75eefa5dfcb7afe2a9d2c8563aef9c9a2a5b7c0c2bb048a95c960973ad",
+    "c2_output_sha256": "dfb7ed75eefa5dfcb7afe2a9d2c8563aef9c9a2a5b7c0c2bb048a95c960973ad",
+    "cml_fixed_point_run_id": 37643951065,
+    "cml_executable_run_id": 37643951089,
+    "cml_fixed_point_job_id": 112869704391,
+    "cml_executable_job_id": 112869705470,
+    "source_equivalence": "byte-identical",
+    "executable_equivalence": "byte-identical",
+    "output_equivalence": "byte-identical",
+    "recorded_at": "2026-10-07"
+  }
+}
