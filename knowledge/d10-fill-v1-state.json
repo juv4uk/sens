@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 345,
-    "remaining_semantic_candidates": 679,
+    "selected_semantic_candidates": 367,
+    "remaining_semantic_candidates": 657,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 89,
+    "unplaced_selected_candidates": 111,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -173,5 +173,14 @@
     "selector_coordinates_preserved": 256,
     "review_required_still_selected": 15,
     "ratification_effect": "NONE"
+  },
+  "crossrepo_mal_v1": {
+    "authority": "#4053",
+    "artifact": "knowledge/d10-crossrepo-mal-v1.json",
+    "reviewed": 62,
+    "selected": 22,
+    "projections": 38,
+    "hold": 2,
+    "coordinates_assigned": 0
   }
 }
