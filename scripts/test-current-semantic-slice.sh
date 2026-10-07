@@ -22,6 +22,8 @@ cargo test -p sens \
   --test semantic_ref_fail_closed \
   --test semantic_coordinate_matrix_845
 
+python3 scripts/test_binary_contract_projection.py
+
 
 # #1096: bare eight-bit tokens are Canon SID spellings. Lisp owns the
 # parity/round-trip meaning; the shell observes only the named envelope.
