@@ -23,12 +23,11 @@
     "No donor repository contributes coordinates."
   ],
   "class_counts": {
-    "REFERENCE-OR-UPSTREAM": 31,
+    "REFERENCE-OR-UPSTREAM": 33,
     "PACKAGE-OR-DOMAIN": 33,
-    "CORE-HISTORICAL-DONOR": 11,
     "BACKEND-OR-MECHANISM": 11,
-    "CORE-LANGUAGE-DONOR": 1,
-    "REVIEW-REQUIRED": 0
+    "CORE-HISTORICAL-DONOR": 9,
+    "CORE-LANGUAGE-DONOR": 1
   },
   "rows": [
     {
@@ -173,13 +172,13 @@
       "visibility": "private",
       "size": 23493,
       "archived": false,
-      "primary_class": "CORE-HISTORICAL-DONOR",
-      "semantic_owner": "historical-language-corpus",
-      "d10_action": "REVIEW-FOR-MISSING-HISTORICAL-SEMANTICS",
-      "deep_review_status": "PRIORITY",
-      "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
-      "evidence_note": null,
-      "candidate_issue": "#4053"
+      "primary_class": "REFERENCE-OR-UPSTREAM",
+      "semantic_owner": "reference/upstream",
+      "d10_action": "REFERENCE-ONLY",
+      "deep_review_status": "BOUNDARY-VERIFIED",
+      "reason": "Modernized fork of Nightcode IDE. Repository owns editor/build/tooling behavior, not Clojure language semantics or SENS Core identity. Use only as implementation/reference evidence.",
+      "evidence_note": "README explicitly identifies Clojure-code as a modernized fork of oakes/Nightcode and juv4uk as fork maintainer.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/clojure-cookbook",
@@ -188,13 +187,13 @@
       "visibility": "private",
       "size": 11402,
       "archived": false,
-      "primary_class": "CORE-HISTORICAL-DONOR",
-      "semantic_owner": "historical-language-corpus",
-      "d10_action": "REVIEW-FOR-MISSING-HISTORICAL-SEMANTICS",
-      "deep_review_status": "PRIORITY",
-      "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
-      "evidence_note": null,
-      "candidate_issue": "#4053"
+      "primary_class": "REFERENCE-OR-UPSTREAM",
+      "semantic_owner": "reference/upstream",
+      "d10_action": "REFERENCE-ONLY",
+      "deep_review_status": "BOUNDARY-VERIFIED",
+      "reason": "O'Reilly Clojure Cookbook reference corpus with many contributors and application recipes. Useful for examples/reference only; no direct SENS Core semantic ownership.",
+      "evidence_note": "README identifies Clojure Cookbook as an O'Reilly Cookbook project by Luke VanderHart/Ryan Neufeld with many contributed recipes.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/cml",
@@ -1338,7 +1337,7 @@
     }
   ],
   "followup_queues": {
-    "historical_core_review": "#4053",
+    "historical_core_review": "COMPLETE #4053",
     "execution_seam_review": "#4054 / #4036",
     "unresolved_scope": "#4055",
     "island_bridge_factorization": "#4036"
