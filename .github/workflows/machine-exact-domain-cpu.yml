@@ -50,6 +50,7 @@ on:
 jobs:
   real-silicon-harness-build:
     name: Compile real-silicon harness only
+    if: vars.HOSTED_RUNNERS == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
