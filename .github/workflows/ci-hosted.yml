@@ -27,6 +27,7 @@ jobs:
         run: |
           python3 scripts/numeric_source_inventory.py --self-test
           python3 scripts/public_api_inventory.py --check
+          python3 scripts/check-d2-structure-ownership.py
           python3 scripts/sens8-semantic-ratchet.py --self-test
           python3 scripts/sens8-semantic-ratchet.py --summary
       - name: Build SENS CLI
