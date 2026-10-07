@@ -1,0 +1,268 @@
+{
+  "schema": "d10-island-bridge-factorization-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4094",
+  "date": "2026-10-07",
+  "parents": [
+    "#4036",
+    "#4054",
+    "#4049"
+  ],
+  "contract": "contracts/island-compat-contract.lisp",
+  "foundation": "#4008 / Contract 11.8",
+  "accounting": {
+    "execution_repositories_reviewed": 11,
+    "selected_d10_candidates": 6,
+    "derived_no_separate_resident": 8,
+    "mechanism_only": 1,
+    "d10_before": 428,
+    "d10_after": 434,
+    "placed_after": 256,
+    "unplaced_after": 178,
+    "remaining_after": 590,
+    "ratified_d10_residents": 0
+  },
+  "selected": [
+    {
+      "stable_id": "d10.bridge.9348ac86d4d019d4",
+      "semantic_name": "ISLAND-CALL",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "invoke one semantic identity on an autonomous execution island using opaque native payload while preserving producer-native observation and provenance",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ]
+    },
+    {
+      "stable_id": "d10.bridge.949b87c2b4e57649",
+      "semantic_name": "EXECUTION-WITNESS",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "represent one admissible execution mechanism witness for a semantic identity without granting semantic authority or changing identity",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ]
+    },
+    {
+      "stable_id": "d10.bridge.b5ea21fb87af4ee7",
+      "semantic_name": "NATIVE-OBSERVATION",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "represent an opaque producer-native observation without universal truth or result coercion",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ]
+    },
+    {
+      "stable_id": "d10.bridge.6898d14e7d0fafc5",
+      "semantic_name": "RESULT-COUNT",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "observe the result cardinality of one completed native observation without coercing the native results",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ]
+    },
+    {
+      "stable_id": "d10.bridge.c66ef27c9d2bfe4c",
+      "semantic_name": "BRIDGE",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "perform an explicit partial conversion from a source native result representation toward a target representation while preserving source observation and making no semantic-equivalence assumption",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ]
+    },
+    {
+      "stable_id": "d10.bridge.16592788ef60fafb",
+      "semantic_name": "MISSING-CAPABILITY",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "represent typed absence of an execution capability such as kernel or bridge without changing semantic identity or registry numbering",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "name": "ZERO-RESULTS",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "RESULT-COUNT(observation) == 0"
+    },
+    {
+      "name": "ONE-RESULT",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "RESULT-COUNT(observation) == 1"
+    },
+    {
+      "name": "MANY-RESULTS",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "RESULT-COUNT(observation) > 1"
+    },
+    {
+      "name": "EXPLICIT-PROJECTION",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "ordinary APPLY of an explicit projection function to NATIVE-OBSERVATION"
+    },
+    {
+      "name": "ISLAND-PROVENANCE",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "ordinary PROVENANCE projection; PROVENANCE already exists below D10"
+    },
+    {
+      "name": "MISSING-BRIDGE",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "MISSING-CAPABILITY(kind=bridge, detail)"
+    },
+    {
+      "name": "MISSING-KERNEL",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "MISSING-CAPABILITY(kind=kernel, detail)"
+    },
+    {
+      "name": "ISLAND-SELECT",
+      "decision": "DERIVED-NO-SEPARATE-RESIDENT",
+      "law": "ordinary data selection of an island/target value"
+    },
+    {
+      "name": "RAW-ISLAND-INVOKE",
+      "decision": "MECHANISM-ONLY",
+      "law": "raw escape-hatch mechanism; stable language operation is ISLAND-CALL"
+    }
+  ],
+  "repository_reviews": [
+    {
+      "repository": "juv4uk/cml",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/fpga-lisp",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/wsm-my-lisp",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/my-lisp-cyberpunk",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/sens-futhark",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/wsm-graalvm",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/wsm-cuda",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/wsm-lazarus",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/wsm-os",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/wsm-os-lisp",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    },
+    {
+      "repository": "juv4uk/wsm-target-contract",
+      "primary_class": "BACKEND-OR-MECHANISM",
+      "decision": "REVIEWED-FOR-UNIVERSAL-SEAM-ONLY",
+      "native_core_rows_selected": 0,
+      "rule": "Backend-native operations remain mechanism. Only the factorized island seam law may feed Core D10."
+    }
+  ],
+  "hard_boundaries": [
+    "no backend opcode/register/ABI/kernel/driver/MMIO/IR identity is a Core resident",
+    "kernel or bridge availability never changes semantic identity",
+    "native result multiplicity and provenance are preserved",
+    "no universal truth/result coercion",
+    "all six selected meanings remain UNPLACED"
+  ]
+}
