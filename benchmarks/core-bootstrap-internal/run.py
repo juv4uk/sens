@@ -23,8 +23,10 @@ STAGES = (
     "profile",
     "macro",
     "decode",
+    "lower",
+    "eval-lowered-no-peers",
+    "eval-lowered-with-peers",
     "eval-no-peers",
-    "eval-with-peers",
     "full-loader",
 )
 TEST_FILTER = "bootstrap_measurement::bootstrap_measure_dispatch"
@@ -156,12 +158,18 @@ def main() -> int:
         "profile_setup_i_refs": med_i["profile"] - med_i["root"],
         "first_macro_i_refs": med_i["macro"] - med_i["profile"],
         "fasl_decode_freshness_i_refs": med_i["decode"] - med_i["macro"],
-        "decoded_core_eval_i_refs": med_i["eval-no-peers"] - med_i["decode"],
+        "core_lowering_i_refs": med_i["lower"] - med_i["decode"],
+        "lowered_core_eval_i_refs": (
+            med_i["eval-lowered-no-peers"] - med_i["lower"]
+        ),
+        "eval_wrapper_gap_i_refs": (
+            med_i["eval-no-peers"] - med_i["eval-lowered-no-peers"]
+        ),
         "stable_peer_projection_i_refs": (
-            med_i["eval-with-peers"] - med_i["eval-no-peers"]
+            med_i["eval-lowered-with-peers"] - med_i["eval-lowered-no-peers"]
         ),
         "production_loader_gap_i_refs": (
-            med_i["full-loader"] - med_i["eval-with-peers"]
+            med_i["full-loader"] - med_i["eval-lowered-with-peers"]
         ),
         "full_loader_delta_i_refs": med_i["full-loader"] - med_i["root"],
     }
@@ -171,7 +179,11 @@ def main() -> int:
         key.removesuffix("_i_refs") + "_share":
             (value / full_delta if full_delta else None)
         for key, value in stage_deltas.items()
-        if key not in {"full_loader_delta_i_refs", "production_loader_gap_i_refs"}
+        if key not in {
+            "full_loader_delta_i_refs",
+            "production_loader_gap_i_refs",
+            "eval_wrapper_gap_i_refs",
+        }
     }
 
     args.out.mkdir(parents=True, exist_ok=True)
