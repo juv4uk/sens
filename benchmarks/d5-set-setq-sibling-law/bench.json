@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d5-set-setq-sibling-law",
+  "wing": "D5 laws",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE"
+  ],
+  "question": "Can already-ratified SET/SETQ siblings be classified by a local target-acquisition delta while reusing the existing semantic donor?",
+  "claim": "Thin composed witness only: it replays the donor test and classifies existing owner coordinates without defining a second SET/SETQ semantics or mutating runtime/owner maps.",
+  "witness": [
+    "run.py",
+    "../../crates/sens/tests/post_d4_set_setq_factor.rs"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "d5/set-setq-target-acquisition",
+  "reproduce": "python3 benchmarks/d5-set-setq-sibling-law/run.py --out /tmp/d5-set-setq-sibling-law"
+}
