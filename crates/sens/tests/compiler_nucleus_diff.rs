@@ -8,9 +8,8 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    parse_mixed_exact_domain, eval_parsed_expressions,
     compiler_execution_role, domain_identity_shape_mechanism, eval_parsed_expressions,
-    eval_program, load_core_library, parse_canonical_binary, sha256_source, Bija3, Bit3, Bit8,
+    load_core_library, parse_mixed_exact_domain, parse_canonical_binary, sha256_source, Bija3, Bit3, Bit8,
     CompilerExecutionRole, CoreD8, DomainIdentity, Exactness, Session, Value,
 };
 use std::fmt;
