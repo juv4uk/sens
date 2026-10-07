@@ -38,3 +38,43 @@
                              (1)
                              (native-first-native-plan
                                (x86-lower-cons-car-u64-forms
+                                 (x86-u64-imm-value typed-left)
+                                 (x86-u64-imm-value typed-right))
+                               x86-pair-cell-bytes))
+                            ((00000001 native-first-fallback)
+                             native-first-fallback
+                             (native-first-fallback expression)))))
+                       ((00000001 native-first-fallback)
+                        native-first-fallback
+                        (native-first-fallback expression)))))
+                  ((00000001 native-first-fallback)
+                   native-first-fallback
+                   (native-first-fallback expression)))))
+             ((00000001 native-first-fallback)
+              native-first-fallback
+              (native-first-fallback expression)))))
+        ((00000001 native-first-fallback)
+         native-first-fallback
+         (native-first-fallback expression))))))
+
+(00001001 native-first-plan-car-argument
+  (00001000 (expression argument)
+    (00000111
+      ((00000010 argument) (0)
+       (10011100 ((head (00000101 argument)))
+         (00000111
+           ((00000010 head) ()
+            (native-first-fallback expression))
+           ((00000010 head) (0)
+            (native-first-fallback expression))
+           ((00000010 head) (1)
+            (00000111
+              ((00000011 head (00000001 cons)) (1)
+               (native-first-plan-car-cons-u64 expression argument))
+              ((00000011 head (00000001 cons)) (0)
+               (native-first-fallback expression)))))))
+      ((00000001 native-first-fallback)
+       native-first-fallback
+       (native-first-fallback expression)))))
+
+(00001001 native-first-plan-car
