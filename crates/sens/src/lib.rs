@@ -106,6 +106,16 @@ pub mod semantic_registry_export {
     ) -> Option<super::CoreDomainIdentity> {
         super::semantic_registry::domain_identity_for_surface(name)
     }
+    /// Bounded transition from a historical eight-bit callable identity to
+    /// its already-ratified exact-domain successor. Missing mappings remain
+    /// fail-closed; this does not mint new callable identities.
+    pub fn exact_domain_successor_for_compatibility_id(
+        semantic_id: super::Sens8,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::legacy_domain_identity_from_registry_byte(
+            semantic_id.packed_byte(),
+        )
+    }
 
     /// Legacy packed-byte export for external projection consumers.
     ///
