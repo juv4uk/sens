@@ -38,14 +38,12 @@
 
 (00001001 machine-effect-within-inclusive-integer-range?
   (00001000 (value lower upper)
-    ; D2 control is two-part only. Numeric order queries already return the
-    ; exact one-bit predicate result consumed by COND; no expected-result field.
     (00000111
-      ((00011110 value lower)
+      ((00011110 value lower) 1
        (00000111
-         ((00011101 value upper) t)
-         ((00000011 0 0) (00000001 ()))))
-      ((00000011 0 0) (00000001 ())))))
+         ((00011101 value upper) 1 t)
+         ((00011101 value upper) 0 (00000001 ()))))
+      ((00011110 value lower) 0 (00000001 ())))))
 
 (00001001 machine-effect-u32-carrier?
   (00001000 (value)
