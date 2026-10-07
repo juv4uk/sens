@@ -41,7 +41,7 @@
       (predicate-one-bit
        . "Core.D1 PredicateBit answers are exactly one contextual bit: 1 means YES and 0 means NO. PredicateBit is not Number, host Bool, T/NIL, Symbol, structural (), or any wider-domain value. No third predicate answer and no graded-width truth value is active.")
       (structure-two-bit
-       . "Core.D2 racana2 is exact two-bit structural syntax under its ratified law: 00 separator, 01 close, 10 open, 11 dot. These are structure-domain objects, not numeric or callable identities merely because they are binary.")
+       . "Core.D2 racana2 is exact two-bit structural syntax under its ratified law: 00 separator, 01 close, 10 open, 11 dot. D2 is the sole owner of canonical language source/structural control: no D3+ semantic resident, callable operation, transport tag, or backend encoding may redefine separator/open/close/dot or reinterpret an exact W2 word as ordinary data or a callable head. Transport framing metadata is mechanism only and never D2 semantic authority.")
       (d3-foundation
        . "Core.D3 bīja3 is the owner-ratified exact three-bit foundation (#3202): 000 structural empty (), 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS. Human role names are documentation projections. Historical exact-eight-bit forms are role-aware compatibility projections only.")
       (d3-l1-l5-constitution
