@@ -481,6 +481,7 @@ fn main() {
         } else if argument == "-h" || argument == "--help" {
             println!("Usage: sens-to-sens [--check] [--language] [--exact-domain] <file>...");
             println!("Parser-aware repository migration from admitted surfaces to SENS functions.");
+            println!("Default output is historical 8-bit compatibility only; it is not canonical exact-domain source.");
             println!("--check reports candidates without writing and exits 1 when changes are available.");
             println!("--exact-domain emits current exact-width identities and fails closed");
             println!("  when an admitted compatibility surface lacks an exact-domain successor.");
