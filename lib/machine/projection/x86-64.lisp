@@ -22,7 +22,7 @@
   (00001000 (effect)
     (10011100 ((forms (x86-project-machine-effect effect)))
       (00000111
-        ((00000011 forms (00000001 x86-projection-rejected))
+        ((00000010 forms)
          (00000001 x86-projection-rejected))
         (t
          (x86-encode-admitted-program forms))))))
