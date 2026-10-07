@@ -6,11 +6,13 @@ on:
     paths:
       - "benchmarks/execution-ladder-conformance/**"
       - "benchmarks/execution-ladder-objective/**"
+      - "crates/sens/examples/execution_ladder_bounded_probe.rs"
       - ".github/workflows/execution-ladder-bench.yml"
   pull_request:
     paths:
       - "benchmarks/execution-ladder-conformance/**"
       - "benchmarks/execution-ladder-objective/**"
+      - "crates/sens/examples/execution_ladder_bounded_probe.rs"
       - ".github/workflows/execution-ladder-bench.yml"
   workflow_dispatch:
 
@@ -19,56 +21,94 @@ permissions:
 
 jobs:
   objective:
-    name: validate and measure ladder encoding
+    name: generate and measure current Contract 11.8 ladder encoding
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-      - name: Validate the conformance artifact
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Validate current Contract 11.8 schema selftest
+        run: python3 benchmarks/execution-ladder-conformance/selftest.py
+
+      - name: Build current oracle helpers
         run: |
+          cargo build --release -p sens \
+            --example execution_ladder_bounded_probe \
+            --example current_en_vs_d1d8_cpu
+
+      - name: Emit and validate first real Contract 11.8 L0 oracle rows
+        run: |
+          python3 benchmarks/execution-ladder-conformance/emit_oracle.py \
+            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
+            --helper target/release/examples/current_en_vs_d1d8_cpu \
+            --out /tmp/d3-oracle-current.jsonl
           python3 benchmarks/execution-ladder-conformance/validate.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl
+            /tmp/d3-oracle-current.jsonl
+          test "$(wc -l < /tmp/d3-oracle-current.jsonl)" -eq 2
+          python3 - <<'PY'
+          import json
+          rows=[json.loads(line) for line in open('/tmp/d3-oracle-current.jsonl', encoding='utf-8') if line.strip()]
+          assert {row['contract'] for row in rows} == {'11.8'}
+          assert {row['producer_layer'] for row in rows} == {'L0'}
+          assert {row['parity_status'] for row in rows} == {'ORACLE'}
+          assert all(row['legacy_identity_used'] is False for row in rows)
+          print('first real Contract 11.8 L0 oracle rows: PASS')
+          PY
+
+      - name: Generate current Contract 11.8 conformance artifact
+        run: |
+          python3 benchmarks/execution-ladder-conformance/generate_bounded.py \
+            --helper target/release/examples/execution_ladder_bounded_probe \
+            --upstream-sha "$(git rev-parse HEAD)" \
+            --out /tmp/bounded-current.jsonl
+          python3 benchmarks/execution-ladder-conformance/validate.py \
+            /tmp/bounded-current.jsonl
+          test "$(wc -l < /tmp/bounded-current.jsonl)" -eq 56
 
       - name: Run structural transmission benchmark
         run: |
           python3 benchmarks/execution-ladder-objective/run.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-structural.json
 
       - name: Run delivery-cost benchmark
         run: |
           python3 benchmarks/execution-ladder-objective/delivery_cost.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-delivery.json
 
       - name: Run encoding-density benchmark
         run: |
           python3 benchmarks/execution-ladder-objective/encoding_cost.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-encoding.json
 
       - name: Run batch-amortization benchmark
         run: |
           python3 benchmarks/execution-ladder-objective/batch_amortization.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-batch.json
 
       - name: Verify deterministic reports and parity
         run: |
           set -euo pipefail
           python3 benchmarks/execution-ladder-objective/run.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-structural-repeat.json
           python3 benchmarks/execution-ladder-objective/delivery_cost.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-delivery-repeat.json
           python3 benchmarks/execution-ladder-objective/encoding_cost.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-encoding-repeat.json
           python3 benchmarks/execution-ladder-objective/batch_amortization.py \
-            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            /tmp/bounded-current.jsonl \
             --out /tmp/ladder-batch-repeat.json
           cmp /tmp/ladder-structural.json /tmp/ladder-structural-repeat.json
           cmp /tmp/ladder-delivery.json /tmp/ladder-delivery-repeat.json
@@ -78,16 +118,18 @@ jobs:
           import json
           from pathlib import Path
 
+          rows=[json.loads(line) for line in Path('/tmp/bounded-current.jsonl').read_text().splitlines() if line.strip()]
           structural = json.loads(Path('/tmp/ladder-structural.json').read_text())
           delivery = json.loads(Path('/tmp/ladder-delivery.json').read_text())
           encoding = json.loads(Path('/tmp/ladder-encoding.json').read_text())
           batch = json.loads(Path('/tmp/ladder-batch.json').read_text())
+          assert {row['contract'] for row in rows} == {'11.8'}
           assert structural['parity']['l1_fail'] == 0
           assert delivery['parity_failures'] == 0
           assert encoding['parity_failures'] == 0
           assert batch['parity_failures'] == 0
           assert structural['validated_cases'] == delivery['validated_cases'] == encoding['validated_cases'] == batch['validated_cases']
-          print('objective benchmark gates PASS')
+          print('current Contract 11.8 objective benchmark gates PASS')
           print(json.dumps({
               'cases': structural['validated_cases'],
               'semantic_bits': structural['aggregate']['semantic_bits_total'],
@@ -102,8 +144,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: execution-ladder-objective-${{ github.sha }}
+          name: execution-ladder-objective-11-8-${{ github.sha }}
           path: |
+            /tmp/d3-oracle-current.jsonl
+            /tmp/bounded-current.jsonl
             /tmp/ladder-structural.json
             /tmp/ladder-delivery.json
             /tmp/ladder-encoding.json

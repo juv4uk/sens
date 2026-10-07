@@ -33,7 +33,7 @@
       "pattern": "^case-[0-9a-f]{64}$"
     },
     "contract": {
-      "const": "11.6"
+      "const": "11.8"
     },
     "upstream_sha": {
       "type": "string",
@@ -80,7 +80,7 @@
           "domain": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 8
+            "maximum": 9
           },
           "bits": {
             "type": "string",
@@ -192,7 +192,7 @@
           "items": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 8
+            "maximum": 9
           }
         },
         "max_ast_depth": {

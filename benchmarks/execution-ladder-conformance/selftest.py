@@ -30,7 +30,7 @@ def oracle_row():
     return {
         "schema": SCHEMA,
         "case_id": case_id_for("canonical-source", program),
-        "contract": "11.6",
+        "contract": "11.8",
         "upstream_sha": "0" * 40,
         "producer_layer": "L0",
         "producer": "schema-selftest-oracle",
@@ -63,6 +63,19 @@ def main():
     base = oracle_row()
     validate(base)
 
+    d9 = copy.deepcopy(base)
+    d9["identity_trace"] = [{"domain": 9, "bits": "000000001"}]
+    d9["identity_trace_digest"] = structured_digest(d9["identity_trace"])
+    validate(d9)
+
+    legacy = copy.deepcopy(base)
+    legacy["contract"] = "11.6"
+    legacy["case_id"] = case_id_for(
+        legacy["program_encoding"], legacy["program"], legacy["contract"]
+    )
+    validate(legacy, expected_contract="11.6")
+    must_fail(legacy, "contract must be")
+
     if case_id_for("canonical-source", base["program"]) == case_id_for(
         "canonical-ast", base["program"]
     ):
@@ -88,9 +101,9 @@ def main():
     changed_output["observable_digest"] = structured_digest(changed_output["observable"])
     must_fail(changed_output, "PASS requires")
 
-    legacy = copy.deepcopy(base)
-    legacy["legacy_identity_used"] = True
-    must_fail(legacy, "legacy identity")
+    legacy_identity = copy.deepcopy(base)
+    legacy_identity["legacy_identity_used"] = True
+    must_fail(legacy_identity, "legacy identity")
 
     mismatch = copy.deepcopy(downstream)
     mismatch["observable"]["value"] = "different"

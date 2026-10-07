@@ -23,7 +23,7 @@ from run import load_rows, exact_width_metrics  # noqa: E402
 
 MAGIC = b"SENS-LADDER-PKG\0"  # 16 bytes
 VERSION = 1
-CONTRACT = b"11.6"
+CONTRACT = b"11.8"
 DIGEST_BYTES = 32
 CASE_ID_BYTES = 32
 
