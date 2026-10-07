@@ -58,4 +58,4 @@
                (t (00000001 machine-effect-rejected))))
             (t (00000001 machine-effect-rejected))))
          (t (00000001 machine-effect-rejected))))
-      (t (00000001 machine-effect-rejected)))))
+      (t (00000001 machine-effect-rejected))))))
