@@ -182,6 +182,20 @@ mod tests {
     }
 
     #[test]
+    fn exact_d4_define_and_lambda_execute_through_mixed_bridge() {
+        let parsed = parse_mixed_exact_domain(
+            "(0011 f (0010 (x) (010 x)))\n(f (001 a))",
+        )
+        .expect("mixed exact DEFINE/LAMBDA parse");
+
+        let mut session = crate::Session::default();
+        let result = crate::eval::eval_parsed_expressions(&parsed, &mut session)
+            .expect("exact D4 DEFINE/LAMBDA must execute through mixed bridge");
+
+        assert!(result.value.as_predicate_bit().is_some());
+    }
+
+    #[test]
     fn mixed_exact_heads_lower_directly_to_domain_calls() {
         let parsed = parse_mixed_exact_domain("(0010 (x) (100 x))").unwrap();
         let lowered = only(lower_program(&parsed));
