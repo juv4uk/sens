@@ -1,4 +1,12 @@
-# Current English surface vs canonical D1-D8 — CPU lane
+# English surface vs canonical D1-D8 — historical/current-transition CPU lane
+
+> **Authority notice:** the directory name and D1–D8 scope are preserved for
+> provenance. Current language authority is Contract 11.8 / D1–D9. This harness
+> remains a useful paired-parity donor, but fresh current benchmark claims are
+> replayed under #4129 with
+> `semantic_generation=contract-11-8-exact-d1-d9`. Existing D1–D8 artifacts
+> are not renamed or promoted. D9 mechanisms that are not implemented must be
+> reported as `BLOCKED-MECHANISM`, never routed through a legacy byte identity.
 
 This directory is the CPU evidence lane for #3088 / #3113.
 
