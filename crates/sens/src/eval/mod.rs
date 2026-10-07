@@ -100,11 +100,19 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::DomainIdentity(identity) => match identity.core_operation() {
-            Some(core_identity) => {
-                canon::invoke_domain_identity(core_identity, arguments, environment, span)
+        Value::DomainIdentity(identity) => {
+            if let Some(core_identity) = identity.core_operation() {
+                return canon::invoke_domain_identity(
+                    core_identity,
+                    arguments,
+                    environment,
+                    span,
+                );
             }
-            None => Err(LanguageError::new(
+            if let Some(Value::Macro(closure)) = environment.domain_code_slot(identity) {
+                return closures::apply_macro(closure, arguments, environment, span);
+            }
+            Err(LanguageError::new(
                 ErrorKind::Type,
                 format!(
                     "domain identity is not callable under its ratified law: D{} {}",
@@ -112,7 +120,7 @@ pub(crate) fn invoke_value(
                     identity
                 ),
                 span,
-            )),
+            ))
         }
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
