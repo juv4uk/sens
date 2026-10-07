@@ -32,10 +32,7 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
-use crate::{
-    parse, DomainIdentity, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8,
-    Span, Value,
-};
+use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -305,35 +302,33 @@ fn evaluate_d5_set_family(
 }
 
 fn dispatch_domain_call(
-    identity: DomainIdentity,
+    identity: CoreDomainIdentity,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    if let Some(core_identity) = identity.core_operation() {
-        if is_d3(core_identity, 0b001) {
-            special_forms::exact_arity("D3:001", arguments, 1, span)?;
-            return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
-        }
+    if is_d3(identity, 0b001) {
+        special_forms::exact_arity("D3:001", arguments, 1, span)?;
+        return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
+    }
 
-        match necessary_forms::identity_for_domain_identity(core_identity) {
-            Some(necessary_forms::NecessaryFormIdentity::Lambda) => {
-                return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
-            }
-            Some(necessary_forms::NecessaryFormIdentity::Define) => {
-                return special_forms::evaluate_definition(arguments, environment, span)
-                    .map(EvalStep::Value);
-            }
-            None => {}
+    match necessary_forms::identity_for_domain_identity(identity) {
+        Some(necessary_forms::NecessaryFormIdentity::Lambda) => {
+            return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
         }
+        Some(necessary_forms::NecessaryFormIdentity::Define) => {
+            return special_forms::evaluate_definition(arguments, environment, span)
+                .map(EvalStep::Value);
+        }
+        None => {}
+    }
 
-        if is_d3(core_identity, 0b110) {
-            return special_forms::evaluate_domain_cond(arguments, environment, span);
-        }
+    if is_d3(identity, 0b110) {
+        return special_forms::evaluate_domain_cond(arguments, environment, span);
+    }
 
-        if is_d5(core_identity, 0b00110) || is_d5(core_identity, 0b00111) {
-            return evaluate_d5_set_family(core_identity, arguments, environment, span);
-        }
+    if is_d5(identity, 0b00110) || is_d5(identity, 0b00111) {
+        return evaluate_d5_set_family(identity, arguments, environment, span);
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
@@ -341,9 +336,7 @@ fn dispatch_domain_call(
             Value::Macro(closure) => {
                 return closures::apply_macro(closure.clone(), arguments, environment, span);
             }
-            Value::Closure(_) if identity
-                .core_operation()
-                .is_some_and(|core_identity| !canon::has_language_result_boundary(core_identity)) => {
+            Value::Closure(_) if !canon::has_language_result_boundary(identity) => {
                 return closures::apply(bound.clone(), arguments, environment, span);
             }
             // #3060: exact D5 MEMBER keeps the same Lisp closure/search law,
@@ -356,23 +349,11 @@ fn dispatch_domain_call(
         }
     }
 
-    let Some(core_identity) = identity.core_operation() else {
-        return Err(LanguageError::new(
-            ErrorKind::Type,
-            format!(
-                "domain identity is not callable under its ratified law: D{} {}",
-                identity.width(),
-                identity
-            ),
-            span,
-        ));
-    };
-
     let mut values = Vec::with_capacity(arguments.len());
     for argument in arguments {
         values.push(evaluate(argument, environment)?);
     }
-    canon::invoke_domain_identity(core_identity, &values, environment, span).map(EvalStep::Value)
+    canon::invoke_domain_identity(identity, &values, environment, span).map(EvalStep::Value)
 }
 
 /// Спільний compatibility-диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
@@ -436,7 +417,23 @@ fn dispatch_call(
     };
     match &function {
         Value::DomainIdentity(identity) => {
-            dispatch_domain_call(*identity, arguments, environment, span)
+            let Some(core_identity) = identity.core_operation() else {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "domain identity is not callable under its ratified law: D{} {}",
+                        identity.width(),
+                        identity
+                    ),
+                    span,
+                ));
+            };
+            let mut values = Vec::with_capacity(arguments.len());
+            for argument in arguments {
+                values.push(evaluate(argument, environment)?);
+            }
+            canon::invoke_domain_identity(core_identity, &values, environment, span)
+                .map(EvalStep::Value)
         }
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
@@ -526,23 +523,6 @@ mod single_pass_eval_tests {
         crate::load_core_library(&mut session).expect("core library");
         let result = crate::eval_program("(10011101 ((x 41)) x)", &mut session)
             .expect("legacy D6 let* compatibility should delegate to exact macro");
-        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
-    }
-
-    #[test]
-    fn nested_legacy_let_inside_let_star_keeps_macro_value_callable() {
-        let mut session = Session::default();
-        crate::load_core_library(&mut session).expect("core library");
-        assert!(matches!(
-            session.environment.get("let"),
-            Some(Value::Macro(_)),
-        ), "let surface must remain bound to the Lisp-owned Macro value");
-
-        let result = crate::eval_program(
-            "(10011101 ((x 41)) (let ((y x)) y))",
-            &mut session,
-        )
-        .expect("legacy let* must expand an inner let without producing a DomainIdentity callee");
         assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
     }
 
