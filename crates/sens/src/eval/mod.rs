@@ -311,8 +311,8 @@ fn dispatch_domain_call(
     // mechanism through their already-bound exact domain slot. Check that
     // mechanism before Core-operation admission: D6 residency alone must not
     // make arbitrary D6 values callable.
-    if let Some(Value::Macro(closure)) = environment.domain_code_slot(identity) {
-        return closures::apply_macro(closure, arguments, environment, span);
+    if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
+        return closures::apply_macro(closure.clone(), arguments, environment, span);
     }
 
     if is_d3(identity, 0b001) {
