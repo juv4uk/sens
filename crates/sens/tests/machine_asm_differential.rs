@@ -130,7 +130,7 @@ struct Case {
 
 #[test]
 #[ignore = "external GAS/NASM witness; run in machine-asm-differential workflow"]
-fn gas_and_nasm_match_lisp_owned_encoder_for_initial_rex_modrm_corpus() {
+fn gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus() {
     let gas_version = tool_version("as", &["--version"]);
     let nasm_version = tool_version("nasm", &["-v"]);
     let objcopy_version = tool_version("objcopy", &["--version"]);
@@ -188,6 +188,30 @@ fn gas_and_nasm_match_lisp_owned_encoder_for_initial_rex_modrm_corpus() {
             form: "(mov-mem-disp8-r64 r12 8 r9)",
             gas: "mov QWORD PTR [r12 + 8], r9",
             nasm: "mov qword [r12 + 8], r9",
+        },
+        Case {
+            name: "aesenc_xmm0_xmm1",
+            form: "(aesenc-xmm-xmm xmm0 xmm1)",
+            gas: "aesenc xmm0, xmm1",
+            nasm: "aesenc xmm0, xmm1",
+        },
+        Case {
+            name: "aesenc_xmm8_xmm9",
+            form: "(aesenc-xmm-xmm xmm8 xmm9)",
+            gas: "aesenc xmm8, xmm9",
+            nasm: "aesenc xmm8, xmm9",
+        },
+        Case {
+            name: "pclmulqdq_xmm0_xmm1_11",
+            form: "(pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)",
+            gas: "pclmulqdq xmm0, xmm1, 0x11",
+            nasm: "pclmulqdq xmm0, xmm1, 0x11",
+        },
+        Case {
+            name: "pclmulqdq_xmm8_xmm9_01",
+            form: "(pclmulqdq-xmm-xmm-imm8 xmm8 xmm9 1)",
+            gas: "pclmulqdq xmm8, xmm9, 0x01",
+            nasm: "pclmulqdq xmm8, xmm9, 0x01",
         },
         Case {
             name: "ret",
