@@ -134,6 +134,7 @@ def load_current_foundation(
         raise ValueError(f"{path}: foundation is not owner-ratified")
 
     by_label: dict[str, CurrentIdentity] = {}
+    ambiguous_labels: set[str] = set()
     by_word: dict[tuple[int, str], CurrentIdentity] = {}
     for domain in current_domains:
         desc = data["domains"][domain]
@@ -141,9 +142,16 @@ def load_current_foundation(
         for bits, label in desc["residents"].items():
             identity = CurrentIdentity(domain, width, bits, str(label))
             key = str(label).upper()
-            if key in by_label and by_label[key] != identity:
-                raise ValueError(f"duplicate current label: {key}")
-            by_label[key] = identity
+            previous = by_label.get(key)
+            if previous is not None and previous != identity:
+                # Human labels are projections, not semantic identity.
+                # If two exact domains reuse one label, remove the shortcut:
+                # resolution must proceed through exact surface/domain evidence
+                # or remain explicitly ambiguous.
+                ambiguous_labels.add(key)
+                by_label.pop(key, None)
+            elif key not in ambiguous_labels:
+                by_label[key] = identity
             by_word[(width, bits)] = identity
     return by_label, by_word
 
