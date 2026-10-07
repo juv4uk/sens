@@ -147,9 +147,9 @@
 | :--- | :---: | :--- |
 | **`semantic-authority`** | **10** | `lib/canon.lisp`, `lib/surface/semantic-registry.lisp`, `contracts/answer-contract.lisp`, `contracts/island-compat-contract.lisp`, `lib/core.lisp`, `contracts/exact-q-binary-contract.lisp`, `contracts/structural-observation-contract.lisp`, `lib/macro.lisp`, `lib/result-status.lisp`, `crates/my-lisp/src/eval/canon.rs` |
 | **`semantic-witness`** | **6** | `tests/fixtures/island-compat-witness.lisp`, `tests/fixtures/answer-contract-witness.lisp`, `tests/fixtures/conformance.lisp`, `tests/fixtures/canon-laws-v2-witness.lisp`, `lib/meta-eval.lisp`, `lib/surface/peer-identity-acceptance.lisp` |
-| **`execution-mechanism`** | **13** | `parser.rs`, `eval/mod.rs`, `environment.rs`, `value.rs`, `bignum.rs`, `arithmetic.rs`, `closures.rs`, `special_forms/io.rs`, `special_forms/json.rs`, `ir.rs`, `layout.rs`, `wsm-kernel-host`, `lib/core.lisp.fasl` |
+| **`execution-mechanism`** | **12** | `parser.rs`, `eval/mod.rs`, `environment.rs`, `value.rs`, `bignum.rs`, `arithmetic.rs`, `closures.rs`, `special_forms/io.rs`, `special_forms/json.rs`, `ir.rs`, `layout.rs`, `wsm-kernel-host` |
 | **`kernel-adapter`** | **5** | `wsm-kernel-c-abi`, `wsm-prolog-kernel`, `wsm-datalog-kernel`, `wsm-clips-kernel`, `wsm-common-lisp-kernel` |
-| **`compatibility-reference`**| **3** | Набір тестів ANSI Common Lisp, `lib/surface/uk.lisp`, `lib/surface/sa.lisp` |
+| **`compatibility-reference`**| **4** | Набір тестів ANSI Common Lisp, `lib/surface/uk.lisp`, `lib/surface/sa.lisp`, застарілий `lib/core.lisp.fasl` (поточний bootstrap — `lib/core4.lisp.fasl`) |
 | **`historical-experiment`** | **10** | `lib/reason.lisp`, `lib/forward.lisp`, `lib/clips-import.lisp`, `lib/unify.lisp`, `lib/knowledge.lisp`, `lib/world.lisp`, `lib/yantra.lisp`, `lib/persistent-map.lisp`, `lib/persistent-vector.lisp`, `experiments/ground-graph.lisp` |
 | **`unknown` (неоднозначне)** | **6** | `lib/si.lisp`, `lib/quantity.lisp`, `lib/time.lisp`, `lib/translation.lisp`, `lib/content-store.lisp`, `lib/tcp.lisp` |
 
