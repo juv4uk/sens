@@ -11,7 +11,7 @@
   (id my-lisp)
   (role language-core)
   (exports language-contract conformance-fixtures core-libs
-    semantic-oracle machine-lowering-boundary machine-effect-boundary swarm-node)
+    semantic-oracle machine-lowering-boundary machine-effect-boundary semantic-effect-lowering swarm-node)
   (imports swarm-contract)
   (capabilities lisp rust testing docs debugging swarm-coordination)
   (authorities language-semantics runtime-core standard-library
