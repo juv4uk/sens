@@ -1,0 +1,33 @@
+name: D10 crossrepo my-idea v1
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-crossrepo-my-idea-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-crossrepo-my-idea-v1.py"
+      - "scripts/check-d10-single-stream-restoration-v1.py"
+      - ".github/workflows/d10-crossrepo-my-idea-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-crossrepo-my-idea-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-crossrepo-my-idea-v1.py"
+      - ".github/workflows/d10-crossrepo-my-idea-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  my-idea:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify my-idea donor tranche
+        run: python3 scripts/check-d10-crossrepo-my-idea-v1.py
+      - name: Verify single-stream restoration baseline
+        run: python3 scripts/check-d10-single-stream-restoration-v1.py
