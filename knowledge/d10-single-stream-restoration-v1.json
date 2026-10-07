@@ -1,0 +1,1080 @@
+{
+  "schema": "d10-single-stream-restoration-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4162",
+  "date": "2026-10-07",
+  "source_ledgers": [
+    "knowledge/d10-noncore-reclassification-v1.json",
+    "knowledge/d10-review-reclassification-v2.json"
+  ],
+  "rule": "Restore every language-visible row previously removed only for package/domain ownership. D10 is one global 10-bit stream. No coordinate is restored; all rows return UNPLACED.",
+  "exclusion_rule": [
+    "exact semantic duplicate",
+    "pure surface alias",
+    "mechanism-only/backend-only without language-visible law",
+    "falsified"
+  ],
+  "accounting": {
+    "d10_before": 434,
+    "restored_cleanup_v1": 55,
+    "restored_cleanup_v2": 15,
+    "restored_total": 70,
+    "d10_after": 504,
+    "law_forced_coordinates": 256,
+    "unplaced_selected": 248,
+    "remaining": 520,
+    "ratified_d10_residents": 0
+  },
+  "rows": [
+    {
+      "stable_id": "d10.forward.022a97b1bb7244c8",
+      "semantic_name": "MATCH-ONE-CONDITION",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "dispatch one rule condition to its matching law",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.03cb5c7dfe52ee7d",
+      "semantic_name": "CONDITION-IS-AND?",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has AND form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.0605416682d9c37c",
+      "semantic_name": "MATCH-EXISTS-CONDITION",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match an existential condition against candidate facts",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.13fee7a6e2cdd322",
+      "semantic_name": "CONDITION-IS-FORALL?",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has universal-quantification form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.14697462da4366f2",
+      "semantic_name": "JTMS-STATE-SUBST",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "JTMS-STATE-ALGEBRA",
+      "behavior": "retrieve the substitution carried by an explicit JTMS matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.1a2d7526901bc272",
+      "semantic_name": "MATCH-NEGATED-CONDITION",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a negated rule condition under current substitution/fact evidence",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.1d0d6a4c58de4fa6",
+      "semantic_name": "MATCH-CONDITIONS",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a sequence/conjunction of rule conditions while threading substitutions",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.272b65957473a815",
+      "semantic_name": "CONDITION-IS-NOT?",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has negation form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.28bd75f0f882b92f",
+      "semantic_name": "MATCH-CONDITIONS-JTMS",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "match a conjunction/list of JTMS rule conditions while threading explicit matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.2ebd0001d13e0700",
+      "semantic_name": "MATCH-TEST-CONDITION",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "evaluate/match an explicit test condition under current substitution",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.4da32404e28cdd68",
+      "semantic_name": "CONDITION-IS-EXISTS?",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has existential form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.57b3e4f93d9bb02d",
+      "semantic_name": "MATCH-CONDITION-AGAINST-FACTS",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match one rule condition against an explicit fact set",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.62f4c67a5e87460d",
+      "semantic_name": "MATCH-AND-CONDITION",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a conjunction of rule conditions",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.6f5786573ba8603d",
+      "semantic_name": "MATCH-PLAIN-CONDITION-JTMS",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "match one ordinary rule condition against JTMS facts while carrying explicit matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.7d09083d7dbc0951",
+      "semantic_name": "FORALL-EVERY-CANDIDATE-SATISFIES?",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "test whether every candidate satisfying the quantified domain also satisfies the universal condition",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.8877867473fd3e2a",
+      "semantic_name": "FIRE-RULES-MULTI",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "MULTI-FORWARD-EXECUTION",
+      "behavior": "fire a rule set over all matching substitutions",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.8b4a53a013867ebf",
+      "semantic_name": "JTMS-MAKE-STATE",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "JTMS-STATE-ALGEBRA",
+      "behavior": "construct an explicit JTMS matching state from substitution and used-fact/support data",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.8ea4e7248eb20e1a",
+      "semantic_name": "MATCH-FORALL-CONDITION",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a universal condition against an explicit fact set",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.ab10f3b5553d2070",
+      "semantic_name": "JTMS-STATE-USED",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "JTMS-STATE-ALGEBRA",
+      "behavior": "retrieve the used-fact/support set carried by an explicit JTMS matching state",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.c5d5059e75133175",
+      "semantic_name": "MATCH-ONE-CONDITION-JTMS",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "dispatch one JTMS rule condition to the appropriate matching law",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.d4850df00d1f1d84",
+      "semantic_name": "CONDITION-IS-TEST?",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has explicit test form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.d4f31203838f06cd",
+      "semantic_name": "FIRE-RULE-MULTI",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "MULTI-FORWARD-EXECUTION",
+      "behavior": "fire one rule over all matching substitutions instead of only one match",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.e6388253c74f02d9",
+      "semantic_name": "MATCH-OR-CONDITION",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-MATCHING",
+      "behavior": "match a disjunction of rule conditions and return the alternative matches",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.ec697a4164384b8d",
+      "semantic_name": "RUN-MULTI",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "MULTI-FORWARD-EXECUTION",
+      "behavior": "iterate multi-match forward reasoning to its language-defined result",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.eec8fab861521eea",
+      "semantic_name": "MATCH-OR-CONDITION-JTMS",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "JTMS-CONDITION-MATCHING",
+      "behavior": "match an OR condition against JTMS facts and return the resulting state alternatives",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.forward.ef4703c320091533",
+      "semantic_name": "CONDITION-IS-OR?",
+      "source_class": "FORWARD-JTMS-HARVEST",
+      "relation_class": "RULE-CONDITION-RECOGNIZER",
+      "behavior": "test whether a rule condition has OR form",
+      "provenance": [
+        "#4028",
+        "lib/forward.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.065ff6c037cda600",
+      "semantic_name": "CHECK-CONFLICT",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "compute the explicit conflict result for a proposed knowledge clause",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.0b9406e2c91bc7b5",
+      "semantic_name": "ADVICE-NEGATIVE-HEAD-CONFLICT",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "compute the conflict relation induced by a negative knowledge head",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.0d9b5d35f817a690",
+      "semantic_name": "ADVICE-ALL-DECISION",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "classify a batch of proposed advice clauses under the Advice Taker boundary",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.0ffd261daf815c3f",
+      "semantic_name": "MODULE-JOURNAL-EVENTS",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "select the journal events belonging to one knowledge module",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.1cf280cba4d5c6a6",
+      "semantic_name": "ADVICE-DECISION",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "classify one proposed clause as accepted, conflicting, or rejected under the Advice Taker boundary",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.280389ace9a9d7e5",
+      "semantic_name": "KNOWLEDGE-PACKAGE-ENTRIES-VALID?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate every entry in a versioned knowledge package",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.2c3e5a5392de9409",
+      "semantic_name": "KNOWLEDGE-CLAUSE-VALID?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate one clause against the admitted knowledge-clause grammar",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.45369b21a80b3c99",
+      "semantic_name": "CLAUSES->TELL-EVENTS",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "convert a clause sequence into explicit tell-journal events",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.476a5d13244efd9e",
+      "semantic_name": "MODULE-JOURNAL-HAS-MODULE?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "test whether a knowledge journal contains any event for a named module",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.4aba51353ffe338c",
+      "semantic_name": "APPLY-JOURNAL-EVENT",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "apply one tell/retract journal event to an explicit clause set",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.58252b08812d5f7e",
+      "semantic_name": "OPPOSITE-KNOWLEDGE-HEAD",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "compute the explicit positive/negative opposite of a knowledge head",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.789a0b4818ce6303",
+      "semantic_name": "KNOWLEDGE-PACKAGE-FIELD",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "retrieve a named field from a versioned knowledge package",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.7f63897ae35ce464",
+      "semantic_name": "KNOWLEDGE-CLAUSES-VALID?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate a batch of knowledge clauses",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.7fecac9e596977c7",
+      "semantic_name": "MAKE-KNOWLEDGE-PACKAGE",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "construct the explicit versioned knowledge-package data shape",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.83302489268459c7",
+      "semantic_name": "KNOWLEDGE-TERMS-VALID?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate every term in a knowledge term collection",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.891bc9722190ee5d",
+      "semantic_name": "ADVICE-BATCH-CONFLICT",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "find the conflict carried by a proposed batch of advice clauses",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.a7e206d384237270",
+      "semantic_name": "KNOWLEDGE-TERM-VALID?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate one knowledge term against the admitted term grammar",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.a7e3aaefbaf29ee4",
+      "semantic_name": "KNOWLEDGE-PROPER-LIST?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "test the proper-list shape required by knowledge protocol values",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.cc2a52e60bbb9647",
+      "semantic_name": "KNOWLEDGE-PACKAGE-DECISION",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "classify a knowledge package as admissible or rejected without mutating knowledge state",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.cd4bae7128135b89",
+      "semantic_name": "KNOWLEDGE-NOT-HEAD?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "test whether a knowledge head is the explicit negation form",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.e16499916ff26cdb",
+      "semantic_name": "KNOWLEDGE-GOAL-VALID?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate one goal against the admitted knowledge-goal grammar",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.f879dbd07a26a666",
+      "semantic_name": "KNOWLEDGE-GOALS-VALID?",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "validate a collection/conjunction of knowledge goals",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.knowledge.fa417329836bc401",
+      "semantic_name": "ADVICE-CONFLICT-PROOF",
+      "source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "behavior": "produce the structured conflict evidence for a proposed advice clause when conflict exists",
+      "provenance": [
+        "#4030",
+        "lib/knowledge.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.29770976affe40e3",
+      "semantic_name": "WORLD-CLIMB-TO-DEPTH",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "behavior": "climb an immutable world ancestry chain to a requested depth",
+      "provenance": [
+        "#4026",
+        "lib/world.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.317eeffc73342b18",
+      "semantic_name": "WORLD-JOURNAL-PREFIX",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "behavior": "compute the journal prefix between a descendant world and an ancestor journal tail",
+      "provenance": [
+        "#4026",
+        "lib/world.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.55de5f0b3896dc6e",
+      "semantic_name": "WORLD-NO-COMMON-ANCESTOR?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "behavior": "test whether two immutable worlds have no common ancestor",
+      "provenance": [
+        "#4026",
+        "lib/world.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.8b93a8112ea17a80",
+      "semantic_name": "WORLD-NOT-ANCESTOR?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "behavior": "test that one immutable world is not an ancestor of another",
+      "provenance": [
+        "#4026",
+        "lib/world.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.8f52d5785c044a9a",
+      "semantic_name": "WORLD-COMMON-ANCESTOR-ALIGNED",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "behavior": "find the common ancestor of two depth-aligned immutable worlds",
+      "provenance": [
+        "#4026",
+        "lib/world.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.d2f580d906911b06",
+      "semantic_name": "WORLD-AT-DEPTH-FROM",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "behavior": "walk from an immutable world toward its parent until a requested ancestry depth is reached",
+      "provenance": [
+        "#4026",
+        "lib/world.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.04a9548ac98a58f9",
+      "semantic_name": "SCIENCE-MERGE-DIMENSIONS",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "DIMENSION-ALGEBRA",
+      "behavior": "merge two dimension collections by exponent addition",
+      "provenance": [
+        "#4026",
+        "lib/quantity.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.0969e96ea4d2d020",
+      "semantic_name": "TRANSLATION-ENVELOPE-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate the versioned translation protocol envelope independently of payload semantics",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.0e1c082d11d49537",
+      "semantic_name": "TRANSLATION-AMBIGUITY-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate that ambiguity contains at least two valid alternatives",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.30a26951923db088",
+      "semantic_name": "TRANSLATION-REVIEW-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate the versioned translation-review envelope",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.39412302796bd17e",
+      "semantic_name": "TRANSLATION-CANDIDATE-PAYLOAD-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate candidate payload according to translation kind",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.44d144a2c4f2a62c",
+      "semantic_name": "TRANSLATION-BATCH-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate that a translation batch payload is a proper list of valid knowledge clauses",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.56310cf7d7b503ec",
+      "semantic_name": "TRANSLATION-REVIEW-ADVICE-DECISION",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "map an Advice Taker admission decision to a structured translation review",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.5879b7448425418a",
+      "semantic_name": "SCIENCE-DIMENSIONS-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "DIMENSION-ALGEBRA",
+      "behavior": "validate a dimension-exponent collection against the language dimension schema",
+      "provenance": [
+        "#4026",
+        "lib/quantity.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.61043fc937c01d44",
+      "semantic_name": "TRANSLATION-ALTERNATIVES-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate every alternative candidate payload in an ambiguity set",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.854c309cc6dfdfb2",
+      "semantic_name": "TRANSLATION-STATUS-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate the finite translation status vocabulary",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.8aaee4b441b0c401",
+      "semantic_name": "SCIENCE-NEGATE-DIMENSIONS",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "DIMENSION-ALGEBRA",
+      "behavior": "negate every exponent in a dimension collection",
+      "provenance": [
+        "#4026",
+        "lib/quantity.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.a96361be62d0eed2",
+      "semantic_name": "TRANSLATION-KIND-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate the finite translation kind vocabulary",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.c4701dc7ce95ae8c",
+      "semantic_name": "TRANSLATION-REVIEW-CANDIDATE",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "review one candidate translation against kind-specific payload and knowledge-admission laws",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.d85004e5cb653807",
+      "semantic_name": "TRANSLATION-REVIEW-STATUS-VALID?",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "TRANSLATION-PROTOCOL-LAW",
+      "behavior": "validate the finite translation-review status vocabulary",
+      "provenance": [
+        "#4026",
+        "lib/translation.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.lib.e25eaf825aab56af",
+      "semantic_name": "SCIENCE-ADD-DIMENSION",
+      "source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "relation_class": "DIMENSION-ALGEBRA",
+      "behavior": "add one base-dimension exponent into a normalized dimension collection",
+      "provenance": [
+        "#4026",
+        "lib/quantity.lisp",
+        "#4162"
+      ],
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "RESTORED-D10-CANDIDATE"
+    }
+  ]
+}
