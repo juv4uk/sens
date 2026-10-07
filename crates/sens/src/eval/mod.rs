@@ -423,7 +423,7 @@ fn dispatch_call(
             // a generic Core operation. Route only when its exact slot already
             // contains the macro; do not widen D6 callability.
             if let crate::DomainIdentity::D6(word) = identity {
-                let exact = crate::CoreDomainIdentity::D6(*word);
+                let exact = crate::CoreDomainIdentity::D6(word);
                 if let Some(Value::Macro(ref closure)) =
                     environment.domain_code_slot(exact)
                 {
