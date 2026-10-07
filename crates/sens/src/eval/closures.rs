@@ -551,8 +551,8 @@ pub(super) fn apply(
             // already-bound exact macro slot; do not widen DomainIdentity::core_operation().
             if let crate::DomainIdentity::D6(word) = identity {
                 let exact = crate::CoreDomainIdentity::D6(word);
-                if let Some(Value::Macro(ref closure)) =
-                    calling_environment.domain_code_slot(exact)
+                if let Some(Value::Macro(closure)) =
+                    calling_environment.domain_code_slot(exact).as_ref()
                 {
                     return apply_macro(closure.clone(), arguments, calling_environment, span);
                 }
