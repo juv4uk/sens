@@ -327,7 +327,7 @@ mod tests {
 
         let mut cursor = decoded;
         for expected_width in 1..=8 {
-            let Value::Pair(head, tail) = cursor else {
+            let Value::Pair(head, tail) = &cursor else {
                 panic!("round-trip list must retain all exact-width identities");
             };
             let Value::DomainIdentity(identity) = head.as_ref() else {
