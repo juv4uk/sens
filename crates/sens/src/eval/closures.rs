@@ -298,7 +298,7 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
     // Legacy 8-bit spellings may project to ratified exact-domain macros.
     // Their arguments are macro syntax, so resolver must keep them opaque too.
     if let Some(identity) =
-        crate::semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+        crate::semantic_registry::legacy_macro_domain_identity_from_registry_byte(sid.packed_byte())
     {
         if matches!(environment.domain_code_slot(identity), Some(Value::Macro(_))) {
             return Head::Opaque;
