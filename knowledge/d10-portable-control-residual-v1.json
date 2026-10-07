@@ -1,0 +1,130 @@
+{
+  "schema": "d10-portable-control-residual-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4061",
+  "date": "2026-10-07",
+  "foundation": "#4008 / Contract 11.8 / D1-D9",
+  "coordinate_policy": "Donor implementation language, goroutine/thread identity, runtime addresses and donor coordinates have zero D10 placement authority. All five selected meanings remain UNPLACED.",
+  "accounting": {
+    "targets_reviewed": 8,
+    "selected_d10_candidates": 5,
+    "current_projection_or_derived": 3,
+    "d10_before": 434,
+    "d10_after": 439,
+    "placed_after": 256,
+    "unplaced_after": 183,
+    "remaining_after": 585,
+    "ratified_d10_residents": 0
+  },
+  "selected": [
+    {
+      "semantic_name": "CALL/EC",
+      "behavior": "call a function with a dynamically valid escape continuation; invoking the escape immediately exits that call extent with the supplied value, while unrelated throws propagate",
+      "donor_repo": "juv4uk/golisp",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "source_file": "prelude.golisp",
+      "source_name": "call/ec",
+      "relation_class": "ESCAPE-CONTINUATION-CONTROL",
+      "stable_id": "d10.crossrepo.control.050c284510fd8d03",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "semantic_name": "DYNAMIC-WIND",
+      "behavior": "run a before thunk, then a body thunk, and ensure the after thunk runs exactly once on normal completion or nonlocal throw from the body",
+      "donor_repo": "juv4uk/golisp",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "source_file": "prelude.golisp",
+      "source_name": "dynamic-wind",
+      "relation_class": "DYNAMIC-EXTENT-CLEANUP-CONTROL",
+      "stable_id": "d10.crossrepo.control.75696a01de2770bc",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "semantic_name": "SPAWN",
+      "behavior": "initiate asynchronous evaluation of a zero-argument function and return immediately without returning a task result value or importing scheduler identity",
+      "donor_repo": "juv4uk/golisp",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "source_file": "lisp/primitives.go",
+      "source_name": "spawn",
+      "relation_class": "ABSTRACT-CONCURRENCY-CONTROL",
+      "stable_id": "d10.crossrepo.control.36580ca722786f14",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "semantic_name": "DEFINE-READERMACRO",
+      "behavior": "extend the language reader table with a delimiter pair mapped to a reader action, changing subsequent surface parsing through language-visible reader configuration",
+      "donor_repo": "juv4uk/lisp",
+      "donor_head": "b4cda76a40d25151a6cdb45a2ed6cb492644ea22",
+      "source_file": "lisp/core.lisp",
+      "source_name": "define-readermacro",
+      "relation_class": "READER-CONFIGURATION-ALGEBRA",
+      "stable_id": "d10.crossrepo.control.9d1a8ddea65abc14",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "semantic_name": "IMPROPER-LISTP",
+      "behavior": "recognize a nonempty pair chain whose terminal cdr is neither a pair nor the empty list",
+      "donor_repo": "juv4uk/golisp",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "source_file": "prelude.golisp",
+      "source_name": "improper-list?",
+      "relation_class": "LIST-SHAPE-PREDICATE",
+      "stable_id": "d10.crossrepo.control.d4c5afb363b46530",
+      "decision": "SELECT-D10-CANDIDATE",
+      "selected_d10_candidate": true,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    }
+  ],
+  "projections": [
+    {
+      "source_name": "proper-list?",
+      "donor_repo": "juv4uk/golisp",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "source_file": "prelude.golisp",
+      "decision": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D10 LISTP",
+      "reason": "golisp explicitly defines list? = proper-list?; current D10 LISTP already owns that list-shape predicate semantic."
+    },
+    {
+      "source_name": "list-tail",
+      "donor_repo": "juv4uk/golisp",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "source_file": "prelude.golisp",
+      "decision": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D6:110001 DROP",
+      "reason": "list-tail advances cdr exactly n times and returns the remaining suffix; this is the current D6 DROP law."
+    },
+    {
+      "source_name": "list-head",
+      "donor_repo": "juv4uk/golisp",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "source_file": "prelude.golisp",
+      "decision": "CURRENT-PROJECTION-DERIVED",
+      "current_target": "D6:110000 TAKE",
+      "reason": "list-head returns the first n elements; this is the current D6 TAKE law."
+    }
+  ]
+}
