@@ -72,6 +72,25 @@
   (00001000 (mode reg rm)
     (00001100 (00001110 mode 64) (00001100 (00001110 reg 8) rm))))
 
+; #4104 — explicit representation boundary for an exact 3-bit machine field.
+; Canonical BinaryNumber remains the source identity (#b...).  The shared
+; legacy byte packer below still consumes mechanical Number fields, so project
+; only the closed u3 domain 0..7 here.  This is intentionally not a general
+; BinaryNumber -> legacy Number coercion.
+(00001001 x86-project-bin3-to-mechanism-u3
+  (00001000 (value)
+    (00000111
+      ((00011010 value #b1)    #d0)
+      ((00011010 value #b10)   #d1)
+      ((00011010 value #b11)   #d2)
+      ((00011010 value #b100)  #d3)
+      ((00011010 value #b101)  #d4)
+      ((00011010 value #b110)  #d5)
+      ((00011010 value #b111)  #d6)
+      ((00011010 value #b1000) #d7)
+      (1 (00000001 ())))))
+
+
 (00001001 x86-encode-sib
   (00001000 (scale index base)
     (00001100 (00001110 scale 64) (00001100 (00001110 index 8) base))))
@@ -1147,12 +1166,14 @@
 ; The shared helper is the encoding law; mnemonic wrappers are derived projections.
 (00001001 x86-encode-0f-c7-group-r64
   (00001000 (opcode-extension register)
-    (10011100 ((code (x86-reg-code register)))
+    (10011100 ((code (x86-reg-code register))
+          (mechanism-extension
+            (x86-project-bin3-to-mechanism-u3 opcode-extension)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         #b1111
         #b11000111
-        (x86-encode-modrm 3 opcode-extension (x86-low3 code))))))
+        (x86-encode-modrm 3 mechanism-extension (x86-low3 code))))))
 
 (00001001 x86-encode-rdrand-r64
   (00001000 (register)
