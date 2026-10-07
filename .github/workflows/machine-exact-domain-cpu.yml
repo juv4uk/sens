@@ -20,7 +20,6 @@ on:
       - "crates/sens/tests/semantic_coordinate_join_2.rs"
       - "crates/sens/tests/semantic_coordinate_join.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
-      - "crates/sens/tests/machine_encoder_coverage_authority.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "crates/sens-host/tests/real_silicon_sweep.rs"
@@ -47,7 +46,6 @@ on:
       - "crates/sens/tests/semantic_coordinate_join_2.rs"
       - "crates/sens/tests/semantic_coordinate_join.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
-      - "crates/sens/tests/machine_encoder_coverage_authority.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "crates/sens-host/tests/real_silicon_sweep.rs"
@@ -90,7 +88,6 @@ jobs:
           cargo test -p sens --test semantic_coordinate_join -- --nocapture
           cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
-          cargo test -p sens --test machine_encoder_coverage_authority -- --nocapture
       - name: Derived machine coverage inputs
         run: python3 scripts/generate-encoder-coverage-input.py --check
       - name: Lisp-owned encoder coverage authority
