@@ -43,6 +43,22 @@ fn native_session() -> Session {
 }
 
 #[test]
+fn whole_native_first_source_has_no_legacy_sid_or_call_nodes() {
+    let path = repo_root().join("lib/machine/dispatch/native-first.lisp");
+    let source = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
+    let parsed = parse_mixed_exact_domain(&source)
+        .unwrap_or_else(|error| panic!("{} must parse as exact mixed source: {error}", path.display()));
+    let lowered = lower_program(&parsed);
+
+    for (index, expression) in lowered.iter().enumerate() {
+        expr_to_exact_program_data(expression).unwrap_or_else(|error| {
+            panic!("native-first form {index} contains legacy Sid/Call identity: {error}")
+        });
+    }
+}
+
+#[test]
 fn lowered_exact_domain_data_selects_native_car_cons_without_spelling_match() {
     let parsed = parse("(перше (сполучити 2 3))").expect("current Ukrainian source");
     let lowered = lower_program(&parsed);
