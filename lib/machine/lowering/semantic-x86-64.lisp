@@ -352,6 +352,55 @@
         (t
          (x86-encode-admitted-program forms))))))
 
+; #4063 exact D6 ADD1/SUB1 bounded fast paths.
+; Language meaning is already admitted as LOWER_DOMAIN_COMPOSITION over exact
+; D5 PLUS/DIFFERENCE with exact integer 1. This machine slice reuses the same
+; admitted ADD/SUB forms and adds no arithmetic meaning of its own.
+(00001001 x86-current-d6-add1-u64-safe?
+  (00001000 (value)
+    (00000111
+      ((x86-admission-exact-integer? value)
+       (x86-admission-within-inclusive-integer-range?
+         value 0 18446744073709551614))
+      (t (00000001 ())))))
+
+(00001001 x86-current-d6-sub1-u64-safe?
+  (00001000 (value)
+    (00000111
+      ((x86-admission-exact-integer? value)
+       (x86-admission-within-inclusive-integer-range?
+         value 1 18446744073709551615))
+      (t (00000001 ())))))
+
+(00001001 x86-lower-current-d6-unary-u64-forms
+  (00001000 (width bits value)
+    (00000111
+      ((x86-current-domain-key? width bits 6 14)
+       (00000111
+         ((x86-current-d6-add1-u64-safe? value)
+          (x86-lower-add-u64-forms value 1))
+         (t (00000001 exact-d6-fallback-required))))
+      ((x86-current-domain-key? width bits 6 15)
+       (00000111
+         ((x86-current-d6-sub1-u64-safe? value)
+          (x86-lower-difference-u64-forms value 1))
+         (t (00000001 exact-d6-fallback-required))))
+      (t
+       (00000001 unsupported-current-domain-d6-unary-u64)))))
+
+(00001001 x86-encode-current-d6-unary-u64
+  (00001000 (width bits value)
+    (10011100 ((forms
+                  (x86-lower-current-d6-unary-u64-forms
+                    width bits value)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-d6-unary-u64))
+         (00000001 unsupported-current-domain-d6-unary-u64))
+        ((00100010 forms (00000001 exact-d6-fallback-required))
+         (00000001 exact-d6-fallback-required))
+        (t
+         (x86-encode-admitted-program forms))))))
+
 ; #4017 exact D5:10111 QUOTIENT bounded dispatcher.
 ; Only equal positive exact integers inside signed i64 enter IDIV. This is a
 ; proof slice, not a claim of general integer division. All non-equal,
