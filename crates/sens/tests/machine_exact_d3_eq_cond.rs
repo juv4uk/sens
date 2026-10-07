@@ -74,7 +74,7 @@ fn exact_d3_eq_cond_pair_selects_existing_bounded_x86_composition() {
     let mut session = machine_session();
 
     let current = eval_value(
-        "(x86-lower-current-eq-cond-u64-forms 101 110 2 3 111 222)",
+        "(x86-lower-current-eq-cond-u64-forms 3 5 3 6 2 3 111 222)",
         &mut session,
     );
     let existing = eval_value(
@@ -84,7 +84,7 @@ fn exact_d3_eq_cond_pair_selects_existing_bounded_x86_composition() {
     assert_eq!(current, existing);
 
     let encoded = eval_value(
-        "(x86-encode-current-eq-cond-u64 101 110 2 3 111 222)",
+        "(x86-encode-current-eq-cond-u64 3 5 3 6 2 3 111 222)",
         &mut session,
     );
     assert!(
