@@ -38,18 +38,20 @@
 
 
 ; Coverage authority uses exact D1 PredicateBit for every control decision.
-; equal? is legacy deep structural comparison and returns one-element
-; structural records (1)/(0), which are NOT D1. Normalize that result by
-; asking canonical D3:101 EQ (`тотожне?`) whether its payload is Number 1.
+; The historical deep structural equal? mechanism returns one-element
+; structural records (1)/(0), which are NOT D1. Normalize only the extracted
+; ordinary Number payload through current exact-D5 predicates, whose language
+; result boundary is guaranteed D1. This deliberately avoids feeding the
+; legacy D3 EQ answer carrier back into D3 EQ again.
 (def encoder-coverage-d1-yes
-  (тотожне? 0 0))
+  (zerop? 0))
 
 (def encoder-coverage-d1-no
-  (тотожне? 0 1))
+  (zerop? 1))
 
 (def encoder-coverage-same?
   (lambda (left right)
-    (тотожне? (car (equal? left right)) 1)))
+    (greaterp? (car (equal? left right)) 0)))
 
 ; Traversal needs structural EMPTY, not the broader ATOM classification.
 ; This preserves the D1:0 != D3:000 distinction and avoids using ATOM as NIL.
