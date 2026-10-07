@@ -174,7 +174,7 @@ const D4_DEFINE: (usize, u8) = (4, 0b0011);
 /// Tooling projection from an admitted human surface to its already-known
 /// domain identity. This consumes `LanguageItem.domain_identity`; it never
 /// reconstructs a domain from the legacy registry byte.
-fn surface_domain_coordinate(surface: &str) -> Option<(usize, u8)> {
+fn surface_domain_coordinate(surface: &str) -> Option<(usize, u16)> {
     sens::language_items()
         .into_iter()
         .find(|item| item.name == surface)
@@ -191,7 +191,7 @@ fn surface_domain_coordinate(surface: &str) -> Option<(usize, u8)> {
 /// domain identity.
 fn head_is_domain_or_legacy(
     expr: &Expr,
-    domain: (usize, u8),
+    domain: (usize, u16),
     legacy_bytes: &[u8],
 ) -> bool {
     match &expr.kind {
