@@ -8,6 +8,7 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
+    parse_mixed_exact_domain, eval_parsed_expressions,
     compiler_execution_role, domain_identity_shape_mechanism, eval_parsed_expressions,
     eval_program, load_core_library, parse_canonical_binary, sha256_source, Bija3, Bit3, Bit8,
     CompilerExecutionRole, CoreD8, DomainIdentity, Exactness, Session, Value,
@@ -213,7 +214,9 @@ fn session(law: &LawProjection) -> Result<Session, HarnessError> {
     session
         .environment
         .define(PROVENANCE_NAME, provenance_value(law));
-    eval_program(NUCLEUS, &mut session)
+    let parsed = parse_mixed_exact_domain(NUCLEUS)
+        .map_err(|error| HarnessError::Bootstrap(format!("nucleus parse: {error:?}")))?;
+    eval_parsed_expressions(&parsed, &mut session)
         .map_err(|error| HarnessError::Bootstrap(format!("nucleus load: {error:?}")))?;
     Ok(session)
 }
