@@ -1,4 +1,7 @@
-; #604 temporary first-row leaf carrier probe. No result is fed to D3 COND.
+; #604 — structural check for the Lisp-owned encoder coverage authority.
+; Validates generated inputs, legacy-subset migration witness, and committed
+; coverage row-by-row without rendering the full output string.
+
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
 
@@ -8,27 +11,22 @@
       (read-file
         "lib/machine/encoding/coverage.lisp"))))
 
-(def encoder-coverage-first-coverage-row
-  (car (cdr (cdr (cdr encoder-coverage-committed-form)))))
-
-(list
-  (quote encoder-coverage-first-row-leaf-probe)
-  (list
-    (quote empty-result)
-    (encoder-coverage-empty?
-      encoder-coverage-first-coverage-row))
-  (list
-    (quote count-result)
-    (encoder-coverage-count=?
-      #b101
-      (length encoder-coverage-first-coverage-row)))
-  (list
-    (quote tag-match)
-    (encoder-coverage-same?
-      (car encoder-coverage-first-coverage-row)
-      (quote coverage)))
-  (list
-    (quote iclass-tag-match)
-    (encoder-coverage-same?
-      (car (second encoder-coverage-first-coverage-row))
-      (quote iclass))))
+(cond
+  ((encoder-coverage-index-valid?)
+   (cond
+     ((encoder-coverage-projection-valid?
+        encoder-coverage-committed-form)
+      (quote
+        (encoder-coverage-check
+          (status pass))))
+     (encoder-coverage-d1-yes
+      (quote
+        (encoder-coverage-check
+          (status fail)
+          (reason projection-mismatch))))))
+  (encoder-coverage-d1-yes
+   (list
+     (quote encoder-coverage-check)
+     (quote (status fail))
+     (quote (reason invalid-coverage-input-projection))
+     (cons (quote checks) (encoder-coverage-index-checks)))))
