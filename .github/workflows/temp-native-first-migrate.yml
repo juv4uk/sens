@@ -16,6 +16,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build canonical migration tool
@@ -42,9 +44,8 @@ jobs:
           git add lib/machine/dispatch/native-first.lisp
           git commit -m "wip(4242): commit parser-aware native-first migration"
           git push origin HEAD:release/4242-native-first-migrate
-      # Force a fresh pull_request synchronization after the detached-HEAD push fix.
       - name: Migration run marker
-        run: echo "native-first migration generator uses an explicit branch push target"
+        run: echo "native-first migration generator uses the exact PR head branch"
       - uses: actions/upload-artifact@v4
         with:
           name: native-first-sens-migration
