@@ -1,0 +1,36 @@
+name: D10 island bridge v1
+
+on:
+  pull_request:
+    paths:
+      - "contracts/island-compat-contract.lisp"
+      - "knowledge/d10-island-bridge-factorization-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/research-d10-island-bridge-v1.py"
+      - "scripts/check-d10-island-bridge-v1.py"
+      - "scripts/check-d10-v1-semantic-inventory.py"
+      - ".github/workflows/d10-island-bridge-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-island-bridge-factorization-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/research-d10-island-bridge-v1.py"
+      - "scripts/check-d10-island-bridge-v1.py"
+      - ".github/workflows/d10-island-bridge-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  bridge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Replay bridge factorization witness
+        run: python3 scripts/research-d10-island-bridge-v1.py
+      - name: Verify bridge selection
+        run: python3 scripts/check-d10-island-bridge-v1.py
+      - name: Verify global D10 inventory
+        run: python3 scripts/check-d10-v1-semantic-inventory.py
