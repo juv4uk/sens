@@ -7,6 +7,10 @@ on:
       - "knowledge/d6-ratified.json"
       - "crates/sens/src/eval/selector_law.rs"
       - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/tests/d6_add1_sub1_mechanisms.rs"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/d6_arithmetic.rs"
+      - "crates/sens/src/domain_identity.rs"
       - "crates/sens/src/eval/necessary_forms.rs"
       - "crates/sens/src/semantic_registry.rs"
       - "scripts/check-d6-mechanism-ledger.py"
@@ -24,7 +28,10 @@ on:
 
 jobs:
   ledger:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     steps:
       - uses: actions/checkout@v5
-      - run: python3 scripts/check-d6-mechanism-ledger.py
+      - name: Check D6 mechanism ledger
+        run: python3 scripts/check-d6-mechanism-ledger.py
+      - name: Prove exact D6 ADD1/SUB1 mechanisms
+        run: cargo test -p sens --test d6_add1_sub1_mechanisms
