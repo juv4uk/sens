@@ -297,6 +297,35 @@ class SourceResolver:
             ) if len(ordered) > 1 else (),
         )
 
+    def resolve_legacy_sid8(self, token: str) -> Resolution:
+        """Resolve only legacy SID8 evidence, without current-width precedence."""
+        if not re.fullmatch(r"[01]{8}", token):
+            return Resolution(
+                kind="not-sid8",
+                pass_number=0,
+                token=token,
+                current=None,
+                evidence=("not an 8-bit legacy SID token",),
+            )
+
+        rows = self.hist_by_sid.get(token, [])
+        candidates = self.current_candidates_for_sid(token)
+        evidence = [f"legacy SID8/Sens8 {token}"]
+        evidence += [f"historical:{r.historical}" for r in rows]
+        evidence += [
+            f"registry:{ns}:{spelling}"
+            for ns, spelling in self.registry_sid_fields.get(token, [])
+        ]
+        return self._choose(
+            "sid8-sens8",
+            1,
+            token,
+            candidates,
+            legacy_sid8=token,
+            rows=rows,
+            evidence=evidence,
+        )
+
     def resolve_head(self, token: str) -> Resolution:
         # Already-current operation-domain source is not one of the historical
         # passes; preserve exact width and identity for every admitted
