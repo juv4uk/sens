@@ -45,15 +45,19 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
 /// Direct D3/D4/D5 human-surface projection.
 ///
 /// This path consumes the exact-domain projection generated from
-/// lib/domains/d1.lisp ... lib/domains/d5.lisp. It never consults a historical
-/// packed byte to recover domain identity.
+/// lib/domains/d1.lisp ... lib/domains/d5.lisp. The source-routable human
+/// namespaces are generated from those rows; this lookup never consults a
+/// historical packed byte to recover domain identity.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
         let matches_human_surface = row.source_routable
             && row
                 .surfaces
                 .iter()
-                .any(|surface| matches!(surface.namespace, "uk" | "sa") && surface.name == name);
+                .any(|surface| {
+                    matches!(surface.namespace, "uk" | "ukr" | "sa" | "en")
+                        && surface.name == name
+                });
         matches_human_surface
             .then(|| exact_domain_identity_from_projection(row.width, row.bits))
             .flatten()
@@ -115,8 +119,8 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 }
 /// Current staged surface lookup.
 ///
-/// Ukrainian and Sanskrit D3/D4/D5 spellings resolve directly through the
-/// exact-domain projection. The byte-backed lookup remains only as a bounded
+/// Generated human D3/D4/D5 spellings resolve directly through the exact-domain
+/// projection. The byte-backed lookup remains only as a bounded
 /// compatibility fallback for still-unmigrated spellings.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     direct_domain_identity_for_surface(name).or_else(|| {
@@ -334,12 +338,15 @@ mod tests {
     }
 
     #[test]
-    fn uk_sa_exact_domain_projection_does_not_need_a_legacy_byte_route() {
+    fn generated_human_exact_domain_projection_does_not_need_a_legacy_byte_route() {
         for (surface, width, bits) in [
             ("aṇu", 3, 0b010),
-            ("р-п", 4, 0b0110),
+            ("car", 3, 0b100),
+            ("решта-від-першого", 4, 0b0110),
             ("phalana", 4, 0b0010),
+            ("lambda", 4, 0b0010),
             ("saṅkalana", 4, 0b1111),
+            ("plus", 5, 0b01010),
         ] {
             let identity = direct_domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("exact-domain surface must resolve directly: {surface}"));
@@ -351,10 +358,10 @@ mod tests {
         // is allowed: the exact-domain table owns the current route, as proved above;
         // historical byte presence must not be used as placement authority.
         assert_eq!(
-            registry_byte_for_surface("р-п")
+            registry_byte_for_surface("plus")
                 .and_then(legacy_domain_identity_from_registry_byte),
             None,
-            "CDAR must be admitted by D4 projection even without a legacy byte mapping"
+            "PLUS must be admitted by D5 projection even without a legacy byte mapping"
         );
     }
 
