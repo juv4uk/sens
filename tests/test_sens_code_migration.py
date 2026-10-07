@@ -121,6 +121,15 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(ROUND x)\n")
 
+    def test_contract_authority_rejects_bare_w8_head_without_legacy_sid8_narrowing(self):
+        # 00000101 is a valid current D8 coordinate. Contract-authority mode
+        # must not reinterpret the same W8 token as historical SID8 CAR/D3.
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "non-callable authority resident used as executable head",
+        ):
+            self.contract_binary("(00000101 x)\n")
+
     def test_contract_authority_preserves_bare_d7_word_instead_of_spelling_digits(self):
         converted, _, _ = self.contract_binary("(LIST 0011001)\n")
         self.assertIn("0011001", converted)
