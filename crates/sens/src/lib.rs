@@ -147,7 +147,8 @@ pub use compiler_language::{
     compiler_execution_role_from_sens, compiler_lowering_role_from_sens,
     compiler_program_artifact_from_sens, compiler_program_bootstrap_bundle,
     compiler_program_requests_from_sens, compiler_semantic_input_from_sens,
-    CompilerProgramBootstrapBundle, CompilerSemanticInput,
+    verify_compiler_program_artifact_from_sens, CompilerProgramBootstrapBundle,
+    CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
 pub use gpu_admission::{GpuAdmission, GpuAdmissionInventory};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
