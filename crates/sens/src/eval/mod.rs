@@ -418,7 +418,19 @@ fn dispatch_call(
         )?,
     };
     if head_sid.is_none() && span.start < 50 && span.end < 50 {
-        eprintln!("SENS_DEBUG_COMPUTED_HEAD: head={head_expr:?} function={function:?}");
+        let kind = match &function {
+            Value::Closure(_) => "Closure",
+            Value::Macro(_) => "Macro",
+            Value::Builtin(_) => "Builtin",
+            Value::Sid(_) => "Sid",
+            Value::DomainIdentity(_) => "DomainIdentity",
+            Value::Pair(_, _) => "Pair",
+            Value::Nil => "Nil",
+            Value::Number(_, _) => "Number",
+            Value::Symbol(_) => "Symbol",
+            _ => "Other",
+        };
+        eprintln!("SENS_DEBUG_COMPUTED_HEAD_KIND: {kind}");
     }
     match &function {
         Value::DomainIdentity(identity) => {
