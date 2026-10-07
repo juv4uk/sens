@@ -11,6 +11,7 @@
   (cpu intel-core-i5-6400)
   (key-shape width+packed-bits)
   (rows
+    (5 8 proof "CMP+SETE+MOVZX / exact integer internal bit; D1 boundary") ; D5 ZEROP
     (5 10 fast-path "ADD / u32 inputs -> exact u64 result")      ; D5 PLUS
     (5 11 fast-path "SUB / u64, left>=right")                   ; D5 DIFFERENCE
     (5 22 fast-path "IMUL / u32 inputs -> exact u64 result")     ; D5 TIMES
