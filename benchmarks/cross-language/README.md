@@ -1,10 +1,31 @@
 # Міжмовні бенчмарки SENS
 
+## Current authority override — Contract 11.8 / D1–D9
+
+Current language authority is `language-contract.lisp` Contract 11.8:
+D1–D9 are the ratified current foundation; D10 is research. Canonical identity
+is exact bits + exact domain + admitted/proved law.
+
+This directory contains several **historical benchmark generations** as well as
+reusable measurement machinery. Historical D1–D4, D1–D8 and Contract 11.6
+rows remain valid provenance for the exact generation that produced them, but
+they must never be relabeled as current Contract 11.8 evidence.
+
+Fresh current replay is coordinated by #4129. Current rows must record
+`contract_version=11.8`,
+`semantic_generation=contract-11-8-exact-d1-d9`, exact git/corpus/artifact
+provenance, and semantic parity before timing. Missing D9 execution mechanisms
+are explicit `BLOCKED-MECHANISM`; they must not fall back to historical
+Sens8/Sid8/Function8 paths.
+
+The sections below preserve older harness documentation unless explicitly
+marked otherwise.
+
 Цей каталог вимірює **конкретні реалізації**, а не абстрактні "мови".
 Перший зовнішній орієнтир — CPython (#1546). Lua (#1547), Racket CS
 (#1548) і стандартний binary-trees (#1549) додаються окремими slices.
 
-## Current D1-D4 boundary
+## Historical D1-D4 boundary
 
 The historical shared harness still uses the old Function8 FASL SENS lane.
 It is preserved for provenance but must not be relabeled as current D1-D4
