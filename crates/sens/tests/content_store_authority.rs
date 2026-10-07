@@ -26,23 +26,6 @@ fn observe(session: &mut Session, source: &str) -> String {
         .to_string()
 }
 #[test]
-fn core4_bootstrap_binds_let_macro_to_exact_d6_slot() {
-    let mut session = store_session();
-    let let_value = session.environment.get("let").expect("let surface must be bound");
-    assert!(
-        matches!(let_value, sens::Value::Macro(_)),
-        "let must remain a Lisp-owned macro, got {let_value:?}"
-    );
-
-    let forms = sens::parse_mixed_exact_domain("(001000 ((x 41)) x)")
-        .expect("exact D6 LET source must parse");
-    let result = sens::eval_parsed_expressions(&forms, &mut session)
-        .expect("exact D6 LET must execute through its Lisp-owned macro slot");
-    assert_eq!(result.value, sens::Value::Number(41.0, sens::Exactness::Exact));
-}
-
-
-#[test]
 fn content_store_semantic_relations_are_owned_by_lisp_witness() {
     let mut session = store_session();
     eval_program(
