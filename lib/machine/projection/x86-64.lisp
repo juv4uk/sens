@@ -114,7 +114,7 @@
                 ((x86-projection-rejected? rest-projected)
                  (00000001 x86-projection-rejected))
                 (t
-                 (00101001 projected rest-projected))))))))))))
+                 (00101001 projected rest-projected)))))))))))
 
 (00001001 x86-encode-machine-effect
   (00001000 (effect)
@@ -160,4 +160,4 @@
                ((x86-projection-rejected? forms)
                 (00000001 x86-projection-rejected))
                (t
-                (x86-call-admitted-u64 forms x86-pair-cell-bytes)))))))))))
+                (x86-call-admitted-u64 forms x86-pair-cell-bytes))))))))))
