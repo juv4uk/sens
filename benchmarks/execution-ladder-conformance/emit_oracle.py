@@ -20,7 +20,7 @@ from validate import (
 )
 
 WORKLOAD_SCHEMA = "sens-current-en-vs-d1d8-workloads/v1"
-IDENTITY = re.compile(r"(?:id|call):D([1-8]):([01]+)")
+IDENTITY = re.compile(r"(?:id|call):D([1-9]):([01]+)")
 
 
 def git_sha(repo: Path) -> str:
@@ -136,7 +136,7 @@ def row_for(
     row = {
         "schema": SCHEMA,
         "case_id": case_id_for("canonical-source", program),
-        "contract": "11.6",
+        "contract": "11.8",
         "upstream_sha": upstream_sha,
         "producer_layer": "L0",
         "producer": producer,
