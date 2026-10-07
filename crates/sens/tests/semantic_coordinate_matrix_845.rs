@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-use sens::{parse, Expr, ExprKind, Sens8};
+use sens::{language_items, parse, CoreDomainIdentity, Expr, ExprKind, Sens8};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -131,11 +131,23 @@ fn law_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
     })
 }
 
-fn source_has_bare_sid(source: &str, sid: Sens8) -> bool {
-    source.contains(&format!("({sid}"))
+fn exact_domain_for_scoped_sid(sid: Sens8) -> CoreDomainIdentity {
+    let mut matches = language_items()
+        .into_iter()
+        .filter(|item| item.legacy_registry_id == sid)
+        .filter_map(|item| item.domain_identity);
+
+    let identity = matches
+        .next()
+        .unwrap_or_else(|| panic!("scoped SID {sid} must project to current exact-domain identity"));
+    assert!(
+        matches.all(|candidate| candidate == identity),
+        "all surfaces for scoped SID {sid} must project to one exact-domain identity"
+    );
+    identity
 }
 
-fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
+fn machine_axis_has_domain_row(source: &str, wanted: CoreDomainIdentity) -> bool {
     let exprs = parse(source).expect("machine capability axis must parse");
 
     exprs.iter().any(|expr| {
@@ -154,15 +166,16 @@ fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
         }
         if !matches!(
             definition.get(1).map(|expr| &expr.kind),
-            Some(ExprKind::Symbol(name)) if &**name == "machine-capability-axis-v1"
+            Some(ExprKind::Symbol(name)) if &**name == "machine-capability-axis-v3"
         ) {
             return false;
         }
 
-        let Some(quoted) = definition.get(2) else {
-            return false;
-        };
-        let ExprKind::List(quote_form) = &quoted.kind else {
+        let Some(Expr {
+            kind: ExprKind::List(quote_form),
+            ..
+        }) = definition.get(2)
+        else {
             return false;
         };
         if !matches!(
@@ -171,10 +184,11 @@ fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
         ) {
             return false;
         }
-        let Some(rows) = quote_form.get(1) else {
-            return false;
-        };
-        let ExprKind::List(rows) = &rows.kind else {
+        let Some(Expr {
+            kind: ExprKind::List(rows),
+            ..
+        }) = quote_form.get(1)
+        else {
             return false;
         };
 
@@ -182,10 +196,17 @@ fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
             let ExprKind::List(fields) = &row.kind else {
                 return false;
             };
-            matches!(
+            let (
+                Some(ExprKind::Number(width, _)),
+                Some(ExprKind::Number(bits, _)),
+            ) = (
                 fields.first().map(|expr| &expr.kind),
-                Some(ExprKind::Sid(sid)) if *sid == wanted_sid
+                fields.get(1).map(|expr| &expr.kind),
             )
+            else {
+                return false;
+            };
+            *width == wanted.width() as f64 && *bits == wanted.packed_bits() as f64
         })
     })
 }
@@ -238,14 +259,19 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
 
         // Presence is derived, never copied into the matrix contract.
         let _math_present = law_axis_has_row(&math, *sid);
-        let _machine_present = source_has_bare_sid(&machine, *sid);
     }
 
-    // Machine coordinates remain present for the whole bounded slice.
+    // Machine coordinates are exact-domain keys now. The matrix's historical
+    // scoped SID locates the live registry row; machine authority remains the
+    // resulting (domain-width, packed-bits), never the compatibility byte.
     for sid in &scope {
+        let identity = exact_domain_for_scoped_sid(*sid);
         assert!(
-            source_has_bare_sid(&machine, *sid),
-            "machine axis missing scoped SID {sid}"
+            machine_axis_has_domain_row(&machine, identity),
+            "machine axis missing exact-domain coordinate D{}:{:0width$b} for scoped SID {sid}",
+            identity.width(),
+            identity.packed_bits(),
+            width = identity.width()
         );
     }
 
@@ -294,7 +320,10 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     assert!(identity.contains(&format!("({LAMBDA_SID} ")));
     assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
     assert!(!law_axis_has_row(&math, LAMBDA_SID));
-    assert!(!machine_axis_has_row(&machine, LAMBDA_SID));
+    assert!(!machine_axis_has_domain_row(
+        &machine,
+        exact_domain_for_scoped_sid(LAMBDA_SID)
+    ));
 }
 
 #[test]
