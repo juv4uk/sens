@@ -20,9 +20,9 @@
     "No donor repository contributes coordinates."
   ],
   "class_counts": {
-    "REFERENCE-OR-UPSTREAM": 29,
+    "REFERENCE-OR-UPSTREAM": 31,
     "PACKAGE-OR-DOMAIN": 32,
-    "CORE-HISTORICAL-DONOR": 13,
+    "CORE-HISTORICAL-DONOR": 11,
     "BACKEND-OR-MECHANISM": 11,
     "CORE-LANGUAGE-DONOR": 1,
     "REVIEW-REQUIRED": 1
@@ -140,13 +140,13 @@
       "visibility": "private",
       "size": 61868,
       "archived": false,
-      "primary_class": "CORE-HISTORICAL-DONOR",
-      "semantic_owner": "historical-language-corpus",
-      "d10_action": "REVIEW-FOR-MISSING-HISTORICAL-SEMANTICS",
-      "deep_review_status": "PRIORITY",
-      "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
-      "evidence_note": null,
-      "candidate_issue": "#4053"
+      "primary_class": "REFERENCE-OR-UPSTREAM",
+      "semantic_owner": "reference/upstream",
+      "d10_action": "REFERENCE-ONLY",
+      "deep_review_status": "BOUNDARY-VERIFIED",
+      "reason": "Common Lisp NLP toolkit; domain library, not language-core semantic authority.",
+      "evidence_note": "README: CL-NLP is an NLP toolkit by Vsevolod Dyomkin with linguistic/ML modules.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/cl-tursas",
@@ -155,13 +155,13 @@
       "visibility": "private",
       "size": 217,
       "archived": false,
-      "primary_class": "CORE-HISTORICAL-DONOR",
-      "semantic_owner": "historical-language-corpus",
-      "d10_action": "REVIEW-FOR-MISSING-HISTORICAL-SEMANTICS",
-      "deep_review_status": "PRIORITY",
-      "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
-      "evidence_note": null,
-      "candidate_issue": "#4053"
+      "primary_class": "REFERENCE-OR-UPSTREAM",
+      "semantic_owner": "reference/upstream",
+      "d10_action": "REFERENCE-ONLY",
+      "deep_review_status": "BOUNDARY-VERIFIED",
+      "reason": "Common Lisp chess engine; chess/search protocol semantics are domain-owned, not language Core.",
+      "evidence_note": "README.org: port of a Clojure chess engine using alpha-beta and 0x88 board representation.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/Clojure-code",
