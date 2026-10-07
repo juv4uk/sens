@@ -55,6 +55,11 @@
     (covers-extensions (BMI1 BMI2)))
 
   (vendored-file
+    (path "lib/machine/xed/vendor/bmi/tzcnt-isa.xed.txt")
+    (upstream-path "datafiles/hswbmi/tzcnt-isa.xed.txt")
+    (covers-extensions (BMI1)))
+
+  (vendored-file
     (path "lib/machine/xed/vendor/clflushopt/clflushopt.xed.txt")
     (upstream-path "datafiles/clflushopt/clflushopt.xed.txt")
     (covers-extensions (CLFLUSHOPT)))
