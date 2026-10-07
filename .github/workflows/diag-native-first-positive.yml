@@ -1,0 +1,19 @@
+name: Diagnose native-first positive path
+
+on:
+  push:
+    branches: [diag/4320-native-first-positive-path]
+    paths:
+      - ".github/workflows/diag-native-first-positive.yml"
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: diag/4320-native-first-positive-path
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused diagnostic
+        run: cargo test -p sens --test diag_native_first_positive -- --nocapture
