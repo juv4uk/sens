@@ -215,3 +215,5 @@
 ; debug trigger #4242-2: no semantic change
 
 ; debug trigger #4242-3
+
+; debug trigger #4242-5
