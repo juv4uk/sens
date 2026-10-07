@@ -110,8 +110,8 @@ class SensCodeMigrationTests(unittest.TestCase):
         )
 
     def test_contract_authority_preserves_exact_d8_word_as_data(self):
-        converted, _, _ = self.contract_binary("(LIST 10101000)\n")
-        self.assertTrue(converted.startswith("10 1110 00 10101000 01\n"), converted)
+        converted, _, _ = self.contract_binary("(LIST 11111111)\n")
+        self.assertTrue(converted.startswith("10 1110 00 11111111 01\n"), converted)
         self.assertNotIn("1100001 1100001 1100001", converted)
 
     def test_contract_authority_rejects_d8_head_as_non_callable(self):
@@ -166,7 +166,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.contract_binary("(LIST 00000101)\n")
 
     def test_contract_authority_never_relabels_d8_as_padded_d3(self):
-        converted, _, _ = self.contract_binary("(LIST 00000000)\n")
+        converted, _, _ = self.contract_binary("(LIST 11111111)\n")
         words = converted.split()
         self.assertIn("00000000", words)
         self.assertNotIn("0", words)
