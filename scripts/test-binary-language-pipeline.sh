@@ -71,11 +71,18 @@ assert substrate.test_raw_delimiter_impossibility(max_delim_width=6) > 0
 internal = BinaryWord("101001001")
 assert "00" in internal.bits and internal.bits != "00"
 
-# Valid width alone does not imply semantic admission.
-admitted = {BinaryWord("000"), BinaryWord("001"), BinaryWord("010")}
-unknown_same_width = BinaryWord("111")
-assert unknown_same_width.width == 3
-assert unknown_same_width not in admitted
+# Valid width alone does not imply semantic admission. Use the live
+# ratified D7 table rather than a synthetic subset: Contract 11.8 admits
+# 126/128 D7 coordinates, leaving exactly two owner-reserved/unadmitted words.
+d7_rows = domain_tables.read_domain_table(ROOT / "lib/domains/d7.lisp")
+admitted_d7 = {BinaryWord(row.bits) for row in d7_rows}
+all_d7 = {BinaryWord(f"{n:07b}") for n in range(128)}
+missing_d7 = all_d7 - admitted_d7
+assert len(admitted_d7) == 126
+assert len(missing_d7) == 2
+unknown_same_width = next(iter(missing_d7))
+assert unknown_same_width.width == 7
+assert unknown_same_width not in admitted_d7
 
 # Current domain tables retain exact D1/D2/D3 widths.
 d1 = domain_tables.read_domain_table(ROOT / "lib/domains/d1.lisp")
