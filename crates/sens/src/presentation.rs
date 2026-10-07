@@ -393,11 +393,12 @@ mod tests {
             render_value_for_presentation(&d9, PresentationLanguage::Canonical),
             "100000001"
         );
-        // Human tables do not mint runtime routing; absent runtime projection
-        // falls back to the exact canonical identity.
+        // Human presentation never mints runtime routing. The established
+        // Ukrainian fallback keeps the value visibly typed as a domain
+        // identity, while Sanskrit falls back to the exact canonical bits.
         assert_eq!(
             render_value_for_presentation(&d9, PresentationLanguage::Ukrainian),
-            "100000001"
+            "#<домен 100000001>"
         );
         assert_eq!(
             render_value_for_presentation(&d9, PresentationLanguage::Sanskrit),
