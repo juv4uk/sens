@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, re
+import json
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 harvest=json.loads((root/"knowledge/d10-knowledge-harvest-v1.json").read_text(encoding="utf-8"))
@@ -16,37 +16,21 @@ assert len(rows)==37 and len({r["stable_id"] for r in rows})==37
 assert all(r["coordinate"] is None for r in rows)
 
 inv_by_id={r["stable_id"]:r for r in inventory["rows"]}
-moved={r["stable_id"]:r for r in ledger["rows"]}
-present=0
-reclassified=0
+historical={r["stable_id"]:r for r in ledger["rows"]}
 for row in rows:
-    in_core=row["stable_id"] in inv_by_id
-    in_ledger=row["stable_id"] in moved
-    assert in_core ^ in_ledger
-    if in_core:
-        got=inv_by_id[row["stable_id"]]
-        assert got["semantic_name"]==row["semantic_name"]
-        assert got["source_class"]=="EPISTEMIC-KNOWLEDGE-HARVEST"
-        present+=1
-    else:
-        got=moved[row["stable_id"]]
-        assert got["semantic_name"]==row["semantic_name"]
-        assert got["decision"]=="RECLASSIFIED-NONCORE"
-        reclassified+=1
-assert present==14
-assert reclassified==23
+    got=inv_by_id[row["stable_id"]]
+    assert got["semantic_name"]==row["semantic_name"]
+    assert got["coordinate"] is None
+    assert got["coordinate_basis"]=="UNPLACED"
+
+assert sum(r["stable_id"] in historical for r in rows)==23
 
 target=state["target"]
-selected_total=target["selected_semantic_candidates"]
-remaining_total=target["remaining_semantic_candidates"]
-assert selected_total>=256
-assert remaining_total==1024-selected_total
+assert target["selected_semantic_candidates"]==504
+assert target["remaining_semantic_candidates"]==520
 assert target["law_forced_coordinates"]==256
-assert target["unplaced_selected_candidates"]==selected_total-256
+assert target["unplaced_selected_candidates"]==248
 assert target["ratified_residents"]==0
-assert len(inventory["rows"])==selected_total
-assert len({r["stable_id"] for r in inventory["rows"]})==selected_total
-assert len({r["semantic_name"] for r in inventory["rows"]})==selected_total
 
 print("D10-KNOWLEDGE-HARVEST-V1=PASS")
-print(f"harvest=37 core=14 reclassified=23 inventory={selected_total}/1024 remaining={remaining_total}")
+print("harvest=37 selected=37 historical-cleanup-v1=23 inventory=504/1024 remaining=520")

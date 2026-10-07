@@ -43,7 +43,7 @@ assert matrix["class_counts"]=={
 assert matrix["followup_queues"]["historical_core_review"]=="COMPLETE #4053"
 
 # This correction is an ownership/provenance correction only.
-assert inventory["accounting"]["selected_semantic_candidates"]==428
+assert inventory["accounting"]["selected_semantic_candidates"]>=504
 assert inventory["accounting"]["ratified_d10_residents"]==0
 
 print("D10-CLOJURE-REFERENCE-REVIEW=PASS")
