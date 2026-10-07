@@ -130,13 +130,15 @@ jobs:
               'profile_setup_i_refs',
               'first_macro_i_refs',
               'fasl_decode_freshness_i_refs',
-              'decoded_core_eval_i_refs',
+              'core_lowering_i_refs',
+              'lowered_core_eval_i_refs',
               'stable_peer_projection_i_refs',
               'full_loader_delta_i_refs',
           ):
               assert isinstance(deltas[field], int)
               assert deltas[field] >= 0
           assert isinstance(deltas['production_loader_gap_i_refs'], int)
+          assert isinstance(deltas['eval_wrapper_gap_i_refs'], int)
           PY
 
       - uses: actions/upload-artifact@v4
