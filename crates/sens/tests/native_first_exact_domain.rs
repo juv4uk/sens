@@ -79,6 +79,30 @@ fn core4_list_slot_is_visible_to_native_first_fallback() {
 }
 
 #[test]
+fn exact_d6_let_executes_after_core_bootstrap() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    let forms = parse_mixed_exact_domain("(001000 ((x 41)) x)")
+        .expect("exact D6 LET parse");
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("exact D6 LET must dispatch through its bound macro slot");
+    assert_eq!(result.value.to_string(), "41");
+}
+
+#[test]
+fn exact_d6_let_executes_inside_exact_lambda_with_exact_initializer() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    let forms = parse_mixed_exact_domain(
+        "(0011 f (0010 (xs) (001000 ((y (100 xs))) y))) (f (001 (41 42)))",
+    )
+    .expect("nested exact D6 LET parse");
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("nested exact D6 LET must preserve macro syntax and initializer code");
+    assert_eq!(result.value.to_string(), "41");
+}
+
+#[test]
 fn lowered_exact_domain_data_selects_native_car_cons_without_spelling_match() {
     let parsed = parse("(перше (сполучити 2 3))").expect("current Ukrainian source");
     let lowered = lower_program(&parsed);
