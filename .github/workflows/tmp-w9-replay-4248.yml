@@ -32,34 +32,9 @@ jobs:
             conflicts="$(git diff --name-only --diff-filter=U | sort)"
             expected="$(printf '%s\n' CURRENT.md crates/sens/src/domain_identity.rs | sort)"
             test "$conflicts" = "$expected"
-
-            # Documentation follows current main; W9 mechanism does not own CURRENT.md.
             git checkout --ours CURRENT.md
-
-            # Start from the donor W9 identity carrier, then restore the newer
-            # current-main D6 ADD1/SUB1 callable slice.
             git checkout --theirs crates/sens/src/domain_identity.rs
-            python3 - <<'PY'
-          from pathlib import Path
-          p = Path("crates/sens/src/domain_identity.rs")
-          s = p.read_text()
-          old = """            Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
-            Self::D9(_) => None,
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
-"""
-          new = """            Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
-            Self::D6(value)
-                if matches!(value.word().packed_bits(), 0b001110 | 0b001111) =>
-            {
-                Some(CoreDomainIdentity::D6(value))
-            }
-            Self::D9(_) => None,
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
-"""
-          if old not in s:
-              raise SystemExit("expected donor core_operation slice not found")
-          p.write_text(s.replace(old, new, 1))
-          PY
+            python3 -c 'from pathlib import Path; p=Path("crates/sens/src/domain_identity.rs"); s=p.read_text(); old="            Self::D5(value) => Some(CoreDomainIdentity::D5(value)),\n            Self::D9(_) => None,\n            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,\n"; new="            Self::D5(value) => Some(CoreDomainIdentity::D5(value)),\n            Self::D6(value)\n                if matches!(value.word().packed_bits(), 0b001110 | 0b001111) =>\n            {\n                Some(CoreDomainIdentity::D6(value))\n            }\n            Self::D9(_) => None,\n            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,\n"; assert old in s, "expected donor core_operation slice not found"; p.write_text(s.replace(old,new,1))'
             git add CURRENT.md crates/sens/src/domain_identity.rs
             test -z "$(git diff --name-only --diff-filter=U)"
             git commit --no-edit
