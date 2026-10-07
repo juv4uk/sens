@@ -1,6 +1,8 @@
 ; #604 — structural check for the Lisp-owned encoder coverage authority.
 ; Validates generated inputs, legacy-subset migration witness, and committed
 ; coverage row-by-row without rendering the full output string.
+; Cardinality checks are BinaryNumber-native end-to-end; this checker must
+; never reintroduce implicit ordinary-Number <-> BinaryNumber coercion.
 
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
