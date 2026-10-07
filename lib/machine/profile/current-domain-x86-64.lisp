@@ -11,6 +11,7 @@
   (target x86-64)
   (cpu intel-core-i5-6400)
   (rows
+    (01000 proof "CMP+SETE+MOVZX / exact integer internal bit; D1 boundary") ; D5 ZEROP
     (01010 fast-path "ADD / u32 inputs -> exact u64 result")     ; D5 PLUS
     (01011 fast-path "SUB / u64, left>=right")     ; D5 DIFFERENCE
     (10110 fast-path "IMUL / u32 inputs -> exact u64 result")    ; D5 TIMES
