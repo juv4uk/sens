@@ -63,7 +63,6 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
     let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
     match byte {
         0b0000_0001 => Some(d3(0b001)), // QUOTE
         0b0000_0010 => Some(d3(0b010)), // ATOM
@@ -74,15 +73,47 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
-        0b0010_0111 => Some(d4(0b1110)), // LIST
         0b0010_1001 => Some(d4(0b1111)), // APPEND
-        0b1001_1100 => Some(d6(0b001000)), // LET
-        0b1001_1101 => Some(d6(0b001001)), // LET*
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
         0b0011_0011 => Some(d4(0b1000)), // CAAR
         0b0011_0100 => Some(d4(0b1001)), // CADR
         0b0011_0101 => Some(d4(0b0111)), // CDDR
+        _ => None,
+    }
+}
+
+/// Source-migration compatibility successors only.
+///
+/// This projection may retire historical source heads once their exact-domain
+/// successor is ratified. Generic runtime invocation must not consult it.
+pub(crate) fn migration_domain_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    legacy_domain_identity_from_registry_byte(byte).or_else(|| {
+        let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+        let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
+        match byte {
+            0b0010_0111 => Some(d4(0b1110)),   // LIST
+            0b1001_1100 => Some(d6(0b001000)), // LET
+            0b1001_1101 => Some(d6(0b001001)), // LET*
+            _ => None,
+        }
+    })
+}
+
+/// Historical macro-call successors only.
+///
+/// LET/LET* need raw-argument macro handling before evaluation. Keeping this
+/// separate prevents D6 macro compatibility from widening generic legacy
+/// invocation into an implicit domain-call rule.
+pub(crate) fn legacy_macro_domain_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
+    match byte {
+        0b1001_1100 => Some(d6(0b001000)), // LET
+        0b1001_1101 => Some(d6(0b001001)), // LET*
         _ => None,
     }
 }
@@ -257,6 +288,22 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 mod tests {
     use super::*;
     use generated::SemanticSurface;
+
+    #[test]
+    fn migration_and_macro_successors_do_not_widen_generic_legacy_routing() {
+        for byte in [0b0010_0111, 0b1001_1100, 0b1001_1101] {
+            assert_eq!(legacy_domain_identity_from_registry_byte(byte), None);
+            assert!(migration_domain_identity_from_registry_byte(byte).is_some());
+        }
+        assert_eq!(
+            legacy_macro_domain_identity_from_registry_byte(0b0010_0111),
+            None,
+            "LIST is not a raw-argument macro compatibility bridge"
+        );
+        for byte in [0b1001_1100, 0b1001_1101] {
+            assert!(legacy_macro_domain_identity_from_registry_byte(byte).is_some());
+        }
+    }
 
     #[test]
     fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
