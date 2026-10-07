@@ -23,6 +23,8 @@ on:
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "crates/sens-host/tests/real_silicon_sweep.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
   push:
@@ -44,6 +46,8 @@ on:
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "crates/sens-host/tests/real_silicon_sweep.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
 
@@ -84,6 +88,8 @@ jobs:
         run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
       - name: Lisp-owned x86 encoder bytes
         run: cargo test -p sens --test x86_64_lisp_encoder -- --nocapture
+      - name: Native machine-byte boundary
+        run: cargo test -p sens-host --test native_lisp_bytes -- --nocapture
       - name: Compile owner-silicon witness without claiming hosted hardware evidence
         run: cargo test -p sens-host --test real_silicon_sweep --no-run
 
