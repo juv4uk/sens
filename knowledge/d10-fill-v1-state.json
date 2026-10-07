@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 504,
-    "remaining_semantic_candidates": 520,
+    "selected_semantic_candidates": 527,
+    "remaining_semantic_candidates": 497,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 248,
+    "unplaced_selected_candidates": 271,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -271,5 +271,12 @@
     "mechanism_gated_donors": 11,
     "evidence_donors": 33,
     "namespace_rule": "ONE-GLOBAL-D10-BITSTREAM"
+  },
+  "crossrepo_panini_v1": {
+    "authority": "#4182 / juv4uk/my-lisp-panini#52",
+    "artifact": "knowledge/d10-crossrepo-panini-v1.json",
+    "selected": 23,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
   }
 }

@@ -1,0 +1,499 @@
+{
+  "schema": "d10-crossrepo-panini-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4182 / juv4uk/my-lisp-panini#52",
+  "date": "2026-10-07",
+  "donor": {
+    "repository": "juv4uk/my-lisp-panini",
+    "branch": "master"
+  },
+  "rule": "Select generic executable Paninian operations, not corpus rows, sutra/dhatu identities, hardcoded derivation examples, trace accessors or old coordinates.",
+  "exclusions": {
+    "data_only": [
+      "Shiva-sutra sound rows",
+      "pratyahara bitmask table",
+      "dhatu registry entries",
+      "sutra IDs",
+      "named example derivations"
+    ],
+    "projection_or_internal": [
+      "list helpers",
+      "specific in-AC/in-HAL class predicates derivable from PRATYAHARA-MEMBER?",
+      "trace field accessors",
+      "print helpers",
+      "hardcoded derive-bhavati/... fixtures"
+    ],
+    "trace_review": "generic trace access/projection overlaps existing D10 witness/provenance/proof families and remains outside this tranche pending exact duplicate review"
+  },
+  "accounting": {
+    "selected_d10_candidates": 23,
+    "d10_before": 504,
+    "d10_after": 527,
+    "law_forced_coordinates": 256,
+    "unplaced_after": 271,
+    "remaining_after": 497,
+    "ratified_d10_residents": 0
+  },
+  "rows": [
+    {
+      "stable_id": "d10.panini.788f4dc0e7e814e1",
+      "semantic_name": "RESOLVE-PRATYAHARA",
+      "path": "panini/machine/siva-sutras.lisp",
+      "source_name": "resolve-pratyahara",
+      "source_sha": "c64a17bac208d028fec0c070d91aab32ed81b3e3",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PRATYAHARA-ALGEBRA",
+      "behavior": "resolve a pratyahara from its initial sound and it-marker by the Shiva-sutra span law, excluding marker sounds",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.e6a13dd97de2c49b",
+      "semantic_name": "PRATYAHARA-MEMBER?",
+      "path": "panini/machine/siva-sutras.lisp",
+      "source_name": "in-pratyahara?",
+      "source_sha": "c64a17bac208d028fec0c070d91aab32ed81b3e3",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PRATYAHARA-ALGEBRA",
+      "behavior": "test whether a sound belongs to the pratyahara resolved from an initial sound and it-marker",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.f1ad2f908ec2d260",
+      "semantic_name": "APPLY-GUNA",
+      "path": "panini/machine/phonology.lisp",
+      "source_name": "apply-guRa",
+      "source_sha": "32aa33c4f92b9e073c2ac068a533e4cf64f6ca77",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PHONOLOGICAL-TRANSFORM",
+      "behavior": "apply the guna grade transformation to one sound, preserving sounds outside the transformation domain",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.55d9101f67b1855c",
+      "semantic_name": "APPLY-ECO-SANDHI",
+      "path": "panini/machine/phonology.lisp",
+      "source_name": "apply-eco-sandhi",
+      "source_sha": "32aa33c4f92b9e073c2ac068a533e4cf64f6ca77",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PHONOLOGICAL-TRANSFORM",
+      "behavior": "apply the e/o/diphthong-to-semivowel sandhi transform when the following sound satisfies the vowel condition",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.37e4f6168c30e92e",
+      "semantic_name": "SANDHI-IKO-YAN-ACI",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "sandhi-iko-yan-aci",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "SANDHI-RULE",
+      "behavior": "replace an IK-final sound by the position-corresponding YAN sound before an AC vowel",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.c5cdd1d037223f96",
+      "semantic_name": "SANDHI-MANUSVARA",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "sandhi-manusvara",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "SANDHI-RULE",
+      "behavior": "replace final m by anusvara before a consonant under the encoded rule condition",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.2293480958af019f",
+      "semantic_name": "STOP-DEVOICE",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "stop-devoice",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PHONOLOGICAL-TRANSFORM",
+      "behavior": "map a voiced stop to its corresponding voiceless stop where the explicit devoice table defines a result",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.6205b261a6b937d1",
+      "semantic_name": "SANDHI-KHARI-SAVARNE",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "sandhi-khari-savarne",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "SANDHI-RULE",
+      "behavior": "apply stop devoicing when a voiced stop is followed by a voiceless KHAR sound",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.73932a8d771d3df2",
+      "semantic_name": "STOP-VOICE",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "stop-voice",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PHONOLOGICAL-TRANSFORM",
+      "behavior": "map a voiceless stop to its corresponding voiced stop where the explicit voice table defines a result",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.7e298bd948d01a33",
+      "semantic_name": "SANDHI-JHALAM-JHASHI",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "sandhi-jhalam-jhashi",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "SANDHI-RULE",
+      "behavior": "voice an eligible voiceless stop before a voiced stop under the encoded rule condition",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.ed2aa1ac6280ff39",
+      "semantic_name": "APPLY-SANDHI",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "apply-sandhi",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "ORDERED-SANDHI-ALGEBRA",
+      "behavior": "apply the ordered sandhi rule set at one sound boundary with later/higher-priority rules taking precedence",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.67c8dbcc9bf2e7bb",
+      "semantic_name": "JOIN-WORDS-SANDHI",
+      "path": "panini/machine/sandhi.lisp",
+      "source_name": "join-words",
+      "source_sha": "4de14daa57409bc077bf1d0f0ba596f39da41f69",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "ORDERED-SANDHI-ALGEBRA",
+      "behavior": "join two sound sequences by applying the boundary sandhi transform and preserving the unaffected interiors",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.68316abc99d04f3a",
+      "semantic_name": "DERIVE-VERB-LAKARA",
+      "path": "panini/machine/derivation.lisp",
+      "source_name": "derive-verb-lakara",
+      "source_sha": "cf5203aff3560c02d9755694c1db4cdaf77f3007",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PANINI-DERIVATION",
+      "behavior": "derive a verb form from dhatu, class, ending, pada choice and lakara through the staged morphological/phonological pipeline",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.a0197c3f0c535406",
+      "semantic_name": "DERIVE-VERB-OPTATIVE",
+      "path": "panini/machine/derivation.lisp",
+      "source_name": "derive-verb-liN",
+      "source_sha": "cf5203aff3560c02d9755694c1db4cdaf77f3007",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PANINI-DERIVATION",
+      "behavior": "derive a parasmaipada optative form using the optative-specific stem and ending pipeline",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.8abf7d39d6427885",
+      "semantic_name": "DERIVE-VERB-ATMANEPADA",
+      "path": "panini/machine/derivation.lisp",
+      "source_name": "derive-verb-atma",
+      "source_sha": "cf5203aff3560c02d9755694c1db4cdaf77f3007",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PANINI-DERIVATION",
+      "behavior": "derive an atmanepada present form using staged internal sandhi, junction and ending rules",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.fd566d5d1157a92d",
+      "semantic_name": "DERIVE-VERB-FUTURE",
+      "path": "panini/machine/derivation.lisp",
+      "source_name": "derive-verb-lRw",
+      "source_sha": "cf5203aff3560c02d9755694c1db4cdaf77f3007",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PANINI-DERIVATION",
+      "behavior": "derive a parasmaipada simple-future form from a future stem and ending with coalescence rules",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.4c84cb58e0632e99",
+      "semantic_name": "PARADIGM-PARASMAIPADA",
+      "path": "panini/machine/paradigm.lisp",
+      "source_name": "paradigm-para",
+      "source_sha": "071b594a3a8e36f30a994fa562ded92c471088ce",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PARADIGM-GENERATOR",
+      "behavior": "generate the nine person-number parasmaipada forms for a dhatu/class pair",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.1c1ead6dc5c51be4",
+      "semantic_name": "PARADIGM-ATMANEPADA",
+      "path": "panini/machine/paradigm.lisp",
+      "source_name": "paradigm-atma",
+      "source_sha": "071b594a3a8e36f30a994fa562ded92c471088ce",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PARADIGM-GENERATOR",
+      "behavior": "generate the nine person-number atmanepada forms for a dhatu/class pair",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.7ccbe766ae6ec09a",
+      "semantic_name": "PARADIGM-FULL",
+      "path": "panini/machine/paradigm.lisp",
+      "source_name": "paradigm-full",
+      "source_sha": "071b594a3a8e36f30a994fa562ded92c471088ce",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "PARADIGM-GENERATOR",
+      "behavior": "generate both parasmaipada and atmanepada paradigms for a dhatu/class pair",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.5e9d123c92f86e3b",
+      "semantic_name": "ANUVRTTI-GRAPH-VALID?",
+      "path": "panini/machine/rules.lisp",
+      "source_name": "dag-edges-resolve?",
+      "source_sha": "234d2e261bdd67ea11513b8040f3c31eb4e657df",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "RULE-SCOPE-ALGEBRA",
+      "behavior": "validate that every declared anuvrtti inheritance edge resolves to a rule identity present in the rule set",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.49746bdfda61803b",
+      "semantic_name": "IT-DELETABLE?",
+      "path": "panini/machine/rules.lisp",
+      "source_name": "it-deletable?",
+      "source_sha": "234d2e261bdd67ea11513b8040f3c31eb4e657df",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "RULE-ELIGIBILITY",
+      "behavior": "test whether a term carries the explicit it-marker designation required for deletion",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.bda85c260614cf78",
+      "semantic_name": "SAP-ELIGIBLE?",
+      "path": "panini/machine/rules.lisp",
+      "source_name": "sap-eligible?",
+      "source_sha": "234d2e261bdd67ea11513b8040f3c31eb4e657df",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "RULE-ELIGIBILITY",
+      "behavior": "test whether Sap application is admissible under the encoded class/tag condition rather than applying after a conflicting Slu condition",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.panini.94fc9099e8a0655f",
+      "semantic_name": "AMBIGUOUS-APAVADA?",
+      "path": "panini/machine/rules.lisp",
+      "source_name": "ambiguous-apavada?",
+      "source_sha": "234d2e261bdd67ea11513b8040f3c31eb4e657df",
+      "donor_repo": "juv4uk/my-lisp-panini",
+      "relation_class": "RULE-PRECEDENCE",
+      "behavior": "detect the invalid mutual-exception relation in which each rule is declared an apavada of the other",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-lisp-panini#52",
+        "#4162"
+      ]
+    }
+  ]
+}

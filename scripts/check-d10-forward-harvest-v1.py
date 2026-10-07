@@ -31,11 +31,13 @@ for row in rows:
     assert historical[row["stable_id"]]["decision"]=="RECLASSIFIED-NONCORE"
 
 target=state["target"]
-assert target["selected_semantic_candidates"]==504
-assert target["remaining_semantic_candidates"]==520
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+assert selected_total>=504
+assert remaining_total==1024-selected_total
 assert target["law_forced_coordinates"]==256
-assert target["unplaced_selected_candidates"]==248
+assert target["unplaced_selected_candidates"]==selected_total-256
 assert target["ratified_residents"]==0
 
 print("D10-FORWARD-HARVEST-V1=PASS")
-print("harvest=26 restored=26 historical-ledger-preserved inventory=504/1024 remaining=520")
+print(f"harvest=26 restored=26 historical-ledger-preserved inventory={selected_total}/1024 remaining={remaining_total}")

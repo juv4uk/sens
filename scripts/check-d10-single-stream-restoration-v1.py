@@ -42,17 +42,19 @@ assert restored <= inv_ids
 assert len(inv_ids)==len(inv["rows"])
 assert len(inv_names)==len(inv["rows"])
 
+selected_now=state["target"]["selected_semantic_candidates"]
+remaining_now=state["target"]["remaining_semantic_candidates"]
+assert selected_now>=504
+assert remaining_now==1024-selected_now
 assert inv["accounting"]=={
-    "selected_semantic_candidates":504,
+    "selected_semantic_candidates":selected_now,
     "law_forced_coordinates":256,
-    "unplaced_selected_candidates":248,
-    "remaining_semantic_inventory":520,
+    "unplaced_selected_candidates":selected_now-256,
+    "remaining_semantic_inventory":remaining_now,
     "ratified_d10_residents":0,
 }
-assert state["target"]["selected_semantic_candidates"]==504
-assert state["target"]["remaining_semantic_candidates"]==520
 assert state["target"]["law_forced_coordinates"]==256
-assert state["target"]["unplaced_selected_candidates"]==248
+assert state["target"]["unplaced_selected_candidates"]==selected_now-256
 assert state["target"]["ratified_residents"]==0
 
 assert matrix["schema"]=="d10-owner-repo-donor-matrix/v3"
@@ -68,5 +70,5 @@ assert state["owner_repo_donor_matrix"]["repositories"]==87
 assert state["owner_repo_donor_matrix"]["namespace_rule"]=="ONE-GLOBAL-D10-BITSTREAM"
 
 print("D10-SINGLE-STREAM-RESTORATION=PASS")
-print("restored=70 inventory=504/1024 placed=256 unplaced=248 remaining=520 ratified=0")
+print(f"restored=70 inventory={selected_now}/1024 placed=256 unplaced={selected_now-256} remaining={remaining_now} ratified=0")
 print("owner-repos=87 direct=43 mechanism-gated=11 evidence=33")
