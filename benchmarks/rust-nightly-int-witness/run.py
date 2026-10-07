@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import subprocess
 import tempfile
@@ -65,14 +64,14 @@ def probe_width(
 
 type Probe = {spelling};
 
-#[no_mangle]
-pub extern "C" fn witness(value: Probe) -> Probe {{
+fn witness(value: Probe) -> Probe {{
     value
 }}
+
+const _: Option<Probe> = None;
 """.strip()
 
     source_path = workdir / f"probe_{width}.rs"
-    output_path = workdir / f"probe_{width}.bin"
     llvm_path = workdir / f"probe_{width}.ll"
     source_path.write_text(source + "\n", encoding="utf-8")
 
@@ -84,8 +83,6 @@ pub extern "C" fn witness(value: Probe) -> Probe {{
         "lib",
         "-C",
         "opt-level=0",
-        "-o",
-        str(output_path),
     ]
     if emit_llvm:
         command += ["--emit", f"llvm-ir={llvm_path}"]
@@ -94,7 +91,7 @@ pub extern "C" fn witness(value: Probe) -> Probe {{
     available = result.returncode == 0
 
     llvm_text = None
-    llvm_mentions = []
+    llvm_mentions: list[str] = []
     if available and emit_llvm and llvm_path.exists():
         llvm_text = llvm_path.read_text(encoding="utf-8")
         llvm_mentions = sorted(set(re.findall(r"\bi\d+\b", llvm_text)))
@@ -175,11 +172,11 @@ def main() -> int:
                 for width in widths
             ]
 
-    text = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
-    print(text, end="")
+    output = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    print(output, end="")
     if args.json_out is not None:
         args.json_out.parent.mkdir(parents=True, exist_ok=True)
-        args.json_out.write_text(text, encoding="utf-8")
+        args.json_out.write_text(output, encoding="utf-8")
 
     return 0
 
