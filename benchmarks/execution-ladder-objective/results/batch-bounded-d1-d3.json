@@ -1,0 +1,74 @@
+{
+  "artifact": "benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl",
+  "artifact_sha256": "6191206e889830b5dbcfbe453d50e85a7deb0ad2106567973ba52c69d046882a",
+  "batch_policy": "deterministic prefix of case_id-sorted validated L0 cases",
+  "batches": [
+    {
+      "canonical_text_bytes": 63,
+      "case_count": 1,
+      "dense_semantic_payload_bytes": 6,
+      "dense_to_framed_ratio": 0.038961,
+      "framed_minus_dense_bytes": 148,
+      "framed_minus_text_bytes": 91,
+      "framed_semantic_package_bytes": 154,
+      "text_to_framed_ratio": 0.409091
+    },
+    {
+      "canonical_text_bytes": 79,
+      "case_count": 2,
+      "dense_semantic_payload_bytes": 8,
+      "dense_to_framed_ratio": 0.034335,
+      "framed_minus_dense_bytes": 225,
+      "framed_minus_text_bytes": 154,
+      "framed_semantic_package_bytes": 233,
+      "text_to_framed_ratio": 0.339056
+    },
+    {
+      "canonical_text_bytes": 224,
+      "case_count": 4,
+      "dense_semantic_payload_bytes": 22,
+      "dense_to_framed_ratio": 0.050575,
+      "framed_minus_dense_bytes": 413,
+      "framed_minus_text_bytes": 211,
+      "framed_semantic_package_bytes": 435,
+      "text_to_framed_ratio": 0.514943
+    },
+    {
+      "canonical_text_bytes": 414,
+      "case_count": 8,
+      "dense_semantic_payload_bytes": 41,
+      "dense_to_framed_ratio": 0.05125,
+      "framed_minus_dense_bytes": 759,
+      "framed_minus_text_bytes": 386,
+      "framed_semantic_package_bytes": 800,
+      "text_to_framed_ratio": 0.5175
+    },
+    {
+      "canonical_text_bytes": 715,
+      "case_count": 16,
+      "dense_semantic_payload_bytes": 71,
+      "dense_to_framed_ratio": 0.047397,
+      "framed_minus_dense_bytes": 1427,
+      "framed_minus_text_bytes": 783,
+      "framed_semantic_package_bytes": 1498,
+      "text_to_framed_ratio": 0.477303
+    },
+    {
+      "canonical_text_bytes": 1432,
+      "case_count": 28,
+      "dense_semantic_payload_bytes": 142,
+      "dense_to_framed_ratio": 0.053565,
+      "framed_minus_dense_bytes": 2509,
+      "framed_minus_text_bytes": 1219,
+      "framed_semantic_package_bytes": 2651,
+      "text_to_framed_ratio": 0.540174
+    }
+  ],
+  "format_status": "research-model-not-production-protocol",
+  "interpretation": "A positive framed_minus_text means this explicit evidence package is larger than the same cases as canonical text. It says nothing about a production protocol with different metadata or compression.",
+  "measurement_kind": "delivery-overhead-amortization",
+  "parity_failures": 0,
+  "schema": "sens-execution-ladder-batch-amortization/v1",
+  "validated_cases": 28,
+  "wall_clock_measured": false
+}
