@@ -207,7 +207,8 @@
       "evidence": [
         "crates/sens/src/domain_identity.rs: callable projection admits only D6:001110/001111",
         "crates/sens/src/eval/d6_arithmetic.rs: composes through admitted D5 PLUS/DIFFERENCE with exact integer 1",
-        "crates/sens/tests/d6_add1_sub1_mechanisms.rs: exact-Q positive witness and arity/type controls"
+        "crates/sens/tests/d6_add1_sub1_mechanisms.rs: exact-Q positive witness and arity/type controls",
+        "crates/sens/tests/machine_exact_d6_add1_sub1.rs: exact DomainIdentity width+packed_bits drives admitted x86 fast path with fail-closed numeric guards"
       ],
       "negative_cross_domain_control": "crates/sens/tests/d6_add1_sub1_mechanisms.rs: equal packed payloads in D5/D7/D8 do not inherit the D6 mechanism"
     },
@@ -219,7 +220,8 @@
       "evidence": [
         "crates/sens/src/domain_identity.rs: callable projection admits only D6:001110/001111",
         "crates/sens/src/eval/d6_arithmetic.rs: composes through admitted D5 PLUS/DIFFERENCE with exact integer 1",
-        "crates/sens/tests/d6_add1_sub1_mechanisms.rs: exact-Q positive witness and arity/type controls"
+        "crates/sens/tests/d6_add1_sub1_mechanisms.rs: exact-Q positive witness and arity/type controls",
+        "crates/sens/tests/machine_exact_d6_add1_sub1.rs: exact DomainIdentity width+packed_bits drives admitted x86 fast path with fail-closed numeric guards"
       ],
       "negative_cross_domain_control": "crates/sens/tests/d6_add1_sub1_mechanisms.rs: equal packed payloads in D5/D7/D8 do not inherit the D6 mechanism"
     },

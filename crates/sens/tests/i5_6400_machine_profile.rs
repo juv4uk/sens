@@ -89,6 +89,8 @@ fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() 
         (5, 23, "CQO+IDIV"),  // D5 QUOTIENT
         (5, 26, "CMP+SETL"),  // D5 LESSP
         (5, 27, "CMP+SETG"),  // D5 GREATERP
+        (6, 14, "ADD"),        // D6 ADD1
+        (6, 15, "SUB"),        // D6 SUB1
         (3, 5, "CMP/SETE"),   // D3 EQ
         (3, 6, "CMP+Jcc"),    // D3 COND
         (3, 7, "STORE-pair"), // D3 CONS
@@ -115,6 +117,15 @@ fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() 
         assert!(
             !current.lines().map(str::trim_start).any(|line| line.starts_with(&row_prefix)),
             "D4 packed payload {packed_bits} must not inherit a D5 machine row"
+        );
+    }
+
+    // D5 selectors with the same packed payload must not inherit D6 ADD1/SUB1.
+    for packed_bits in [14, 15] {
+        let row_prefix = format!("(5 {packed_bits} ");
+        assert!(
+            !current.lines().map(str::trim_start).any(|line| line.starts_with(&row_prefix)),
+            "D5 packed payload {packed_bits} must not inherit a D6 machine row"
         );
     }
 }

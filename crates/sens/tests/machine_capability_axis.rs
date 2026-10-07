@@ -123,6 +123,36 @@ fn packed_bits_do_not_cross_domain_widths() {
             .to_string(),
         "()"
     );
+
+
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 6 14)", &mut s)
+            .expect("D6:001110 ADD1")
+            .value
+            .to_string(),
+        "((integer-increment bounded-u64 no-overflow))"
+    );
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 5 14)", &mut s)
+            .expect("D5:01110 selector must not inherit D6 ADD1")
+            .value
+            .to_string(),
+        "()"
+    );
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 6 15)", &mut s)
+            .expect("D6:001111 SUB1")
+            .value
+            .to_string(),
+        "((integer-decrement bounded-u64 no-underflow))"
+    );
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 5 15)", &mut s)
+            .expect("D5:01111 selector must not inherit D6 SUB1")
+            .value
+            .to_string(),
+        "()"
+    );
 }
 
 #[test]
@@ -147,6 +177,8 @@ fn capability_names_do_not_mint_semantic_identities() {
         "integer-quotient",
         "integer-order-less",
         "integer-order-greater",
+        "integer-increment",
+        "integer-decrement",
         "identity-compare",
         "conditional-branch",
         "pair-field-store",

@@ -18,6 +18,8 @@
     (5 23 fast-path "CQO+IDIV / positive i64 equal operands")    ; D5 QUOTIENT
     (5 26 proof "CMP+SETL+MOVZX / internal bit; D1 boundary")    ; D5 LESSP
     (5 27 proof "CMP+SETG+MOVZX / internal bit; D1 boundary")    ; D5 GREATERP
+    (6 14 fast-path "ADD / exact u64 input <= u64-2, RHS=1")  ; D6 ADD1
+    (6 15 fast-path "SUB / exact u64 input >=1, RHS=1")        ; D6 SUB1
     (3 5 direct "CMP/SETE")                                      ; D3 EQ
     (3 6 control "CMP+Jcc")                                      ; D3 COND
     (3 7 runtime "STORE-pair-head+tail")                         ; D3 CONS

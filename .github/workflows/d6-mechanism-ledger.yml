@@ -11,6 +11,10 @@ on:
       - "crates/sens/src/eval/d6_arithmetic.rs"
       - "crates/sens/src/eval/mod.rs"
       - "crates/sens/tests/d6_add1_sub1_mechanisms.rs"
+      - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
+      - "lib/machine/profile/current-domain-x86-64.lisp"
+      - "lib/machine/capability-axis.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
       - "crates/sens/src/eval/necessary_forms.rs"
       - "crates/sens/src/semantic_registry.rs"
       - "scripts/check-d6-mechanism-ledger.py"
@@ -22,9 +26,17 @@ on:
       - "knowledge/d6-ratified.json"
       - "crates/sens/src/eval/selector_law.rs"
       - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/d6_arithmetic.rs"
+      - "crates/sens/src/eval/mod.rs"
       - "crates/sens/src/eval/necessary_forms.rs"
       - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/tests/d6_add1_sub1_mechanisms.rs"
+      - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
+      - "lib/machine/profile/current-domain-x86-64.lisp"
+      - "lib/machine/capability-axis.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
       - "scripts/check-d6-mechanism-ledger.py"
+      - ".github/workflows/d6-mechanism-ledger.yml"
 
 jobs:
   ledger:
@@ -35,3 +47,5 @@ jobs:
         run: python3 scripts/check-d6-mechanism-ledger.py
       - name: Prove exact D6 ADD1/SUB1 mechanisms
         run: cargo test -p sens --test d6_add1_sub1_mechanisms
+      - name: Prove exact D6 ADD1/SUB1 x86 fast paths
+        run: cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture

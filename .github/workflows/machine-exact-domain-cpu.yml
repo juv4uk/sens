@@ -15,6 +15,7 @@ on:
       - "crates/sens/tests/machine_exact_d5_quotient.rs"
       - "crates/sens/tests/machine_exact_d5_order.rs"
       - "crates/sens/tests/machine_exact_d5_zerop.rs"
+      - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/i5_6400_machine_profile.rs"
       - "crates/sens/tests/semantic_coordinate_join_2.rs"
@@ -38,6 +39,7 @@ on:
       - "crates/sens/tests/machine_exact_d5_quotient.rs"
       - "crates/sens/tests/machine_exact_d5_order.rs"
       - "crates/sens/tests/machine_exact_d5_zerop.rs"
+      - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/i5_6400_machine_profile.rs"
       - "crates/sens/tests/semantic_coordinate_join_2.rs"
@@ -78,6 +80,7 @@ jobs:
           cargo test -p sens --test machine_exact_d5_quotient -- --nocapture
           cargo test -p sens --test machine_exact_d5_order -- --nocapture
           cargo test -p sens --test machine_exact_d5_zerop -- --nocapture
+          cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
           cargo test -p sens --test machine_capability_axis -- --nocapture
           cargo test -p sens --test semantic_coordinate_join -- --nocapture
           cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
@@ -93,6 +96,17 @@ jobs:
       - name: Compile owner-silicon witness without claiming hosted hardware evidence
         run: cargo test -p sens-host --test real_silicon_sweep --no-run
 
+  d6-add1-sub1-gpu-witness:
+    name: D6 ADD1/SUB1 GPU-runner witness
+    if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact D6 ADD1/SUB1 machine witness
+        run: cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
+
   owner-i5-6400-real-silicon:
     name: Owner i5-6400 real-silicon witness
     if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
@@ -101,6 +115,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Exact D6 ADD1/SUB1 machine witness
+        run: cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
       - name: Owner i5-6400 profile
         run: cargo test -p sens --test i5_6400_machine_profile -- --nocapture
       - name: Owner i5-6400 real-silicon sweep
