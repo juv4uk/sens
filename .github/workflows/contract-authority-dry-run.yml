@@ -1,0 +1,31 @@
+name: Binary contract authority dry-run
+
+on:
+  push:
+    branches: [diag/4248-contract-authority-dry-run-1007]
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Contract 11.8 authority migration without modifying source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/sens-contract-input /tmp/sens-contract-output
+          mkdir -p /tmp/sens-contract-input /tmp/sens-contract-output
+          cp language-contract.lisp /tmp/sens-contract-input/language-contract.lisp
+          python3 scripts/migrate-to-sens-codes.py /tmp/sens-contract-input \
+            --foundation knowledge/d1-d9-foundation.json \
+            --contract-authority \
+            --binary-mirror /tmp/sens-contract-output \
+            --report /tmp/sens-contract-report.json
+          echo "=== report ==="
+          cat /tmp/sens-contract-report.json
+          echo "=== output prefix ==="
+          head -c 4000 /tmp/sens-contract-output/language-contract.lisp || true
+          echo
