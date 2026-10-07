@@ -15,6 +15,7 @@ struct SiliconRow<'a> {
     observed: String,
     classification: &'a str,
     feature_gate: &'a str,
+    witness_kind: &'a str,
 }
 
 fn repo_root() -> PathBuf {
@@ -46,10 +47,6 @@ fn cpuinfo_field(name: &str) -> String {
         .unwrap_or_else(|| format!("missing-{name}"))
 }
 
-fn cpu_has_flag(flags: &str, flag: &str) -> bool {
-    flags.split_whitespace().any(|candidate| candidate == flag)
-}
-
 fn json_escape(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     for ch in value.chars() {
@@ -79,7 +76,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
 
     let mut json = String::new();
     json.push_str("{\n");
-    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v1\",\n");
+    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v2\",\n");
     json.push_str(&format!("  \"sens_commit\": \"{}\",\n", json_escape(&sha)));
     json.push_str("  \"target\": \"x86_64-linux-owner-self-hosted\",\n");
     json.push_str(&format!(
@@ -90,7 +87,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
         "  \"cpu_flags\": \"{}\",\n",
         json_escape(cpu_flags)
     ));
-    json.push_str("  \"classification_policy\": \"per-row\",\n");
+    json.push_str("  \"classification\": \"mixed-per-row\",\n");
     json.push_str(
         "  \"admission_boundary\": \"lib/machine/admission/x86-64.lisp:x86-call-admitted-u64\",\n",
     );
@@ -105,7 +102,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
     for (index, row) in rows.iter().enumerate() {
         json.push_str("    {");
         json.push_str(&format!(
-            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"classification\":\"{}\",\"feature_gate\":\"{}\",\"status\":\"pass\"",
+            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"classification\":\"{}\",\"feature_gate\":\"{}\",\"witness_kind\":\"{}\",\"status\":\"pass\"",
             json_escape(row.id),
             json_escape(row.families),
             json_escape(row.expression),
@@ -113,6 +110,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
             json_escape(&row.observed),
             json_escape(row.classification),
             json_escape(row.feature_gate),
+            json_escape(row.witness_kind),
         ));
         json.push('}');
         if index + 1 != rows.len() {
@@ -362,40 +360,40 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             observed,
             classification: "execute-safe",
             feature_gate: "none",
+            witness_kind: "deterministic-exact-value",
         });
     }
 
-    for (id, family, flag, expression) in [
+    for (id, feature, expression) in [
         (
             "rdrand-status",
-            "RDRAND r64 + SETC + MOVZX",
             "rdrand",
             "(x86-call-admitted-u64 (quote ((rdrand-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
         ),
         (
             "rdseed-status",
-            "RDSEED r64 + SETC + MOVZX",
             "rdseed",
             "(x86-call-admitted-u64 (quote ((rdseed-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
         ),
     ] {
         assert!(
-            cpu_has_flag(&cpu_flags, flag),
-            "owner i5-6400 real-silicon lane requires CPU feature {flag} before executing {id}"
+            cpu_flags.split_whitespace().any(|flag| flag == feature),
+            "owner i5-6400 silicon lane expected CPU feature {feature}, flags were: {cpu_flags}"
         );
         let observed = eval_value(expression, &mut session);
         assert!(
             observed == "0" || observed == "1",
-            "{id} must expose only the architectural CF status bit 0|1, observed {observed}"
+            "{id} must expose only the hardware CF status bit, observed {observed}"
         );
         rows.push(SiliconRow {
             id,
-            families: family,
+            families: feature,
             expression,
-            expected: "status-bit 0|1",
+            expected: "0|1",
             observed,
             classification: "platform-gated",
-            feature_gate: flag,
+            feature_gate: feature,
+            witness_kind: "nondeterministic-status-invariant",
         });
     }
 
