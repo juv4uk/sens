@@ -54,6 +54,26 @@ require_literal docs/semantic-authority-map.uk.md 'Канонічна семан
 require_literal docs/semantic-authority-map.uk.md 'Історичні exact-eight-bit Sens8/Sid8/Function8 лишаються обмеженими compatibility'
 
 
+# README generation banner is a projection of current authority, not a second source.
+test -f language-contract.lisp || {
+  printf 'current-authority-contract-missing: language-contract.lisp\n' >&2
+  exit 1
+}
+
+contract_major="$(sed -n 's/.*(major \. #d\([0-9][0-9]*\)).*/\1/p' language-contract.lisp | head -n1)"
+contract_minor="$(sed -n 's/.*(minor \. \([0-9][0-9]*\)).*/\1/p' language-contract.lisp | head -n1)"
+foundation="$(grep -oE 'current ratified semantic Core domains are D1–D[0-9]+' CURRENT.md | head -n1 | sed 's/.* are //')"
+research_domain="$(grep -oE 'D[0-9]+ remains research/unratified' CURRENT.md | head -n1 | awk '{print $1}')"
+
+test -n "$contract_major" && test -n "$contract_minor" && test -n "$foundation" && test -n "$research_domain" || {
+  printf 'current-authority-generation-unreadable\n' >&2
+  exit 1
+}
+
+generation_banner="Current authority: Contract ${contract_major}.${contract_minor} · ${foundation} · ${research_domain} research/unratified"
+require_literal README.md "$generation_banner"
+require_literal CURRENT.md "$research_domain remains research/unratified"
+
 # Contract/domain status and canonical human table entry-points.
 require_literal README.md 'Contract **11.8**'
 require_literal README.md 'owner-ratified #4008'
