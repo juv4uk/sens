@@ -21,6 +21,7 @@ SPEC.loader.exec_module(mod)
 from sens_source_resolver import build_resolver
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
+CONTRACT_FOUNDATION = ROOT / "knowledge" / "d1-d9-foundation.json"
 NUMBER_WIDTHS = ROOT / "knowledge" / "number-width-ratified.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
@@ -28,6 +29,10 @@ HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
 DOMAIN_SURFACES = [
     ROOT / "lib" / "domains" / f"d{width}.lisp"
     for width in range(1, 7)
+]
+CONTRACT_DOMAIN_SURFACES = [
+    ROOT / "lib" / "domains" / f"d{width}.lisp"
+    for width in (*range(1, 7), 8, 9)
 ]
 
 
@@ -62,6 +67,94 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.registry_surfaces,
             self.resolver,
         )
+
+    @classmethod
+    def contract_setup(cls):
+        data, _ = mod.load_foundation(CONTRACT_FOUNDATION)
+        domains = ["D3", "D4", "D5", "D6", "D8"]
+        code_map = mod.build_map(data, domains)
+        code_map = mod.augment_code_map_with_domain_surfaces(
+            code_map,
+            CONTRACT_DOMAIN_SURFACES,
+        )
+        resolver = build_resolver(
+            historical_map=HISTORICAL,
+            foundation=CONTRACT_FOUNDATION,
+            registry=REGISTRY,
+            domain_surfaces=CONTRACT_DOMAIN_SURFACES,
+            current_domains=domains,
+        )
+        authority = mod.build_binary_authority(
+            data,
+            [domain for domain in mod.CONTRACT_DOMAINS if domain != "D9"],
+        )
+        return (
+            data,
+            code_map,
+            mod.build_text7_encoder(data, TEXT7),
+            resolver,
+            authority,
+        )
+
+    def contract_binary(self, source: str):
+        _, code_map, text7, resolver, authority = self.contract_setup()
+        return mod.binary_rewrite(
+            source,
+            code_map,
+            text7,
+            resolver=resolver,
+            contract_authority=True,
+            binary_authority=authority,
+            d9_enabled=False,
+        )
+
+    def test_contract_authority_preserves_exact_d8_word(self):
+        converted, hits, _ = self.contract_binary("(ROUND x)\n")
+        self.assertTrue(converted.startswith("10 10101000 00 "), converted)
+        self.assertEqual(hits[0].label, "ROUND")
+        self.assertNotIn("000000001", converted)
+
+    def test_contract_authority_preserves_bare_d7_word_instead_of_spelling_digits(self):
+        converted, _, _ = self.contract_binary("(LIST 0011001)\n")
+        self.assertIn("0011001", converted)
+        self.assertNotIn("1100001 1100001 1100001", converted)
+
+    def test_contract_authority_rejects_hash_b_wrapper(self):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "legacy #b binary wrapper"):
+            self.contract_binary("(LIST #b101)\n")
+
+    def test_contract_authority_rejects_quoted_binary_identity(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "quoted binary semantic identity",
+        ):
+            self.contract_binary('(LIST "101")\n')
+
+    def test_contract_authority_rejects_noncanonical_d2_data_word(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "D2 word 10 is structural control only",
+        ):
+            self.contract_binary("(LIST 10)\n")
+
+    def test_contract_authority_rejects_wrong_width_w9_before_reader_support(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "requires GREEN exact-W9 reader/carrier support",
+        ):
+            self.contract_binary("(LIST 100000001)\n")
+
+    def test_contract_authority_migrates_legacy_sid8_to_current_exact_width(self):
+        converted, hits, _ = self.contract_binary("(00000101 x)\n")
+        self.assertTrue(converted.startswith("10 100 00 "), converted)
+        self.assertEqual(hits[0].label, "CAR")
+        self.assertNotIn("00000101", converted.split())
+
+    def test_contract_authority_blocks_zero_padded_current_width_as_legacy_sid(self):
+        converted, hits, _ = self.contract_binary("(00000000 x)\n")
+        self.assertEqual(hits[0].domain, "D8")
+        self.assertEqual(hits[0].bits, "00000000")
+        self.assertIn("00000000", converted)
 
     def test_current_d3_authority_is_used(self):
         self.assertEqual(self.code_map["CAR"].bits, "100")
