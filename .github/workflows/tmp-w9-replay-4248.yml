@@ -1,0 +1,40 @@
+name: TEMP W9 current-main replay
+
+on:
+  push:
+    branches:
+      - replay/4038-w9-current-main
+    paths:
+      - ".github/workflows/tmp-w9-replay-4248.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: replay/4038-w9-current-main
+          fetch-depth: 0
+
+      - name: Merge existing W9 mechanism donor
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin w9-runtime-carrier-4038
+          if ! git merge --no-ff --no-edit origin/w9-runtime-carrier-4038; then
+            git status --short
+            git diff --name-only --diff-filter=U
+            exit 1
+          fi
+
+      - name: Remove temporary replay workflow
+        run: |
+          set -euxo pipefail
+          git rm .github/workflows/tmp-w9-replay-4248.yml
+          git commit -m "chore: remove temporary W9 replay workflow"
+          git push origin HEAD:replay/4038-w9-current-main
