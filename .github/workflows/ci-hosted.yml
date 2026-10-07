@@ -49,29 +49,3 @@ jobs:
           cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
       - name: Clippy
         run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
-
-  temp-4225-public-api-refresh:
-    if: github.event_name == 'pull_request' && github.head_ref == 'fix/4225-compiler-nucleus-current-main-r2'
-    name: TEMP 4225 public API report refresh
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.head_ref }}
-      - name: Regenerate generated report
-        run: python3 scripts/public_api_inventory.py --write-report
-      - name: Commit generated report
-        env:
-          HEAD_BRANCH: ${{ github.head_ref }}
-        run: |
-          if git diff --quiet -- docs/generated/public-api-discovery.md; then
-            echo "report already current"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/generated/public-api-discovery.md
-          git commit -m "docs(4225): regenerate public API discovery exactly"
-          git push origin "HEAD:$HEAD_BRANCH"
