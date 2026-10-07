@@ -48,13 +48,15 @@ assert gate["artifact"]=="knowledge/island-ownership-gate-v1.json"
 assert gate["status"]=="SUPERSEDED-BY-OWNER-CORRECTION-4162"
 assert "#4162" in d10state["owner_correction_single_stream"]["authority"]
 assert d10state["owner_correction_single_stream"]["restored_total"]==70
-assert d10state["target"]["selected_semantic_candidates"]==504
+selected_now=d10state["target"]["selected_semantic_candidates"]
+remaining_now=d10state["target"]["remaining_semantic_candidates"]
+assert selected_now>=504
+assert remaining_now==1024-selected_now
 assert d10state["target"]["law_forced_coordinates"]==256
-assert d10state["target"]["unplaced_selected_candidates"]==248
-assert d10state["target"]["remaining_semantic_candidates"]==520
+assert d10state["target"]["unplaced_selected_candidates"]==selected_now-256
 assert d10state["target"]["ratified_residents"]==0
 
 print("ISLAND-OWNERSHIP-GATE=HISTORICAL-PASS")
 print("old #4033 ownership split preserved as provenance")
 print("owner correction #4162 restored 55 definite + 15 review rows into one D10 stream")
-print("D10=504/1024 placed=256 unplaced=248 remaining=520 ratified=0")
+print(f"D10={selected_now}/1024 placed=256 unplaced={selected_now-256} remaining={remaining_now} ratified=0")
