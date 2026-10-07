@@ -19,6 +19,11 @@
   (semantic-id-allocation explicit-language-contract-only)
   (semantic-id-from-isa forbidden)
   (lowering-direction semantic-to-machine)
+  (canonical-machine-effect-layer lib/machine/effect-boundary.lisp)
+  (lowering-stage semantic-to-machine-effect required)
+  (lowering-stage machine-effect-to-target-projection required)
+  (target-specific-data-before-machine-effect forbidden)
+  (machine-effect-semantic-authority forbidden)
   (reverse-authority forbidden)
 
   ; Admission belongs to a closed witnessed subset, not to asm-x86.lisp,

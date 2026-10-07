@@ -260,9 +260,88 @@ fn semantic_sid_00001100_lowers_through_structured_forms_without_legacy_byte_wra
 }
 
 #[test]
-fn repo_exports_machine_lowering_boundary_for_consumers() {
+fn target_neutral_machine_effect_contract_is_explicit_and_nonsemantic() {
+    let path = repo_root().join("lib/machine/effect-boundary.lisp");
+    let boundary = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
+
+    for fact in [
+        "(role target-neutral-machine-mechanism)",
+        "(semantic-authority upstream-only)",
+        "(machine-effect-semantic-authority forbidden)",
+        "(canonical-machine-effect target-neutral)",
+        "(machine-effect-contract-owner sens)",
+        "(effect-vocabulary-from-isa forbidden)",
+        "(effect-vocabulary-from-target-profile forbidden)",
+        "(effect-vocabulary-from-compiler-ir forbidden)",
+        "(global-machine-opcode-enum forbidden)",
+        "(semantic-id-from-machine-effect forbidden)",
+        "(semantic-id-from-target-projection forbidden)",
+        "(projection-direction machine-effect-to-target)",
+        "(reverse-projection-authority forbidden)",
+        "(target-projection-admission fail-closed)",
+        "(target-projection-rejection named)",
+        "(semantic-observable-preserved required)",
+        "(diagnostic machine-effect-boundary-violation)",
+    ] {
+        assert!(
+            boundary.contains(fact),
+            "machine effect boundary missing required fact: {fact}"
+        );
+    }
+
+    let lower = boundary.to_ascii_lowercase();
+    for forbidden in [
+        "x86-",
+        "rax",
+        "rcx",
+        "modrm",
+        "vex",
+        "avx",
+        "cuda",
+        "ptx",
+        "fpga",
+    ] {
+        assert!(
+            !lower.contains(forbidden),
+            "target-neutral machine effect contract leaked target-specific token: {forbidden}"
+        );
+    }
+}
+
+#[test]
+fn lowering_boundary_requires_effect_then_target_projection() {
+    let path = repo_root().join("machine-lowering-boundary.lisp");
+    let contract = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
+
+    for fact in [
+        "(canonical-machine-effect-layer lib/machine/effect-boundary.lisp)",
+        "(lowering-stage semantic-to-machine-effect required)",
+        "(lowering-stage machine-effect-to-target-projection required)",
+        "(target-specific-data-before-machine-effect forbidden)",
+        "(machine-effect-semantic-authority forbidden)",
+    ] {
+        assert!(
+            contract.contains(fact),
+            "machine lowering effect seam missing required fact: {fact}"
+        );
+    }
+
+    assert!(
+        contract.contains("(lowering-direction semantic-to-machine)"),
+        "effect seam must refine, not replace, the existing one-way lowering law"
+    );
+}
+
+#[test]
+fn repo_exports_machine_boundaries_for_consumers() {
     assert!(
         REPO_DECLARATION.contains("machine-lowering-boundary"),
         "repo.lisp must export the machine authority boundary"
+    );
+    assert!(
+        REPO_DECLARATION.contains("machine-effect-boundary"),
+        "repo.lisp must export the target-neutral machine-effect boundary"
     );
 }
