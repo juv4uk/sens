@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 400,
-    "remaining_semantic_candidates": 624,
+    "selected_semantic_candidates": 345,
+    "remaining_semantic_candidates": 679,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 144,
+    "unplaced_selected_candidates": 89,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -163,5 +163,14 @@
     "mechanism_only_rows": 8,
     "coordinates_assigned": 0,
     "inventory_count_unchanged": true
+  },
+  "ownership_cleanup_v1": {
+    "authority": "#4047",
+    "artifact": "knowledge/d10-noncore-reclassification-v1.json",
+    "removed_from_core": 55,
+    "selected_after": 345,
+    "selector_coordinates_preserved": 256,
+    "review_required_still_selected": 15,
+    "ratification_effect": "NONE"
   }
 }
