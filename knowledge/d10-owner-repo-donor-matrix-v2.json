@@ -1340,7 +1340,7 @@
   "followup_queues": {
     "historical_core_review": "COMPLETE #4053",
     "execution_seam_review": "COMPLETE #4054 / #4094",
-    "unresolved_scope": "#4055",
+    "unresolved_scope": "COMPLETE #4055",
     "island_bridge_factorization": "COMPLETE #4036 / #4094"
   }
 }
