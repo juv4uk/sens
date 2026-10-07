@@ -98,7 +98,7 @@ def check_source_carriers(failures: list[str]) -> None:
         "BinarySourceWord::W2(word) => packer.push(word)",
         "2 => BinarySourceWord::W2(packed.read::<2>(bit_offset)?)",
         "not a standalone wire",
-        "widths is explicit",
+        "`widths` is explicit",
     ]:
         require(
             marker in packing,
