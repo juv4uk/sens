@@ -88,10 +88,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             domain_surfaces=CONTRACT_DOMAIN_SURFACES,
             current_domains=current_domains,
         )
-        authority = mod.build_binary_authority(
-            data,
-            [domain for domain in mod.CONTRACT_DOMAINS if domain != "D9"],
-        )
+        authority = mod.build_binary_authority(data, mod.CONTRACT_DOMAINS)
         return (
             data,
             code_map,
@@ -109,8 +106,8 @@ class SensCodeMigrationTests(unittest.TestCase):
             resolver=resolver,
             contract_authority=True,
             binary_authority=authority,
-            d1_enabled=False,
-            d9_enabled=False,
+            d1_enabled=True,
+            d9_enabled=True,
         )
 
     def test_contract_authority_preserves_exact_d8_word_as_data(self):
@@ -125,17 +122,32 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(ROUND x)\n")
 
+    def test_contract_authority_call_map_excludes_d8_d9_but_resolver_keeps_evidence(self):
+        _, code_map, _, resolver, authority = self.contract_setup()
+        self.assertTrue(
+            all(entry.domain in mod.CONTRACT_CALL_DOMAINS for entry in code_map.values())
+        )
+        self.assertIn((8, "00000101"), authority)
+        self.assertIn((9, "100000001"), authority)
+        self.assertNotIn("ROUND", code_map)
+
+        resolution = resolver.resolve_head("ROUND")
+        self.assertTrue(resolution.resolved)
+        self.assertEqual(resolution.current.domain, "D8")
+
+        # A reused human label cannot select one domain globally.
+        self.assertNotIn("MAP", resolver.current_by_label)
+
+
     def test_contract_authority_preserves_bare_d7_word_instead_of_spelling_digits(self):
         converted, _, _ = self.contract_binary("(LIST 0011001)\n")
         self.assertIn("0011001", converted)
         self.assertNotIn("1100001 1100001 1100001", converted)
 
-    def test_contract_authority_rejects_d1_source_cell(self):
-        with self.assertRaisesRegex(
-            mod.BinaryMigrationError,
-            "D1 word",
-        ):
-            self.contract_binary("(LIST 1)\n")
+    def test_contract_authority_preserves_exact_d1_source_cell(self):
+        converted, _, _ = self.contract_binary("(LIST 1)\n")
+        self.assertTrue(converted.startswith("10 1110 00 1 01\n"), converted)
+        self.assertIn("1", converted.split())
 
     def test_contract_authority_rejects_hash_b_wrapper(self):
         with self.assertRaisesRegex(
@@ -144,12 +156,12 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(LIST #b101)\n")
 
-    def test_contract_authority_rejects_quoted_binary_identity(self):
-        with self.assertRaisesRegex(
-            mod.BinaryMigrationError,
-            "quoted binary semantic identity",
-        ):
-            self.contract_binary('(LIST "101")\n')
+    def test_contract_authority_digit_only_string_is_text7_data(self):
+        converted, hits, _ = self.contract_binary('(LIST "101")\n')
+        self.assertTrue(converted.startswith("10 1110 00 "), converted)
+        self.assertNotIn("101", converted.split())
+        self.assertRegex(converted, r"^[01\\s]+$")
+        self.assertEqual([hit.label for hit in hits], ["LIST"])
 
     def test_contract_authority_rejects_noncanonical_d2_data_word(self):
         with self.assertRaisesRegex(
@@ -158,12 +170,9 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(LIST 10)\n")
 
-    def test_contract_authority_rejects_wrong_width_w9_before_reader_support(self):
-        with self.assertRaisesRegex(
-            mod.BinaryMigrationError,
-            "requires GREEN exact-W9 reader/carrier support",
-        ):
-            self.contract_binary("(LIST 100000001)\n")
+    def test_contract_authority_preserves_exact_w9_source_cell(self):
+        converted, _, _ = self.contract_binary("(LIST 100000001)\n")
+        self.assertIn("100000001", converted.split())
 
     def test_contract_authority_keeps_w8_even_when_legacy_sid8_evidence_exists(self):
         converted, _, _ = self.contract_binary("(LIST 00000101)\n")
@@ -186,11 +195,9 @@ class SensCodeMigrationTests(unittest.TestCase):
             "unadmitted exact binary word",
         ):
             mod.validate_contract_binary_output(
-                "10 111 00 000001011 01\n",
+                "10 111 00 0100001 01\n",
                 authority,
-                d1_enabled=False,
-                # Enable the width gate in this unit so the assertion tests
-                # authority membership rather than prerequisite availability.
+                d1_enabled=True,
                 d9_enabled=True,
             )
 
