@@ -598,7 +598,36 @@ pub(super) fn apply(
             // Argumente gehören zum Aufrufer, Parameter zum erfassten lexikalischen Frame.
             let mut slots = Vec::with_capacity(closure.slot_names.len());
             for argument in &arguments[..closure.parameters.len()] {
-                slots.push(evaluate(argument, calling_environment)?);
+                if span.start < 50 && span.end < 50 {
+                    let kind = match &argument.kind {
+                        ExprKind::Call(_, _) => "Call",
+                        ExprKind::DomainCall(_, _) => "DomainCall",
+                        ExprKind::DomainIdentity(_) => "DomainIdentity",
+                        ExprKind::List(_) => "List",
+                        ExprKind::Symbol(_) => "Symbol",
+                        ExprKind::Number(_, _) => "Number",
+                        ExprKind::Sid(_) => "Sid",
+                        _ => "Other",
+                    };
+                    eprintln!("SENS_DEBUG_CLOSURE_ARG: {kind}");
+                }
+                let value = evaluate(argument, calling_environment)?;
+                if span.start < 50 && span.end < 50 {
+                    let kind = match &value {
+                        Value::Closure(_) => "Closure",
+                        Value::Macro(_) => "Macro",
+                        Value::Builtin(_) => "Builtin",
+                        Value::Sid(_) => "Sid",
+                        Value::DomainIdentity(_) => "DomainIdentity",
+                        Value::Pair(_, _) => "Pair",
+                        Value::Nil => "Nil",
+                        Value::Number(_, _) => "Number",
+                        Value::Symbol(_) => "Symbol",
+                        _ => "Other",
+                    };
+                    eprintln!("SENS_DEBUG_CLOSURE_ARG_VALUE: {kind}");
+                }
+                slots.push(value);
             }
             if closure.rest.is_some() {
                 let mut rest_values = Vec::with_capacity(arguments.len() - closure.parameters.len());
