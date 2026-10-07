@@ -83,6 +83,15 @@ jobs:
             compiler_bootstrap::tests::compiler_evidence_decoder_fails_closed_on_malformed_bytes \
             -- --nocapture
 
+      - name: Verified whole-program compiler artifact seam
+        run: |
+          cargo test -p sens --lib \
+            compiler_language::tests::whole_program_artifact_verifier_binds_requests_to_current_sens_authority \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_language::tests::whole_program_artifact_verifier_rejects_tampering_and_target_smuggling \
+            -- --nocapture
+
       - name: Compiler semantic export CLI
         run: cargo test -p xtask --test compiler_export_cli -- --nocapture
       - name: Whole-nucleus lowering coverage when present
