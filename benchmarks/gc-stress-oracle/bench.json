@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "gc-stress-oracle",
+  "wing": "GC",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can collector-independent adversarial graphs establish reachability, reclamation, relabeling, and stale-handle oracle behavior before a runtime heap exists?",
+  "claim": "RED/oracle layer only; it proves falsifier sensitivity on representation-neutral fixtures while runtime-dependent checks remain pending.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "PENDING-RUNTIME-HEAP",
+  "generation": "unknown",
+  "axis": "gc/adversarial-oracle",
+  "reproduce": "python3 benchmarks/gc-stress-oracle/run.py --out /tmp/gc-stress-oracle"
+}
