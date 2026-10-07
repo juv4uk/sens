@@ -25,6 +25,7 @@ fn is_explicit_non_implementation(rel: &str) -> bool {
     rel.starts_with("lib/generated/")
         || rel.starts_with("lib/surface/")
         || rel == "lib/machine/encoding/coverage.lisp"
+        || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
 }
 
 fn is_language_definition_file(rel: &str) -> bool {
@@ -122,6 +123,9 @@ fn active_authored_lib_has_no_parser_convertible_surface_heads() {
 fn completion_gate_exclusions_are_narrow_and_explicit() {
     assert!(is_explicit_non_implementation(
         "lib/machine/encoding/coverage.lisp"
+    ));
+    assert!(is_explicit_non_implementation(
+        "lib/machine/encoding/admitted-iclass-index.lisp"
     ));
     assert!(is_explicit_non_implementation(
         "lib/surface/uk-acceptance.lisp"
