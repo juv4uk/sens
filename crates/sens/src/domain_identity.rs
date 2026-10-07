@@ -1,18 +1,18 @@
-//! Exact width-qualified identity carrier for the W1→W8 ladder.
+//! Exact width-qualified identity carrier for the W1→W9 ladder.
 //!
 //! Semantic ratification and callable Core-operation identity are deliberately
 //! separate. Width never grants a semantic role by itself.
 //!
 //! - D1-D9 мають чинну семантичну authority згідно з Contract 11.8.
 //! - D5 #3305, D6 #3393, D7 #3572, D8 #3960, D9 #4008.
-//! - Цей Rust carrier поки матеріалізує лише W1-W8; D9 fail-closed до W9 cut.
+//! - W1-W8 keep the one-byte fast path; D9 uses the exact non-truncating W9 carrier.
 //! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
 //!   відсутній механізм може fail-closed навіть для ратифікованого resident.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
 //! - D8 exact identity is current; historical Sens8/Sid8 remains compatibility/provenance only.
 
 use crate::{
-    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, PredicateBit, Racana2, SoundD7,
+    Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, PredicateBit, Racana2, SoundD7,
 };
 use std::fmt;
 
@@ -26,6 +26,7 @@ pub enum DomainIdentity {
     D6(CoreD6),
     D7(SoundD7),
     D8(CoreD8),
+    D9(CoreD9),
 }
 
 impl DomainIdentity {
@@ -39,19 +40,25 @@ impl DomainIdentity {
             Self::D6(_) => 6,
             Self::D7(_) => 7,
             Self::D8(_) => 8,
+            Self::D9(_) => 9,
         }
     }
 
-    pub const fn packed_bits(self) -> u8 {
+    /// Mechanical payload wide enough for every current exact domain.
+    ///
+    /// Width remains part of `DomainIdentity`; the numeric payload alone is
+    /// never a semantic identity.
+    pub const fn packed_bits(self) -> u16 {
         match self {
-            Self::D1(value) => value.word().packed_bits(),
-            Self::D2(value) => value.word().packed_bits(),
-            Self::D3(value) => value.word().packed_bits(),
-            Self::D4(value) => value.word().packed_bits(),
-            Self::D5(value) => value.word().packed_bits(),
-            Self::D6(value) => value.word().packed_bits(),
-            Self::D7(value) => value.word().packed_bits(),
-            Self::D8(value) => value.word().packed_bits(),
+            Self::D1(value) => value.word().packed_bits() as u16,
+            Self::D2(value) => value.word().packed_bits() as u16,
+            Self::D3(value) => value.word().packed_bits() as u16,
+            Self::D4(value) => value.word().packed_bits() as u16,
+            Self::D5(value) => value.word().packed_bits() as u16,
+            Self::D6(value) => value.word().packed_bits() as u16,
+            Self::D7(value) => value.word().packed_bits() as u16,
+            Self::D8(value) => value.word().packed_bits() as u16,
+            Self::D9(value) => value.word().packed_bits(),
         }
     }
 
@@ -66,6 +73,7 @@ impl DomainIdentity {
             BinarySourceWord::W6(word) => Self::D6(CoreD6::from_word(word)),
             BinarySourceWord::W7(word) => Self::D7(SoundD7::from_word(word)),
             BinarySourceWord::W8(word) => Self::D8(CoreD8::from_word(word)),
+            BinarySourceWord::W9(word) => Self::D9(CoreD9::from_word(word)),
         }
     }
 
@@ -79,6 +87,7 @@ impl DomainIdentity {
             Self::D6(value) => BinarySourceWord::W6(value.word()),
             Self::D7(value) => BinarySourceWord::W7(value.word()),
             Self::D8(value) => BinarySourceWord::W8(value.word()),
+            Self::D9(value) => BinarySourceWord::W9(value.word()),
         }
     }
 
@@ -92,8 +101,8 @@ impl DomainIdentity {
     /// ADD1 і D6:001111 SUB1 admitted під #3394 як LOWER_DOMAIN_COMPOSITION.
     /// Інші D6 residents лишаються fail-closed; residency не дорівнює mechanism.
     /// D8 так само OWNER-RATIFIED #3960.
-    /// D9 OWNER-RATIFIED #4008, але цей W1-W8 carrier ще не матеріалізує D9;
-    /// відсутній W9/mechanism support fail-closed і не скасовує D9 residency.
+    /// D9 OWNER-RATIFIED #4008 і матеріалізується як exact identity, але
+    /// callability/mechanism admission лишається окремою і fail-closed.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
         match self {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
@@ -104,6 +113,7 @@ impl DomainIdentity {
             {
                 Some(CoreDomainIdentity::D6(value))
             }
+            Self::D9(_) => None,
             Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
@@ -224,6 +234,9 @@ impl From<SoundD7> for DomainIdentity {
 impl From<CoreD8> for DomainIdentity {
     fn from(value: CoreD8) -> Self { Self::D8(value) }
 }
+impl From<CoreD9> for DomainIdentity {
+    fn from(value: CoreD9) -> Self { Self::D9(value) }
+}
 
 impl From<Bija3> for CoreDomainIdentity {
     fn from(value: Bija3) -> Self { Self::D3(value) }
@@ -256,10 +269,10 @@ impl From<CoreDomainIdentity> for DomainIdentity {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
+    use crate::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9};
 
     #[test]
-    fn all_d1_d8_source_words_round_trip_through_domain_identity() {
+    fn all_d1_d9_source_words_round_trip_through_domain_identity() {
         for raw in 0..=1 {
             let source = BinarySourceWord::W1(Bit1::new(raw).unwrap());
             assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
@@ -292,6 +305,10 @@ mod tests {
             let source = BinarySourceWord::W8(Bit8::new(raw).unwrap());
             assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
         }
+        for raw in 0..=511 {
+            let source = BinarySourceWord::W9(Bit9::new(raw).unwrap());
+            assert_eq!(DomainIdentity::from_source_word(source).source_word(), source);
+        }
     }
 
     #[test]
@@ -301,6 +318,7 @@ mod tests {
             BinarySourceWord::W2(Bit2::new(1).unwrap()),
             BinarySourceWord::W7(Bit7::new(1).unwrap()),
             BinarySourceWord::W8(Bit8::new(1).unwrap()),
+            BinarySourceWord::W9(Bit9::new(1).unwrap()),
         ] {
             assert!(DomainIdentity::from_source_word(source).core_operation().is_none());
         }
@@ -332,7 +350,38 @@ mod tests {
     }
 
     #[test]
-    fn equal_payloads_do_not_collapse_across_d1_d8() {
+    fn w9_source_word_round_trips_without_byte_truncation() {
+        for raw in [0u16, 1, 255, 256, 257, 511] {
+            let source = BinarySourceWord::W9(Bit9::new(raw).unwrap());
+            let identity = DomainIdentity::from_source_word(source);
+            assert!(matches!(identity, DomainIdentity::D9(_)));
+            assert_eq!(identity.width(), 9);
+            assert_eq!(identity.packed_bits(), raw);
+            assert_eq!(identity.source_word(), source);
+            assert!(identity.core_operation().is_none());
+        }
+    }
+
+    #[test]
+    fn d9_does_not_collapse_to_equal_low_payload_in_d1_d8() {
+        let d9 = DomainIdentity::from_source_word(
+            BinarySourceWord::W9(Bit9::new(1).unwrap())
+        );
+        let d8 = DomainIdentity::from_source_word(
+            BinarySourceWord::W8(Bit8::new(1).unwrap())
+        );
+        assert_eq!(d9.packed_bits(), d8.packed_bits());
+        assert_ne!(d9, d8);
+
+        let high = DomainIdentity::from_source_word(
+            BinarySourceWord::W9(Bit9::new(0x101).unwrap())
+        );
+        assert_eq!(high.packed_bits(), 0x101);
+        assert_ne!(high, d9);
+    }
+
+    #[test]
+    fn equal_payloads_do_not_collapse_across_d1_d9() {
         let ids = [
             DomainIdentity::from_source_word(BinarySourceWord::W1(Bit1::new(1).unwrap())),
             DomainIdentity::from_source_word(BinarySourceWord::W2(Bit2::new(1).unwrap())),
@@ -342,6 +391,7 @@ mod tests {
             DomainIdentity::from_source_word(BinarySourceWord::W6(Bit6::new(1).unwrap())),
             DomainIdentity::from_source_word(BinarySourceWord::W7(Bit7::new(1).unwrap())),
             DomainIdentity::from_source_word(BinarySourceWord::W8(Bit8::new(1).unwrap())),
+            DomainIdentity::from_source_word(BinarySourceWord::W9(Bit9::new(1).unwrap())),
         ];
         for id in ids { assert_eq!(id.packed_bits(), 1); }
         for left in 0..ids.len() {
