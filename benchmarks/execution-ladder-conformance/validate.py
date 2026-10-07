@@ -11,7 +11,8 @@ import sys
 from pathlib import Path
 
 SCHEMA = "sens-execution-conformance/v1"
-CONTRACT = "11.6"
+CONTRACT = "11.8"
+SUPPORTED_CONTRACTS = {"11.6": 8, "11.8": 9}
 LAYERS = {"L0", "L1", "L2", "L3"}
 ENCODINGS = {"canonical-ast", "canonical-source"}
 RESULT_KINDS = {"VALUE", "ERROR", "BLOCKED-MECHANISM", "RESEARCH-DOMAIN"}
@@ -85,7 +86,16 @@ def _expect_exact_keys(value, expected, where):
         raise ValueError(f"{where}: unknown fields: {extra}")
 
 
-def _validate_identity_trace(trace, line_no):
+def _max_domain(expected_contract: str) -> int:
+    try:
+        return SUPPORTED_CONTRACTS[expected_contract]
+    except KeyError as exc:
+        raise ValueError(
+            f"unsupported contract generation {expected_contract!r}"
+        ) from exc
+
+
+def _validate_identity_trace(trace, line_no, expected_contract):
     if not isinstance(trace, list):
         raise ValueError(f"line {line_no}: identity_trace must be an array")
     for index, item in enumerate(trace):
@@ -93,8 +103,16 @@ def _validate_identity_trace(trace, line_no):
         _expect_exact_keys(item, {"domain", "bits"}, where)
         domain = item["domain"]
         bits = item["bits"]
-        if not isinstance(domain, int) or isinstance(domain, bool) or not 1 <= domain <= 8:
-            raise ValueError(f"{where}: domain must be integer 1..8")
+        max_domain = _max_domain(expected_contract)
+        if (
+            not isinstance(domain, int)
+            or isinstance(domain, bool)
+            or not 1 <= domain <= max_domain
+        ):
+            raise ValueError(
+                f"{where}: domain must be integer 1..{max_domain} "
+                f"for Contract {expected_contract}"
+            )
         if not isinstance(bits, str) or not bits or set(bits) - {"0", "1"}:
             raise ValueError(f"{where}: bits must be non-empty binary text")
         if len(bits) != domain:
@@ -148,7 +166,7 @@ def _validate_observable(observable, line_no):
             )
 
 
-def _validate_bound(row, line_no):
+def _validate_bound(row, line_no, expected_contract):
     scope = row["evidence_scope"]
     bound = row["exhaustive_bound"]
     if scope not in SCOPES:
@@ -177,13 +195,17 @@ def _validate_bound(row, line_no):
         not isinstance(domains, list)
         or not domains
         or any(
-            not isinstance(x, int) or isinstance(x, bool) or not 1 <= x <= 8
+            not isinstance(x, int)
+            or isinstance(x, bool)
+            or not 1 <= x <= _max_domain(expected_contract)
             for x in domains
         )
         or len(set(domains)) != len(domains)
     ):
         raise ValueError(
-            f"line {line_no}: exhaustive_bound.domain_set must be unique D1..D8 integers"
+            f"line {line_no}: exhaustive_bound.domain_set must be unique "
+            f"D1..D{_max_domain(expected_contract)} integers "
+            f"for Contract {expected_contract}"
         )
     for key, minimum in (
         ("max_ast_depth", 0),
@@ -197,13 +219,17 @@ def _validate_bound(row, line_no):
             )
 
 
-def validate(row, line_no=1):
+def validate(row, line_no=1, expected_contract=CONTRACT):
     _expect_exact_keys(row, REQUIRED, f"line {line_no}")
 
     if row["schema"] != SCHEMA:
         raise ValueError(f"line {line_no}: schema must be {SCHEMA!r}")
-    if row["contract"] != CONTRACT:
-        raise ValueError(f"line {line_no}: contract must be {CONTRACT!r}")
+    _max_domain(expected_contract)
+    if row["contract"] != expected_contract:
+        raise ValueError(
+            f"line {line_no}: contract must be {expected_contract!r}, "
+            f"got {row['contract']!r}"
+        )
     if not SHA40.fullmatch(row["upstream_sha"]):
         raise ValueError(f"line {line_no}: invalid upstream_sha")
     if row["producer_layer"] not in LAYERS:
@@ -229,7 +255,7 @@ def validate(row, line_no=1):
     if row["case_id"] != expected_case_id or not CASE_ID.fullmatch(row["case_id"]):
         raise ValueError(f"line {line_no}: deterministic case_id mismatch")
 
-    _validate_identity_trace(row["identity_trace"], line_no)
+    _validate_identity_trace(row["identity_trace"], line_no, expected_contract)
     expected_trace_digest = structured_digest(row["identity_trace"])
     if row["identity_trace_digest"] != expected_trace_digest:
         raise ValueError(f"line {line_no}: identity_trace_digest mismatch")
@@ -267,17 +293,17 @@ def validate(row, line_no=1):
                 f"line {line_no}: NOT-RUN requires blocked/research observable"
             )
 
-    _validate_bound(row, line_no)
+    _validate_bound(row, line_no, expected_contract)
 
 
-def validate_file(path: Path) -> int:
+def validate_file(path: Path, expected_contract=CONTRACT) -> int:
     seen = set()
     count = 0
     for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if not raw.strip():
             continue
         row = json.loads(raw)
-        validate(row, line_no)
+        validate(row, line_no, expected_contract)
         case_key = (row["case_id"], row["producer_layer"], row["producer"])
         if case_key in seen:
             raise ValueError(
@@ -292,11 +318,20 @@ def validate_file(path: Path) -> int:
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--contract",
+        choices=sorted(SUPPORTED_CONTRACTS),
+        default=CONTRACT,
+        help="Expected evidence generation; default is current Contract 11.8.",
+    )
     ap.add_argument("jsonl", type=Path, nargs="+")
     args = ap.parse_args()
     for path in args.jsonl:
-        count = validate_file(path)
-        print(f"validated {count} execution-conformance rows: {path}")
+        count = validate_file(path, args.contract)
+        print(
+            f"validated {count} execution-conformance rows: {path} "
+            f"(contract={args.contract})"
+        )
     return 0
 
 
