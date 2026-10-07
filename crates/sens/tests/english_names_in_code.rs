@@ -79,7 +79,7 @@ fn explicit_nonsemantic_lisp_evidence(text: &str) -> bool {
 }
 
 fn rust_test_is_semantic_authority(rel: &str) -> bool {
-    if !rel.starts_with("crates/sens/tests/") || !rel.ends_with(".rs") {
+    if !rel.starts_with("crates/") || !rel.contains("/tests/") || !rel.ends_with(".rs") {
         return false;
     }
     let inventory = fs::read_to_string(repo_root().join("tests/authority-inventory.tsv"))
@@ -95,7 +95,8 @@ fn rust_test_is_semantic_authority(rel: &str) -> bool {
 }
 
 fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static str {
-    if rel.starts_with("crates/sens/tests/")
+    if rel.starts_with("crates/")
+        && rel.contains("/tests/")
         && rel.ends_with(".rs")
         && !rust_test_is_semantic_authority(rel)
     {
@@ -456,6 +457,16 @@ fn scanners_find_names_in_lisp_and_rust() {
         classified_kind("crates/sens/tests/numeric_wire.rs", "", "rust-lisp"),
         "rust-test-instrument"
     );
+    assert_eq!(
+        classified_kind("crates/sens-host/tests/native_lisp_bytes.rs", "", "rust-lisp"),
+        "rust-test-instrument",
+        "tests in other crates are instruments unless explicitly semantic-authority"
+    );
+    assert!(is_table_source("lib/domains/d9.lisp"));
+    assert!(is_table_source("lib/machine/encoding/admitted-iclass-index.lisp"));
+    assert!(is_table_source("lib/machine/encoding/coverage.lisp"));
+    assert!(!is_table_source("lib/compiler-nucleus.lisp"));
+    assert!(!is_table_source("lib/machine/encoding/x86-64.lisp"));
     assert_eq!(
         classified_kind("crates/sens/tests/mccarthy.rs", "", "rust-lisp"),
         "rust-lisp",
