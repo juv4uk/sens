@@ -51,6 +51,16 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
                         *clause = lift_cond_clause(source, clause.clone(), depth + 1)?;
                     }
                 } else {
+                    // A list-valued head is itself an executable expression,
+                    // e.g. ((lambda (...) ...) arg). It can also appear as the
+                    // first element of a syntax container such as LET bindings.
+                    // lift_head only understands atomic source spellings, so
+                    // recurse into structural heads before visiting arguments.
+                    // Quote remains protected above and scalar data is unchanged.
+                    if matches!(lifted[0].kind, ExprKind::List(_) | ExprKind::Pair(_, _)) {
+                        lifted[0] =
+                            lift_expression(source, lifted[0].clone(), depth + 1)?;
+                    }
                     for item in lifted.iter_mut().skip(1) {
                         *item = lift_expression(source, item.clone(), depth + 1)?;
                     }
@@ -181,6 +191,63 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn list_valued_head_is_recursively_lifted_as_an_expression() {
+        let expression = only(
+            parse_mixed_exact_domain("((0010 (x) (100 x)) (001 (41 42)))")
+                .expect("mixed immediate-lambda parse"),
+        );
+        let ExprKind::List(outer) = expression.kind else {
+            panic!("expected immediate-call list");
+        };
+        let ExprKind::List(lambda) = &outer[0].kind else {
+            panic!("expected list-valued lambda head");
+        };
+        assert!(matches!(
+            &lambda[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0010
+        ));
+        let ExprKind::List(body) = &lambda[2].kind else {
+            panic!("expected lambda body call");
+        };
+        assert!(matches!(
+            &body[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b100
+        ));
+    }
+
+    #[test]
+    fn exact_call_inside_first_let_binding_is_not_lost_in_container_head() {
+        let expression = only(
+            parse_mixed_exact_domain("(001000 ((y (100 xs))) y)")
+                .expect("mixed LET binding parse"),
+        );
+        let ExprKind::List(let_form) = expression.kind else {
+            panic!("expected LET form");
+        };
+        assert!(matches!(
+            &let_form[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 6 && identity.packed_bits() == 0b001000
+        ));
+        let ExprKind::List(bindings) = &let_form[1].kind else {
+            panic!("expected bindings container");
+        };
+        let ExprKind::List(binding) = &bindings[0].kind else {
+            panic!("expected first binding");
+        };
+        assert!(matches!(&binding[0].kind, ExprKind::Symbol(name) if &**name == "y"));
+        let ExprKind::List(initializer) = &binding[1].kind else {
+            panic!("expected initializer call");
+        };
+        assert!(matches!(
+            &initializer[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b100
+        ));
+    }
     #[test]
     fn exact_d4_define_and_lambda_execute_through_mixed_bridge() {
         let parsed = parse_mixed_exact_domain(
