@@ -134,6 +134,7 @@ def load_current_foundation(
         raise ValueError(f"{path}: foundation is not owner-ratified")
 
     by_label: dict[str, CurrentIdentity] = {}
+    ambiguous_labels: set[str] = set()
     by_word: dict[tuple[int, str], CurrentIdentity] = {}
     for domain in current_domains:
         desc = data["domains"][domain]
@@ -141,9 +142,17 @@ def load_current_foundation(
         for bits, label in desc["residents"].items():
             identity = CurrentIdentity(domain, width, bits, str(label))
             key = str(label).upper()
-            if key in by_label and by_label[key] != identity:
-                raise ValueError(f"duplicate current label: {key}")
-            by_label[key] = identity
+            if key not in ambiguous_labels:
+                previous = by_label.get(key)
+                if previous is not None and previous != identity:
+                    # Human labels are projection evidence, not global semantic
+                    # identity.  A cross-domain duplicate must therefore remove
+                    # the normalized-label shortcut rather than pick one domain
+                    # or make the whole exact-domain resolver unusable.
+                    by_label.pop(key, None)
+                    ambiguous_labels.add(key)
+                else:
+                    by_label[key] = identity
             by_word[(width, bits)] = identity
     return by_label, by_word
 
