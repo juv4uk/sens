@@ -440,18 +440,22 @@
      ; #176 RDRAND/RDSEED: pinned #175 XED evidence gives one GPRv form each:
      ; 0F C7 /6 for RDRAND and /7 for RDSEED. REX.W selects r64; REX.B
      ; witnesses extended-register encoding without claiming host RNG semantics.
+     ; Carrier shape is part of this exact witness: the shared legacy REX/ModR/M
+     ; packers emit exact Number cells, while literal 0F/C7 remain canonical
+     ; BinaryNumber cells. #4117 deliberately accepts that mixed list only at
+     ; the raw machine-byte boundary; do not coerce either side here.
      ((encode rdrand-r64-rax)
       (x86-encode-rdrand-r64 'rax)
-      (#b1001000 #b1111 #b11000111 #b11110000))
+      (72 #b1111 #b11000111 240))
      ((encode rdrand-r64-r8)
       (x86-encode-rdrand-r64 'r8)
-      (#b1001001 #b1111 #b11000111 #b11110000))
+      (73 #b1111 #b11000111 240))
      ((encode rdseed-r64-rax)
       (x86-encode-rdseed-r64 'rax)
-      (#b1001000 #b1111 #b11000111 #b11111000))
+      (72 #b1111 #b11000111 248))
      ((encode rdseed-r64-r15)
       (x86-encode-rdseed-r64 'r15)
-      (#b1001001 #b1111 #b11000111 #b11111111))
+      (73 #b1111 #b11000111 255))
      ((admission rdrand-r64-valid)
       (x86-admitted-instruction? '(rdrand-r64 r8))
       t)
