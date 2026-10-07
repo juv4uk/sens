@@ -1,0 +1,19 @@
+name: 4320 LET-star quantity probe
+
+on:
+  push:
+    branches: [diag/4320-letstar-quantity-1007]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Legacy LET-star parity witness
+        run: cargo test -p sens --test let_code_parity_1678 -- --nocapture
+      - name: Exact quantity witness
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp
