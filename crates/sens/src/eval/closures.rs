@@ -2,7 +2,7 @@
 //! Pobudova `lambda` ta zastosuvannia zamykan/makrosiv do arhumentiv.
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
-use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
+use super::{canon, capabilities, evaluate, lower, necessary_forms, special_forms::quoted, EvalStep};
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 use std::{
@@ -713,6 +713,10 @@ pub(super) fn apply_macro(
 
     let expanded_value = evaluate(last, &local_environment)?;
     let expanded_expr = value_to_expr(expanded_value, span)?;
+    let expanded_expr = lower::lower_program(std::slice::from_ref(&expanded_expr))
+        .into_iter()
+        .next()
+        .expect("lowering one macro expansion returns one expression");
 
     Ok(EvalStep::TailCall {
         expression: expanded_expr,
