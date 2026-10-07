@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the Contract 11.6 bounded-exhaustive D1-D3 conformance slice.
+"""Generate the Contract 11.8 bounded-exhaustive D1-D3 conformance slice.
 
 The finite grammar is deliberately small and explicit. D2 owns structure,
 D3 owns the callable primitives, and D1 appears only as an exact predicate
@@ -260,7 +260,7 @@ def make_rows(
     common = {
         "schema": SCHEMA,
         "case_id": case_id,
-        "contract": "11.6",
+        "contract": "11.8",
         "upstream_sha": upstream_sha,
         "program_encoding": "canonical-source",
         "program": program.source,
