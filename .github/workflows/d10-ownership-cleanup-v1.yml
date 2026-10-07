@@ -1,0 +1,55 @@
+name: D10 ownership cleanup v1
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-noncore-reclassification-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "knowledge/island-ownership-gate-v1.json"
+      - "scripts/check-d10-ownership-cleanup-v1.py"
+      - "scripts/check-island-ownership-gate.py"
+      - "scripts/check-d10-v1-semantic-inventory.py"
+      - "scripts/check-d10-forward-harvest-v1.py"
+      - "scripts/check-d10-knowledge-harvest-v1.py"
+      - "scripts/check-d10-library-harvest-v1.py"
+      - "scripts/check-d10-historical-maclisp-v1.py"
+      - "scripts/check-d10-historical-maclisp-v2.py"
+      - "scripts/check-d10-wsm-os-lisp-ownership.py"
+      - ".github/workflows/d10-ownership-cleanup-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-noncore-reclassification-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-ownership-cleanup-v1.py"
+      - ".github/workflows/d10-ownership-cleanup-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify ownership cleanup
+        run: python3 scripts/check-d10-ownership-cleanup-v1.py
+      - name: Verify island ownership gate
+        run: python3 scripts/check-island-ownership-gate.py
+      - name: Verify D10 inventory
+        run: python3 scripts/check-d10-v1-semantic-inventory.py
+      - name: Preserve forward tranche
+        run: python3 scripts/check-d10-forward-harvest-v1.py
+      - name: Preserve knowledge tranche
+        run: python3 scripts/check-d10-knowledge-harvest-v1.py
+      - name: Preserve library tranche
+        run: python3 scripts/check-d10-library-harvest-v1.py
+      - name: Preserve historical MacLisp v1
+        run: python3 scripts/check-d10-historical-maclisp-v1.py
+      - name: Preserve historical MacLisp v2
+        run: python3 scripts/check-d10-historical-maclisp-v2.py
+      - name: Preserve WSM ownership review
+        run: python3 scripts/check-d10-wsm-os-lisp-ownership.py
