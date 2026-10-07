@@ -37,7 +37,11 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
 
     let mut s = session();
     let add = eval_program(
-        "(machine-capabilities-for-domain 5 10)",
+        &format!(
+            "(machine-capabilities-for-domain {} {})",
+            add_identity.width(),
+            add_identity.packed_bits()
+        ),
         &mut s,
     )
     .expect("D5 PLUS capability lookup")
@@ -46,7 +50,11 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     assert_eq!(add, "((integer-add bounded-u32-inputs u64-result))");
 
     let car = eval_program(
-        "(machine-capabilities-for-domain 3 4)",
+        &format!(
+            "(machine-capabilities-for-domain {} {})",
+            car_identity.width(),
+            car_identity.packed_bits()
+        ),
         &mut s,
     )
     .expect("D3 CAR capability lookup")
@@ -55,7 +63,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     assert_eq!(car, "((pair-field-load head bounded-u64))");
 
     let quoted_shadow = eval_program(
-        r#"(machine-capabilities-for-domain "01010")"#,
+        r#"(machine-capabilities-for-domain 5 "01010")"#,
         &mut s,
     )
     .expect("quoted domain shadow must remain ordinary String data")
@@ -68,11 +76,54 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
 }
 
 #[test]
+fn packed_bits_do_not_cross_domain_widths() {
+    let mut s = session();
+
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 5 10)", &mut s)
+            .expect("D5:01010 PLUS")
+            .value
+            .to_string(),
+        "((integer-add bounded-u32-inputs u64-result))"
+    );
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 4 10)", &mut s)
+            .expect("D4:1010 LOOKUP must not inherit PLUS")
+            .value
+            .to_string(),
+        "()"
+    );
+
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 5 11)", &mut s)
+            .expect("D5:01011 DIFFERENCE")
+            .value
+            .to_string(),
+        "((integer-subtract bounded-u64 no-underflow))"
+    );
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 4 11)", &mut s)
+            .expect("D4:1011 BIND must not inherit DIFFERENCE")
+            .value
+            .to_string(),
+        "()"
+    );
+
+    assert_eq!(
+        eval_program("(machine-capabilities-for-domain 4 8)", &mut s)
+            .expect("D4:1000 CAAR must fail closed")
+            .value
+            .to_string(),
+        "()"
+    );
+}
+
+#[test]
 fn active_machine_capability_axis_has_no_sid8_lookup() {
     let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis source");
 
-    assert!(source.contains("machine-capability-axis-v2"));
+    assert!(source.contains("machine-capability-axis-v3"));
     assert!(source.contains("machine-capabilities-for-domain"));
     assert!(!source.contains("machine-capability-legacy-sid-axis"));
     assert!(!source.contains("machine-capabilities-for-sid"));
