@@ -6,6 +6,9 @@ on:
       - 'crates/sens/examples/store_air_load_repr.rs'
       - 'crates/sens/examples/current_en_vs_d1d8_cpu.rs'
       - 'benchmarks/store-air-load/**'
+      - 'language-contract.lisp'
+      - 'lib/core4.lisp'
+      - 'lib/core4.lisp.fasl'
       - '.github/workflows/store-air-load.yml'
   workflow_dispatch:
 
