@@ -98,6 +98,7 @@ jobs:
 
   d6-add1-sub1-gpu-witness:
     name: D6 ADD1/SUB1 GPU-runner witness
+    if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
     runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     timeout-minutes: 30
     steps:
