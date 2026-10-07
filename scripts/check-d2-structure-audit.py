@@ -81,7 +81,8 @@ stale_claim="canonical Control2" in framing
 if old_present or stale_claim:
     assert debt["status"]=="DEBT-OWNED"
     assert "#4164" in debt["owner"]
-    assert "not** the canonical" in framing or "not** the canonical" not in framing
+    assert "standalone framing/decoder mechanism" in framing
+    assert "not** the canonical" in framing
     print("binary_framing=DEBT-OWNED:#4164")
 else:
     assert new_present, "framing debt disappeared without WIRE_* replacement"
