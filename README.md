@@ -18,6 +18,9 @@
 
 **Українська — перша мова проєкту.** Англійська й німецька — допоміжні.
 
+**Current authority: Contract 11.8 · D1–D9 · D10 research/unratified**
+
+
 </div>
 
 ---
