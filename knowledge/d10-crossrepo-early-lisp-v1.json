@@ -1,0 +1,314 @@
+{
+  "schema": "d10-crossrepo-early-lisp-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4071",
+  "date": "2026-10-07",
+  "parent": "#4053",
+  "foundation": "#4008 / Contract 11.8 / D1-D9",
+  "donors": [
+    {
+      "repository": "juv4uk/mccarthy-eval",
+      "head": "6031f92652066825a245c806c0773e9e524257bd",
+      "review_status": "EXHAUSTED-FOR-THIS-SLICE"
+    },
+    {
+      "repository": "juv4uk/lisp",
+      "head": "b4cda76a40d25151a6cdb45a2ed6cb492644ea22",
+      "review_status": "EXHAUSTED-FOR-THIS-SLICE"
+    },
+    {
+      "repository": "juv4uk/lisp-1",
+      "head": "f6719457ff38e01fc87c6aea027bedfad1742cdd",
+      "review_status": "EXHAUSTED-FOR-THIS-SLICE"
+    },
+    {
+      "repository": "juv4uk/LISP-2",
+      "head": "29f4dc7b7ee0b476bb845cbda5fa58f2203bf41f",
+      "review_status": "EXHAUSTED-FOR-THIS-SLICE"
+    }
+  ],
+  "coordinate_policy": "Donor coordinates, implementation addresses and runtime layout have zero D10 placement authority. Every selected row is UNPLACED.",
+  "accounting": {
+    "donors_reviewed": 4,
+    "selected_d10_candidates": 6,
+    "current_projections": 17,
+    "hold_semantic_review": 1,
+    "no_semantic_slot": 1,
+    "d10_selected_before": 367,
+    "d10_selected_after": 373,
+    "d10_remaining_after": 651,
+    "ratified_d10_residents": 0
+  },
+  "selected_rows": [
+    {
+      "stable_id": "d10.crossrepo.early.df61e09eb40f66de",
+      "semantic_name": "APPQ",
+      "behavior": "apply/evaluate a function through the McCarthy-1960 appq path that quotes an already evaluated argument sequence before constructing the application",
+      "donor_repo": "juv4uk/mccarthy-eval",
+      "source_file": "docs/HISTORICAL-FUNCTION-LEDGER.md",
+      "provenance": [
+        "#4071",
+        "McCarthy 1960 evaluator",
+        "juv4uk/mccarthy-eval docs/HISTORICAL-FUNCTION-LEDGER.md"
+      ],
+      "relation_class": "EVALUATOR-APPLICATION-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "SELECT-D10-CANDIDATE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.e341ebf53d16f5c8",
+      "semantic_name": "DEFINE-BATCH",
+      "behavior": "define a list of name/definition pairs in one historical DEFINE/DEFN operation and return the defined names, supporting batch or mutually related installation semantics distinct from one-binding DEFINE",
+      "donor_repo": "juv4uk/mccarthy-eval",
+      "source_file": "docs/HISTORICAL-FUNCTION-LEDGER.md",
+      "provenance": [
+        "#4071",
+        "LISP I Programmer's Manual 1960 §3.1",
+        "juv4uk/mccarthy-eval docs/HISTORICAL-FUNCTION-LEDGER.md"
+      ],
+      "relation_class": "BINDING-DEFINITION-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "SELECT-D10-CANDIDATE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.fbbdb9f97d617f40",
+      "semantic_name": "CALL/CC",
+      "behavior": "capture the current continuation as a first-class callable value and invoke the supplied function with that continuation",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "provenance": [
+        "#4071",
+        "juv4uk/lisp src/Primitives.hs"
+      ],
+      "relation_class": "CONTINUATION-CONTROL",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "SELECT-D10-CANDIDATE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.f2cfe79e398f7f24",
+      "semantic_name": "READTABLE",
+      "behavior": "expose reader dispatch configuration as a language value mapping surface tokens to reader actions",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "provenance": [
+        "#4071",
+        "juv4uk/lisp src/Primitives.hs"
+      ],
+      "relation_class": "READER-CONFIGURATION-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "SELECT-D10-CANDIDATE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.7e7576e6a5af03b7",
+      "semantic_name": "IF",
+      "behavior": "evaluate one predicate and select exactly one of two branch forms, preserving short-circuit branch semantics",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "provenance": [
+        "#4071",
+        "juv4uk/lisp src/Primitives.hs"
+      ],
+      "relation_class": "DERIVED-CONTROL-FORM",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "SELECT-D10-CANDIDATE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.c54e7e4316a0f576",
+      "semantic_name": "NUMERIC-NOT-EQUAL",
+      "behavior": "compare two numeric values and return the predicate result that they are unequal by numeric value rather than atom identity",
+      "donor_repo": "juv4uk/lisp-1",
+      "source_file": "lisp1_5/math.go",
+      "provenance": [
+        "#4071",
+        "juv4uk/lisp-1 lisp1_5/math.go"
+      ],
+      "relation_class": "NUMERIC-COMPARISON-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "decision": "SELECT-D10-CANDIDATE",
+      "ratified_resident": false
+    }
+  ],
+  "reviewed_nonselect": [
+    {
+      "semantic_name": "DEFINE-SYNTAX",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D5 MACRO + D4 DEFINE",
+      "reason": "macro-definition packaging already admitted",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "READ-MANY",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D9 READ-ALL",
+      "reason": "same read-all-expressions meaning",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "SLURP",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D9 READ-FILE",
+      "reason": "file/url read surface; file case already admitted and URL branch remains host/package boundary",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "SPIT",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D9 WRITE-FILE",
+      "reason": "text file write projection",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "SET!",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D5 SET / SETQ family",
+      "reason": "evaluate RHS and mutate named binding",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "UNQUOTE",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D4 EVAL projection",
+      "reason": "this donor's unquote primitive delegates directly to eval",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "FIRST",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D3 CAR",
+      "reason": "list first projection",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "REST",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "D3 CDR",
+      "reason": "list rest projection",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "MOD",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "HOLD",
+      "reason": "signed modulus law not yet compared exactly against current REMAINDER",
+      "decision": "HOLD-SEMANTIC-REVIEW"
+    },
+    {
+      "semantic_name": "DEBUG",
+      "donor_repo": "juv4uk/lisp",
+      "source_file": "src/Primitives.hs",
+      "current_target": "NO-SLOT",
+      "reason": "REPL/tooling entry point rather than language semantic",
+      "decision": "NO-SEMANTIC-SLOT"
+    },
+    {
+      "semantic_name": "APPLY",
+      "donor_repo": "juv4uk/lisp-1",
+      "source_file": "lisp1_5/elementary.go",
+      "current_target": "D4 APPLY",
+      "reason": "exact current lower identity",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "DEFN",
+      "donor_repo": "juv4uk/lisp-1",
+      "source_file": "lisp1_5/elementary.go",
+      "current_target": "DEFINE-BATCH",
+      "reason": "same selected batch-definition family",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "GE",
+      "donor_repo": "juv4uk/lisp-1",
+      "source_file": "lisp1_5/math.go",
+      "current_target": "D6 GEQ",
+      "reason": "numeric >= projection",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "LE",
+      "donor_repo": "juv4uk/lisp-1",
+      "source_file": "lisp1_5/math.go",
+      "current_target": "D6 LEQ",
+      "reason": "numeric <= projection",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "GT",
+      "donor_repo": "juv4uk/lisp-1",
+      "source_file": "lisp1_5/math.go",
+      "current_target": "D5 GREATERP",
+      "reason": "numeric > projection",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "LT",
+      "donor_repo": "juv4uk/lisp-1",
+      "source_file": "lisp1_5/math.go",
+      "current_target": "D5 LESSP",
+      "reason": "numeric < projection",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "EVALQUOTE",
+      "donor_repo": "juv4uk/LISP-2",
+      "source_file": "tests/lisp15.scm",
+      "current_target": "D5 EVALQUOTE",
+      "reason": "exact current lower identity",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "PAIRLIS",
+      "donor_repo": "juv4uk/LISP-2",
+      "source_file": "tests/lisp15.scm",
+      "current_target": "D5 PAIRLIS",
+      "reason": "exact current lower identity",
+      "decision": "CURRENT-PROJECTION"
+    },
+    {
+      "semantic_name": "ASSOC",
+      "donor_repo": "juv4uk/LISP-2",
+      "source_file": "tests/lisp15.scm",
+      "current_target": "D5 ASSOC",
+      "reason": "exact current lower identity",
+      "decision": "CURRENT-PROJECTION"
+    }
+  ]
+}
