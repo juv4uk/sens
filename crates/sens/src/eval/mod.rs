@@ -225,7 +225,7 @@ fn evaluate_list(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    if let Some(identity) = binary_head_domain_identity(&items[0]) {
+    if let Some(identity) = binary_head_domain_identity(&items[0], environment) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
     dispatch_call(
@@ -393,7 +393,7 @@ fn dispatch_call(
     // domain slot; we merely preserve raw argument syntax before evaluation.
     if let Some(sid) = head_sid {
         if let Some(identity) =
-            crate::semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+            crate::semantic_registry::legacy_macro_domain_identity_from_registry_byte(sid.packed_byte())
         {
             if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
                 return closures::apply_macro(closure.clone(), arguments, environment, span);
@@ -476,11 +476,25 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_domain_identity(expression: &Expr) -> Option<CoreDomainIdentity> {
+fn binary_head_domain_identity(
+    expression: &Expr,
+    environment: &Environment,
+) -> Option<CoreDomainIdentity> {
     let ExprKind::DomainIdentity(identity) = expression.kind else {
         return None;
     };
-    identity.core_operation()
+    if let Some(core) = identity.core_operation() {
+        return Some(core);
+    }
+
+    // Exact D6 residency alone never grants callability. A D6 source head
+    // becomes macro-executable only when bootstrap has installed an actual
+    // Lisp-owned Macro in that exact domain slot.
+    let crate::DomainIdentity::D6(word) = identity else {
+        return None;
+    };
+    let core = CoreDomainIdentity::D6(word);
+    matches!(environment.domain_code_slot(core), Some(Value::Macro(_))).then_some(core)
 }
 
 fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
@@ -515,6 +529,15 @@ mod single_pass_eval_tests {
         let result = eval_parsed_expressions(&forms, &mut session)
             .expect("eval_parsed_expressions should succeed");
         assert_eq!(result.value.to_string(), "(1/3)");
+    }
+
+    #[test]
+    fn exact_d6_let_executes_only_through_bound_macro_slot() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let result = crate::eval_program("(001000 ((x 41)) x)", &mut session)
+            .expect("exact D6 LET should execute through its bound Lisp macro");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
     }
 
     #[test]
