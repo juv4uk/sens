@@ -1,0 +1,44 @@
+{
+  "schema": "d10-crossrepo-clojure-reference-v1/v1",
+  "status": "REVIEW-COMPLETE-NO-ADMISSION",
+  "authority": "#4053",
+  "date": "2026-10-07",
+  "foundation": "#4008 / Contract 11.8 / D1-D9",
+  "reviewed_repositories": [
+    {
+      "repository": "juv4uk/Clojure-code",
+      "pinned_commit": "40049756e76417fbc5b6dcc42f47cc69bfb01313",
+      "classification": "REFERENCE-OR-UPSTREAM",
+      "selected_d10_candidates": 0,
+      "evidence": [
+        "README: modernized fork of oakes/Nightcode",
+        "repository purpose: Clojure/ClojureScript IDE/tooling",
+        "juv4uk role: fork maintainer"
+      ],
+      "decision": "NO-DIRECT-CORE-ADMISSION",
+      "reason": "IDE/editor/build semantics do not own Clojure language semantics. Any Clojure language operation must be sourced from an actual language/reference donor, not the IDE implementation."
+    },
+    {
+      "repository": "juv4uk/clojure-cookbook",
+      "pinned_commit": "1b3754a7f4aab51cc9b254ea102870e7ce478aa0",
+      "classification": "REFERENCE-OR-UPSTREAM",
+      "selected_d10_candidates": 0,
+      "evidence": [
+        "README: O'Reilly Clojure Cookbook",
+        "authors: Luke VanderHart and Ryan Neufeld",
+        "many contributor license assignments and application recipes"
+      ],
+      "decision": "NO-DIRECT-CORE-ADMISSION",
+      "reason": "Cookbook recipes are reference/application examples. They may corroborate existing semantics but do not create SENS Core semantic authority."
+    }
+  ],
+  "accounting": {
+    "repositories_reviewed": 2,
+    "selected_d10_candidates": 0,
+    "reclassified_to_reference": 2,
+    "d10_inventory_delta": 0,
+    "historical_donor_queue_reviewed": "11/11",
+    "ratified_d10_residents": 0
+  },
+  "hard_rule": "Reference/upstream ownership evidence may confirm or compare semantics, but does not mint D10 residents or coordinates."
+}
