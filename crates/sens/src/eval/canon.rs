@@ -605,9 +605,9 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         return;
     };
     if let Some(identity) =
-        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+        semantic_registry::legacy_macro_domain_identity_from_registry_byte(sid.packed_byte())
     {
-        if matches!(identity, CoreDomainIdentity::D6(_)) && matches!(value, Value::Macro(_)) {
+        if matches!(value, Value::Macro(_)) {
             environment.bind_domain_code_slot_once(identity, value.clone());
             environment.bind_code_slot_once(sid, value.clone());
             return;
