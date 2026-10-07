@@ -112,11 +112,12 @@ jobs:
           summary = json.loads(Path('/tmp/core-bootstrap-3648/summary.json').read_text())
 
           expected = {
-              'root', 'profile', 'macro', 'decode',
-              'eval-no-peers', 'eval-with-peers', 'full-loader',
+              'root', 'profile', 'macro', 'decode', 'lower',
+              'eval-lowered-no-peers', 'eval-lowered-with-peers',
+              'eval-no-peers', 'full-loader',
           }
           assert {row['stage'] for row in rows} == expected
-          assert len(rows) == 21
+          assert len(rows) == 27
           for stage in expected:
               assert sum(row['stage'] == stage for row in rows) == 3
           assert summary['schema'] == 'sens-core-bootstrap-internal-summary/v1'
