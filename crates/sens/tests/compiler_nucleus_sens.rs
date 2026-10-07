@@ -8,8 +8,8 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    parse_mixed_exact_domain, eval_parsed_expressions,
-    compiler_execution_role, eval_parsed_expressions, eval_program, load_core_library,
+    compiler_execution_role, eval_parsed_expressions, load_core_library,
+    parse_mixed_exact_domain,
     lower_program, parse, Bija3, Bit3, CompilerExecutionRole, CoreDomainIdentity,
     DomainIdentity, Session, Value,
 };
