@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 443,
-    "remaining_semantic_candidates": 581,
+    "selected_semantic_candidates": 428,
+    "remaining_semantic_candidates": 596,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 187,
+    "unplaced_selected_candidates": 172,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -130,12 +130,12 @@
   "ownership_gate": {
     "authority": "#4033",
     "artifact": "knowledge/island-ownership-gate-v1.json",
-    "status": "RATIFICATION-BLOCKER-REVIEW-ONLY",
+    "status": "OWNERSHIP-DEBT-CLEARED",
     "definite_noncore_selected": 0,
     "definite_noncore_reclassified": 55,
-    "review_required_selected": 15,
+    "review_required_selected": 0,
     "no_new_definite_noncore": true,
-    "rule": "All definite non-Core rows identified by #4033 have been removed from Core D10 and preserved in knowledge/d10-noncore-reclassification-v1.json. The remaining 15 REVIEW-REQUIRED rows still need explicit ownership witnesses before D10 ratification."
+    "rule": "All 55 definite non-Core and all 15 former REVIEW-REQUIRED package/domain rows have been removed from Core D10 and preserved in reclassification ledgers. No known D10 ownership debt remains."
   },
   "historical_maclisp_v1": {
     "artifact": "knowledge/d10-historical-maclisp-v1.json",
@@ -214,5 +214,14 @@
     "clojure_code": "REVIEWED-EXHAUSTED-FOR-CORE",
     "clojure_cookbook": "REVIEWED-EXHAUSTED-FOR-CORE",
     "coordinates_assigned": 0
+  },
+  "ownership_cleanup_v2": {
+    "authority": "#4092",
+    "artifact": "knowledge/d10-review-reclassification-v2.json",
+    "removed_from_core": 15,
+    "selected_after": 428,
+    "selector_coordinates_preserved": 256,
+    "review_required_still_selected": 0,
+    "ratification_effect": "NONE"
   }
 }
