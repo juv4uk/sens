@@ -393,9 +393,10 @@ mod tests {
             render_value_for_presentation(&d9, PresentationLanguage::Canonical),
             "100000001"
         );
-        // Human presentation never mints runtime routing. The established
-        // Ukrainian fallback keeps the value visibly typed as a domain
-        // identity, while Sanskrit falls back to the exact canonical bits.
+        // Human presentation is a projection only: it never mints runtime routing.
+        // For D9, the Ukrainian fallback is intentionally domain-qualified and
+        // the Sanskrit fallback remains the exact canonical 9-bit identity.
+        // Neither projection changes D9 residency or grants callability.
         assert_eq!(
             render_value_for_presentation(&d9, PresentationLanguage::Ukrainian),
             "#<домен 100000001>"
