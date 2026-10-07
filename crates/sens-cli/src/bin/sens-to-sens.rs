@@ -435,12 +435,13 @@ fn apply_edits(source: &str, edits: &[Edit]) -> Result<String, String> {
 }
 
 fn usage() {
-    eprintln!("Usage: sens-to-sens [--check] [--language] <file>...");
+    eprintln!("Usage: sens-to-sens [--check] [--language] [--exact-domain] <file>...");
 }
 
 fn main() {
     let mut check = false;
     let mut language = false;
+    let mut exact_domain = false;
     let mut files = Vec::new();
 
     for argument in env::args().skip(1) {
@@ -448,10 +449,14 @@ fn main() {
             check = true;
         } else if argument == "--language" {
             language = true;
+        } else if argument == "--exact-domain" {
+            exact_domain = true;
         } else if argument == "-h" || argument == "--help" {
-            println!("Usage: sens-to-sens [--check] [--language] <file>...");
-            println!("Parser-aware repository migration from admitted surfaces to exact SENS functions.");
+            println!("Usage: sens-to-sens [--check] [--language] [--exact-domain] <file>...");
+            println!("Parser-aware repository migration from admitted surfaces to SENS functions.");
             println!("--check reports candidates without writing and exits 1 when changes are available.");
+            println!("--exact-domain emits current exact-width identities and fails closed");
+            println!("  when an admitted compatibility surface lacks an exact-domain successor.");
             println!("--language: the files are the language's own first definitions of table");
             println!("  functions (code slots, #1468); calls to them become codes too.");
             return;
@@ -483,7 +488,12 @@ fn main() {
             }
         };
 
-        let analysis = match analyze_with(&source, &host_capabilities, language) {
+        let analysis = match analyze_with(
+            &source,
+            &host_capabilities,
+            language,
+            exact_domain,
+        ) {
             Ok(analysis) => analysis,
             Err(error) => {
                 eprintln!("sens-to-sens: {filename}: {error}");
@@ -494,12 +504,25 @@ fn main() {
 
         if check {
             println!(
-                "{filename}: convertible={} named-calls={} blocked-host={}",
+                "{filename}: convertible={} named-calls={} blocked-host={} blocked-exact={}",
                 analysis.edits.len(),
                 analysis.named_calls,
-                analysis.blocked_host_capabilities
+                analysis.blocked_host_capabilities,
+                analysis.blocked_exact_domain
             );
             changes_available |= !analysis.edits.is_empty();
+            if exact_domain && analysis.blocked_exact_domain != 0 {
+                failed = true;
+            }
+            continue;
+        }
+
+        if exact_domain && analysis.blocked_exact_domain != 0 {
+            eprintln!(
+                "sens-to-sens: {filename}: {} admitted named call(s) have no proven exact-domain successor; file left unchanged",
+                analysis.blocked_exact_domain
+            );
+            failed = true;
             continue;
         }
 
@@ -512,7 +535,12 @@ fn main() {
             }
         };
 
-        if let Err(error) = analyze(&output, &host_capabilities) {
+        if let Err(error) = analyze_with(
+            &output,
+            &host_capabilities,
+            language,
+            exact_domain,
+        ) {
             eprintln!("sens-to-sens: {filename}: rewritten source does not parse: {error}");
             failed = true;
             continue;
@@ -526,14 +554,27 @@ fn main() {
             }
         }
 
-        let remaining =
-            analyze(&output, &host_capabilities).expect("rewritten source was just validated");
+        let remaining = analyze_with(
+            &output,
+            &host_capabilities,
+            language,
+            exact_domain,
+        )
+        .expect("rewritten source was just validated");
         println!(
-            "{filename}: replaced={} named-calls-remaining={} blocked-host={}",
+            "{filename}: replaced={} named-calls-remaining={} blocked-host={} blocked-exact={}",
             analysis.edits.len(),
             remaining.named_calls,
-            remaining.blocked_host_capabilities
+            remaining.blocked_host_capabilities,
+            remaining.blocked_exact_domain
         );
+        if exact_domain && remaining.blocked_exact_domain != 0 {
+            eprintln!(
+                "sens-to-sens: {filename}: rewritten source still has {} named call(s) without exact-domain identity",
+                remaining.blocked_exact_domain
+            );
+            failed = true;
+        }
     }
 
     if failed {
@@ -603,7 +644,7 @@ mod tests {
     }
 
     fn rewrite_language(source: &str) -> String {
-        let analysis = analyze_with(source, &HashSet::new(), true).expect("source analyzes");
+        let analysis = analyze_with(source, &HashSet::new(), true, false).expect("source analyzes");
         apply_edits(source, &analysis.edits).expect("edits apply")
     }
 
