@@ -112,7 +112,7 @@ fn program_digest_deterministic(exprs: &[Expr]) -> String {
 ///
 /// This is deliberately coordinate-only: it does not reconstruct a human role
 /// name and it does not widen callability.
-fn admitted_mechanism_identity(width: usize, packed_bits: u8) -> Option<String> {
+fn admitted_mechanism_identity(width: usize, packed_bits: u16) -> Option<String> {
     let admitted = match (width, packed_bits) {
         (3, 0b001..=0b111) => true,
         (4, 0b0010 | 0b0011) => true,
