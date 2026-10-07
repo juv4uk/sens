@@ -130,7 +130,7 @@
   (1111010 (ук знак-крапка) (укр текст-крапка) (san lekha-bindu) (en sign.dot) (LISP ()) (sym .))
   (1111011 (ук кома) (укр текст-кома) (san lekha-alpavirāma) (en sign.comma) (LISP ()) (sym ,))
   (1111100 (ук двокрапка) (укр текст-двокрапка) (san lekha-dvi-bindu) (en sign.colon) (LISP ()) (sym :))
-  (1111101 (ук крапка-з-комою) (укр текст-крапка-з-комою) (san lekha-ardha-virāma) (en sign.semicolon) (LISP ()) (sym ;))
+  (1111101 (ук крапка-з-комою) (укр текст-крапка-з-комою) (san lekha-ardha-virāma) (en sign.semicolon) (LISP ()) (sym ";"))
   (1111110 (ук решітка) (укр текст-решітка) (san lekha-saṅkhyā-cihna) (en sign.hash) (LISP ()) (sym #))
   (1111111 (ук равлик) (укр текст-равлик) (san lekha-sthāna-cihna) (en sign.at) (LISP ()) (sym @))
 )
