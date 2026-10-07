@@ -1,4 +1,4 @@
-; #604 temporary carrier probe. No probe result is fed to D3 COND.
+; #604 leaf carrier probe for the first committed coverage row.
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
 
@@ -8,42 +8,43 @@
       (read-file
         "lib/machine/encoding/coverage.lisp"))))
 
-(def encoder-coverage-first-index-row
-  (car encoder-coverage-index-rows))
-
 (def encoder-coverage-first-coverage-row
   (car (cdr (cdr (cdr encoder-coverage-committed-form)))))
 
-(def encoder-coverage-first-partial-row
-  (car encoder-coverage-partials))
+(def encoder-coverage-first-row-empty-result
+  (encoder-coverage-empty?
+    encoder-coverage-first-coverage-row))
+
+(def encoder-coverage-first-row-count-result
+  (encoder-coverage-count=?
+    #b101
+    (length encoder-coverage-first-coverage-row)))
 
 (list
-  (quote encoder-coverage-local-carrier-probe)
-  (list (quote index-checks) (encoder-coverage-index-checks))
-  (list (quote index-valid) (encoder-coverage-index-valid?))
+  (quote encoder-coverage-first-row-leaf-probe)
   (list
-    (quote first-row-match)
-    (encoder-coverage-committed-row-matches?
-      encoder-coverage-first-index-row
-      encoder-coverage-first-coverage-row
-      (quote ())))
+    (quote empty-result)
+    encoder-coverage-first-row-empty-result)
   (list
-    (quote first-row-match-is-yes)
+    (quote empty-is-d1-no)
     (encoder-coverage-same?
-      (encoder-coverage-committed-row-matches?
-        encoder-coverage-first-index-row
-        encoder-coverage-first-coverage-row
-        (quote ()))
+      encoder-coverage-first-row-empty-result
+      encoder-coverage-d1-no))
+  (list
+    (quote count-result)
+    encoder-coverage-first-row-count-result)
+  (list
+    (quote count-is-d1-yes)
+    (encoder-coverage-same?
+      encoder-coverage-first-row-count-result
       encoder-coverage-d1-yes))
   (list
-    (quote first-partial-self-key)
-    (encoder-coverage-row-key=?
-      encoder-coverage-first-partial-row
-      encoder-coverage-first-partial-row))
-  (list
-    (quote first-partial-self-key-is-yes)
+    (quote tag-match)
     (encoder-coverage-same?
-      (encoder-coverage-row-key=?
-        encoder-coverage-first-partial-row
-        encoder-coverage-first-partial-row)
-      encoder-coverage-d1-yes)))
+      (car encoder-coverage-first-coverage-row)
+      (quote coverage)))
+  (list
+    (quote iclass-tag-match)
+    (encoder-coverage-same?
+      (car (second encoder-coverage-first-coverage-row))
+      (quote iclass))))
