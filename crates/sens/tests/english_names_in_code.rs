@@ -129,11 +129,29 @@ fn rust_literal_is_nonsemantic_schema_data(
         ("crates/sens/src/gpu_oracle.rs", "numeric-buffer-map") => {
             source_line.contains("forbidden_legacy_operation:")
         }
+        _ => false,
+    }
+}
+
+/// Exact machine-schema fields embedded in Rust string literals that are
+/// themselves Lisp data. The line number is relative to the literal because
+/// the token scanner tracks embedded newlines independently of the Rust source.
+fn rust_lisp_token_is_nonsemantic_schema_data(
+    rel: &str,
+    literal_source: &str,
+    line: usize,
+    token: &str,
+) -> bool {
+    let literal_line = literal_source
+        .lines()
+        .nth(line.saturating_sub(1))
+        .unwrap_or_default();
+    match (rel, token) {
         ("crates/xtask/src/compiler_export.rs", "identity") => {
-            source_line.contains("(identity . ")
+            literal_line.contains("(identity . ")
         }
         ("crates/xtask/src/compiler_export.rs", "provenance") => {
-            source_line.contains("(provenance . ")
+            literal_line.contains("(provenance . ")
         }
         _ => false,
     }
@@ -367,8 +385,17 @@ fn places() -> Vec<Place> {
                 } else if rust_literal_has_lisp_source(&literal) {
                     for (l, token, data) in lisp_tokens(&literal, line) {
                         if names.contains(&token) {
-                            let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
-                            let kind = classified_kind(&rel, &text, base_kind);
+                            let kind = if rust_lisp_token_is_nonsemantic_schema_data(
+                                &rel,
+                                &literal,
+                                l,
+                                &token,
+                            ) {
+                                "rust-schema-data"
+                            } else {
+                                let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
+                                classified_kind(&rel, &text, base_kind)
+                            };
                             out.push((kind, rel.clone(), l, token));
                         }
                     }
@@ -542,16 +569,16 @@ fn scanners_find_names_in_lisp_and_rust() {
         1,
         "numeric-buffer-map",
     ));
-    assert!(rust_literal_is_nonsemantic_schema_data(
+    assert!(rust_lisp_token_is_nonsemantic_schema_data(
         "crates/xtask/src/compiler_export.rs",
-        "(identity . ((domain . D3) (bits . 010)))",
-        1,
+        "(compiler-semantic-request\n           (identity . ((domain . D3) (bits . 010)))\n           (provenance . ((repository . \"juv4uk/sens\"))))",
+        2,
         "identity",
     ));
-    assert!(rust_literal_is_nonsemantic_schema_data(
+    assert!(rust_lisp_token_is_nonsemantic_schema_data(
         "crates/xtask/src/compiler_export.rs",
-        "(provenance . ((repository . \"juv4uk/sens\")))",
-        1,
+        "(compiler-semantic-request\n           (identity . ((domain . D3) (bits . 010)))\n           (provenance . ((repository . \"juv4uk/sens\"))))",
+        3,
         "provenance",
     ));
     assert!(!rust_literal_is_nonsemantic_schema_data(
@@ -560,9 +587,9 @@ fn scanners_find_names_in_lisp_and_rust() {
         1,
         "numeric-buffer-map",
     ));
-    assert!(!rust_literal_is_nonsemantic_schema_data(
+    assert!(!rust_lisp_token_is_nonsemantic_schema_data(
         "crates/xtask/src/compiler_export.rs",
-        "let field = \"identity\";",
+        "(let field \"identity\")",
         1,
         "identity",
     ));
