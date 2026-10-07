@@ -337,6 +337,30 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 42) (nop) (ret))) 0)",
             "42",
         ),
+        (
+            "bt-imm-carry-set",
+            "BT r64,imm8 + SETC + MOVZX",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 8) (bt-r64-imm8 rax 3) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
+            "1",
+        ),
+        (
+            "bts-imm-set",
+            "BTS r64,imm8",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 0) (bts-r64-imm8 rax 3) (ret))) 0)",
+            "8",
+        ),
+        (
+            "btr-imm-reset",
+            "BTR r64,imm8",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 15) (btr-r64-imm8 rax 1) (ret))) 0)",
+            "13",
+        ),
+        (
+            "btc-imm-complement",
+            "BTC r64,imm8",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 0) (btc-r64-imm8 rax 4) (ret))) 0)",
+            "16",
+        ),
     ];
 
     let mut rows = Vec::with_capacity(cases.len());
