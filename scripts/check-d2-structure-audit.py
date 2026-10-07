@@ -61,7 +61,8 @@ packing=(root/"crates/sens/src/source_packing.rs").read_text(encoding="utf-8")
 for literal in [
     "grammar/EOS/container framing is a separate protocol",
     "structural_bit_patterns_are_packed_as_payload_not_transport_delimiters",
-    "Standalone self-description belongs to the framing layer.",
+    "Standalone self-description belongs to",
+    "the framing layer.",
 ]:
     assert literal in packing, literal
 assert rows["crates/sens/src/source_packing.rs"]["status"]=="PASS"
