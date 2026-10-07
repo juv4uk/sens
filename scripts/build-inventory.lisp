@@ -12,6 +12,28 @@
 
 (00001001 fixtures (01001011 (10100110 "tests/fixtures/conformance.lisp")))
 
+(00001001 transitions (01001011 (10100110 "tests/fixtures/conformance-transition-witness.lisp")))
+
+(00001001 є-у-переходах?
+  (00001000 (вираз залишок)
+    (00000111
+      ((00000010 залишок) ())
+      ((00100010 вираз (assoc-str (00000001 supersedes-expr)
+                                  (00000101 залишок)))
+       (1))
+      (t (є-у-переходах? вираз (00000110 залишок))))))
+
+(00001001 поле-статусу
+  (00001000 (фікстура)
+    (00000111
+      ((є-у-переходах?
+        (assoc-str (00000001 expr) фікстура)
+        transitions)
+       (00100111
+        (00000100 (00000001 authority-status)
+                   (00000001 historical-superseded))))
+      (t ()))))
+
 ;; ---- Helpers ----
 
 (00001001 assoc
@@ -183,7 +205,9 @@
           (outcome-value (00000111 (expected expected) (t error-kind)))
           (id (compute-id expr axioms outcome-kind outcome-value))
           (observed-forms (get-observed-forms expr error-kind)))
-      (01001000 (00100111 (00000001 fixture)
+      (01001000 (00101001
+        (поле-статусу fixture)
+        (00100111 (00000100 (00000001 fixture) fixture)
                    (00000100 (00000001 id) id)
                    (00000100 (00000001 tier) tier)
                    (00000100 (00000001 axioms) axioms)
