@@ -103,6 +103,21 @@ pub(crate) fn migration_domain_identity_from_registry_byte(
         }
     })
 }
+/// Compatibility projection for historical macro call heads only.
+///
+/// This is deliberately separate from generic legacy invocation: LET/LET*
+/// need raw-argument macro dispatch before evaluation, while ordinary legacy
+/// function invocation must not acquire D6 meaning through this bridge.
+pub(crate) fn legacy_macro_domain_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
+    match byte {
+        0b1001_1100 => Some(d6(0b001000)), // LET
+        0b1001_1101 => Some(d6(0b001001)), // LET*
+        _ => None,
+    }
+}
 
 /// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
 ///
@@ -340,6 +355,27 @@ mod tests {
             let identity = migration_domain_identity_from_registry_byte(legacy_byte)
                 .expect("migration tooling must retain the ratified exact successor");
             assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+        }
+    }
+    #[test]
+    fn legacy_macro_projection_is_narrower_than_migration_projection() {
+        assert_eq!(
+            legacy_macro_domain_identity_from_registry_byte(0b0010_0111),
+            None,
+            "LIST is migration-compatible but is not a raw-argument macro bridge"
+        );
+        for (legacy_byte, bits) in [
+            (0b1001_1100, 0b001000),
+            (0b1001_1101, 0b001001),
+        ] {
+            let identity = legacy_macro_domain_identity_from_registry_byte(legacy_byte)
+                .expect("legacy LET/LET* must preserve raw macro dispatch");
+            assert_eq!((identity.width(), identity.packed_bits()), (6, bits));
+            assert_eq!(
+                legacy_domain_identity_from_registry_byte(legacy_byte),
+                None,
+                "macro bridge must not leak into generic legacy invocation"
+            );
         }
     }
 
