@@ -116,7 +116,33 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
 }
 
 fn ratchet_enforced_kind(kind: &str) -> bool {
-    !matches!(kind, "rust-test-instrument" | "lisp-evidence")
+    !matches!(
+        kind,
+        "rust-test-instrument" | "lisp-evidence" | "rust-contract-data" | "rust-evidence-data"
+    )
+}
+
+fn rust_nonsemantic_data_kind(
+    rel: &str,
+    text: &str,
+    literal: &str,
+) -> Option<&'static str> {
+    let source = literal.trim_start();
+
+    if rel == "crates/xtask/src/compiler_export.rs"
+        && source.starts_with("(compiler-semantic-request")
+    {
+        return Some("rust-contract-data");
+    }
+
+    if rel == "crates/sens/src/gpu_oracle.rs"
+        && literal == "numeric-buffer-map"
+        && text.contains("forbidden_legacy_operation: \"numeric-buffer-map\".to_string()")
+    {
+        return Some("rust-evidence-data");
+    }
+
+    None
 }
 
 fn files() -> Vec<(PathBuf, String)> {
@@ -325,14 +351,17 @@ fn places() -> Vec<Place> {
         let Ok(text) = fs::read_to_string(&path) else { continue };
         if rel.ends_with(".rs") {
             for (line, literal) in rust_strings(&text) {
+                let data_kind = rust_nonsemantic_data_kind(&rel, &text, &literal);
                 if names.contains(literal.as_str()) {
-                    let kind = classified_kind(&rel, &text, "rust");
+                    let kind =
+                        data_kind.unwrap_or_else(|| classified_kind(&rel, &text, "rust"));
                     out.push((kind, rel.clone(), line, literal));
                 } else if rust_literal_has_lisp_source(&literal) {
                     for (l, token, data) in lisp_tokens(&literal, line) {
                         if names.contains(&token) {
                             let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
-                            let kind = classified_kind(&rel, &text, base_kind);
+                            let kind =
+                                data_kind.unwrap_or_else(|| classified_kind(&rel, &text, base_kind));
                             out.push((kind, rel.clone(), l, token));
                         }
                     }
@@ -618,6 +647,64 @@ fn scanners_find_names_in_lisp_and_rust() {
         classified_kind("lib/core1.lisp", "", "lisp-дані"),
         "lisp-дані",
         "production Core1 data that drives compatibility must remain enforced"
+    );
+
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/xtask/src/compiler_export.rs",
+            "",
+            "(compiler-semantic-request\n  (identity . ((domain . D3) (bits . 001))))",
+        ),
+        Some("rust-contract-data"),
+        "the canonical compiler export record is contract data, not executable Lisp"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/other.rs",
+            "",
+            "(compiler-semantic-request\n  (identity . car))",
+        ),
+        None,
+        "the same record-shaped text in another production file must not be exempt"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/xtask/src/compiler_export.rs",
+            "",
+            "(car x)",
+        ),
+        None,
+        "ordinary embedded Lisp in compiler_export remains enforced"
+    );
+
+    let gpu_evidence =
+        "forbidden_legacy_operation: \"numeric-buffer-map\".to_string()";
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/gpu_oracle.rs",
+            gpu_evidence,
+            "numeric-buffer-map",
+        ),
+        Some("rust-evidence-data"),
+        "the forbidden legacy operation name is negative-control evidence"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/gpu_oracle.rs",
+            "let operation = \"numeric-buffer-map\";",
+            "numeric-buffer-map",
+        ),
+        None,
+        "the same surface outside the named negative-control field remains enforced"
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/other.rs",
+            gpu_evidence,
+            "numeric-buffer-map",
+        ),
+        None,
+        "the negative-control exemption is path-specific"
     );
 
     let rust = rust_strings("let a = \"car\"; // \"cdr\"\nlet c = '\"'; let s = r#\"(cons 1 ())\"#;");
