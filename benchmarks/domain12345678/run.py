@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#3001 initial D1-D8 exact-domain carrier/runtime benchmark."""
+"""Contract 11.8 W1-W8 carrier/runtime replay; D9 is explicit BLOCKED-CARRIER."""
 
 from __future__ import annotations
 
@@ -83,6 +83,8 @@ def main() -> int:
         median_net = statistics.median(net)
         rows.append(
             {
+                "contract_version": CONTRACT_VERSION,
+                "semantic_generation": SEMANTIC_GENERATION,
                 "case": case,
                 "iterations": args.iterations,
                 "reps": args.reps,
@@ -111,20 +113,30 @@ def main() -> int:
         "machine": platform.machine(),
         "iterations": args.iterations,
         "reps": args.reps,
-        "scope": "D1-D8 exact source-word -> DomainIdentity carrier/runtime",
-        "semantic_authority": "none; benchmark consumes production APIs only",
+        "contract_version": CONTRACT_VERSION,
+        "semantic_generation": SEMANTIC_GENERATION,
+        "current_foundation": "D1-D9",
+        "measured_carriers": "W1-W8",
+        "d9_status": D9_STATUS,
+        "d9_reason": D9_REASON,
+        "scope": "W1-W8 exact source-word -> DomainIdentity carrier/runtime",
+        "semantic_authority": (
+            "Contract 11.8 metadata; measured values are mechanical carrier cost only"
+        ),
     }
     (args.out_dir / "environment.json").write_text(
         json.dumps(environment, indent=2) + "\n", encoding="utf-8"
     )
 
     lines = [
-        "# D1-D8 exact-width carrier benchmark — Contract 11.6 boundary",
+        "# W1-W8 exact-width carrier benchmark — Contract 11.8 / D1-D9 authority",
         "",
         f"Cachegrind I refs, paired empty-loop subtraction, median of {args.reps} runs, "
         f"{args.iterations:,} iterations.",
         "",
         "This slice consumes production BinarySourceWord -> DomainIdentity APIs only.",
+        "Current semantic authority is D1-D9; this Rust carrier materializes W1-W8.",
+        f"D9 status: {D9_STATUS} — {D9_REASON}.",
         "It contains no benchmark-local residency table, surface-name lookup, or legacy "
         "Sens8/Function8 identity.",
         "",
@@ -145,11 +157,14 @@ def main() -> int:
         "- D1/D2/D6/D7/D8 fail the generic callable-Core projection;",
         "- D3/D4/D5 project through the current generic callable boundary;",
         "- D6 is current semantic residency but generic callability remains separate;",
-        "- D7 is owner-ratified but remains outside generic callable-Core projection; D8 remains research;",
+        "- D7 is owner-ratified but remains outside generic callable-Core projection;",
+        "- D8 is owner-ratified current identity and remains distinct from historical Sens8;",
+        f"- D9 is owner-ratified current identity but this carrier reports {D9_STATUS};",
         "",
         "Deferred lanes:",
         "- packed/framing accounting follows #3026/#2833;",
-        "- registry/surface comparisons follow the full 510-owner projection -> #2992;",
+        "- D9/W9 carrier implementation is a separate mechanism task; this replay stays fail-closed;",
+        "- registry/surface comparisons remain separate from carrier cost;",
         "- domain-law execution benchmarks are separate from carrier cost.",
         "",
     ]
