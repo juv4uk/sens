@@ -15,6 +15,10 @@
   (machine-public-api-admission explicit-ratification-only)
 
   (lowering-direction semantic-to-machine)
+  (canonical-machine-effect-layer lib/machine/effect-boundary.lisp)
+  (machine-effect-semantic-authority forbidden)
+  (target-projection-from-machine-effect required)
+  (target-specific-data-before-machine-effect forbidden)
   (reverse-authority machine-to-semantic forbidden)
 
   (semantic-id-from-isa forbidden)
