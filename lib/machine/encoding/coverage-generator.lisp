@@ -365,28 +365,58 @@
   (lambda (index-rows coverage-rows partials)
     (cond
       ((encoder-coverage-empty? index-rows)
-       (encoder-coverage-all? (list (encoder-coverage-empty? coverage-rows) (encoder-coverage-empty? partials))))
-      ((encoder-coverage-empty? coverage-rows) encoder-coverage-d1-no)
+       (cond
+         ((encoder-coverage-empty? coverage-rows)
+          (cond
+            ((encoder-coverage-empty? partials)
+             encoder-coverage-d1-yes)
+            (encoder-coverage-d1-yes
+             encoder-coverage-d1-no)))
+         (encoder-coverage-d1-yes
+          encoder-coverage-d1-no)))
+      ((encoder-coverage-empty? coverage-rows)
+       encoder-coverage-d1-no)
       ((encoder-coverage-empty? partials)
-       (encoder-coverage-all?
-         (list
-           (encoder-coverage-committed-row-matches? (car index-rows) (car coverage-rows) (quote ()))
-           (encoder-coverage-projection-rows-valid? (cdr index-rows) (cdr coverage-rows) partials))))
+       (cond
+         ((encoder-coverage-committed-row-matches?
+            (car index-rows)
+            (car coverage-rows)
+            (quote ()))
+          (encoder-coverage-projection-rows-valid?
+            (cdr index-rows)
+            (cdr coverage-rows)
+            partials))
+         (encoder-coverage-d1-yes
+          encoder-coverage-d1-no)))
       (encoder-coverage-d1-yes
        (let ((index-row (car index-rows))
              (coverage-row (car coverage-rows))
              (partial-row (car partials)))
          (cond
            ((encoder-coverage-row-key=? index-row partial-row)
-            (encoder-coverage-all?
-              (list
-                (encoder-coverage-committed-row-matches? index-row coverage-row partial-row)
-                (encoder-coverage-projection-rows-valid? (cdr index-rows) (cdr coverage-rows) (cdr partials)))))
+            (cond
+              ((encoder-coverage-committed-row-matches?
+                 index-row
+                 coverage-row
+                 partial-row)
+               (encoder-coverage-projection-rows-valid?
+                 (cdr index-rows)
+                 (cdr coverage-rows)
+                 (cdr partials)))
+              (encoder-coverage-d1-yes
+               encoder-coverage-d1-no)))
            (encoder-coverage-d1-yes
-            (encoder-coverage-all?
-              (list
-                (encoder-coverage-committed-row-matches? index-row coverage-row (quote ()))
-                (encoder-coverage-projection-rows-valid? (cdr index-rows) (cdr coverage-rows) partials))))))))))
+            (cond
+              ((encoder-coverage-committed-row-matches?
+                 index-row
+                 coverage-row
+                 (quote ()))
+               (encoder-coverage-projection-rows-valid?
+                 (cdr index-rows)
+                 (cdr coverage-rows)
+                 partials))
+              (encoder-coverage-d1-yes
+               encoder-coverage-d1-no)))))))))
 
 (def encoder-coverage-projection-valid?
   (lambda (coverage-form)
