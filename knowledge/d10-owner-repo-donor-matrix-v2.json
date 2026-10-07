@@ -1,13 +1,16 @@
 {
   "schema": "d10-owner-repo-donor-matrix-v2/v1",
-  "status": "AUDIT-COMPLETE-FIRST-PASS",
+  "status": "AUDIT-COMPLETE",
   "authority": "#4049",
   "date": "2026-10-07",
   "scope": {
     "owner_namespace": "juv4uk",
     "repositories_accounted": 87,
     "source": "GitHub owner-affiliation repository listing",
-    "provenance_note": "Namespace ownership/access is not treated as proof of original authorship. README evidence is used where available; known forks/upstream projects are classified as reference/upstream."
+    "provenance_note": "Namespace ownership/access is not treated as proof of original authorship. README evidence is used where available; known forks/upstream projects are classified as reference/upstream.",
+    "review_required_repositories": 0,
+    "final_unresolved_repositories": [],
+    "all_repositories_classified": true
   },
   "doctrine": [
     "Every accessible juv4uk repository is accounted for exactly once.",
@@ -21,11 +24,11 @@
   ],
   "class_counts": {
     "REFERENCE-OR-UPSTREAM": 31,
-    "PACKAGE-OR-DOMAIN": 32,
+    "PACKAGE-OR-DOMAIN": 33,
     "CORE-HISTORICAL-DONOR": 11,
     "BACKEND-OR-MECHANISM": 11,
     "CORE-LANGUAGE-DONOR": 1,
-    "REVIEW-REQUIRED": 1
+    "REVIEW-REQUIRED": 0
   },
   "rows": [
     {
@@ -1070,12 +1073,12 @@
       "visibility": "private",
       "size": 628,
       "archived": false,
-      "primary_class": "REVIEW-REQUIRED",
-      "semantic_owner": "review:vault-semantic-mcp",
-      "d10_action": "DEEP-OWNERSHIP-REVIEW",
-      "deep_review_status": "QUEUED",
-      "reason": "Repository is accounted for but current metadata is insufficient to assign a safe semantic ownership boundary.",
-      "evidence_note": "README currently contains only project title/license; insufficient semantic scope evidence.",
+      "primary_class": "PACKAGE-OR-DOMAIN",
+      "semantic_owner": "vault-semantic-mcp",
+      "d10_action": "NO-DIRECT-CORE-ADMISSION",
+      "deep_review_status": "COMPLETE",
+      "reason": "Obsidian/vault semantic-search, ontology tagging and concept-discovery package. Language-owned Core semantics are not its authority; BGE-M3/Python/CUDA/MCP are mechanisms or domain tooling.",
+      "evidence_note": "NLP-ARCHITECTURE.md defines a local semantic-search/tagging pipeline over vault/Sanskrit corpus; TAGGING-V2-DESIGN separates similarity suggestions from epistemic truth and keeps generated tags review-gated. No substrate-independent Core language primitive was identified.",
       "candidate_issue": "#4055"
     },
     {
