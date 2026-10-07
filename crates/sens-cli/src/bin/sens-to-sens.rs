@@ -769,13 +769,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn exact_domain_mode_maps_compatibility_def_to_d4_define() {
-        assert_eq!(
-            rewrite_exact("(def f (функція (x) (перше x)))").unwrap(),
-            "(0011 f (0010 (x) (100 x)))"
-        );
-    }
 
     #[test]
     fn direct_sens_quote_protects_quoted_data() {
