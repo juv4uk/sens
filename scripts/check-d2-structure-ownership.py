@@ -81,6 +81,48 @@ def check_canonical_reader(failures: list[str]) -> None:
         )
 
 
+def check_exact_width_carriers(failures: list[str]) -> None:
+    source_words = read("crates/sens/src/source_words.rs")
+    require(
+        "Structural roles remain language-owned; width is the only fact here."
+        in source_words,
+        "source-word carrier no longer separates width from D2 structural roles",
+        failures,
+    )
+
+    packing = read("crates/sens/src/source_packing.rs")
+    for marker in [
+        "assigns no semantic roles and defines no wire framing",
+        "caller-owned boundary information",
+        "structural_bit_patterns_are_packed_as_payload_not_transport_delimiters",
+    ]:
+        require(
+            marker in packing,
+            f"source packing lost semantic/framing separation marker: {marker}",
+            failures,
+        )
+
+    forbidden_backend_markers = [
+        "D2_SEPARATOR",
+        "D2_CLOSE",
+        "D2_OPEN",
+        "D2_DOT",
+        "CONTROL_ESCAPE",
+    ]
+    for path in [
+        "crates/sens/src/compiler_bootstrap.rs",
+        "crates/sens/src/gpu_execution_packet.rs",
+    ]:
+        text = read(path)
+        for marker in forbidden_backend_markers:
+            require(
+                marker not in text,
+                f"backend/compiler carrier claims D2 structural control: "
+                f"{path}: {marker}",
+                failures,
+            )
+
+
 def check_migration(failures: list[str]) -> None:
     text = read("scripts/migrate-three-pass.py")
     markers = [
@@ -159,6 +201,7 @@ def main() -> int:
     check_d2_table(failures)
     check_language_contract(failures)
     check_canonical_reader(failures)
+    check_exact_width_carriers(failures)
     check_migration(failures)
     check_surface_translation(failures)
     check_transport(spec, failures)
