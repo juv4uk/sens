@@ -13,7 +13,7 @@ on:
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
       - "contracts/core1-historical-sid-map.lisp"
-      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d1-d9-foundation.json"
       - "knowledge/number-width-ratified.json"
       - ".github/workflows/sens-code-migration.yml"
   push:
@@ -29,7 +29,7 @@ on:
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
       - "contracts/core1-historical-sid-map.lisp"
-      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d1-d9-foundation.json"
       - "knowledge/number-width-ratified.json"
       - ".github/workflows/sens-code-migration.yml"
 
@@ -39,7 +39,7 @@ concurrency:
 
 jobs:
   migration-tests:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - name: Test manifest-driven migration and three-pass classifier
@@ -80,7 +80,7 @@ jobs:
       - name: Audit migrator itself
         run: |
           python3 scripts/audit-sens-name-debt.py . \
-            --foundation knowledge/d1-d7-foundation.json \
+            --foundation knowledge/d1-d9-foundation.json \
             --report /tmp/sens-name-debt.json
 
       - name: Enforce migration tests
