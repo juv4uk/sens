@@ -403,6 +403,32 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     }
 }
 
+/// Complete exact-domain mechanism slots from already-bound admitted surfaces.
+/// This is a mechanical compatibility pass: the semantic registry supplies the
+/// historical lookup only to recover an already-ratified exact-domain identity.
+/// No surface name or packed byte becomes semantic authority.
+fn bind_missing_exact_domain_macro_slots(environment: &Environment) {
+    for semantic_id in semantic_registry::admitted_semantic_ids() {
+        let Some(identity) =
+            semantic_registry::legacy_domain_identity_from_registry_byte(semantic_id.packed_byte())
+        else {
+            continue;
+        };
+        if environment.domain_code_slot(identity).is_some() {
+            continue;
+        }
+        for surface in semantic_registry::admitted_surfaces_for_semantic_id(semantic_id) {
+            let Some(value) = environment.get(surface) else {
+                continue;
+            };
+            if matches!(value, Value::Macro(_)) {
+                environment.bind_domain_code_slot_once(identity, value);
+                break;
+            }
+        }
+    }
+}
+
 /// Install the narrow macro substrate, then load the language-owned macro
 /// layer and finally the ordinary core library. Once the Lisp-owned values
 /// exist, install every missing stable peer spelling from the semantic
@@ -432,6 +458,7 @@ fn load_core_library_with_fasl(
     };
 
     bind_missing_stable_surface_peers(&session.environment);
+    bind_missing_exact_domain_macro_slots(&session.environment);
     Ok(result)
 }
 
