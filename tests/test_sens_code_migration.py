@@ -167,18 +167,32 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(LIST 100000001)\n")
 
-    def test_contract_authority_rejects_ambiguous_w8_sid8_input(self):
+    def test_contract_authority_keeps_w8_even_when_legacy_sid8_evidence_exists(self):
+        converted, _, _ = self.contract_binary("(LIST 00000101)\n")
+        self.assertIn("00000101", converted.split())
+        self.assertNotIn("100", converted.split())
+
+    def test_contract_authority_rejects_w8_head_without_callable_domain_law(self):
         with self.assertRaisesRegex(
             mod.BinaryMigrationError,
-            "ambiguous W8 token",
+            "non-callable authority resident used as executable head",
         ):
-            self.contract_binary("(LIST 00000101)\n")
+            self.contract_binary("(00000101 x)\n")
 
     def test_contract_authority_preserves_exact_d8_word_without_zero_padding(self):
         converted, _, _ = self.contract_binary("(LIST 11111111)\n")
         words = converted.split()
         self.assertIn("11111111", words)
         self.assertNotIn("0", words)
+
+    def test_contract_authority_validator_accepts_exact_d8_value(self):
+        _, _, _, _, authority = self.contract_setup()
+        mod.validate_contract_binary_output(
+            "10 1110 00 00000101 01\n",
+            authority,
+            d1_enabled=False,
+            d9_enabled=False,
+        )
 
     def test_contract_authority_validator_rejects_unadmitted_binary_word(self):
         _, _, _, _, authority = self.contract_setup()
