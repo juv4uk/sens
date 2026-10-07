@@ -106,3 +106,29 @@ fn same_packed_payload_wrong_width_falls_back() {
 
     assert_eq!(actual, expected);
 }
+
+
+#[test]
+fn exact_domain_classifier_block_has_no_spelling_or_sid_match() {
+    let source = fs::read_to_string(repo_root().join("lib/machine/dispatch/native-first.lisp"))
+        .expect("native-first classifier source");
+    let marker = "; #4081 — exact-domain native-first classifier.";
+    let start = source.find(marker).expect("exact-domain classifier marker");
+    let block = &source[start..];
+
+    for forbidden in [
+        "(00000001 car)",
+        "(00000001 cons)",
+        "machine-capabilities-for-sid",
+        "semantic-registry",
+    ] {
+        assert!(
+            !block.contains(forbidden),
+            "exact-domain classifier must not regain spelling/SID authority: {forbidden}"
+        );
+    }
+
+    assert!(block.contains("native-first-domain-d3-car?"));
+    assert!(block.contains("native-first-domain-d3-cons?"));
+    assert!(block.contains("shape-or-empty"));
+}
