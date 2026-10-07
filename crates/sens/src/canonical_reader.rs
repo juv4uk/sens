@@ -2,8 +2,8 @@
 //!
 //! This path is intentionally separate from the human/compatibility parser.
 //! It consumes already-bounded binary source words, applies the ratified D2
-//! structural law, and lifts W3-W8 payloads directly into DomainIdentity.
-//! Core.D8 stays domain-qualified; no legacy Sens8/Function8 identity is constructed.
+//! structural law, and lifts W3-W9 payloads directly into DomainIdentity.
+//! D8/D9 stay domain-qualified; no legacy Sens8/Function8 identity is constructed.
 
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
@@ -99,7 +99,7 @@ impl<'a> CanonicalReader<'a> {
         }
 
         // D2 has already been consumed structurally above. Every remaining
-        // W3..W8 word carries exact ratified domain identity here; occupancy
+        // W3..W9 word carries exact ratified domain identity here; occupancy
         // and callability remain later law-owned decisions.
         let identity = crate::DomainIdentity::from_source_word(token.word);
 
@@ -308,6 +308,19 @@ mod tests {
         };
         assert_eq!((domain(second).width(), domain(second).packed_bits()), (3, 0b110));
         assert_eq!((domain(tail).width(), domain(tail).packed_bits()), (3, 0b001));
+    }
+
+    #[test]
+    fn w9_reaches_ast_as_exact_non_callable_domain_identity() {
+        let expression = only("100000001");
+        let identity = domain(&expression);
+        assert_eq!((identity.width(), identity.packed_bits()), (9, 257));
+        assert!(identity.core_operation().is_none());
+
+        let low = domain(&only("000000001"));
+        let d8 = domain(&only("00000001"));
+        assert_eq!(low.packed_bits(), d8.packed_bits());
+        assert_ne!(low, d8);
     }
 
     #[test]

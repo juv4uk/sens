@@ -24,6 +24,7 @@
 //! ```
 
 use crate::bits::Bits;
+use crate::Bit9;
 
 /// Canonical dense payload bytes plus the exact count of meaningful bits.
 ///
@@ -121,6 +122,27 @@ impl PackedBitstream {
         Bits::<N>::new(value)
     }
 
+    /// Read one exact W9 word at a known bit offset.
+    ///
+    /// W9 is intentionally separate from `Bits<N>` so the one-byte W1-W8
+    /// fast path remains unchanged.
+    pub fn read_w9(&self, bit_offset: usize) -> Option<Bit9> {
+        let end = bit_offset.checked_add(9)?;
+        if end > self.bit_len {
+            return None;
+        }
+
+        let mut value = 0u16;
+        for position in bit_offset..end {
+            let byte = self.bytes[position / 8];
+            let bit_in_byte = position % 8;
+            let bit = u16::from((byte >> (7 - bit_in_byte)) & 1);
+            value = (value << 1) | bit;
+        }
+
+        Bit9::new(value)
+    }
+
     /// Split the mechanical container into its physical payload and exact bit
     /// count. The returned byte vector alone is not a complete identity.
     pub fn into_parts(self) -> (Vec<u8>, usize) {
@@ -173,6 +195,27 @@ impl BitPacker {
         let start = self.bit_len;
 
         for index in 0..N {
+            let bit_in_byte = self.bit_len % 8;
+            if bit_in_byte == 0 {
+                self.bytes.push(0);
+            }
+
+            if word.bit(index) == Some(true) {
+                let byte_index = self.bit_len / 8;
+                self.bytes[byte_index] |= 1 << (7 - bit_in_byte);
+            }
+
+            self.bit_len += 1;
+        }
+
+        start
+    }
+
+    /// Append one exact W9 word with no interior alignment or padding.
+    pub fn push_w9(&mut self, word: Bit9) -> usize {
+        let start = self.bit_len;
+
+        for index in 0..9 {
             let bit_in_byte = self.bit_len % 8;
             if bit_in_byte == 0 {
                 self.bytes.push(0);
@@ -387,6 +430,21 @@ mod tests {
         assert!(PackedBitstream::from_parts(vec![0b1010_0001], 3).is_none());
         assert!(PackedBitstream::from_parts(vec![0b1010_0000, 0], 3).is_none());
         assert!(PackedBitstream::from_parts(vec![0b1010_0000], 9).is_none());
+    }
+
+    #[test]
+    fn w9_crosses_byte_boundary_without_interior_padding() {
+        let mut packer = BitPacker::new();
+        let first = packer.push(Bit7::new(0b1010101).unwrap());
+        let w9 = packer.push_w9(Bit9::new(0b1_00000001).unwrap());
+        let packed = packer.finish();
+
+        assert_eq!(first, 0);
+        assert_eq!(w9, 7);
+        assert_eq!(packed.bit_len(), 16);
+        assert_eq!(packed.byte_len(), 2);
+        assert_eq!(packed.read::<7>(first).unwrap().packed_bits(), 0b1010101);
+        assert_eq!(packed.read_w9(w9).unwrap().packed_bits(), 0b1_00000001);
     }
 
     #[test]

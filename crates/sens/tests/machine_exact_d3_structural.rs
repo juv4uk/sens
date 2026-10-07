@@ -64,7 +64,7 @@ fn current_structural_surfaces_lower_to_exact_d3_identities() {
             panic!("{source} must lower to exact DomainCall");
         };
         assert_eq!(identity.width(), 3, "{source}");
-        assert_eq!(identity.packed_bits(), bits, "{source}");
+        // DomainCall is the bounded callable-Core projection, which remains u8.\n        // W9 widens universal DomainIdentity payloads, not D3 callable identity.\n        assert_eq!(identity.packed_bits(), bits, "{source}");
     }
 }
 
