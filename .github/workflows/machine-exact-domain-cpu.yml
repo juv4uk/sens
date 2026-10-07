@@ -22,6 +22,10 @@ on:
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "scripts/generate-encoder-coverage-input.py"
+      - "crates/xtask/**"
+      - "tests/authority-inventory.lisp"
+      - "tests/authority-inventory.tsv"
+      - "crates/sens/tests/data/english-names-baseline.tsv"
       - "scripts/check-encoder-coverage.lisp"
       - "scripts/generate-encoder-coverage.lisp"
       - "knowledge/encoder-coverage-legacy-parity.lisp"
@@ -44,6 +48,10 @@ on:
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "scripts/generate-encoder-coverage-input.py"
+      - "crates/xtask/**"
+      - "tests/authority-inventory.lisp"
+      - "tests/authority-inventory.tsv"
+      - "crates/sens/tests/data/english-names-baseline.tsv"
       - "scripts/check-encoder-coverage.lisp"
       - "scripts/generate-encoder-coverage.lisp"
       - "knowledge/encoder-coverage-legacy-parity.lisp"
@@ -80,6 +88,8 @@ jobs:
             printf 'Lisp encoder coverage check failed: %s\n' "$coverage_status" >&2
             exit 1
           fi
+      - name: Remaining xtask evidence generators
+        run: cargo test -p xtask
       - name: Existing x86 lowering boundary
         run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
       - name: Lisp-owned x86 encoder bytes
