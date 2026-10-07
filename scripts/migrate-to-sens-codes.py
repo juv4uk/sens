@@ -36,6 +36,7 @@ from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
 CONTRACT_CALL_DOMAINS = CALL_DOMAINS
+CONTRACT_SURFACE_DOMAINS = ("D3", "D4", "D5", "D6", "D8", "D9")
 CONTRACT_DOMAINS = ("D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9")
 LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
 BINARY_MASTER_EXTS = {".lisp"}
@@ -1136,7 +1137,7 @@ def main():
     if args.contract_authority:
         selected_domains = [
             domain
-            for domain in CONTRACT_CALL_DOMAINS
+            for domain in CONTRACT_SURFACE_DOMAINS
             if domain != "D9" or d9_enabled
         ]
         selected_surfaces.extend(
