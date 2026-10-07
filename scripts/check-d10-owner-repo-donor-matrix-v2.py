@@ -6,7 +6,7 @@ root=Path(__file__).resolve().parents[1]
 m=json.loads((root/"knowledge/d10-owner-repo-donor-matrix-v2.json").read_text(encoding="utf-8"))
 
 assert m["schema"]=="d10-owner-repo-donor-matrix-v2/v1"
-assert m["status"]=="AUDIT-COMPLETE-FIRST-PASS"
+assert m["status"]=="AUDIT-COMPLETE"
 assert m["authority"]=="#4049"
 assert m["scope"]["repositories_accounted"]==87
 
@@ -16,19 +16,20 @@ assert len({r["repository"] for r in rows})==87
 assert len({r["name"] for r in rows})==87
 assert all(r["repository"]==f"juv4uk/{r['name']}" for r in rows)
 
-expected={
+expected_stored={
     "CORE-LANGUAGE-DONOR":1,
     "CORE-HISTORICAL-DONOR":11,
     "BACKEND-OR-MECHANISM":11,
-    "PACKAGE-OR-DOMAIN":32,
+    "PACKAGE-OR-DOMAIN":33,
     "REFERENCE-OR-UPSTREAM":31,
-    "REVIEW-REQUIRED":1,
+    "REVIEW-REQUIRED":0,
 }
-assert m["class_counts"]==expected
+assert m["class_counts"]==expected_stored
 actual={}
 for r in rows:
     actual[r["primary_class"]]=actual.get(r["primary_class"],0)+1
-assert actual==expected
+expected_actual={k:v for k,v in expected_stored.items() if v}
+assert actual==expected_actual
 
 by={r["name"]:r for r in rows}
 
@@ -55,7 +56,10 @@ for name in ("basalt","graph-heavy-basalt","knowledge-graph-basalt","hydra","mai
 
 # Only explicitly unresolved repository after first-pass deep review.
 review=[r["name"] for r in rows if r["primary_class"]=="REVIEW-REQUIRED"]
-assert review==["vault-semantic-mcp"]
+assert review==[]
+assert by["vault-semantic-mcp"]["primary_class"]=="PACKAGE-OR-DOMAIN"
+assert by["vault-semantic-mcp"]["d10_action"]=="NO-DIRECT-CORE-ADMISSION"
+assert by["vault-semantic-mcp"]["deep_review_status"]=="COMPLETE"
 
 # Core admission is deliberately narrow.
 for r in rows:
@@ -65,4 +69,4 @@ for r in rows:
 assert "No donor repository contributes coordinates." in m["doctrine"]
 
 print("D10-OWNER-REPO-DONOR-MATRIX-V2=PASS")
-print("repos=87 core-authority=1 historical=11 backend=11 package=32 reference=31 review=1")
+print("repos=87 core-authority=1 historical=11 backend=11 package=33 reference=31 review=0")
