@@ -25,7 +25,10 @@ PROJECTION = ROOT / "lib/machine/encoding/admission-iclass-projection.lisp"
 
 PAIR_RE = re.compile(r'^\s*\(pair\s+([^\s()]+)\s+"([^"]+)"\)\s*$')
 PARTIAL_RE = re.compile(
-    r'^\s*\(partial\s+([^\s()]+)\s+"([^"]+)"\s+\(heads\s+([^)]*)\)\)\s*
+    r'^\s*\(partial\s+([^\s()]+)\s+"([^"]+)"\s+\(heads\s+([^)]*)\)\)\s*$'
+)
+PARTIAL_COUNT_RE = re.compile(r'^\s*\(partial-pair-count\s+#b([01]+)\)\s*$')
+
 # Admitted forms intentionally not physically executed by the generic owner
 # sweep until they have a dedicated bounded side-effect/control-flow witness.
 DECODE_ONLY_ICLASSES = {
