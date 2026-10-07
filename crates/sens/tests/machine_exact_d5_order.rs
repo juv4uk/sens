@@ -118,6 +118,28 @@ fn current_order_surfaces_lower_to_exact_d5_identities() {
 }
 
 #[test]
+fn current_order_surfaces_execute_with_exact_d1_results() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+
+    for (source, expected) in [
+        ("(більше? 3 2)", true),
+        ("(більше? 2 3)", false),
+        ("(менше? 2 3)", true),
+        ("(менше? 3 2)", false),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "current D5 order surface must execute through the exact D1 boundary"
+        );
+    }
+}
+
+#[test]
 fn exact_d5_order_predicates_cross_the_language_boundary_only_as_d1() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
