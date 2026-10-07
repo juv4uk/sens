@@ -109,8 +109,20 @@ pub(crate) fn invoke_value(
                     span,
                 );
             }
-            if let Some(Value::Macro(closure)) = environment.domain_code_slot(identity) {
-                return closures::apply_macro(closure, arguments, environment, span);
+            let macro_identity = match identity {
+                crate::DomainIdentity::D6(value)
+                    if matches!(value.word().packed_bits(), 0b001000 | 0b001001) =>
+                {
+                    Some(crate::CoreDomainIdentity::D6(value))
+                }
+                _ => None,
+            };
+            if let Some(macro_identity) = macro_identity {
+                if let Some(Value::Macro(closure)) =
+                    environment.domain_code_slot(macro_identity)
+                {
+                    return closures::apply_macro(closure, arguments, environment, span);
+                }
             }
             Err(LanguageError::new(
                 ErrorKind::Type,
