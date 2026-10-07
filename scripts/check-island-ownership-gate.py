@@ -56,7 +56,8 @@ gate=d10state["ownership_gate"]
 assert gate["authority"]=="#4033"
 assert gate["artifact"]=="knowledge/island-ownership-gate-v1.json"
 assert gate["status"]=="RATIFICATION-BLOCKER-REVIEW-ONLY"
-assert gate["definite_noncore_selected"]==0\nassert gate["definite_noncore_reclassified"]==55
+assert gate["definite_noncore_selected"]==0
+assert gate["definite_noncore_reclassified"]==55
 assert gate["review_required_selected"]==15
 assert gate["no_new_definite_noncore"] is True
 

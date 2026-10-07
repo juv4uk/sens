@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 420,
+    "selected_semantic_candidates": 443,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 164,
-    "remaining_semantic_inventory": 604,
+    "unplaced_selected_candidates": 187,
+    "remaining_semantic_inventory": 581,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -2527,6 +2527,397 @@
       ],
       "source_name": "fs-recover-root-package",
       "law_status": "SOURCE-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.166d9036a7efacba",
+      "semantic_name": "EMPTY-QUEUE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "QUEUE-ALGEBRA",
+      "behavior": "test whether a FIFO queue has no elements",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.1b114e8244aa1520",
+      "semantic_name": "MEMO",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MEMOIZATION",
+      "behavior": "return a function wrapper that caches results by a configurable key and equality test",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.1d52accd0c9d57a7",
+      "semantic_name": "FRONT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "QUEUE-ALGEBRA",
+      "behavior": "observe the current head element of a FIFO queue",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.1f7614c2540acd89",
+      "semantic_name": "ONCE-ONLY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MACRO-EVALUATION-CONTROL",
+      "behavior": "construct macro expansion that evaluates supplied forms at most once while preserving body semantics",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.35556e9f23b46e49",
+      "semantic_name": "ENQUEUE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "QUEUE-ALGEBRA",
+      "behavior": "append one item to the tail of a FIFO queue",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.3a204f4ea82d1122",
+      "semantic_name": "DEQUEUE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "QUEUE-ALGEBRA",
+      "behavior": "remove one item from the head of a FIFO queue",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.69d9fcb9d367520a",
+      "semantic_name": "FIND-ALL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-SELECTION",
+      "behavior": "return all elements of a sequence matching an item under supplied equality/test semantics",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.71184990c42de3ee",
+      "semantic_name": "MAP-INTO",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "DESTRUCTIVE-SEQUENCE-MAP",
+      "behavior": "destructively fill an existing result sequence with results of applying a function to source sequences",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.81ab43199f71a8d8",
+      "semantic_name": "MAPPEND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HIGHER-ORDER-SEQUENCE",
+      "behavior": "map a function over a list and concatenate the resulting lists in order",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.84e4729545f2daca",
+      "semantic_name": "SORT*",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ORDERING",
+      "behavior": "return a sorted copy of a sequence without altering the original sequence",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.890d5b3ad59fd876",
+      "semantic_name": "MAKE-QUEUE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "QUEUE-ALGEBRA",
+      "behavior": "construct an empty FIFO queue value",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.9e7435fb8d689398",
+      "semantic_name": "LAST1",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LIST-SELECTION",
+      "behavior": "return the last element of a nonempty list rather than the last cons cell",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.b44ddadce041218d",
+      "semantic_name": "FLATTEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURAL-NORMALIZATION",
+      "behavior": "flatten exactly one level by converting each top-level element to a list and concatenating",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.bd1bbda28298c2c0",
+      "semantic_name": "PARTITION-IF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-PARTITION",
+      "behavior": "partition one list into two order-preserving result lists according to a predicate",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.bf1225a22d406e68",
+      "semantic_name": "NEW-SYMBOL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOL-CONSTRUCTION",
+      "behavior": "construct an uninterned symbol whose printed name is formed from supplied symbol/string parts",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.c1b740635246d4fc",
+      "semantic_name": "QUEUE-NCONC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "QUEUE-ALGEBRA",
+      "behavior": "destructively append all elements of a list to the tail of a FIFO queue",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.cd1ddf0183d791e5",
+      "semantic_name": "FORCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "DELAYED-COMPUTATION",
+      "behavior": "evaluate a delayed computation at most once and return the cached result thereafter",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.cf9aa3e6cc56fe82",
+      "semantic_name": "FIND-IF-ANYWHERE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TREE-SEARCH",
+      "behavior": "test whether a predicate succeeds on any atomic leaf of a tree",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.da85db62a69b7233",
+      "semantic_name": "DELAY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "DELAYED-COMPUTATION",
+      "behavior": "construct a delayed computation value that has not yet been evaluated",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.e203c49df944f8df",
+      "semantic_name": "CLEAR-MEMOIZE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MEMOIZATION",
+      "behavior": "clear the cache associated with a named memoized function",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.e7380398ec6d7198",
+      "semantic_name": "MEMOIZE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MEMOIZATION",
+      "behavior": "replace a named global function definition with a memoizing wrapper",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.fc5f29b3ef760732",
+      "semantic_name": "MKLIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURAL-NORMALIZATION",
+      "behavior": "return input unchanged when already a list, otherwise wrap it as a one-element list",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.fd257dfefeee0915",
+      "semantic_name": "UNIQUE-FIND-IF-ANYWHERE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-PAIP-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TREE-SEARCH",
+      "behavior": "collect unique atomic leaves of a tree satisfying a predicate",
+      "provenance": [
+        "#4089",
+        "juv4uk/paip-lisp",
+        "lisp/auxfns.lisp",
+        "2db2ba99465cadef904e574b20b6981b32ad81df"
+      ],
       "ratified_resident": false
     },
     {
@@ -7989,6 +8380,7 @@
     "knowledge/d10-crossrepo-mal-v1.json",
     "knowledge/d10-crossrepo-early-lisp-v1.json",
     "knowledge/d10-crossrepo-lisp-koans-v1.json",
-    "knowledge/d10-crossrepo-golisp-pascal-v1.json"
+    "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+    "knowledge/d10-crossrepo-paip-v1.json"
   ]
 }

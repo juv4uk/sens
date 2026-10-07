@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 420,
-    "remaining_semantic_candidates": 604,
+    "selected_semantic_candidates": 443,
+    "remaining_semantic_candidates": 581,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 164,
+    "unplaced_selected_candidates": 187,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -206,6 +206,13 @@
     "artifact": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
     "donors_reviewed": 2,
     "selected": 22,
+    "coordinates_assigned": 0
+  },
+  "crossrepo_paip_v1": {
+    "artifact": "knowledge/d10-crossrepo-paip-v1.json",
+    "selected": 23,
+    "clojure_code": "REVIEWED-EXHAUSTED-FOR-CORE",
+    "clojure_cookbook": "REVIEWED-EXHAUSTED-FOR-CORE",
     "coordinates_assigned": 0
   }
 }
