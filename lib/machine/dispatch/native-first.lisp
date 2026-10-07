@@ -52,57 +52,49 @@
 (0011 native-first-plan-car-argument
   (0010 (expression argument)
     (110
-      ((010 argument) (0)
+      ((010 argument)
+       (native-first-fallback expression))
+      ((native-first-domain-true ())
        (001000 ((head (100 argument)))
          (110
-           ((010 head) ()
-            (native-first-fallback expression))
-           ((010 head) (0)
-            (native-first-fallback expression))
-           ((010 head) (1)
+           ((010 head)
             (110
-              ((101 head (001 cons)) (1)
+              ((101 head (001 cons))
                (native-first-plan-car-cons-u64 expression argument))
-              ((101 head (001 cons)) (0)
-               (native-first-fallback expression)))))))
-      ((001 native-first-fallback)
-       native-first-fallback
-       (native-first-fallback expression)))))
+              ((native-first-domain-true ())
+               (native-first-fallback expression))))
+           ((native-first-domain-true ())
+            (native-first-fallback expression))))))))
 
 (0011 native-first-plan-car
   (0010 (expression)
     (001000 ((arguments (011 expression)))
       (110
-        ((010 arguments) (0)
+        ((010 arguments)
+         (native-first-fallback expression))
+        ((native-first-domain-true ())
          (110
-           ((010 (011 arguments)) ()
+           ((010 (011 arguments))
             (native-first-plan-car-argument expression (100 arguments)))
-           ((001 native-first-fallback)
-            native-first-fallback
-            (native-first-fallback expression))))
-        ((001 native-first-fallback)
-         native-first-fallback
-         (native-first-fallback expression))))))
+           ((native-first-domain-true ())
+            (native-first-fallback expression))))))))
 
 (0011 native-first-plan
   (0010 (expression)
     (110
-      ((010 expression) (0)
+      ((010 expression)
+       (native-first-fallback expression))
+      ((native-first-domain-true ())
        (001000 ((head (100 expression)))
          (110
-           ((010 head) ()
-            (native-first-fallback expression))
-           ((010 head) (0)
-            (native-first-fallback expression))
-           ((010 head) (1)
+           ((010 head)
             (110
-              ((101 head (001 car)) (1)
+              ((101 head (001 car))
                (native-first-plan-car expression))
-              ((101 head (001 car)) (0)
-               (native-first-fallback expression)))))))
-      ((001 native-first-fallback)
-       native-first-fallback
-       (native-first-fallback expression)))))
+              ((native-first-domain-true ())
+               (native-first-fallback expression))))
+           ((native-first-domain-true ())
+            (native-first-fallback expression))))))))
 
 ; #4081 — exact-domain native-first classifier.
 ;
