@@ -131,11 +131,25 @@ struct Case {
 #[test]
 #[ignore = "external GAS/NASM witness; run in machine-asm-differential workflow"]
 fn gas_and_nasm_match_lisp_owned_encoder_for_initial_rex_modrm_corpus() {
+    let gas_version = tool_version("as", &["--version"]);
+    let nasm_version = tool_version("nasm", &["-v"]);
+    let objcopy_version = tool_version("objcopy", &["--version"]);
+
     eprintln!(
-        "external witness tools: {} | {} | {}",
-        tool_version("as", &["--version"]),
-        tool_version("nasm", &["-v"]),
-        tool_version("objcopy", &["--version"])
+        "external witness tools: {gas_version} | {nasm_version} | {objcopy_version}"
+    );
+
+    assert!(
+        gas_version.ends_with(" 2.42"),
+        "review #4344 evidence before changing pinned GAS 2.42: {gas_version}"
+    );
+    assert_eq!(
+        nasm_version, "NASM version 2.16.01",
+        "review #4344 evidence before changing pinned NASM version"
+    );
+    assert!(
+        objcopy_version.ends_with(" 2.42"),
+        "review #4344 evidence before changing pinned objcopy 2.42: {objcopy_version}"
     );
 
     let temp = std::env::temp_dir().join(format!("sens-asm-differential-{}", std::process::id()));
