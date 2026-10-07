@@ -15,53 +15,64 @@
       ((00000011 slot (00000001 field1)) 1 t)
       ((00000011 0 0) 1 (00000001 ())))))
 
-(00001001 machine-effect-bounded-two-field-store-load
-  (00001000 (first-value second-value first-slot second-slot observed-slot)
+(00001001
+  machine-effect-bounded-two-field-store-load
+  (00001000
+    (first-value second-value first-slot second-slot observed-slot)
     (00000111
-      ((machine-effect-u64-carrier? first-value) t
-       (00000111
-         ((machine-effect-u64-carrier? second-value) t
-          (00000111
-            ((machine-effect-structural-slot? first-slot) t
-             (00000111
-               ((machine-effect-structural-slot? second-slot) t
+      ((machine-effect-u64-carrier? first-value)
+        t
+        (00000111
+          ((machine-effect-u64-carrier? second-value)
+            t
+            (00000111
+              ((machine-effect-structural-slot? first-slot)
+                t
                 (00000111
-                  ((machine-effect-structural-slot? observed-slot) t
-                   (00100111
-                     (00100111
-                       (00000001 materialize-u64)
-                       (00000001 work)
-                       first-value)
-                     (00100111
-                       (00000001 store-u64)
-                       (00000001 arena)
-                       first-slot
-                       (00000001 work))
-                     (00100111
-                       (00000001 materialize-u64)
-                       (00000001 work)
-                       second-value)
-                     (00100111
-                       (00000001 store-u64)
-                       (00000001 arena)
-                       second-slot
-                       (00000001 work))
-                     (00100111
-                       (00000001 load-u64)
-                       (00000001 result)
-                       (00000001 arena)
-                       observed-slot)
-                     (00100111
-                       (00000001 return-u64)
-                       (00000001 result)))
-                  ((00000011 0 0) 1
-                   (00000001 machine-effect-rejected))))
-               ((00000011 0 0) 1
+                  ((machine-effect-structural-slot? second-slot)
+                    t
+                    (00000111
+                      ((machine-effect-structural-slot? observed-slot)
+                        t
+                        (00100111
+                          (00100111
+                            (00000001 materialize-u64)
+                            (00000001 work)
+                            first-value)
+                          (00100111
+                            (00000001 store-u64)
+                            (00000001 arena)
+                            first-slot
+                            (00000001 work))
+                          (00100111
+                            (00000001 materialize-u64)
+                            (00000001 work)
+                            second-value)
+                          (00100111
+                            (00000001 store-u64)
+                            (00000001 arena)
+                            second-slot
+                            (00000001 work))
+                          (00100111
+                            (00000001 load-u64)
+                            (00000001 result)
+                            (00000001 arena)
+                            observed-slot)
+                          (00100111
+                            (00000001 return-u64)
+                            (00000001 result))))
+                      ((00000011 0 0)
+                        1
+                        (00000001 machine-effect-rejected))))
+                  ((00000011 0 0)
+                    1
+                    (00000001 machine-effect-rejected))))
+              ((00000011 0 0)
+                1
                 (00000001 machine-effect-rejected))))
-            ((00000011 0 0) 1
-             (00000001 machine-effect-rejected))))
-         ((00000011 0 0) 1
-          (00000001 machine-effect-rejected))))
-      ((00000011 0 0) 1
-       (00000001 machine-effect-rejected)))))
-)
+          ((00000011 0 0)
+            1
+            (00000001 machine-effect-rejected))))
+      ((00000011 0 0)
+        1
+        (00000001 machine-effect-rejected)))))
