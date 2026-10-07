@@ -1,8 +1,13 @@
-//! Width-safe domain carriers over the shared small-word mechanism.
+//! Width-safe logical domain carriers over exact-width words.
 //!
 //! These newtypes separate domain membership at the Rust type boundary without
 //! assigning semantic meaning to individual bit patterns. SENS contracts own
-//! orientation and role tables; this module owns representation only.
+//! orientation and role tables; this module owns typed logical representation.
+//!
+//! The carriers are not canonical physical program cells. A program is packed
+//! separately at the bit level by `BitPacker`/`PackedBitstream`. Rust's
+//! byte-addressed ABI may use a host byte for an individual transient value,
+//! but that host fact never becomes SENS semantic width.
 //!
 //! Different domains do not implicitly interchange:
 //!
@@ -23,7 +28,7 @@
 
 use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
 
-/// Exact one-bit carrier for the SENS predicate-result domain.
+/// Exact one-bit logical carrier for the SENS predicate-result domain.
 ///
 /// The mapping/orientation of the bit is language-owned and deliberately absent
 /// here. In particular, there is no `bool` constructor or conversion.
@@ -32,7 +37,7 @@ use crate::bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8};
 pub struct PredicateBit(Bit1);
 
 impl PredicateBit {
-    /// Wrap an already validated one-bit word.
+    /// Wrap an already validated one-bit logical word.
     pub const fn from_word(word: Bit1) -> Self {
         Self(word)
     }
@@ -43,7 +48,7 @@ impl PredicateBit {
     }
 }
 
-/// Exact two-bit carrier for the ratified racanā2 structural domain.
+/// Exact two-bit logical carrier for the ratified racanā2 structural domain.
 ///
 /// This type does not encode which two-bit pattern has which structural role.
 #[repr(transparent)]
@@ -51,7 +56,7 @@ impl PredicateBit {
 pub struct Racana2(Bit2);
 
 impl Racana2 {
-    /// Wrap an already validated two-bit word.
+    /// Wrap an already validated two-bit logical word.
     pub const fn from_word(word: Bit2) -> Self {
         Self(word)
     }
@@ -62,7 +67,7 @@ impl Racana2 {
     }
 }
 
-/// Exact three-bit carrier for the ratified bīja3 foundation domain.
+/// Exact three-bit logical carrier for the ratified bīja3 foundation domain.
 ///
 /// Individual three-bit meanings remain in SENS-owned contracts/witnesses.
 #[repr(transparent)]
@@ -70,7 +75,7 @@ impl Racana2 {
 pub struct Bija3(Bit3);
 
 impl Bija3 {
-    /// Wrap an already validated three-bit word.
+    /// Wrap an already validated three-bit logical word.
     pub const fn from_word(word: Bit3) -> Self {
         Self(word)
     }
@@ -81,8 +86,7 @@ impl Bija3 {
     }
 }
 
-
-/// Exact four-bit carrier for the ratified Core.D4 bootstrap domain.
+/// Exact four-bit logical carrier for the ratified Core.D4 bootstrap domain.
 ///
 /// This type proves only exact Core.D4 membership. The occupied/free map and
 /// executable laws remain owned by #2169 and SENS conformance evidence.
@@ -91,7 +95,7 @@ impl Bija3 {
 pub struct CoreD4(Bit4);
 
 impl CoreD4 {
-    /// Wrap an already validated four-bit word as a Core.D4 member.
+    /// Wrap an already validated four-bit logical word as a Core.D4 member.
     pub const fn from_word(word: Bit4) -> Self {
         Self(word)
     }
@@ -102,17 +106,16 @@ impl CoreD4 {
     }
 }
 
-
-/// Exact five-bit mechanical/research carrier historically named CoreD5.
+/// Exact five-bit logical carrier.
 ///
-/// D5 semantic ratification is revoked by #3278. This type preserves exact
-/// width only and does not prove current Core.D5 membership or resident meaning.
+/// D5 semantic ratification is governed by its current contract. This type
+/// proves exact width only; resident meaning remains domain-law owned.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD5(Bit5);
 
 impl CoreD5 {
-    /// Wrap an already validated five-bit word as a Core.D5 member.
+    /// Wrap an already validated five-bit logical word.
     pub const fn from_word(word: Bit5) -> Self {
         Self(word)
     }
@@ -123,17 +126,16 @@ impl CoreD5 {
     }
 }
 
-/// Exact six-bit carrier for current Core.D6 semantic identity.
+/// Exact six-bit logical carrier for current Core.D6 semantic identity.
 ///
-/// Contract 11.6 / #3393 ратифікує D6 64/64. Цей тип доводить лише exact
-/// D6 membership; наявність callable mechanism лишається окремим фактом і
-/// може fail-closed. Жодного неявного зв'язку з D5 або історичним Sens8 нема.
+/// Contract 11.6 / #3393 ratifies D6 64/64. This type proves exact D6
+/// membership; callable mechanism remains a separate fact and may fail-closed.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD6(Bit6);
 
 impl CoreD6 {
-    /// Wrap an already validated six-bit word as a Core.D6 member.
+    /// Wrap an already validated six-bit logical word.
     pub const fn from_word(word: Bit6) -> Self {
         Self(word)
     }
@@ -144,7 +146,7 @@ impl CoreD6 {
     }
 }
 
-/// Exact seven-bit carrier for the ratified D7 Sound7/local-ordinal domain.
+/// Exact seven-bit logical carrier for the ratified D7 Sound7/local-ordinal domain.
 ///
 /// This proves D7 membership only. Sound7/local-ordinal laws own interpretation;
 /// callability or selector geometry must never be inferred from its width.
@@ -153,28 +155,33 @@ impl CoreD6 {
 pub struct SoundD7(Bit7);
 
 impl SoundD7 {
+    /// Wrap an already validated seven-bit logical word.
     pub const fn from_word(word: Bit7) -> Self {
         Self(word)
     }
 
+    /// Recover the mechanical seven-bit word without interpreting it.
     pub const fn word(self) -> Bit7 {
         self.0
     }
 }
 
-/// Exact eight-bit mechanical/research carrier historically named CoreD8.
+/// Exact eight-bit logical carrier for the ratified D8 domain.
 ///
-/// D8 semantic ratification is revoked by #3278. This carrier remains distinct
-/// from historical flat Sens8/Sid8 bytes but does not itself admit Core.D8 semantics.
+/// This carrier remains distinct from historical flat Sens8/Sid8 bytes. It
+/// proves exact width/domain typing; physical program bytes are produced only
+/// by the program-level packing layer.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD8(Bit8);
 
 impl CoreD8 {
+    /// Wrap an already validated eight-bit logical word.
     pub const fn from_word(word: Bit8) -> Self {
         Self(word)
     }
 
+    /// Recover the mechanical eight-bit word without interpreting it.
     pub const fn word(self) -> Bit8 {
         self.0
     }
@@ -183,10 +190,9 @@ impl CoreD8 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem::size_of;
 
     #[test]
-    fn domain_carriers_round_trip_all_mechanical_words() {
+    fn domain_carriers_round_trip_all_logical_words() {
         for raw in 0..=1 {
             let word = Bit1::new(raw).unwrap();
             assert!(PredicateBit::from_word(word).word() == word);
@@ -226,17 +232,5 @@ mod tests {
             let word = Bit8::new(raw).unwrap();
             assert!(CoreD8::from_word(word).word() == word);
         }
-    }
-
-    #[test]
-    fn domain_carriers_remain_one_host_byte() {
-        assert_eq!(size_of::<PredicateBit>(), 1);
-        assert_eq!(size_of::<Racana2>(), 1);
-        assert_eq!(size_of::<Bija3>(), 1);
-        assert_eq!(size_of::<CoreD4>(), 1);
-        assert_eq!(size_of::<CoreD5>(), 1);
-        assert_eq!(size_of::<CoreD6>(), 1);
-        assert_eq!(size_of::<SoundD7>(), 1);
-        assert_eq!(size_of::<CoreD8>(), 1);
     }
 }
