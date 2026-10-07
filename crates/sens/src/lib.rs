@@ -382,6 +382,19 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         };
 
+        // Some already-admitted compatibility surfaces have ratified exact-domain
+        // successors whose generated D3-D5 surface projection is intentionally
+        // not the binding source. Populate that exact slot from the existing
+        // Lisp-owned value, without inventing a new identity or widening
+        // callability. This is needed for D6 LET/LET* after FASL bootstrap.
+        if let Some(identity) =
+            semantic_registry::legacy_domain_identity_from_registry_byte(semantic_id.packed_byte())
+        {
+            if matches!(value, Value::Macro(_)) {
+                environment.bind_domain_code_slot_once(identity, value.clone());
+            }
+        }
+
         for peer in peers {
             if environment.get(peer).is_none() {
                 environment.define(peer, value.clone());
