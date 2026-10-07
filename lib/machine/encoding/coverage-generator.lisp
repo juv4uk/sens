@@ -32,8 +32,8 @@
 (def encoder-coverage-same?
   (lambda (left right)
     (cond
-      ((equal? left right) (structural-relation same) t)
-      ((equal? left right) (structural-relation distinct) (quote ())))))
+      ((equal? left right) t)
+      (1 (quote ())))))
 
 (def encoder-coverage-pair=?
   (lambda (left right)
@@ -312,7 +312,6 @@
     (cond
       ((atom coverage-row) (quote ()))
       ((equal? (length coverage-row) #b101)
-       (structural-relation same)
        (let* ((expected-status
                 (cond
                   ((atom partial-row) (quote not-yet-implemented))
@@ -403,7 +402,6 @@
     (cond
       ((atom coverage-form) (quote ()))
       ((equal? (length coverage-form) (+ encoder-coverage-form-count #b11))
-       (structural-relation same)
        (and
          (encoder-coverage-same?
            (car coverage-form)
