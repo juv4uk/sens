@@ -86,7 +86,16 @@ def _expect_exact_keys(value, expected, where):
         raise ValueError(f"{where}: unknown fields: {extra}")
 
 
-def _max_domain(expected_contract: str) -> int:\n    try:\n        return SUPPORTED_CONTRACTS[expected_contract]\n    except KeyError as exc:\n        raise ValueError(f"unsupported contract generation {expected_contract!r}") from exc\n\n\ndef _validate_identity_trace(trace, line_no, expected_contract):
+def _max_domain(expected_contract: str) -> int:
+    try:
+        return SUPPORTED_CONTRACTS[expected_contract]
+    except KeyError as exc:
+        raise ValueError(
+            f"unsupported contract generation {expected_contract!r}"
+        ) from exc
+
+
+def _validate_identity_trace(trace, line_no, expected_contract):
     if not isinstance(trace, list):
         raise ValueError(f"line {line_no}: identity_trace must be an array")
     for index, item in enumerate(trace):
@@ -94,8 +103,16 @@ def _max_domain(expected_contract: str) -> int:\n    try:\n        return SUPPOR
         _expect_exact_keys(item, {"domain", "bits"}, where)
         domain = item["domain"]
         bits = item["bits"]
-        if not isinstance(domain, int) or isinstance(domain, bool) or not 1 <= domain <= 8:
-            raise ValueError(f"{where}: domain must be integer 1..8")
+        max_domain = _max_domain(expected_contract)
+        if (
+            not isinstance(domain, int)
+            or isinstance(domain, bool)
+            or not 1 <= domain <= max_domain
+        ):
+            raise ValueError(
+                f"{where}: domain must be integer 1..{max_domain} "
+                f"for Contract {expected_contract}"
+            )
         if not isinstance(bits, str) or not bits or set(bits) - {"0", "1"}:
             raise ValueError(f"{where}: bits must be non-empty binary text")
         if len(bits) != domain:
@@ -178,14 +195,17 @@ def _validate_bound(row, line_no, expected_contract):
         not isinstance(domains, list)
         or not domains
         or any(
-            not isinstance(x, int) or isinstance(x, bool) or not 1 <= x <= 8
+            not isinstance(x, int)
+            or isinstance(x, bool)
+            or not 1 <= x <= _max_domain(expected_contract)
             for x in domains
         )
         or len(set(domains)) != len(domains)
     ):
         raise ValueError(
             f"line {line_no}: exhaustive_bound.domain_set must be unique "
-            f"D1..D{_max_domain(expected_contract)} integers for Contract {expected_contract}"
+            f"D1..D{_max_domain(expected_contract)} integers "
+            f"for Contract {expected_contract}"
         )
     for key, minimum in (
         ("max_ast_depth", 0),
@@ -204,8 +224,12 @@ def validate(row, line_no=1, expected_contract=CONTRACT):
 
     if row["schema"] != SCHEMA:
         raise ValueError(f"line {line_no}: schema must be {SCHEMA!r}")
-    if row["contract"] != CONTRACT:
-        raise ValueError(f"line {line_no}: contract must be {CONTRACT!r}")
+    _max_domain(expected_contract)
+    if row["contract"] != expected_contract:
+        raise ValueError(
+            f"line {line_no}: contract must be {expected_contract!r}, "
+            f"got {row['contract']!r}"
+        )
     if not SHA40.fullmatch(row["upstream_sha"]):
         raise ValueError(f"line {line_no}: invalid upstream_sha")
     if row["producer_layer"] not in LAYERS:
@@ -294,11 +318,20 @@ def validate_file(path: Path, expected_contract=CONTRACT) -> int:
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--contract",
+        choices=sorted(SUPPORTED_CONTRACTS),
+        default=CONTRACT,
+        help="Expected evidence generation; default is current Contract 11.8.",
+    )
     ap.add_argument("jsonl", type=Path, nargs="+")
     args = ap.parse_args()
     for path in args.jsonl:
-        count = validate_file(path)
-        print(f"validated {count} execution-conformance rows: {path}")
+        count = validate_file(path, args.contract)
+        print(
+            f"validated {count} execution-conformance rows: {path} "
+            f"(contract={args.contract})"
+        )
     return 0
 
 
