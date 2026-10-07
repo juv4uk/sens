@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   critical:
@@ -74,17 +74,6 @@ jobs:
           git diff -- lib/compiler-nucleus.lisp > /tmp/compiler-nucleus.diff
           test -s /tmp/compiler-nucleus.diff
           cp lib/compiler-nucleus.lisp /tmp/compiler-nucleus.after.lisp
-      - name: Commit generated source
-        run: |
-          if git diff --quiet -- lib/compiler-nucleus.lisp; then
-            echo "compiler nucleus already clean"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/compiler-nucleus.lisp
-          git commit -m "wip(4225): commit parser-aware compiler nucleus migration"
-          git push
       - name: Commit generated compiler nucleus to the PR branch
         env:
           HEAD_BRANCH: ${{ github.head_ref }}
