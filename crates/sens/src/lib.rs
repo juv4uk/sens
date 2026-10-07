@@ -112,7 +112,7 @@ pub mod semantic_registry_export {
     pub fn exact_domain_successor_for_compatibility_id(
         semantic_id: super::Sens8,
     ) -> Option<super::CoreDomainIdentity> {
-        super::semantic_registry::legacy_domain_identity_from_registry_byte(
+        super::semantic_registry::migration_domain_identity_from_registry_byte(
             semantic_id.packed_byte(),
         )
     }
