@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 345,
+    "selected_semantic_candidates": 367,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 89,
-    "remaining_semantic_inventory": 679,
+    "unplaced_selected_candidates": 111,
+    "remaining_semantic_inventory": 657,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -1606,6 +1606,424 @@
       ],
       "source_name": "SCHAR",
       "law_status": "PRIMARY-SOURCE-CORRECTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.081cac9ac0745ee4",
+      "semantic_name": "SWAP-REF!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REFERENCE-CELL-ALGEBRA",
+      "behavior": "atomically-at-the-language-level replace a reference-cell value with the result of applying a function to its current value and extra arguments",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "swap!",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.2d7acb5034834296",
+      "semantic_name": "MACROP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CALLABLE-TYPE-ALGEBRA",
+      "behavior": "test whether a callable value is marked as a macro",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "macro?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.2ed937e54b081de4",
+      "semantic_name": "REF-CELLP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REFERENCE-CELL-ALGEBRA",
+      "behavior": "test whether a value is a mutable reference cell",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "atom?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.4617a451a1d575cb",
+      "semantic_name": "MAP-KEYS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MAP-ALGEBRA",
+      "behavior": "return the keys of a map as a sequence",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "keys",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.4625e1bf9d1f0f24",
+      "semantic_name": "MAPP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MAP-ALGEBRA",
+      "behavior": "test whether a value is a map",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "map?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.4d65dec1be54770f",
+      "semantic_name": "MAP-VALUES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MAP-ALGEBRA",
+      "behavior": "return the values of a map as a sequence",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "vals",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.50255d6fc0d7b72a",
+      "semantic_name": "SEQ-VIEW",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ALGEBRA",
+      "behavior": "return a list view of a non-empty list/vector/string, or empty/NIL for an empty or unsupported value",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "seq",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.562967fe22291080",
+      "semantic_name": "DEREF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REFERENCE-CELL-ALGEBRA",
+      "behavior": "read the current value stored in a mutable reference cell",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "deref",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.57b39afa4ec59d9a",
+      "semantic_name": "SEQUENTIALP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ALGEBRA",
+      "behavior": "test whether a value belongs to the list/vector sequential family",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "sequential?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.6fb04a1ad14befb7",
+      "semantic_name": "KEYWORDP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOLIC-TYPE-ALGEBRA",
+      "behavior": "test whether a value is a keyword",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "keyword?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.8bf2e1fa349ead2e",
+      "semantic_name": "KEYWORD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SYMBOLIC-TYPE-ALGEBRA",
+      "behavior": "idempotently construct or preserve a keyword value from a string/keyword input",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "keyword",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.a389c3b1248f055b",
+      "semantic_name": "FUNCTIONP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CALLABLE-TYPE-ALGEBRA",
+      "behavior": "test whether a value is an ordinary callable function and not a macro",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "fn?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.aa681dfe8a01b653",
+      "semantic_name": "WITH-META",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "METADATA-ALGEBRA",
+      "behavior": "return a value-equivalent copy carrying supplied metadata where the value kind supports metadata",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "with-meta",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.af86e4bc14b61622",
+      "semantic_name": "META",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "METADATA-ALGEBRA",
+      "behavior": "retrieve metadata attached to a metadata-capable value, or empty/NIL when absent",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "meta",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.cccb18087a3612c7",
+      "semantic_name": "REF-CELL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REFERENCE-CELL-ALGEBRA",
+      "behavior": "construct a mutable reference cell containing a value",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "atom",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.d174c7961ea500b7",
+      "semantic_name": "SEQUENCE-COUNT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ALGEBRA",
+      "behavior": "return the number of elements in a sequence-like value",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "count",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.e490e1c97fbdf0be",
+      "semantic_name": "MAP-DISSOC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MAP-ALGEBRA",
+      "behavior": "return a map with one or more keys removed, preserving the input map value",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "dissoc",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.e7ccb65f56df8020",
+      "semantic_name": "SEQUENCE-EMPTY?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SEQUENCE-ALGEBRA",
+      "behavior": "test whether a sequence-like value has zero elements",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "empty?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.eabdd9abe55be826",
+      "semantic_name": "RESET-REF!",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REFERENCE-CELL-ALGEBRA",
+      "behavior": "replace the value stored in a mutable reference cell and return the new value",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "reset!",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.f3b45d71a4e4987a",
+      "semantic_name": "LISTP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-PREDICATE",
+      "behavior": "test whether a MAL value is list-shaped, including the empty list",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "list?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.f7707dc99a43cf4b",
+      "semantic_name": "MAP-FROM-PAIRS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MAP-ALGEBRA",
+      "behavior": "construct a map from an even sequence of key/value arguments",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "hash-map",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.fb3558ec01201b4f",
+      "semantic_name": "VECTORP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-MAL-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-PREDICATE",
+      "behavior": "test whether a value is a vector",
+      "provenance": [
+        "#4053",
+        "juv4uk/mal",
+        "impls/common-lisp/src/core.lisp"
+      ],
+      "donor_name": "vector?",
+      "ownership": "CORE-OWNED-CANDIDATE",
+      "law_status": "DONOR-DEFINED-UNPLACED",
       "ratified_resident": false
     },
     {
@@ -6489,6 +6907,7 @@
     "knowledge/d10-knowledge-harvest-v1.json",
     "knowledge/d10-historical-maclisp-v1.json",
     "knowledge/d10-historical-maclisp-v2.json",
-    "knowledge/d10-noncore-reclassification-v1.json"
+    "knowledge/d10-noncore-reclassification-v1.json",
+    "knowledge/d10-crossrepo-mal-v1.json"
   ]
 }
