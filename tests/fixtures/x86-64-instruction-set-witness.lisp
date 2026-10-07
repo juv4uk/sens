@@ -639,6 +639,26 @@
       (#d102 #d15 #d58 #d68 #d193 #d17
        #d102 #d69 #d15 #d58 #d68 #d68
        #d36 #d240 #d1))
+     ; #4083 VEX3 exact-byte witnesses. These are deliberately register-only:
+     ; byte1 C4, byte2 ~R/~X/~B+0F map, byte3 W/~vvvv/L/pp.
+     ((encode vaddps-xmm-basic)
+      (x86-encode-vaddps-xmm-xmm-xmm 'xmm0 'xmm1 'xmm2)
+      (#b11000100 #b11100001 #b01110000 #b01011000 #b11000010))
+     ((encode vaddpd-xmm-basic)
+      (x86-encode-vaddpd-xmm-xmm-xmm 'xmm0 'xmm1 'xmm2)
+      (#b11000100 #b11100001 #b01110001 #b01011000 #b11000010))
+     ((encode vandnps-xmm-basic)
+      (x86-encode-vandnps-xmm-xmm-xmm 'xmm0 'xmm1 'xmm2)
+      (#b11000100 #b11100001 #b01110000 #b01010101 #b11000010))
+     ((encode vandnpd-xmm-basic)
+      (x86-encode-vandnpd-xmm-xmm-xmm 'xmm0 'xmm1 'xmm2)
+      (#b11000100 #b11100001 #b01110001 #b01010101 #b11000010))
+     ((encode vaddps-xmm-high-registers)
+      (x86-encode-vaddps-xmm-xmm-xmm 'xmm8 'xmm9 'xmm10)
+      (#b11000100 #b01000001 #b00110000 #b01011000 #b11000010))
+     ((encode vandnpd-xmm-high-registers)
+      (x86-encode-vandnpd-xmm-xmm-xmm 'xmm15 'xmm8 'xmm9)
+      (#b11000100 #b01000001 #b00111001 #b01010101 #b11111001))
      ((admission rdtsc-valid)
       (x86-admitted-instruction? (quote (rdtsc)))
       t)
