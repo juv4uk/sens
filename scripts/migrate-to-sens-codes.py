@@ -973,6 +973,7 @@ def binary_rewrite(
                         token,
                         resolver=resolver,
                         binary_authority=binary_authority,
+                        d1_enabled=d1_enabled,
                         d9_enabled=d9_enabled,
                     )
                 )
@@ -1116,6 +1117,10 @@ def main():
         parser.error("--contract-authority requires --binary-mirror")
 
     foundation, digest = load_foundation(args.foundation)
+    d1_enabled = (
+        args.contract_authority
+        and canonical_reader_supports_width(args.source_words, args.canonical_reader, 1)
+    )
     d9_enabled = (
         args.contract_authority
         and canonical_reader_supports_w9(args.source_words, args.canonical_reader)
