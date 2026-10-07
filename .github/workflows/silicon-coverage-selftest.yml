@@ -1,0 +1,24 @@
+name: Silicon coverage self-test
+
+on:
+  pull_request:
+    paths:
+      - "scripts/silicon-coverage.py"
+      - ".github/workflows/silicon-coverage-selftest.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/silicon-coverage.py"
+      - ".github/workflows/silicon-coverage-selftest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate silicon coverage reducer
+        run: python3 scripts/silicon-coverage.py --self-test
