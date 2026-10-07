@@ -175,7 +175,20 @@ fn d3_empty_identity_decomposes_to_exact_shape() {
         panic!("D3:000 shape bits missing: {rest:?}");
     };
     assert!(matches!(tail.as_ref(), Value::Nil));
-    assert_eq!(format!("{}", bits), "000");
+
+    let Value::Pair(bit0, rest) = bits.as_ref() else {
+        panic!("D3:000 first bit missing: {bits:?}");
+    };
+    let Value::Pair(bit1, rest) = rest.as_ref() else {
+        panic!("D3:000 second bit missing: {rest:?}");
+    };
+    let Value::Pair(bit2, tail) = rest.as_ref() else {
+        panic!("D3:000 third bit missing: {rest:?}");
+    };
+    assert!(matches!(tail.as_ref(), Value::Nil));
+    assert_eq!(bit0.as_predicate_bit(), Some(false));
+    assert_eq!(bit1.as_predicate_bit(), Some(false));
+    assert_eq!(bit2.as_predicate_bit(), Some(false));
 }
 
 
