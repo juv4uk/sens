@@ -14,7 +14,7 @@ jobs:
   pr-focused:
     name: focused PR verification
     if: github.event_name == 'pull_request'
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
@@ -278,11 +278,15 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: git diff --check "$BASE_SHA" "$HEAD_SHA"
 
-      - name: Validate workflow YAML syntax with Guix Ruby
+      - name: Set up Ruby for workflow YAML validation
         if: steps.changes.outputs.workflow == 'true'
-        run: |
-          guix shell ruby -- \
-            ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Validate workflow YAML syntax with Ruby
+        if: steps.changes.outputs.workflow == 'true'
+        run: ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
 
       - name: Check generated function signatures projection
         if: steps.changes.outputs.semantic == 'true' && steps.changes.outputs.workspace != 'true'
@@ -372,7 +376,7 @@ jobs:
   island-math-adversarial:
     name: island math adversarial matrix
     if: github.event_name == 'pull_request'
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
@@ -408,7 +412,6 @@ jobs:
 
   windows-native-exec-witness:
     name: Windows native-exec ABI witness
-    if: vars.HOSTED_RUNNERS == 'true'
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
@@ -429,7 +432,7 @@ jobs:
   main-fast-critical:
     name: main fast critical gate
     if: github.event_name != 'pull_request'
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
@@ -485,7 +488,7 @@ jobs:
   main-fast-clippy:
     name: main fast clippy
     if: github.event_name != 'pull_request'
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
