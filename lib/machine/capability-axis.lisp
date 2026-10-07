@@ -1,54 +1,51 @@
-; #3989 — target-neutral machine capability axis.
+; #4068 — target-neutral width-safe machine capability axis.
 ;
 ; This file does NOT define language semantics and does NOT define an ISA.
 ; Current semantic meaning is exact-domain: exact bits + exact domain +
 ; ratified law (Contract 11.8). Human spellings and historical SID8 bytes are
 ; not machine-capability authority.
 ;
-; Current axis:
-;   exact DomainIdentity -> 0..N machine capabilities -> 0..N target witnesses
+; IMPORTANT: ordinary Lisp source does not preserve leading-zero width for
+; W1-W7 (#3946). Therefore live machine dispatch never uses a bare bit-looking
+; token as an identity key. It carries the two scalar fields obtained from the
+; real DomainIdentity:
 ;
-; Historical SID8 machine-capability projections are no longer live code.
-; Provenance remains in git history; current machine work uses
-; machine-capabilities-for-domain exclusively.
+;   domain-width + packed-bits -> capabilities
 ;
-; A capability name never mints a semantic identity. A target may honestly have
-; no witness yet. Target-specific lowering remains under lib/machine/lowering/*.
+; Examples:
+;   D5:01010 PLUS  -> (5, 10)
+;   D4:1010 LOOKUP -> (4, 10)
+;
+; Those keys cannot collide even though the ordinary Lisp reader would collapse
+; the source spellings 01010 and 1010 to the same numeric value.
 
-; Current exact-domain machine-capability slice.
-;
-; The keys below are exact domain literals, not zero-padded bytes:
-;   D5:01010 = PLUS
-;   D3:101   = EQ
-;   D3:110   = COND
-;   D3:111   = CONS
-;   D3:100   = CAR
-;   D3:011   = CDR
-(00001001 machine-capability-axis-v2
+; Row schema:
+;   (domain-width packed-bits ((capability ...)*))
+(00001001 machine-capability-axis-v3
   (00000001
-    ((01010
-       ((integer-add bounded-u32-inputs u64-result)))
-     (01011
-       ((integer-subtract bounded-u64 no-underflow)))
-     (10110
-       ((integer-multiply bounded-u32-inputs u64-result)))
-     (10111
-       ((integer-quotient bounded-positive-i64 equal-operands-only)))
-     (11010
-       ((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary)))
-     (11011
-       ((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary)))
-     (101
-       ((identity-compare bounded-u64)))
-     (110
-       ((conditional-branch bounded-u64)))
-     (111
+    ((5 10
+       ((integer-add bounded-u32-inputs u64-result)))              ; D5:01010 PLUS
+     (5 11
+       ((integer-subtract bounded-u64 no-underflow)))              ; D5:01011 DIFFERENCE
+     (5 22
+       ((integer-multiply bounded-u32-inputs u64-result)))         ; D5:10110 TIMES
+     (5 23
+       ((integer-quotient bounded-positive-i64 equal-operands-only))) ; D5:10111 QUOTIENT
+     (5 26
+       ((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary))) ; D5:11010 LESSP
+     (5 27
+       ((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary))) ; D5:11011 GREATERP
+     (3 5
+       ((identity-compare bounded-u64)))                            ; D3:101 EQ
+     (3 6
+       ((conditional-branch bounded-u64)))                         ; D3:110 COND
+     (3 7
        ((pair-field-store head bounded-u64)
-        (pair-field-store tail bounded-u64)))
-     (100
-       ((pair-field-load head bounded-u64)))
-     (011
-       ((pair-field-load tail bounded-u64))))))
+        (pair-field-store tail bounded-u64)))                      ; D3:111 CONS
+     (3 4
+       ((pair-field-load head bounded-u64)))                       ; D3:100 CAR
+     (3 3
+       ((pair-field-load tail bounded-u64))))))                    ; D3:011 CDR
 
 (00001001 machine-capability-target-witnesses-v2
   (00000001
@@ -102,6 +99,34 @@
      (risc-v absent)
      (fpga absent))))
 
+(00001001 machine-domain-capability-find-row
+  (00001000 (width packed-bits rows)
+    (00000111
+      ((00000010 rows) () ())
+      ((00000010 rows) (1) ())
+      ((00100010 width (00000101 (00000101 rows)))
+       (00000111
+         ((00100010 packed-bits (00000101 (00000110 (00000101 rows))))
+          (00000101 rows))
+         (t
+          (machine-domain-capability-find-row
+            width packed-bits (00000110 rows)))))
+      (t
+       (machine-domain-capability-find-row
+         width packed-bits (00000110 rows))))))
+
+; Current lookup: width-safe exact domain identity transport.
+(00001001 machine-capabilities-for-domain
+  (00001000 (width packed-bits)
+    (10011100 ((row
+                  (machine-domain-capability-find-row
+                    width packed-bits machine-capability-axis-v3)))
+      (00000111
+        ((00000010 row) () ())
+        ((00000010 row) (1) ())
+        (t
+         (00000101 (00000110 (00000110 row))))))))
+
 (00001001 machine-capability-find-row
   (00001000 (key rows)
     (00000111
@@ -109,15 +134,6 @@
       ((00000010 rows) (1) ())
       ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
       (t (machine-capability-find-row key (00000110 rows))))))
-
-; Current lookup: exact domain identity only.
-(00001001 machine-capabilities-for-domain
-  (00001000 (identity)
-    (10011100 ((row (machine-capability-find-row identity machine-capability-axis-v2)))
-      (00000111
-        ((00000010 row) () ())
-        ((00000010 row) (1) ())
-        (t (00000101 (00000110 row)))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
