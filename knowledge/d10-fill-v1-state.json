@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 398,
-    "remaining_semantic_candidates": 626,
+    "selected_semantic_candidates": 420,
+    "remaining_semantic_candidates": 604,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 142,
+    "unplaced_selected_candidates": 164,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -199,6 +199,13 @@
     "reviewed": 36,
     "selected": 25,
     "exact_lower_duplicates": 11,
+    "coordinates_assigned": 0
+  },
+  "crossrepo_golisp_pascal_v1": {
+    "authority": "#4077",
+    "artifact": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+    "donors_reviewed": 2,
+    "selected": 22,
     "coordinates_assigned": 0
   }
 }
