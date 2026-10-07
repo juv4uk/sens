@@ -87,16 +87,16 @@ pub struct ArityDiagnostic {
     pub span: Span,
 }
 
-const D3_QUOTE: (usize, u8) = (3, 0b001);
+const D3_QUOTE: (usize, u16) = (3, 0b001);
 
 /// Resolve an admitted human surface through tooling metadata that already
 /// carries exact domain identity. No legacy byte is used to infer a domain.
-fn surface_domain_coordinate(surface: &str) -> Option<(usize, u8)> {
+fn surface_domain_coordinate(surface: &str) -> Option<(usize, u16)> {
     sens::language_items()
         .into_iter()
         .find(|item| item.name == surface)
         .and_then(|item| item.domain_identity)
-        .map(|identity| (identity.width(), identity.packed_bits()))
+        .map(|identity| (identity.width(), u16::from(identity.packed_bits())))
 }
 
 /// True when an expression is Core.D3 QUOTE.
