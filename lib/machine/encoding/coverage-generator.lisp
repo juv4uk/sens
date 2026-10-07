@@ -73,10 +73,8 @@
     (cond
       ((encoder-coverage-empty? answers)
        encoder-coverage-d1-yes)
-      ((encoder-coverage-same? (car answers) encoder-coverage-d1-yes)
+      ((car answers)
        (encoder-coverage-all? (cdr answers)))
-      ((encoder-coverage-same? (car answers) encoder-coverage-d1-no)
-       encoder-coverage-d1-no)
       (encoder-coverage-d1-yes
        encoder-coverage-d1-no))))
 
