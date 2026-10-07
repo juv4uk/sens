@@ -205,10 +205,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:cml",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": "README: AOT/middle-end; explicitly separates language semantics from physical execution; sens/my-lisp remains semantic authority.",
-      "candidate_issue": "#4054"
+      "evidence_note": "README: AOT/middle-end; explicitly separates language semantics from physical execution; sens/my-lisp remains semantic authority. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/coreboot",
@@ -340,10 +340,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:fpga-lisp",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": "README: hardware Lisp-machine implementation accountable to my-lisp semantic oracle.",
-      "candidate_issue": "#4054"
+      "evidence_note": "README: hardware Lisp-machine implementation accountable to my-lisp semantic oracle. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/golisp",
@@ -670,10 +670,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:my-lisp-cyberpunk",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": "README explicitly states language semantics belong only to my-lisp/sens; Cyberpunk host adapter/runtime.",
-      "candidate_issue": "#4054"
+      "evidence_note": "README explicitly states language semantics belong only to my-lisp/sens; Cyberpunk host adapter/runtime. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/my-lisp-panini",
@@ -940,10 +940,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:sens-futhark",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": null,
-      "candidate_issue": "#4054"
+      "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/shiva-sutras",
@@ -1225,10 +1225,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:wsm-cuda",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": null,
-      "candidate_issue": "#4054"
+      "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/wsm-graalvm",
@@ -1240,10 +1240,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:wsm-graalvm",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": null,
-      "candidate_issue": "#4054"
+      "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/wsm-lazarus",
@@ -1255,10 +1255,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:wsm-lazarus",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": null,
-      "candidate_issue": "#4054"
+      "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/wsm-my-lisp",
@@ -1270,10 +1270,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:wsm-my-lisp",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": "README: self-hosting destination; explicitly not authoritative over language semantics.",
-      "candidate_issue": "#4054"
+      "evidence_note": "README: self-hosting destination; explicitly not authoritative over language semantics. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/wsm-os",
@@ -1285,10 +1285,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:wsm-os",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": null,
-      "candidate_issue": "#4054"
+      "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/wsm-os-lisp",
@@ -1300,10 +1300,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:wsm-os-lisp",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": "README: bare-metal target; my-lisp owns language semantics, CML owns lowering.",
-      "candidate_issue": "#4054"
+      "evidence_note": "README: bare-metal target; my-lisp owns language semantics, CML owns lowering. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/wsm-target-contract",
@@ -1315,10 +1315,10 @@
       "primary_class": "BACKEND-OR-MECHANISM",
       "semantic_owner": "backend:wsm-target-contract",
       "d10_action": "REVIEW-SEAM-ONLY",
-      "deep_review_status": "BOUNDARY-VERIFIED",
+      "deep_review_status": "SEAM-REVIEW-COMPLETE",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
-      "evidence_note": "README: neutral target ABI boundary, explicitly not language semantics.",
-      "candidate_issue": "#4054"
+      "evidence_note": "README: neutral target ABI boundary, explicitly not language semantics. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
+      "candidate_issue": null
     },
     {
       "repository": "juv4uk/xva-trainer",
@@ -1338,8 +1338,8 @@
   ],
   "followup_queues": {
     "historical_core_review": "COMPLETE #4053",
-    "execution_seam_review": "#4054 / #4036",
+    "execution_seam_review": "COMPLETE #4054 / #4094",
     "unresolved_scope": "#4055",
-    "island_bridge_factorization": "#4036"
+    "island_bridge_factorization": "COMPLETE #4036 / #4094"
   }
 }
