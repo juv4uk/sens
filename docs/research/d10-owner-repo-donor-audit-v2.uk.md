@@ -9,10 +9,10 @@ This is a **semantic ownership audit**, not a claim of original authorship and n
 
 ```text
 CORE-LANGUAGE-DONOR       1
-CORE-HISTORICAL-DONOR    13
+CORE-HISTORICAL-DONOR    11
 BACKEND-OR-MECHANISM     11
 PACKAGE-OR-DOMAIN        32
-REFERENCE-OR-UPSTREAM    29
+REFERENCE-OR-UPSTREAM    31
 REVIEW-REQUIRED           1
 ---------------------------
 TOTAL                    87
@@ -24,7 +24,7 @@ Deep README review corrected several misleading name-based assumptions: CML, FPG
 
 ## Work queues
 
-- #4053 — 13 historical Lisp-family donors.
+- #4053 — 11 historical Lisp-family donors.
 - #4054 — execution/backend seams only.
 - #4036 — minimal Core island bridge semantics.
 - #4055 — resolve vault-semantic-mcp scope.
