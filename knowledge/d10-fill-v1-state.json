@@ -152,5 +152,16 @@
     "coordinates_assigned": 0,
     "ownership": "CORE-OWNED-CANDIDATE",
     "sens8_preservation": "UNCHANGED"
+  },
+  "wsm_os_lisp_ownership": {
+    "artifact": "knowledge/d10-wsm-os-lisp-ownership-v1.json",
+    "authority": "#4045",
+    "wsm_issue": "juv4uk/wsm-os-lisp#74",
+    "core_review_rows": 4,
+    "selected_d10_candidates": 0,
+    "wsm_owned_package_rows": 24,
+    "mechanism_only_rows": 8,
+    "coordinates_assigned": 0,
+    "inventory_count_unchanged": true
   }
 }
