@@ -47,6 +47,10 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
         run: |
           set -euo pipefail
+          cp lib/core4.lisp.fasl /tmp/core4.lisp.fasl
+          git fetch origin "${HEAD_REF}"
+          git checkout -B "${HEAD_REF}" FETCH_HEAD
+          cp /tmp/core4.lisp.fasl lib/core4.lisp.fasl
           if git diff --quiet -- lib/core4.lisp.fasl; then
             echo "Core4 FASL already fresh"
             exit 0
