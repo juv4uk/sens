@@ -113,6 +113,23 @@ fn current_zerop_surface_lowers_to_exact_d5_identity() {
 }
 
 #[test]
+fn current_zerop_surface_executes_with_exact_d1_result() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+
+    for (source, expected) in [("(нуль? 0)", true), ("(нуль? 1)", false)] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "current D5 ZEROP surface must execute through the exact D1 boundary"
+        );
+    }
+}
+
+#[test]
 fn exact_d5_zerop_language_law_crosses_only_as_d1() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
