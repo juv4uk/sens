@@ -248,6 +248,12 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             "16",
         ),
         (
+            "sar-reg-imm8-signed",
+            "NEG + SAR r64,imm8 + NEG normalization",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 16) (neg-r64 rax) (sar-r64-imm8 rax 2) (neg-r64 rax) (ret))) 0)",
+            "4",
+        ),
+        (
             "test-jnz-zero",
             "TEST r64,r64 + JNZ rel8 zero path",
             "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 0) (test-r64-r64 rax rax) (jnz-rel8 11) (mov-r64-imm64 rax 111) (ret) (mov-r64-imm64 rax 222) (ret))) 0)",
