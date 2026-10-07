@@ -310,6 +310,10 @@ fn rust_strings(text: &str) -> Vec<(usize, String)> {
     out
 }
 
+fn rust_literal_has_lisp_source(literal: &str) -> bool {
+    let source = literal.trim_start();
+    source.starts_with('(')
+}
 /// Одне місце: (вид, файл, рядок, ім'я).
 type Place = (&'static str, String, usize, String);
 
@@ -323,7 +327,7 @@ fn places() -> Vec<Place> {
                 if names.contains(literal.as_str()) {
                     let kind = classified_kind(&rel, &text, "rust");
                     out.push((kind, rel.clone(), line, literal));
-                } else if literal.contains('(') {
+                } else if rust_literal_has_lisp_source(&literal) {
                     for (l, token, data) in lisp_tokens(&literal, line) {
                         if names.contains(&token) {
                             let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
@@ -477,6 +481,10 @@ fn scanners_find_names_in_lisp_and_rust() {
     assert!(!is_table_source("contracts/core-universal-contract.lisp"));
     assert!(!is_table_source("lib/compiler-nucleus.lisp"));
     assert!(!is_table_source("lib/machine/encoding/x86-64.lisp"));
+    assert!(!rust_literal_has_lisp_source("CDR: list accessor (structural)"));
+    assert!(!rust_literal_has_lisp_source("CONS: pair construction (structural)"));
+    assert!(rust_literal_has_lisp_source("(атом? x)"));
+    assert!(rust_literal_has_lisp_source("  (як-є radio)"));
     assert_eq!(
         classified_kind("crates/sens/tests/mccarthy.rs", "", "rust-lisp"),
         "rust-lisp",
