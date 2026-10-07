@@ -1,4 +1,7 @@
-; #604 temporary shape probe: raw first coverage row, no predicate calls.
+; #604 — structural check for the Lisp-owned encoder coverage authority.
+; Validates generated inputs, legacy-subset migration witness, and committed
+; coverage row-by-row without rendering the full output string.
+
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
 
@@ -8,16 +11,22 @@
       (read-file
         "lib/machine/encoding/coverage.lisp"))))
 
-(def encoder-coverage-first-coverage-row
-  (car (cdr (cdr (cdr encoder-coverage-committed-form)))))
-
-(list
-  (quote encoder-coverage-first-row-shape)
-  (list (quote raw) encoder-coverage-first-coverage-row)
-  (list (quote first) (car encoder-coverage-first-coverage-row))
-  (list (quote second) (second encoder-coverage-first-coverage-row))
-  (list (quote second-car) (car (second encoder-coverage-first-coverage-row)))
-  (list (quote second-second) (second (second encoder-coverage-first-coverage-row)))
-  (list (quote third) (third encoder-coverage-first-coverage-row))
-  (list (quote fourth) (fourth encoder-coverage-first-coverage-row))
-  (list (quote fifth) (fifth encoder-coverage-first-coverage-row)))
+(cond
+  ((encoder-coverage-index-valid?)
+   (cond
+     ((encoder-coverage-projection-valid?
+        encoder-coverage-committed-form)
+      (quote
+        (encoder-coverage-check
+          (status pass))))
+     (encoder-coverage-d1-yes
+      (quote
+        (encoder-coverage-check
+          (status fail)
+          (reason projection-mismatch))))))
+  (encoder-coverage-d1-yes
+   (list
+     (quote encoder-coverage-check)
+     (quote (status fail))
+     (quote (reason invalid-coverage-input-projection))
+     (cons (quote checks) (encoder-coverage-index-checks)))))
