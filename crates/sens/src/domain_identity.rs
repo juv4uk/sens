@@ -107,7 +107,8 @@ impl DomainIdentity {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
             Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
-            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) | Self::D9(_) => None,
+            Self::D9(_) => None,
+            Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
 }
