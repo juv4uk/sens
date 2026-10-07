@@ -46,6 +46,12 @@ fn prepare_through_decode() -> (Session, Vec<Expr>) {
     (session, expressions)
 }
 
+fn prepare_through_lower() -> (Session, Vec<Expr>) {
+    let (session, expressions) = prepare_through_decode();
+    let lowered = eval::lower::lower_program(&expressions);
+    (session, lowered)
+}
+
 #[test]
 #[ignore = "diagnostic benchmark for #3648"]
 fn bootstrap_measure_dispatch() {
@@ -71,6 +77,26 @@ fn bootstrap_measure_dispatch() {
             let (session, expressions) = prepare_through_decode();
             black_box(session);
             black_box(expressions);
+        }
+        "lower" => {
+            let (session, lowered) = prepare_through_lower();
+            black_box(session);
+            black_box(lowered);
+        }
+        "eval-lowered-no-peers" => {
+            let (mut session, lowered) = prepare_through_lower();
+            let result = eval_lowered_expressions(&lowered, &mut session)
+                .expect("lowered decoded Core must evaluate");
+            black_box(result);
+            black_box(session);
+        }
+        "eval-lowered-with-peers" => {
+            let (mut session, lowered) = prepare_through_lower();
+            let result = eval_lowered_expressions(&lowered, &mut session)
+                .expect("lowered decoded Core must evaluate");
+            bind_missing_stable_surface_peers(&session.environment);
+            black_box(result);
+            black_box(session);
         }
         "eval-no-peers" => {
             let (mut session, expressions) = prepare_through_decode();
