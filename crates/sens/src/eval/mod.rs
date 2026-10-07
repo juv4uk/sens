@@ -307,6 +307,14 @@ fn dispatch_domain_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    // Lisp-owned macro residents (including D6 LET/LET*) have callable
+    // mechanism through their already-bound exact domain slot. Check that
+    // mechanism before Core-operation admission: D6 residency alone must not
+    // make arbitrary D6 values callable.
+    if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
+        return closures::apply_macro(closure.clone(), arguments, environment, span);
+    }
+
     if is_d3(identity, 0b001) {
         special_forms::exact_arity("D3:001", arguments, 1, span)?;
         return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
@@ -386,6 +394,19 @@ fn dispatch_call(
     }
     if routed_head_sid == Some(crate::sens!(00000111)) {
         return special_forms::evaluate_cond(arguments, environment, span);
+    }
+
+    // Legacy byte compatibility for Lisp-owned macro surfaces whose exact
+    // successor is already ratified. The macro stays owned by its exact
+    // domain slot; we merely preserve raw argument syntax before evaluation.
+    if let Some(sid) = head_sid {
+        if let Some(identity) =
+            crate::semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+        {
+            if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
+                return closures::apply_macro(closure.clone(), arguments, environment, span);
+            }
+        }
     }
 
     if let Some(name) = head_name {
@@ -502,6 +523,15 @@ mod single_pass_eval_tests {
         let result = eval_parsed_expressions(&forms, &mut session)
             .expect("eval_parsed_expressions should succeed");
         assert_eq!(result.value.to_string(), "(1/3)");
+    }
+
+    #[test]
+    fn legacy_d6_let_star_delegates_to_exact_macro_slot() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let result = crate::eval_program("(10011101 ((x 41)) x)", &mut session)
+            .expect("legacy D6 let* compatibility should delegate to exact macro");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
     }
 
     #[test]

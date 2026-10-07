@@ -597,11 +597,38 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         }
     }
 
-    // Compatibility-only lane for registry rows that do not yet have a
-    // canonical domain identity.
+    // Compatibility-only lane for already-ratified exact-domain residents whose
+    // current surface projection is not yet in the generated D3-D5 table.
+    // In particular, legacy LET/LET* macro definitions must occupy their exact
+    // D6 slots so a legacy byte cannot fall through to non-callable identity.
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
+
+    // LIST is language-owned and already ratified at D4:1110. Install the
+    // exact slot from its first root definition, but deliberately continue so
+    // the historical code slot can remain a temporary alias for old callers.
+    if let Some(identity) =
+        semantic_registry::legacy_language_definition_identity_from_registry_byte(
+            sid.packed_byte(),
+        )
+    {
+        if super::necessary_forms::identity_for_domain_identity(identity).is_none()
+            && domain_primitive(identity).is_none()
+        {
+            environment.bind_domain_code_slot_once(identity, value.clone());
+        }
+    }
+
+    if let Some(identity) =
+        semantic_registry::legacy_macro_domain_identity_from_registry_byte(sid.packed_byte())
+    {
+        if matches!(value, Value::Macro(_)) {
+            environment.bind_domain_code_slot_once(identity, value.clone());
+            environment.bind_code_slot_once(sid, value.clone());
+            return;
+        }
+    }
     // #3070 transitional bootstrap.
     //
     // Canonical storage/routing is the exact D5 slot. The historical code slot
@@ -641,6 +668,32 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn core4_bootstrap_binds_exact_d4_list_closure_slot() {
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core4 bootstrap");
+        let identity = CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(0b1110).expect("D4 LIST coordinate"),
+        ));
+        assert!(
+            matches!(session.environment.domain_code_slot(identity), Some(Value::Closure(_))),
+            "Core4 must expose Lisp-owned LIST through exact D4:1110"
+        );
+    }
+
+    #[test]
+    fn core4_bootstrap_binds_exact_d6_let_macro_slot() {
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core4 bootstrap");
+        let identity = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b001000).expect("D6 LET coordinate"),
+        ));
+        assert!(
+            matches!(session.environment.domain_code_slot(identity), Some(Value::Macro(_))),
+            "Core4 must expose the Lisp-owned LET macro through exact D6:001000"
+        );
+    }
+
     use super::*;
 
     #[test]

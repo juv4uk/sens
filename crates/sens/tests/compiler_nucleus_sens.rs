@@ -8,7 +8,7 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    compiler_execution_role, eval_parsed_expressions, eval_program, load_core_library,
+    compiler_execution_role, eval_parsed_expressions, parse_mixed_exact_domain, load_core_library,
     lower_program, parse, Bija3, Bit3, CompilerExecutionRole, CoreDomainIdentity,
     DomainIdentity, Session, Value,
 };
@@ -148,7 +148,8 @@ fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
 fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("active core loads");
-    eval_program(NUCLEUS, &mut session).expect("SENS compiler nucleus loads");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("SENS compiler nucleus parses");
+    eval_parsed_expressions(&parsed, &mut session).expect("SENS compiler nucleus loads");
 
     for raw in 0u8..=0b111 {
         let expected_role = compiler_execution_role(d3_core(raw));
