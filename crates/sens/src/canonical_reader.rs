@@ -371,7 +371,11 @@ mod tests {
             assert!(identity.core_operation().is_none());
         }
 
-        assert_ne!(domain(&only("0")), domain(&only("000")));
+        let empty = only("000");
+        assert!(
+            matches!(empty.kind, ExprKind::List(ref items) if items.is_empty()),
+            "D3:000 must remain structural empty, not D1:0"
+        );
     }
 
     #[test]
