@@ -9,6 +9,7 @@ on:
     paths:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/src/program_data.rs"
       - "crates/sens/tests/native_first_exact_domain.rs"
       - "crates/sens/tests/machine_exact_d3_structural.rs"
@@ -37,6 +38,7 @@ on:
     paths:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/tests/native_first_exact_domain.rs"
       - "crates/sens/src/program_data.rs"
       - "crates/sens/tests/machine_exact_d3_structural.rs"
@@ -82,6 +84,7 @@ jobs:
       - name: Exact-domain CPU bridge
         run: |
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
+          cargo test -p sens --test machine_effect_add_projection -- --nocapture
           # Exact lowered DomainCall data must select native CAR(CONS ...) without spelling/SID authority.
           cargo test -p sens --test native_first_exact_domain -- --nocapture
           cargo test -p sens --test machine_exact_d3_structural -- --nocapture
