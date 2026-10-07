@@ -17,9 +17,12 @@ struct Edit {
 struct Analysis {
     /// `--language`: this file defines the language's own table functions.
     language: bool,
+    /// `--exact-domain`: emit current width-qualified domain coordinates.
+    exact_domain: bool,
     edits: Vec<Edit>,
     named_calls: usize,
     blocked_host_capabilities: usize,
+    blocked_exact_domain: usize,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -89,11 +92,27 @@ fn resolve_head<'a>(
     }
 }
 
-fn push_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysis) {
+fn push_head_edit(head: &Expr, surface: &str, sens: Sens8, analysis: &mut Analysis) {
+    let replacement = if analysis.exact_domain {
+        let Some(identity) =
+            semantic_registry_export::domain_identity_for_admitted_surface(surface)
+        else {
+            analysis.blocked_exact_domain += 1;
+            return;
+        };
+        format!(
+            "{:0width$b}",
+            identity.packed_bits(),
+            width = identity.width()
+        )
+    } else {
+        target_sens(sens).to_string()
+    };
+
     analysis.edits.push(Edit {
         start: head.span.start,
         end: head.span.end,
-        replacement: target_sens(sens).to_string(),
+        replacement,
     });
 }
 
@@ -234,8 +253,8 @@ fn walk_expr(
         }
 
         let kind = head_kind(sens);
-        if surface.is_some() {
-            push_head_edit(head, sens, analysis);
+        if let Some(surface) = surface {
+            push_head_edit(head, surface, sens, analysis);
         }
 
         match kind {
@@ -367,16 +386,21 @@ fn analyze(
     source: &str,
     host_capabilities: &HashSet<String>,
 ) -> Result<Analysis, String> {
-    analyze_with(source, host_capabilities, false)
+    analyze_with(source, host_capabilities, false, false)
 }
 
 fn analyze_with(
     source: &str,
     host_capabilities: &HashSet<String>,
     language: bool,
+    exact_domain: bool,
 ) -> Result<Analysis, String> {
     let expressions = parse(source).map_err(|error| error.render(source))?;
-    let mut analysis = Analysis { language, ..Analysis::default() };
+    let mut analysis = Analysis {
+        language,
+        exact_domain,
+        ..Analysis::default()
+    };
     let mut bound = HashSet::new();
     walk_sequence(
         &expressions,
