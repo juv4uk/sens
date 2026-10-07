@@ -156,7 +156,7 @@ fn cells_above_seven_bits_fail_closed_on_every_path() {
 
 #[test]
 fn fasl_frame_carries_text7_cells_without_utf8_transcoding() {
-    // The Control2/FASL frame already types Text7 (CONTROL_ESCAPE + TYPE_TEXT);
+    // The standalone transport frame types Text7 with private wire metadata;
     // the exact cell stream survives with no UTF-8/Unicode spelling in the bytes.
     let text = cells(&[0x41, 0x7F]);
     let frame = BinaryFrame::Text(text);
