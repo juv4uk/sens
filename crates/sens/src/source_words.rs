@@ -32,15 +32,15 @@ pub enum BinarySourceWord {
 impl BinarySourceWord {
     pub const fn width(self) -> usize {
         match self {
-            Self::W1(_) => 1,
-            Self::W2(_) => 2,
-            Self::W3(_) => 3,
-            Self::W4(_) => 4,
-            Self::W5(_) => 5,
-            Self::W6(_) => 6,
-            Self::W7(_) => 7,
-            Self::W8(_) => 8,
-            Self::W9(_) => 9,
+            Self::W1(_) => Bit1::width(),
+            Self::W2(_) => Bit2::width(),
+            Self::W3(_) => Bit3::width(),
+            Self::W4(_) => Bit4::width(),
+            Self::W5(_) => Bit5::width(),
+            Self::W6(_) => Bit6::width(),
+            Self::W7(_) => Bit7::width(),
+            Self::W8(_) => Bit8::width(),
+            Self::W9(_) => Bit9::width(),
         }
     }
 
