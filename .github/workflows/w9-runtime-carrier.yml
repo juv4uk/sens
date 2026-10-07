@@ -17,6 +17,8 @@ on:
       - "crates/sens/src/value.rs"
       - "crates/sens/src/presentation.rs"
       - "scripts/check-d9-current-authority.py"
+      - "scripts/check-d1-d5-foundation.py"
+      - "crates/sens/tests/machine_exact_d3_structural.rs"
       - ".github/workflows/w9-runtime-carrier.yml"
   push:
     branches: [main]
@@ -36,11 +38,14 @@ on:
 
 jobs:
   exact-w9:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Verify D9 authority boundary
-        run: python3 scripts/check-d9-current-authority.py
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify D9 and foundation authority boundaries
+        run: |
+          python3 scripts/check-d9-current-authority.py
+          python3 scripts/check-d1-d5-foundation.py
       - name: Exact Bit9 and DomainIdentity carrier
         run: |
           cargo test -p sens bit9::
@@ -66,3 +71,5 @@ jobs:
         run: cargo test -p sens eval::lower::tests::d9_identity_does_not_gain_domain_callability
       - name: D1-D9 AST and Value anti-collapse integration
         run: cargo test -p sens --test domain_ast_value_identity
+      - name: Existing D3 machine witness stays on callable u8 projection
+        run: cargo test -p sens --test machine_exact_d3_structural
