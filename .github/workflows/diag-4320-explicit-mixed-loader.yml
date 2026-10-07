@@ -1,0 +1,37 @@
+name: diag-4320-explicit-mixed-loader
+
+on:
+  push:
+    branches:
+      - diag/4320-explicit-mixed-loader
+
+jobs:
+  targeted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: sens-host unit tests
+        run: cargo test -p sens-host
+
+      - name: dispatch witness
+        run: |
+          actual="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-dispatch-witness.lisp)"
+          test "$actual" = "(pass pass pass pass pass pass)"
+      - name: totality witness
+        run: |
+          actual="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-totality-witness.lisp)"
+          test "$actual" = "(pass pass)"
+      - name: execution witness
+        run: |
+          actual="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-execution-witness.lisp)"
+          test "$actual" = "(pass pass pass pass pass)"
+      - name: parity witness
+        run: |
+          actual="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-parity-witness.lisp)"
+          test "$actual" = "(native-first-parity-witness (status pass) (cases 4))"
+      - name: coverage witness
+        run: |
+          actual="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-coverage-ledger-witness.lisp)"
+          test "$actual" = "(native-first-coverage-ledger-witness (status pass) (rows 6) (native 1) (fallback 2) (blocked 3))"
