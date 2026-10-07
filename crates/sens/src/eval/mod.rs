@@ -417,23 +417,7 @@ fn dispatch_call(
     };
     match &function {
         Value::DomainIdentity(identity) => {
-            let Some(core_identity) = identity.core_operation() else {
-                return Err(LanguageError::new(
-                    ErrorKind::Type,
-                    format!(
-                        "domain identity is not callable under its ratified law: D{} {}",
-                        identity.width(),
-                        identity
-                    ),
-                    span,
-                ));
-            };
-            let mut values = Vec::with_capacity(arguments.len());
-            for argument in arguments {
-                values.push(evaluate(argument, environment)?);
-            }
-            canon::invoke_domain_identity(core_identity, &values, environment, span)
-                .map(EvalStep::Value)
+            dispatch_domain_call(*identity, arguments, environment, span)
         }
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.
