@@ -26,7 +26,9 @@
 ;   D3:011   = CDR
 (00001001 machine-capability-axis-v2
   (00000001
-    ((01010
+    ((01000
+       ((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary)))
+     (01010
        ((integer-add bounded-u32-inputs u64-result)))
      (01011
        ((integer-subtract bounded-u64 no-underflow)))
@@ -53,6 +55,11 @@
 (00001001 machine-capability-target-witnesses-v2
   (00000001
     ((x86-64
+       (integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary
+         (admitted-form cmp-r64-r64)
+         (admitted-form sete-r8)
+         (admitted-form movzx-r64-r8)
+         (lowering x86-lower-zerop-u64-forms))
        (integer-add bounded-u32-inputs u64-result
          (admitted-form add-r64-r64)
          (lowering x86-lower-add-u64-forms))
