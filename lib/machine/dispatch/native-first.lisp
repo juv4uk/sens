@@ -11,11 +11,13 @@
 
 (0011 native-first-fallback
   (0010 (expression)
-    (1110 (001 evaluator-fallback) expression)))
+    (111 (001 evaluator-fallback) (111 expression ()))))
 
 (0011 native-first-native-plan
   (0010 (forms arena-bytes)
-    (1110 (001 native-plan) forms arena-bytes)))
+    (111
+      (001 native-plan)
+      (111 forms (111 arena-bytes ())))))
 
 (0011 native-first-plan-car-cons-u64
   (0010 (expression cons-expression)
