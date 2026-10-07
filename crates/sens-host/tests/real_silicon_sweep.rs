@@ -413,6 +413,9 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 1311768467463790320) (movq-xmm-r64 xmm0 rax) (xorpd-xmm-xmm xmm0 xmm0) (movq-r64-xmm rax xmm0) (ret))) 0)",
             "0",
         ),
+        // AESENC zero-state/zero-key has every output byte 0x63:
+        // SubBytes(0)=0x63; equal-byte columns stay equal through ShiftRows/
+        // MixColumns; the zero round key does not change the round output.
         (
             "aesenc-zero-round-low64",
             "aes",
