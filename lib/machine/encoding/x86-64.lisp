@@ -1169,10 +1169,14 @@
     (10011100 ((code (x86-reg-code register))
           (mechanism-extension
             (x86-project-bin3-to-mechanism-u3 opcode-extension)))
+      ; Emitted instruction bytes are the legacy/mechanical byte carrier.
+      ; Keep the opcode-extension input canonical (#b...) above, but do not
+      ; leak BinaryNumber into the byte list: equal? intentionally keeps
+      ; canonical BinaryNumber distinct from legacy/mechanical Number.
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
-        #b1111
-        #b11000111
+        #d15
+        #d199
         (x86-encode-modrm 3 mechanism-extension (x86-low3 code))))))
 
 (00001001 x86-encode-rdrand-r64
