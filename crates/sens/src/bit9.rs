@@ -7,7 +7,7 @@
 
 /// Exact W9 payload, mechanically bounded to 0..=511.
 #[repr(transparent)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Bit9(u16);
 
 impl Bit9 {
