@@ -203,9 +203,20 @@ def build_exact_authority_index(foundation):
                 desc.get("authority", foundation.get("authority", "unknown"))
             ))
 
+    expected_counts = {
+        "D1": 2, "D2": 4, "D3": 8, "D4": 16,
+        "D5": 32, "D6": 64, "D7": 126, "D8": 256, "D9": 512,
+    }
+    for domain, expected in expected_counts.items():
+        actual = len(foundation["domains"][domain].get("residents", {}))
+        if actual != expected:
+            raise BinaryMigrationError(
+                f"{domain}: expected {expected} owner-ratified residents, found {actual}"
+            )
+
     d7 = foundation["domains"]["D7"]
-    d7_reserved = set(d7.get("reserved_coordinates", foundation.get(
-        "d7_reserved_coordinates", []
+    d7_reserved = set(d7.get("owner_reserved_pinned", d7.get(
+        "reserved_coordinates", foundation.get("d7_reserved_coordinates", [])
     )))
     for bits in d7_reserved:
         if bits in d7.get("residents", {}):
@@ -1149,7 +1160,10 @@ def main():
     mode = (
         "apply" if args.apply
         else "mirror" if args.mirror
-        else "binary-mirror" if args.binary_mirror
+        else "contract-authority-binary-mirror"
+        if args.contract_authority
+        else "binary-mirror"
+        if args.binary_mirror
         else "audit"
     )
     report = {
