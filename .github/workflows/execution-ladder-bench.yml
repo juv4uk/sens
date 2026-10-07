@@ -1,0 +1,98 @@
+name: Execution ladder objective benchmarks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "benchmarks/execution-ladder-objective/**"
+      - ".github/workflows/execution-ladder-bench.yml"
+  pull_request:
+    paths:
+      - "benchmarks/execution-ladder-conformance/**"
+      - "benchmarks/execution-ladder-objective/**"
+      - ".github/workflows/execution-ladder-bench.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  objective:
+    name: validate and measure ladder encoding
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Validate the conformance artifact
+        run: |
+          python3 benchmarks/execution-ladder-conformance/validate.py \
+            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl
+
+      - name: Run structural transmission benchmark
+        run: |
+          python3 benchmarks/execution-ladder-objective/run.py \
+            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            --out /tmp/ladder-structural.json
+
+      - name: Run delivery-cost benchmark
+        run: |
+          python3 benchmarks/execution-ladder-objective/delivery_cost.py \
+            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            --out /tmp/ladder-delivery.json
+
+      - name: Run encoding-density benchmark
+        run: |
+          python3 benchmarks/execution-ladder-objective/encoding_cost.py \
+            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            --out /tmp/ladder-encoding.json
+
+      - name: Verify deterministic reports and parity
+        run: |
+          set -euo pipefail
+          python3 benchmarks/execution-ladder-objective/run.py \
+            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            --out /tmp/ladder-structural-repeat.json
+          python3 benchmarks/execution-ladder-objective/delivery_cost.py \
+            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            --out /tmp/ladder-delivery-repeat.json
+          python3 benchmarks/execution-ladder-objective/encoding_cost.py \
+            benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl \
+            --out /tmp/ladder-encoding-repeat.json
+          cmp /tmp/ladder-structural.json /tmp/ladder-structural-repeat.json
+          cmp /tmp/ladder-delivery.json /tmp/ladder-delivery-repeat.json
+          cmp /tmp/ladder-encoding.json /tmp/ladder-encoding-repeat.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          structural = json.loads(Path('/tmp/ladder-structural.json').read_text())
+          delivery = json.loads(Path('/tmp/ladder-delivery.json').read_text())
+          encoding = json.loads(Path('/tmp/ladder-encoding.json').read_text())
+          assert structural['parity']['l1_fail'] == 0
+          assert delivery['parity_failures'] == 0
+          assert encoding['parity_failures'] == 0
+          assert structural['validated_cases'] == delivery['validated_cases'] == encoding['validated_cases']
+          print('objective benchmark gates PASS')
+          print(json.dumps({
+              'cases': structural['validated_cases'],
+              'semantic_bits': structural['aggregate']['semantic_bits_total'],
+              'dense_bytes': encoding['aggregate']['dense_exact_width_bytes'],
+              'text_bytes': encoding['aggregate']['canonical_text_bytes'],
+              'framed_bytes': delivery['models']['framed_semantic_package']['bytes'],
+          }, sort_keys=True))
+          PY
+
+      - name: Publish measured reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-ladder-objective-${{ github.sha }}
+          path: |
+            /tmp/ladder-structural.json
+            /tmp/ladder-delivery.json
+            /tmp/ladder-encoding.json
+          if-no-files-found: error
+          retention-days: 14
