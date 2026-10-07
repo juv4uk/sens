@@ -63,6 +63,12 @@ fn is_table_source(rel: &str) -> bool {
         // paths here so generated executable Lisp is not silently exempted.
         || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
         || rel == "lib/machine/encoding/coverage.lisp"
+        // Exact data-only contract/provenance tables currently visible to the
+        // scanner.  Keep this path-specific: contracts as a directory are not
+        // exempt from executable-name migration.
+        || rel == "contracts/compiler-gpu-execution-packet-v1.lisp"
+        || rel == "contracts/d8-ratification.lisp"
+        || rel == "contracts/d9-ratification.lisp"
         || rel.starts_with("lib/generated/")
         || rel.ends_with("_generated.rs")
         || rel.starts_with("crates/sens/tests/data/")
@@ -465,6 +471,10 @@ fn scanners_find_names_in_lisp_and_rust() {
     assert!(is_table_source("lib/domains/d9.lisp"));
     assert!(is_table_source("lib/machine/encoding/admitted-iclass-index.lisp"));
     assert!(is_table_source("lib/machine/encoding/coverage.lisp"));
+    assert!(is_table_source("contracts/compiler-gpu-execution-packet-v1.lisp"));
+    assert!(is_table_source("contracts/d8-ratification.lisp"));
+    assert!(is_table_source("contracts/d9-ratification.lisp"));
+    assert!(!is_table_source("contracts/core-universal-contract.lisp"));
     assert!(!is_table_source("lib/compiler-nucleus.lisp"));
     assert!(!is_table_source("lib/machine/encoding/x86-64.lisp"));
     assert_eq!(
