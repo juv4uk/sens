@@ -671,27 +671,27 @@
      ((encode vaddps-xmm-basic)
       (x86-encode-vaddps-xmm-xmm-xmm
         (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
-      (#d196 #d225 #d112 #d88 #d194))
+      (#b11000100 #b11100001 #b01110000 #b01011000 #b11000010))
      ((encode vaddpd-xmm-basic)
       (x86-encode-vaddpd-xmm-xmm-xmm
         (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
-      (#d196 #d225 #d113 #d88 #d194))
+      (#b11000100 #b11100001 #b01110001 #b01011000 #b11000010))
      ((encode vandnps-xmm-basic)
       (x86-encode-vandnps-xmm-xmm-xmm
         (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
-      (#d196 #d225 #d112 #d85 #d194))
+      (#b11000100 #b11100001 #b01110000 #b01010101 #b11000010))
      ((encode vandnpd-xmm-basic)
       (x86-encode-vandnpd-xmm-xmm-xmm
         (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
-      (#d196 #d225 #d113 #d85 #d194))
+      (#b11000100 #b11100001 #b01110001 #b01010101 #b11000010))
      ((encode vaddps-xmm-high-registers)
       (x86-encode-vaddps-xmm-xmm-xmm
         (00000001 xmm8) (00000001 xmm9) (00000001 xmm10))
-      (#d196 #d65 #d48 #d88 #d194))
+      (#b11000100 #b01000001 #b00110000 #b01011000 #b11000010))
      ((encode vandnpd-xmm-high-registers)
       (x86-encode-vandnpd-xmm-xmm-xmm
         (00000001 xmm15) (00000001 xmm8) (00000001 xmm9))
-      (#d196 #d65 #d57 #d85 #d249))
+      (#b11000100 #b01000001 #b00111001 #b01010101 #b11111001))
      ((admission vex3-register-valid)
       (x86-admitted-instruction?
         (00000001 (vaddps-xmm-xmm-xmm xmm0 xmm1 xmm2)))
