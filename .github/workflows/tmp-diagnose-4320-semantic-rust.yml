@@ -1,0 +1,31 @@
+name: TEMP diagnose 4320 semantic rust tests
+on:
+  push:
+    branches:
+      - diag/4320-semantic-slice-529e
+    paths:
+      - ".github/workflows/tmp-diagnose-4320-semantic-rust.yml"
+jobs:
+  rust-contract-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run semantic Rust contract set
+        run: |
+          cargo test -p sens \
+            --test d1_canonical_source_value \
+            --test witness_authority \
+            --test structural_observation_contract \
+            --test exact_q_binary_contract \
+            --test mathematical_result_taxonomy \
+            --test canon_laws_v2_contract \
+            --test reason_honesty_contract \
+            --test unification_outcome_contract \
+            --test knowledge_clause_kind_contract \
+            --test content_store_authority \
+            --test decimal_comma_authority \
+            --test authority_guard_contract \
+            --test semantic_ref_fail_closed \
+            --test semantic_coordinate_matrix_845
