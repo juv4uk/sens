@@ -1,4 +1,4 @@
-use sens::{eval_parsed_expressions, parse, parse_mixed_exact_domain, Environment, Session, Value};
+use sens::{eval_parsed_expressions, parse, Environment, Session, Value};
 use std::env;
 use std::fs;
 use std::io::Read;
@@ -475,9 +475,10 @@ fn main() {
 
         // Run file
         //
-        // Ordinary `parse()` remains the lexical/compatibility parser.
-        // Executable current-source files use the bounded mixed exact-domain
-        // bridge so exact D3-D6 heads survive into the existing lowering path.
+        // Generic CLI execution stays on the lexical/compatibility parser until
+        // the current fixture corpus is atomically migrated by #4247. Exact
+        // current sources use explicit mixed-domain loaders at their ownership
+        // boundaries; a bare W8 token must not silently change meaning here.
         let filename = arg;
 
         // `*argv*` (PLAN.md item 21's follow-up, for scripts/release.lisp
@@ -502,7 +503,7 @@ fn main() {
         session.environment.define("*argv*", argv);
 
         match fs::read_to_string(filename) {
-            Ok(source) => match parse_mixed_exact_domain(&source) {
+            Ok(source) => match parse(&source) {
                 Ok(ast) => match eval_parsed_expressions(&ast, &mut session) {
                     Ok(result) => {
                         for out in result.output {
