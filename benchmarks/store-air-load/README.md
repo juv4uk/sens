@@ -134,7 +134,7 @@ python3 benchmarks/store-air-load/load.py \
   --out /tmp/store-air-load.load.jsonl \
   --helper target/release/examples/current_en_vs_d1d8_cpu \
   --startup-helper target/release/examples/startup_bench \
-  --fasl lib/core.lisp.fasl \
+  --fasl lib/core4.lisp.fasl \
   --only d3-quote-empty \
   --reps 1
 ```

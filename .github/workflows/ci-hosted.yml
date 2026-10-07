@@ -31,6 +31,8 @@ jobs:
           python3 scripts/sens8-semantic-ratchet.py --summary
       - name: Build SENS CLI
         run: cargo build -p sens-cli --bin sens
+      - name: Current Core4 FASL freshness
+        run: cargo test -p sens --test core_fasl_freshness -- --nocapture
       - name: Current semantic slice
         run: bash scripts/test-current-semantic-slice.sh
       - name: Critical machine and surface witnesses
