@@ -56,6 +56,13 @@ fn english_names() -> BTreeSet<String> {
 fn is_table_source(rel: &str) -> bool {
     rel == "lib/surface/semantic-registry.lisp"
         || rel == "lib/surface/function-signatures.lisp"
+        // Canonical D1+ human-readable domain tables are surface/registry data,
+        // not executable language code.
+        || rel.starts_with("lib/domains/")
+        // Generated machine evidence tables are data projections. Keep exact
+        // paths here so generated executable Lisp is not silently exempted.
+        || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
+        || rel == "lib/machine/encoding/coverage.lisp"
         || rel.starts_with("lib/generated/")
         || rel.ends_with("_generated.rs")
         || rel.starts_with("crates/sens/tests/data/")
