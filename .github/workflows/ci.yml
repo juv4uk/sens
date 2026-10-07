@@ -237,6 +237,16 @@ jobs:
           grep -q 'machine-semantic-hybrid-violation' /tmp/machine-hybrid.log
           cp /tmp/machine-capability-provenance.lisp lib/machine/capability-provenance.lisp
 
+          # #4057: current Contract authority with a retired SID8 witness form
+          # must still fail closed.
+          cp tests/fixtures/machine-authority/legacy-sid-witness.lisp lib/machine/capability-provenance.lisp
+          if ./target/debug/sens scripts/machine-authority-guard.lisp > /tmp/machine-legacy-sid.log 2>&1; then
+            echo "ERROR: #4057 legacy SID8 provenance witness was accepted"
+            exit 1
+          fi
+          grep -q 'machine-semantic-hybrid-violation' /tmp/machine-legacy-sid.log
+          cp /tmp/machine-capability-provenance.lisp lib/machine/capability-provenance.lisp
+
           # Same Lisp addition, two admitted register realizations.
           representation_status="$(./target/debug/sens tests/fixtures/machine-representation-independence-witness.lisp)"
           if [[ "$representation_status" != "(machine-representation-independence-witness (status pass))" ]]; then
