@@ -52,9 +52,11 @@
         (асоц-рядок (00000001 expr) фікстура)
         transitions)
        (00000100
-        (00000100 (00000001 authority-status)
-                   (00000001 historical-superseded))
-        фікстура))
+        (00000001 fixture)
+        (00000100
+          (00000100 (00000001 authority-status)
+                     (00000001 historical-superseded))
+          (00000110 фікстура))))
       (t фікстура))))
 
 (01001000 (00000100 (00000001 about) "my-lisp-constitution.lisp — the executable proof of docs/language-core-axioms.md's project principles and axioms (G1-G8 generative, S1-S3 safety). Each fixture is one of the observable claims from tests/fixtures/conformance.lisp, tagged with the tier (1 CORE SEMANTICS, 2 LANGUAGE CONTRACT, 3 ECOSYSTEM CONFORMANCE) and, where one applies, the axiom(s) it is evidence for. Symbolic-reasoning fixtures (tier 3, unify/reason) carry no axiom tag on purpose — they are evidence for project principle 3, not the G/S axiom list."))
