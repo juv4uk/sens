@@ -370,13 +370,13 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             "rdrand-status",
             "RDRAND r64 + SETC + MOVZX",
             "rdrand",
-            "(x86-call-admitted-u64 (quote ((rdrand-r64 rax) (setc-r8 cl) (movzx-r64-r8 rcx cl) (mov-r64-r64 rax rcx) (ret))) 0)",
+            "(x86-call-admitted-u64 (quote ((rdrand-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
         ),
         (
             "rdseed-status",
             "RDSEED r64 + SETC + MOVZX",
             "rdseed",
-            "(x86-call-admitted-u64 (quote ((rdseed-r64 rax) (setc-r8 cl) (movzx-r64-r8 rcx cl) (mov-r64-r64 rax rcx) (ret))) 0)",
+            "(x86-call-admitted-u64 (quote ((rdseed-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
         ),
     ] {
         assert!(
