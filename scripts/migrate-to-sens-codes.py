@@ -950,6 +950,11 @@ def binary_rewrite(
                 )
             identity = resolution.current
             assert identity is not None
+            if contract_authority and identity.domain not in CONTRACT_CALL_DOMAINS:
+                raise BinaryMigrationError(
+                    f"non-callable authority resident used as executable head: "
+                    f"{identity.domain}:{identity.bits}"
+                )
             if identity.label == "EMPTY":
                 raise BinaryMigrationError(
                     "structural EMPTY/000 cannot be used as a callable head"
