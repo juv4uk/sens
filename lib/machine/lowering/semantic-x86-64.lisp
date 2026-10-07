@@ -442,6 +442,51 @@
         (t
          (x86-encode-admitted-program forms))))))
 
+; #4064 exact D5:01000 ZEROP bounded machine proof.
+; ZEROP's full language law includes the historical epsilon policy for
+; rational/inexact numeric carriers. This native slice is therefore admitted
+; only for exact nonnegative integers in u64. The emitted 0/1 is INTERNAL
+; machine data; the language-visible predicate remains exact D1.
+(00001001 x86-current-d5-zerop-u64-safe?
+  (00001000 (value)
+    (00000111
+      ((x86-admission-exact-integer? value)
+       (x86-admission-within-inclusive-integer-range?
+         value 0 18446744073709551615))
+      (t (00000001 ())))))
+
+(00001001 x86-lower-zerop-u64-forms
+  (00001000 (value)
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) value)
+      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) 0)
+      (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
+      (00100111 (00000001 sete-r8) (00000001 al))
+      (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
+      (00100111 (00000001 ret)))))
+
+(00001001 x86-lower-current-zerop-u64-forms
+  (00001000 (identity value)
+    (00000111
+      ((00100010 identity 01000)
+       (00000111
+         ((x86-current-d5-zerop-u64-safe? value)
+          (x86-lower-zerop-u64-forms value))
+         (t (00000001 exact-d5-fallback-required))))
+      (t
+       (00000001 unsupported-current-domain-zerop-u64)))))
+
+(00001001 x86-encode-current-zerop-bit
+  (00001000 (identity value)
+    (10011100 ((forms (x86-lower-current-zerop-u64-forms identity value)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-zerop-u64))
+         (00000001 unsupported-current-domain-zerop-u64))
+        ((00100010 forms (00000001 exact-d5-fallback-required))
+         (00000001 exact-d5-fallback-required))
+        (t
+         (x86-encode-admitted-program forms))))))
+
 ; #3996 exact-domain structural D3 dispatcher.
 ; These are bounded native-call witnesses only. They do not claim a general
 ; allocator, escaping pair ABI, GC, or arbitrary first-class native pair value.
