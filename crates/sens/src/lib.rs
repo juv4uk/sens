@@ -388,7 +388,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         // Lisp-owned value, without inventing a new identity or widening
         // callability. This is needed for D6 LET/LET* after FASL bootstrap.
         if let Some(identity) =
-            semantic_registry::legacy_domain_identity_from_registry_byte(semantic_id.packed_byte())
+            semantic_registry::legacy_macro_domain_identity_from_registry_byte(semantic_id.packed_byte())
         {
             if matches!(value, Value::Macro(_)) {
                 environment.bind_domain_code_slot_once(identity, value.clone());
@@ -410,7 +410,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 fn bind_missing_exact_domain_macro_slots(environment: &Environment) {
     for semantic_id in semantic_registry::admitted_semantic_ids() {
         let Some(identity) =
-            semantic_registry::legacy_domain_identity_from_registry_byte(semantic_id.packed_byte())
+            semantic_registry::legacy_macro_domain_identity_from_registry_byte(semantic_id.packed_byte())
         else {
             continue;
         };
