@@ -710,6 +710,7 @@ mod install_tests {
             "write-file-bytes",
             "process-run-raw",
             "load",
+            "load-mixed-exact-domain",
             "tcp-connect",
             "tcp-listen-raw",
             "tcp-accept",
