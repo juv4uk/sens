@@ -12,6 +12,11 @@ from collections import defaultdict
 from pathlib import Path
 
 SCHEMA = "sens-store-air-load/v1"
+CURRENT_CONTRACT = "11.8"
+SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
+CURRENT_FOUNDATION = "D1-D9"
+MEASURED_CARRIERS = "W1-W8"
+D9_STATUS = "BLOCKED-CARRIER"
 SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
 SHA64_RE = re.compile(r"^[0-9a-f]{64}$")
 REPRESENTATIONS = {"canonical-packed", "text-surface"}
@@ -41,6 +46,26 @@ def validate_row(row: dict[str, object], line_no: int) -> None:
         raise ValueError(f"line {line_no}: invalid git_sha")
     if not SHA64_RE.fullmatch(str(row.get("semantic_identity_digest", ""))):
         raise ValueError(f"line {line_no}: invalid semantic_identity_digest")
+    if row.get("contract_version") != CURRENT_CONTRACT:
+        raise ValueError(
+            f"line {line_no}: current replay requires Contract {CURRENT_CONTRACT}"
+        )
+    provenance = row.get("provenance")
+    if not isinstance(provenance, dict):
+        raise ValueError(f"line {line_no}: provenance must be an object")
+    expected_generation = {
+        "semantic_generation": SEMANTIC_GENERATION,
+        "current_foundation": CURRENT_FOUNDATION,
+        "measured_carriers": MEASURED_CARRIERS,
+        "d9_status": D9_STATUS,
+    }
+    for key, expected in expected_generation.items():
+        if provenance.get(key) != expected:
+            raise ValueError(
+                f"line {line_no}: provenance {key} must be {expected!r}"
+            )
+    if not provenance.get("d9_reason") or not provenance.get("d9_mechanism_owner"):
+        raise ValueError(f"line {line_no}: D9 blocked provenance is incomplete")
 
     fixture_id = str(row["fixture_id"])
     semantic_word_count = int(row["semantic_word_count"])
