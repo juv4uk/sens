@@ -64,8 +64,9 @@ def cachegrind_i_refs(command: list[str]) -> int:
     return int(match.group(1).replace(",", ""))
 
 
-def median_i_refs(command: list[str], reps: int) -> int:
-    return int(statistics.median(cachegrind_i_refs(command) for _ in range(reps)))
+def sample_i_refs(command: list[str], reps: int) -> tuple[int, list[int]]:
+    samples = [cachegrind_i_refs(command) for _ in range(reps)]
+    return int(statistics.median(samples)), samples
 
 
 def parse_kv(stdout: str) -> dict[str, str]:
@@ -187,17 +188,20 @@ def measure_candidate(
     source_path: Path,
     reps: int,
 ) -> dict[str, object]:
-    def mode(phase: str, repeat: int | None = None) -> int:
+    def mode(phase: str, repeat: int | None = None) -> tuple[int, list[int]]:
         cmd = [str(helper), candidate, phase, str(source_path)]
         if repeat is not None:
             cmd.append(str(repeat))
-        return median_i_refs(cmd, reps)
+        return sample_i_refs(cmd, reps)
 
-    raw = {
-        phase: mode(phase)
-        for phase in ("baseline", "session", "ingest", "lower", "ready", "execute", "full")
-    }
-    repeated = {n: mode("repeated", n) for n in REPEAT_LADDER}
+    phase_names = ("baseline", "session", "ingest", "lower", "ready", "execute", "full")
+    phase_measurements = {phase: mode(phase) for phase in phase_names}
+    raw = {phase: phase_measurements[phase][0] for phase in phase_names}
+    raw_samples = {phase: phase_measurements[phase][1] for phase in phase_names}
+
+    repeated_measurements = {n: mode("repeated", n) for n in REPEAT_LADDER}
+    repeated = {n: repeated_measurements[n][0] for n in REPEAT_LADDER}
+    repeated_samples = {str(n): repeated_measurements[n][1] for n in REPEAT_LADDER}
     repeated_slope, repeated_intercept = slope(
         REPEAT_LADDER, [repeated[n] for n in REPEAT_LADDER]
     )
@@ -218,7 +222,9 @@ def measure_candidate(
 
     return {
         "raw_i_refs": raw,
+        "raw_i_ref_samples": raw_samples,
         "repeated_i_refs": {str(k): v for k, v in repeated.items()},
+        "repeated_i_ref_samples": repeated_samples,
         "derived": derived,
     }
 
@@ -236,14 +242,16 @@ def core_bootstrap(startup: Path, fasl: Path, reps: int) -> dict[str, object]:
         "root-core",
     )
     raw: dict[str, int] = {}
+    samples: dict[str, list[int]] = {}
     for mode in modes:
         cmd = [str(startup), mode]
         if mode in {"bytes", "decode"}:
             cmd.append(str(fasl))
-        raw[mode] = median_i_refs(cmd, reps)
+        raw[mode], samples[mode] = sample_i_refs(cmd, reps)
 
     return {
         "raw_i_refs": raw,
+        "raw_i_ref_samples": samples,
         "delta_vs_root_i_refs": {mode: raw[mode] - raw["root"] for mode in modes if mode != "root"},
         "delta_vs_session_i_refs": {
             mode: raw[mode] - raw["session"]
