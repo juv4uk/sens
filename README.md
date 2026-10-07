@@ -1,667 +1,491 @@
+
 <div align="center">
 
-<img src="docs/assets/wsm-lisp-hero.svg" alt="sens — exact-width domain language" width="100%">
+# SENS
 
-# sens (СЕНС)
-
-**Експериментальна мова, що росте з точних двійкових доменів і математичних законів**
-
-*An experimental language grown from exact-width binary domains and executable laws*
-
-<p><a href="https://github.com/juv4uk/sens/releases/latest/download/sens-cli-web.html"><strong>▶ Спробувати sens у вебі</strong></a></p>
-<sub>Один автономний portable-файл <code>.html</code> · без встановлення · працює локально у браузері</sub>
+**Експериментальна мова програмування, у якій двійкова координата є частиною семантики.**
 
 [![CI](https://github.com/juv4uk/sens/actions/workflows/ci.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/ci.yml)
 [![WASM](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/wasm-browser-test.yml)
-[![Surface drift](https://github.com/juv4uk/sens/actions/workflows/surface-drift-check.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/surface-drift-check.yml)
-[![Domain tables](https://github.com/juv4uk/sens/actions/workflows/domain-tables.yml/badge.svg)](https://github.com/juv4uk/sens/actions/workflows/domain-tables.yml)
 
-**Українська — перша мова проєкту.** Англійська й німецька — допоміжні.
-
-**Current authority: Contract 11.8 · D1–D9 · D10 research/unratified**
-
+**Українська — перша мова проєкту.**
 
 </div>
 
 ---
 
-## Що таке SENS
+## SENS у двох словах
 
-SENS — експериментальна мова програмування і лабораторія формальної семантики. Її поточна конституція — **Contract 11.8 і owner-ratified драбина точних доменів D1–D9**: D7 має 126/128 semantic residents із двома owner-reserved координатами, D8 — 256/256, D9 — 512/512.
+SENS — це не «звичайна мова з бітовими opcode».
 
-Історично проєкт розвивався під робочою назвою `my-lisp`. Старі матеріали зберігаються як provenance розвитку ідей, але не визначають чинну семантичну модель.
+У SENS **точна двійкова послідовність + точна ширина + закон домену** утворюють semantic identity.
 
-Канонічне розширення вихідного коду — **`.lisp`**. `.wsm` і `.my` зберігаються лише як **legacy aliases** для сумісності зі старими матеріалами та інструментами; вони не визначають окрему семантику.
-
-Основна ідея не в тому, щоб зменшити звичні інструкції до меншої кількості бітів. І не в тому, щоб заповнити таблицю кодами.
-
-Основна ідея така:
-
-> **семантичний об'єкт має точну двійкову координату, належить точному домену і отримує значення лише від доведеного або ратифікованого закону.**
-
-У скороченій формі:
-
-```text
-semantic object
-    =
-exact bits
-  + exact domain
-  + proved / ratified law
-```
-
-Тому однаковий числовий payload у різних доменах — не одна й та сама річ:
-
-```text
+~~~text
 D1 1  ≠  D2 01  ≠  D3 001  ≠  D4 0001
-```
+~~~
 
-Width входить в identity, але **width сам по собі не створює значення**.
+Число, яке можна отримати з бітів, — лише похідне представлення. 168 не стає семантичним значенням замість 10101000.
 
-Поточний машинно-читаний контракт: [`language-contract.lisp`](language-contract.lisp), Contract **11.8**.
+І так само байт, u8, FPGA-комірка чи інший carrier не визначає meaning.
 
-Докладний опис парадигми: [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md).
-
----
-
-## Нова парадигма за 30 секунд
-
-Звичайна таблиця каже:
-
-```text
-візьмемо вільний код → призначимо йому функцію
-```
-
-SENS намагається робити навпаки:
-
-```text
-знайти корінь
-    ↓
-довести закон перетворення
-    ↓
-породити наслідок
-    ↓
-перевірити witness / falsifier
-    ↓
-лише тоді допустити semantic resident
-```
-
-Тобто мова має **рости**, а не просто накопичувати записи.
-
-Це важлива різниця. **Сам факт, що бітова координата механічно представна в певній ширині, не надає їй meaning.** Для current D1–D9 meaning/occupancy задають уже ратифіковані domain laws; для майбутніх або research-доменів стан **UNKNOWN** лишається чесним і корисним — він означає, що admission law ще не знайдений або не прийнятий.
-
-### Конкретний приклад: селектори
-
-У ратифікованому D3 є два selector-корені:
-
-```text
-100  CAR
-011  CDR
-```
-
-Для першого розгортання selector-family доведений локальний закон:
-
-```text
-suffix 0 → compose CAR
-suffix 1 → compose CDR
-```
-
-Тому D4-селектори породжуються механічно:
-
-```text
-1000  CAAR
-1001  CADR
-0110  CDAR
-0111  CDDR
-```
-
-Цей конкретний D4-закон **не надає автоматичної влади D5+**. Глибші selector-family у D5, D6 і D8 допускаються лише там, де для них є окремо прийнята карта/закон і немає конфлікту з уже ратифікованими residents. Схожість бітового рисунка сама по собі нічого не ратифікує.
-
-Це і є бажаний тип росту SENS: **корені + доведений закон → відтворювана родина**, але лише в межах, де закон пройшов falsifier і не суперечить іншим ратифікованим доменам.
+Поточна конституція проєкту: **Contract 11.8, D1–D9**.
 
 ---
 
-## Домени як будинки, а біти як адреси кімнат
+## Подивімося на саму мову
 
-Найпростіша інтуїція SENS така: **кожен домен — це окремий будинок, а точна бітова координата — адреса кімнати всередині нього**.
+Ось маленька програма, у якій **весь executable source можна побачити як точні двійкові слова**.
 
-```text
-SENS
-  |
-  +-- D1: будинок на 2 кімнати
-  +-- D2: будинок на 4 кімнати
-  +-- D3: будинок на 8 кімнат
-  +-- D4: будинок на 16 кімнат
-  +-- D5: будинок на 32 кімнати
-  +-- D6: будинок на 64 кімнати
-  +-- D7: будинок на 128 кімнат
-  +-- D8: будинок на 256 кімнат, 256/256 ратифіковано
-  +-- D9: будинок на 512 кімнат, 512/512 ратифіковано
-```
+Людська форма:
 
-У домені `Dn` є рівно `2^n` можливих адрес. Але сама адреса ще не створює мешканця. **Закон домену визначає, хто має право жити в кімнаті і що цей мешканець означає.**
+~~~lisp
+(CAR (CONS () ()))
+~~~
 
-Тому однакова на вигляд адреса в різних будинках не означає одну й ту саму річ:
+Це означає:
 
-```text
-D1: 1
-D2: 01
-D3: 001
-D4: 0001
-```
+> взяти CAR від пари, у якій обидва елементи — порожня структура.
 
-Це різні будинки, різні кімнати і різні semantic identities.
+Канонічна видима двійкова форма:
 
-### D1 — найменший будинок: «ні» і «так»
+~~~text
+10 100 00 10 111 00 000 00 000 01 01
+~~~
 
-У D1 лише дві кімнати:
+Тут немає ні #b..., ні рядків "101", ні десяткових semantic IDs.
 
-```text
-0  → NO  / НІ
-1  → YES / ТАК
-```
+Розбираємо послідовність:
 
-Це PredicateBit — точна відповідь предиката. Тут немає третього стану і structural `()` не є «ні».
+~~~text
+10    D2 open
+100   D3 CAR
+00    D2 separator
 
-### D2 — будинок структури
+10    D2 open
+111   D3 CONS
+00    D2 separator
+000   D3 empty
+00    D2 separator
+000   D3 empty
+01    D2 close
 
-D2 має чотири кімнати, в яких живуть елементи структурної граматики:
+01    D2 close
+~~~
 
-```text
-00 → separator
-01 → close
-10 → open
-11 → dot
-```
+Тобто структура програми видно прямо з бітів:
 
-Тобто D2 вже не відповідає «так/ні». Він описує **форму запису**.
+~~~text
+10 [100 00 10 [111 00 000 00 000] 01] 01
+~~~
 
-### D3 — фундаментальний будинок Core
+А semantic words мають **різну ширину там, де цього вимагає домен**:
 
-У D3 вісім кімнат:
+~~~text
+D2 = 2 біти
+D3 = 3 біти
+~~~
 
-```text
-000 → ()
-001 → QUOTE
-010 → ATOM
-011 → CDR
-100 → CAR
-101 → EQ
-110 → COND
-111 → CONS
-```
+Результат цієї програми — D3 000, тобто порожня структура.
 
-Тут уже живе фундамент мови: порожня структура, quotation, перевірка атома, селектори, рівність, умовний вибір і побудова пари.
+### Те саме іншою surface-мовою
 
-### D4 — перший повний bootstrap-будинок
+Людські surface names — лише проекції. Наприклад, current Ukrainian surface може записати ту саму операцію як:
 
-D4 має 16 кімнат, і всі вони зайняті ратифікованими residents:
+~~~lisp
+(перше (сполучити порожнє порожнє))
+~~~
 
-```text
-0000 APPLY      0001 EVAL
-0010 LAMBDA     0011 DEFINE
-0100 NOT        0101 NULL
-0110 CDAR       0111 CDDR
-1000 CAAR       1001 CADR
-1010 LOOKUP     1011 BIND
-1100 EVCON      1101 EVLIS
-1110 LIST       1111 APPEND
-```
-
-Це вже «будинок, у якому мова починає обслуговувати сама себе»: тут є evaluation, визначення функцій, environment-механізми, похідні селектори та list operations.
-
-### D5, D6, D7 — більші будинки
-
-Далі принцип не змінюється — змінюється лише місткість і закони заселення:
-
-```text
-D5 → 32 кімнати, 32/32 ратифікованих residents
-D6 → 64 кімнати, 64/64 ратифікованих residents
-D7 → 128 кімнат, 126/128 admitted; 2 координати зарезервовані
-```
-
-D5 і D6 вже містять ширші функціональні родини та локальні algebra/generator laws. D7 переважно є Sound7/Text7-доменом: його мешканці — не «ще більше opcode-ів Core», а об'єкти власного семантичного будинку.
-
-### D8 — повний восьмибітний будинок
-
-D8 має 256 можливих восьмибітових адрес і **owner-ratified 256/256 semantic residents під #3960**. Це не робить усі 256 residents автоматично callable: semantic residency і runtime mechanism лишаються різними осями.
-
-Тому правильна картина не така:
-
-```text
-є вільна кімната → поселимо туди функцію
-```
-
-а така:
-
-```text
-знайшли закон
-      ↓
-довели / ратифікували його
-      ↓
-закон визначив resident
-      ↓
-resident отримав точну кімнату
-```
-
-Отже, SENS — це не один великий будинок із 256 opcode-кімнатами. Це **драбина окремих доменних будинків**, де кожен має власну ширину, власні правила і власних мешканців.
-
-> **Домен — будинок. Біти — адреса кімнати. Закон — правило заселення. Semantic object — мешканець.**
+Семантична програма при цьому не стає іншою. Після canonical lowering вона приходить до тієї самої двійкової identity.
 
 ---
 
-## D1–D9: одна драбина, різні закони
+## Чотири фундаментальні речі
 
-| Домен | Ширина | Поточна роль |
+### 1. D2 задає форму
+
+D2 не містить Core-функцій. Він описує структуру source:
+
+~~~text
+00  separator
+01  close
+10  open
+11  dot
+~~~
+
+Наприклад:
+
+~~~text
+10 100 00 000 01
+~~~
+
+має відкрити форму, покласти туди D3-word 100 і закрити її.
+
+11 — саме D2 dot. Воно не є «ще одним opcode».
+
+### 2. D3 задає фундамент мови
+
+Поточний D3:
+
+| Біти | Meaning | Surface |
+|---|---|---|
+| 000 | порожня структура | порожнє |
+| 001 | QUOTE | як-є |
+| 010 | ATOM | атом? |
+| 011 | CDR | решта |
+| 100 | CAR | перше |
+| 101 | EQ | тотожне? |
+| 110 | COND | за-умовою |
+| 111 | CONS | сполучити |
+
+Ці координати — **current authority**, а не старі prefix-tree експерименти.
+
+### 3. Ширина є частиною identity
+
+Не можна зробити так:
+
+~~~text
+001 → 1 → byte 1
+~~~
+
+і потім забути, що це був D3.
+
+Правильно:
+
+~~~text
+(D1, 1)
+(D2, 01)
+(D3, 001)
+(D4, 0001)
+~~~
+
+— чотири різні exact-width identities.
+
+### 4. Carrier не є семантикою
+
+У пам'яті D3 може фізично лежати в u8.
+
+На FPGA D3 може потрапити у ширшу BRAM word.
+
+У WASM воно може пройти через integer type.
+
+Це нічого не змінює:
+
+~~~text
+semantic width  ≠  physical carrier width
+~~~
+
+---
+
+## D1–D9
+
+SENS будує не одну плоску таблицю opcode, а **драбину доменів**.
+
+| Домен | Ширина | Роль |
 |---|---:|---|
-| **D1** | 1 біт | PredicateBit: точне YES/NO |
-| **D2** | 2 біти | структурна граматика |
-| **D3** | 3 біти | фундамент Core |
-| **D4** | 4 біти | bootstrap і перше розгортання законів |
-| **D5** | 5 бітів | typed domain; резиденти визначаються власними законами |
-| **D6** | 6 бітів | typed domain; ширша область для доведених незалежних факторів |
-| **D7** | 7 бітів | owner-ratified #3572, 126/128: Sound7/Text7 + окремі role laws; 2 координати owner-reserved/pinned |
-| **D8** | 8 бітів | owner-ratified #3960, 256/256 semantic residents; callability окрема від residency |
-| **D9** | 9 бітів | owner-ratified #4008, 512/512 semantic residents; 128 law-forced + 384 owner-ratified gauge |
+| D1 | 1 | точний PredicateBit |
+| D2 | 2 | структура source |
+| D3 | 3 | фундамент Core |
+| D4 | 4 | bootstrap |
+| D5 | 5 | наступний exact-width semantic domain |
+| D6 | 6 | наступний exact-width semantic domain |
+| D7 | 7 | Sound7/Text7 та окремі role laws |
+| D8 | 8 | повний owner-ratified domain |
+| D9 | 9 | повний owner-ratified domain |
 
-### Канонічні таблиці доменів
+Поточна owner-ratified картина:
 
-Human surfaces живуть **по одному домену на файл**:
+~~~text
+D7 = 126/128 admitted; 2 координати reserved
+D8 = 256/256
+D9 = 512/512
+~~~
 
-```text
-lib/domains/d1.lisp
-lib/domains/d2.lisp
-lib/domains/d3.lisp
-lib/domains/d4.lisp
-lib/domains/d5.lisp
-lib/domains/d6.lisp
-lib/domains/d7.lisp
-lib/domains/d8.lisp
-lib/domains/d9.lisp
-```
+D9 має окремий runtime-carrier ланцюг. Це механізм розміщення, а не привід звести D9 назад до D8/SID8.
 
-У кожному файлі порядок колонок однаковий:
+---
 
-```text
+## Як виглядає справжня binary source
+
+Канонічний source має містити **лише видимі біти та синтаксичні розділення**.
+
+Добре:
+
+~~~text
+10 100 00 10 111 00 000 00 000 01 01
+~~~
+
+Не є канонічним semantic source:
+
+~~~text
+#b100
+"100"
+4
+168
+Sid8(168)
+Function8(...)
+~~~
+
+Останні форми можуть існувати як compatibility, tooling або host representation, але вони не повинні ставати authority для current SENS source.
+
+---
+
+## Чому 00, 01, 10, 11 не плутаються з D3
+
+Двобітні слова належать **D2**.
+
+Трибітні слова належать **D3**.
+
+Тому:
+
+~~~text
+10  ≠  010
+01  ≠  001
+11  ≠  111
+~~~
+
+10 — D2 open.
+
+010 — D3 ATOM.
+
+11 — D2 dot.
+
+111 — D3 CONS.
+
+Саме тому SENS не намагається вирівняти все до одного 8-бітного поля.
+
+---
+
+## Як мова росте
+
+SENS не хоче вручну роздати meaning кожному вільному бітовому шаблону.
+
+Потрібен закон:
+
+~~~text
+корінь
+  ↓
+закон
+  ↓
+породження
+  ↓
+witness
+  ↓
+falsifier / negative cases
+  ↓
+ratification
+~~~
+
+Для selector-family це особливо наочно. У current D3:
+
+~~~text
+100 = CAR
+011 = CDR
+~~~
+
+Але подальший selector не можна призначати тільки через «схожість бітів». Кожна family-law має бути окремо доведена або ратифікована.
+
+Отже:
+
+> **геометрія допомагає знайти закон; вона не замінює закон.**
+
+---
+
+## Канонічний pipeline
+
+~~~text
+human / symbolic surface
+        ↓
+domain-aware parser
+        ↓
+exact-width semantic objects
+        ↓
+domain laws / evaluator
+        ↓
+IR / lowering
+        ↓
+Rust / WASM / C / FPGA / other substrate
+~~~
+
+Назва CAR, перше, aṇu або інша surface-форма не є semantic authority.
+
+Так само backend не має права сказати:
+
+> «у мене opcode 100, отже це CAR».
+
+Правильний напрямок інший:
+
+> «семантика вже визначила exact D3:100; backend лише обирає механізм виконання».
+
+---
+
+## Українська surface
+
+Українська — основна surface-мова SENS.
+
+Поточні короткі програмні імена:
+
+~~~text
+порожнє
+як-є
+атом?
+решта
+перше
+тотожне?
+за-умовою
+сполучити
+~~~
+
+Повні назви та інші поверхні зберігаються окремо:
+
+~~~text
 ук → укр → san → en → LISP → sym
-```
+~~~
 
-- `ук` — компактна українська програмна поверхня;
-- `укр` — повна українська розшифровка;
-- `san` — санскритська surface без програмних маркерів `?` / `!`;
-- `en` — англійська програмна surface;
-- `LISP` — історичне/reference Lisp spelling, якщо воно доречне;
-- `sym` — символічна/гліфова projection, якщо вона є.
-
-Маркери синхронні в програмних поверхнях: **предикати мають `?` у `ук/укр/en`**, destructive/in-place операції мають **`!` у `ук/укр/en`**. D7 містить 126 semantic rows; `0100001` і `0101010` owner-reserved і навмисно не отримують фальшивої семантики.
-
-Ці таблиці — human-readable projections над уже ратифікованими exact-domain identities. Вони не замінюють domain law і не створюють semantic identity самі.
-
-Важливо розрізняти п'ять речей:
-
-```text
-carrier exists
-≠ coordinate is occupied
-≠ object is derivable
-≠ object is callable
-≠ runtime implements it
-```
-
-Ратифікація домену не означає, що кожна з його `2^N` координат автоматично має функцію. І навпаки: відставання конкретного Rust/backend механізму не скасовує ратифікований закон мови.
+Surface можна повністю перейменувати без зміни semantic identity.
 
 ---
 
-## Як SENS має рости
+## Інструменти для двійкової мови
 
-Нова функція або інший semantic resident бажано з'являється одним із трьох шляхів:
+У репозиторії вже є корисне tooling-ядро.
 
-1. **Корінь** — справді незалежний об'єкт, який не виводиться з уже прийнятих.
-2. **Наслідок закону** — об'єкт механічно породжується з кореня/коренів і має replayable certificate.
-3. **Міст між доменами** — окремо доведений закон пов'язує об'єкти різних доменів без їхнього злиття.
+### migrate-to-sens-codes.py
 
-Не допускається логіка:
+Основний мігратор source → visible binary SENS:
 
-```text
-"тут вільно"
-"біти схожі"
-"так було в старій таблиці"
-"цей host enum має те саме число"
-→ отже це та сама семантика
-```
+~~~bash
+python3 scripts/migrate-to-sens-codes.py . \
+  --binary-mirror /tmp/sens-binary
+~~~
 
-### Математичне дослідження
+Він уже вміє відтворювати D2 structure, exact-width executable words і fail-closed migration cases. Його подальший cutover до current Contract 11.8 ведеться окремо, без створення другого мігратора.
 
-Окремий напрям SENS — шукати алгебру над функціями та доменами.
+### Exact-width witness-и
 
-Наприклад, якщо в чітко визначеній функціональній алгебрі виявиться:
+Корисні дослідницькі скрипти:
 
-```text
-G ∘ G = F
-```
+~~~text
+scripts/research-2077-binary-word-law.py
+scripts/research-2092-word-algebra.py
+~~~
 
-то `G` можна досліджувати як композиційний «корінь» `F`. Якщо незалежний математичний шлях приведе до вже відомого semantic object, це значно цікавіше за ручне призначення коду: ми знайшли **структурний закон**.
+Вони досліджують exact binary words, width-preserving identity, prefix-vs-equality та зовнішнє framing.
 
-Але математична краса не замінює доказу. Потрібні:
-
-- точне означення операції;
-- типи/domain boundaries;
-- witness;
-- falsifier або negative cases;
-- відсутність колізій;
-- відтворюваність.
-
-Саме так SENS може поступово стати мовою, структура якої пояснює сама себе.
+Старі research witness-и в research-1962-*, research-2023-*, research-2034-* можуть містити історичні координати. Їхні алгоритми корисні, але їхні старі бітові карти не є current authority.
 
 ---
 
-## Семантична влада
+## Запуск
 
-README пояснює проєкт, але не визначає його семантику.
+Потрібен Rust toolchain.
 
-```text
-language-contract.lisp
-        ↓
-ратифіковані domain laws
-        ↓
-executables / witnesses / conformance fixtures
-        ↓
-reference implementation
-        ↓
-інші backends
-        ↓
-README / tutorials / historical research
-```
-
-Якщо код суперечить чинному закону — це **implementation debt**, а не нова семантика.
-
-Якщо старий документ суперечить Contract 11 або пізнішому ратифікованому закону — це історія дослідження.
-
-Повна карта: [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md).
-
----
-
-## Бінарна форма — не байтовий контейнер
-
-SENS не вважає, що все треба спочатку перетворити на 8-бітне слово.
-
-Канонічний reader має зберігати точну ширину. Наприклад:
-
-```text
-10 001 01
-```
-
-можна читати як:
-
-```text
-D2 open
-D3 exact word 001
-D2 close
-```
-
-Тут `001` не є «байтом із нулями зліва». Це точне трьохбітове слово.
-
-Packed transport може фізично складати біти щільніше або зберігати їх у ширших машинних словах, але фізичне пакування не має права змінити semantic identity.
-
----
-
-## AST, compiler і backend
-
-Наслідок нової парадигми для компілятора простий:
-
-```text
-surface
-   ↓
-domain-qualified AST
-   ↓
-law-aware lowering
-   ↓
-IR
-   ↓
-backend mechanism
-```
-
-Людська назва потрібна для читання й письма, але не є semantic authority.
-
-Backend може бути Rust, C, WASM, GraalVM, FPGA чи іншим. Він отримує вже визначений semantic object і вибирає механізм виконання. Backend не має права відновлювати значення з номера opcode, byte value або host type.
-
-### FPGA
-
-Для FPGA особливо важливо розділяти:
-
-```text
-semantic_width
-≠
-physical_width
-```
-
-D3 залишається D3 навіть якщо конкретний BRAM фізично зберігає його в ширшій комірці.
-
-FPGA-бенчмарки відповідають на питання **«скільки це коштує залізу?»**, а не **«що це означає?»**.
-
----
-
-## Українська, English, Sanskrit і символи
-
-Людські surface-мови — це проєкції над уже визначеною семантикою.
-
-```text
-людське spelling
-      ↓
-surface projection
-      ↓
-exact domain identity
-```
-
-Тому українська, англійська, санскритська й символічна поверхні не створюють чотири різні функції.
-
-Українська — головна surface-мова проєкту. У current domain tables дві українські колонки мають різні ролі:
-
-```text
-ук   = коротке програмне ім'я
-укр  = повна українська розшифровка
-```
-
-Скорочення мають бути передбачуваними, а не телеграфними. Ми скорочуємо **структуру**, не калічимо корені слів: `п/р` для selector-path (`п=перше`, `р=решта`), `?` для предикатів, `!` для destructive/in-place операцій, усталені `нсд/нск` для математичних назв. Наприклад:
-
-```text
-ук             укр
-п-р            перше-від-решти
-видалити!      видалити-на-місці!
-нсд            найбільший-спільний-дільник
-```
-
-Маркери `?` і `!` синхронізуються в `ук/укр/en`; `san` їх не використовує. Усі чинні semantic residents D1–D9 мають заповнені `ук`, `укр` і `san`.
-
-Surface може бути зручним, красивим і читабельним. Але машинна семантика має пережити повне перейменування surface без зміни програми.
-
-Деталі:
-
-- [`docs/uk-surface-naming.md`](docs/uk-surface-naming.md)
-- [`docs/ukrainian-api.md`](docs/ukrainian-api.md)
-- [`docs/program-surface-translator.md`](docs/program-surface-translator.md)
-- [`docs/domain-surfaces-d7.md`](docs/domain-surfaces-d7.md)
-- [`docs/domain-surfaces-d8.md`](docs/domain-surfaces-d8.md)
-- [`lib/domains/`](lib/domains)
-
----
-
-## Одна мова, різні execution substrates
-
-SENS не вимагає, щоб одна реалізація найкраще робила все.
-
-```text
-                    SENS
-           domains / laws / AST
-                      |
-       +--------------+--------------+
-       |              |              |
-      Rust           FPGA          kernels
-                                     |
-                         +-----------+-----------+
-                         |           |           |
-                       Prolog      Datalog      CLIPS
-```
-
-Common Lisp, Prolog, Datalog, CLIPS, C, WASM, FPGA чи інший substrate може мати власний сильний механізм. Але жоден substrate не стає власником semantic identity мови.
-
-Принцип:
-
-> **Мова визначає що це. Backend визначає як це виконати.**
-
----
-
-## Що вже є в репозиторії
-
-- Contract 11.8 з domain-qualified identity;
-- owner-ratified драбина D1–D9; D7 126/128, D8 256/256, D9 512/512;
-- exact-width carrier/packing механізми;
-- D1 PredicateBit;
-- D2 structural grammar;
-- D3 foundation;
-- D4 bootstrap;
-- D5/D6 ratified domain laws і executable guards;
-- D7 owner-ratified 126/128 Sound7/Text7 domain + окрема LocalOrdinal role;
-- D8 owner-ratified 256/256 під #3960 із окремою runtime-callability віссю;
-- D9 owner-ratified 512/512 під #4008: 128 law-forced selector coordinates + 384 owner-ratified S4 gauge;
-- selector generation witnesses;
-- domain graph / factor / residue / closure experiments;
-- one-way migration guard, який забороняє новому exact-width коду повертатися до старої flat-identity моделі;
-- Rust, WASM, C та інші execution paths;
-- FPGA exact-width benchmark/evidence lane.
-
-### Важлива чесність про реалізацію
-
-**Ратифікована семантика і стан реалізації — не одне й те саме.**
-
-У source tree ще існує migration debt: старі workflows, compatibility paths, назви типів і backend adapters. Вони можуть бути потрібні для відтворення історичних доказів або поступового cutover.
-
-Вони **не визначають сучасну модель SENS**.
-
----
-
-## UNKNOWN — це не порожня клітинка для заповнення
-
-Одна з найважливіших дисциплін проєкту:
-
-> **UNKNOWN означає «ми ще не маємо достатнього закону», а не «сюди можна щось покласти».**
-
-Це захищає SENS від numerology — спокуси оголосити законом красивий бітовий рисунок лише тому, що він красивий.
-
-Хороший новий закон має пояснювати більше, ніж одну координату, і робити перевірювані передбачення.
-
----
-
-## Як перевіряти нову ідею
-
-Для нового domain law або generative family корисний мінімальний цикл:
-
-```text
-1. сформулювати закон
-2. записати мінімальний basis / roots
-3. згенерувати наслідки
-4. перевірити відомі cases
-5. шукати counterexample
-6. перевірити collisions
-7. виміряти compression / instruction cost
-8. лише потім пропонувати ratification
-```
-
-Для performance-ідей додатково потрібні об'єктивні числа:
-
-- кількість semantic/IR instructions;
-- encoded bits;
-- parse/decode cost;
-- execution time;
-- memory footprint;
-- FPGA LUT/FF/BRAM/DSP;
-- Fmax/latency після реального vendor flow.
-
-Ефективність не ратифікує семантику, але допомагає вибрати кращий механізм для вже коректної семантики.
-
----
-
-## Локальний запуск
-
-Потрібен Rust toolchain. У репозиторії також є Guix manifest для відтворюваного середовища.
-
-```bash
+~~~bash
 # REPL
-cargo run -p sens --example repl
-# або
 cargo run -p sens-cli
 
-# виконати файл
+# або приклад REPL
+cargo run -p sens --example repl
+
+# файл
 cargo run -p sens-cli -- path/to/file.lisp
 
-# перевірки workspace
+# тести
 cargo test --workspace
+
+# build
 cargo build --workspace
+
+# clippy
 cargo clippy --workspace --all-targets -- -D warnings
-```
+~~~
 
-Канонічне розширення source — **`.lisp`**.
+Канонічне розширення source-файлів — **.lisp**.
 
----
-
-## З чого читати проєкт
-
-Якщо ви бачите SENS уперше:
-
-1. [`docs/README.md`](docs/README.md) — карта актуальної документації;
-2. [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) — навіщо існують домени і як мова росте;
-3. [`language-contract.lisp`](language-contract.lisp) — машинна конституція Contract 11.8;
-4. [`lib/domains/`](lib/domains) — канонічні human-readable таблиці D1–D9, один домен = один файл;
-5. [`docs/language-core.md`](docs/language-core.md) — точна domain identity;
-6. [`docs/semantic-authority-map.md`](docs/semantic-authority-map.md) — порядок семантичної влади;
-7. [`docs/uk-surface-naming.md`](docs/uk-surface-naming.md) — правила `ук/укр`, `?`, `!`, selector-скорочень;
-8. [`tests/fixtures/conformance.lisp`](tests/fixtures/conformance.lisp) — observable conformance;
-9. [`AGENTS.md`](AGENTS.md) — правила роботи агентів.
-
-Для історії й research-археології дивіться `docs/research/` та `docs/archive/`, але датований документ не переважає чинний контракт.
+.wsm та .my залишаються legacy aliases для старих матеріалів.
 
 ---
 
-## Мовна політика
+## Де дивитися далі
 
-1. Українська — перша і головна.
-2. Англійська й німецька — допоміжні.
-3. Текстові файли репозиторію — UTF-8.
-4. Нові коментарі в коді — українською кирилицею.
-5. Точні API, protocol literals, identifiers, filenames і upstream-назви не перекладаються довільно.
+**Семантика:**
 
-Машинно-читана політика: [`knowledge/language-policy.lisp`](knowledge/language-policy.lisp).
+- [language-contract.lisp](language-contract.lisp)
+- [docs/domain-paradigm.uk.md](docs/domain-paradigm.uk.md)
+- [docs/language-core.md](docs/language-core.md)
+- [docs/semantic-authority-map.md](docs/semantic-authority-map.md)
+
+**Домени:**
+
+- [lib/domains/](lib/domains)
+
+**Conformance:**
+
+- [tests/fixtures/conformance.lisp](tests/fixtures/conformance.lisp)
+
+**Binary tooling:**
+
+- [scripts/migrate-to-sens-codes.py](scripts/migrate-to-sens-codes.py)
+- [scripts/research-2077-binary-word-law.py](scripts/research-2077-binary-word-law.py)
+- [scripts/research-2092-word-algebra.py](scripts/research-2092-word-algebra.py)
+
+**Правила для агентів:**
+
+- [AGENTS.md](AGENTS.md)
 
 ---
 
-## English · short summary
+## Що SENS намагається зробити
 
-SENS is an experimental language whose current Contract 11.8 ratifies exact-width domains D1–D9. D7 has 126/128 admitted residents with two owner-reserved coordinates; D8 is owner-ratified 256/256 under #3960; D9 is owner-ratified 512/512 under #4008.
+Не:
 
-Its central idea is not “smaller opcodes”. A canonical semantic object is:
+~~~text
+зробити стару мову трохи компактнішою
+~~~
 
-```text
+і не:
+
+~~~text
+покласти всі функції у 8-бітну таблицю
+~~~
+
+А:
+
+~~~text
+визначити точні домени
+        ↓
+знайти закони між ними
+        ↓
+отримувати semantic objects з цих законів
+        ↓
+переносити одну семантику між різними substrates
+~~~
+
+Тому головний об'єкт SENS — не opcode.
+
+**Головний об'єкт SENS — точна семантична identity, яку можна перенести з мови в мову, з backend у backend і з carrier у carrier, не змінюючи того, чим вона є.**
+
+---
+
+## English
+
+SENS is an experimental programming language built around **exact-width binary domains**.
+
+A semantic object is:
+
+~~~text
 exact bits + exact domain + proved/ratified law
-```
+~~~
 
-The language is intended to **grow generatively**: a small basis of roots plus executable laws should derive larger semantic families. Free bit patterns do not automatically acquire meaning, and UNKNOWN is an epistemic state rather than spare allocation space.
+Width is part of identity. A byte or u8 carrier is only storage.
 
-Human-language names and execution backends are projections/mechanisms. They do not own semantic identity.
+Current Contract 11.8 ratifies D1–D9. D2 owns source structure; D3 and higher domains own semantic residents according to their own laws.
 
-Start with [`docs/domain-paradigm.uk.md`](docs/domain-paradigm.uk.md) and [`language-contract.lisp`](language-contract.lisp).
+Canonical binary source is visible binary, not decimal IDs, #b..., quoted binary strings, or host opcode wrappers.
 
-## Deutsch · Kurzfassung
-
-SENS ist eine experimentelle Sprache mit ratifizierten Exact-Width-Domänen D1–D9. D7 enthält 126/128 semantische Residents; D8 ist unter #3960 vollständig mit 256/256 Residents ratifiziert.
-
-Ein kanonisches semantisches Objekt besteht aus:
-
-```text
-exakten Bits + exakter Domäne + bewiesenem/ratifiziertem Gesetz
-```
-
-Die Sprache soll durch Gesetze wachsen, nicht durch das manuelle Belegen freier Bitmuster. Menschliche Namen und Backends sind Projektionen beziehungsweise Mechanismen und besitzen nicht die semantische Identität.
+The project is designed so that the same semantic identity can be executed by different substrates without making any backend the owner of language meaning.
 
 ---
 
-## Ліцензія
+## License
 
 [ВОЛЬНІСТЬ](LICENSE)
