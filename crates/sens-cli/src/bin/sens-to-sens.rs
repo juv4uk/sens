@@ -425,6 +425,7 @@ fn is_language_definition(name: &str) -> bool {
         })
 }
 
+#[cfg(test)]
 fn analyze(
     source: &str,
     host_capabilities: &HashSet<String>,
