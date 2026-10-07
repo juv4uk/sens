@@ -61,6 +61,28 @@ fn mechanism_error(operation: &str, action: &str, detail: &str, span: Span) -> L
     )
 }
 
+fn machine_byte(value: &Value) -> Option<u8> {
+    match value {
+        Value::Number(number, Exactness::Exact)
+            if number.fract() == 0.0 && (0.0..=255.0).contains(number) =>
+        {
+            Some(*number as u8)
+        }
+        // Explicit machine-mechanism projection only. BinaryNumber keeps its
+        // language identity as canonical bits everywhere else; executable
+        // memory consumes physical bytes, so this boundary may decode at most
+        // one byte's worth of bits into u8.
+        Value::BinaryNumber(number) if number.width() <= 8 => {
+            let mut byte = 0u8;
+            for bit in number.as_bits() {
+                byte = (byte << 1) | *bit;
+            }
+            Some(byte)
+        }
+        _ => None,
+    }
+}
+
 fn expect_machine_bytes(
     value: &Value,
     operation: &str,
@@ -73,21 +95,16 @@ fn expect_machine_bytes(
         match current {
             Value::Nil => return Ok(bytes),
             Value::Pair(head, tail) => {
-                let Value::Number(number, Exactness::Exact) = **head else {
+                let Some(byte) = machine_byte(head) else {
                     return Err(LanguageError::new(
                         ErrorKind::Type,
-                        format!("{operation} expects exact byte integers 0-255"),
+                        format!(
+                            "{operation} expects byte values 0-255 as exact integers or <=8-bit BinaryNumber values"
+                        ),
                         span,
                     ));
                 };
-                if number.fract() != 0.0 || !(0.0..=255.0).contains(&number) {
-                    return Err(LanguageError::new(
-                        ErrorKind::Type,
-                        format!("{operation} expects exact byte integers 0-255"),
-                        span,
-                    ));
-                }
-                bytes.push(number as u8);
+                bytes.push(byte);
                 current = tail;
             }
             _ => {
