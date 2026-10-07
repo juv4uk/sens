@@ -44,14 +44,14 @@
 ; result boundary is guaranteed D1. This deliberately avoids feeding the
 ; legacy D3 EQ answer carrier back into D3 EQ again.
 (def encoder-coverage-d1-yes
-  (zerop? 0))
+  (нуль? 0))
 
 (def encoder-coverage-d1-no
-  (zerop? 1))
+  (нуль? 1))
 
 (def encoder-coverage-same?
   (lambda (left right)
-    (greaterp? (car (equal? left right)) 0)))
+    (більше? (car (equal? left right)) 0)))
 
 ; Traversal needs structural EMPTY, not the broader ATOM classification.
 ; This preserves the D1:0 != D3:000 distinction and avoids using ATOM as NIL.
