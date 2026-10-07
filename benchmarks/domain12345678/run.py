@@ -17,6 +17,10 @@ CASES = (
     "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8",
     "mixed", "callable-projection",
 )
+CONTRACT_VERSION = "11.8"
+SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
+D9_STATUS = "BLOCKED-CARRIER"
+D9_REASON = "BinarySourceWord/DomainIdentity currently materialize W1-W8 only"
 IREF_RE = re.compile(r"I\s+refs:\s*([0-9,]+)")
 
 
