@@ -1,0 +1,26 @@
+name: D10 all-repo donor audit v2
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      - "scripts/check-d10-owner-repo-donor-matrix-v2.py"
+      - ".github/workflows/d10-owner-repo-donor-audit-v2.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      - "scripts/check-d10-owner-repo-donor-matrix-v2.py"
+      - ".github/workflows/d10-owner-repo-donor-audit-v2.yml"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify all-repo donor matrix
+        run: python3 scripts/check-d10-owner-repo-donor-matrix-v2.py
