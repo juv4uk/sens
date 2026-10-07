@@ -198,3 +198,14 @@
          ((native-first-domain-true ())
           (native-first-fallback expression))))
       ((native-first-domain-true ())
+       (native-first-fallback expression)))))
+
+(00001001 native-first-plan-domain
+  (00001000 (shape-or-empty expression)
+    (00000111
+      ((00000010 expression)
+       (native-first-fallback expression))
+      ((native-first-domain-d3-car? shape-or-empty (00000101 expression))
+       (native-first-plan-domain-car shape-or-empty expression))
+      ((native-first-domain-true ())
+       (native-first-fallback expression)))))
