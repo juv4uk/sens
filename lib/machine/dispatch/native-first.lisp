@@ -21,42 +21,34 @@
   (0010 (expression cons-expression)
     (001000 ((cons-arguments (011 cons-expression)))
       (110
-        ((010 cons-arguments) (0)
+        ((010 cons-arguments)
+         (native-first-fallback expression))
+        ((native-first-domain-true ())
          (001000 ((rest-after-left (011 cons-arguments)))
            (110
-             ((010 rest-after-left) (0)
+             ((010 rest-after-left)
+              (native-first-fallback expression))
+             ((native-first-domain-true ())
               (001000 ((rest-after-right (011 rest-after-left)))
                 (110
-                  ((010 rest-after-right) ()
+                  ((101 rest-after-right ())
                    (001000 ((typed-left (x86-as-u64-imm (100 cons-arguments))))
                      (110
                        ((101 (100 typed-left) (001 u64-imm))
-                        (1)
                         (001000 ((typed-right (x86-as-u64-imm (100 rest-after-left))))
                           (110
                             ((101 (100 typed-right) (001 u64-imm))
-                             (1)
                              (native-first-native-plan
                                (x86-lower-cons-car-u64-forms
                                  (x86-u64-imm-value typed-left)
                                  (x86-u64-imm-value typed-right))
                                x86-pair-cell-bytes))
-                            ((001 native-first-fallback)
-                             native-first-fallback
+                            ((native-first-domain-true ())
                              (native-first-fallback expression)))))
-                       ((001 native-first-fallback)
-                        native-first-fallback
+                       ((native-first-domain-true ())
                         (native-first-fallback expression)))))
-                  ((001 native-first-fallback)
-                   native-first-fallback
-                   (native-first-fallback expression)))))
-             ((001 native-first-fallback)
-              native-first-fallback
-              (native-first-fallback expression)))))
-        ((001 native-first-fallback)
-         native-first-fallback
-         (native-first-fallback expression))))))
-
+                  ((native-first-domain-true ())
+                   (native-first-fallback expression))))))))))))
 (0011 native-first-plan-car-argument
   (0010 (expression argument)
     (110
