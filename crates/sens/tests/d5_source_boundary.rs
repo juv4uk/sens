@@ -15,7 +15,7 @@ fn every_exact_d5_word_round_trips_as_w5_without_padding() {
 
         let word = tokens[0].word;
         assert_eq!(word.width(), 5);
-        assert_eq!(word.packed_bits(), raw);
+        assert_eq!(word.packed_bits(), u16::from(raw));
         assert_eq!(word.to_string(), source);
         assert!(matches!(word, BinarySourceWord::W5(_)));
     }

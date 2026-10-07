@@ -192,6 +192,34 @@ mod tests {
     }
 
     #[test]
+    fn d9_identity_does_not_gain_domain_callability_from_width() {
+        let head = Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D9(
+                crate::CoreD9::from_word(crate::Bit9::new(0b1_00000001).unwrap()),
+            )),
+            span: crate::Span { start: 0, end: 9 },
+        };
+        let argument = Expr {
+            kind: ExprKind::Number(1.0, crate::Exactness::Exact),
+            span: crate::Span { start: 10, end: 11 },
+        };
+        let source = Expr {
+            kind: ExprKind::List(Rc::from(vec![head, argument].into_boxed_slice())),
+            span: crate::Span { start: 0, end: 11 },
+        };
+
+        let lowered = lower_program(&[source]);
+        let ExprKind::List(items) = &lowered[0].kind else {
+            panic!("D9 without admitted mechanism must remain an ordinary list");
+        };
+        assert!(matches!(
+            items[0].kind,
+            ExprKind::DomainIdentity(crate::DomainIdentity::D9(_))
+        ));
+        assert!(!matches!(lowered[0].kind, ExprKind::DomainCall(_, _)));
+    }
+
+    #[test]
     fn migrated_d3_surfaces_lower_to_exact_domain_calls() {
         // Use already-admitted Ukrainian projections so this witness proves
         // domain routing without reinstalling an English spelling as identity.

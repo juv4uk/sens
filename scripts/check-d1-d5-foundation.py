@@ -46,7 +46,7 @@ assert "(minor . 8)" in contract
 assert "Contract 11.8" in contract
 assert "#4008" in contract
 assert "Core.D9 is OWNER-RATIFIED 512/512 under #4008" in contract
-assert "current ratified semantic Core domains are D1–D9" in current
+assert "Contract 11.8 D1–D9 foundation contract" in current
 assert "D9  full compact 512/512" in current
 assert "(current-domains . (D1 D2 D3 D4 D5 D6 D7 D8 D9))" in rat
 

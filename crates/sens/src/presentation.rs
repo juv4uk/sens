@@ -383,6 +383,30 @@ mod tests {
     }
 
     #[test]
+    fn d9_without_runtime_surface_renders_exact_canonical_bits() {
+        let d9 = Value::DomainIdentity(crate::DomainIdentity::D9(
+            crate::CoreD9::from_word(crate::Bit9::new(0b1_00000001).unwrap()),
+        ));
+
+        assert_eq!(d9.to_string(), "100000001");
+        assert_eq!(
+            render_value_for_presentation(&d9, PresentationLanguage::Canonical),
+            "100000001"
+        );
+        // Human presentation never mints runtime routing. The established
+        // Ukrainian fallback keeps the value visibly typed as a domain
+        // identity, while Sanskrit falls back to the exact canonical bits.
+        assert_eq!(
+            render_value_for_presentation(&d9, PresentationLanguage::Ukrainian),
+            "#<домен 100000001>"
+        );
+        assert_eq!(
+            render_value_for_presentation(&d9, PresentationLanguage::Sanskrit),
+            "100000001"
+        );
+    }
+
+    #[test]
     fn sanskrit_presentation_projects_domain_identities_inside_lists() {
         let yes = Value::DomainIdentity(crate::DomainIdentity::D1(
             crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()),

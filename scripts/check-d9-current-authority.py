@@ -49,12 +49,14 @@ assert "Contract 11.8" in lang
 assert "Core.D9 is OWNER-RATIFIED 512/512 under #4008" in lang
 assert "D9  full compact 512/512" in current
 
-# Semantic authority and implementation support are separate.
-# Current Rust DomainIdentity intentionally remains W1-W8, so D9 must fail closed.
+# Semantic authority, identity materialization and callability remain separate.
+# W9 now materializes exact D9 identity, while generic callability remains
+# explicitly fail-closed.
 assert "D1-D9 мають чинну семантичну authority згідно з Contract 11.8" in domain_identity
-assert "D9 fail-closed до W9 cut" in domain_identity
-assert "D9(" not in domain_identity
+assert "D9(CoreD9)" in domain_identity
+assert "Self::D9(_) => None" in domain_identity
+assert "W1-W8 keep the one-byte fast path; D9 uses the exact non-truncating W9 carrier." in domain_identity
 
 print("D9-CURRENT-AUTHORITY: PASS")
 print("occupancy=512/512 distinct=512 selector=128 s4-gauge=384")
-print("runtime=W1-W8 implementation only; D9 fail-closed pending W9 carrier")
+print("runtime=W1-W9 exact identity; D9 generic callability=fail-closed")
