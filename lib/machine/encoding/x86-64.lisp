@@ -1157,35 +1157,51 @@
 
 
 
-; VEX prefix helpers (minimal, generic)
-; byte2 for VEX3: ~R in high bit? Intel VEX: R is inverted for register >= 8 in some forms;
-; keep shape explicit; to be exercised by witnesses
+; VEX3 prefix helpers, factored directly from Intel's byte layout:
+;   byte1 = C4
+;   byte2 = ~R ~X ~B m-mmmm
+;   byte3 = W ~vvvv L pp
+; All inversion is exact one-bit/four-bit arithmetic, not a predicate call.
 (00001001 x86-vex3-byte2
-  (00001000 (pp r x b)
+  (00001000 (map r x b)
     (00001100
-      (00001110 (00011011 pp) 32)
+      (00001110 (00001101 1 r) 128)
       (00001100
-        (00001110 r 16)
-        (00001100 (00001110 x 8) b)))))
+        (00001110 (00001101 1 x) 64)
+        (00001100
+          (00001110 (00001101 1 b) 32)
+          map)))))
 
 (00001001 x86-vex3-byte3
-  (00001000 (mmmmm w vvvv)
+  (00001000 (w vvvv l pp)
     (00001100
-      (00001110 mmmmm 32)
+      (00001110 w 128)
       (00001100
-        (00001110 (00011011 w) 16)
-        (00001100 (00001110 (00011011 vvvv) 8) 0)))))
+        (00001110 (00001101 15 vvvv) 8)
+        (00001100
+          (00001110 l 4)
+          pp)))))
 
-(00001001 x86-encode-vex3-reg-reg
-  (00001000 (pp map w opcode dst src)
+; Generic VEX3 XMM register form.
+; map=1 means 0F map. L=0 selects the 128-bit XMM form.
+(00001001 x86-encode-vex3-xmm-xmm-xmm
+  (00001000 (map w l pp opcode dst src1 src2)
     (10011100 ((dst-code (x86-xmm-reg-code dst))
-          (src-code (x86-xmm-reg-code src)))
+          (src1-code (x86-xmm-reg-code src1))
+          (src2-code (x86-xmm-reg-code src2)))
       (00100111
-        #b11001000
-        (x86-vex3-byte2 pp (x86-high1 dst-code) 0 (x86-high1 src-code))
-        (x86-vex3-byte3 map w (x86-low3 src-code))
+        #b11000100
+        (x86-vex3-byte2
+          map
+          (x86-high1 dst-code)
+          0
+          (x86-high1 src2-code))
+        (x86-vex3-byte3 w src1-code l pp)
         opcode
-        (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
+        (x86-encode-modrm
+          3
+          (x86-low3 dst-code)
+          (x86-low3 src2-code))))))
 
 (00001001 x86-encode-program
   (00001000 (instructions)
@@ -1197,55 +1213,27 @@
           (00000101 instructions)
           (x86-encode-program (00000110 instructions)))))))
 
-; VANDNPS xmm,xmm,xmm (VEX.128): VEX.3.0F 0F 57 /r
+; VANDNPS xmm,xmm,xmm: VEX.128.0F.WIG 55 /r, pp=00.
 (00001001 x86-encode-vandnps-xmm-xmm-xmm
   (00001000 (dst src1 src2)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
-          (src1-code (x86-xmm-reg-code src1))
-          (src2-code (x86-xmm-reg-code src2)))
-      (00100111
-        #b11001000
-        (x86-vex3-byte2 0 (x86-high1 dst-code) (x86-high1 src1-code) (x86-high1 src2-code))
-        (x86-vex3-byte3 1 0 (x86-low3 src1-code))
-        #b01010111
-        (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src2-code))))))
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 0 #b01010101 dst src1 src2)))
 
-; VANDNPD xmm,xmm,xmm (VEX.128): VEX.3.0F 66 57 /r? 66 prefix in VEX context encoded via pp; pp=1 for 66
+; VANDNPD xmm,xmm,xmm: VEX.128.66.0F.WIG 55 /r, pp=01.
 (00001001 x86-encode-vandnpd-xmm-xmm-xmm
   (00001000 (dst src1 src2)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
-          (src1-code (x86-xmm-reg-code src1))
-          (src2-code (x86-xmm-reg-code src2)))
-      (00100111
-        #b11001000
-        (x86-vex3-byte2 1 (x86-high1 dst-code) (x86-high1 src1-code) (x86-high1 src2-code))
-        (x86-vex3-byte3 1 0 (x86-low3 src1-code))
-        #b01010111
-        (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src2-code))))))
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 1 #b01010101 dst src1 src2)))
 
-; VADDPD xmm,xmm,xmm (VEX.128): VEX.3.0F 66 58 /r
+; VADDPD xmm,xmm,xmm: VEX.128.66.0F.WIG 58 /r, pp=01.
 (00001001 x86-encode-vaddpd-xmm-xmm-xmm
   (00001000 (dst src1 src2)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
-          (src1-code (x86-xmm-reg-code src1))
-          (src2-code (x86-xmm-reg-code src2)))
-      (00100111
-        #b11001000
-        (x86-vex3-byte2 1 (x86-high1 dst-code) (x86-high1 src1-code) (x86-high1 src2-code))
-        (x86-vex3-byte3 1 0 (x86-low3 src1-code))
-        #b01011000
-        (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src2-code))))))
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 1 #b01011000 dst src1 src2)))
 
-; VADDPS xmm,xmm,xmm (VEX.128): VEX.3.0F 0F 58 /r
+; VADDPS xmm,xmm,xmm: VEX.128.0F.WIG 58 /r, pp=00.
 (00001001 x86-encode-vaddps-xmm-xmm-xmm
   (00001000 (dst src1 src2)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
-          (src1-code (x86-xmm-reg-code src1))
-          (src2-code (x86-xmm-reg-code src2)))
-      (00100111
-        #b11001000
-        (x86-vex3-byte2 0 (x86-high1 dst-code) (x86-high1 src1-code) (x86-high1 src2-code))
-        (x86-vex3-byte3 1 0 (x86-low3 src1-code))
-        #b01011000
-        (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src2-code))))))
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 0 #b01011000 dst src1 src2)))
 
