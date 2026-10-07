@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 373,
+    "selected_semantic_candidates": 398,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 117,
-    "remaining_semantic_inventory": 651,
+    "unplaced_selected_candidates": 142,
+    "remaining_semantic_inventory": 626,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -137,6 +137,506 @@
       ],
       "donor_repo": "juv4uk/lisp",
       "donor_source_file": "src/Primitives.hs",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.06aa667b66eda1fc",
+      "semantic_name": "COERCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "behavior": "convert a value to a requested representable target type according to language coercion rules",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/type-checking.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.09ef6cea8657b6ce",
+      "semantic_name": "BIT-VECTOR-P",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-PREDICATE",
+      "behavior": "test whether a value is a bit-vector",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/type-checking.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.0edca11200ae5700",
+      "semantic_name": "DEFCLASS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "OBJECT-SYSTEM-ALGEBRA",
+      "behavior": "define a named class with superclasses, slots and slot options",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/clos.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.0f1de1be19160f5a",
+      "semantic_name": "SLOT-VALUE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "OBJECT-SYSTEM-ALGEBRA",
+      "behavior": "read or designate the value stored in a named slot of an object instance",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/clos.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.15060349336a3708",
+      "semantic_name": "MAKE-INSTANCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "OBJECT-SYSTEM-ALGEBRA",
+      "behavior": "construct an instance of a class using initialization arguments",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/clos.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.192017552cbfb355",
+      "semantic_name": "SEARCH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-SEQUENCE-ALGEBRA",
+      "behavior": "return the first index at which one sequence occurs as a subsequence of another or the no-match result",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/strings.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/strings.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.21c5d59e5d2abd0e",
+      "semantic_name": "RETURN-FROM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LEXICAL-NONLOCAL-CONTROL",
+      "behavior": "transfer control to a lexically enclosing named block with an optional result value",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/condition-handlers.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/condition-handlers.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.2ebc9090d1217cbf",
+      "semantic_name": "CHARACTERP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-PREDICATE",
+      "behavior": "test whether a value is a character",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/type-checking.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.34a32de6e93ef9e9",
+      "semantic_name": "MAKE-HASH-TABLE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "behavior": "construct a mutable key/value table with an explicit or default equality predicate",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/hash-tables.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.38e9791ae8a745fe",
+      "semantic_name": "HASH-TABLE-P",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "behavior": "test whether a value is a hash-table object",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/hash-tables.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.41f530f6bb388791",
+      "semantic_name": "TYPEP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "behavior": "test whether a value belongs to the set denoted by a general type specifier",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/type-checking.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.45aba00bce4b45f3",
+      "semantic_name": "DEFGENERIC",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-FUNCTION-ALGEBRA",
+      "behavior": "define a named generic function and its dispatch interface",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/clos.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.46801b92169fff06",
+      "semantic_name": "MULTIPLE-VALUE-LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MULTIPLE-VALUE-ALGEBRA",
+      "behavior": "evaluate a form and materialize all of its returned values as an ordinary list",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/multiple-values.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/multiple-values.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.4bc8bc0337f5abe6",
+      "semantic_name": "CONCATENATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-SEQUENCE-ALGEBRA",
+      "behavior": "concatenate multiple sequences into a result sequence of an explicitly requested type",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/strings.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/strings.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.58f0048925c7dcf2",
+      "semantic_name": "UNLESS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "DERIVED-CONTROL-FORM",
+      "behavior": "evaluate a body only when its predicate is false and otherwise produce the language false/empty result",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/control-statements.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/control-statements.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.6ff4f70d305014a4",
+      "semantic_name": "BLOCK",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LEXICAL-NONLOCAL-CONTROL",
+      "behavior": "establish a named lexical return target around a body",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/condition-handlers.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/condition-handlers.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.740762c2f021d8bf",
+      "semantic_name": "GETHASH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "behavior": "lookup a key and return both its associated value and an independent found/not-found result",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/hash-tables.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.756f9665e03d3108",
+      "semantic_name": "DEFMETHOD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-FUNCTION-ALGEBRA",
+      "behavior": "define a specialized method attached to a generic function",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/clos.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.7cb614c79c6b9e69",
+      "semantic_name": "SUBTYPEP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "behavior": "test the subset relation between two type specifiers",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/type-checking.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.82ab0f11504ad273",
+      "semantic_name": "DESTRUCTURING-BIND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "BINDING-DESTRUCTURE-ALGEBRA",
+      "behavior": "bind variables by destructuring a value according to a lambda-list shaped pattern",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/functions.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/functions.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.96ccb98390f405d8",
+      "semantic_name": "HASH-TABLE-COUNT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "behavior": "return the number of key/value entries currently stored in a hash table",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/hash-tables.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.a915f51c8cabeae5",
+      "semantic_name": "WHEN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "DERIVED-CONTROL-FORM",
+      "behavior": "evaluate a body only when its predicate is true and otherwise produce the language false/empty result",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/control-statements.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/control-statements.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.b0637ddab7192426",
+      "semantic_name": "CHECK-TYPE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-CONDITION-BRIDGE",
+      "behavior": "verify a value/place satisfies a type specifier and signal a typed error when it does not",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/condition-handlers.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/condition-handlers.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.cab801cf8e258449",
+      "semantic_name": "FORMAT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRUCTURED-FORMATTING-ALGEBRA",
+      "behavior": "interpret a format-control language over arguments to produce text or directed output",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/format.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/format.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.e929ed55d5400863",
+      "semantic_name": "TYPE-OF",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-LISP-KOANS-HISTORICAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "behavior": "return a type specifier describing the dynamic type of a value",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_source_file": "koans-solved/type-checking.lisp",
       "ownership": "CORE-CANDIDATE",
       "law_status": "DONOR-ATTESTED-UNPLACED",
       "ratified_resident": false
@@ -7025,6 +7525,7 @@
     "knowledge/d10-historical-maclisp-v2.json",
     "knowledge/d10-noncore-reclassification-v1.json",
     "knowledge/d10-crossrepo-mal-v1.json",
-    "knowledge/d10-crossrepo-early-lisp-v1.json"
+    "knowledge/d10-crossrepo-early-lisp-v1.json",
+    "knowledge/d10-crossrepo-lisp-koans-v1.json"
   ]
 }
