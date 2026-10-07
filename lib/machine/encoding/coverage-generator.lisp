@@ -71,9 +71,8 @@
 
 (def encoder-coverage-count=?
   (lambda (binary-count observed-count)
-    (encoder-coverage-same?
-      binary-count
-      (encoder-coverage-count-as-binary observed-count))))
+    (= binary-count
+       (encoder-coverage-count-as-binary observed-count))))
 
 
 ; Conjunction over already-admitted predicate answers. Structural EMPTY is
@@ -329,7 +328,7 @@
       (list (quote projection-count)
         (encoder-coverage-count=? encoder-coverage-projection-partial-count (length encoder-coverage-partials)))
       (list (quote projection-orphan-zero)
-        (encoder-coverage-same? encoder-coverage-projection-orphan-count #b0))
+        (= encoder-coverage-projection-orphan-count #b0))
       (list (quote projection-subset)
         (encoder-coverage-partials-valid? encoder-coverage-index-rows encoder-coverage-partials))
       (list (quote legacy-head)
