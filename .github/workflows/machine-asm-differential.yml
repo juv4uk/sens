@@ -23,7 +23,7 @@ on:
 jobs:
   gas-nasm-byte-witness:
     name: GAS/NASM exact-byte witness
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
