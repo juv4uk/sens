@@ -77,10 +77,10 @@ fn same_packed_payload_wrong_width_falls_back() {
     ));
     assert_eq!((wrong_identity.width(), wrong_identity.packed_bits()), (4, 4));
 
-    let wrong = match data {
+    let wrong = match &data {
         Value::Pair(_, tail) => Value::Pair(
             Rc::new(Value::DomainIdentity(wrong_identity)),
-            tail,
+            Rc::clone(tail),
         ),
         other => panic!("expected application data, got {other}"),
     };
