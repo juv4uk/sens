@@ -307,6 +307,14 @@ fn dispatch_domain_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    // Lisp-owned macro residents (including D6 LET/LET*) have callable
+    // mechanism through their already-bound exact domain slot. Check that
+    // mechanism before Core-operation admission: D6 residency alone must not
+    // make arbitrary D6 values callable.
+    if let Some(Value::Macro(closure)) = environment.domain_code_slot(identity) {
+        return closures::apply_macro(closure, arguments, environment, span);
+    }
+
     if is_d3(identity, 0b001) {
         special_forms::exact_arity("D3:001", arguments, 1, span)?;
         return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
