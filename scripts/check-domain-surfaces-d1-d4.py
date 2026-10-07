@@ -9,10 +9,10 @@ from pathlib import Path
 from domain_tables import DOMAIN_TABLES, read_domain_tables
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCES = DOMAIN_TABLES[:5]
+SOURCES = DOMAIN_TABLES
 GENERATED = ROOT / "crates/sens/src/domain_surface_registry_generated.rs"
 
-EXPECTED_COUNTS = {"D1": 2, "D2": 4, "D3": 8, "D4": 16, "D5": 32}
+EXPECTED_COUNTS = {"D1": 2, "D2": 4, "D3": 8, "D4": 16, "D5": 32, "D6": 64}
 DISPLAY_ONLY = {("D2", f"{n:02b}") for n in range(4)} | {("D3", "000")}
 
 
@@ -46,7 +46,7 @@ def rust_string(value: str) -> str:
 def render_generated(rows: list[dict[str, str]]) -> str:
     lines = [
         "// GENERATED — DO NOT EDIT BY HAND.",
-        "// Authority: lib/domains/d1.lisp ... lib/domains/d5.lisp",
+        "// Authority: lib/domains/d1.lisp ... lib/domains/d6.lisp",
         "// Checked by: scripts/check-domain-surfaces-d1-d4.py",
         "",
         "#[derive(Clone, Copy, Debug, Eq, PartialEq)]",
@@ -68,7 +68,7 @@ def render_generated(rows: list[dict[str, str]]) -> str:
 
     for row in rows:
         width = int(row["domain"][1:])
-        source_routable = row["domain"] in {"D3", "D4", "D5"} and row["role"] != "display"
+        source_routable = row["domain"] in {"D3", "D4", "D5", "D6"} and row["role"] != "display"
         surfaces = ", ".join(
             [
                 "DomainSurfaceName { namespace: "
@@ -104,8 +104,8 @@ def render_generated(rows: list[dict[str, str]]) -> str:
 
 
 def validate(rows: list[dict[str, str]]) -> None:
-    if len(rows) != 62:
-        fail(f"expected 62 exact-domain rows, found {len(rows)}")
+    if len(rows) != 126:
+        fail(f"expected 126 exact-domain rows, found {len(rows)}")
 
     keys = [(row["domain"], row["bits"]) for row in rows]
     if len(set(keys)) != len(keys):
@@ -174,7 +174,7 @@ def main() -> int:
         )
 
     print("D1-D5-SURFACE-GUARD: PASS")
-    print("rows=62 source=lib/domains/d1..d5 uk+ukr+san+en exact-domain")
+    print("rows=126 source=lib/domains/d1..d6 uk+ukr+san+en exact-domain")
     return 0
 
 
