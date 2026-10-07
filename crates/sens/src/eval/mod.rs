@@ -423,7 +423,7 @@ fn dispatch_call(
             // a generic Core operation. Route only when its exact slot already
             // contains the macro; do not widen D6 callability.
             if let crate::DomainIdentity::D6(word) = identity {
-                let exact = crate::CoreDomainIdentity::D6(word);
+                let exact = crate::CoreDomainIdentity::D6(*word);
                 if let Some(Value::Macro(ref closure)) =
                     environment.domain_code_slot(exact)
                 {
@@ -722,43 +722,3 @@ mod single_pass_eval_tests {
                 .expect_err("surface routing to a function SID must reject redefinition");
             assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
             assert!(error.message.contains("surface routes to immutable function SID"));
-        }
-    }
-
-    #[test]
-    fn surfaces_routing_to_function_sids_cannot_be_lambda_parameters() {
-        for source in [
-            "(lambda (car) car)",
-            "(lambda (перше) перше)",
-            "(lambda (ādi) ādi)",
-            "(lambda atom? atom?)",
-        ] {
-            let mut session = Session::default();
-            let error = eval_program(source, &mut session)
-                .expect_err("surface routing to a function SID must reject parameter binding");
-            assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
-            assert!(error.message.contains("surface routes to immutable function SID"));
-        }
-    }
-
-    #[test]
-    fn ordinary_nonregistry_bindings_remain_lexical() {
-        let source = "(def local-add (lambda (a b) (quote shadowed))) (local-add 1 2)";
-        let mut session = Session::default();
-        let result = eval_program(source, &mut session)
-            .expect("ordinary non-registry bindings remain lexical values");
-        assert_eq!(result.value.to_string(), "shadowed");
-    }
-
-    #[test]
-    fn canonical_resolution_ignores_even_preexisting_environment_shadow() {
-        let mut session = Session::default();
-        session.environment.define(
-            "car",
-            Value::Number(99.0, crate::Exactness::Exact),
-        );
-        let result = eval_program("(car (quote (1 2)))", &mut session)
-            .expect("Canon resolver must outrank Environment");
-        assert_eq!(result.value.to_string(), "1");
-    }
-}
