@@ -1,9 +1,9 @@
-; #150/#211 — executable one-way machine authority + anti-hybrid guard.
+; #150/#211/#4057 — executable one-way machine authority + anti-hybrid guard.
 ; Admitted authority direction remains semantic-to-machine; reverse authority is RED.
-; #150 rejects direct machine -> semantic authority edges.
-; #211 additionally requires every bounded machine capability to name an
-; independent Lisp-owned semantic witness. Native/host results may realize
-; meaning but may never become their own answer key.
+; Current semantic authority is Contract 11.8 + ratified exact-domain laws.
+; Every bounded machine capability must name an independent exact-domain
+; semantic witness. Native/host results may realize meaning but may never
+; become their own answer key.
 
 (00001001 second (00001000 (x) (00000101 (00000110 x))))
 (00001001 third (00001000 (x) (00000101 (00000110 (00000110 x)))))
@@ -64,23 +64,23 @@
            ((00100010 value (00000001 missing)) (0)
             (machine-required-fields-state (00000110 required) row))))))))
 
-(00001001 lisp-owned-independent-witness-state
+(00001001 exact-domain-independent-witness-state
   (00001000 (witness)
     (00000111
       ((00000010 witness) () (00000001 rejected))
       ((00000010 witness) (1) (00000001 rejected))
       ((00000010 witness) (0)
        (00000111
-         ((00000011 (00000101 witness) (00000001 lisp-owned-expression))
+         ((00000011 (00000101 witness) (00000001 exact-domain-expression))
           (1)
           (00000001 admitted))
-         ((00000011 (00000101 witness) (00000001 lisp-owned-expression))
+         ((00000011 (00000101 witness) (00000001 exact-domain-expression))
           (0)
           (00000111
-            ((00000011 (00000101 witness) (00000001 lisp-owned-corpus))
+            ((00000011 (00000101 witness) (00000001 exact-domain-corpus))
              (1)
              (00000001 admitted))
-            ((00000011 (00000101 witness) (00000001 lisp-owned-corpus))
+            ((00000011 (00000101 witness) (00000001 exact-domain-corpus))
              (0)
              (00000001 rejected)))))))))
 
@@ -158,10 +158,10 @@
                           (00000001 independent-semantic-witness)
                           row))
                       (independent-state
-                        (lisp-owned-independent-witness-state
+                        (exact-domain-independent-witness-state
                           independent-witness)))
                  (00000111
-                   ((00000011 semantic-authority (00000001 my-lisp))
+                   ((00000011 semantic-authority (00000001 language-contract.lisp+ratified-domain-laws))
                     (1)
                     (00000111
                       ((00000011 reverse-edge (00000001 forbidden))
@@ -182,7 +182,7 @@
                       ((00000011 reverse-edge (00000001 forbidden))
                        (0)
                        (00000001 rejected))))
-                   ((00000011 semantic-authority (00000001 my-lisp))
+                   ((00000011 semantic-authority (00000001 language-contract.lisp+ratified-domain-laws))
                     (0)
                     (00000001 rejected)))))
               ((00000011 required-state (00000001 complete)) (0)
