@@ -18,6 +18,27 @@ fn store_session() -> Session {
     session
 }
 
+#[test]
+fn core4_bootstrap_binds_let_macro_to_exact_d6_slot() {
+    let mut session = store_session();
+    let let_value = session.environment.get("let").expect("let surface must be bound");
+    assert!(
+        matches!(let_value, sens::Value::Macro(_)),
+        "let must remain a Lisp-owned macro, got {let_value:?}"
+    );
+    let identity = sens::CoreDomainIdentity::D6(
+        sens::CoreD6::from_word(sens::Bit6::new(0b001000).expect("D6 LET"))
+    );
+    let slot = session
+        .environment
+        .domain_code_slot_for_test(identity)
+        .expect("D6 LET exact slot must be populated");
+    assert!(
+        matches!(slot, sens::Value::Macro(_)),
+        "D6 LET slot must contain the macro, got {slot:?}"
+    );
+}
+
 fn observe(session: &mut Session, source: &str) -> String {
     eval_program(source, session)
         .expect("content-store observation must execute")
