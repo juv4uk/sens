@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "execution-ladder-objective",
+  "wing": "Execution Ladder",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE"
+  ],
+  "question": "What structural transmission cost does exact-width canonical representation have after L0↔L1 parity is validated?",
+  "claim": "Measures structural transmission cost for the validated corpus only; it does not establish wall-clock speed, safety, or arbitrary-channel suitability.",
+  "witness": [
+    "README.md",
+    "run.py",
+    "results/bounded-d1-d3.json"
+  ],
+  "status": "ACTIVE",
+  "generation": "unknown",
+  "axis": "execution-ladder/structural-transmission-cost",
+  "reproduce": "python3 benchmarks/execution-ladder-objective/run.py benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl --out /tmp/execution-ladder-objective.json"
+}
