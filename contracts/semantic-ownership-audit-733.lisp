@@ -286,12 +286,12 @@
 
   ((key . precompiled-fasl-image)
    (path . "lib/core.lisp.fasl")
-   (category . execution-mechanism)
-   (question-answer . how-implementation-executes-it)
-   (semantic-role . binary-bootstrap-snapshot)
-   (future-action . retain-in-core)
+   (category . compatibility-reference)
+   (question-answer . historical-implementation-reference)
+   (semantic-role . legacy-binary-bootstrap-snapshot)
+   (future-action . retain-as-reference)
    (target-destination . "lib/core.lisp.fasl")
-   (rationale . "Pre-serialized binary memory snapshot of core.lisp for sub-millisecond host bootstrap."))
+   (rationale . "Compatibility/reference snapshot only. Current native/WASM bootstrap and freshness authority use lib/core4.lisp -> lib/core4.lisp.fasl; this legacy artifact must not be selected as the current Core loader merely because it exists."))
 
   ; --------------------------------------------------------------------------
   ; SECTION 4: KERNEL ADAPTERS (Bridges to the 4 autonomous islands)
