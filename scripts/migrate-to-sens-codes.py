@@ -1169,7 +1169,15 @@ def main():
             )
             if path not in selected_surfaces and path.exists()
         )
-        current_resolver_domains = tuple(selected_domains)
+        # Resolver evidence is broader than the callable code map: D8/D9
+        # human spellings must still resolve to their exact current identity
+        # so executable use can fail named/non-callable instead of degrading to
+        # Text7 or legacy SID evidence.
+        current_resolver_domains = tuple(
+            domain
+            for domain in CONTRACT_SURFACE_DOMAINS
+            if domain != "D9" or d9_enabled
+        )
     code_map = build_map(foundation, selected_domains)
     code_map = augment_code_map_with_domain_surfaces(code_map, selected_surfaces)
     if not args.contract_authority:
