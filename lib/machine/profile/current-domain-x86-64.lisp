@@ -1,24 +1,25 @@
-; #3989 — current exact-domain x86-64 machine projection.
+; #4068 — current width-safe exact-domain x86-64 machine projection.
 ;
 ; This is the current semantic->machine projection for already-witnessed
-; Contract 11.8 residents. Keys are exact domain literals; their width is part
-; of identity. This file does not infer meaning from a historical SID8 byte.
+; Contract 11.8 residents. Each row carries DomainIdentity::width() and
+; DomainIdentity::packed_bits() as separate scalar fields, so ordinary Lisp
+; reader width loss (#3946) cannot collapse D5:01010 into D4:1010.
 ;
-; It is intentionally small. Rows are admitted only when an existing machine
-; witness already proves the realization.
+; Row schema:
+;   (domain-width packed-bits class "machine path")
 
-(machine-domain-profile/1
+(machine-domain-profile/2
   (target x86-64)
   (cpu intel-core-i5-6400)
   (rows
-    (01010 fast-path "ADD / u32 inputs -> exact u64 result")     ; D5 PLUS
-    (01011 fast-path "SUB / u64, left>=right")     ; D5 DIFFERENCE
-    (10110 fast-path "IMUL / u32 inputs -> exact u64 result")    ; D5 TIMES
-    (10111 fast-path "CQO+IDIV / positive i64 equal operands")    ; D5 QUOTIENT
-    (11010 proof "CMP+SETL+MOVZX / internal bit; D1 boundary")     ; D5 LESSP
-    (11011 proof "CMP+SETG+MOVZX / internal bit; D1 boundary")     ; D5 GREATERP
-    (101 direct "CMP/SETE")                        ; D3 EQ
-    (110 control "CMP+Jcc")                        ; D3 COND
-    (111 runtime "STORE-pair-head+tail")           ; D3 CONS
-    (100 direct "LOAD-pair-head")                  ; D3 CAR
-    (011 direct "LOAD-pair-tail")))                ; D3 CDR
+    (5 10 fast-path "ADD / u32 inputs -> exact u64 result")       ; D5:01010 PLUS
+    (5 11 fast-path "SUB / u64, left>=right")                    ; D5:01011 DIFFERENCE
+    (5 22 fast-path "IMUL / u32 inputs -> exact u64 result")      ; D5:10110 TIMES
+    (5 23 fast-path "CQO+IDIV / positive i64 equal operands")    ; D5:10111 QUOTIENT
+    (5 26 proof "CMP+SETL+MOVZX / internal bit; D1 boundary")    ; D5:11010 LESSP
+    (5 27 proof "CMP+SETG+MOVZX / internal bit; D1 boundary")    ; D5:11011 GREATERP
+    (3 5 direct "CMP/SETE")                                      ; D3:101 EQ
+    (3 6 control "CMP+Jcc")                                      ; D3:110 COND
+    (3 7 runtime "STORE-pair-head+tail")                         ; D3:111 CONS
+    (3 4 direct "LOAD-pair-head")                                ; D3:100 CAR
+    (3 3 direct "LOAD-pair-tail")))                              ; D3:011 CDR
