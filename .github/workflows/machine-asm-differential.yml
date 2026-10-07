@@ -1,0 +1,36 @@
+name: machine-asm-differential
+
+concurrency:
+  group: machine-asm-differential-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/machine_asm_differential.rs"
+      - "lib/machine/encoding/x86-64.lisp"
+      - "lib/machine/admission/x86-64.lisp"
+      - ".github/workflows/machine-asm-differential.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/machine_asm_differential.rs"
+      - "lib/machine/encoding/x86-64.lisp"
+      - "lib/machine/admission/x86-64.lisp"
+      - ".github/workflows/machine-asm-differential.yml"
+  workflow_dispatch:
+
+jobs:
+  gas-nasm-byte-witness:
+    name: GAS/NASM exact-byte witness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install external assembler witnesses
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils nasm
+      - name: Compare external assembler bytes with Lisp-owned encoder
+        run: cargo test --locked -p sens --test machine_asm_differential -- --ignored --nocapture
