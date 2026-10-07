@@ -24,6 +24,74 @@ fn eval_bytes(source: &str, session: &mut Session) -> String {
         .to_string()
 }
 
+fn admitted_encoder_session() -> Session {
+    let mut session = encoder_session();
+    let path = repo_root().join("lib/machine/admission/x86-64.lisp");
+    let source = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
+    eval_program(&source, &mut session).expect("x86-64 admission must load over encoder");
+    session
+}
+
+
+#[test]
+fn binary_u3_machine_field_projection_is_explicit_total_and_fail_closed() {
+    let mut session = encoder_session();
+    for (source, expected) in [
+        ("#b0", "0"),
+        ("#b1", "1"),
+        ("#b10", "2"),
+        ("#b11", "3"),
+        ("#b100", "4"),
+        ("#b101", "5"),
+        ("#b110", "6"),
+        ("#b111", "7"),
+    ] {
+        let form = format!("(x86-project-bin3-to-mechanism-u3 {source})");
+        assert_eq!(eval_bytes(&form, &mut session), expected, "form: {form}");
+    }
+
+    assert_eq!(
+        eval_bytes("(x86-project-bin3-to-mechanism-u3 #b1000)", &mut session),
+        "()",
+        "u3 projection must fail closed outside 0..7"
+    );
+}
+
+#[test]
+fn admitted_rdrand_rdseed_programs_materialize_expected_bytes_through_binary_u3_bridge() {
+    let mut session = admitted_encoder_session();
+
+    assert_eq!(
+        eval_bytes(
+            "(x86-encode-admitted-program (quote ((rdrand-r64 rax) (ret))))",
+            &mut session
+        ),
+        "(72 15 199 240 195)"
+    );
+    assert_eq!(
+        eval_bytes(
+            "(x86-encode-admitted-program (quote ((rdrand-r64 r8) (ret))))",
+            &mut session
+        ),
+        "(73 15 199 240 195)"
+    );
+    assert_eq!(
+        eval_bytes(
+            "(x86-encode-admitted-program (quote ((rdseed-r64 rax) (ret))))",
+            &mut session
+        ),
+        "(72 15 199 248 195)"
+    );
+    assert_eq!(
+        eval_bytes(
+            "(x86-encode-admitted-program (quote ((rdseed-r64 r15) (ret))))",
+            &mut session
+        ),
+        "(73 15 199 255 195)"
+    );
+}
+
 #[test]
 fn register_ordinals_10_and_11_preserve_decimal_values() {
     let mut session = encoder_session();
