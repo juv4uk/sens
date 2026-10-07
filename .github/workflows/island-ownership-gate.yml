@@ -24,11 +24,9 @@ on:
 
 jobs:
   gate:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: GPU runner identity
-        run: nvidia-smi || true
       - name: Verify island ownership gate
         run: python3 scripts/check-island-ownership-gate.py
