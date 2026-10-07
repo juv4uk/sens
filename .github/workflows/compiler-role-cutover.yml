@@ -50,10 +50,9 @@ concurrency:
 
 jobs:
   cutover:
-    # Hosted runners are unavailable for this private repository.
-    # Use the known-live local GPU-labelled host, while keeping Rust/Python
-    # control-plane CPU pressure bounded below.
-    runs-on: [self-hosted, guix]
+    # Compiler-role cutover is CPU-only; use the public-repo hosted runner.
+    # Actual CUDA lanes remain on GPU-labelled workflows.
+    runs-on: ubuntu-latest
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
