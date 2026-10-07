@@ -143,7 +143,7 @@ fn render_request(
 ) -> String {
     let (domain, bits) = identity_transport(input.identity);
     format!(
-        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (identity . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{}\") (proof-ref . \"{}\") (semantic-status . {})))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (provenance . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"{}\") (authority-sha256 . \"{}\") (compiler-nucleus-sha256 . \"{}\") (contract . {}))))",
+        "(compiler-semantic-request\n           (schema . compiler-semantic-input/1)\n           (fixture-id . \"{fixture_id}\")\n           (ідентичність . ((domain . {domain}) (bits . {bits})))\n           (law . ((authority-ref . \"{}\") (proof-ref . \"{}\") (semantic-status . {})))\n           (mechanism . ((execution-role . {}) (mechanism-status . unknown) (mechanism-ref . ())))\n           (походження . ((repository . \"juv4uk/sens\") (revision . \"{source_commit}\") (authority-path . \"{}\") (authority-sha256 . \"{}\") (compiler-nucleus-sha256 . \"{}\") (contract . {}))))",
         input.authority_ref,
         input.proof_ref,
         input.semantic_status,
@@ -231,6 +231,10 @@ mod tests {
         assert!(artifact.contains(&format!("(semantic-request-sha256 . \"{request_digest}\")")));
         assert!(artifact.contains(&format!("(semantic-request . {request})")));
         assert!(artifact.contains("(artifact-status . canonical-backend-neutral)"));
+        assert!(request.contains("(ідентичність . ((domain . D3) (bits . 010)))"));
+        assert!(request.contains("(походження . ((repository . \\"juv4uk/sens\\")"));
+        assert!(!request.contains("(identity ."));
+        assert!(!request.contains("(provenance ."));
     }
 
     #[test]
