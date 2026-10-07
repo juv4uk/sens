@@ -78,6 +78,38 @@ fn current_car_cons_witness_stays_exact_d3_before_machine_effects() {
 }
 
 #[test]
+fn structural_u64_carrier_helpers_accept_the_bounded_vertical_day_values() {
+    let mut session = machine_session();
+
+    assert_eq!(
+        eval_value("(machine-effect-exact-integer? 2)", &mut session),
+        "t",
+        "exact-integer recognition must precede the structural u64 carrier"
+    );
+    assert_eq!(
+        eval_value(
+            "(machine-effect-within-inclusive-integer-range? 2 0 18446744073709551615)",
+            &mut session,
+        ),
+        "t",
+        "u64 inclusive range witness must accept the bounded value 2"
+    );
+    assert_eq!(
+        eval_value("(machine-effect-u64-carrier? 2)", &mut session),
+        "t",
+        "shared u64 carrier must accept the bounded value 2"
+    );
+    assert_eq!(
+        eval_value(
+            "(machine-effect-structural-slot? (00000001 field0))",
+            &mut session,
+        ),
+        "t",
+        "abstract field0 must be a target-neutral structural slot"
+    );
+}
+
+#[test]
 fn structural_effect_is_target_neutral_and_layout_free() {
     let source = fs::read_to_string(repo_root().join("lib/machine/effects/structural.lisp"))
         .expect("structural effect source");
