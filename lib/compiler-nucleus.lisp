@@ -23,15 +23,15 @@
 ; and rejects any historical Sid/Call node.
 
 (визначити compiler-authority-find
-  (функція (identity rows)
+  (функція (ідентичність rows)
     (за-умовою
       ((атом? rows) ())
-      ((тотожне? identity (перше (перше rows))) (перше rows))
-      ((атом? ()) (compiler-authority-find identity (решта rows))))))
+      ((тотожне? ідентичність (перше (перше rows))) (перше rows))
+      ((атом? ()) (compiler-authority-find ідентичність (решта rows))))))
 
 (визначити compiler-nucleus
-  (функція (identity authority)
-    (compiler-authority-find identity authority)))
+  (функція (ідентичність authority)
+    (compiler-authority-find ідентичність authority)))
 
 
 ; Representation-only bootstrap seam for #3808.
@@ -39,8 +39,8 @@
 ; chooses when to invoke it; the host function may reveal only exact width/bits
 ; and has no identity->meaning authority.
 (визначити compiler-domain-shape
-  (функція (decompose identity)
-    (decompose identity)))
+  (функція (decompose ідентичність)
+    (decompose ідентичність)))
 
 
 ; #3809 — bounded compiler-role derivation from generated, provenance-bound
@@ -197,16 +197,16 @@
       ((compiler-true seed) ()))))
 
 (визначити compiler-role-from-l1-l5
-  (функція (decompose identity law)
+  (функція (decompose ідентичність law)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose identity))
+         (compiler-shape-width (decompose ідентичність))
          (compiler-law-width law))
        (compiler-role-from-l1-l5-bits
-         identity
-         (compiler-shape-bits (decompose identity))
+         ідентичність
+         (compiler-shape-bits (decompose ідентичність))
          law))
-      ((compiler-true identity) ()))))
+      ((compiler-true ідентичність) ()))))
 
 
 ; #3824 — D4 bootstrap-role derivation from the ordered owner-ratified fibre.
@@ -241,44 +241,44 @@
       ((compiler-true seed) ()))))
 
 (визначити compiler-role-from-d4-bootstrap
-  (функція (decompose identity law)
+  (функція (decompose ідентичність law)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose identity))
+         (compiler-shape-width (decompose ідентичність))
          (compiler-d4-law-width law))
        (compiler-role-from-d4-bootstrap-bits
-         identity
-         (compiler-shape-bits (decompose identity))
+         ідентичність
+         (compiler-shape-bits (decompose ідентичність))
          law))
-      ((compiler-true identity) ()))))
+      ((compiler-true ідентичність) ()))))
 
 ; One production role query for the whole current compiler nucleus.  Domain
 ; width selects which already-ratified structural law is applicable; neither
 ; the host nor this function infers meaning from an equal packed payload.
 (визначити compiler-lowering-role-from-l1-l5
-  (функція (decompose identity law)
+  (функція (decompose ідентичність law)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose identity))
+         (compiler-shape-width (decompose ідентичність))
          (compiler-law-width law))
        (compiler-lowering-role-from-l1-l5-bits
-         identity
-         (compiler-shape-bits (decompose identity))
+         ідентичність
+         (compiler-shape-bits (decompose ідентичність))
          law))
-      ((compiler-true identity) ()))))
+      ((compiler-true ідентичність) ()))))
 
 (визначити compiler-lowering-role-from-laws
-  (функція (decompose identity d3-law d4-law)
+  (функція (decompose ідентичність d3-law d4-law)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose identity))
+         (compiler-shape-width (decompose ідентичність))
          (compiler-law-width d3-law))
-       (compiler-lowering-role-from-l1-l5 decompose identity d3-law))
+       (compiler-lowering-role-from-l1-l5 decompose ідентичність d3-law))
       ((тотожне?
-         (compiler-shape-width (decompose identity))
+         (compiler-shape-width (decompose ідентичність))
          (compiler-d4-law-width d4-law))
-       (compiler-role-from-d4-bootstrap decompose identity d4-law))
-      ((compiler-true identity) ()))))
+       (compiler-role-from-d4-bootstrap decompose ідентичність d4-law))
+      ((compiler-true ідентичність) ()))))
 
 
 ; #3810 — production request cutover.
@@ -286,26 +286,26 @@
 ; transport LAW/proof/provenance values, but it does not select the role.
 
 (визначити compiler-request-from-role
-  (функція (seed identity role proof-ref provenance)
+  (функція (seed ідентичність role proof-ref походження)
     (за-умовою
       ((тотожне? role ()) ())
       ((compiler-true seed)
        (сполучити
-         identity
+         ідентичність
          (сполучити
            role
            (сполучити
              proof-ref
-             (сполучити provenance ()))))))))
+             (сполучити походження ()))))))))
 
 (визначити compiler-request-from-l1-l5
-  (функція (decompose identity law proof-ref provenance)
+  (функція (decompose ідентичність law proof-ref походження)
     (compiler-request-from-role
-      identity
-      identity
-      (compiler-role-from-l1-l5 decompose identity law)
+      ідентичність
+      ідентичність
+      (compiler-role-from-l1-l5 decompose ідентичність law)
       proof-ref
-      provenance)))
+      походження)))
 
 
 ; #3839 — whole-program compiler traversal.
@@ -321,27 +321,27 @@
 ; subtree.  Backend lowering/installation remains outside this program.
 
 (визначити compiler-request-from-laws
-  (функція (decompose identity d3-law d4-law d3-proof d4-proof provenance)
+  (функція (decompose ідентичність d3-law d4-law d3-proof d4-proof походження)
     (за-умовою
       ((тотожне?
-         (compiler-shape-width (decompose identity))
+         (compiler-shape-width (decompose ідентичність))
          (compiler-law-width d3-law))
        (compiler-request-from-role
-         identity
-         identity
-         (compiler-lowering-role-from-l1-l5 decompose identity d3-law)
+         ідентичність
+         ідентичність
+         (compiler-lowering-role-from-l1-l5 decompose ідентичність d3-law)
          d3-proof
-         provenance))
+         походження))
       ((тотожне?
-         (compiler-shape-width (decompose identity))
+         (compiler-shape-width (decompose ідентичність))
          (compiler-d4-law-width d4-law))
        (compiler-request-from-role
-         identity
-         identity
-         (compiler-role-from-d4-bootstrap decompose identity d4-law)
+         ідентичність
+         ідентичність
+         (compiler-role-from-d4-bootstrap decompose ідентичність d4-law)
          d4-proof
-         provenance))
-      ((compiler-true identity) ()))))
+         походження))
+      ((compiler-true ідентичність) ()))))
 
 (визначити compiler-result-ok
   (функція (requests)
@@ -484,7 +484,7 @@
 
 (визначити compiler-program-list
   (функція
-    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof provenance)
+    (shape-or-empty decompose nodes d3-law d4-law d3-proof d4-proof походження)
     (за-умовою
       ((атом? nodes) (compiler-result-ok ()))
       ((compiler-true ())
@@ -497,7 +497,7 @@
            d4-law
            d3-proof
            d4-proof
-           provenance)
+           походження)
          (compiler-program-list
            shape-or-empty
            decompose
@@ -506,11 +506,11 @@
            d4-law
            d3-proof
            d4-proof
-           provenance))))))
+           походження))))))
 
 (визначити compiler-program-node
   (функція
-    (shape-or-empty decompose node d3-law d4-law d3-proof d4-proof provenance)
+    (shape-or-empty decompose node d3-law d4-law d3-proof d4-proof походження)
     (за-умовою
       ((атом? node) (compiler-result-ok ()))
       ((атом? (shape-or-empty (перше node)))
@@ -522,7 +522,7 @@
          d4-law
          d3-proof
          d4-proof
-         provenance))
+         походження))
       ((compiler-true ())
        (compiler-domain-result
          (compiler-request-from-laws
@@ -532,7 +532,7 @@
            d4-law
            d3-proof
            d4-proof
-           provenance)
+           походження)
          (решта node)
          (compiler-program-list
            shape-or-empty
@@ -545,17 +545,17 @@
                d4-law
                d3-proof
                d4-proof
-               provenance)
+               походження)
              (решта node))
            d3-law
            d4-law
            d3-proof
            d4-proof
-           provenance))))))
+           походження))))))
 
 (визначити compiler-compile-program
   (функція
-    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof provenance)
+    (shape-or-empty decompose program d3-law d4-law d3-proof d4-proof походження)
     (compiler-program-list
       shape-or-empty
       decompose
@@ -564,7 +564,7 @@
       d4-law
       d3-proof
       d4-proof
-      provenance)))
+      походження)))
 
 
 ; #3839 whole-program artifact composition.
