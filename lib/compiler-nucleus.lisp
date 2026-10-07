@@ -70,7 +70,12 @@
 (00001001 compiler-bits-equal
   (00001000 (seed left right)
     (00000111
-      ((00000010 left) (00000010 right))
+      ((00000011 left ())
+       (00000011 right ()))
+      ((00000010 left)
+       (00000111
+         ((00000010 right) (compiler-true seed))
+         ((compiler-true seed) (compiler-false seed))))
       ((00000010 right) (compiler-false seed))
       ((00000011 (00000101 left) (00000101 right))
        (compiler-bits-equal seed (00000110 left) (00000110 right)))
@@ -85,6 +90,7 @@
 (00001001 compiler-xor-bits
   (00001000 (seed left right)
     (00000111
+      ((00000011 left) ())
       ((00000010 left)
        (00000111
          ((00000010 right) ())
