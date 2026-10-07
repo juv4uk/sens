@@ -1,0 +1,37 @@
+name: TEMP exact-domain compiler-nucleus generator 4289
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "crates/sens-cli/src/bin/sens-to-sens.rs"
+      - "crates/sens-cli/tests/to_sens.rs"
+      - "crates/sens/src/lib.rs"
+      - "lib/compiler-nucleus.lisp"
+      - ".github/workflows/temp-exact-domain-generator-4289.yml"
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build exact-domain writer
+        run: cargo build --quiet -p sens-cli --bin sens-to-sens
+      - name: Generate compiler nucleus in exact-domain mode
+        run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --exact-domain lib/compiler-nucleus.lisp
+      - name: Prove migration is complete
+        run: |
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain lib/compiler-nucleus.lisp
+      - name: Check exact-width output
+        run: |
+          ! grep -nE '^[[:space:]]*;|#[bB]|"([01]+)"' lib/compiler-nucleus.lisp
+          test -s lib/compiler-nucleus.lisp
+      - name: Upload generated compiler nucleus
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-nucleus-exact-domain-4289
+          path: lib/compiler-nucleus.lisp
+          if-no-files-found: error
