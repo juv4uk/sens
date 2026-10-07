@@ -13,6 +13,9 @@ struct SiliconRow<'a> {
     expression: &'a str,
     expected: &'a str,
     observed: String,
+    classification: &'a str,
+    feature_gate: &'a str,
+    witness_kind: &'a str,
 }
 
 fn repo_root() -> PathBuf {
@@ -73,7 +76,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
 
     let mut json = String::new();
     json.push_str("{\n");
-    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v1\",\n");
+    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v2\",\n");
     json.push_str(&format!("  \"sens_commit\": \"{}\",\n", json_escape(&sha)));
     json.push_str("  \"target\": \"x86_64-linux-owner-self-hosted\",\n");
     json.push_str(&format!(
@@ -84,7 +87,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
         "  \"cpu_flags\": \"{}\",\n",
         json_escape(cpu_flags)
     ));
-    json.push_str("  \"classification\": \"execute-safe\",\n");
+    json.push_str("  \"classification\": \"mixed-per-row\",\n");
     json.push_str(
         "  \"admission_boundary\": \"lib/machine/admission/x86-64.lisp:x86-call-admitted-u64\",\n",
     );
@@ -99,12 +102,15 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
     for (index, row) in rows.iter().enumerate() {
         json.push_str("    {");
         json.push_str(&format!(
-            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"status\":\"pass\"",
+            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"classification\":\"{}\",\"feature_gate\":\"{}\",\"witness_kind\":\"{}\",\"status\":\"pass\"",
             json_escape(row.id),
             json_escape(row.families),
             json_escape(row.expression),
             json_escape(row.expected),
             json_escape(&row.observed),
+            json_escape(row.classification),
+            json_escape(row.feature_gate),
+            json_escape(row.witness_kind),
         ));
         json.push('}');
         if index + 1 != rows.len() {
@@ -352,6 +358,44 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             expression,
             expected,
             observed,
+            classification: "execute-safe",
+            feature_gate: "none",
+            witness_kind: "deterministic-exact-value",
+        });
+    }
+
+    // ADR-012 / #4154: nondeterministic hardware witnesses assert only
+    // guaranteed invariants, never one sampled random payload.
+    for (id, feature, expression) in [
+        (
+            "rdrand-status",
+            "rdrand",
+            "(x86-call-admitted-u64 (quote ((rdrand-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
+        ),
+        (
+            "rdseed-status",
+            "rdseed",
+            "(x86-call-admitted-u64 (quote ((rdseed-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
+        ),
+    ] {
+        assert!(
+            cpu_flags.split_whitespace().any(|flag| flag == feature),
+            "owner i5-6400 silicon lane expected CPU feature {feature}, flags were: {cpu_flags}"
+        );
+        let observed = eval_value(expression, &mut session);
+        assert!(
+            observed == "0" || observed == "1",
+            "{id} must expose only the architectural CF status bit, observed {observed}"
+        );
+        rows.push(SiliconRow {
+            id,
+            families: feature,
+            expression,
+            expected: "0|1",
+            observed,
+            classification: "platform-gated",
+            feature_gate: feature,
+            witness_kind: "nondeterministic-status-invariant",
         });
     }
 
