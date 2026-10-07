@@ -13,8 +13,8 @@
 
 use crate::{
     canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
-    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
-    load_core_library, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, load_core_library,
+    parse_mixed_exact_domain, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
     CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
     Session, Span, Value,
 };
@@ -638,6 +638,12 @@ fn decode_language_lowering_role(
     }
 }
 
+fn load_compiler_nucleus(session: &mut Session) -> Result<(), LanguageError> {
+    let expressions = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)?;
+    eval_parsed_expressions(&expressions, session)?;
+    Ok(())
+}
+
 /// Derive the complete current compiler lowering role by executing the
 /// SENS-owned compiler law over the ratified D3 and D4 structural inputs.
 pub fn compiler_lowering_role_from_sens(
@@ -656,7 +662,7 @@ pub fn compiler_lowering_role_from_sens(
         .environment
         .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
 
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    load_compiler_nucleus(&mut session)?;
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_lowering_role(&result)
@@ -709,7 +715,7 @@ pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, Lang
     let mut session = Session::default();
     load_core_library(&mut session)?;
     install_compiler_program_bindings(&mut session, program)?;
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    load_compiler_nucleus(&mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
 }
 
@@ -764,7 +770,7 @@ pub fn compiler_program_artifact_from_sens(
             Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
         ]),
     );
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    load_compiler_nucleus(&mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
 }
 
@@ -926,7 +932,7 @@ pub fn verify_compiler_program_artifact_from_sens(
     role_session
         .environment
         .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut role_session)?;
+    load_compiler_nucleus(&mut role_session)?;
 
     let verified_requests = requests
         .into_iter()
@@ -1178,7 +1184,7 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses as mixed exact-domain source");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1230,7 +1236,7 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses as mixed exact-domain source");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1274,7 +1280,7 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses as mixed exact-domain source");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
