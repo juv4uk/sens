@@ -27,6 +27,13 @@ from pathlib import Path
 SCHEMA = "sens-store-air-load/v1"
 FIXTURE_SCHEMA = "sens-store-air-load-fixtures/v1"
 REPO = "juv4uk/sens"
+CURRENT_CONTRACT = "11.8"
+SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
+CURRENT_FOUNDATION = "D1-D9"
+MEASURED_CARRIERS = "W1-W8"
+D9_STATUS = "BLOCKED-CARRIER"
+D9_REASON = "BinarySourceWord/DomainIdentity currently materialize W1-W8 only"
+D9_MECHANISM_OWNER = "#4038 / PR #4044"
 PACKING_EXAMPLE = "store_air_load_repr"
 SEMANTIC_EXAMPLE = "current_en_vs_d1d8_cpu"
 SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -339,6 +346,11 @@ def main() -> int:
     fixtures = load_fixtures(args.fixtures.resolve())
     current_git_sha = git_sha(repo)
     current_contract = contract_version(repo)
+    if current_contract != CURRENT_CONTRACT:
+        raise ValueError(
+            f"this evidence generation is pinned to Contract {CURRENT_CONTRACT}; "
+            f"found {current_contract}. Start a new generation replay instead of relabeling rows."
+        )
 
     if args.packing_helper and args.semantic_helper:
         packing_helper = args.packing_helper.resolve()
@@ -354,6 +366,12 @@ def main() -> int:
 
     common_provenance = {
         "runner": "store-air-load/v1",
+        "semantic_generation": SEMANTIC_GENERATION,
+        "current_foundation": CURRENT_FOUNDATION,
+        "measured_carriers": MEASURED_CARRIERS,
+        "d9_status": D9_STATUS,
+        "d9_reason": D9_REASON,
+        "d9_mechanism_owner": D9_MECHANISM_OWNER,
         "python": platform.python_version(),
         "platform": platform.platform(),
         "packing_helper_sha256": sha256_file(packing_helper),
