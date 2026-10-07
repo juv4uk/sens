@@ -116,6 +116,27 @@ fn push_head_edit(head: &Expr, surface: &str, sens: Sens8, analysis: &mut Analys
     });
 }
 
+fn push_compatibility_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysis) {
+    if !analysis.exact_domain {
+        return;
+    }
+    let Some(identity) =
+        semantic_registry_export::exact_domain_successor_for_compatibility_id(sens)
+    else {
+        analysis.blocked_exact_domain += 1;
+        return;
+    };
+    analysis.edits.push(Edit {
+        start: head.span.start,
+        end: head.span.end,
+        replacement: format!(
+            "{:0width$b}",
+            identity.packed_bits(),
+            width = identity.width()
+        ),
+    });
+}
+
 fn collect_parameter_names(expression: &Expr, out: &mut HashSet<String>) {
     match &expression.kind {
         ExprKind::Symbol(name) => {
@@ -255,6 +276,8 @@ fn walk_expr(
         let kind = head_kind(sens);
         if let Some(surface) = surface {
             push_head_edit(head, surface, sens, analysis);
+        } else {
+            push_compatibility_head_edit(head, sens, analysis);
         }
 
         match kind {
@@ -519,7 +542,7 @@ fn main() {
 
         if exact_domain && analysis.blocked_exact_domain != 0 {
             eprintln!(
-                "sens-to-sens: {filename}: {} admitted named call(s) have no proven exact-domain successor; file left unchanged",
+                "sens-to-sens: {filename}: {} call head(s) have no proven exact-domain successor; file left unchanged",
                 analysis.blocked_exact_domain
             );
             failed = true;
@@ -570,7 +593,7 @@ fn main() {
         );
         if exact_domain && remaining.blocked_exact_domain != 0 {
             eprintln!(
-                "sens-to-sens: {filename}: rewritten source still has {} named call(s) without exact-domain identity",
+                "sens-to-sens: {filename}: rewritten source still has {} call head(s) without exact-domain identity",
                 remaining.blocked_exact_domain
             );
             failed = true;
@@ -686,6 +709,23 @@ mod tests {
         assert_eq!(rewrite_exact(source).unwrap(), expected);
     }
 
+    #[test]
+    fn exact_domain_mode_retires_mapped_legacy_eight_bit_heads() {
+        let source = "(00001001 f (00001000 (x) (00000101 x)))";
+        assert_eq!(
+            rewrite_exact(source).unwrap(),
+            "(0011 f (0010 (x) (100 x)))"
+        );
+    }
+
+    #[test]
+    fn exact_domain_mode_blocks_unmapped_legacy_eight_bit_head() {
+        let hosts = no_host();
+        let analysis =
+            analyze_with("(00001100 1 2)", &hosts, false, true).expect("source parses");
+        assert!(analysis.edits.is_empty());
+        assert_eq!(analysis.blocked_exact_domain, 1);
+    }
     #[test]
     fn exact_domain_mode_fails_closed_without_exact_successor() {
         let hosts = no_host();
