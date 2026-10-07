@@ -1,0 +1,46 @@
+name: TEMP generate active lib exact-domain
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [gen/active-lib-exact-domain-4305]
+    paths:
+      - ".github/workflows/temp-generate-active-lib-exact.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: gen/active-lib-exact-domain-4305
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build exact-domain migrator
+        run: cargo build -p sens-cli --bin sens-to-sens
+      - name: Generate compiler nucleus and native-first
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens-to-sens --exact-domain lib/compiler-nucleus.lisp
+          target/debug/sens-to-sens --exact-domain lib/machine/dispatch/native-first.lisp
+          target/debug/sens-to-sens --check --exact-domain lib/compiler-nucleus.lisp
+          target/debug/sens-to-sens --check --exact-domain lib/machine/dispatch/native-first.lisp
+      - name: Show generated diff
+        run: git diff --check && git diff --stat && git diff -- lib/compiler-nucleus.lisp lib/machine/dispatch/native-first.lisp
+      - name: Commit generated exact-domain source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/compiler-nucleus.lisp lib/machine/dispatch/native-first.lisp
+          if git diff --cached --quiet; then
+            echo "no generated changes"
+            exit 1
+          fi
+          git commit -m "gen: migrate active lib to exact-domain SENS"
+          git push origin HEAD:gen/active-lib-exact-domain-4305
