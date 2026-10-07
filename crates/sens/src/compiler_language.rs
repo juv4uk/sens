@@ -59,6 +59,27 @@ pub struct CompilerProgramBootstrapBundle {
     pub language_contract_version: &'static str,
     pub compiler_nucleus_sha256: String,
 }
+
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct VerifiedCompilerProgramRequest {
+    pub identity: CoreDomainIdentity,
+    pub lowering_role: CompilerLoweringRole,
+    pub proof_ref: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct VerifiedCompilerProgramArtifact {
+    pub program_wire_sha256: String,
+    pub sens_revision: String,
+    pub authority_path: String,
+    pub authority_sha256: String,
+    pub language_contract_version: String,
+    pub compiler_nucleus_sha256: String,
+    pub semantic_requests_sha256: String,
+    pub semantic_requests: Value,
+    pub requests: Vec<VerifiedCompilerProgramRequest>,
+}
 const LAW_PROJECTION: &str =
     include_str!("../../../knowledge/bija3-l1-l5-structure-projection.json");
 const LAW_AUTHORITY: &str = include_str!("../../../contracts/bija3-l1-l5-ratification.lisp");
@@ -180,6 +201,138 @@ fn sha256_hex(bytes: &[u8]) -> String {
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect()
+}
+
+
+fn compiler_artifact_list<'a>(
+    value: &'a Value,
+    context: &str,
+) -> Result<Vec<&'a Value>, LanguageError> {
+    let mut items = Vec::new();
+    let mut cursor = value;
+    loop {
+        match cursor {
+            Value::Nil => return Ok(items),
+            Value::Pair(head, tail) => {
+                items.push(head.as_ref());
+                cursor = tail.as_ref();
+            }
+            other => {
+                return Err(invalid_projection(format!(
+                    "{context} must be a proper list, got {other}"
+                )));
+            }
+        }
+    }
+}
+
+fn compiler_artifact_field<'a>(
+    rows: &[&'a Value],
+    field: &str,
+) -> Result<&'a Value, LanguageError> {
+    let mut found = None;
+    for row in rows {
+        let parts = compiler_artifact_list(row, "compiler artifact field")?;
+        if parts.len() != 2 {
+            return Err(invalid_projection(
+                "compiler artifact fields must contain exactly name and value",
+            ));
+        }
+        let Value::Symbol(name) = parts[0] else {
+            return Err(invalid_projection(
+                "compiler artifact field name must be a symbol",
+            ));
+        };
+        if name.as_ref() == field {
+            if found.is_some() {
+                return Err(invalid_projection(format!(
+                    "compiler artifact field {field} is duplicated"
+                )));
+            }
+            found = Some(parts[1]);
+        }
+    }
+    found.ok_or_else(|| invalid_projection(format!("compiler artifact field {field} is missing")))
+}
+
+fn compiler_artifact_string(value: &Value, field: &str) -> Result<String, LanguageError> {
+    match value {
+        Value::String(value) => Ok(value.to_string()),
+        other => Err(invalid_projection(format!(
+            "compiler artifact field {field} must be a string, got {other}"
+        ))),
+    }
+}
+
+fn valid_lower_hex(value: &str, len: usize) -> bool {
+    value.len() == len
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+}
+
+fn verify_compiler_program_request(
+    request: &Value,
+    role_session: &mut Session,
+) -> Result<VerifiedCompilerProgramRequest, LanguageError> {
+    let parts = compiler_artifact_list(request, "compiler semantic request")?;
+    if parts.len() != 4 {
+        return Err(invalid_projection(
+            "compiler semantic request must contain identity, role, proof and provenance",
+        ));
+    }
+
+    let Value::DomainIdentity(identity) = parts[0] else {
+        return Err(invalid_projection(
+            "compiler semantic request identity must be exact DomainIdentity",
+        ));
+    };
+    let core = identity.core_operation().ok_or_else(|| {
+        invalid_projection("compiler semantic request identity is not a callable Core identity")
+    })?;
+    let role = decode_language_lowering_role(parts[1])?
+        .ok_or_else(|| invalid_projection("compiler semantic request role must not be empty"))?;
+    let derived = eval_parsed_expressions(&[language_role_call(core)], role_session)?.value;
+    let expected_role = decode_language_lowering_role(&derived)?
+        .ok_or_else(|| invalid_projection("compiler semantic request identity has no SENS role"))?;
+    if role != expected_role {
+        return Err(invalid_projection(
+            "compiler semantic request role disagrees with current SENS authority",
+        ));
+    }
+
+    let proof_ref = compiler_artifact_string(parts[2], "semantic-request proof-ref")?;
+    if proof_ref != proof_ref_for_lowering_role(role) {
+        return Err(invalid_projection(
+            "compiler semantic request proof disagrees with current SENS authority",
+        ));
+    }
+
+    let provenance = compiler_artifact_list(parts[3], "semantic-request provenance")?;
+    if provenance.len() != 3 {
+        return Err(invalid_projection(
+            "compiler semantic request provenance must contain path, authority digest and contract version",
+        ));
+    }
+    let path = compiler_artifact_string(provenance[0], "semantic-request authority path")?;
+    let authority_sha =
+        compiler_artifact_string(provenance[1], "semantic-request authority digest")?;
+    let contract_version =
+        compiler_artifact_string(provenance[2], "semantic-request contract version")?;
+    if path != COMPILER_AUTHORITY_PATH
+        || authority_sha != sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        || contract_version != COMPILER_CONTRACT_VERSION
+    {
+        return Err(invalid_projection(
+            "compiler semantic request provenance disagrees with current SENS authority",
+        ));
+    }
+
+    Ok(VerifiedCompilerProgramRequest {
+        identity: core,
+        lowering_role: role,
+        proof_ref,
+    })
 }
 
 fn authority_sha256_from(projection: &str) -> Result<String, LanguageError> {
@@ -615,6 +768,184 @@ pub fn compiler_program_artifact_from_sens(
     Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
 }
 
+/// Verify a decoded SENS whole-program compiler artifact before any backend
+/// mechanism binds to it.
+///
+/// The expected wire digest and SENS revision are supplied by the caller as
+/// transport provenance. Schema, authority, request digest, role, proof and
+/// request provenance are all checked against current SENS-owned authority.
+pub fn verify_compiler_program_artifact_from_sens(
+    artifact: &Value,
+    expected_program_wire_sha256: &str,
+    expected_sens_revision: &str,
+) -> Result<VerifiedCompilerProgramArtifact, LanguageError> {
+    if !valid_lower_hex(expected_program_wire_sha256, 64) {
+        return Err(invalid_projection(
+            "expected compiler program wire digest must be exactly 64 lowercase hexadecimal characters",
+        ));
+    }
+    if !valid_lower_hex(expected_sens_revision, 40) {
+        return Err(invalid_projection(
+            "expected compiler SENS revision must be exactly 40 lowercase hexadecimal characters",
+        ));
+    }
+
+    let rows = compiler_artifact_list(artifact, "compiler program artifact")?;
+    let Some(Value::Symbol(schema)) = rows.first().copied() else {
+        return Err(invalid_projection(
+            "compiler program artifact must start with a schema symbol",
+        ));
+    };
+    if schema.as_ref() == "compiler-compilation-error/1" {
+        return Err(invalid_projection(
+            "compiler-compilation-error/1 cannot enter executable lowering",
+        ));
+    }
+    if schema.as_ref() != "compiler-compilation-artifact/1" {
+        return Err(invalid_projection(format!(
+            "unknown compiler program artifact schema: {schema}"
+        )));
+    }
+
+    const ALLOWED_FIELDS: [&str; 7] = [
+        "artifact-kind",
+        "program-wire-sha256",
+        "semantic-requests-sha256",
+        "authority-provenance",
+        "semantic-requests",
+        "required-capabilities",
+        "artifact-status",
+    ];
+    for row in &rows[1..] {
+        let parts = compiler_artifact_list(row, "compiler artifact field")?;
+        if parts.len() != 2 {
+            return Err(invalid_projection(
+                "compiler artifact fields must contain exactly name and value",
+            ));
+        }
+        let Value::Symbol(name) = parts[0] else {
+            return Err(invalid_projection(
+                "compiler artifact field name must be a symbol",
+            ));
+        };
+        if !ALLOWED_FIELDS.contains(&name.as_ref()) {
+            return Err(invalid_projection(format!(
+                "compiler artifact contains unsupported field {name}"
+            )));
+        }
+    }
+
+    let kind = compiler_artifact_field(&rows[1..], "artifact-kind")?;
+    if !matches!(kind, Value::Symbol(name) if name.as_ref() == "whole-program") {
+        return Err(invalid_projection(
+            "compiler artifact kind must be whole-program",
+        ));
+    }
+    let status = compiler_artifact_field(&rows[1..], "artifact-status")?;
+    if !matches!(status, Value::Symbol(name) if name.as_ref() == "canonical-backend-neutral") {
+        return Err(invalid_projection(
+            "compiler artifact status must be canonical-backend-neutral",
+        ));
+    }
+    if !matches!(
+        compiler_artifact_field(&rows[1..], "required-capabilities")?,
+        Value::Nil
+    ) {
+        return Err(invalid_projection(
+            "compiler artifact required-capabilities must be empty",
+        ));
+    }
+
+    let program_wire_sha256 = compiler_artifact_string(
+        compiler_artifact_field(&rows[1..], "program-wire-sha256")?,
+        "program-wire-sha256",
+    )?;
+    if program_wire_sha256 != expected_program_wire_sha256 {
+        return Err(invalid_projection(
+            "compiler artifact program wire digest does not match caller provenance",
+        ));
+    }
+
+    let provenance =
+        compiler_artifact_list(
+            compiler_artifact_field(&rows[1..], "authority-provenance")?,
+            "compiler artifact authority provenance",
+        )?;
+    if provenance.len() != 5 {
+        return Err(invalid_projection(
+            "compiler artifact authority provenance must contain revision, path, authority digest, contract version and nucleus digest",
+        ));
+    }
+    let sens_revision = compiler_artifact_string(provenance[0], "SENS revision")?;
+    let authority_path = compiler_artifact_string(provenance[1], "authority path")?;
+    let authority_sha256 = compiler_artifact_string(provenance[2], "authority digest")?;
+    let language_contract_version =
+        compiler_artifact_string(provenance[3], "language contract version")?;
+    let compiler_nucleus_sha256 =
+        compiler_artifact_string(provenance[4], "compiler nucleus digest")?;
+
+    if sens_revision != expected_sens_revision
+        || authority_path != COMPILER_AUTHORITY_PATH
+        || authority_sha256 != sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        || language_contract_version != COMPILER_CONTRACT_VERSION
+        || compiler_nucleus_sha256 != sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
+    {
+        return Err(invalid_projection(
+            "compiler artifact authority provenance disagrees with current SENS authority",
+        ));
+    }
+
+    let semantic_requests =
+        compiler_artifact_field(&rows[1..], "semantic-requests")?.clone();
+    let requests = compiler_artifact_list(&semantic_requests, "compiler semantic requests")?;
+    if requests.is_empty() {
+        return Err(invalid_projection(
+            "compiler whole-program artifact must contain semantic requests",
+        ));
+    }
+    let semantic_requests_sha256 = compiler_artifact_string(
+        compiler_artifact_field(&rows[1..], "semantic-requests-sha256")?,
+        "semantic-requests-sha256",
+    )?;
+    let canonical_requests = crate::compiler_evidence_canonical_bytes(&semantic_requests)
+        .map_err(invalid_projection)?;
+    if sha256_hex(&canonical_requests) != semantic_requests_sha256 {
+        return Err(invalid_projection(
+            "compiler artifact semantic request digest mismatch",
+        ));
+    }
+
+    let mut role_session = Session::default();
+    load_core_library(&mut role_session)?;
+    role_session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    role_session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    role_session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut role_session)?;
+
+    let verified_requests = requests
+        .into_iter()
+        .map(|request| verify_compiler_program_request(request, &mut role_session))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(VerifiedCompilerProgramArtifact {
+        program_wire_sha256,
+        sens_revision,
+        authority_path,
+        authority_sha256,
+        language_contract_version,
+        compiler_nucleus_sha256,
+        semantic_requests_sha256,
+        semantic_requests,
+        requests: verified_requests,
+    })
+}
+
 /// Backward-compatible three-role view used by the already-landed selector/pair
 /// compiler bridge. It delegates to the same full SENS-owned role law and never
 /// reconstructs identity-to-role meaning in Rust.
@@ -624,14 +955,8 @@ pub fn compiler_program_artifact_from_sens(
 /// Role meaning and D3/D4 proof ownership are selected inside SENS. Downstream
 /// consumers may verify and bind a private mechanism, but must not reconstruct
 /// either fact from coordinates, names, or a legacy callable identity.
-pub fn compiler_semantic_input_from_sens(
-    identity: CoreDomainIdentity,
-) -> Result<Option<CompilerSemanticInput>, LanguageError> {
-    let Some(lowering_role) = compiler_lowering_role_from_sens(identity)? else {
-        return Ok(None);
-    };
-
-    let proof_ref = match lowering_role {
+fn proof_ref_for_lowering_role(role: CompilerLoweringRole) -> &'static str {
+    match role {
         CompilerLoweringRole::LambdaForm | CompilerLoweringRole::DefineForm => {
             COMPILER_D4_PROOF_REF
         }
@@ -642,7 +967,17 @@ pub fn compiler_semantic_input_from_sens(
         | CompilerLoweringRole::AtomEquality
         | CompilerLoweringRole::CondForm
         | CompilerLoweringRole::PairConstruct => COMPILER_D3_PROOF_REF,
+    }
+}
+
+pub fn compiler_semantic_input_from_sens(
+    identity: CoreDomainIdentity,
+) -> Result<Option<CompilerSemanticInput>, LanguageError> {
+    let Some(lowering_role) = compiler_lowering_role_from_sens(identity)? else {
+        return Ok(None);
     };
+
+    let proof_ref = proof_ref_for_lowering_role(lowering_role);
 
     Ok(Some(CompilerSemanticInput {
         identity,
@@ -863,6 +1198,102 @@ mod tests {
             }
         }
         panic!("artifact field {field} not found: {artifact}");
+    }
+
+    #[test]
+    fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
+        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let lowered = crate::lower_program(&parsed);
+        let wire = crate::wire_encode_program(&lowered);
+        let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
+        let program = Value::list(decoded.iter().map(expr_program_data));
+        let digest = sha256_hex(&wire);
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+
+        let artifact = compiler_program_artifact_from_sens(program, &digest, revision)
+            .expect("SENS whole-program artifact");
+        let verified =
+            verify_compiler_program_artifact_from_sens(&artifact, &digest, revision)
+                .expect("current SENS artifact verifies");
+
+        assert_eq!(verified.program_wire_sha256, digest);
+        assert_eq!(verified.sens_revision, revision);
+        assert_eq!(verified.authority_path, COMPILER_AUTHORITY_PATH);
+        assert_eq!(verified.language_contract_version, COMPILER_CONTRACT_VERSION);
+        assert!(!verified.requests.is_empty());
+        for role in [
+            CompilerLoweringRole::QuoteForm,
+            CompilerLoweringRole::AtomPredicate,
+            CompilerLoweringRole::SelectorTail,
+            CompilerLoweringRole::SelectorHead,
+            CompilerLoweringRole::AtomEquality,
+            CompilerLoweringRole::CondForm,
+            CompilerLoweringRole::PairConstruct,
+            CompilerLoweringRole::LambdaForm,
+            CompilerLoweringRole::DefineForm,
+        ] {
+            assert!(
+                verified.requests.iter().any(|request| request.lowering_role == role),
+                "verified whole-program artifact omitted role {role:?}"
+            );
+        }
+        assert_eq!(
+            verified.semantic_requests_sha256,
+            sha256_hex(
+                &crate::compiler_evidence_canonical_bytes(&verified.semantic_requests)
+                    .expect("request evidence bytes")
+            )
+        );
+        for request in &verified.requests {
+            assert_eq!(
+                request.proof_ref,
+                proof_ref_for_lowering_role(request.lowering_role)
+            );
+        }
+    }
+
+    #[test]
+    fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
+        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let lowered = crate::lower_program(&parsed);
+        let wire = crate::wire_encode_program(&lowered);
+        let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
+        let program = Value::list(decoded.iter().map(expr_program_data));
+        let digest = sha256_hex(&wire);
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+        let artifact = compiler_program_artifact_from_sens(program, &digest, revision)
+            .expect("SENS whole-program artifact");
+
+        assert!(
+            verify_compiler_program_artifact_from_sens(
+                &artifact,
+                &"00".repeat(32),
+                revision
+            )
+            .is_err()
+        );
+        assert!(
+            verify_compiler_program_artifact_from_sens(
+                &artifact,
+                &digest,
+                "fedcba9876543210fedcba9876543210fedcba98"
+            )
+            .is_err()
+        );
+
+        let mut rows = list_values(&artifact)
+            .into_iter()
+            .cloned()
+            .collect::<Vec<_>>();
+        rows.push(Value::list([
+            Value::Symbol(Rc::from("cuda-target")),
+            Value::String(Rc::from("sm_61")),
+        ]));
+        let smuggled = Value::list(rows);
+        assert!(
+            verify_compiler_program_artifact_from_sens(&smuggled, &digest, revision)
+                .is_err()
+        );
     }
 
     #[test]
