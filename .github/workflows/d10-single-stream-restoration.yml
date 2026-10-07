@@ -1,0 +1,44 @@
+name: D10 single-stream restoration
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-single-stream-restoration-v1.json"
+      - "knowledge/d10-owner-repo-donor-matrix-v3.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "knowledge/archipelago-map-v1.json"
+      - "scripts/check-d10-single-stream-restoration-v1.py"
+      - "scripts/check-d10-ownership-cleanup-v1.py"
+      - "scripts/check-d10-ownership-cleanup-v2.py"
+      - "scripts/check-archipelago-map-v1.py"
+      - ".github/workflows/d10-single-stream-restoration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-single-stream-restoration-v1.json"
+      - "knowledge/d10-owner-repo-donor-matrix-v3.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-single-stream-restoration-v1.py"
+      - ".github/workflows/d10-single-stream-restoration.yml"
+  workflow_dispatch:
+
+jobs:
+  restore:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify owner correction restoration
+        run: python3 scripts/check-d10-single-stream-restoration-v1.py
+      - name: Verify cleanup-v1 history reversed
+        run: python3 scripts/check-d10-ownership-cleanup-v1.py
+      - name: Verify cleanup-v2 history reversed
+        run: python3 scripts/check-d10-ownership-cleanup-v2.py
+      - name: Verify execution-only archipelago
+        run: python3 scripts/check-archipelago-map-v1.py
+      - name: Verify global D10 inventory
+        run: python3 scripts/check-d10-v1-semantic-inventory.py
