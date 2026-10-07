@@ -482,14 +482,53 @@ Backend opcode, host type, native enum, register number або physical memory l
 
 ## Physical representation
 
+Exact domain width is a **logical bit width**, not the byte size of a standalone Rust value.
+
 ```text
-semantic_width != physical_width
+D1 = 1 bit
+D2 = 2 bits
+D3 = 3 bits
+D4 = 4 bits
+D5 = 5 bits
+D6 = 6 bits
+D7 = 7 bits
+D8 = 8 bits
+D9 = 9 bits
 ```
+
+Rust is byte-addressed, so a transient typed value may need a host byte (or a wider
+temporary for widths above the bounded byte fast path). That host allocation is
+not the language's physical cell size and must not become `u8-per-cell` storage.
+
+Canonical program construction is different:
+
+```text
+typed domain word
+      ↓
+program-level bit accumulator
+      ↓
+continuous exact-width bitstream
+      ↓
+physical bytes only at the final byte boundary
+```
+
+Thus a program containing:
+
+```text
+D3 + D2 + D3
+```
+
+has exactly 8 semantic bits and therefore exactly 1 physical payload byte, with
+no byte padding between the three domains. A D7 word may cross a byte boundary;
+a 9-bit domain may occupy bits spanning two physical bytes without becoming a
+9-bit semantic "byte".
+
+`BitPacker` / `PackedBitstream` own this physical assembly. Domain carriers own
+only exact logical width and domain typing.
 
 Backend може:
 
-- pack several D3 values у physical word;
-- розмістити D5 у BRAM geometry;
+- pack several domain values у physical word;
 - widen temporary arithmetic;
 - vectorize values;
 - map operations to FPGA primitives.

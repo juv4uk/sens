@@ -1,26 +1,31 @@
-//! Small exact-width binary carriers for the bounded 1..=8-bit fast path.
+//! Exact-width logical binary words for SENS.
 //!
-//! This module owns representation only. A `Bits<N>` value proves that the
-//! payload fits exactly within the declared width `N`; it does not assign any
-//! SENS meaning to that payload.
+//! A `Bits<N>` value is a transient semantic word used at typed boundaries.
+//! It proves that a payload has exactly width `N`; it is **not** the canonical
+//! physical storage for a program. Rust's ABI is byte-addressed, so a standalone
+//! runtime value cannot occupy less than one byte. SENS does not use that host
+//! fact as semantic width and must not treat one `Bits<N>` object as one
+//! physical program cell.
 //!
-//! Width is part of the Rust type:
-//!
-//! ```compile_fail
-//! use sens::{Bit1, Bit2};
-//!
-//! let one = Bit1::new(1).unwrap();
-//! let _: Bit2 = one;
-//! ```
-//!
-//! The universal no-width-ceiling identity carrier is a separate migration
-//! concern. This type is deliberately the allocation-free small-word mechanism.
+//! Canonical program storage is built separately by `BitPacker`/
+//! `PackedBitstream`, where multiple domains are concatenated at the bit level
+//! and physical bytes are emitted only for the surrounding program payload.
 
-/// Exact-width binary payload for the bounded 1..=8-bit fast path.
+/// Exact-width logical binary payload for a bounded 1..=8-bit word.
 ///
-/// The inner byte is private so safe construction cannot silently truncate,
-/// mask, widen, or zero-pad a word. No arithmetic/ordering traits are provided:
-/// the carrier proves shape, not semantics.
+/// The private byte is only a transient host register for carrying an already
+/// validated word into typed/domain logic. It is never the canonical storage
+/// model for a sequence of SENS values: program storage is bit-packed by
+/// `BitPacker`.
+///
+/// Width is part of the Rust type:
+///
+/// ```compile_fail
+/// use sens::{Bit1, Bit2};
+///
+/// let one = Bit1::new(1).unwrap();
+/// let _: Bit2 = one;
+/// ```
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Bits<const N: usize>(u8);
@@ -35,10 +40,10 @@ pub type Bit7 = Bits<7>;
 pub type Bit8 = Bits<8>;
 
 impl<const N: usize> Bits<N> {
-    /// Construct a word only when both the type width and payload are valid.
+    /// Construct a logical word only when both the type width and payload are valid.
     ///
     /// Width zero and widths above eight are intentionally unconstructible
-    /// through this bounded carrier.
+    /// through this bounded fast-path carrier.
     pub const fn new(value: u8) -> Option<Self> {
         if N == 0 || N > 8 {
             return None;
@@ -51,15 +56,16 @@ impl<const N: usize> Bits<N> {
         }
     }
 
-    /// The exact width carried by this Rust type.
+    /// The exact semantic width carried by this Rust type.
     pub const fn width() -> usize {
         N
     }
 
-    /// Mechanical packed payload.
+    /// Mechanical payload extraction for typed logic and packing.
     ///
-    /// This loses width if detached from its `Bits<N>` type, so callers must
-    /// not use the returned byte as a cross-width semantic identity.
+    /// The returned host byte is only a scratch projection; callers must keep
+    /// it qualified by this exact `Bits<N>` type and must not use it as a
+    /// cross-width semantic identity.
     pub const fn packed_bits(self) -> u8 {
         self.0
     }
@@ -117,7 +123,6 @@ impl<const N: usize> Bits<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem::size_of;
 
     fn assert_width<const N: usize>() {
         let max = Bits::<N>::max_value().expect("test width must be valid");
@@ -155,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn every_small_width_accepts_exactly_its_range() {
+    fn every_small_width_accepts_exactly_its_logical_range() {
         assert_width::<1>();
         assert_width::<2>();
         assert_width::<3>();
@@ -217,17 +222,5 @@ mod tests {
         assert_eq!(word.bit(1), Some(false));
         assert_eq!(word.bit(2), Some(true));
         assert_eq!(word.bit(3), None);
-    }
-
-    #[test]
-    fn every_bounded_box_occupies_one_host_byte() {
-        assert_eq!(size_of::<Bit1>(), 1);
-        assert_eq!(size_of::<Bit2>(), 1);
-        assert_eq!(size_of::<Bit3>(), 1);
-        assert_eq!(size_of::<Bit4>(), 1);
-        assert_eq!(size_of::<Bit5>(), 1);
-        assert_eq!(size_of::<Bit6>(), 1);
-        assert_eq!(size_of::<Bit7>(), 1);
-        assert_eq!(size_of::<Bit8>(), 1);
     }
 }
