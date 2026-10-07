@@ -1,0 +1,295 @@
+{
+  "schema": "d10-crossrepo-my-idea-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4182 / juv4uk/my-idea#80",
+  "date": "2026-10-07",
+  "donor": {
+    "repository": "juv4uk/my-idea",
+    "branch": "main"
+  },
+  "rule": "Select abstract language-visible IDE/ecosystem laws; keep filesystem/process/Tauri transport and serialization mechanics out of D10 identity.",
+  "exclusions": {
+    "mechanism_only": [
+      "plugins::load_plugins filesystem traversal",
+      "evidence::scan filesystem traversal",
+      "repo_graph::scan filesystem traversal",
+      "process/repl worker channels",
+      "Tauri commands and window plumbing"
+    ],
+    "projection": [
+      "canonical_plan_json serialization of SELF-BUILD-PLAN"
+    ],
+    "note": "Rust hosts these capabilities, but selected meanings are defined by abstract input/state/effect laws rather than host pointer/path/process identities."
+  },
+  "accounting": {
+    "selected_d10_candidates": 13,
+    "d10_before": 527,
+    "d10_after": 540,
+    "law_forced_coordinates": 256,
+    "unplaced_after": 284,
+    "remaining_after": 484,
+    "ratified_d10_residents": 0
+  },
+  "rows": [
+    {
+      "stable_id": "d10.myidea.477592ff35b15a05",
+      "semantic_name": "EDITOR-REGISTER-COMMAND",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "editor_register_command",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-COMMAND-ALGEBRA",
+      "behavior": "register or replace a named editor command with a Lisp-owned handler under one editor registry",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.849ae5944f0616ae",
+      "semantic_name": "EDITOR-SELECTION",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "editor_selection",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-STATE-OBSERVATION",
+      "behavior": "observe the current editor selection as language string data within a command/event invocation",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.362a0c681992523f",
+      "semantic_name": "EDITOR-BUFFER-TEXT",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "editor_buffer_text",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-STATE-OBSERVATION",
+      "behavior": "observe the current editor buffer text as language string data within a command/event invocation",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.5b76890296fefd98",
+      "semantic_name": "EDITOR-REPLACE-SELECTION",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "editor_replace_selection",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-EFFECT-ALGEBRA",
+      "behavior": "request replacement of the current selection with supplied text and return that text as the command effect value",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.59c7c3f6a18c59d4",
+      "semantic_name": "EDITOR-MESSAGE",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "editor_message",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-EFFECT-ALGEBRA",
+      "behavior": "request an editor message effect carrying supplied text, distinct from ordinary language output",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.d9ca9d217df9aeb9",
+      "semantic_name": "EDITOR-REGISTER-KEYMAP",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "editor_keymap",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-DISPATCH-ALGEBRA",
+      "behavior": "bind or replace one key identity to a named editor command without requiring registration order",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.f2c10827e3f3c7ce",
+      "semantic_name": "EDITOR-REGISTER-HANDLER",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "editor_on",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-EVENT-ALGEBRA",
+      "behavior": "register or replace an event handler by event plus handler identity, preserving reload idempotence",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.9d4b1dd7fc8b2e4e",
+      "semantic_name": "EDITOR-INVOKE-COMMAND",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "invoke_command",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-COMMAND-ALGEBRA",
+      "behavior": "invoke one registered editor command against an explicit editor-state snapshot and return its requested editor effect",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.6be188d739ecc97d",
+      "semantic_name": "EDITOR-DISPATCH-KEY",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "dispatch_key",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-DISPATCH-ALGEBRA",
+      "behavior": "resolve a key binding to a registered command and invoke it fail-closed when key or command is absent",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.f58ce56cc0676dfa",
+      "semantic_name": "EDITOR-EMIT-EVENT",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/editor_api.rs",
+      "source_name": "emit_event",
+      "source_sha": "9118dd2cd54c596232ca8061c953175bdd8e1c33",
+      "relation_class": "EDITOR-EVENT-ALGEBRA",
+      "behavior": "invoke every handler subscribed to an event against an editor-state snapshot while isolating each handler result or failure",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.bdcc6b95ff0b97d3",
+      "semantic_name": "SELF-BUILD-PLAN",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/self_build.rs",
+      "source_name": "build_self_build_plan",
+      "source_sha": "189981c26ff5f2ad4c3deb0aedfea150d168b7ba",
+      "relation_class": "SELF-BUILD-PROVENANCE-ALGEBRA",
+      "behavior": "construct a deterministic self-build plan from explicit clean source, runtime, compiler, target and toolchain provenance and derive its digest",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.762274b28ae78613",
+      "semantic_name": "EVIDENCE-LATEST-MATRIX",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/ecosystem/evidence.rs",
+      "source_name": "matrix",
+      "source_sha": "6b72988f9ef7a59efd94d290bf6231e80b434a3f",
+      "relation_class": "EVIDENCE-REDUCTION-ALGEBRA",
+      "behavior": "reduce evidence records into a requirement-by-implementation matrix keeping the latest record per pair by timestamp",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    },
+    {
+      "stable_id": "d10.myidea.0017d7fa71dbd8a6",
+      "semantic_name": "REPO-CAPABILITY-EDGES",
+      "donor_repo": "juv4uk/my-idea",
+      "source_file": "src-tauri/src/ecosystem/repo_graph.rs",
+      "source_name": "derive_edges",
+      "source_sha": "f1d14817f7c250d41a1635e822fbb436a6b71e42",
+      "relation_class": "REPOSITORY-CAPABILITY-GRAPH",
+      "behavior": "derive directed capability-overlap edges where one repository imports a capability exported by another",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "provenance": [
+        "#4182",
+        "juv4uk/my-idea#80",
+        "#4162"
+      ]
+    }
+  ]
+}
