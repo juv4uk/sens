@@ -197,6 +197,10 @@
      (aeskeygenassist-xmm-mem-disp8-imm8
        xmm-register register disp8 uimm8)
      (pclmulqdq-xmm-xmm-imm8 xmm-register xmm-register uimm8)
+     (vandnps-xmm-xmm-xmm xmm-register xmm-register xmm-register)
+     (vandnpd-xmm-xmm-xmm xmm-register xmm-register xmm-register)
+     (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)
+     (vaddpd-xmm-xmm-xmm xmm-register xmm-register xmm-register)
      (pclmulqdq-xmm-mem-disp8-imm8
        xmm-register register disp8 uimm8))))
 
@@ -785,6 +789,14 @@
          form)
        (x86-encode-pclmulqdq-xmm-xmm-imm8
          (00101111 form) (00110000 form) (00110001 form)))
+      ((x86-admission-pattern-match? (00000001 (vandnps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) form)
+       (x86-encode-vandnps-xmm-xmm-xmm (00101111 form) (00110000 form) (00110001 form)))
+      ((x86-admission-pattern-match? (00000001 (vandnpd-xmm-xmm-xmm xmm-register xmm-register xmm-register)) form)
+       (x86-encode-vandnpd-xmm-xmm-xmm (00101111 form) (00110000 form) (00110001 form)))
+      ((x86-admission-pattern-match? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) form)
+       (x86-encode-vaddps-xmm-xmm-xmm (00101111 form) (00110000 form) (00110001 form)))
+      ((x86-admission-pattern-match? (00000001 (vaddpd-xmm-xmm-xmm xmm-register xmm-register xmm-register)) form)
+       (x86-encode-vaddpd-xmm-xmm-xmm (00101111 form) (00110000 form) (00110001 form)))
       ((x86-admission-pattern-match?
          (00000001
            (pclmulqdq-xmm-mem-disp8-imm8
