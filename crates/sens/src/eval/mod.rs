@@ -418,11 +418,13 @@ fn dispatch_call(
     match &function {
         Value::DomainIdentity(identity) => {
             // A language-owned D6 macro has an exact-domain identity but is not
-            // a generic Core operation. Route only when its ratified exact slot
-            // already contains the macro; do not widen D6 callability.
+            // a generic Core operation. Route only when its exact slot already
+            // contains the macro; do not widen D6 callability.
             if let crate::DomainIdentity::D6(word) = identity {
                 let exact = crate::CoreDomainIdentity::D6(word);
-                if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(exact) {
+                if let Some(Value::Macro(ref closure)) =
+                    environment.domain_code_slot(exact)
+                {
                     return closures::apply_macro(closure.clone(), arguments, environment, span);
                 }
             }
@@ -536,13 +538,13 @@ mod single_pass_eval_tests {
     }
 
     #[test]
-    fn exact_d6_let_uses_only_bound_exact_macro_slot() {
+    fn exact_d6_let_routes_only_through_bound_macro_slot() {
         let mut session = Session::default();
         crate::load_core_library(&mut session).expect("core library");
         let forms = crate::parse_mixed_exact_domain("(001000 ((x 41)) x)")
             .expect("exact D6 LET source");
         let result = eval_parsed_expressions(&forms, &mut session)
-            .expect("exact D6 LET should route through its bound macro slot");
+            .expect("exact D6 LET should use its bound exact macro slot");
         assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
     }
 
@@ -638,3 +640,107 @@ mod single_pass_eval_tests {
         let result = eval_program("()", &mut session).expect("empty structure should evaluate");
         assert_eq!(result.value.to_string(), "()");
     }
+
+    #[test]
+    fn ukrainian_canonical_surface_executes_the_core() {
+        let source = r#"
+            (за-умовою
+              ((атом? (як-є (кіт))) (як-є помилка))
+              ((атом? (як-є кіт)) (перше
+                 (сполучити
+                   (як-є груша)
+                   (сполучити (як-є слива) ())))))
+        "#;
+        let mut session = Session::default();
+        let result = eval_program(source, &mut session)
+            .expect("Ukrainian canonical surface should evaluate");
+        assert_eq!(result.value.to_string(), "груша");
+    }
+
+    #[test]
+    fn ukrainian_rest_obeys_proper_list_semantics() {
+        let mut session = Session::default();
+        let result = eval_program("(решта (як-є (яблуко груша слива)))", &mut session)
+            .expect("решта should return the structural remainder");
+        assert_eq!(result.value.to_string(), "(груша слива)");
+    }
+
+    #[test]
+    fn ukrainian_double_projection_reads_the_tree() {
+        let mut session = Session::default();
+        let result = eval_program("(перше (решта (як-є (яблуко груша слива))))", &mut session)
+            .expect("canonical composition should evaluate");
+        assert_eq!(result.value.to_string(), "груша");
+    }
+
+    #[test]
+    fn sanskrit_canonical_surface_executes_the_same_core() {
+        let source = r#"
+            (anukrama
+              ((aṇu (svarūpa phalam))
+               (ādi
+                 (saṃyuj
+                   (svarūpa prathama)
+                   (saṃyuj (svarūpa śeṣaḥ) ()))))
+              (t (svarūpa doṣa)))
+        "#;
+        let mut session = Session::default();
+        let result =
+            eval_program(source, &mut session).expect("Sanskrit canonical surface should evaluate");
+        assert_eq!(result.value.to_string(), "prathama");
+    }
+
+    #[test]
+    fn surfaces_routing_to_function_sids_cannot_be_redefined() {
+        for source in [
+            "(def car 42)",
+            "(def перше 42)",
+            "(def ādi 42)",
+            "(def quote 42)",
+            "(def за-умовою 42)",
+        ] {
+            let mut session = Session::default();
+            let error = eval_program(source, &mut session)
+                .expect_err("surface routing to a function SID must reject redefinition");
+            assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
+            assert!(error.message.contains("surface routes to immutable function SID"));
+        }
+    }
+
+    #[test]
+    fn surfaces_routing_to_function_sids_cannot_be_lambda_parameters() {
+        for source in [
+            "(lambda (car) car)",
+            "(lambda (перше) перше)",
+            "(lambda (ādi) ādi)",
+            "(lambda atom? atom?)",
+        ] {
+            let mut session = Session::default();
+            let error = eval_program(source, &mut session)
+                .expect_err("surface routing to a function SID must reject parameter binding");
+            assert_eq!(error.kind, ErrorKind::InvalidForm, "source: {source}");
+            assert!(error.message.contains("surface routes to immutable function SID"));
+        }
+    }
+
+    #[test]
+    fn ordinary_nonregistry_bindings_remain_lexical() {
+        let source = "(def local-add (lambda (a b) (quote shadowed))) (local-add 1 2)";
+        let mut session = Session::default();
+        let result = eval_program(source, &mut session)
+            .expect("ordinary non-registry bindings remain lexical values");
+        assert_eq!(result.value.to_string(), "shadowed");
+    }
+
+    #[test]
+    fn canonical_resolution_ignores_even_preexisting_environment_shadow() {
+        let mut session = Session::default();
+        session.environment.define(
+            "car",
+            Value::Number(99.0, crate::Exactness::Exact),
+        );
+        let result = eval_program("(car (quote (1 2)))", &mut session)
+            .expect("Canon resolver must outrank Environment");
+        assert_eq!(result.value.to_string(), "1");
+    }
+}
