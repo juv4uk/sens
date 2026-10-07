@@ -23,6 +23,8 @@ on:
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "crates/sens-host/tests/real_silicon_sweep.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
   push:
@@ -44,6 +46,8 @@ on:
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "crates/sens-host/tests/real_silicon_sweep.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
 
