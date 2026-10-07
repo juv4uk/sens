@@ -335,9 +335,13 @@ fn lowering_boundary_requires_effect_then_target_projection() {
 }
 
 #[test]
-fn repo_exports_machine_lowering_boundary_for_consumers() {
+fn repo_exports_machine_boundaries_for_consumers() {
     assert!(
         REPO_DECLARATION.contains("machine-lowering-boundary"),
         "repo.lisp must export the machine authority boundary"
+    );
+    assert!(
+        REPO_DECLARATION.contains("machine-effect-boundary"),
+        "repo.lisp must export the target-neutral machine-effect boundary"
     );
 }
