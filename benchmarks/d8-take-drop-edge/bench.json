@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-take-drop-edge",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Do TAKE/DROP expose independent mode and left/right edge choices under REVERSE conjugation?",
+  "claim": "Tests a bounded mode × edge product as Contract 11.6 research; it does not admit D8 residency or callability.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3622-d8-take-drop-edge.md",
+    "../../docs/research/3622-d8-take-drop-edge.uk.md"
+  ],
+  "status": "PRODUCT-CANDIDATE",
+  "generation": "11.6",
+  "axis": "d8/list-edge",
+  "reproduce": "python3 benchmarks/d8-take-drop-edge/run.py --out /tmp/d8-take-drop-edge"
+}
