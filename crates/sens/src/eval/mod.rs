@@ -302,33 +302,35 @@ fn evaluate_d5_set_family(
 }
 
 fn dispatch_domain_call(
-    identity: CoreDomainIdentity,
+    identity: DomainIdentity,
     arguments: &[Expr],
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    if is_d3(identity, 0b001) {
-        special_forms::exact_arity("D3:001", arguments, 1, span)?;
-        return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
-    }
-
-    match necessary_forms::identity_for_domain_identity(identity) {
-        Some(necessary_forms::NecessaryFormIdentity::Lambda) => {
-            return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
+    if let Some(core_identity) = identity.core_operation() {
+        if is_d3(core_identity, 0b001) {
+            special_forms::exact_arity("D3:001", arguments, 1, span)?;
+            return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
         }
-        Some(necessary_forms::NecessaryFormIdentity::Define) => {
-            return special_forms::evaluate_definition(arguments, environment, span)
-                .map(EvalStep::Value);
+
+        match necessary_forms::identity_for_domain_identity(core_identity) {
+            Some(necessary_forms::NecessaryFormIdentity::Lambda) => {
+                return closures::create_lambda(arguments, environment, span).map(EvalStep::Value);
+            }
+            Some(necessary_forms::NecessaryFormIdentity::Define) => {
+                return special_forms::evaluate_definition(arguments, environment, span)
+                    .map(EvalStep::Value);
+            }
+            None => {}
         }
-        None => {}
-    }
 
-    if is_d3(identity, 0b110) {
-        return special_forms::evaluate_domain_cond(arguments, environment, span);
-    }
+        if is_d3(core_identity, 0b110) {
+            return special_forms::evaluate_domain_cond(arguments, environment, span);
+        }
 
-    if is_d5(identity, 0b00110) || is_d5(identity, 0b00111) {
-        return evaluate_d5_set_family(identity, arguments, environment, span);
+        if is_d5(core_identity, 0b00110) || is_d5(core_identity, 0b00111) {
+            return evaluate_d5_set_family(core_identity, arguments, environment, span);
+        }
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
@@ -336,7 +338,9 @@ fn dispatch_domain_call(
             Value::Macro(closure) => {
                 return closures::apply_macro(closure.clone(), arguments, environment, span);
             }
-            Value::Closure(_) if !canon::has_language_result_boundary(identity) => {
+            Value::Closure(_) if identity
+                .core_operation()
+                .is_some_and(|core_identity| !canon::has_language_result_boundary(core_identity)) => {
                 return closures::apply(bound.clone(), arguments, environment, span);
             }
             // #3060: exact D5 MEMBER keeps the same Lisp closure/search law,
@@ -349,11 +353,23 @@ fn dispatch_domain_call(
         }
     }
 
+    let Some(core_identity) = identity.core_operation() else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            format!(
+                "domain identity is not callable under its ratified law: D{} {}",
+                identity.width(),
+                identity
+            ),
+            span,
+        ));
+    };
+
     let mut values = Vec::with_capacity(arguments.len());
     for argument in arguments {
         values.push(evaluate(argument, environment)?);
     }
-    canon::invoke_domain_identity(identity, &values, environment, span).map(EvalStep::Value)
+    canon::invoke_domain_identity(core_identity, &values, environment, span).map(EvalStep::Value)
 }
 
 /// Спільний compatibility-диспетчер виклику. Для `ExprKind::Call` ім'я голови відсутнє:
