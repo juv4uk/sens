@@ -105,7 +105,9 @@ fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
         .expect("capability axis");
     assert!(axis.contains("machine-capability-axis-v2"));
     assert!(axis.contains("machine-capabilities-for-domain"));
-    assert!(axis.contains("machine-capability-legacy-sid-axis-v1"));
+    assert!(!axis.contains("machine-capability-legacy-sid-axis"));
+    assert!(!axis.contains("machine-capabilities-for-sid"));
+    assert!(!axis.contains("00001100"));
 
     let profile =
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
