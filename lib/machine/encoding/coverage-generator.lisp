@@ -32,7 +32,12 @@
 ; retired structural-relation/t compatibility layer.
 (def encoder-coverage-same?
   (lambda (left right)
-    (equal? left right)))
+    ; equal? owns structural/deep equality and returns the historical
+    ; one-bit answer list (1)/(0). Strict current D3 COND must not consume
+    ; that compatibility list directly. Re-ask atom identity about its bit
+    ; so this helper returns exact D1 PredicateBit.
+    (eq? (car (equal? left right))
+         (car (quote (1))))))
 
 (def encoder-coverage-pair=?
   (lambda (left right)
