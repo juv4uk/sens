@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-reduce-scan-direction",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does REDUCE/SCAN support an independent left/right fold-direction product on the bounded nonempty corpus?",
+  "claim": "Covers nonempty lists only because the empty-list SCAN presentation is not fully pinned in the cited lower-domain law; it grants no D8 residency.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3674-d8-reduce-scan-direction.md",
+    "../../docs/research/3674-d8-reduce-scan-direction.uk.md"
+  ],
+  "status": "PRODUCT-CANDIDATE-NONEMPTY",
+  "generation": "unknown",
+  "axis": "d8/fold-direction",
+  "reproduce": "python3 benchmarks/d8-reduce-scan-direction/run.py --out /tmp/d8-reduce-scan-direction"
+}
