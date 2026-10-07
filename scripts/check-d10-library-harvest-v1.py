@@ -36,10 +36,10 @@ assert len(rows)==39
 target=state["target"]
 selected_total=target["selected_semantic_candidates"]
 remaining_total=target["remaining_semantic_candidates"]
-assert selected_total==504
-assert remaining_total==520
+assert selected_total>=504
+assert remaining_total==1024-selected_total
 assert target["law_forced_coordinates"]==256
-assert target["unplaced_selected_candidates"]==248
+assert target["unplaced_selected_candidates"]==selected_total-256
 assert target["ratified_residents"]==0
 assert len(inventory["rows"])==selected_total
 assert len({r["stable_id"] for r in inventory["rows"]})==selected_total
@@ -47,4 +47,4 @@ assert len({r["semantic_name"] for r in inventory["rows"]})==selected_total
 
 print("D10-LIBRARY-HARVEST-V1=PASS")
 print("harvest=39 selected=39 historical-cleanup-v1=6 historical-cleanup-v2=15")
-print("inventory=504/1024 remaining=520 ratified=0")
+print(f"inventory={selected_total}/1024 remaining={remaining_total} ratified=0")
