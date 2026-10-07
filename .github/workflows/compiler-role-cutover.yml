@@ -75,6 +75,15 @@ jobs:
           --test compiler_nucleus_sens
           --test compiler_nucleus_diff
           --test compiler_selfhost_role_closure
+      - name: Canonical compiler-evidence decoder roundtrip
+        run: |
+          cargo test -p sens --lib \
+            compiler_bootstrap::tests::compiler_evidence_round_trips_exact_value_and_width \
+            -- --nocapture
+          cargo test -p sens --lib \
+            compiler_bootstrap::tests::compiler_evidence_decoder_fails_closed_on_malformed_bytes \
+            -- --nocapture
+
       - name: Compiler semantic export CLI
         run: cargo test -p xtask --test compiler_export_cli -- --nocapture
       - name: Whole-nucleus lowering coverage when present
