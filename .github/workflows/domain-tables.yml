@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "knowledge/d1-d9-foundation.json"
+      - "language-contract.lisp"
+      - "README.md"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
@@ -19,12 +21,18 @@ on:
       - "lib/domains/d9.lisp"
       - "scripts/domain_tables.py"
       - "scripts/check-domain-tables.py"
+      - "scripts/check-d2-structure-ownership.py"
+      - "knowledge/d2-structure-audit.json"
+      - "contracts/d2-language-control-contract.lisp"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
       - "scripts/sens_source_resolver.py"
       - "scripts/migrate-to-sens-codes.py"
       - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/tests/text7_canonical_wire.rs"
+      - "knowledge/structure-not-ontology-inventory.lisp"
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
@@ -33,6 +41,8 @@ on:
     branches: [main]
     paths:
       - "knowledge/d1-d9-foundation.json"
+      - "language-contract.lisp"
+      - "README.md"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
@@ -48,12 +58,18 @@ on:
       - "lib/domains/d9.lisp"
       - "scripts/domain_tables.py"
       - "scripts/check-domain-tables.py"
+      - "scripts/check-d2-structure-ownership.py"
+      - "knowledge/d2-structure-audit.json"
+      - "contracts/d2-language-control-contract.lisp"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
       - "scripts/sens_source_resolver.py"
       - "scripts/migrate-to-sens-codes.py"
       - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "knowledge/structure-not-ontology-inventory.lisp"
+      - "crates/sens/tests/text7_canonical_wire.rs"
+      - "crates/sens/src/binary_framing.rs"
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
@@ -66,6 +82,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: Validate canonical domain tables
         run: python3 scripts/check-domain-tables.py
+      - name: Enforce D2-only language structure ownership
+        run: python3 scripts/check-d2-structure-ownership.py
       - name: Check D1-D5 runtime projection
         run: python3 scripts/check-domain-surfaces-d1-d4.py
       - name: Check D5 authority
@@ -74,6 +92,11 @@ jobs:
         run: python3 scripts/translate-domain-program.py --self-test
       - name: Check D9 ratified authority
         run: python3 scripts/check-d9-current-authority.py
+      - name: Prove D2 structural exclusivity
+        run: |
+          cargo test -p sens canonical_reader::tests::d2_open_close_builds_empty_proper_list
+          cargo test -p sens canonical_reader::tests::malformed_d2_structure_fails_closed
+          cargo test -p sens binary_framing::tests::current_d2_dot_round_trips_as_domain_identity_not_wire_escape
       - name: Prove exact-width substrate preserves domain address
         run: |
           cargo test -p sens source_words::tests::same_numeric_payload_at_different_widths_never_collapses
