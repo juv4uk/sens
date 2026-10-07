@@ -273,6 +273,7 @@ fn valid_lower_hex(value: &str, len: usize) -> bool {
 
 fn verify_compiler_program_request(
     request: &Value,
+    role_session: &mut Session,
 ) -> Result<VerifiedCompilerProgramRequest, LanguageError> {
     let parts = compiler_artifact_list(request, "compiler semantic request")?;
     if parts.len() != 4 {
@@ -291,16 +292,17 @@ fn verify_compiler_program_request(
     })?;
     let role = decode_language_lowering_role(parts[1])?
         .ok_or_else(|| invalid_projection("compiler semantic request role must not be empty"))?;
-    let expected = compiler_semantic_input_from_sens(core)?
+    let derived = eval_parsed_expressions(&[language_role_call(core)], role_session)?.value;
+    let expected_role = decode_language_lowering_role(&derived)?
         .ok_or_else(|| invalid_projection("compiler semantic request identity has no SENS role"))?;
-    if role != expected.lowering_role {
+    if role != expected_role {
         return Err(invalid_projection(
             "compiler semantic request role disagrees with current SENS authority",
         ));
     }
 
     let proof_ref = compiler_artifact_string(parts[2], "semantic-request proof-ref")?;
-    if proof_ref != expected.proof_ref {
+    if proof_ref != proof_ref_for_lowering_role(role) {
         return Err(invalid_projection(
             "compiler semantic request proof disagrees with current SENS authority",
         ));
@@ -317,9 +319,9 @@ fn verify_compiler_program_request(
         compiler_artifact_string(provenance[1], "semantic-request authority digest")?;
     let contract_version =
         compiler_artifact_string(provenance[2], "semantic-request contract version")?;
-    if path != expected.authority_path
-        || authority_sha != expected.authority_sha256
-        || contract_version != expected.language_contract_version
+    if path != COMPILER_AUTHORITY_PATH
+        || authority_sha != sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        || contract_version != COMPILER_CONTRACT_VERSION
     {
         return Err(invalid_projection(
             "compiler semantic request provenance disagrees with current SENS authority",
@@ -913,9 +915,22 @@ pub fn verify_compiler_program_artifact_from_sens(
         ));
     }
 
+    let mut role_session = Session::default();
+    load_core_library(&mut role_session)?;
+    role_session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    role_session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    role_session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut role_session)?;
+
     let verified_requests = requests
         .into_iter()
-        .map(verify_compiler_program_request)
+        .map(|request| verify_compiler_program_request(request, &mut role_session))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(VerifiedCompilerProgramArtifact {
@@ -940,14 +955,8 @@ pub fn verify_compiler_program_artifact_from_sens(
 /// Role meaning and D3/D4 proof ownership are selected inside SENS. Downstream
 /// consumers may verify and bind a private mechanism, but must not reconstruct
 /// either fact from coordinates, names, or a legacy callable identity.
-pub fn compiler_semantic_input_from_sens(
-    identity: CoreDomainIdentity,
-) -> Result<Option<CompilerSemanticInput>, LanguageError> {
-    let Some(lowering_role) = compiler_lowering_role_from_sens(identity)? else {
-        return Ok(None);
-    };
-
-    let proof_ref = match lowering_role {
+fn proof_ref_for_lowering_role(role: CompilerLoweringRole) -> &'static str {
+    match role {
         CompilerLoweringRole::LambdaForm | CompilerLoweringRole::DefineForm => {
             COMPILER_D4_PROOF_REF
         }
@@ -958,7 +967,17 @@ pub fn compiler_semantic_input_from_sens(
         | CompilerLoweringRole::AtomEquality
         | CompilerLoweringRole::CondForm
         | CompilerLoweringRole::PairConstruct => COMPILER_D3_PROOF_REF,
+    }
+}
+
+pub fn compiler_semantic_input_from_sens(
+    identity: CoreDomainIdentity,
+) -> Result<Option<CompilerSemanticInput>, LanguageError> {
+    let Some(lowering_role) = compiler_lowering_role_from_sens(identity)? else {
+        return Ok(None);
     };
+
+    let proof_ref = proof_ref_for_lowering_role(lowering_role);
 
     Ok(Some(CompilerSemanticInput {
         identity,
@@ -1226,11 +1245,10 @@ mod tests {
             )
         );
         for request in &verified.requests {
-            let expected = compiler_semantic_input_from_sens(request.identity)
-                .expect("current SENS role lookup")
-                .expect("verified request identity is admitted");
-            assert_eq!(request.lowering_role, expected.lowering_role);
-            assert_eq!(request.proof_ref, expected.proof_ref);
+            assert_eq!(
+                request.proof_ref,
+                proof_ref_for_lowering_role(request.lowering_role)
+            );
         }
     }
 
