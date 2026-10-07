@@ -1066,6 +1066,7 @@ def binary_rewrite(
         validate_contract_binary_output(
             rendered,
             binary_authority,
+            d1_enabled=d1_enabled,
             d9_enabled=d9_enabled,
         )
     return rendered, hits, sorted(shadowed)
