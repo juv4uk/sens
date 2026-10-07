@@ -1,0 +1,39 @@
+name: Archipelago ownership v1
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/archipelago-map-v1.json"
+      - "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      - "knowledge/d10-island-bridge-factorization-v1.json"
+      - "knowledge/d10-noncore-reclassification-v1.json"
+      - "knowledge/d10-review-reclassification-v2.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "packaging/islands-manifest-v1.json"
+      - "scripts/check-archipelago-map-v1.py"
+      - ".github/workflows/archipelago-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/archipelago-map-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-archipelago-map-v1.py"
+      - ".github/workflows/archipelago-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  archipelago:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify archipelago ownership map
+        run: python3 scripts/check-archipelago-map-v1.py
+      - name: Verify island ownership gate
+        run: python3 scripts/check-island-ownership-gate.py
+      - name: Verify D10 inventory
+        run: python3 scripts/check-d10-v1-semantic-inventory.py

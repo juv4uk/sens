@@ -233,5 +233,19 @@
     "execution_repositories_reviewed": 11,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
+  },
+  "archipelago": {
+    "artifact": "knowledge/archipelago-map-v1.json",
+    "authority": "#4140",
+    "execution_islands": [
+      "common-lisp",
+      "prolog",
+      "clips",
+      "datalog"
+    ],
+    "repository_count": 87,
+    "core_bridge_meanings": 6,
+    "ownership_rule": "Core owns semantic border/bridges; islands/packages/substrates own native semantics.",
+    "ownership_debt_selected": 0
   }
 }
