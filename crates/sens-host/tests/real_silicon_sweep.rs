@@ -79,7 +79,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
 
     let mut json = String::new();
     json.push_str("{\n");
-    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v1\",\n");
+    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v2\",\n");
     json.push_str(&format!("  \"sens_commit\": \"{}\",\n", json_escape(&sha)));
     json.push_str("  \"target\": \"x86_64-linux-owner-self-hosted\",\n");
     json.push_str(&format!(
