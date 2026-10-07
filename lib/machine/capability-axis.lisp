@@ -8,9 +8,9 @@
 ; Current axis:
 ;   exact DomainIdentity -> 0..N machine capabilities -> 0..N target witnesses
 ;
-; The legacy SID8 axis is retained below only as an explicit compatibility
-; projection for historical tests/evidence. New machine work must use
-; machine-capabilities-for-domain.
+; Historical SID8 machine-capability projections are no longer live code.
+; Provenance remains in git history; current machine work uses
+; machine-capabilities-for-domain exclusively.
 ;
 ; A capability name never mints a semantic identity. A target may honestly have
 ; no witness yet. Target-specific lowering remains under lib/machine/lowering/*.
@@ -48,23 +48,6 @@
      (100
        ((pair-field-load head bounded-u64)))
      (011
-       ((pair-field-load tail bounded-u64))))))
-
-; Historical SID8 compatibility projection. It does not own current meaning.
-(00001001 machine-capability-legacy-sid-axis-v1
-  (00000001
-    ((00001100
-       ((integer-add bounded-u64)))
-     (00000011
-       ((identity-compare bounded-u64)))
-     (00000111
-       ((conditional-branch bounded-u64)))
-     (00000100
-       ((pair-field-store head bounded-u64)
-        (pair-field-store tail bounded-u64)))
-     (00000101
-       ((pair-field-load head bounded-u64)))
-     (00000110
        ((pair-field-load tail bounded-u64))))))
 
 (00001001 machine-capability-target-witnesses-v2
@@ -131,15 +114,6 @@
 (00001001 machine-capabilities-for-domain
   (00001000 (identity)
     (10011100 ((row (machine-capability-find-row identity machine-capability-axis-v2)))
-      (00000111
-        ((00000010 row) () ())
-        ((00000010 row) (1) ())
-        (t (00000101 (00000110 row)))))))
-
-; Compatibility lookup for historical evidence only.
-(00001001 machine-capabilities-for-sid
-  (00001000 (sid)
-    (10011100 ((row (machine-capability-find-row sid machine-capability-legacy-sid-axis-v1)))
       (00000111
         ((00000010 row) () ())
         ((00000010 row) (1) ())
