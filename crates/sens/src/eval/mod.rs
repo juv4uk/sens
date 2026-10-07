@@ -100,31 +100,11 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::DomainIdentity(identity) => {
-            if let Some(core_identity) = identity.core_operation() {
-                return canon::invoke_domain_identity(
-                    core_identity,
-                    arguments,
-                    environment,
-                    span,
-                );
+        Value::DomainIdentity(identity) => match identity.core_operation() {
+            Some(core_identity) => {
+                canon::invoke_domain_identity(core_identity, arguments, environment, span)
             }
-            let macro_identity = match identity {
-                crate::DomainIdentity::D6(value)
-                    if matches!(value.word().packed_bits(), 0b001000 | 0b001001) =>
-                {
-                    Some(crate::CoreDomainIdentity::D6(value))
-                }
-                _ => None,
-            };
-            if let Some(macro_identity) = macro_identity {
-                if let Some(Value::Macro(closure)) =
-                    environment.domain_code_slot(macro_identity)
-                {
-                    return closures::apply_macro(closure, arguments, environment, span);
-                }
-            }
-            Err(LanguageError::new(
+            None => Err(LanguageError::new(
                 ErrorKind::Type,
                 format!(
                     "domain identity is not callable under its ratified law: D{} {}",
@@ -132,7 +112,7 @@ pub(crate) fn invoke_value(
                     identity
                 ),
                 span,
-            ))
+            )),
         }
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
@@ -245,7 +225,7 @@ fn evaluate_list(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    if let Some(identity) = binary_head_domain_identity(&items[0], environment) {
+    if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
     dispatch_call(
@@ -413,9 +393,7 @@ fn dispatch_call(
     // domain slot; we merely preserve raw argument syntax before evaluation.
     if let Some(sid) = head_sid {
         if let Some(identity) =
-            crate::semantic_registry::legacy_macro_domain_identity_from_registry_byte(
-                sid.packed_byte(),
-            )
+            crate::semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
         {
             if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
                 return closures::apply_macro(closure.clone(), arguments, environment, span);
@@ -439,17 +417,6 @@ fn dispatch_call(
     };
     match &function {
         Value::DomainIdentity(identity) => {
-            // A language-owned D6 macro has an exact-domain identity but is not
-            // a generic Core operation. Route only when its exact slot already
-            // contains the macro; do not widen D6 callability.
-            if let crate::DomainIdentity::D6(word) = identity {
-                let exact = crate::CoreDomainIdentity::D6(*word);
-                if let Some(Value::Macro(ref closure)) =
-                    environment.domain_code_slot(exact)
-                {
-                    return closures::apply_macro(closure.clone(), arguments, environment, span);
-                }
-            }
             let Some(core_identity) = identity.core_operation() else {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
@@ -509,27 +476,11 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_domain_identity(
-    expression: &Expr,
-    environment: &Environment,
-) -> Option<CoreDomainIdentity> {
+fn binary_head_domain_identity(expression: &Expr) -> Option<CoreDomainIdentity> {
     let ExprKind::DomainIdentity(identity) = expression.kind else {
         return None;
     };
-    if let Some(core_identity) = identity.core_operation() {
-        return Some(core_identity);
-    }
-
-    // Exact D6 residency alone does not grant callability. LET/LET* become
-    // executable only when the canonical exact slot actually contains a macro
-    // mechanism installed by the language bootstrap.
-    if let crate::DomainIdentity::D6(word) = identity {
-        let exact = CoreDomainIdentity::D6(word);
-        if matches!(environment.domain_code_slot(exact), Some(Value::Macro(_))) {
-            return Some(exact);
-        }
-    }
-    None
+    identity.core_operation()
 }
 
 fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
@@ -572,43 +523,6 @@ mod single_pass_eval_tests {
         crate::load_core_library(&mut session).expect("core library");
         let result = crate::eval_program("(10011101 ((x 41)) x)", &mut session)
             .expect("legacy D6 let* compatibility should delegate to exact macro");
-        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
-    }
-
-    #[test]
-    fn exact_d6_let_inside_exact_lambda_keeps_macro_syntax_raw() {
-        let mut session = Session::default();
-        crate::load_core_library(&mut session).expect("core library");
-        let forms = crate::parse_mixed_exact_domain(
-            "(0011 f (0010 (x) (001000 ((y x)) y))) (f 41)",
-        )
-        .expect("exact D4 lambda with nested exact D6 LET");
-        let result = eval_parsed_expressions(&forms, &mut session)
-            .expect("nested exact D6 LET should use the same bound macro slot");
-        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
-    }
-
-    #[test]
-    fn exact_d6_let_inside_exact_lambda_preserves_lowered_initializer_call() {
-        let mut session = Session::default();
-        crate::load_core_library(&mut session).expect("core library");
-        let forms = crate::parse_mixed_exact_domain(
-            "(0011 f (0010 (xs) (001000 ((y (100 xs))) y))) (f (001 (41 42)))",
-        )
-        .expect("nested exact LET with exact CAR initializer");
-        let result = eval_parsed_expressions(&forms, &mut session)
-            .expect("macro quoting must preserve lowered exact initializer as source-shaped data");
-        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
-    }
-
-    #[test]
-    fn exact_d6_let_routes_only_through_bound_macro_slot() {
-        let mut session = Session::default();
-        crate::load_core_library(&mut session).expect("core library");
-        let forms = crate::parse_mixed_exact_domain("(001000 ((x 41)) x)")
-            .expect("exact D6 LET source");
-        let result = eval_parsed_expressions(&forms, &mut session)
-            .expect("exact D6 LET should use its bound exact macro slot");
         assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
     }
 
