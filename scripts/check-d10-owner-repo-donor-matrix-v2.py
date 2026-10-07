@@ -50,6 +50,7 @@ for name in (
 assert m["followup_queues"]["historical_core_review"]=="COMPLETE #4053"
 assert m["followup_queues"]["execution_seam_review"]=="COMPLETE #4054 / #4094"
 assert m["followup_queues"]["island_bridge_factorization"]=="COMPLETE #4036 / #4094"
+assert m["followup_queues"]["unresolved_scope"]=="COMPLETE #4055"
 
 # Domain/tooling repos with explicit authority boundaries.
 for name in ("panca-vac","my-lisp-panini","my-idea","ecosystem","ecosystem-observer","spanda","tauricode","wsm","WSM-24","pravda"):
