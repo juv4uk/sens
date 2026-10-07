@@ -1,19 +1,19 @@
 ; #1698 — structure is not a fourth SENS payload domain.
 ; Inventory only: no runtime type, tag, coercion, or new semantic identity.
 ;
-; Canonical payload remains Function8 | Number | Text7.
-; Predicate1 is contextual output. Structure is Control2 composition.
+; Canonical identity is exact bits + exact domain + admitted/proved law.
+; D1 PredicateBit is contextual output/data where admitted. Structure is Core.D2 racanā2 composition.
 
 (structure-not-ontology/1
   ((representation . empty-structure)
    (class . structural)
-   (projection . control2-open-close)
+   (projection . d2-open-close)
    (law . not-payload))
 
   ((representation . pair-or-list)
    (class . structural)
-   (projection . control2-composition)
-   (dot . human-reader-only)
+   (projection . d2-composition)
+   (dot . d2-11)
    (law . no-symbol-required))
 
   ((representation . numeric-buffer)
