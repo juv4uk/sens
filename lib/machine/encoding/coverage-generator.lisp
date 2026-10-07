@@ -8,35 +8,6 @@
   (lambda args
     (reduce (lambda (acc s) (string-append acc s)) "" args)))
 
-; Render ordinary cardinality Numbers with explicit binary source spelling.
-; Radix 2 is intentionally an ordinary Number here: #b10 is the distinct
-; BinaryNumber carrier that this serializer is producing, not an arithmetic
-; constant to be implicitly mixed into the input Number domain.
-(def encoder-coverage-binary-digits-onto
-  (lambda (value acc)
-    (cond
-      ((менше? value 2)
-       (string-append (number->string value) acc))
-      (encoder-coverage-d1-yes
-       (encoder-coverage-binary-digits-onto
-         (quotient value 2)
-         (string-append
-           (number->string (mod value 2))
-           acc))))))
-
-(def encoder-coverage-binary-literal
-  (lambda (value)
-    (string-append
-      "#b"
-      (encoder-coverage-binary-digits-onto value ""))))
-
-(def encoder-coverage-count-as-binary
-  (lambda (value)
-    (car
-      (read-all
-        (encoder-coverage-binary-literal value)))))
-
-
 ; Coverage authority uses exact D1 PredicateBit for every control decision.
 ; Deep structural equality is Lisp-owned here and is built only from current
 ; exact D3 laws: ATOM classifies pair-vs-atom and EQ compares admitted atoms.
@@ -73,10 +44,25 @@
   (lambda (value)
     (encoder-coverage-same? value (quote ()))))
 
+; Cardinality stays in canonical BinaryNumber from the first cell to the last.
+; No ordinary Number -> BinaryNumber coercion exists or is needed.
+(def encoder-coverage-binary-length-onto
+  (lambda (values count)
+    (cond
+      ((encoder-coverage-empty? values) count)
+      (encoder-coverage-d1-yes
+       (encoder-coverage-binary-length-onto
+         (cdr values)
+         (+ count #b1))))))
+
+(def encoder-coverage-binary-length
+  (lambda (values)
+    (encoder-coverage-binary-length-onto values #b0)))
+
 (def encoder-coverage-count=?
-  (lambda (binary-count observed-count)
+  (lambda (binary-count values)
     (= binary-count
-       (encoder-coverage-count-as-binary observed-count))))
+       (encoder-coverage-binary-length values))))
 
 
 ; Conjunction over already-admitted predicate answers. Structural EMPTY is
@@ -260,7 +246,7 @@
               (cons
                 (encoder-coverage-render-row index-row partial-row)
                 rendered)
-              (+ count 1)))
+              (+ count #b1)))
            (encoder-coverage-d1-yes
             (encoder-coverage-build-onto
               (cdr index-rows)
@@ -298,7 +284,7 @@
   (cdr (cdr encoder-coverage-index-form)))
 
 (def encoder-coverage-form-count
-  (length encoder-coverage-index-rows))
+  (encoder-coverage-binary-length encoder-coverage-index-rows))
 
 (def encoder-coverage-partials-valid?
   (lambda (index-rows partials)
@@ -324,13 +310,13 @@
       (list (quote admitted-head)
         (encoder-coverage-same? (car encoder-coverage-index-form) (quote x86-admitted-iclass-index/2)))
       (list (quote admitted-count)
-        (encoder-coverage-count=? encoder-coverage-index-count encoder-coverage-form-count))
+        (encoder-coverage-count=? encoder-coverage-index-count encoder-coverage-index-rows))
       (list (quote admitted-unique)
         (encoder-coverage-index-unique? encoder-coverage-index-rows (quote ())))
       (list (quote projection-head)
         (encoder-coverage-same? (car encoder-coverage-admission-projection-form) (quote x86-admission-iclass-projection/1)))
       (list (quote projection-count)
-        (encoder-coverage-count=? encoder-coverage-projection-partial-count (length encoder-coverage-partials)))
+        (encoder-coverage-count=? encoder-coverage-projection-partial-count encoder-coverage-partials))
       (list (quote projection-orphan-zero)
         (= encoder-coverage-projection-orphan-count #b0))
       (list (quote projection-subset)
@@ -338,9 +324,9 @@
       (list (quote legacy-head)
         (encoder-coverage-same? (car encoder-coverage-legacy-form) (quote encoder-coverage-legacy-parity/1)))
       (list (quote legacy-count)
-        (encoder-coverage-count=? encoder-coverage-legacy-count (length encoder-coverage-legacy-pairs)))
+        (encoder-coverage-count=? encoder-coverage-legacy-count encoder-coverage-legacy-pairs))
       (list (quote legacy-successor-count)
-        (encoder-coverage-count=? encoder-coverage-legacy-successor-count (length encoder-coverage-partials)))
+        (encoder-coverage-count=? encoder-coverage-legacy-successor-count encoder-coverage-partials))
       (list (quote legacy-subset)
         (encoder-coverage-partials-valid? encoder-coverage-partials encoder-coverage-legacy-pairs)))))
 
@@ -353,7 +339,7 @@
   (lambda (index-row coverage-row partial-row)
     (cond
       ((encoder-coverage-empty? coverage-row) encoder-coverage-d1-no)
-      ((encoder-coverage-count=? #b101 (length coverage-row))
+      ((encoder-coverage-count=? #b101 coverage-row)
        (let* ((expected-status
                 (cond
                   ((encoder-coverage-empty? partial-row) (quote not-yet-implemented))
@@ -408,14 +394,14 @@
       ((encoder-coverage-empty? coverage-form) encoder-coverage-d1-no)
       ((encoder-coverage-count=?
          encoder-coverage-index-count
-         (length (cdr (cdr (cdr coverage-form)))))
+         (cdr (cdr (cdr coverage-form))))
        (encoder-coverage-all?
          (list
            (encoder-coverage-same? (car coverage-form) (quote x86-encoder-coverage/1))
            (encoder-coverage-same? (car (second coverage-form)) (quote form-count))
-           (encoder-coverage-count=? (second (second coverage-form)) encoder-coverage-form-count)
+           (= (second (second coverage-form)) encoder-coverage-form-count)
            (encoder-coverage-same? (car (third coverage-form)) (quote partial-count))
-           (encoder-coverage-count=? (second (third coverage-form)) (length encoder-coverage-partials))
+           (= (second (third coverage-form)) encoder-coverage-projection-partial-count)
            (encoder-coverage-projection-rows-valid?
              encoder-coverage-index-rows
              (cdr (cdr (cdr coverage-form)))
@@ -429,7 +415,7 @@
                encoder-coverage-index-rows
                encoder-coverage-partials
                (quote ())
-               0))
+               #b0))
            (rendered-rows (car build))
            (partial-count (second build))
            (stale-partial? (third build))
@@ -442,8 +428,8 @@
                "; coverage of every XED operand/addressing form. No silent third status (#176/#604).\n"
                "\n"
                "(x86-encoder-coverage/1\n"
-               "  (form-count " (encoder-coverage-binary-literal encoder-coverage-form-count) ")\n"
-               "  (partial-count " (encoder-coverage-binary-literal partial-count) ")\n")))
+               "  (form-count " (write-to-string encoder-coverage-form-count) ")\n"
+               "  (partial-count " (write-to-string partial-count) ")\n")))
       (cond
         (stale-partial?
          (quote ()))
