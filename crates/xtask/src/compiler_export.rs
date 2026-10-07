@@ -232,7 +232,7 @@ mod tests {
         assert!(artifact.contains(&format!("(semantic-request . {request})")));
         assert!(artifact.contains("(artifact-status . canonical-backend-neutral)"));
         assert!(request.contains("(ідентичність . ((domain . D3) (bits . 010)))"));
-        assert!(request.contains("(походження . ((repository . \\"juv4uk/sens\\")"));
+        assert!(request.contains("(походження . ((repository . \"juv4uk/sens\")"));
         assert!(!request.contains("(identity ."));
         assert!(!request.contains("(provenance ."));
     }
