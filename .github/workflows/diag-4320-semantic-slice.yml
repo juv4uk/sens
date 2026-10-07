@@ -12,26 +12,48 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust semantic contract tests
+      - name: rust d1_canonical_source_value
         continue-on-error: true
-        run: |
-          cargo test -p sens \
-            --test d1_canonical_source_value \
-            --test witness_authority \
-            --test structural_observation_contract \
-            --test exact_q_binary_contract \
-            --test mathematical_result_taxonomy \
-            --test canon_laws_v2_contract \
-            --test reason_honesty_contract \
-            --test unification_outcome_contract \
-            --test knowledge_clause_kind_contract \
-            --test content_store_authority \
-            --test decimal_comma_authority \
-            --test authority_guard_contract \
-            --test semantic_ref_fail_closed \
-            --test semantic_coordinate_matrix_845
-
+        run: cargo test -p sens --test d1_canonical_source_value -- --nocapture
+      - name: rust witness_authority
+        continue-on-error: true
+        run: cargo test -p sens --test witness_authority -- --nocapture
+      - name: rust structural_observation_contract
+        continue-on-error: true
+        run: cargo test -p sens --test structural_observation_contract -- --nocapture
+      - name: rust exact_q_binary_contract
+        continue-on-error: true
+        run: cargo test -p sens --test exact_q_binary_contract -- --nocapture
+      - name: rust mathematical_result_taxonomy
+        continue-on-error: true
+        run: cargo test -p sens --test mathematical_result_taxonomy -- --nocapture
+      - name: rust canon_laws_v2_contract
+        continue-on-error: true
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+      - name: rust reason_honesty_contract
+        continue-on-error: true
+        run: cargo test -p sens --test reason_honesty_contract -- --nocapture
+      - name: rust unification_outcome_contract
+        continue-on-error: true
+        run: cargo test -p sens --test unification_outcome_contract -- --nocapture
+      - name: rust knowledge_clause_kind_contract
+        continue-on-error: true
+        run: cargo test -p sens --test knowledge_clause_kind_contract -- --nocapture
+      - name: rust content_store_authority
+        continue-on-error: true
+        run: cargo test -p sens --test content_store_authority -- --nocapture
+      - name: rust decimal_comma_authority
+        continue-on-error: true
+        run: cargo test -p sens --test decimal_comma_authority -- --nocapture
+      - name: rust authority_guard_contract
+        continue-on-error: true
+        run: cargo test -p sens --test authority_guard_contract -- --nocapture
+      - name: rust semantic_ref_fail_closed
+        continue-on-error: true
+        run: cargo test -p sens --test semantic_ref_fail_closed -- --nocapture
+      - name: rust semantic_coordinate_matrix_845
+        continue-on-error: true
+        run: cargo test -p sens --test semantic_coordinate_matrix_845 -- --nocapture
       - name: exact quantity witness
         continue-on-error: true
         run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp
