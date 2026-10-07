@@ -62,3 +62,5 @@ jobs:
         run: cargo test -p sens syntax::wire_tests::w9_domain_identity_round_trips
       - name: D9 human presentation stays non-authoritative
         run: cargo test -p sens presentation::tests::d9_without_runtime_surface
+      - name: D9 identity does not gain callability from width
+        run: cargo test -p sens eval::lower::tests::d9_identity_does_not_gain_domain_callability
