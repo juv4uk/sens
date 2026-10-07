@@ -1,9 +1,9 @@
-use sens::{eval_program, Session};
+use sens::{eval_program, load_core_library, Session};
 
 fn store_session() -> Session {
     let mut session = Session::default();
+    load_core_library(&mut session).expect("core library must load through canonical bootstrap");
     for source in [
-        include_str!("../../../lib/core.lisp"),
         include_str!("../../../lib/unify.lisp"),
         include_str!("../../../lib/reason.lisp"),
         include_str!("../../../lib/forward.lisp"),
