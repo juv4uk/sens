@@ -3,7 +3,7 @@
 (load "lib/machine/encoding/coverage-generator.lisp")
 
 (cond
-  (encoder-coverage-index-valid?
+  ((encoder-coverage-index-valid?)
    ((lambda ()
       (write-file
         "lib/machine/encoding/coverage.lisp"
