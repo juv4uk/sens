@@ -1,4 +1,4 @@
-name: STORE → AIR → LOAD evidence / доказ
+name: Contract 11.8 STORE → AIR → LOAD replay
 
 on:
   pull_request:
@@ -10,10 +10,21 @@ on:
       - 'lib/core4.lisp'
       - 'lib/core4.lisp.fasl'
       - '.github/workflows/store-air-load.yml'
+      - '.github/workflows/contract-11-8-store-air-load.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens/examples/store_air_load_repr.rs'
+      - 'crates/sens/examples/current_en_vs_d1d8_cpu.rs'
+      - 'benchmarks/store-air-load/**'
+      - 'language-contract.lisp'
+      - 'lib/core4.lisp'
+      - 'lib/core4.lisp.fasl'
+      - '.github/workflows/contract-11-8-store-air-load.yml'
   workflow_dispatch:
 
 concurrency:
-  group: store-air-load-${{ github.ref }}
+  group: contract-11-8-store-air-load-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -188,6 +199,6 @@ jobs:
       - name: Опублікувати evidence artifact / Upload evidence
         uses: actions/upload-artifact@v4
         with:
-          name: store-air-load-evidence
+          name: contract-11-8-store-air-load-evidence
           path: /tmp/store-air-load.jsonl
           if-no-files-found: error

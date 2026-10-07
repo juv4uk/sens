@@ -2,6 +2,16 @@
 
 Цей каталог реалізує спільний machine-readable evidence-контракт для #3580 / #3595.
 
+Поточний replay generation:
+- `contract_version=11.8`;
+- `semantic_generation=contract-11-8-exact-d1-d9`;
+- current foundation = D1–D9;
+- measured exact-width carriers = W1–W8;
+- D9 = `BLOCKED-CARRIER` до реалізації W9 (#4038 / PR #4044).
+
+Runner відмовляється мовчки перелабелювати ці рядки під іншу версію Contract:
+після зміни Contract потрібен новий generation replay.
+
 ## Головна межа
 
 Один і той самий канонічний exact-width об'єкт має **три різні фізичні питання**:
