@@ -64,7 +64,7 @@ fn current_structural_surfaces_lower_to_exact_d3_identities() {
             panic!("{source} must lower to exact DomainCall");
         };
         assert_eq!(identity.width(), 3, "{source}");
-        assert_eq!(identity.packed_bits(), bits, "{source}");
+        assert_eq!(identity.packed_bits(), u16::from(bits), "{source}");
     }
 }
 
