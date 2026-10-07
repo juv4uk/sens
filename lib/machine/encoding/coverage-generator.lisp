@@ -15,7 +15,7 @@
 (def encoder-coverage-binary-digits-onto
   (lambda (value acc)
     (cond
-      ((< value 2)
+      ((менше? value 2)
        (string-append (number->string value) acc))
       (encoder-coverage-d1-yes
        (encoder-coverage-binary-digits-onto
