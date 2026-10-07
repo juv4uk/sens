@@ -513,14 +513,3 @@
          (x86-encode-admitted-program-or-reject forms))))))
 
 
-(00001001 x86-encode-current-eq-cond-u64
-  (00001000 (eq-identity cond-identity left right then-value else-value)
-    (10011100 ((forms
-            (x86-lower-current-eq-cond-u64-forms
-              eq-identity cond-identity
-              left right then-value else-value)))
-      (00000111
-        ((00100010 forms (00000001 unsupported-current-domain-eq-cond-u64))
-         (00000001 unsupported-current-domain-eq-cond-u64))
-        (t
-         (x86-encode-admitted-program-or-reject forms))))))
