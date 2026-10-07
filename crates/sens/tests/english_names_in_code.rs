@@ -310,6 +310,155 @@ fn rust_strings(text: &str) -> Vec<(usize, String)> {
     out
 }
 
+fn rust_literal_is_lisp_form(literal: &str) -> bool {
+    let trimmed = literal.trim_start();
+    trimmed.starts_with('(') || trimmed.starts_with("'(") || trimmed.starts_with("`(")
+}
+
+/// Lines that belong to Rust items guarded by an exact #[cfg(test)].
+/// Strings/comments are masked first, then the annotated item's brace range
+/// is matched. Production code before/after the item stays visible.
+fn rust_cfg_test_lines(text: &str) -> BTreeSet<usize> {
+    fn mask(text: &str) -> String {
+        let chars: Vec<char> = text.chars().collect();
+        let mut out = String::with_capacity(text.len());
+        let mut i = 0usize;
+
+        while i < chars.len() {
+            let c = chars[i];
+            let next = chars.get(i + 1).copied();
+
+            if c == '/' && next == Some('/') {
+                out.push(' ');
+                out.push(' ');
+                i += 2;
+                while i < chars.len() && chars[i] != '\n' {
+                    out.push(' ');
+                    i += 1;
+                }
+            } else if c == '/' && next == Some('*') {
+                out.push(' ');
+                out.push(' ');
+                i += 2;
+                while i + 1 < chars.len() && !(chars[i] == '*' && chars[i + 1] == '/') {
+                    if chars[i] == '\n' { out.push('\n'); } else { out.push(' '); }
+                    i += 1;
+                }
+                if i + 1 < chars.len() {
+                    out.push(' ');
+                    out.push(' ');
+                    i += 2;
+                }
+            } else if c == '\'' {
+                if next == Some('\\') {
+                    out.push(' ');
+                    out.push(' ');
+                    i += 2;
+                    while i < chars.len() {
+                        let ch = chars[i];
+                        out.push(if ch == '\n' { '\n' } else { ' ' });
+                        i += 1;
+                        if ch == '\'' { break; }
+                    }
+                } else if chars.get(i + 2) == Some(&'\'') {
+                    out.push(' ');
+                    out.push(' ');
+                    out.push(' ');
+                    i += 3;
+                } else {
+                    out.push(c);
+                    i += 1;
+                }
+            } else if c == 'r'
+                && (next == Some('"') || next == Some('#'))
+                && (i == 0 || !(chars[i - 1].is_alphanumeric() || chars[i - 1] == '_'))
+            {
+                let start = i;
+                let mut j = i + 1;
+                let mut hashes = 0usize;
+                while j < chars.len() && chars[j] == '#' { hashes += 1; j += 1; }
+                if chars.get(j) != Some(&'"') {
+                    out.push(c);
+                    i += 1;
+                    continue;
+                }
+                j += 1;
+                while j < chars.len() {
+                    if chars[j] == '"' && (0..hashes).all(|k| chars.get(j + 1 + k) == Some(&'#')) {
+                        j += 1 + hashes;
+                        break;
+                    }
+                    j += 1;
+                }
+                for ch in &chars[start..j.min(chars.len())] {
+                    out.push(if *ch == '\n' { '\n' } else { ' ' });
+                }
+                i = j;
+            } else if c == '"' {
+                out.push(' ');
+                i += 1;
+                while i < chars.len() {
+                    let ch = chars[i];
+                    out.push(if ch == '\n' { '\n' } else { ' ' });
+                    i += 1;
+                    if ch == '\\' && i < chars.len() {
+                        let escaped = chars[i];
+                        out.push(if escaped == '\n' { '\n' } else { ' ' });
+                        i += 1;
+                    } else if ch == '"' {
+                        break;
+                    }
+                }
+            } else {
+                out.push(c);
+                i += 1;
+            }
+        }
+        out
+    }
+
+    fn line_at(text: &str, byte: usize) -> usize {
+        text.as_bytes()[..byte.min(text.len())].iter().filter(|&&b| b == b'\n').count() + 1
+    }
+
+    let masked = mask(text);
+    let mut lines = BTreeSet::new();
+    let mut search_from = 0usize;
+
+    while let Some(rel) = masked[search_from..].find("#[cfg(test)]") {
+        let attr = search_from + rel;
+        let after = attr + "#[cfg(test)]".len();
+        let tail = &masked[after..];
+        let next_open = tail.find('{').map(|p| after + p);
+        let next_semi = tail.find(';').map(|p| after + p);
+
+        if let Some(semi) = next_semi {
+            if next_open.map_or(true, |open| semi < open) {
+                for line in line_at(&masked, attr)..=line_at(&masked, semi) { lines.insert(line); }
+                search_from = semi + 1;
+                continue;
+            }
+        }
+
+        let Some(open) = next_open else { break };
+        let mut depth = 0i32;
+        let mut end = open;
+        for (offset, ch) in masked[open..].char_indices() {
+            match ch {
+                '{' => depth += 1,
+                '}' => {
+                    depth -= 1;
+                    if depth == 0 { end = open + offset; break; }
+                }
+                _ => {}
+            }
+        }
+        for line in line_at(&masked, attr)..=line_at(&masked, end) { lines.insert(line); }
+        search_from = end.saturating_add(1);
+    }
+
+    lines
+}
 /// Одне місце: (вид, файл, рядок, ім'я).
 type Place = (&'static str, String, usize, String);
 
@@ -319,15 +468,24 @@ fn places() -> Vec<Place> {
     for (path, rel) in files() {
         let Ok(text) = fs::read_to_string(&path) else { continue };
         if rel.ends_with(".rs") {
+            let cfg_test_lines = rust_cfg_test_lines(&text);
             for (line, literal) in rust_strings(&text) {
                 if names.contains(literal.as_str()) {
-                    let kind = classified_kind(&rel, &text, "rust");
+                    let kind = if cfg_test_lines.contains(&line) {
+                        "rust-test-instrument"
+                    } else {
+                        classified_kind(&rel, &text, "rust")
+                    };
                     out.push((kind, rel.clone(), line, literal));
-                } else if literal.contains('(') {
+                } else if rust_literal_is_lisp_form(&literal) {
                     for (l, token, data) in lisp_tokens(&literal, line) {
                         if names.contains(&token) {
                             let base_kind = if data { "rust-lisp-дані" } else { "rust-lisp" };
-                            let kind = classified_kind(&rel, &text, base_kind);
+                            let kind = if cfg_test_lines.contains(&l) {
+                                "rust-test-instrument"
+                            } else {
+                                classified_kind(&rel, &text, base_kind)
+                            };
                             out.push((kind, rel.clone(), l, token));
                         }
                     }
@@ -495,4 +653,25 @@ fn scanners_find_names_in_lisp_and_rust() {
     let literals: Vec<&str> = rust.iter().map(|(_, s)| s.as_str()).collect();
     assert_eq!(literals, ["car", "(cons 1 ())"]);
     assert_eq!(rust[1].0, 2);
+
+    assert!(rust_literal_is_lisp_form("  \n(cons 1 ())"));
+    assert!(rust_literal_is_lisp_form("'(car x)"));
+    assert!(!rust_literal_is_lisp_form("CDR: list accessor (structural)"));
+
+    let cfg_source = r#"
+let production_before = "car";
+#[cfg(test)]
+mod tests {
+    const FIXTURE: &str = "(cons 1 ())";
+    fn nested() { let name = "lambda"; }
+}
+let production_after = "cdr";
+"#;
+    let cfg_lines = rust_cfg_test_lines(cfg_source);
+    assert!(!cfg_lines.contains(&2));
+    assert!(cfg_lines.contains(&3));
+    assert!(cfg_lines.contains(&4));
+    assert!(cfg_lines.contains(&5));
+    assert!(cfg_lines.contains(&6));
+    assert!(!cfg_lines.contains(&8));
 }
