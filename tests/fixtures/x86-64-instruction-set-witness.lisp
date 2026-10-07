@@ -666,6 +666,40 @@
       (#d102 #d15 #d58 #d68 #d193 #d17
        #d102 #d69 #d15 #d58 #d68 #d68
        #d36 #d240 #d1))
+     ; #2372 corrected generic VEX3 exact-byte witnesses.
+     ; byte1 C4, byte2 ~R/~X/~B+0F map, byte3 W/~vvvv/L/pp.
+     ((encode vaddps-xmm-basic)
+      (x86-encode-vaddps-xmm-xmm-xmm
+        (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
+      (#d196 #d225 #d112 #d88 #d194))
+     ((encode vaddpd-xmm-basic)
+      (x86-encode-vaddpd-xmm-xmm-xmm
+        (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
+      (#d196 #d225 #d113 #d88 #d194))
+     ((encode vandnps-xmm-basic)
+      (x86-encode-vandnps-xmm-xmm-xmm
+        (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
+      (#d196 #d225 #d112 #d85 #d194))
+     ((encode vandnpd-xmm-basic)
+      (x86-encode-vandnpd-xmm-xmm-xmm
+        (00000001 xmm0) (00000001 xmm1) (00000001 xmm2))
+      (#d196 #d225 #d113 #d85 #d194))
+     ((encode vaddps-xmm-high-registers)
+      (x86-encode-vaddps-xmm-xmm-xmm
+        (00000001 xmm8) (00000001 xmm9) (00000001 xmm10))
+      (#d196 #d65 #d48 #d88 #d194))
+     ((encode vandnpd-xmm-high-registers)
+      (x86-encode-vandnpd-xmm-xmm-xmm
+        (00000001 xmm15) (00000001 xmm8) (00000001 xmm9))
+      (#d196 #d65 #d57 #d85 #d249))
+     ((admission vex3-register-valid)
+      (x86-admitted-instruction?
+        (00000001 (vaddps-xmm-xmm-xmm xmm0 xmm1 xmm2)))
+      t)
+     ((admission vex3-register-invalid)
+      (x86-admitted-instruction?
+        (00000001 (vaddps-xmm-xmm-xmm xmm16 xmm1 xmm2)))
+      ())
      ((admission rdtsc-valid)
       (x86-admitted-instruction? (quote (rdtsc)))
       t)
