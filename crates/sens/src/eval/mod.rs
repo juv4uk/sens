@@ -556,6 +556,32 @@ mod single_pass_eval_tests {
     }
 
     #[test]
+    fn exact_d6_let_inside_exact_lambda_keeps_macro_syntax_raw() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let forms = crate::parse_mixed_exact_domain(
+            "(0011 f (0010 (x) (001000 ((y x)) y))) (f 41)",
+        )
+        .expect("exact D4 lambda with nested exact D6 LET");
+        let result = eval_parsed_expressions(&forms, &mut session)
+            .expect("nested exact D6 LET should use the same bound macro slot");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
+    }
+
+    #[test]
+    fn exact_d6_let_inside_exact_lambda_preserves_lowered_initializer_call() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let forms = crate::parse_mixed_exact_domain(
+            "(0011 f (0010 (xs) (001000 ((y (100 xs))) y))) (f (001 (41 42)))",
+        )
+        .expect("nested exact LET with exact CAR initializer");
+        let result = eval_parsed_expressions(&forms, &mut session)
+            .expect("macro quoting must preserve lowered exact initializer as source-shaped data");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
+    }
+
+    #[test]
     fn exact_d6_let_routes_only_through_bound_macro_slot() {
         let mut session = Session::default();
         crate::load_core_library(&mut session).expect("core library");
