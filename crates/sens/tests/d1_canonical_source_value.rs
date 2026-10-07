@@ -1,6 +1,6 @@
 use sens::{
-    eval_parsed_expressions, parse_canonical_binary, DomainIdentity, ErrorKind, ExprKind, Session,
-    Value,
+    eval_parsed_expressions, parse, parse_canonical_binary, DomainIdentity, ErrorKind, Exactness,
+    ExprKind, Session, Value,
 };
 
 fn eval_source(source: &str) -> Result<Value, sens::LanguageError> {
@@ -49,6 +49,23 @@ fn canonical_d1_values_are_not_callable_heads() {
             error.message.contains("not callable"),
             "unexpected D1 head failure: {}",
             error.message
+        );
+    }
+}
+
+#[test]
+fn human_numeric_parser_does_not_alias_canonical_d1_source() {
+    for source in ["0", "1"] {
+        let human = parse(source).expect("human parser accepts decimal number");
+        assert!(
+            matches!(human[0].kind, ExprKind::Number(_, Exactness::Exact)),
+            "human compatibility parser must keep {source} numeric"
+        );
+
+        let binary = parse_canonical_binary(source).expect("canonical W1 source");
+        assert!(
+            matches!(binary[0].kind, ExprKind::DomainIdentity(DomainIdentity::D1(_))),
+            "canonical binary reader must keep {source} in D1"
         );
     }
 }
