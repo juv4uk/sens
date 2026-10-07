@@ -8,7 +8,7 @@
 (load "lib/machine/operands/x86-64.lisp")
 (load "lib/machine/admission/x86-64.lisp")
 (load "lib/machine/lowering/semantic-x86-64.lisp")
-(load "lib/machine/dispatch/native-first.lisp")
+(load-mixed-exact-domain "lib/machine/dispatch/native-first.lisp")
 (load "lib/machine/dispatch/native-first-execute.lisp")
 
 (00001001 native-first-execution-witness-check
