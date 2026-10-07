@@ -78,3 +78,43 @@
        (native-first-fallback expression)))))
 
 (00001001 native-first-plan-car
+  (00001000 (expression)
+    (10011100 ((arguments (00000110 expression)))
+      (00000111
+        ((00000010 arguments) (0)
+         (00000111
+           ((00000010 (00000110 arguments)) ()
+            (native-first-plan-car-argument expression (00000101 arguments)))
+           ((00000001 native-first-fallback)
+            native-first-fallback
+            (native-first-fallback expression))))
+        ((00000001 native-first-fallback)
+         native-first-fallback
+         (native-first-fallback expression))))))
+
+(00001001 native-first-plan
+  (00001000 (expression)
+    (00000111
+      ((00000010 expression) (0)
+       (10011100 ((head (00000101 expression)))
+         (00000111
+           ((00000010 head) ()
+            (native-first-fallback expression))
+           ((00000010 head) (0)
+            (native-first-fallback expression))
+           ((00000010 head) (1)
+            (00000111
+              ((00000011 head (00000001 car)) (1)
+               (native-first-plan-car expression))
+              ((00000011 head (00000001 car)) (0)
+               (native-first-fallback expression)))))))
+      ((00000001 native-first-fallback)
+       native-first-fallback
+       (native-first-fallback expression)))))
+
+; #4081 — exact-domain native-first classifier.
+;
+; Input is already-lowered source-shaped program-data:
+;   (DomainIdentity arg...)
+; The caller supplies a representation-only SHAPE-OR-EMPTY mechanism:
+;   DomainIdentity -> (width (PredicateBit...))
