@@ -50,7 +50,6 @@ on:
 jobs:
   real-silicon-harness-build:
     name: Compile real-silicon harness only
-    if: vars.HOSTED_RUNNERS == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -60,7 +59,8 @@ jobs:
         run: cargo test -p sens-host --test real_silicon_sweep --no-run
 
   exact-domain-x86:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    name: Exact-domain x86 portable witness
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
@@ -77,7 +77,6 @@ jobs:
           cargo test -p sens --test machine_capability_axis -- --nocapture
           cargo test -p sens --test semantic_coordinate_join -- --nocapture
           cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
-          cargo test -p sens --test i5_6400_machine_profile -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Derived machine coverage inputs
         run: python3 scripts/generate-encoder-coverage-input.py --check
@@ -85,6 +84,19 @@ jobs:
         run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
       - name: Lisp-owned x86 encoder bytes
         run: cargo test -p sens --test x86_64_lisp_encoder -- --nocapture
+      - name: Compile owner-silicon witness without claiming hosted hardware evidence
+        run: cargo test -p sens-host --test real_silicon_sweep --no-run
+
+  owner-i5-6400-real-silicon:
+    name: Owner i5-6400 real-silicon witness
+    if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Owner i5-6400 profile
+        run: cargo test -p sens --test i5_6400_machine_profile -- --nocapture
       - name: Owner i5-6400 real-silicon sweep
         env:
           SENS_REAL_SILICON_ARTIFACT: ${{ github.workspace }}/real-silicon-sweep.json
