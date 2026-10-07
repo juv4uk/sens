@@ -308,20 +308,30 @@
          (t (00000001 ()))))
       (t (00000001 ())))))
 
-(00001001 x86-lower-current-binary-u64-forms
-  (00001000 (identity left right)
+; #4068 width-safe machine key helper. Width and packed bits are separate
+; mechanism scalars derived from Rust DomainIdentity; source leading zeros are never
+; consulted.
+(00001001 x86-current-domain-key?
+  (00001000 (width bits expected-width expected-bits)
     (00000111
-      ((00100010 identity 01010)
+      ((00100010 width expected-width)
+       (00100010 bits expected-bits))
+      (t (00000001 ())))))
+
+(00001001 x86-lower-current-binary-u64-forms
+  (00001000 (width bits left right)
+    (00000111
+      ((x86-current-domain-key? width bits 5 10)
        (00000111
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-add-u64-forms left right))
          (t (00000001 exact-d5-fallback-required))))
-      ((00100010 identity 01011)
+      ((x86-current-domain-key? width bits 5 11)
        (00000111
          ((x86-current-d5-difference-u64-safe? left right)
           (x86-lower-difference-u64-forms left right))
          (t (00000001 exact-d5-fallback-required))))
-      ((00100010 identity 10110)
+      ((x86-current-domain-key? width bits 5 22)
        (00000111
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-times-u64-forms left right))
@@ -330,8 +340,10 @@
        (00000001 unsupported-current-domain-binary-u64)))))
 
 (00001001 x86-encode-current-binary-u64
-  (00001000 (identity left right)
-    (10011100 ((forms (x86-lower-current-binary-u64-forms identity left right)))
+  (00001000 (width bits left right)
+    (10011100 ((forms
+                  (x86-lower-current-binary-u64-forms
+                    width bits left right)))
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-binary-u64))
          (00000001 unsupported-current-domain-binary-u64))
@@ -363,9 +375,9 @@
       (t (00000001 ())))))
 
 (00001001 x86-lower-current-quotient-i64-forms
-  (00001000 (identity left right)
+  (00001000 (width bits left right)
     (00000111
-      ((00100010 identity 10111)
+      ((x86-current-domain-key? width bits 5 23)
        (00000111
          ((x86-current-d5-quotient-i64-equal-safe? left right)
           (x86-lower-quotient-i64-equal-forms left right))
@@ -373,10 +385,10 @@
       (t (00000001 unsupported-current-domain-quotient-i64)))))
 
 (00001001 x86-encode-current-quotient-i64
-  (00001000 (identity left right)
+  (00001000 (width bits left right)
     (10011100 ((forms
                   (x86-lower-current-quotient-i64-forms
-                    identity left right)))
+                    width bits left right)))
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-quotient-i64))
          (00000001 unsupported-current-domain-quotient-i64))
@@ -406,11 +418,11 @@
       (t (00000001 ())))))
 
 (00001001 x86-lower-order-i64-forms
-  (00001000 (identity left right)
+  (00001000 (width bits left right)
     (00000111
       ((x86-current-d5-order-i63-safe? left right)
        (00000111
-         ((00100010 identity 11010)
+         ((x86-current-domain-key? width bits 5 26)
           (00100111
             (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
             (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
@@ -418,7 +430,7 @@
             (00100111 (00000001 setl-r8) (00000001 al))
             (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
             (00100111 (00000001 ret))))
-         ((00100010 identity 11011)
+         ((x86-current-domain-key? width bits 5 27)
           (00100111
             (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
             (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
@@ -432,8 +444,8 @@
        (00000001 exact-d5-fallback-required)))))
 
 (00001001 x86-encode-current-order-bit
-  (00001000 (identity left right)
-    (10011100 ((forms (x86-lower-order-i64-forms identity left right)))
+  (00001000 (width bits left right)
+    (10011100 ((forms (x86-lower-order-i64-forms width bits left right)))
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-order-i64))
          (00000001 unsupported-current-domain-order-i64))
@@ -446,26 +458,27 @@
 ; These are bounded native-call witnesses only. They do not claim a general
 ; allocator, escaping pair ABI, GC, or arbitrary first-class native pair value.
 (00001001 x86-lower-current-structural-u64-forms
-  (00001000 (identity left right)
+  (00001000 (width bits left right)
     (00000111
-      ((00100010 identity 111)
+      ((x86-current-domain-key? width bits 3 7)
        (x86-lower-bounded-pair-store-u64-forms left right))
-      ((00100010 identity 100)
+      ((x86-current-domain-key? width bits 3 4)
        (x86-lower-cons-car-u64-forms left right))
-      ((00100010 identity 011)
+      ((x86-current-domain-key? width bits 3 3)
        (x86-lower-cons-cdr-u64-forms left right))
       (t
        (00000001 unsupported-current-domain-structural-u64)))))
 
 (00001001 x86-encode-current-structural-u64
-  (00001000 (identity left right)
-    (10011100 ((forms (x86-lower-current-structural-u64-forms identity left right)))
+  (00001000 (width bits left right)
+    (10011100 ((forms
+                  (x86-lower-current-structural-u64-forms
+                    width bits left right)))
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-structural-u64))
          (00000001 unsupported-current-domain-structural-u64))
         (t
          (x86-encode-admitted-program-or-reject forms))))))
-
 
 ; #4000 exact-domain bounded composition for current D3 EQ + COND.
 ; This route intentionally does not expose an independent numeric-boolean EQ
@@ -473,17 +486,32 @@
 ; two-arm composition; the language boundary remains exact D1/EMPTY according
 ; to current D3 law.
 (00001001 x86-lower-current-eq-cond-u64-forms
-  (00001000 (eq-identity cond-identity left right then-value else-value)
+  (00001000
+    (eq-width eq-bits cond-width cond-bits left right then-value else-value)
     (00000111
-      ((00100010 eq-identity 101)
+      ((x86-current-domain-key? eq-width eq-bits 3 5)
        (00000111
-         ((00100010 cond-identity 110)
+         ((x86-current-domain-key? cond-width cond-bits 3 6)
           (x86-lower-eq-cond-u64-forms
             left right then-value else-value))
          (t
           (00000001 unsupported-current-domain-eq-cond-u64))))
       (t
        (00000001 unsupported-current-domain-eq-cond-u64)))))
+
+(00001001 x86-encode-current-eq-cond-u64
+  (00001000
+    (eq-width eq-bits cond-width cond-bits left right then-value else-value)
+    (10011100 ((forms
+            (x86-lower-current-eq-cond-u64-forms
+              eq-width eq-bits cond-width cond-bits
+              left right then-value else-value)))
+      (00000111
+        ((00100010 forms (00000001 unsupported-current-domain-eq-cond-u64))
+         (00000001 unsupported-current-domain-eq-cond-u64))
+        (t
+         (x86-encode-admitted-program-or-reject forms))))))
+
 
 (00001001 x86-encode-current-eq-cond-u64
   (00001000 (eq-identity cond-identity left right then-value else-value)
