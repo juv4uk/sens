@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d6-parity-duality",
+  "wing": "D6 laws",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Is odd parity exactly the D1-bit complement of even parity, with period two, independently of current D6 coordinates?",
+  "claim": "Proves the bounded/exact integer parity relation without using coordinates to compute the law; coordinates are provenance only.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "d6/parity-duality",
+  "reproduce": "python3 benchmarks/d6-parity-duality/run.py --out /tmp/d6-parity-duality"
+}
