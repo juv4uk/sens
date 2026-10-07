@@ -737,6 +737,18 @@ mod tests {
         assert_eq!(analysis.blocked_exact_domain, 0);
     }
     #[test]
+    fn exact_domain_mode_is_idempotent_and_preserves_quote_data() {
+        let source =
+            "(0011 f (0010 (x) (001 (перше x)) (100 x))) (f (111 7 ()))";
+        assert_eq!(rewrite_exact(source).unwrap(), source);
+    }
+
+    #[test]
+    fn exact_lambda_binding_named_like_surface_stays_lexical() {
+        let source = "(0010 (перше) (перше 7))";
+        assert_eq!(rewrite_exact(source).unwrap(), source);
+    }
+    #[test]
     fn exact_domain_mode_retires_mapped_legacy_eight_bit_heads() {
         let source = "(00001001 f (00001000 (x) (00000101 x)))";
         assert_eq!(
