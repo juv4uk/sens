@@ -42,6 +42,9 @@ jobs:
           git add lib/machine/dispatch/native-first.lisp
           git commit -m "wip(4242): commit parser-aware native-first migration"
           git push origin HEAD:release/4242-native-first-migrate
+      # Force a fresh pull_request synchronization after the detached-HEAD push fix.
+      - name: Migration run marker
+        run: echo "native-first migration generator uses an explicit branch push target"
       - uses: actions/upload-artifact@v4
         with:
           name: native-first-sens-migration
