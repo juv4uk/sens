@@ -77,12 +77,17 @@ class SensCodeMigrationTests(unittest.TestCase):
             code_map,
             CONTRACT_DOMAIN_SURFACES,
         )
+        resolver_domains = [
+            domain
+            for domain in mod.CONTRACT_SURFACE_DOMAINS
+            if domain != "D9"
+        ]
         resolver = build_resolver(
             historical_map=HISTORICAL,
             foundation=CONTRACT_FOUNDATION,
             registry=REGISTRY,
             domain_surfaces=CONTRACT_DOMAIN_SURFACES,
-            current_domains=domains,
+            current_domains=resolver_domains,
         )
         authority = mod.build_binary_authority(
             data,
@@ -123,10 +128,20 @@ class SensCodeMigrationTests(unittest.TestCase):
 
     def test_contract_authority_human_call_map_excludes_noncallable_d8_d9(self):
         _, code_map, _, resolver, authority = self.contract_setup()
-        self.assertTrue(all(entry.domain in mod.CONTRACT_CALL_DOMAINS for entry in code_map.values()))
-        self.assertTrue(all(identity.domain in mod.CONTRACT_CALL_DOMAINS for identity in resolver.current_by_label.values()))
+        self.assertTrue(
+            all(entry.domain in mod.CONTRACT_CALL_DOMAINS for entry in code_map.values())
+        )
         self.assertIn((8, "00000101"), authority)
         self.assertNotIn("ROUND", code_map)
+
+        round_resolution = resolver.resolve_head("ROUND")
+        self.assertTrue(round_resolution.resolved)
+        self.assertEqual(round_resolution.current.domain, "D8")
+
+        # MAP exists as a human label in more than one current domain.  The
+        # normalized-label shortcut must therefore disappear rather than pick
+        # one semantic identity.
+        self.assertNotIn("MAP", resolver.current_by_label)
 
 
     def test_contract_authority_preserves_bare_d7_word_instead_of_spelling_digits(self):
