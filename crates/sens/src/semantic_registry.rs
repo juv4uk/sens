@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, DomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -63,6 +63,7 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
     let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+    let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
     match byte {
         0b0000_0001 => Some(d3(0b001)), // QUOTE
         0b0000_0010 => Some(d3(0b010)), // ATOM
@@ -73,7 +74,10 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        0b0010_0111 => Some(d4(0b1110)), // LIST
         0b0010_1001 => Some(d4(0b1111)), // APPEND
+        0b1001_1100 => Some(d6(0b001000)), // LET
+        0b1001_1101 => Some(d6(0b001001)), // LET*
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
         0b0011_0011 => Some(d4(0b1000)), // CAAR
@@ -304,6 +308,19 @@ mod tests {
             assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
         }
     }
+    #[test]
+    fn list_and_let_compatibility_bytes_project_only_to_ratified_exact_domains() {
+        for (legacy_byte, width, bits) in [
+            (0b0010_0111, 4, 0b1110),   // LIST -> D4
+            (0b1001_1100, 6, 0b001000), // LET -> D6
+            (0b1001_1101, 6, 0b001001), // LET* -> D6
+        ] {
+            let identity = legacy_domain_identity_from_registry_byte(legacy_byte)
+                .expect("compatibility byte must have an owner-ratified exact successor");
+            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+        }
+    }
+
     #[test]
     fn append_surface_projects_only_to_ratified_d4() {
         let identity = domain_identity_for_surface("приєднати")
