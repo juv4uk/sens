@@ -18,10 +18,10 @@ assert all(r["repository"]==f"juv4uk/{r['name']}" for r in rows)
 
 expected_stored={
     "CORE-LANGUAGE-DONOR":1,
-    "CORE-HISTORICAL-DONOR":11,
+    "CORE-HISTORICAL-DONOR":9,
     "BACKEND-OR-MECHANISM":11,
     "PACKAGE-OR-DOMAIN":33,
-    "REFERENCE-OR-UPSTREAM":31,
+    "REFERENCE-OR-UPSTREAM":33,
     "REVIEW-REQUIRED":0,
 }
 assert m["class_counts"]==expected_stored
@@ -50,7 +50,7 @@ for name in ("panca-vac","my-lisp-panini","my-idea","ecosystem","ecosystem-obser
     assert by[name]["primary_class"]=="PACKAGE-OR-DOMAIN"
 
 # Known forks/upstream/reference projects discovered during deep review.
-for name in ("basalt","graph-heavy-basalt","knowledge-graph-basalt","hydra","maitreya8","TH","chebupelka","cl-nlp","cl-tursas"):
+for name in ("basalt","graph-heavy-basalt","knowledge-graph-basalt","hydra","maitreya8","TH","chebupelka","cl-nlp","cl-tursas","Clojure-code","clojure-cookbook"):
     assert by[name]["primary_class"]=="REFERENCE-OR-UPSTREAM"
     assert by[name]["d10_action"]=="REFERENCE-ONLY"
 
@@ -69,4 +69,4 @@ for r in rows:
 assert "No donor repository contributes coordinates." in m["doctrine"]
 
 print("D10-OWNER-REPO-DONOR-MATRIX-V2=PASS")
-print("repos=87 core-authority=1 historical=11 backend=11 package=33 reference=31 review=0")
+print("repos=87 core-authority=1 historical=9 backend=11 package=33 reference=33 review=0")
