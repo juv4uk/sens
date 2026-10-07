@@ -1,0 +1,91 @@
+name: diag-4320-semantic-slice-split
+
+on:
+  push:
+    branches:
+      - diag/4320-semantic-slice-split
+
+jobs:
+  split:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust semantic contract tests
+        continue-on-error: true
+        run: |
+          cargo test -p sens \
+            --test d1_canonical_source_value \
+            --test witness_authority \
+            --test structural_observation_contract \
+            --test exact_q_binary_contract \
+            --test mathematical_result_taxonomy \
+            --test canon_laws_v2_contract \
+            --test reason_honesty_contract \
+            --test unification_outcome_contract \
+            --test knowledge_clause_kind_contract \
+            --test content_store_authority \
+            --test decimal_comma_authority \
+            --test authority_guard_contract \
+            --test semantic_ref_fail_closed \
+            --test semantic_coordinate_matrix_845
+
+      - name: exact quantity witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp
+      - name: meta empty witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/meta-eval-empty-program-witness.lisp
+      - name: meta registry witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/meta-semantic-registry-witness.lisp
+      - name: process load witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/process-load-witness.lisp
+      - name: narrate outcome witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/narrate-outcome-authority-witness.lisp
+      - name: vector balance witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/persistent-vector-balance-witness.lisp
+      - name: reason index witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/reason-index-authority-witness.lisp
+      - name: explicit negative witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/explicit-negative-reason-observe-witness.lisp
+      - name: x86 instruction witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/x86-64-instruction-set-witness.lisp
+      - name: machine register width witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/machine-register-width-witness.lisp
+      - name: machine gpr atoms witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/machine-current-gpr-atoms-witness.lisp
+      - name: native-first totality witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-totality-witness.lisp
+      - name: native-first execution witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-execution-witness.lisp
+      - name: native-first parity witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-parity-witness.lisp
+      - name: native-first coverage ledger witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-coverage-ledger-witness.lisp
+      - name: scientific projection witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/scientific-constant-knowledge-projection-witness.lisp
+      - name: mechanism selector witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/mechanism-selector-1047-witness.lisp
+      - name: island lowering witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/island-lowering-1048-witness.lisp
+      - name: translation symbol witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/translation-symbol-boundary-witness.lisp
