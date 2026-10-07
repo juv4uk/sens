@@ -32,6 +32,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 fn repo_root() -> PathBuf {
@@ -361,6 +362,111 @@ fn counts(places: &[Place]) -> BTreeMap<String, usize> {
     out
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct DebtMetrics {
+    sites: usize,
+    files: usize,
+}
+
+fn debt_metrics(places: &[Place]) -> DebtMetrics {
+    let enforced: Vec<&Place> = places
+        .iter()
+        .filter(|(kind, _, _, _)| ratchet_enforced_kind(kind))
+        .collect();
+    let files: BTreeSet<&str> = enforced.iter().map(|(_, file, _, _)| file.as_str()).collect();
+    DebtMetrics {
+        sites: enforced.len(),
+        files: files.len(),
+    }
+}
+
+fn baseline_entry_enforced(key: &str) -> bool {
+    let mut fields = key.splitn(3, '\t');
+    let Some(kind) = fields.next() else { return false };
+    let Some(file) = fields.next() else { return false };
+    let _name = fields.next();
+
+    if !ratchet_enforced_kind(kind) || is_table_source(file) {
+        return false;
+    }
+    if file.starts_with("crates/")
+        && file.contains("/tests/")
+        && file.ends_with(".rs")
+        && !rust_test_is_semantic_authority(file)
+    {
+        return false;
+    }
+    if !file.ends_with(".rs") {
+        let text = fs::read_to_string(repo_root().join(file)).unwrap_or_default();
+        if explicit_nonsemantic_lisp_evidence(&text) {
+            return false;
+        }
+    }
+    true
+}
+
+fn baseline_debt_metrics(baseline: &BTreeMap<String, usize>) -> DebtMetrics {
+    let mut sites = 0usize;
+    let mut files = BTreeSet::new();
+    for (key, count) in baseline {
+        if !baseline_entry_enforced(key) {
+            continue;
+        }
+        sites += *count;
+        if let Some((_, rest)) = key.split_once('\t') {
+            if let Some((file, _)) = rest.split_once('\t') {
+                files.insert(file);
+            }
+        }
+    }
+    DebtMetrics {
+        sites,
+        files: files.len(),
+    }
+}
+
+fn emit_debt_metric(
+    current: DebtMetrics,
+    baseline: DebtMetrics,
+    growth_sites: usize,
+    growth_files: usize,
+    growth_keys: usize,
+) {
+    let delta_sites = current.sites as isize - baseline.sites as isize;
+    let delta_files = current.files as isize - baseline.files as isize;
+    let line = format!(
+        "semantic-migration-debt-v1 remaining_sites={} remaining_files={} baseline_sites={} baseline_files={} delta_sites={:+} delta_files={:+} growth_sites={} growth_files={} growth_keys={}",
+        current.sites,
+        current.files,
+        baseline.sites,
+        baseline.files,
+        delta_sites,
+        delta_files,
+        growth_sites,
+        growth_files,
+        growth_keys,
+    );
+    eprintln!("{line}");
+
+    if let Ok(path) = std::env::var("GITHUB_STEP_SUMMARY") {
+        if let Ok(mut out) = fs::OpenOptions::new().create(true).append(true).open(path) {
+            let _ = writeln!(
+                out,
+                "### Semantic migration debt\n\n- remaining executable-English sites: **{}**\n- production files: **{}**\n- classifier-normalized baseline: **{} sites / {} files**\n- delta: **{:+} sites / {:+} files**\n- ratchet growth: **{} sites / {} files / {} keys**\n",
+                current.sites,
+                current.files,
+                baseline.sites,
+                baseline.files,
+                delta_sites,
+                delta_files,
+                growth_sites,
+                growth_files,
+                growth_keys,
+            );
+        }
+    }
+}
+
 fn baseline_path() -> PathBuf {
     repo_root().join("crates/sens/tests/data/english-names-baseline.tsv")
 }
@@ -414,7 +520,12 @@ fn english_names_in_code_never_grow() {
     }
     let baseline = read_baseline();
     assert!(!baseline.is_empty(), "бази немає: SENS_BASELINE_UPDATE=1 cargo test ...");
+    let current_debt = debt_metrics(&places);
+    let baseline_debt = baseline_debt_metrics(&baseline);
     let mut grown = Vec::new();
+    let mut growth_sites = 0usize;
+    let mut growth_files = BTreeSet::new();
+    let mut growth_keys = 0usize;
     for (key, count) in &current {
         let base = baseline.get(key).copied().unwrap_or(0);
         if *count > base {
@@ -425,9 +536,19 @@ fn english_names_in_code_never_grow() {
                 .filter(|(k, f, _, n)| *k == kind && f == file && n == name)
                 .map(|(_, _, l, _)| l.to_string())
                 .collect();
+            growth_sites += *count - base;
+            growth_files.insert(file.to_owned());
+            growth_keys += 1;
             grown.push(format!("{file}:{} {name} ({kind}): {base} -> {count}", lines.join(",")));
         }
     }
+    emit_debt_metric(
+        current_debt,
+        baseline_debt,
+        growth_sites,
+        growth_files.len(),
+        growth_keys,
+    );
     eprintln!("{}", summary(&places));
     assert!(
         grown.is_empty(),
@@ -503,4 +624,15 @@ fn scanners_find_names_in_lisp_and_rust() {
     let literals: Vec<&str> = rust.iter().map(|(_, s)| s.as_str()).collect();
     assert_eq!(literals, ["car", "(cons 1 ())"]);
     assert_eq!(rust[1].0, 2);
+
+    let metric_fixture = vec![
+        ("rust", "lib/a.rs".to_owned(), 1, "car".to_owned()),
+        ("rust-test-instrument", "crates/sens/tests/a.rs".to_owned(), 1, "car".to_owned()),
+        ("lisp", "lib/b.lisp".to_owned(), 1, "cdr".to_owned()),
+    ];
+    assert_eq!(
+        debt_metrics(&metric_fixture),
+        DebtMetrics { sites: 2, files: 2 },
+        "migration debt counts only classifier-enforced production sites"
+    );
 }
