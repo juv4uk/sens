@@ -55,19 +55,18 @@ assert current_review <= frozen_review
 gate=d10state["ownership_gate"]
 assert gate["authority"]=="#4033"
 assert gate["artifact"]=="knowledge/island-ownership-gate-v1.json"
-assert gate["status"]=="RATIFICATION-BLOCKER-REVIEW-ONLY"
+assert gate["status"]=="OWNERSHIP-DEBT-CLEARED"
 assert gate["definite_noncore_selected"]==0
 assert gate["definite_noncore_reclassified"]==55
-assert gate["review_required_selected"]==15
+assert gate["review_required_selected"]==0
 assert gate["no_new_definite_noncore"] is True
 
 # D10 is still research. Definite ownership debt has been cleared; the
-# remaining REVIEW-REQUIRED rows keep ratification blocked until ownership
-# witnesses are resolved.
+# final REVIEW-REQUIRED rows were reclassified outside Core; ownership debt is cleared.
 assert d10state["target"]["ratified_residents"]==0
 assert len(current_definite)==0
-assert len(current_review)==15
+assert len(current_review)==0
 
 print("ISLAND-OWNERSHIP-GATE=PASS")
 print("D9: ratified audit only; definite=136 review=70 owner-amendment-required")
-print("D10: definite-selected=0 reclassified=55 review=15 ratification-blocked")
+print("D10: definite-selected=0 reclassified=55 review=0 ownership-debt-cleared")

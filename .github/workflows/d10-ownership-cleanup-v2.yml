@@ -1,0 +1,36 @@
+name: D10 ownership cleanup v2
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-review-reclassification-v2.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-ownership-cleanup-v2.py"
+      - "scripts/check-island-ownership-gate.py"
+      - "scripts/check-d10-v1-semantic-inventory.py"
+      - ".github/workflows/d10-ownership-cleanup-v2.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-review-reclassification-v2.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-ownership-cleanup-v2.py"
+      - ".github/workflows/d10-ownership-cleanup-v2.yml"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify ownership cleanup v2
+        run: python3 scripts/check-d10-ownership-cleanup-v2.py
+      - name: Verify island ownership gate
+        run: python3 scripts/check-island-ownership-gate.py
+      - name: Verify global D10 inventory
+        run: python3 scripts/check-d10-v1-semantic-inventory.py
