@@ -22,6 +22,7 @@ on:
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - "crates/sens-host/tests/real_silicon_sweep.rs"
       - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
   push:
@@ -42,6 +43,7 @@ on:
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - "crates/sens-host/tests/real_silicon_sweep.rs"
       - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
 
@@ -72,3 +74,13 @@ jobs:
         run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
       - name: Lisp-owned x86 encoder bytes
         run: cargo test -p sens --test x86_64_lisp_encoder -- --nocapture
+      - name: Owner i5-6400 real-silicon sweep
+        env:
+          SENS_REAL_SILICON_ARTIFACT: ${{ github.workspace }}/real-silicon-sweep.json
+        run: cargo test -p sens-host --test real_silicon_sweep -- --nocapture
+      - name: Upload real-silicon evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-silicon-sweep-${{ github.sha }}
+          path: real-silicon-sweep.json
+          if-no-files-found: error
