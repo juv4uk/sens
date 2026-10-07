@@ -17,14 +17,6 @@ fn d5(bits: u8) -> CoreDomainIdentity {
     ))
 }
 
-pub(super) fn has_mechanism(identity: CoreDomainIdentity) -> bool {
-    matches!(
-        identity,
-        CoreDomainIdentity::D6(word)
-            if matches!(word.word().packed_bits(), 0b001110 | 0b001111)
-    )
-}
-
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -81,13 +73,20 @@ mod tests {
     }
 
     #[test]
-    fn only_add1_and_sub1_have_this_d6_mechanism() {
+    fn only_add1_and_sub1_enter_the_real_d6_mechanism_path() {
+        let env = Environment::root();
+        let span = Span::default();
+
         for bits in 0u8..64 {
-            assert_eq!(
-                has_mechanism(d6(bits)),
-                matches!(bits, 0b001110 | 0b001111),
-                "D6:{bits:06b}"
-            );
+            let result = invoke(d6(bits), &[], &env, span);
+            if matches!(bits, 0b001110 | 0b001111) {
+                let error = result
+                    .expect("ADD1/SUB1 must enter the admitted D6 mechanism")
+                    .expect_err("empty arguments must fail with arity after admission");
+                assert_eq!(error.kind, ErrorKind::Arity, "D6:{bits:06b}");
+            } else {
+                assert!(result.is_none(), "D6:{bits:06b} must remain fail-closed");
+            }
         }
     }
 
