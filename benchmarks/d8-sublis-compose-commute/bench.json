@@ -1,0 +1,18 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-sublis-compose-commute",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Can a generic second substitution/tree-transformer stage serve as an order-independent D8 axis for SUBLIS/COMPOSE?",
+  "claim": "Falsifies the generic commuting-axis proposal on the smallest nontrivial three-atom carrier; restricted families remain open and no D8 coordinate is admitted.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "GENERIC-COMMUTING-AXIS-REJECTED",
+  "generation": "unknown",
+  "axis": "d8/substitution-commutativity",
+  "reproduce": "python3 benchmarks/d8-sublis-compose-commute/run.py --out /tmp/d8-sublis-compose-commute"
+}
