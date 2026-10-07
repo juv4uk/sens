@@ -42,10 +42,13 @@ SKIP_DIRS = {
     "dist", "build", "__pycache__",
 }
 
-D2_OPEN = "10"
-D2_CLOSE = "01"
-D2_DOT = "11"
-D2_SEPARATOR = "00"
+
+@dataclass(frozen=True)
+class D2Structure:
+    separator: str
+    close: str
+    open: str
+    dot: str
 
 
 @dataclass(frozen=True)
@@ -68,6 +71,37 @@ class Hit:
 
 class BinaryMigrationError(ValueError):
     pass
+
+
+def load_d2_structure(foundation: dict) -> D2Structure:
+    """Load D2 structure from the owner-ratified foundation, never a surface label."""
+    d2 = foundation.get("domains", {}).get("D2")
+    if not isinstance(d2, dict) or int(d2.get("width", -1)) != 2:
+        raise BinaryMigrationError("foundation: expected canonical D2 width=2 authority")
+    if str(d2.get("authority")) != "#1702":
+        raise BinaryMigrationError(
+            f"foundation: D2 authority mismatch: expected #1702, found {d2.get('authority')!r}"
+        )
+
+    residents = d2.get("residents")
+    expected = {
+        "00": "SEPARATOR",
+        "01": "CLOSE",
+        "10": "OPEN",
+        "11": "DOT",
+    }
+    if residents != expected:
+        raise BinaryMigrationError(
+            f"foundation: D2 structural authority mismatch: expected {expected}, found {residents}"
+        )
+
+    by_role = {role: bits for bits, role in residents.items()}
+    return D2Structure(
+        separator=by_role["SEPARATOR"],
+        close=by_role["CLOSE"],
+        open=by_role["OPEN"],
+        dot=by_role["DOT"],
+    )
 
 
 def load_foundation(path: Path):
@@ -616,9 +650,9 @@ def encode_text7_spelling(text: str, candidates):
     return words
 
 
-def _emit_item(out, words, need_separator):
-    if need_separator and out and out[-1] not in (D2_OPEN, D2_SEPARATOR):
-        out.append(D2_SEPARATOR)
+def _emit_item(out, words, need_separator, d2_structure: D2Structure):
+    if need_separator and out and out[-1] not in (d2_structure.open, d2_structure.separator):
+        out.append(d2_structure.separator)
     out.extend(words)
 
 
@@ -629,6 +663,8 @@ def binary_rewrite(
     legacy_sid_map=None,
     registry_surface_sid_map=None,
     resolver: SourceResolver | None = None,
+    *,
+    d2_structure: D2Structure,
 ):
     """Encode one source file as exact-width visible binary SENS words."""
     source = strip_comments(text)
@@ -657,12 +693,12 @@ def binary_rewrite(
         if frames:
             frame = frames[-1]
             need = frame["items"] > 0
-            if need and (not out or out[-1] != D2_SEPARATOR):
-                out.append(D2_SEPARATOR)
+            if need and (not out or out[-1] != d2_structure.separator):
+                out.append(d2_structure.separator)
             frame["items"] += 1
             return
-        if top_has_item and (not out or out[-1] != D2_SEPARATOR):
-            out.append(D2_SEPARATOR)
+        if top_has_item and (not out or out[-1] != d2_structure.separator):
+            out.append(d2_structure.separator)
         top_has_item = True
 
     while i < len(source):
@@ -692,7 +728,7 @@ def binary_rewrite(
                 "quote_children": False,
                 "items": 0,
             })
-            out.append(D2_OPEN)
+            out.append(d2_structure.open)
             i += 1
             pending_quote = False
             continue
@@ -701,7 +737,7 @@ def binary_rewrite(
             if not frames:
                 raise BinaryMigrationError("unexpected closing parenthesis")
             frames.pop()
-            out.append(D2_CLOSE)
+            out.append(d2_structure.close)
             i += 1
             pending_quote = False
             continue
@@ -754,7 +790,7 @@ def binary_rewrite(
             after_ok = i + 1 == len(source) or source[i + 1].isspace() or source[i + 1] == ")"
             if before_ok and after_ok:
                 begin_item()
-                out.append(D2_DOT)
+                out.append(d2_structure.dot)
                 i += 1
                 pending_quote = False
                 continue
@@ -850,12 +886,12 @@ def binary_rewrite(
     # Collapse accidental duplicate separators and never leave edge separators.
     compact = []
     for word in out:
-        if word == D2_SEPARATOR and (not compact or compact[-1] in (D2_OPEN, D2_SEPARATOR)):
+        if word == d2_structure.separator and (not compact or compact[-1] in (d2_structure.open, d2_structure.separator)):
             continue
-        if word == D2_CLOSE and compact and compact[-1] == D2_SEPARATOR:
+        if word == d2_structure.close and compact and compact[-1] == d2_structure.separator:
             compact.pop()
         compact.append(word)
-    while compact and compact[-1] == D2_SEPARATOR:
+    while compact and compact[-1] == d2_structure.separator:
         compact.pop()
 
     rendered = " ".join(compact)
@@ -921,7 +957,9 @@ def main():
     if selected_modes > 1:
         parser.error("--apply, --mirror and --binary-mirror are mutually exclusive")
 
+    root = args.root.resolve()
     foundation, digest = load_foundation(args.foundation)
+    d2_structure = load_d2_structure(foundation)
     code_map = build_map(foundation, args.domains)
     code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
     code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
@@ -947,7 +985,6 @@ def main():
         else None
     )
 
-    root = args.root.resolve()
     rows = []
     rewritten_files = 0
     blocked_files = 0
@@ -966,6 +1003,7 @@ def main():
                     legacy_sid_map,
                     registry_surface_sid_map,
                     resolver,
+                    d2_structure=d2_structure,
                 )
                 if not converted.strip():
                     status = "empty"

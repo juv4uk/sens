@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import copy
 import importlib.util
 from pathlib import Path
 import sys
@@ -20,7 +21,7 @@ SPEC.loader.exec_module(mod)
 
 from sens_source_resolver import build_resolver
 
-FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
+FOUNDATION = ROOT / "knowledge" / "d1-d9-foundation.json"
 NUMBER_WIDTHS = ROOT / "knowledge" / "number-width-ratified.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
@@ -43,6 +44,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         cls.code_map = mod.augment_code_map_with_registry_aliases(
             cls.code_map, REGISTRY
         )
+        cls.d2_structure = mod.load_d2_structure(data)
         cls.text7 = mod.build_text7_encoder(data, TEXT7)
         cls.legacy = mod.build_legacy_sid_map(REGISTRY, cls.code_map)
         cls.registry_surfaces = mod.build_registry_surface_sid_map(REGISTRY)
@@ -61,7 +63,42 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.legacy,
             self.registry_surfaces,
             self.resolver,
+            d2_structure=self.d2_structure,
         )
+
+    def test_d2_structure_is_loaded_from_owner_foundation(self):
+        self.assertEqual(self.data["domains"]["D2"]["authority"], "#1702")
+        self.assertEqual(
+            self.d2_structure,
+            mod.D2Structure(separator="00", close="01", open="10", dot="11"),
+        )
+
+    def test_d2_structure_fails_closed_if_owner_foundation_role_is_missing(self):
+        drifted = copy.deepcopy(self.data)
+        del drifted["domains"]["D2"]["residents"]["11"]
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError, "D2 structural authority mismatch"
+        ):
+            mod.load_d2_structure(drifted)
+
+    def test_d2_structure_fails_closed_if_owner_foundation_role_moves_bits(self):
+        drifted = copy.deepcopy(self.data)
+        drifted["domains"]["D2"]["residents"] = {
+            "00": "OPEN",
+            "01": "CLOSE",
+            "10": "SEPARATOR",
+            "11": "DOT",
+        }
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError, "D2 structural authority mismatch"
+        ):
+            mod.load_d2_structure(drifted)
+
+    def test_d2_structure_fails_closed_if_owner_foundation_authority_drifts(self):
+        drifted = copy.deepcopy(self.data)
+        drifted["domains"]["D2"]["authority"] = "#surface-projection"
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "D2 authority mismatch"):
+            mod.load_d2_structure(drifted)
 
     def test_current_d3_authority_is_used(self):
         self.assertEqual(self.code_map["CAR"].bits, "100")
