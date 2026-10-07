@@ -80,6 +80,61 @@ def check_canonical_reader(failures: list[str]) -> None:
             failures,
         )
 
+def check_source_carriers(failures: list[str]) -> None:
+    words = read("crates/sens/src/source_words.rs")
+    packing = read("crates/sens/src/source_packing.rs")
+
+    for marker in [
+        "Self::W2(word) => Some(crate::Racana2::from_word(word))",
+        "Structural roles remain language-owned; width is the only fact here.",
+    ]:
+        require(
+            marker in words,
+            f"source-word carrier lost exact D2 boundary: {marker}",
+            failures,
+        )
+
+    for marker in [
+        "BinarySourceWord::W2(word) => packer.push(word)",
+        "2 => BinarySourceWord::W2(packed.read::<2>(bit_offset)?)",
+        "not a standalone wire",
+        "widths is explicit",
+    ]:
+        require(
+            marker in packing,
+            f"source pack/unpack lost exact-width transport boundary: {marker}",
+            failures,
+        )
+
+
+def check_audit_census(spec: dict, failures: list[str]) -> None:
+    active = spec.get("active_paths", [])
+    rows = spec.get("audit_results", [])
+    by_path = {row.get("path"): row for row in rows}
+
+    require(
+        len(by_path) == len(rows),
+        "D2 audit contains duplicate path rows",
+        failures,
+    )
+    require(
+        set(by_path) == set(active),
+        "D2 audit PASS/DEBT rows do not exactly match active_paths",
+        failures,
+    )
+    for path in active:
+        row = by_path.get(path, {})
+        require(
+            row.get("status") == "PASS",
+            f"D2 active path is not PASS: {path}: {row.get('status')}",
+            failures,
+        )
+        require(
+            bool(row.get("evidence")),
+            f"D2 active path lacks evidence text: {path}",
+            failures,
+        )
+
 
 def check_migration(failures: list[str]) -> None:
     text = read("scripts/migrate-three-pass.py")
@@ -159,6 +214,8 @@ def main() -> int:
     check_d2_table(failures)
     check_language_contract(failures)
     check_canonical_reader(failures)
+    check_source_carriers(failures)
+    check_audit_census(spec, failures)
     check_migration(failures)
     check_surface_translation(failures)
     check_transport(spec, failures)
