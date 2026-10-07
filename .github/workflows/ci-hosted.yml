@@ -1,0 +1,47 @@
+name: Hosted CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: hosted-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  critical:
+    name: portable critical gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Python and repository structure gates
+        run: |
+          python3 scripts/numeric_source_inventory.py --self-test
+          python3 scripts/public_api_inventory.py --check
+          python3 scripts/sens8-semantic-ratchet.py --self-test
+          python3 scripts/sens8-semantic-ratchet.py --summary
+      - name: Build SENS CLI
+        run: cargo build -p sens-cli --bin sens
+      - name: Current semantic slice
+        run: bash scripts/test-current-semantic-slice.sh
+      - name: Critical machine and surface witnesses
+        run: cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract --test english_names_in_code
+      - name: Native CPU vertical witnesses
+        run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
+      - name: CLI smoke
+        run: cargo test -p sens-cli --test cli
+      - name: Governance and policy checks
+        run: |
+          cargo test -p xtask --test license_policy
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
+      - name: Clippy
+        run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
