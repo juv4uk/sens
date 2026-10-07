@@ -825,32 +825,8 @@ mod tests {
     }
 
     fn expr_program_data(expr: &Expr) -> Value {
-        match &expr.kind {
-            ExprKind::Number(value, exactness) => Value::Number(*value, *exactness),
-            ExprKind::Rational(value) => Value::Rational(value.clone()),
-            ExprKind::BinaryNumber(value) => Value::BinaryNumber(value.clone()),
-            ExprKind::NumericBuffer(value) => Value::NumericBuffer(value.clone()),
-            ExprKind::DomainIdentity(identity) => Value::DomainIdentity(*identity),
-            ExprKind::String(value) => Value::String(value.clone()),
-            ExprKind::Symbol(value) => Value::Symbol(value.clone()),
-            ExprKind::List(items) => Value::list(items.iter().map(expr_program_data)),
-            ExprKind::Pair(head, tail) => Value::Pair(
-                Rc::new(expr_program_data(head)),
-                Rc::new(expr_program_data(tail)),
-            ),
-            ExprKind::DomainCall(identity, arguments) => {
-                let mut items = Vec::with_capacity(arguments.len() + 1);
-                items.push(Value::DomainIdentity((*identity).into()));
-                items.extend(arguments.iter().map(expr_program_data));
-                Value::list(items)
-            }
-            ExprKind::Sid(_) | ExprKind::Call(_, _) => {
-                panic!("current compiler program-data must not contain legacy Sid/Call")
-            }
-            ExprKind::Local { .. } => {
-                panic!("source-shaped compiler program-data must not contain resolved Local")
-            }
-        }
+        crate::expr_to_exact_program_data(expr)
+            .expect("compiler program-data must be exact-domain source-shaped data")
     }
 
     fn field_value<'a>(artifact: &'a Value, field: &str) -> &'a Value {
