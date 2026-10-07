@@ -38,10 +38,13 @@ pub enum BinaryFrameError {
     UnclosedStructure { index: usize, depth: usize },
 }
 
-const CONTROL_SPACE: [u8; 2] = [0, 0];
-const CONTROL_CLOSE: [u8; 2] = [0, 1];
-const CONTROL_OPEN: [u8; 2] = [1, 0];
-const CONTROL_ESCAPE: [u8; 2] = [1, 1];
+// Private tags of this standalone transport framing. They are not Core.D2 semantic objects.
+// In particular WIRE_ESCAPE_TAG=11 does not reinterpret
+// current D2:11, whose language meaning is DOT.
+const WIRE_SPACE_TAG: [u8; 2] = [0, 0];
+const WIRE_CLOSE_TAG: [u8; 2] = [0, 1];
+const WIRE_OPEN_TAG: [u8; 2] = [1, 0];
+const WIRE_ESCAPE_TAG: [u8; 2] = [1, 1];
 
 const TYPE_FUNCTION: [u8; 2] = [0, 0];
 const TYPE_NUMBER: [u8; 2] = [0, 1];
@@ -93,30 +96,30 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
     let mut out = Vec::new();
 
     match frame {
-        BinaryFrame::Space => out.extend_from_slice(&CONTROL_SPACE),
-        BinaryFrame::Close => out.extend_from_slice(&CONTROL_CLOSE),
-        BinaryFrame::Open => out.extend_from_slice(&CONTROL_OPEN),
+        BinaryFrame::Space => out.extend_from_slice(&WIRE_SPACE_TAG),
+        BinaryFrame::Close => out.extend_from_slice(&WIRE_CLOSE_TAG),
+        BinaryFrame::Open => out.extend_from_slice(&WIRE_OPEN_TAG),
         BinaryFrame::Function(sens) => {
-            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&WIRE_ESCAPE_TAG);
             out.extend_from_slice(&TYPE_FUNCTION);
             append_fixed_bits(sens.packed_byte(), 8, &mut out);
         }
         BinaryFrame::Domain(identity) => {
-            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&WIRE_ESCAPE_TAG);
             out.extend_from_slice(&TYPE_EXTENSION);
             out.extend_from_slice(&EXT_DOMAIN);
             append_fixed_bits((identity.width() - 1) as u8, 3, &mut out);
             append_fixed_bits(identity.packed_bits(), identity.width(), &mut out);
         }
         BinaryFrame::BinaryNumber(number) => {
-            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&WIRE_ESCAPE_TAG);
             out.extend_from_slice(&TYPE_EXTENSION);
             out.extend_from_slice(&EXT_BINARY_NUMBER);
             encode_len_into(number.width(), &mut out)?;
             out.extend_from_slice(number.as_bits());
         }
         BinaryFrame::Text(text) => {
-            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&WIRE_ESCAPE_TAG);
             out.extend_from_slice(&TYPE_TEXT);
             encode_len_into(text.len(), &mut out)?;
             for &cell in text.cells() {
@@ -124,7 +127,7 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             }
         }
         BinaryFrame::Number(number) => {
-            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&WIRE_ESCAPE_TAG);
             out.extend_from_slice(&TYPE_NUMBER);
 
             let (numerator, denominator) = number.binary_parts();
@@ -217,10 +220,10 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
     let second = reader.read_bit()?;
 
     match [first, second] {
-        CONTROL_SPACE => Ok(BinaryFrame::Space),
-        CONTROL_CLOSE => Ok(BinaryFrame::Close),
-        CONTROL_OPEN => Ok(BinaryFrame::Open),
-        CONTROL_ESCAPE => {
+        WIRE_SPACE_TAG => Ok(BinaryFrame::Space),
+        WIRE_CLOSE_TAG => Ok(BinaryFrame::Close),
+        WIRE_OPEN_TAG => Ok(BinaryFrame::Open),
+        WIRE_ESCAPE_TAG => {
             let type_start = reader.position();
             let t0 = reader.read_bit()?;
             let t1 = reader.read_bit()?;
@@ -450,7 +453,7 @@ impl fmt::Display for BinaryFrameError {
             Self::ReservedExtension { index } => {
                 write!(
                     f,
-                    "canonical Control2 extension 11 is reserved at bit {index}"
+                    "standalone framing extension tag 11 is reserved at bit {index}"
                 )
             }
             Self::NonCanonicalNumber { index } => {
@@ -460,12 +463,12 @@ impl fmt::Display for BinaryFrameError {
                 write!(f, "invalid exact Number frame begins at bit {index}")
             }
             Self::UnexpectedClose { index } => {
-                write!(f, "canonical Control2 program closes unopened structure at bit {index}")
+                write!(f, "standalone framed program closes unopened structure at bit {index}")
             }
             Self::UnclosedStructure { index, depth } => {
                 write!(
                     f,
-                    "canonical Control2 program ends at bit {index} with {depth} unclosed structure(s)"
+                    "standalone framed program ends at bit {index} with {depth} unclosed structure(s)"
                 )
             }
         }
@@ -557,6 +560,17 @@ mod tests {
     }
 
     #[test]
+    fn current_d2_dot_round_trips_as_domain_identity_not_wire_escape() {
+        let dot = crate::BinarySourceWord::W2(crate::Bit2::new(0b11).unwrap()).domain_identity();
+        let frame = BinaryFrame::Domain(dot);
+        let encoded = encode_binary_frame(&frame).unwrap();
+        let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
+
+        assert_eq!(decoded, frame);
+        assert_eq!(consumed, encoded.len());
+    }
+
+    #[test]
     fn all_function8_values_round_trip_exactly() {
         for packed in 0u16..=255 {
             let frame = BinaryFrame::Function(Sens8::from_packed_byte(packed as u8));
@@ -604,7 +618,7 @@ mod tests {
     }
 
     #[test]
-    fn control2_stream_keeps_real_space_and_nested_structure() {
+    fn standalone_framing_keeps_real_space_and_nested_structure() {
         let frames = vec![
             BinaryFrame::Open,
             BinaryFrame::Function(crate::sens!(00001100)),
@@ -622,7 +636,7 @@ mod tests {
     }
 
     #[test]
-    fn canonical_program_rejects_unbalanced_control2_structure() {
+    fn standalone_framed_program_rejects_unbalanced_structure() {
         assert!(matches!(
             encode_binary_program(&[BinaryFrame::Close]),
             Err(BinaryFrameError::UnexpectedClose { index: 0 })
