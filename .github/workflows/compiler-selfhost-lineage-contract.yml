@@ -1,4 +1,5 @@
 name: Compiler selfhost lineage contract
+# #3822 stored executable fixed-point report gate.
 
 on:
   pull_request:
