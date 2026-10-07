@@ -99,6 +99,26 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
+    /// Current exact-domain identity for a source-routable canonical human surface.
+    ///
+    /// This projection reads only the generated exact domain-table surface map.
+    /// It does not use the historical flat registry as placement authority.
+    pub fn domain_identity_for_admitted_surface(
+        name: &str,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::exact_domain_identity_for_surface(name)
+    }
+
+    /// Migration-only successor for a historical eight-bit source identity.
+    ///
+    /// Returns a value only when compatibility surfaces converge on one current
+    /// exact-domain identity. Missing or ambiguous evidence fails closed.
+    pub fn exact_domain_successor_for_compatibility_id(
+        semantic_id: super::Sens8,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::exact_domain_successor_for_compatibility_id(semantic_id)
+    }
+
     /// Legacy packed-byte export for external projection consumers.
     ///
     /// Runtime/source semantics use opaque `Sens8`; this function deliberately
