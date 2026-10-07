@@ -21,13 +21,14 @@ concurrency:
 jobs:
   oracle:
     # Semantic oracle verification is CPU control-plane work; never reserve CUDA.
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
       - name: Validate machine-readable blocked artifact
         run: python3 -m json.tool benchmarks/gpu-oracle-current/blocked-gpu-admission.json >/dev/null
       - name: Run GPU oracle unit tests
