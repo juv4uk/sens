@@ -94,8 +94,12 @@ fn resolve_head<'a>(
 
 fn push_head_edit(head: &Expr, surface: &str, sens: Sens8, analysis: &mut Analysis) {
     let replacement = if analysis.exact_domain {
-        let Some(identity) =
-            semantic_registry_export::domain_identity_for_admitted_surface(surface)
+        let Some(identity) = semantic_registry_export::domain_identity_for_admitted_surface(surface)
+            .or_else(|| {
+                semantic_registry_export::exact_domain_successor_for_compatibility_id(
+                    target_sens(sens),
+                )
+            })
         else {
             analysis.blocked_exact_domain += 1;
             return;
@@ -739,6 +743,14 @@ mod tests {
         assert_eq!(
             rewrite("(def f (lambda (x) (car x)))"),
             "(00001001 f (00001000 (x) (00000101 x)))"
+        );
+    }
+
+    #[test]
+    fn exact_domain_mode_maps_compatibility_def_to_d4_define() {
+        assert_eq!(
+            rewrite_exact("(def f (функція (x) (перше x)))").unwrap(),
+            "(0011 f (0010 (x) (100 x)))"
         );
     }
 
