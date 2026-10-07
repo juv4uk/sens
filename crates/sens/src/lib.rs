@@ -20,6 +20,7 @@ pub mod gpu_admission;
 pub mod gpu_oracle;
 pub mod gpu_oracle_conformance;
 pub mod program_compiler;
+mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
@@ -193,6 +194,7 @@ pub use eval::{
 };
 pub use eval::lower::lower_program;
 pub use parser::parse;
+pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation,
     PresentationLanguage,
