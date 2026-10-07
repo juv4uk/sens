@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-use sens::{parse, Expr, ExprKind, Sens8};
+use sens::{eval_program, load_core_library, parse, Expr, ExprKind, Sens8, Session};
 
 fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -131,63 +131,25 @@ fn law_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
     })
 }
 
-fn source_has_bare_sid(source: &str, sid: Sens8) -> bool {
-    source.contains(&format!("({sid}"))
+fn load_machine_axis_session(source: &str) -> Session {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core must load");
+    eval_program(source, &mut session).expect("machine capability axis must load");
+    session
 }
 
-fn machine_axis_has_row(source: &str, wanted_sid: Sens8) -> bool {
-    let exprs = parse(source).expect("machine capability axis must parse");
-
-    exprs.iter().any(|expr| {
-        let ExprKind::List(definition) = &expr.kind else {
-            return false;
-        };
-        let Some(Expr {
-            kind: ExprKind::Sid(define_sid),
-            ..
-        }) = definition.first()
-        else {
-            return false;
-        };
-        if *define_sid != sens::sens!(00001001) {
-            return false;
-        }
-        if !matches!(
-            definition.get(1).map(|expr| &expr.kind),
-            Some(ExprKind::Symbol(name)) if &**name == "machine-capability-axis-v1"
-        ) {
-            return false;
-        }
-
-        let Some(quoted) = definition.get(2) else {
-            return false;
-        };
-        let ExprKind::List(quote_form) = &quoted.kind else {
-            return false;
-        };
-        if !matches!(
-            quote_form.first().map(|expr| &expr.kind),
-            Some(ExprKind::Sid(sid)) if *sid == sens::sens!(00000001)
-        ) {
-            return false;
-        }
-        let Some(rows) = quote_form.get(1) else {
-            return false;
-        };
-        let ExprKind::List(rows) = &rows.kind else {
-            return false;
-        };
-
-        rows.iter().any(|row| {
-            let ExprKind::List(fields) = &row.kind else {
-                return false;
-            };
-            matches!(
-                fields.first().map(|expr| &expr.kind),
-                Some(ExprKind::Sid(sid)) if *sid == wanted_sid
-            )
-        })
+fn machine_coordinate_value(session: &mut Session, width: u8, packed_bits: u8) -> String {
+    eval_program(
+        &format!("(machine-capabilities-for-domain {width} {packed_bits})"),
+        session,
+    )
+    .unwrap_or_else(|error| {
+        panic!(
+            "width-safe machine capability lookup failed for ({width},{packed_bits}): {error:?}"
+        )
     })
+    .value
+    .to_string()
 }
 
 fn kernel_map_has_sid(source: &str, wanted_sid: Sens8) -> bool {
@@ -229,6 +191,7 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
     let math = read(&math_path);
     let kernel = read(&kernel_path);
     let machine = read(&machine_path);
+    let mut machine_session = load_machine_axis_session(&machine);
 
     for sid in &scope {
         assert!(
@@ -236,16 +199,25 @@ fn bounded_matrix_derives_coordinates_from_live_axes() {
             "SID {sid} must exist in canonical semantic registry"
         );
 
-        // Presence is derived, never copied into the matrix contract.
+        // Historical SID coordinates remain provenance for the math/kernel axes.
+        // The live machine axis intentionally no longer accepts SID8 keys.
         let _math_present = law_axis_has_row(&math, *sid);
-        let _machine_present = source_has_bare_sid(&machine, *sid);
     }
 
-    // Machine coordinates remain present for the whole bounded slice.
-    for sid in &scope {
-        assert!(
-            source_has_bare_sid(&machine, *sid),
-            "machine axis missing scoped SID {sid}"
+    // Machine coordinates use the current exact-domain successors.  Do not
+    // revive the retired SID8 machine join merely to satisfy this observer.
+    for (sid, width, packed_bits) in [
+        (sens::sens!(00001100), 5, 10), // historical + -> D5:01010
+        (sens::sens!(00000011), 3, 5),  // historical EQ -> D3:101
+        (sens::sens!(00000100), 3, 7),  // historical CONS -> D3:111
+        (sens::sens!(00000101), 3, 4),  // historical CAR -> D3:100
+        (sens::sens!(00000111), 3, 6),  // historical COND -> D3:110
+    ] {
+        assert!(scope.contains(&sid), "provenance SID {sid} must remain in bounded scope");
+        assert_ne!(
+            machine_coordinate_value(&mut machine_session, width, packed_bits),
+            "()",
+            "machine axis missing exact-domain successor ({width},{packed_bits}) for provenance SID {sid}"
         );
     }
 
@@ -290,11 +262,16 @@ fn missing_axis_evidence_does_not_erase_a_semantic_identity() {
     let math = read(&math_path);
     let kernel = read(&kernel_path);
     let machine = read(&machine_path);
+    let mut machine_session = load_machine_axis_session(&machine);
 
     assert!(identity.contains(&format!("({LAMBDA_SID} ")));
     assert!(kernel_map_has_sid(&kernel, LAMBDA_SID));
     assert!(!law_axis_has_row(&math, LAMBDA_SID));
-    assert!(!machine_axis_has_row(&machine, LAMBDA_SID));
+    assert_eq!(
+        machine_coordinate_value(&mut machine_session, 4, 2),
+        "()",
+        "D4:0010 LAMBDA must keep explicit absence on the live machine axis"
+    );
 }
 
 #[test]
