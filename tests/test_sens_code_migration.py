@@ -154,7 +154,7 @@ class SensCodeMigrationTests(unittest.TestCase):
     def test_contract_authority_rejects_noncanonical_d2_data_word(self):
         with self.assertRaisesRegex(
             mod.BinaryMigrationError,
-            "D2 word 10 is structural control only",
+            "D2 word '10' is structural control only",
         ):
             self.contract_binary("(LIST 10)\n")
 
@@ -189,7 +189,9 @@ class SensCodeMigrationTests(unittest.TestCase):
                 "10 111 00 000001011 01\n",
                 authority,
                 d1_enabled=False,
-                d9_enabled=False,
+                # Enable the width gate in this unit so the assertion tests
+                # authority membership rather than prerequisite availability.
+                d9_enabled=True,
             )
 
     def test_current_d3_authority_is_used(self):
