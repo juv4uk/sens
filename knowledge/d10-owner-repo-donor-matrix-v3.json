@@ -14,7 +14,7 @@
   },
   "doctrine": [
     "D10 is one global 10-bit semantic stream.",
-    "All owner repositories may donate D10 semantic evidence.",
+    "All owner repositories participate as donor sources or evidence sources.",
     "Package/domain ownership is not an exclusion criterion.",
     "Only exact duplicate, pure alias, mechanism-only/backend-only, or falsified semantics are excluded.",
     "Reference/upstream repositories donate evidence, not automatic semantic ownership.",
@@ -22,7 +22,9 @@
   ],
   "repository_count": 87,
   "policy_counts": {
-    "DIRECT-SEMANTIC-DONOR": 87
+    "EVIDENCE-DONOR": 33,
+    "DIRECT-SEMANTIC-DONOR": 43,
+    "SEMANTIC-DONOR-WITH-MECHANISM-GATE": 11
   },
   "rows": [
     {
@@ -39,9 +41,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/alpha-zero-general",
@@ -57,9 +60,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/basalt",
@@ -75,9 +79,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": "README identifies upstream Basalt TUI; reference/upstream.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/chebupelka",
@@ -93,9 +98,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": "README explicitly says fork of alexey-goloburdin/chebupelka; reference/upstream.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/chess",
@@ -111,6 +117,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -129,6 +136,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -147,6 +155,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -165,9 +174,10 @@
       "reason": "Common Lisp NLP toolkit; domain library, not language-core semantic authority.",
       "evidence_note": "README: CL-NLP is an NLP toolkit by Vsevolod Dyomkin with linguistic/ML modules.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/cl-tursas",
@@ -183,9 +193,10 @@
       "reason": "Common Lisp chess engine; chess/search protocol semantics are domain-owned, not language Core.",
       "evidence_note": "README.org: port of a Clojure chess engine using alpha-beta and 0x88 board representation.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/Clojure-code",
@@ -201,9 +212,10 @@
       "reason": "Modernized fork of Nightcode IDE. Repository owns editor/build/tooling behavior, not Clojure language semantics or SENS Core identity. Use only as implementation/reference evidence.",
       "evidence_note": "README explicitly identifies Clojure-code as a modernized fork of oakes/Nightcode and juv4uk as fork maintainer.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/clojure-cookbook",
@@ -219,9 +231,10 @@
       "reason": "O'Reilly Clojure Cookbook reference corpus with many contributors and application recipes. Useful for examples/reference only; no direct SENS Core semantic ownership.",
       "evidence_note": "README identifies Clojure Cookbook as an O'Reilly Cookbook project by Luke VanderHart/Ryan Neufeld with many contributed recipes.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/cml",
@@ -237,9 +250,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: AOT/middle-end; explicitly separates language semantics from physical execution; sens/my-lisp remains semantic authority. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/coreboot",
@@ -255,9 +269,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/coursera-deep-learning-specialization",
@@ -273,9 +288,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/CP77Tools",
@@ -291,9 +307,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/desktop-tutorial",
@@ -309,9 +326,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/dict_uk",
@@ -327,6 +345,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -345,6 +364,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: integration superproject; explicitly distinguishes semantic authority from physical dependency/gitlinks.",
       "candidate_issue": "#4036",
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -363,6 +383,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: read-only observation/provenance tool; observation laws may feed bridge review, app remains tooling.",
       "candidate_issue": "#4036",
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -381,6 +402,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -399,9 +421,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: hardware Lisp-machine implementation accountable to my-lisp semantic oracle. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/golisp",
@@ -417,6 +440,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -435,9 +459,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": "README identifies upstream visual-inertial odometry/mapping Basalt; reference/upstream.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/hsChess",
@@ -453,6 +478,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -471,9 +497,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": "README identifies Hydra game launcher/Bittorrent project; reference/upstream app.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/knowledge-graph-basalt",
@@ -489,9 +516,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": "README identifies independent/upstream Markdown knowledge-base Basalt; reference/domain corpus.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/latynka",
@@ -507,6 +535,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -525,9 +554,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/lc0-docker",
@@ -543,9 +573,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/LightTable",
@@ -561,9 +592,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/lisp",
@@ -579,6 +611,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -597,6 +630,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -615,6 +649,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -633,6 +668,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -651,6 +687,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -669,9 +706,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": "README points to upstream Maitreya astrology project; reference/domain corpus.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/mal",
@@ -687,6 +725,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -705,6 +744,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": "README: McCarthy 1960 eval/apply historical implementation + source bundle; semantic provenance donor, x86/heap/tag details are mechanism.",
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -723,9 +763,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/MEAnalyzer",
@@ -741,9 +782,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/minix",
@@ -759,9 +801,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/my-idea",
@@ -777,6 +820,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: IDE/tooling; my-lisp language is independent and sens owns semantics.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -795,9 +839,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README explicitly states language semantics belong only to my-lisp/sens; Cyberpunk host adapter/runtime. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/my-lisp-panini",
@@ -813,6 +858,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: Paninian formal system consuming sens as semantic substrate; domain/package ownership.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -831,6 +877,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -849,6 +896,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: web knowledge-base application; domain/package semantics.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -867,9 +915,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/o3de",
@@ -885,9 +934,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/Ooogle-it",
@@ -903,6 +953,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -921,9 +972,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/paip-lisp",
@@ -939,6 +991,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -957,6 +1010,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: linguistic/historical evidence and alignment project; domain evidence methodology, not Core-language authority.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -975,6 +1029,7 @@
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
       "candidate_issue": "#4053",
+      "previous_classification": "CORE-HISTORICAL-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -993,6 +1048,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: historical/legal/ethical research and VOLNOST/PACTA; domain research, not Core-language semantics.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1011,9 +1067,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/radio-log",
@@ -1029,6 +1086,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1047,9 +1105,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/russian-lang",
@@ -1065,6 +1124,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1083,6 +1143,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1101,6 +1162,7 @@
       "reason": "Current language authority. May expose missing Core semantics only through explicit laws absent from D1-D9/D10.",
       "evidence_note": null,
       "candidate_issue": "#4013",
+      "previous_classification": "CORE-LANGUAGE-DONOR",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1119,9 +1181,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/shiva-sutras",
@@ -1137,6 +1200,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1155,6 +1219,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1173,6 +1238,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1191,6 +1257,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: hybrid analog/FPGA/sens universe-simulation research; domain/math experiment, not Core authority.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1209,6 +1276,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README explicitly says it is not authority for my-lisp language semantics; workstation/control-plane tooling.",
       "candidate_issue": "#4036",
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1227,9 +1295,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": "README: Common Lisp deep-learning/tensor library; reference/domain library.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/Ucuddle-Search-Engine",
@@ -1245,6 +1314,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1263,9 +1333,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/vault-semantic-mcp",
@@ -1281,6 +1352,7 @@
       "reason": "Obsidian/vault semantic-search, ontology tagging and concept-discovery package. Language-owned Core semantics are not its authority; BGE-M3/Python/CUDA/MCP are mechanisms or domain tooling.",
       "evidence_note": "NLP-ARCHITECTURE.md defines a local semantic-search/tagging pipeline over vault/Sanskrit corpus; TAGGING-V2-DESIGN separates similarity suggestions from epistemic truth and keeps generated tags review-gated. No substrate-independent Core language primitive was identified.",
       "candidate_issue": "#4055",
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1299,6 +1371,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1317,6 +1390,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1335,9 +1409,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/vsop2013",
@@ -1353,6 +1428,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1371,9 +1447,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/word2vec-1",
@@ -1389,9 +1466,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/word2vec-on-wikipedia",
@@ -1407,9 +1485,10 @@
       "reason": "Reference/upstream/fork corpus. Useful for comparison or historical evidence, but not semantic ownership or D10 authority.",
       "evidence_note": null,
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "REFERENCE-OR-UPSTREAM",
+      "d10_single_stream_policy": "EVIDENCE-DONOR",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate semantic evidence/provenance; copied implementation details do not gain authority."
     },
     {
       "repository": "juv4uk/wsm",
@@ -1425,6 +1504,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: independent ()→mathematics research project; route mathematical laws to separate Core-Math review, not D10 automatically.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1443,6 +1523,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: navigation/watch/world-map project; domain semantics.",
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1461,9 +1542,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/wsm-graalvm",
@@ -1479,9 +1561,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/wsm-lazarus",
@@ -1497,9 +1580,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/wsm-my-lisp",
@@ -1515,9 +1599,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: self-hosting destination; explicitly not authoritative over language semantics. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/wsm-os",
@@ -1533,9 +1618,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/wsm-os-lisp",
@@ -1551,9 +1637,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: bare-metal target; my-lisp owns language semantics, CML owns lowering. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/wsm-target-contract",
@@ -1569,9 +1656,10 @@
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: neutral target ABI boundary, explicitly not language semantics. Universal execution seam reviewed under #4054/#4036/#4094: zero native backend operations admitted; only the shared six-meaning island seam may compete for Core D10.",
       "candidate_issue": null,
-      "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
+      "previous_classification": "BACKEND-OR-MECHANISM",
+      "d10_single_stream_policy": "SEMANTIC-DONOR-WITH-MECHANISM-GATE",
       "no_slot_by_ownership": false,
-      "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
+      "rule": "May donate distinct language-visible semantics; backend/ABI/ISA/register/driver mechanisms remain no-slot."
     },
     {
       "repository": "juv4uk/xva-trainer",
@@ -1587,6 +1675,7 @@
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": null,
       "candidate_issue": null,
+      "previous_classification": "PACKAGE-OR-DOMAIN",
       "d10_single_stream_policy": "DIRECT-SEMANTIC-DONOR",
       "no_slot_by_ownership": false,
       "rule": "May donate distinct language-visible semantics directly to the single D10 inventory."
@@ -1594,95 +1683,97 @@
   ],
   "followup_queues": {
     "direct_semantic_donors": [
-      "juv4uk/12-factor-agents",
-      "juv4uk/alpha-zero-general",
-      "juv4uk/basalt",
-      "juv4uk/chebupelka",
       "juv4uk/chess",
       "juv4uk/chess-lisp-zero",
       "juv4uk/chess-tauri-zero",
-      "juv4uk/cl-nlp",
-      "juv4uk/cl-tursas",
-      "juv4uk/Clojure-code",
-      "juv4uk/clojure-cookbook",
-      "juv4uk/cml",
-      "juv4uk/coreboot",
-      "juv4uk/coursera-deep-learning-specialization",
-      "juv4uk/CP77Tools",
-      "juv4uk/desktop-tutorial",
       "juv4uk/dict_uk",
       "juv4uk/ecosystem",
       "juv4uk/ecosystem-observer",
       "juv4uk/esp32-pendulum",
-      "juv4uk/fpga-lisp",
       "juv4uk/golisp",
-      "juv4uk/graph-heavy-basalt",
       "juv4uk/hsChess",
-      "juv4uk/hydra",
-      "juv4uk/knowledge-graph-basalt",
       "juv4uk/latynka",
-      "juv4uk/lc0",
-      "juv4uk/lc0-docker",
-      "juv4uk/LightTable",
       "juv4uk/lisp",
       "juv4uk/lisp-1",
       "juv4uk/LISP-2",
       "juv4uk/lisp-chess-engine",
       "juv4uk/lisp-koans",
-      "juv4uk/maitreya8",
       "juv4uk/mal",
       "juv4uk/mccarthy-eval",
-      "juv4uk/me_cleaner",
-      "juv4uk/MEAnalyzer",
-      "juv4uk/minix",
       "juv4uk/my-idea",
-      "juv4uk/my-lisp-cyberpunk",
       "juv4uk/my-lisp-panini",
       "juv4uk/nlp_uk",
       "juv4uk/nodum",
-      "juv4uk/nvidia-docker",
-      "juv4uk/o3de",
       "juv4uk/Ooogle-it",
-      "juv4uk/OpenManus",
       "juv4uk/paip-lisp",
       "juv4uk/panca-vac",
       "juv4uk/pascal-lisp",
       "juv4uk/pravda",
-      "juv4uk/ProgrammingWithLazarus",
       "juv4uk/radio-log",
-      "juv4uk/Resume-Matcher",
       "juv4uk/russian-lang",
       "juv4uk/sanskritworld_texts",
       "juv4uk/sens",
-      "juv4uk/sens-futhark",
       "juv4uk/shiva-sutras",
       "juv4uk/simple-lisp-chess-engine",
       "juv4uk/SpaceEngineers",
       "juv4uk/spanda",
       "juv4uk/tauricode",
-      "juv4uk/TH",
       "juv4uk/Ucuddle-Search-Engine",
-      "juv4uk/UnrealEngine",
       "juv4uk/vault-semantic-mcp",
       "juv4uk/VedicAstro",
       "juv4uk/vidyut",
-      "juv4uk/vscode",
       "juv4uk/vsop2013",
-      "juv4uk/word2vec",
-      "juv4uk/word2vec-1",
-      "juv4uk/word2vec-on-wikipedia",
       "juv4uk/wsm",
       "juv4uk/WSM-24",
+      "juv4uk/xva-trainer"
+    ],
+    "mechanism_gated_donors": [
+      "juv4uk/cml",
+      "juv4uk/fpga-lisp",
+      "juv4uk/my-lisp-cyberpunk",
+      "juv4uk/sens-futhark",
       "juv4uk/wsm-cuda",
       "juv4uk/wsm-graalvm",
       "juv4uk/wsm-lazarus",
       "juv4uk/wsm-my-lisp",
       "juv4uk/wsm-os",
       "juv4uk/wsm-os-lisp",
-      "juv4uk/wsm-target-contract",
-      "juv4uk/xva-trainer"
+      "juv4uk/wsm-target-contract"
     ],
-    "mechanism_gated_donors": [],
-    "evidence_donors": []
+    "evidence_donors": [
+      "juv4uk/12-factor-agents",
+      "juv4uk/alpha-zero-general",
+      "juv4uk/basalt",
+      "juv4uk/chebupelka",
+      "juv4uk/cl-nlp",
+      "juv4uk/cl-tursas",
+      "juv4uk/Clojure-code",
+      "juv4uk/clojure-cookbook",
+      "juv4uk/coreboot",
+      "juv4uk/coursera-deep-learning-specialization",
+      "juv4uk/CP77Tools",
+      "juv4uk/desktop-tutorial",
+      "juv4uk/graph-heavy-basalt",
+      "juv4uk/hydra",
+      "juv4uk/knowledge-graph-basalt",
+      "juv4uk/lc0",
+      "juv4uk/lc0-docker",
+      "juv4uk/LightTable",
+      "juv4uk/maitreya8",
+      "juv4uk/me_cleaner",
+      "juv4uk/MEAnalyzer",
+      "juv4uk/minix",
+      "juv4uk/nvidia-docker",
+      "juv4uk/o3de",
+      "juv4uk/OpenManus",
+      "juv4uk/ProgrammingWithLazarus",
+      "juv4uk/Resume-Matcher",
+      "juv4uk/TH",
+      "juv4uk/UnrealEngine",
+      "juv4uk/vscode",
+      "juv4uk/word2vec",
+      "juv4uk/word2vec-1",
+      "juv4uk/word2vec-on-wikipedia"
+    ]
   }
 }
