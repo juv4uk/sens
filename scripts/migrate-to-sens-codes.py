@@ -697,6 +697,44 @@ def _emit_item(out, words, need_separator):
     out.extend(words)
 
 
+def resolve_contract_binary_token(
+    token: str,
+    *,
+    resolver: SourceResolver | None,
+    binary_authority: dict[tuple[int, str], Entry],
+    d9_enabled: bool,
+) -> str:
+    """Resolve one already-binary data token under Contract 11.8 authority."""
+    width = len(token)
+    if width == 1:
+        raise BinaryMigrationError(
+            f"D1 word {token!r} is not accepted by the current canonical source reader"
+        )
+    if width == 9 and not d9_enabled:
+        raise BinaryMigrationError(
+            f"W9 word {token!r} requires GREEN exact-W9 reader/carrier support"
+        )
+
+    exact = binary_authority.get((width, token))
+    if exact is not None:
+        if width == 2:
+            raise BinaryMigrationError(
+                f"D2 word {token!r} is structural control only"
+            )
+        return token
+
+    if width == 8 and resolver is not None:
+        resolution = resolver.resolve_head(token)
+        if resolution.resolved and resolution.kind == "sid8-sens8":
+            identity = resolution.current
+            assert identity is not None
+            return identity.bits
+
+    raise BinaryMigrationError(
+        f"unadmitted exact binary word {token!r}"
+    )
+
+
 def binary_rewrite(
     text,
     code_map,
@@ -902,36 +940,14 @@ def binary_rewrite(
             # In contract-authority mode, a bare binary word is already canonical
             # source.  Keep its exact width instead of spelling its digits as D7.
             if contract_authority and re.fullmatch(r"[01]+", token):
-                width = len(token)
-                if width == 1:
-                    raise BinaryMigrationError(
-                        f"D1 word {token!r} is not accepted by the current canonical source reader"
+                out.append(
+                    resolve_contract_binary_token(
+                        token,
+                        resolver=resolver,
+                        binary_authority=binary_authority,
+                        d9_enabled=d9_enabled,
                     )
-                if width == 9 and not d9_enabled:
-                    raise BinaryMigrationError(
-                        f"W9 word {token!r} requires GREEN exact-W9 reader/carrier support"
-                    )
-                exact = binary_authority.get((width, token))
-                if exact is not None:
-                    if width == 2:
-                        raise BinaryMigrationError(
-                            f"D2 word {token!r} is structural control only"
-                        )
-                    out.append(token)
-                elif width == 8 and resolver is not None:
-                    resolution = resolver.resolve_head(token)
-                    if resolution.resolved and resolution.kind == "sid8-sens8":
-                        identity = resolution.current
-                        assert identity is not None
-                        out.append(identity.bits)
-                    else:
-                        raise BinaryMigrationError(
-                            f"unadmitted exact binary word {token!r}"
-                        )
-                else:
-                    raise BinaryMigrationError(
-                        f"unadmitted exact binary word {token!r}"
-                    )
+                )
             # Explicit legacy SID values are semantic identities even outside a
             # call head; migrate them by named historical evidence rather than
             # spelling their eight digits as Text7.
