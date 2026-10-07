@@ -1,0 +1,29 @@
+name: D10 wsm-os-lisp ownership
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-wsm-os-lisp-ownership-v1.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "scripts/check-d10-wsm-os-lisp-ownership.py"
+      - ".github/workflows/d10-wsm-os-lisp-ownership.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-wsm-os-lisp-ownership-v1.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-wsm-os-lisp-ownership.py"
+      - ".github/workflows/d10-wsm-os-lisp-ownership.yml"
+  workflow_dispatch:
+
+jobs:
+  ownership:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify WSM ownership split
+        run: python3 scripts/check-d10-wsm-os-lisp-ownership.py
