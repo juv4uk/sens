@@ -119,6 +119,13 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertIn("0011001", converted)
         self.assertNotIn("1100001 1100001 1100001", converted)
 
+    def test_contract_authority_rejects_d1_source_cell(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "D1 word",
+        ):
+            self.contract_binary("(LIST 1)\n")
+
     def test_contract_authority_rejects_hash_b_wrapper(self):
         with self.assertRaisesRegex(mod.BinaryMigrationError, "legacy #b binary wrapper"):
             self.contract_binary("(LIST #b101)\n")
