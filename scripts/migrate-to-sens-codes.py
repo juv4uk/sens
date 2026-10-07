@@ -35,7 +35,7 @@ from domain_tables import read_domain_table
 from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
-CONTRACT_CALL_DOMAINS = ("D3", "D4", "D5", "D6", "D8", "D9")
+CONTRACT_CALL_DOMAINS = CALL_DOMAINS
 CONTRACT_DOMAINS = ("D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9")
 LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
 BINARY_MASTER_EXTS = {".lisp"}
@@ -125,20 +125,31 @@ def build_binary_authority(data, domains=CONTRACT_DOMAINS):
     return out
 
 
-def canonical_reader_supports_w9(source_words: Path, canonical_reader: Path) -> bool:
-    """D9 is enabled only when the exact W9 reader/carrier path exists."""
+def canonical_reader_supports_width(
+    source_words: Path,
+    canonical_reader: Path,
+    width: int,
+) -> bool:
+    """Enable a source width only when both carrier and canonical reader expose it."""
     try:
         source = source_words.read_text(encoding="utf-8")
         reader = canonical_reader.read_text(encoding="utf-8")
     except OSError:
         return False
-    return "W9" in source and "W9" in reader
+    marker = f"W{width}"
+    return marker in source and marker in reader
+
+
+def canonical_reader_supports_w9(source_words: Path, canonical_reader: Path) -> bool:
+    """Compatibility wrapper for the explicit W9 gate."""
+    return canonical_reader_supports_width(source_words, canonical_reader, 9)
 
 
 def validate_contract_binary_output(
     rendered: str,
     authority: dict[tuple[int, str], Entry],
     *,
+    d1_enabled: bool,
     d9_enabled: bool,
 ) -> None:
     """Fail closed unless every emitted word is an admitted exact coordinate."""
@@ -149,9 +160,15 @@ def validate_contract_binary_output(
             )
         width = len(word)
         if width == 1:
-            raise BinaryMigrationError(
-                f"D1 word {word!r} is not accepted by the current canonical source reader"
-            )
+            if not d1_enabled:
+                raise BinaryMigrationError(
+                    f"D1 word {word!r} requires GREEN exact-W1 reader support"
+                )
+            if (width, word) not in authority:
+                raise BinaryMigrationError(
+                    f"unadmitted D1 exact binary word {word!r}"
+                )
+            continue
         if width == 2:
             # D2 is the only structural exception to ordinary semantic residents.
             if (width, word) not in authority:
@@ -702,14 +719,20 @@ def resolve_contract_binary_token(
     *,
     resolver: SourceResolver | None,
     binary_authority: dict[tuple[int, str], Entry],
+    d1_enabled: bool,
     d9_enabled: bool,
 ) -> str:
     """Resolve one already-binary data token under Contract 11.8 authority."""
     width = len(token)
     if width == 1:
-        raise BinaryMigrationError(
-            f"D1 word {token!r} is not accepted by the current canonical source reader"
-        )
+        if not d1_enabled:
+            raise BinaryMigrationError(
+                f"D1 word {token!r} requires GREEN exact-W1 reader support"
+            )
+        if (width, token) not in binary_authority:
+            raise BinaryMigrationError(
+                f"unadmitted D1 exact binary word {token!r}"
+            )
     if width == 9 and not d9_enabled:
         raise BinaryMigrationError(
             f"W9 word {token!r} requires GREEN exact-W9 reader/carrier support"
@@ -721,14 +744,19 @@ def resolve_contract_binary_token(
             raise BinaryMigrationError(
                 f"D2 word {token!r} is structural control only"
             )
-        return token
 
-    if width == 8 and resolver is not None:
-        resolution = resolver.resolve_head(token)
-        if resolution.resolved and resolution.kind == "sid8-sens8":
-            identity = resolution.current
-            assert identity is not None
-            return identity.bits
+        if width == 8 and resolver is not None:
+            legacy = resolver.resolve_legacy_sid8(token)
+            if legacy.resolved:
+                identity = legacy.current
+                assert identity is not None
+                if identity.domain != exact.domain or identity.bits != exact.bits:
+                    raise BinaryMigrationError(
+                        f"ambiguous W8 token {token!r}: current D8 coordinate "
+                        f"{exact.domain}:{exact.bits} conflicts with legacy SID8 "
+                        f"evidence {identity.domain}:{identity.bits}"
+                    )
+        return token
 
     raise BinaryMigrationError(
         f"unadmitted exact binary word {token!r}"
