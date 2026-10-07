@@ -36,8 +36,8 @@
     ; one-bit answer list (1)/(0). Strict current D3 COND must not consume
     ; that compatibility list directly. Re-ask atom identity about its bit
     ; so this helper returns exact D1 PredicateBit.
-    (eq? (car (equal? left right))
-         (car (quote (1))))))
+    (тотожне? (car (equal? left right))
+             (car (quote (1))))))
 
 (def encoder-coverage-pair=?
   (lambda (left right)
