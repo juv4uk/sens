@@ -38,18 +38,20 @@
 
 
 ; Coverage authority uses exact D1 PredicateBit for every control decision.
-; equal? is legacy deep structural comparison and returns one-element
-; structural records (1)/(0), which are NOT D1. Normalize that result by
-; asking canonical D3:101 EQ (`тотожне?`) whether its payload is Number 1.
+; equal? is the historical deep structural comparator and returns a one-element
+; structural (1)/(0) answer carrier. Normalize only its ordinary Number payload
+; through current exact-D5 predicates. The Ukrainian D5 surfaces are the
+; source-routable names for 01000 ZEROP and 11011 GREATERP, and both cross the
+; language boundary only as exact D1.
 (def encoder-coverage-d1-yes
-  (тотожне? 0 0))
+  (нуль? 0))
 
 (def encoder-coverage-d1-no
-  (тотожне? 0 1))
+  (нуль? 1))
 
 (def encoder-coverage-same?
   (lambda (left right)
-    (тотожне? (car (equal? left right)) 1)))
+    (більше? (car (equal? left right)) 0)))
 
 ; Traversal needs structural EMPTY, not the broader ATOM classification.
 ; This preserves the D1:0 != D3:000 distinction and avoids using ATOM as NIL.
