@@ -1,0 +1,33 @@
+name: One-shot public API report
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/public-api-report-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Regenerate public API discovery report
+        run: python3 scripts/public_api_inventory.py --write-report
+      - name: Commit generated report
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- docs/generated/public-api-discovery.md; then
+            echo "Report already current."
+            exit 0
+          fi
+          git add docs/generated/public-api-discovery.md
+          git commit -m "docs: refresh public API discovery"
+          git push origin HEAD:main
