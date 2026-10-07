@@ -146,7 +146,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/cl-tursas",
@@ -161,7 +161,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/Clojure-code",
@@ -176,7 +176,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/clojure-cookbook",
@@ -191,7 +191,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/cml",
@@ -206,7 +206,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: AOT/middle-end; explicitly separates language semantics from physical execution; sens/my-lisp remains semantic authority.",
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/coreboot",
@@ -296,7 +296,7 @@
       "deep_review_status": "ACCOUNTED",
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: integration superproject; explicitly distinguishes semantic authority from physical dependency/gitlinks.",
-      "candidate_issue": null
+      "candidate_issue": "#4036"
     },
     {
       "repository": "juv4uk/ecosystem-observer",
@@ -311,7 +311,7 @@
       "deep_review_status": "ACCOUNTED",
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README: read-only observation/provenance tool; observation laws may feed bridge review, app remains tooling.",
-      "candidate_issue": null
+      "candidate_issue": "#4036"
     },
     {
       "repository": "juv4uk/esp32-pendulum",
@@ -341,7 +341,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: hardware Lisp-machine implementation accountable to my-lisp semantic oracle.",
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/golisp",
@@ -356,7 +356,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/graph-heavy-basalt",
@@ -491,7 +491,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/lisp-1",
@@ -506,7 +506,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/LISP-2",
@@ -521,7 +521,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/lisp-chess-engine",
@@ -551,7 +551,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/maitreya8",
@@ -581,7 +581,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/mccarthy-eval",
@@ -596,7 +596,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": "README: McCarthy 1960 eval/apply historical implementation + source bundle; semantic provenance donor, x86/heap/tag details are mechanism.",
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/me_cleaner",
@@ -671,7 +671,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README explicitly states language semantics belong only to my-lisp/sens; Cyberpunk host adapter/runtime.",
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/my-lisp-panini",
@@ -791,7 +791,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/panca-vac",
@@ -821,7 +821,7 @@
       "deep_review_status": "PRIORITY",
       "reason": "Historical/reference Lisp-family corpus. Donate semantic provenance and missing operations only; implementation details and coordinates have zero authority.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4053"
     },
     {
       "repository": "juv4uk/pravda",
@@ -926,7 +926,7 @@
       "deep_review_status": "AUTHORITY",
       "reason": "Current language authority. May expose missing Core semantics only through explicit laws absent from D1-D9/D10.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4013"
     },
     {
       "repository": "juv4uk/sens-futhark",
@@ -941,7 +941,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/shiva-sutras",
@@ -1016,7 +1016,7 @@
       "deep_review_status": "ACCOUNTED",
       "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core.",
       "evidence_note": "README explicitly says it is not authority for my-lisp language semantics; workstation/control-plane tooling.",
-      "candidate_issue": null
+      "candidate_issue": "#4036"
     },
     {
       "repository": "juv4uk/TH",
@@ -1076,7 +1076,7 @@
       "deep_review_status": "QUEUED",
       "reason": "Repository is accounted for but current metadata is insufficient to assign a safe semantic ownership boundary.",
       "evidence_note": "README currently contains only project title/license; insufficient semantic scope evidence.",
-      "candidate_issue": null
+      "candidate_issue": "#4055"
     },
     {
       "repository": "juv4uk/VedicAstro",
@@ -1226,7 +1226,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/wsm-graalvm",
@@ -1241,7 +1241,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/wsm-lazarus",
@@ -1256,7 +1256,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/wsm-my-lisp",
@@ -1271,7 +1271,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: self-hosting destination; explicitly not authoritative over language semantics.",
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/wsm-os",
@@ -1286,7 +1286,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": null,
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/wsm-os-lisp",
@@ -1301,7 +1301,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: bare-metal target; my-lisp owns language semantics, CML owns lowering.",
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/wsm-target-contract",
@@ -1316,7 +1316,7 @@
       "deep_review_status": "BOUNDARY-VERIFIED",
       "reason": "Compiler/runtime/target/backend repository. Machine/ABI/ISA/driver/lowering behavior stays mechanism; only a separately proved universal bridge/capability law may be proposed to Core.",
       "evidence_note": "README: neutral target ABI boundary, explicitly not language semantics.",
-      "candidate_issue": null
+      "candidate_issue": "#4054"
     },
     {
       "repository": "juv4uk/xva-trainer",
@@ -1333,5 +1333,11 @@
       "evidence_note": null,
       "candidate_issue": null
     }
-  ]
+  ],
+  "followup_queues": {
+    "historical_core_review": "#4053",
+    "execution_seam_review": "#4054 / #4036",
+    "unresolved_scope": "#4055",
+    "island_bridge_factorization": "#4036"
+  }
 }
