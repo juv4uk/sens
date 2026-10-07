@@ -68,21 +68,15 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
 }
 
 #[test]
-fn historical_sid_capability_lookup_is_compatibility_only() {
-    let mut s = session();
-    let legacy = eval_program(
-        "(machine-capabilities-for-sid 00001100)",
-        &mut s,
-    )
-    .expect("legacy ADD compatibility lookup")
-    .value
-    .to_string();
-    assert_eq!(legacy, "((integer-add bounded-u64))");
-
+fn active_machine_capability_axis_has_no_sid8_lookup() {
     let source = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis source");
-    assert!(source.contains("machine-capability-legacy-sid-axis-v1"));
-    assert!(source.contains("New machine work must use"));
+
+    assert!(source.contains("machine-capability-axis-v2"));
+    assert!(source.contains("machine-capabilities-for-domain"));
+    assert!(!source.contains("machine-capability-legacy-sid-axis"));
+    assert!(!source.contains("machine-capabilities-for-sid"));
+    assert!(!source.contains("00001100"));
 }
 
 #[test]
