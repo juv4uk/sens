@@ -148,6 +148,10 @@ def validate_contract_binary_output(
                 f"contract-authority output contains non-binary token {word!r}"
             )
         width = len(word)
+        if width == 1:
+            raise BinaryMigrationError(
+                f"D1 word {word!r} is not accepted by the current canonical source reader"
+            )
         if width == 2:
             # D2 is the only structural exception to ordinary semantic residents.
             if (width, word) not in authority:
@@ -899,6 +903,10 @@ def binary_rewrite(
             # source.  Keep its exact width instead of spelling its digits as D7.
             if contract_authority and re.fullmatch(r"[01]+", token):
                 width = len(token)
+                if width == 1:
+                    raise BinaryMigrationError(
+                        f"D1 word {token!r} is not accepted by the current canonical source reader"
+                    )
                 if width == 9 and not d9_enabled:
                     raise BinaryMigrationError(
                         f"W9 word {token!r} requires GREEN exact-W9 reader/carrier support"
@@ -1208,7 +1216,7 @@ def main():
         "root": str(root),
         "mode": mode,
         "binary_source_rule": (
-            "D2 structure + exact current domain words + D7/Text7 spelling; comments absent"
+            "D2 structure + exact current source-reader domains + D7/Text7 spelling; D1 source cells blocked until reader admission; comments absent"
             if args.binary_mirror and args.contract_authority
             else "D2 structure + exact D3-D6 callable heads + D7/Text7 spelling; comments absent"
             if args.binary_mirror else None
