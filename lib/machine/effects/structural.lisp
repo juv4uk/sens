@@ -1,8 +1,8 @@
 ; #4349 — bounded target-neutral structural machine effects.
 ;
 ; This layer consumes already-decided representation data (field offsets and
-; bounded machine words). It does not know CAR/CONS/pair meaning, x86 registers,
-; opcodes, addressing encodings, or a target ABI.
+; bounded machine words). It does not know language-level field meaning, target
+; registers, opcodes, addressing encodings, or a target ABI.
 ;
 ; One calibration sequence is demanded by the existing bounded two-field
 ; store/load witness:
