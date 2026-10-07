@@ -39,25 +39,29 @@ assert moved_ids==frozen
 
 review=set(gate["d10"]["frozen_review_stable_ids"])
 current_ids=set(inv_ids)
-assert review <= current_ids
+review_ledger=json.loads((root/"knowledge/d10-review-reclassification-v2.json").read_text(encoding="utf-8"))
+review_moved={r["stable_id"] for r in review_ledger["rows"]}
+assert review_moved==review
+assert not (review & current_ids)
 
+target=state["target"]
+selected_now=target["selected_semantic_candidates"]
+remaining_now=target["remaining_semantic_candidates"]
+assert selected_now>=345
+assert remaining_now==1024-selected_now
+assert target["domain"]=="D10"
+assert target["width"]==10
+assert target["capacity"]==1024
+assert target["dense_target"]==1024
+assert target["law_forced_coordinates"]==256
+assert target["unplaced_selected_candidates"]==selected_now-256
+assert target["ratified_residents"]==0
 assert inventory["accounting"]=={
-    "selected_semantic_candidates":345,
+    "selected_semantic_candidates":selected_now,
     "law_forced_coordinates":256,
-    "unplaced_selected_candidates":89,
-    "remaining_semantic_inventory":679,
+    "unplaced_selected_candidates":selected_now-256,
+    "remaining_semantic_inventory":remaining_now,
     "ratified_d10_residents":0,
-}
-assert state["target"]=={
-    "domain":"D10",
-    "width":10,
-    "capacity":1024,
-    "dense_target":1024,
-    "selected_semantic_candidates":345,
-    "remaining_semantic_candidates":679,
-    "law_forced_coordinates":256,
-    "unplaced_selected_candidates":89,
-    "ratified_residents":0,
 }
 assert state["ownership_cleanup_v1"]=={
     "authority":"#4047",
@@ -70,8 +74,8 @@ assert state["ownership_cleanup_v1"]=={
 }
 assert state["ownership_gate"]["definite_noncore_selected"]==0
 assert state["ownership_gate"]["definite_noncore_reclassified"]==55
-assert state["ownership_gate"]["review_required_selected"]==15
+assert state["ownership_gate"]["review_required_selected"]==0
 assert state["target"]["ratified_residents"]==0
 
 print("D10-OWNERSHIP-CLEANUP-1=PASS")
-print("core=345/1024 placed=256 unplaced=89 moved-noncore=55 review-blocked=15 ratified=0")
+print(f"first-cleanup-preserved=55 final-review-reclassified=15 inventory={selected_now}/1024 placed=256 unplaced={selected_now-256} remaining={remaining_now} ratified=0")
