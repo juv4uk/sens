@@ -150,11 +150,25 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertEqual(hits[0].label, "CAR")
         self.assertNotIn("00000101", converted.split())
 
-    def test_contract_authority_blocks_zero_padded_current_width_as_legacy_sid(self):
+    def test_contract_authority_keeps_exact_width_and_never_relabels_d8_as_padded_d3(self):
         converted, hits, _ = self.contract_binary("(00000000 x)\n")
         self.assertEqual(hits[0].domain, "D8")
         self.assertEqual(hits[0].bits, "00000000")
-        self.assertIn("00000000", converted)
+        words = converted.split()
+        self.assertIn("00000000", words)
+        self.assertNotIn("0", words)
+
+    def test_contract_authority_validator_rejects_unadmitted_binary_word(self):
+        _, _, _, _, authority = self.contract_setup()
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "unadmitted exact binary word",
+        ):
+            mod.validate_contract_binary_output(
+                "10 111 00 000001011 01\n",
+                authority,
+                d9_enabled=False,
+            )
 
     def test_current_d3_authority_is_used(self):
         self.assertEqual(self.code_map["CAR"].bits, "100")
