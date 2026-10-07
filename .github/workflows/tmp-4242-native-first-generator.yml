@@ -1,0 +1,43 @@
+name: temporary 4242 native-first exact-SENS generator
+
+on:
+  push:
+    branches:
+      - release/4242-native-first-exact-sens
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: release/4242-native-first-exact-sens
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rewrite native-first with canonical parser-aware migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- lib/machine/dispatch/native-first.lisp
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/machine/dispatch/native-first.lisp | tee /tmp/4242-check.txt
+          grep -F 'convertible=0 named-calls=0 blocked-host=0' /tmp/4242-check.txt
+      - name: Focused native-first witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p sens --test native_first_exact_domain
+          bash scripts/test-current-semantic-slice.sh
+      - name: Commit generated source and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/machine/dispatch/native-first.lisp
+          git rm .github/workflows/tmp-4242-native-first-generator.yml
+          git commit -m "refactor(4242): migrate native-first to exact SENS source"
+          git push origin HEAD:release/4242-native-first-exact-sens
