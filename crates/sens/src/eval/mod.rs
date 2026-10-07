@@ -504,7 +504,7 @@ fn binary_head_domain_identity(
     // executable only when the canonical exact slot actually contains a macro
     // mechanism installed by the language bootstrap.
     if let crate::DomainIdentity::D6(word) = identity {
-        let exact = CoreDomainIdentity::D6(word);
+        let exact = CoreDomainIdentity::D6(*word);
         if matches!(environment.domain_code_slot(exact), Some(Value::Macro(_))) {
             return Some(exact);
         }
