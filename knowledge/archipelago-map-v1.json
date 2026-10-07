@@ -1,6 +1,6 @@
 {
   "schema": "sens-archipelago-map/v1",
-  "status": "CURRENT-ARCHITECTURE",
+  "status": "EXECUTION-ARCHITECTURE-SEMANTIC-OWNERSHIP-SUPERSEDED",
   "authority": "#4140",
   "date": "2026-10-07",
   "foundation": "#4008 / Contract 11.8",
@@ -10,11 +10,13 @@
     "docs/superpowers/specs/2026-09-22-island-selector-and-raw-invoke-design.md",
     "contracts/island-compat-contract.lisp",
     "knowledge/island-ownership-gate-v1.json",
-    "knowledge/d10-owner-repo-donor-matrix-v2.json"
+    "knowledge/d10-owner-repo-donor-matrix-v2.json",
+    "knowledge/d10-owner-repo-donor-matrix-v3.json",
+    "#4162"
   ],
   "core_border": {
     "semantic_owner": "SENS Core",
-    "rule": "Core owns semantic identity and explicit borders; autonomous islands own native execution/reasoning/domain semantics.",
+    "rule": "Execution islands own mechanisms/runtime behavior, but distinct language-visible meanings from any owner repository may occupy the single D10 semantic stream. Backend-only mechanism details remain excluded.",
     "may_own": [
       "semantic identity",
       "admitted language laws",
@@ -32,7 +34,7 @@
       "native Datalog fixpoint/closure algorithms",
       "Common Lisp implementation/library semantics merely because callable",
       "backend opcode/register/ABI/driver/MMIO/IR identities",
-      "package/domain algorithms merely because implemented in Lisp"
+      "backend opcode/register/ABI/driver/MMIO/IR identities without a language-visible semantic law"
     ],
     "d10_bridge_meanings": [
       {
@@ -134,10 +136,12 @@
       "science/core-math dimensional package": 4,
       "linguistic/translation package or island coordinator": 11
     },
-    "rule": "Reclassified rows leave Core, not the ecosystem; their provenance and package/island ownership remain preserved."
+    "rule": "Historical reclassification is preserved as provenance, but all 70 language-visible rows are restored to the single D10 inventory. Package/domain ownership no longer creates a no-slot decision.",
+    "status": "REVERSED-BY-OWNER-CORRECTION-4162",
+    "restored_rows": 70
   },
   "repository_archipelago": {
-    "source": "knowledge/d10-owner-repo-donor-matrix-v2.json",
+    "source": "knowledge/d10-owner-repo-donor-matrix-v3.json",
     "repository_count": 87,
     "zone_counts": {
       "REFERENCE-WATERS": 33,
@@ -149,9 +153,9 @@
     "zones": {
       "CORE-DONOR": "May donate universal Core language law after exact duplicate/ownership review.",
       "HISTORICAL-DONOR": "Evidence/provenance only; no coordinate authority.",
-      "PACKAGE-ISLAND": "Owns application/domain semantics; only separately factored universal border laws may enter Core.",
-      "SUBSTRATE-ISLAND": "Owns compiler/runtime/target/backend mechanism; only universal seam laws may enter Core.",
-      "REFERENCE-WATERS": "Comparison/reference evidence only; no semantic ownership."
+      "PACKAGE-ISLAND": "May directly donate distinct language-visible D10 semantics; package ownership is provenance, not an exclusion rule.",
+      "SUBSTRATE-ISLAND": "May donate language-visible semantics through the mechanism gate; backend mechanism details remain no-slot.",
+      "REFERENCE-WATERS": "May donate semantic evidence/provenance; copied implementation details gain no authority."
     },
     "repositories": [
       {
@@ -1198,19 +1202,19 @@
         "candidate_issue": null,
         "reason": "Application/domain/tooling semantics stay with their package. Only a separately factored domain-independent law can be reviewed for Core."
       }
-    ]
+    ],
+    "semantic_namespace_rule": "ONE-GLOBAL-D10-BITSTREAM"
   },
   "d10_gate": {
-    "selected_semantic_candidates": 434,
+    "selected_semantic_candidates": 504,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 178,
-    "remaining_semantic_inventory": 590,
+    "unplaced_selected_candidates": 248,
+    "remaining_semantic_inventory": 520,
     "ratified_d10_residents": 0,
-    "ownership_status": "OWNERSHIP-DEBT-CLEARED",
-    "definite_noncore_selected": 0,
-    "review_required_selected": 0,
+    "ownership_status": "SINGLE-STREAM-OWNER-CORRECTED",
+    "restored_prior_reclassification_rows": 70,
     "bridge_meanings_selected": 6,
-    "rule": "D10 may admit island/package/backend-derived semantics only after factorization into a substrate-independent Core border law."
+    "rule": "All distinct language-visible semantics share one D10 bitstream. Exclude only exact duplicates, pure aliases, mechanism-only rows, or falsified rows."
   },
   "invariants": [
     "one repository appears exactly once in the owner-repo archipelago map",
@@ -1220,5 +1224,6 @@
     "missing bridge or missing kernel is legal and does not change semantic identity",
     "reclassified non-Core stable IDs must not reappear in D10 Core inventory",
     "D10 remains unratified until explicit owner decision"
-  ]
+  ],
+  "owner_correction": "#4162"
 }
