@@ -207,7 +207,7 @@
           (observed-forms (get-observed-forms expr error-kind)))
       (01001000 (00101001
         (поле-статусу fixture)
-        (00100111 (00000100 (00000001 fixture) fixture)
+        (00100111 (00000001 fixture)
                    (00000100 (00000001 id) id)
                    (00000100 (00000001 tier) tier)
                    (00000100 (00000001 axioms) axioms)
