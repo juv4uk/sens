@@ -21,6 +21,7 @@ CONTRACT_VERSION = "11.8"
 SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
 D9_STATUS = "BLOCKED-CARRIER"
 D9_REASON = "BinarySourceWord/DomainIdentity currently materialize W1-W8 only"
+D9_MECHANISM_OWNER = "#4038 / PR #4044"
 IREF_RE = re.compile(r"I\s+refs:\s*([0-9,]+)")
 
 
@@ -123,6 +124,7 @@ def main() -> int:
         "measured_carriers": "W1-W8",
         "d9_status": D9_STATUS,
         "d9_reason": D9_REASON,
+        "d9_mechanism_owner": D9_MECHANISM_OWNER,
         "scope": "W1-W8 exact source-word -> DomainIdentity carrier/runtime",
         "semantic_authority": (
             "Contract 11.8 metadata; measured values are mechanical carrier cost only"
@@ -141,6 +143,7 @@ def main() -> int:
         "This slice consumes production BinarySourceWord -> DomainIdentity APIs only.",
         "Current semantic authority is D1-D9; this Rust carrier materializes W1-W8.",
         f"D9 status: {D9_STATUS} — {D9_REASON}.",
+        f"D9 mechanism owner: {D9_MECHANISM_OWNER}.",
         "It contains no benchmark-local residency table, surface-name lookup, or legacy "
         "Sens8/Function8 identity.",
         "",
