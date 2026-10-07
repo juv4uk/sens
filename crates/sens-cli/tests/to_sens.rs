@@ -55,6 +55,47 @@ fn check_reports_without_writing_then_apply_preserves_formatting() {
 }
 
 #[test]
+fn exact_domain_mode_preserves_result_and_real_widths() {
+    let source =
+        "(визначити f (функція (x) (перше x)))\n(f (сполучити 7 ()))\n";
+    let path = temp_file("exact-domain-parity", source);
+    let original = eval_core(source);
+
+    let apply = tool()
+        .args(["--exact-domain", path.to_str().expect("utf8 path")])
+        .output()
+        .expect("run exact-domain apply");
+    assert!(
+        apply.status.success(),
+        "{}",
+        String::from_utf8_lossy(&apply.stderr)
+    );
+
+    let rewritten = std::fs::read_to_string(&path).expect("read exact-domain rewrite");
+    let _ = std::fs::remove_file(&path);
+    assert_eq!(
+        rewritten,
+        "(0011 f (0010 (x) (100 x)))\n(f (111 7 ()))\n"
+    );
+    assert_eq!(eval_core(&rewritten), original);
+}
+
+#[test]
+fn exact_domain_mode_blocks_without_partial_write() {
+    let source = "(+ 1 2)\n";
+    let path = temp_file("exact-domain-block", source);
+
+    let apply = tool()
+        .args(["--exact-domain", path.to_str().expect("utf8 path")])
+        .output()
+        .expect("run blocked exact-domain apply");
+    assert_eq!(apply.status.code(), Some(2));
+    assert_eq!(std::fs::read_to_string(&path).expect("read unchanged"), source);
+    let stderr = String::from_utf8_lossy(&apply.stderr);
+    assert!(stderr.contains("no proven exact-domain successor"), "{stderr}");
+    let _ = std::fs::remove_file(&path);
+}
+#[test]
 fn derived_functions_and_macros_keep_runtime_result_after_rewrite() {
     let source =
         "(let* ((xs (list 1 2 3)) (n (length xs))) (and (member? 2 xs) (or () (+ n 39))))";
