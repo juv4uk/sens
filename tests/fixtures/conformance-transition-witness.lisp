@@ -34,12 +34,10 @@
  (expr . "(за-умовою (() (як-є first)) (() (як-є second)))")
  (expected . "()")
  (meta-eval . t)
- (reason . historical-bare-t-fallback-retired)
  (owner . "4196/4166"))
 
 ((supersedes-expr . "(cond ((quote radio) antenna (quote wrong)))")
  (expr . "(за-умовою ((тотожне? (як-є radio) (як-є radio)) (як-є antenna)))")
  (expected . "antenna")
  (meta-eval . t)
- (reason . historical-three-part-cond-retired)
  (owner . "4196/4166"))
