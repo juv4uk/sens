@@ -5,12 +5,14 @@ on:
     paths:
       - "contracts/compiler-selfhost-lineage-v1.lisp"
       - "scripts/validate-compiler-selfhost-lineage.py"
+      - "evidence/compiler-selfhost-lineage-*.json"
       - ".github/workflows/compiler-selfhost-lineage-contract.yml"
   push:
     branches: [main]
     paths:
       - "contracts/compiler-selfhost-lineage-v1.lisp"
       - "scripts/validate-compiler-selfhost-lineage.py"
+      - "evidence/compiler-selfhost-lineage-*.json"
       - ".github/workflows/compiler-selfhost-lineage-contract.yml"
 
 concurrency:
@@ -18,11 +20,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  self-test:
-    runs-on: [self-hosted, guix]
+  lineage:
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Validate lineage contract falsifiers
         run: python3 scripts/validate-compiler-selfhost-lineage.py --self-test
+
+      - name: Validate executable fixed-point report
+        run: >-
+          python3 scripts/validate-compiler-selfhost-lineage.py
+          evidence/compiler-selfhost-lineage-2026-10-07.json
+
+      - name: Recompute exact historical SENS source digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          report=evidence/compiler-selfhost-lineage-2026-10-07.json
+          sens_sha="$(python3 -c 'import json; print(json.load(open("'"$report"'"))["source"]["sens_source_sha"])')"
+          nucleus_expected="$(python3 -c 'import json; print(json.load(open("'"$report"'"))["source"]["compiler_nucleus_sha256"])')"
+          contract_expected="$(python3 -c 'import json; print(json.load(open("'"$report"'"))["source"]["language_contract_sha256"])')"
+          projection_expected="$(python3 -c 'import json; print(json.load(open("'"$report"'"))["source"]["structural_law_projection_sha256"])')"
+
+          test "$(git show "$sens_sha:lib/compiler-nucleus.lisp" | sha256sum | cut -d' ' -f1)" = "$nucleus_expected"
+          test "$(git show "$sens_sha:language-contract.lisp" | sha256sum | cut -d' ' -f1)" = "$contract_expected"
+          test "$(git show "$sens_sha:knowledge/bija3-l1-l5-structure-projection.json" | sha256sum | cut -d' ' -f1)" = "$projection_expected"
+
+      - name: Assert strongest fixed-point evidence is internally consistent
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          r = json.loads(Path("evidence/compiler-selfhost-lineage-2026-10-07.json").read_text())
+          assert r["generations"]["c1"]["artifact_sha256"] == r["generations"]["c2"]["artifact_sha256"]
+          assert r["generations"]["c1"]["normalized_sha256"] == r["generations"]["c2"]["normalized_sha256"]
+          e = r["evidence"]
+          assert e["c1_executable_sha256"] == e["c2_executable_sha256"]
+          assert e["c1_c_source_sha256"] == e["c2_c_source_sha256"]
+          assert e["c1_output_sha256"] == e["c2_output_sha256"]
+          assert r["equivalence"]["selected_method"] == "byte-identical-artifact"
+          print("COMPILER-SELFHOST-LINEAGE-EVIDENCE: PASS")
+          PY
