@@ -6,7 +6,7 @@
 //! into per-session filesystem/TCP scopes carried by `Environment`.
 
 use sens::{
-    eval_expr, exact_arity, register_capability, register_evaluated_capability, Environment,
+    eval_expr, exact_arity, parse_mixed_exact_domain, register_capability, register_evaluated_capability, Environment,
     ErrorKind, Exactness, Expr, LanguageError, Span, Value,
 };
 use std::{path::{Path, PathBuf}, rc::Rc};
@@ -613,7 +613,7 @@ fn evaluate_load(
             span,
         )
     })?;
-    let expressions = sens::parse(&source).map_err(|mut error| {
+    let expressions = sens::parse_mixed_exact_domain(&source).map_err(|mut error| {
         error.span = span;
         error
     })?;
