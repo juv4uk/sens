@@ -1339,8 +1339,8 @@
   ],
   "followup_queues": {
     "historical_core_review": "#4053",
-    "execution_seam_review": "#4054 / #4036",
-    "unresolved_scope": "#4055",
-    "island_bridge_factorization": "#4036"
+    "execution_seam_review": "#4054 / #4036 / #4094",
+    "unresolved_scope": "RESOLVED #4055 — vault-semantic-mcp classified PACKAGE-OR-DOMAIN",
+    "island_bridge_factorization": "#4094 / knowledge/d10-island-bridge-factorization-v1.json"
   }
 }
