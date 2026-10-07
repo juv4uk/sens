@@ -174,10 +174,10 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(LIST 00000101)\n")
 
-    def test_contract_authority_never_relabels_d8_as_padded_d3(self):
+    def test_contract_authority_preserves_exact_d8_word_without_zero_padding(self):
         converted, _, _ = self.contract_binary("(LIST 11111111)\n")
         words = converted.split()
-        self.assertIn("00000000", words)
+        self.assertIn("11111111", words)
         self.assertNotIn("0", words)
 
     def test_contract_authority_validator_rejects_unadmitted_binary_word(self):
