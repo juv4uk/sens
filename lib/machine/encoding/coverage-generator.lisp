@@ -47,13 +47,19 @@
 (def encoder-coverage-d1-no
   (тотожне? (quote encoder-coverage-yes) (quote encoder-coverage-no)))
 
+(def encoder-coverage-atom-same?
+  (lambda (left right)
+    (тотожне?
+      (write-to-string left)
+      (write-to-string right))))
+
 (def encoder-coverage-same?
   (lambda (left right)
     (cond
       ((атом? left)
        (cond
          ((атом? right)
-          (тотожне? left right))
+          (encoder-coverage-atom-same? left right))
          (encoder-coverage-d1-yes
           encoder-coverage-d1-no)))
       ((атом? right)
