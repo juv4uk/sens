@@ -21,6 +21,7 @@ on:
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
   push:
     branches: [main]
@@ -39,6 +40,7 @@ on:
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - "scripts/generate-encoder-coverage-input.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
 
 jobs:
@@ -61,6 +63,8 @@ jobs:
           cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
           cargo test -p sens --test i5_6400_machine_profile -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
+      - name: Derived machine coverage inputs
+        run: python3 scripts/generate-encoder-coverage-input.py --check
       - name: Existing x86 lowering boundary
         run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
       - name: Lisp-owned x86 encoder bytes
