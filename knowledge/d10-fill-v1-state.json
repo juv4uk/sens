@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 527,
-    "remaining_semantic_candidates": 497,
+    "selected_semantic_candidates": 540,
+    "remaining_semantic_candidates": 484,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 271,
+    "unplaced_selected_candidates": 284,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -276,6 +276,13 @@
     "authority": "#4182 / juv4uk/my-lisp-panini#52",
     "artifact": "knowledge/d10-crossrepo-panini-v1.json",
     "selected": 23,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "crossrepo_my_idea_v1": {
+    "authority": "#4182 / juv4uk/my-idea#80",
+    "artifact": "knowledge/d10-crossrepo-my-idea-v1.json",
+    "selected": 13,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
   }
