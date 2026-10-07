@@ -1,0 +1,66 @@
+{
+  "schema": "sens-domain-width-certificate/v1",
+  "status": "generated-projection-non-authoritative",
+  "source": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "schema": "d1-d9-foundation-ratification/v1",
+    "status": "owner-ratified",
+    "authority": "#4008",
+    "git_blob_sha1": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "current_domains": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "D8",
+    "D9"
+  ],
+  "domains": {
+    "D1": {
+      "width": 1,
+      "authority": "#1699"
+    },
+    "D2": {
+      "width": 2,
+      "authority": "#1702"
+    },
+    "D3": {
+      "width": 3,
+      "authority": "#3202"
+    },
+    "D4": {
+      "width": 4,
+      "authority": "#3272"
+    },
+    "D5": {
+      "width": 5,
+      "authority": "#3331 via #3305/#3330"
+    },
+    "D6": {
+      "width": 6,
+      "authority": "#3393"
+    },
+    "D7": {
+      "width": 7,
+      "authority": "#3572"
+    },
+    "D8": {
+      "width": 8,
+      "authority": "#3960"
+    },
+    "D9": {
+      "width": 9,
+      "authority": "#4008"
+    }
+  },
+  "verified": {
+    "binary_coordinate_lengths_match_declared_width": true,
+    "declared_capacities_match_power_of_two_width": true,
+    "declared_occupancies_match_resident_count": true
+  },
+  "law": "Widths are copied from current SENS authority. This generated projection cannot mint, infer, widen, narrow, or otherwise redefine a domain width."
+}
