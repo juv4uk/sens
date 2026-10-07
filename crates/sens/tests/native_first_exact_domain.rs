@@ -66,11 +66,7 @@ fn lowered_exact_domain_data_selects_native_car_cons_without_spelling_match() {
         "(native-first-domain-key3-shape? __native_first_shape 1 0 0)",
         &mut session,
     ).expect("key3 predicate witness").value;
-    let bits_pred = eval_program(
-        "(native-first-domain-key3-bits? (00000101 (00000110 (__native_first_shape __native_first_expr))) 1 0 0)",
-        &mut session,
-    ).expect("bits predicate witness").value;
-    eprintln!("native-first diagnostics: shape={shape:?} head={head:?} car_pred={car_pred:?} key3_pred={key3_pred:?} bits_pred={bits_pred:?}");
+    eprintln!("native-first diagnostics: shape={shape:?} head={head:?} car_pred={car_pred:?} key3_pred={key3_pred:?}");
     let actual = eval_program(
         "(native-first-plan-domain __native_first_shape __native_first_expr)",
         &mut session,
