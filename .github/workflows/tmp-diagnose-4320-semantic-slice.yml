@@ -1,0 +1,30 @@
+name: TEMP diagnose 4320 semantic slice
+on:
+  push:
+    branches:
+      - diag/4320-semantic-slice-529e
+    paths:
+      - ".github/workflows/tmp-diagnose-4320-semantic-slice.yml"
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run semantic slice with bounded failure output
+        shell: bash
+        run: |
+          set +e
+          bash scripts/test-current-semantic-slice.sh > /tmp/semantic-slice.log 2>&1
+          status=$?
+          echo "semantic-slice-status=$status"
+          if [ "$status" -ne 0 ]; then
+            echo "===== LAST 240 LINES ====="
+            tail -n 240 /tmp/semantic-slice.log
+            echo "===== FAILURE MARKERS ====="
+            grep -nE 'FAILED|failed|panicked|error:|witness failed|test result:' /tmp/semantic-slice.log | tail -n 120 || true
+          else
+            tail -n 80 /tmp/semantic-slice.log
+          fi
+          exit "$status"
