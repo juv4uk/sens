@@ -68,11 +68,16 @@ fn machine_evidence_cannot_mint_semantic_identity_or_peer_surfaces() {
 fn reverse_authority_edge_has_an_executable_negative_witness() {
     let guard = read("scripts/machine-authority-guard.lisp");
     let fixture = read("tests/fixtures/machine-authority/reverse-edge.lisp");
+    let legacy_sid = read("tests/fixtures/machine-authority/legacy-sid-witness.lisp");
     let workflow = read(".github/workflows/ci.yml");
 
     assert!(guard.contains("machine-authority-boundary-violation"));
     assert!(guard.contains("semantic-to-machine"));
+    assert!(guard.contains("exact-domain-expression"));
+    assert!(!guard.contains("(00000001 lisp-owned-expression)"));
     assert!(fixture.contains("(authority-edge machine semantic mint-semantic-id)"));
+    assert!(legacy_sid.contains("(lisp-owned-expression 00001100)"));
     assert!(workflow.contains("scripts/machine-authority-guard.lisp"));
     assert!(workflow.contains("tests/fixtures/machine-authority/reverse-edge.lisp"));
+    assert!(workflow.contains("tests/fixtures/machine-authority/legacy-sid-witness.lisp"));
 }
