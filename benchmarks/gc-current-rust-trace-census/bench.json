@@ -1,0 +1,18 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "gc-current-rust-trace-census",
+  "wing": "GC",
+  "roles": [
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "What trace-relevant child edges exist in the currently landed Rust representation?",
+  "claim": "Representation witness only: it fails on host-layout drift so GC work cannot assume an imagined heap; it is neither a collector nor semantic authority.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "REPRESENTATION-WITNESS",
+  "generation": "unknown",
+  "axis": "gc/current-rust-trace-census",
+  "reproduce": "python3 benchmarks/gc-current-rust-trace-census/run.py"
+}
