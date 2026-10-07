@@ -1,0 +1,32 @@
+name: D10 Clojure reference review
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-crossrepo-clojure-reference-v1.json"
+      - "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      - "scripts/check-d10-crossrepo-clojure-reference-v1.py"
+      - "scripts/check-d10-owner-repo-donor-matrix-v2.py"
+      - ".github/workflows/d10-crossrepo-clojure-reference-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-crossrepo-clojure-reference-v1.json"
+      - "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      - "scripts/check-d10-crossrepo-clojure-reference-v1.py"
+      - "scripts/check-d10-owner-repo-donor-matrix-v2.py"
+      - ".github/workflows/d10-crossrepo-clojure-reference-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  review:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify Clojure reference-only review
+        run: python3 scripts/check-d10-crossrepo-clojure-reference-v1.py
+      - name: Verify all-repo donor matrix
+        run: python3 scripts/check-d10-owner-repo-donor-matrix-v2.py
