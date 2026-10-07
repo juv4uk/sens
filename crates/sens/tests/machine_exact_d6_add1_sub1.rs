@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_program, load_core_library, Bit6, CoreD6, DomainIdentity, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -57,6 +57,37 @@ fn exact_d6_add1_sub1_have_width_safe_machine_capabilities() {
             "()",
             "{form} must not inherit D6 machine meaning"
         );
+    }
+}
+
+
+#[test]
+fn admitted_d6_domain_identity_drives_machine_key_without_source_width_recovery() {
+    let mut session = machine_session();
+
+    for (bits, input, expected) in [
+        (0b001110, 41u64, "(72 184 41 0 0 0 0 0 0 0 72 185 1 0 0 0 0 0 0 0 72 1 200 195)"),
+        (0b001111, 41u64, "(72 184 41 0 0 0 0 0 0 0 72 185 1 0 0 0 0 0 0 0 72 41 200 195)"),
+    ] {
+        let identity = DomainIdentity::D6(CoreD6::from_word(
+            Bit6::new(bits).expect("D6 identity bits"),
+        ));
+        assert!(
+            identity.core_operation().is_some(),
+            "D6:{bits:06b} must be admitted before machine dispatch"
+        );
+
+        let form = format!(
+            "(x86-encode-current-d6-unary-u64 {} {} {})",
+            identity.width(),
+            identity.packed_bits(),
+            input
+        );
+        let bytes = eval_program(&form, &mut session)
+            .unwrap_or_else(|error| panic!("exact DomainIdentity machine route failed: {error}"))
+            .value
+            .to_string();
+        assert_eq!(bytes, expected, "D6:{bits:06b}");
     }
 }
 
