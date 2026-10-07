@@ -1,0 +1,33 @@
+name: diag-4320-semantic-matrix
+
+on:
+  push:
+    branches:
+      - diag/4320-semantic-matrix
+
+jobs:
+  rust:
+    name: rust-${{ matrix.test }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        test: ["d1_canonical_source_value", "witness_authority", "structural_observation_contract", "exact_q_binary_contract", "mathematical_result_taxonomy", "canon_laws_v2_contract", "reason_honesty_contract", "unification_outcome_contract", "knowledge_clause_kind_contract", "content_store_authority", "decimal_comma_authority", "authority_guard_contract", "semantic_ref_fail_closed", "semantic_coordinate_matrix_845"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test -p sens --test ${{ matrix.test }} -- --nocapture
+
+  fixture:
+    name: fixture-${{ matrix.fixture }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        fixture: ["exact-quantity-arithmetic-witness.lisp", "meta-eval-empty-program-witness.lisp", "meta-semantic-registry-witness.lisp", "process-load-witness.lisp", "narrate-outcome-authority-witness.lisp", "persistent-vector-balance-witness.lisp", "reason-index-authority-witness.lisp", "explicit-negative-reason-observe-witness.lisp", "x86-64-instruction-set-witness.lisp", "machine-register-width-witness.lisp", "machine-current-gpr-atoms-witness.lisp", "native-first-totality-witness.lisp", "native-first-execution-witness.lisp", "native-first-parity-witness.lisp", "native-first-coverage-ledger-witness.lisp", "scientific-constant-knowledge-projection-witness.lisp", "mechanism-selector-1047-witness.lisp", "island-lowering-1048-witness.lisp", "translation-symbol-boundary-witness.lisp"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/${{ matrix.fixture }}
