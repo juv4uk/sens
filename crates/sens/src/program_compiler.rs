@@ -148,9 +148,14 @@ fn traverse_program_operations(
                 // Infer the required mechanism from exact-domain identity only.
                 // Human surface names are presentation data and must not become
                 // compiler mechanism keys.
-                if let Some(domain_identity) =
-                    admitted_mechanism_identity(id.width(), id.packed_bits())
-                {
+                if id.width() <= 8 {
+                    // Mechanism admission remains a bounded callable projection.
+                    // W9 is representable identity, but D9 callability stays
+                    // fail-closed and must never truncate into this u8 lane.
+                    if let Ok(packed_bits) = u8::try_from(id.packed_bits()) {
+                        if let Some(domain_identity) =
+                            admitted_mechanism_identity(id.width(), packed_bits)
+                        {
                     let mech = crate::compilation_artifact::MechanismRequirement {
                         name: format!("domain-call:{domain_identity}"),
                         domain_identity,
@@ -159,6 +164,8 @@ fn traverse_program_operations(
                     };
                     if !mechanisms.iter().any(|m| m.name == mech.name) {
                         mechanisms.push(mech);
+                    }
+                        }
                     }
                 }
 
