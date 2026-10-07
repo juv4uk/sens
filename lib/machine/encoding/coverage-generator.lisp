@@ -39,19 +39,24 @@
 
 ; Coverage authority uses exact D1 PredicateBit for every control decision.
 ; equal? is the historical deep structural comparator and returns a one-element
-; structural (1)/(0) answer carrier. Normalize only its ordinary Number payload
-; through current exact-D5 predicates. The Ukrainian D5 surfaces are the
-; source-routable names for 01000 ZEROP and 11011 GREATERP, and both cross the
-; language boundary only as exact D1.
+; structural (1)/(0) answer carrier. Ordinary Number comparison is NOT a D1
+; boundary: current exact-Q comparison deliberately returns mathematical 1/0.
+; Therefore normalize the extracted bit explicitly to BinaryNumber first.
+; comparison_on_values has a dedicated BinaryNumber path whose result is exact
+; D1, so this remains carrier-explicit even if the callable mechanism is still
+; compatibility-routed during bootstrap.
 (def encoder-coverage-d1-yes
-  (нуль? 0))
+  (більше? #b1 #b0))
 
 (def encoder-coverage-d1-no
-  (нуль? 1))
+  (більше? #b0 #b1))
 
 (def encoder-coverage-same?
   (lambda (left right)
-    (більше? (car (equal? left right)) 0)))
+    (більше?
+      (encoder-coverage-count-as-binary
+        (car (equal? left right)))
+      #b0)))
 
 ; Traversal needs structural EMPTY, not the broader ATOM classification.
 ; This preserves the D1:0 != D3:000 distinction and avoids using ATOM as NIL.
