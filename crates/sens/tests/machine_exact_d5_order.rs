@@ -145,19 +145,19 @@ fn exact_d5_order_predicates_cross_the_language_boundary_only_as_d1() {
 fn bounded_order_predicates_reach_admitted_internal_bit_bytes() {
     let mut session = machine_session();
 
-    for (identity, capability) in [
+    for (packed_bits, capability) in [
         (
-            "11010",
+            26,
             "((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary))",
         ),
         (
-            "11011",
+            27,
             "((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary))",
         ),
     ] {
         assert_eq!(
             eval_program(
-                &format!("(machine-capabilities-for-domain {identity})"),
+                &format!("(machine-capabilities-for-domain 5 {packed_bits})"),
                 &mut session,
             )
             .expect("order capability")
@@ -246,7 +246,7 @@ fn order_native_slice_fails_closed_outside_first_proved_integer_rectangle() {
 
     assert_eq!(
         eval_program(
-            "(x86-encode-current-order-bit 101 2 3)",
+            "(x86-encode-current-order-bit 3 5 2 3)",
             &mut session,
         )
         .expect("wrong exact identity fails closed")
@@ -286,8 +286,8 @@ fn order_machine_proof_does_not_publish_a_numeric_boolean_language_api() {
     let profile =
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current profile");
-    assert!(profile.contains("(11010 proof \"CMP+SETL+MOVZX / internal bit; D1 boundary\")"));
-    assert!(profile.contains("(11011 proof \"CMP+SETG+MOVZX / internal bit; D1 boundary\")"));
+    assert!(profile.contains("(5 26 proof \"CMP+SETL+MOVZX / internal bit; D1 boundary\")"));
+    assert!(profile.contains("(5 27 proof \"CMP+SETG+MOVZX / internal bit; D1 boundary\")"));
     assert!(!profile.contains("00011010 direct"));
     assert!(!profile.contains("00011011 direct"));
 }
