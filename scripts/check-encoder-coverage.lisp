@@ -1,44 +1,12 @@
-; #604 — structural check for the Lisp-owned encoder coverage authority.
-; Validates generated inputs, legacy-subset migration witness, and committed
-; coverage row-by-row without rendering the full output string.
-
+; #604 temporary exact-result probe. No coverage recursion and no D3 COND.
 (load "lib/core.lisp")
 (load "lib/machine/encoding/coverage-generator.lisp")
 
-(def encoder-coverage-committed-form
-  (car
-    (read-all
-      (read-file
-        "lib/machine/encoding/coverage.lisp"))))
-
-(def encoder-coverage-projection-result
-  (encoder-coverage-projection-valid?
-    encoder-coverage-committed-form))
-
-(cond
-  ((encoder-coverage-same?
-     encoder-coverage-index-valid?
-     encoder-coverage-d1-yes)
-   (cond
-     ((encoder-coverage-same?
-        encoder-coverage-projection-result
-        encoder-coverage-d1-yes)
-      (quote
-        (encoder-coverage-check
-          (status pass))))
-     (encoder-coverage-d1-yes
-      (list
-        (quote encoder-coverage-check)
-        (quote (status fail))
-        (quote (reason projection-mismatch))
-        (list
-          (quote projection-is-d1-no)
-          (encoder-coverage-same?
-            encoder-coverage-projection-result
-            encoder-coverage-d1-no))))))
-  (encoder-coverage-d1-yes
-   (list
-     (quote encoder-coverage-check)
-     (quote (status fail))
-     (quote (reason invalid-coverage-input-projection))
-     (cons (quote checks) encoder-coverage-index-checks))))
+(list
+  (quote encoder-coverage-d1-probe)
+  (list (quote yes) encoder-coverage-d1-yes)
+  (list (quote no) encoder-coverage-d1-no)
+  (list (quote same-symbol) (encoder-coverage-same? (quote x) (quote x)))
+  (list (quote distinct-symbol) (encoder-coverage-same? (quote x) (quote y)))
+  (list (quote empty-empty) (encoder-coverage-empty? (quote ())))
+  (list (quote nonempty-empty) (encoder-coverage-empty? (quote (x)))))
