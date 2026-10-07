@@ -102,7 +102,7 @@ fn equal_payloads_in_other_domains_do_not_gain_selfhost_roles() {
 
 #[test]
 fn established_three_role_execution_api_remains_compatibility_stable() {
-    let parsed = parse(NUCLEUS).expect("current compiler nucleus parses");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus parses");
     let lowered = lower_program(&parsed);
 
     let mut saw_old_role = false;
