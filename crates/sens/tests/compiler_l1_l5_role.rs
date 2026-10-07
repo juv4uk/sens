@@ -148,7 +148,8 @@ fn session() -> Session {
         .environment
         .define(MECHANISM_NAME, domain_identity_shape_mechanism());
     session.environment.define(LAW_NAME, law_value());
-    eval_program(NUCLEUS, &mut session).expect("compiler nucleus loads");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("canonical compiler nucleus parses");
+    eval_parsed_expressions(&parsed, &mut session).expect("compiler nucleus loads");
     session
 }
 
