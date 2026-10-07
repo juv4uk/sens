@@ -1,0 +1,70 @@
+name: Contract 11.8 carrier replay
+
+# Fresh workflow identity for #4136. Benchmark semantics are owned by #4129/#4132.
+# Current semantic authority is D1-D9; current main materializes W1-W8 only.
+# D9 remains explicit BLOCKED-CARRIER until #4038/#4044 lands.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/contract-11-8-carrier-bench.yml"
+      - ".github/workflows/sens-bench.yml"
+      - "crates/sens/src/bits.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/examples/domain12345678_bench.rs"
+      - "benchmarks/domain12345678/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/contract-11-8-carrier-bench.yml"
+      - ".github/workflows/sens-bench.yml"
+      - "crates/sens/src/bits.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/examples/domain12345678_bench.rs"
+      - "benchmarks/domain12345678/**"
+
+concurrency:
+  group: contract-11-8-carrier-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: contract-11-8-carrier
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+          rustc --version
+
+      - name: Build current carrier benchmark
+        run: cargo build --release -p sens --example domain12345678_bench
+
+      - name: Measure Contract 11.8 current carrier/runtime
+        run: |
+          rm -rf /tmp/domain12345678
+          python3 benchmarks/domain12345678/run.py \
+            --binary target/release/examples/domain12345678_bench \
+            --out-dir /tmp/domain12345678 \
+            --iterations 200000 \
+            --reps 3
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: contract-11-8-carrier-cachegrind
+          path: /tmp/domain12345678
+          retention-days: 7
