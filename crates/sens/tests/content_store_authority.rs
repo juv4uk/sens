@@ -26,25 +26,14 @@ fn core4_bootstrap_binds_let_macro_to_exact_d6_slot() {
         matches!(let_value, sens::Value::Macro(_)),
         "let must remain a Lisp-owned macro, got {let_value:?}"
     );
-    let identity = sens::CoreDomainIdentity::D6(
-        sens::CoreD6::from_word(sens::Bit6::new(0b001000).expect("D6 LET"))
-    );
-    let slot = session
-        .environment
-        .domain_code_slot_for_test(identity)
-        .expect("D6 LET exact slot must be populated");
-    assert!(
-        matches!(slot, sens::Value::Macro(_)),
-        "D6 LET slot must contain the macro, got {slot:?}"
-    );
+
+    let forms = sens::parse_mixed_exact_domain("(001000 ((x 41)) x)")
+        .expect("exact D6 LET source must parse");
+    let result = sens::eval_parsed_expressions(&forms, &mut session)
+        .expect("exact D6 LET must execute through its Lisp-owned macro slot");
+    assert_eq!(result.value, sens::Value::Number(41.0, sens::Exactness::Exact));
 }
 
-fn observe(session: &mut Session, source: &str) -> String {
-    eval_program(source, session)
-        .expect("content-store observation must execute")
-        .value
-        .to_string()
-}
 
 #[test]
 fn content_store_semantic_relations_are_owned_by_lisp_witness() {
