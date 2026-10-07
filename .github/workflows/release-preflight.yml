@@ -6,6 +6,11 @@ on:
       - "Cargo.lock"
       - "Cargo.toml"
       - "crates/**/Cargo.toml"
+      - "guix.scm"
+      - "packaging/install.sh"
+      - "packaging/windows/sens.wxs"
+      - "packaging/islands-manifest-v1.json"
+      - "scripts/release.lisp"
       - ".github/workflows/release.yml"
       - ".github/workflows/release-preflight.yml"
   workflow_dispatch:
@@ -16,14 +21,12 @@ concurrency:
 
 jobs:
   release-preflight:
-    # Той самий focused набір, що тег-гейт `test` у `release.yml`: тег-час
-    # гарантує ці чеки серверно, тут вони ловлять проблему ще в PR. Повний
-    # `cargo test --workspace` + `clippy --workspace` належить `full-nightly`,
-    # не PR-гейту випуску: релізний скрипт тепер вимагає саме зелений CI на
-    # злитому SHA, а не локальний повний прогон.
-    name: focused release preflight
+    # #975 / #4196: this lane intentionally matches the exact l0.42.0
+    # candidate gate. It is release-preparation evidence, not the ordinary
+    # fast PR lane.
+    name: exact workspace release preflight
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -33,23 +36,8 @@ jobs:
         with:
           shared-key: release-preflight
 
-      - name: Версійна паритетність релізних crates
-        run: cargo test --locked -p sens-lsp --test release_parity
+      - name: Full workspace tests
+        run: cargo test --workspace
 
-      - name: Ізольовані перевірки інсталятора
-        run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
-
-      - name: translation boundary regression
-        run: cargo test --locked -p sens --test translation_boundary
-
-      - name: Ukrainian/Sanskrit surface regression
-        run: cargo test --locked -p sens --test uk_sa_surface
-
-      - name: island installer CLI
-        run: cargo test --locked -p sens-cli --test islands_cli
-
-      - name: release asset contract
-        run: cargo test --locked -p sens-cli --test islands_release_asset
-
-      - name: focused release clippy
-        run: cargo clippy -p sens -p sens-cli --all-targets -- -D warnings
+      - name: Full workspace clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
