@@ -160,7 +160,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         converted, hits, _ = self.contract_binary('(LIST "101")\n')
         self.assertTrue(converted.startswith("10 1110 00 "), converted)
         self.assertNotIn("101", converted.split())
-        self.assertRegex(converted, r"^[01\\s]+$")
+        self.assertRegex(converted, r"^[01\s]+$")
         self.assertEqual([hit.label for hit in hits], ["LIST"])
 
     def test_contract_authority_rejects_noncanonical_d2_data_word(self):
