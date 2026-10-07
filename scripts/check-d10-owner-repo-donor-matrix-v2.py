@@ -44,6 +44,12 @@ for name in (
 ):
     assert by[name]["primary_class"]=="BACKEND-OR-MECHANISM"
     assert by[name]["d10_action"]=="REVIEW-SEAM-ONLY"
+    assert by[name]["deep_review_status"]=="SEAM-REVIEW-COMPLETE"
+    assert by[name]["candidate_issue"] is None
+
+assert m["followup_queues"]["historical_core_review"]=="COMPLETE #4053"
+assert m["followup_queues"]["execution_seam_review"]=="COMPLETE #4054 / #4094"
+assert m["followup_queues"]["island_bridge_factorization"]=="COMPLETE #4036 / #4094"
 
 # Domain/tooling repos with explicit authority boundaries.
 for name in ("panca-vac","my-lisp-panini","my-idea","ecosystem","ecosystem-observer","spanda","tauricode","wsm","WSM-24","pravda"):
