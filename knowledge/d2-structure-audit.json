@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "authority": "#4157",
+  "version": 2,
+  "authority": "#4157 / #4160",
   "invariant": "D2 alone owns canonical language source/structural control",
   "d2": {
     "10": "open",
@@ -9,16 +9,18 @@
     "01": "close"
   },
   "active_paths": [
-    "README.md",
-    "language-contract.lisp",
     "lib/domains/d2.lisp",
+    "language-contract.lisp",
     "crates/sens/src/canonical_reader.rs",
     "crates/sens/src/source_words.rs",
+    "crates/sens/src/source_packing.rs",
     "scripts/migrate-three-pass.py",
     "scripts/translate-domain-program.py",
     "crates/sens/src/binary_framing.rs",
+    "crates/sens/tests/text7_canonical_wire.rs",
     "knowledge/structure-not-ontology-inventory.lisp",
-    "crates/sens/tests/text7_canonical_wire.rs"
+    "crates/sens/src/compiler_bootstrap.rs",
+    "crates/sens/src/gpu_execution_packet.rs"
   ],
   "transport_rule": "private framing metadata is not D2 semantic identity",
   "forbidden_active_claims": [
@@ -26,5 +28,90 @@
     "canonical Control2",
     "(dot . human-reader-only)",
     "Control2/FASL"
+  ],
+  "summary": {
+    "pass": 12,
+    "debt": 0,
+    "rule": "research/provenance material may retain historical Control2 terminology only when it is explicitly non-authoritative"
+  },
+  "path_audit": [
+    {
+      "path": "lib/domains/d2.lisp",
+      "role": "semantic owner table",
+      "status": "PASS",
+      "evidence": "exact 00 separator / 01 close / 10 open / 11 dot"
+    },
+    {
+      "path": "language-contract.lisp",
+      "role": "current constitution",
+      "status": "PASS",
+      "evidence": "D2 sole canonical source/structural-control owner"
+    },
+    {
+      "path": "crates/sens/src/canonical_reader.rs",
+      "role": "canonical reader",
+      "status": "PASS",
+      "evidence": "W2 consumed structurally before W3+ DomainIdentity lifting"
+    },
+    {
+      "path": "crates/sens/src/source_words.rs",
+      "role": "exact-width carrier",
+      "status": "PASS",
+      "evidence": "W2 lifts to Racana2; structural roles remain language-owned"
+    },
+    {
+      "path": "crates/sens/src/source_packing.rs",
+      "role": "dense pack/unpack",
+      "status": "PASS",
+      "evidence": "no semantic roles/framing; exact widths are caller-owned boundary information"
+    },
+    {
+      "path": "scripts/migrate-three-pass.py",
+      "role": "source migration encoder",
+      "status": "PASS",
+      "evidence": "W2 rejected as data/call head and emitted only as structure"
+    },
+    {
+      "path": "scripts/translate-domain-program.py",
+      "role": "surface translator",
+      "status": "PASS",
+      "evidence": "D2 labels are documentation only, never token rewrites"
+    },
+    {
+      "path": "crates/sens/src/binary_framing.rs",
+      "role": "standalone transport mechanism",
+      "status": "PASS",
+      "evidence": "private WIRE tags; D2:11 exact DomainIdentity non-alias witness"
+    },
+    {
+      "path": "crates/sens/tests/text7_canonical_wire.rs",
+      "role": "transport witness",
+      "status": "PASS",
+      "evidence": "no Control2/FASL semantic-authority claim"
+    },
+    {
+      "path": "knowledge/structure-not-ontology-inventory.lisp",
+      "role": "active structure inventory",
+      "status": "PASS",
+      "evidence": "D2 composition and dot=d2-11"
+    },
+    {
+      "path": "crates/sens/src/compiler_bootstrap.rs",
+      "role": "compiler evidence carrier",
+      "status": "PASS",
+      "evidence": "width-qualified W2 reconstruction only; no source delimiter ownership"
+    },
+    {
+      "path": "crates/sens/src/gpu_execution_packet.rs",
+      "role": "backend packet carrier",
+      "status": "PASS",
+      "evidence": "width-qualified W2 reconstruction only; backend packet does not define source grammar"
+    }
+  ],
+  "debt": [],
+  "research_provenance": [
+    "docs/research/1962-framing-separation.md",
+    "docs/research/1962-framing-run.txt",
+    "scripts/research-1962-framing-cost.py"
   ]
 }
