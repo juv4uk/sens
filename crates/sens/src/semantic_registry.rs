@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, DomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -38,14 +38,15 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
         3 => Some(CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(bits)?))),
         4 => Some(CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(bits)?))),
         5 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(bits)?))),
+        6 => Some(CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(bits)?))),
         _ => None,
     }
 }
 
-/// Direct D3/D4/D5 human-surface projection.
+/// Direct D3/D4/D5/D6 human-surface projection.
 ///
 /// This path consumes the exact-domain projection generated from
-/// lib/domains/d1.lisp ... lib/domains/d5.lisp. The source-routable human
+/// lib/domains/d1.lisp ... lib/domains/d6.lisp. The source-routable human
 /// namespaces are generated from those rows; this lookup never consults a
 /// historical packed byte to recover domain identity.
 fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
@@ -119,7 +120,7 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 }
 /// Current staged surface lookup.
 ///
-/// Generated human D3/D4/D5 spellings resolve directly through the exact-domain
+/// Generated human D3/D4/D5/D6 spellings resolve directly through the exact-domain
 /// projection. The byte-backed lookup remains only as a bounded
 /// compatibility fallback for still-unmigrated spellings.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
@@ -347,6 +348,8 @@ mod tests {
             ("lambda", 4, 0b0010),
             ("saṅkalana", 4, 0b1111),
             ("plus", 5, 0b01010),
+            ("length", 6, 0b000000),
+            ("нехай", 6, 0b001000),
         ] {
             let identity = direct_domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("exact-domain surface must resolve directly: {surface}"));
