@@ -1,0 +1,531 @@
+{
+  "schema": "d10-crossrepo-golisp-pascal-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4077",
+  "date": "2026-10-07",
+  "parent": "#4053",
+  "foundation": "#4008 / Contract 11.8 / D1-D9",
+  "donors": [
+    {
+      "repository": "juv4uk/golisp",
+      "head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "review_status": "EXHAUSTED-FOR-PORTABLE-CORE-SLICE"
+    },
+    {
+      "repository": "juv4uk/pascal-lisp",
+      "head": "2679615f70498a1d463fc3379097d61f145d53f0",
+      "review_status": "EXHAUSTED-FOR-PORTABLE-CORE-SLICE"
+    }
+  ],
+  "coordinate_policy": "No donor coordinate, Go channel identity, OS file descriptor, goroutine identity, Pascal object address or process identity has D10 placement authority.",
+  "accounting": {
+    "donors_reviewed": 2,
+    "selected_d10_candidates": 22,
+    "d10_selected_before": 398,
+    "d10_selected_after": 420,
+    "d10_remaining_after": 604,
+    "ratified_d10_residents": 0
+  },
+  "explicit_nonselection": [
+    {
+      "source_name": "expand",
+      "reason": "projection to current macro-expansion family"
+    },
+    {
+      "source_name": "add-global",
+      "reason": "binding-installation mechanism over current DEFINE/SET family"
+    },
+    {
+      "source_name": "add-syntax",
+      "reason": "syntax/macro registration mechanism over current macro-definition semantics"
+    },
+    {
+      "source_name": "call-with-exception",
+      "reason": "higher-order packaging over current handler/case semantics"
+    },
+    {
+      "source_name": "start-process",
+      "reason": "host process mechanism"
+    },
+    {
+      "source_name": "go",
+      "reason": "host scheduler/goroutine mechanism in this donor, not D5 GO semantics"
+    },
+    {
+      "source_name": "open-file",
+      "reason": "projection to current OPEN stream family"
+    },
+    {
+      "source_name": "close",
+      "reason": "projection to current CLOSE stream family"
+    },
+    {
+      "source_name": "load",
+      "reason": "host/module loading boundary"
+    }
+  ],
+  "rows": [
+    {
+      "stable_id": "d10.crossrepo.portable.3ce9ccba86133181",
+      "semantic_name": "NULL-ENVIRONMENT",
+      "behavior": "construct an empty lexical environment value with no parent bindings",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "null-environment",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "ENVIRONMENT-VALUE-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0818540bbb725701",
+      "semantic_name": "CAPTURE-ENVIRONMENT",
+      "behavior": "construct a new environment value whose parent is the supplied environment, preserving that binding context as an explicit language value",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "capture-environment",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "ENVIRONMENT-VALUE-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.67589d8479d4fb82",
+      "semantic_name": "DEFINE-CUSTOM-TYPE",
+      "behavior": "define a named custom wrapper protocol that exposes constructor, accessor and mutation operations for values of the new type",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "define-type",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "CUSTOM-TYPE-CONSTRUCTION",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0a9e280f95dd5d31",
+      "semantic_name": "FIXNUM->FLONUM",
+      "behavior": "convert an exact fixnum to a floating numeric value while leaving an already floating value unchanged",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "fixnum->flonum",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "NUMERIC-CONVERSION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.85258dd87cc637d5",
+      "semantic_name": "MODULO",
+      "behavior": "return the modulus whose nonzero result has the divisor's sign, adjusting the raw remainder when operand signs differ",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "modulo",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "ARITHMETIC-SIGN-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.e9c5e4e05dd5691c",
+      "semantic_name": "STRING-SPLIT",
+      "behavior": "split a string by a separator string into an ordered list of substrings",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "string-split",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "STRING-SEQUENCE-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.6890a34598686969",
+      "semantic_name": "STRING-JOIN",
+      "behavior": "join an ordered list of strings using a separator string",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "string-join",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "STRING-SEQUENCE-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.98d243fba8537473",
+      "semantic_name": "STRING->VECTOR",
+      "behavior": "convert a string to a vector of character/rune values preserving order",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "string->vector",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.74c97450ed90f255",
+      "semantic_name": "LIST->VECTOR",
+      "behavior": "convert a proper list to a vector preserving element order",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "list->vector",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.c9c19f2cbb116818",
+      "semantic_name": "VECTOR-SLICE",
+      "behavior": "return the half-open vector slice selected by lower and upper indices",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "vector-slice",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "VECTOR-SEQUENCE-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.66ee8572b7f5ca2b",
+      "semantic_name": "VECTOR->LIST",
+      "behavior": "convert a vector to a proper list preserving element order",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "vector->list",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.80421dbd5105fc9d",
+      "semantic_name": "VECTOR->STRING",
+      "behavior": "convert a vector of character/rune values to a string preserving order",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "vector->string",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.b5af0a7c928c4f4f",
+      "semantic_name": "READ-CHAR",
+      "behavior": "read one character value from an abstract input port",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "read-char",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "PORT-IO-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.f43f640178fb2bb8",
+      "semantic_name": "READ-BYTE",
+      "behavior": "read one byte value from an abstract input port",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "read-byte",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "PORT-IO-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.2982bc0cfd701ac8",
+      "semantic_name": "EOF-OBJECT?",
+      "behavior": "test whether a value is the distinguished end-of-input object",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "eof-object?",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "PORT-IO-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.e6b54318e4ed5eb1",
+      "semantic_name": "WRITE-STRING",
+      "behavior": "write a string value to an abstract output port",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "write-string",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "PORT-IO-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.fbdaffd8cdf97d55",
+      "semantic_name": "WRITE-BYTE",
+      "behavior": "write one byte value to an abstract output port",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "write-byte",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "PORT-IO-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.973740e9c6dde448",
+      "semantic_name": "FLUSH",
+      "behavior": "request that buffered output on an abstract output port become externally committed",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "flush",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "PORT-IO-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0e0677665249b8f9",
+      "semantic_name": "MAKE-CHANNEL",
+      "behavior": "construct an abstract communication channel value",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "make-channel",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "CHANNEL-COMMUNICATION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.4542c71c3a466ab4",
+      "semantic_name": "CHANNEL-SEND",
+      "behavior": "send one language value through an abstract channel according to its synchronization law",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "channel-send",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "CHANNEL-COMMUNICATION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.c33147d6a05ec2d0",
+      "semantic_name": "CHANNEL-RECEIVE",
+      "behavior": "receive one language value from an abstract channel according to its synchronization law",
+      "donor_repo": "juv4uk/golisp",
+      "source_file": "lisp/primitives.go",
+      "source_name": "channel-receive",
+      "donor_head": "820a36ef45c3492e9d607b8f4e232222759014b3",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "relation_class": "CHANNEL-COMMUNICATION-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.50799e42b2372493",
+      "semantic_name": "CALL-WITH-VALUES",
+      "behavior": "call a zero-argument producer and pass all values it returns as arguments to a consumer, treating a single ordinary result as one value",
+      "donor_repo": "juv4uk/pascal-lisp",
+      "source_file": "lispprimitives.pas",
+      "source_name": "call-with-values",
+      "donor_head": "2679615f70498a1d463fc3379097d61f145d53f0",
+      "provenance": [
+        "#4077",
+        "juv4uk/pascal-lisp",
+        "lispprimitives.pas"
+      ],
+      "relation_class": "MULTIPLE-VALUE-ALGEBRA",
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "implementation_identity_authority": "NONE",
+      "ratified_resident": false
+    }
+  ]
+}
