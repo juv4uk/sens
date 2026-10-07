@@ -82,6 +82,7 @@ fn current_i5_6400_profile_uses_exact_domain_keys_for_migrated_cpu_slice() {
     assert!(current.contains("Keys are exact domain literals"));
 
     for (exact_key, expected_machine_path) in [
+        ("01000", "CMP+SETE+MOVZX"), // D5 ZEROP
         ("01010", "ADD"),       // D5 PLUS
         ("01011", "SUB"),       // D5 DIFFERENCE
         ("10110", "IMUL"),      // D5 TIMES
