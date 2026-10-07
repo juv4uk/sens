@@ -80,8 +80,12 @@ fn explicit_nonsemantic_lisp_evidence(text: &str) -> bool {
         || header.contains("не language-contract")
 }
 
+fn is_workspace_rust_test(rel: &str) -> bool {
+    rel.starts_with("crates/") && rel.contains("/tests/") && rel.ends_with(".rs")
+}
+
 fn rust_test_is_semantic_authority(rel: &str) -> bool {
-    if !rel.starts_with("crates/sens/tests/") || !rel.ends_with(".rs") {
+    if !is_workspace_rust_test(rel) {
         return false;
     }
     let inventory = fs::read_to_string(repo_root().join("tests/authority-inventory.tsv"))
@@ -97,10 +101,7 @@ fn rust_test_is_semantic_authority(rel: &str) -> bool {
 }
 
 fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static str {
-    if rel.starts_with("crates/sens/tests/")
-        && rel.ends_with(".rs")
-        && !rust_test_is_semantic_authority(rel)
-    {
+    if is_workspace_rust_test(rel) && !rust_test_is_semantic_authority(rel) {
         return "rust-test-instrument";
     }
     if !rel.ends_with(".rs") && explicit_nonsemantic_lisp_evidence(text) {
@@ -459,6 +460,11 @@ fn scanners_find_names_in_lisp_and_rust() {
     assert_eq!(
         classified_kind("crates/sens/tests/numeric_wire.rs", "", "rust-lisp"),
         "rust-test-instrument"
+    );
+    assert_eq!(
+        classified_kind("crates/sens-host/tests/native_lisp_bytes.rs", "", "rust-lisp"),
+        "rust-test-instrument",
+        "workspace integration tests are instrumentation unless authority inventory says otherwise"
     );
     assert_eq!(
         classified_kind("crates/sens/tests/mccarthy.rs", "", "rust-lisp"),
