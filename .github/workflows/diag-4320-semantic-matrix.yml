@@ -26,8 +26,52 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        fixture: ["exact-quantity-arithmetic-witness.lisp", "meta-eval-empty-program-witness.lisp", "meta-semantic-registry-witness.lisp", "process-load-witness.lisp", "narrate-outcome-authority-witness.lisp", "persistent-vector-balance-witness.lisp", "reason-index-authority-witness.lisp", "explicit-negative-reason-observe-witness.lisp", "x86-64-instruction-set-witness.lisp", "machine-register-width-witness.lisp", "machine-current-gpr-atoms-witness.lisp", "native-first-totality-witness.lisp", "native-first-execution-witness.lisp", "native-first-parity-witness.lisp", "native-first-coverage-ledger-witness.lisp", "scientific-constant-knowledge-projection-witness.lisp", "mechanism-selector-1047-witness.lisp", "island-lowering-1048-witness.lisp", "translation-symbol-boundary-witness.lisp"]
+        include:
+          - fixture: "tests/fixtures/exact-quantity-arithmetic-witness.lisp"
+            expected: "(exact-quantity-arithmetic-witness (status pass))"
+          - fixture: "tests/fixtures/meta-eval-empty-program-witness.lisp"
+            expected: "(meta-eval-empty-program-witness (status pass))"
+          - fixture: "tests/fixtures/meta-semantic-registry-witness.lisp"
+            expected: "(meta-semantic-registry-witness (status pass))"
+          - fixture: "tests/fixtures/process-load-witness.lisp"
+            expected: "(process-load-witness (status pass))"
+          - fixture: "tests/fixtures/narrate-outcome-authority-witness.lisp"
+            expected: "(narrate-outcome-authority-witness (status pass))"
+          - fixture: "tests/fixtures/persistent-vector-balance-witness.lisp"
+            expected: "(persistent-vector-balance-witness (status pass))"
+          - fixture: "tests/fixtures/reason-index-authority-witness.lisp"
+            expected: "(reason-index-authority-witness (status pass) (laws indexed-linear-parity immutable-prepared-snapshot recursion-negation-parity))"
+          - fixture: "tests/fixtures/explicit-negative-reason-observe-witness.lisp"
+            expected: "(explicit-negative-reason-observe-witness (status pass))"
+          - fixture: "tests/fixtures/x86-64-instruction-set-witness.lisp"
+            expected: "(x86-64-instruction-set-witness (status pass))"
+          - fixture: "tests/fixtures/machine-register-width-witness.lisp"
+            expected: "(machine-register-width-witness (status pass))"
+          - fixture: "tests/fixtures/machine-current-gpr-atoms-witness.lisp"
+            expected: "(machine-current-gpr-atoms-witness (status pass))"
+          - fixture: "tests/fixtures/native-first-totality-witness.lisp"
+            expected: "(pass pass)"
+          - fixture: "tests/fixtures/native-first-execution-witness.lisp"
+            expected: "(pass pass pass pass pass)"
+          - fixture: "tests/fixtures/native-first-parity-witness.lisp"
+            expected: "(native-first-parity-witness (status pass) (cases 4))"
+          - fixture: "tests/fixtures/native-first-coverage-ledger-witness.lisp"
+            expected: "(native-first-coverage-ledger-witness (status pass) (rows 6) (native 1) (fallback 2) (blocked 3))"
+          - fixture: "tests/fixtures/scientific-constant-knowledge-projection-witness.lisp"
+            expected: "(scientific-constant-knowledge-projection-witness (status pass))"
+          - fixture: "tests/fixtures/mechanism-selector-1047-witness.lisp"
+            expected: "(mechanism-selector-1047 (status pass))"
+          - fixture: "tests/fixtures/island-lowering-1048-witness.lisp"
+            expected: "(island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))"
+          - fixture: "tests/fixtures/translation-symbol-boundary-witness.lisp"
+            expected: "(translation-symbol-boundary-witness (status pass))"
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/${{ matrix.fixture }}
+      - name: run and assert exact envelope
+        env:
+          EXPECTED: ${{ matrix.expected }}
+        run: |
+          actual="$(cargo run --quiet -p sens-cli --bin sens -- ${{ matrix.fixture }})"
+          printf 'actual=%s\nexpected=%s\n' "$actual" "$EXPECTED"
+          [[ "$actual" == "$EXPECTED" ]]
