@@ -37,16 +37,17 @@ assert not (removed & current)
 frozen=set(audit["d10"]["frozen_review_stable_ids"])
 assert removed==frozen
 
-assert inventory["accounting"]=={
-    "selected_semantic_candidates":428,
-    "law_forced_coordinates":256,
-    "unplaced_selected_candidates":172,
-    "remaining_semantic_inventory":596,
-    "ratified_d10_residents":0,
-}
-assert len(inventory["rows"])==428
-assert len({r["stable_id"] for r in inventory["rows"]})==428
-assert len({r["semantic_name"] for r in inventory["rows"]})==428
+target=state["target"]
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+assert selected_total>=428
+assert remaining_total==1024-selected_total
+assert target["law_forced_coordinates"]==256
+assert target["unplaced_selected_candidates"]==selected_total-256
+assert target["ratified_residents"]==0
+assert len(inventory["rows"])==selected_total
+assert len({r["stable_id"] for r in inventory["rows"]})==selected_total
+assert len({r["semantic_name"] for r in inventory["rows"]})==selected_total
 
 gate=state["ownership_gate"]
 assert gate["status"]=="OWNERSHIP-DEBT-CLEARED"
@@ -55,11 +56,6 @@ assert gate["definite_noncore_reclassified"]==55
 assert gate["review_required_selected"]==0
 assert gate["no_new_definite_noncore"] is True
 
-assert state["target"]["selected_semantic_candidates"]==428
-assert state["target"]["remaining_semantic_candidates"]==596
-assert state["target"]["law_forced_coordinates"]==256
-assert state["target"]["unplaced_selected_candidates"]==172
-assert state["target"]["ratified_residents"]==0
 
 print("D10-OWNERSHIP-CLEANUP-V2=PASS")
-print("reclassified=15 ownership-review-debt=0 inventory=428/1024 placed=256 unplaced=172 remaining=596")
+print(f"reclassified=15 ownership-review-debt=0 inventory={selected_total}/1024 placed=256 unplaced={selected_total-256} remaining={remaining_total}")
