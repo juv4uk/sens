@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 428,
-    "remaining_semantic_candidates": 596,
+    "selected_semantic_candidates": 434,
+    "remaining_semantic_candidates": 590,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 172,
+    "unplaced_selected_candidates": 178,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -222,6 +222,18 @@
     "selected_after": 428,
     "selector_coordinates_preserved": 256,
     "review_required_still_selected": 0,
+    "ratification_effect": "NONE"
+  },
+  "island_bridge_v1": {
+    "authority": "#4094",
+    "artifact": "knowledge/d10-island-bridge-factorization-v1.json",
+    "execution_repositories_reviewed": 11,
+    "selected": 6,
+    "derived_no_separate_resident": 8,
+    "mechanism_only": 1,
+    "coordinates_assigned": 0,
+    "selected_after": 434,
+    "remaining_after": 590,
     "ratification_effect": "NONE"
   }
 }
