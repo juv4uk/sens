@@ -114,8 +114,36 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
     base_kind
 }
 
+/// Exact schema/evidence string contexts that are machine data rather than
+/// semantic surface lookup. This stays path- and context-specific: a whole
+/// Rust source file is never exempted, and the English-name ratchet still
+/// catches new executable semantic names in the same files.
+fn rust_literal_is_nonsemantic_schema_data(
+    rel: &str,
+    source: &str,
+    line: usize,
+    literal: &str,
+) -> bool {
+    let source_line = source.lines().nth(line.saturating_sub(1)).unwrap_or_default();
+    match (rel, literal) {
+        ("crates/sens/src/gpu_oracle.rs", "numeric-buffer-map") => {
+            source_line.contains("forbidden_legacy_operation:")
+        }
+        ("crates/xtask/src/compiler_export.rs", "identity") => {
+            source_line.contains("(identity . ")
+        }
+        ("crates/xtask/src/compiler_export.rs", "provenance") => {
+            source_line.contains("(provenance . ")
+        }
+        _ => false,
+    }
+}
+
 fn ratchet_enforced_kind(kind: &str) -> bool {
-    !matches!(kind, "rust-test-instrument" | "lisp-evidence")
+    !matches!(
+        kind,
+        "rust-test-instrument" | "lisp-evidence" | "rust-schema-data"
+    )
 }
 
 fn files() -> Vec<(PathBuf, String)> {
@@ -325,7 +353,16 @@ fn places() -> Vec<Place> {
         if rel.ends_with(".rs") {
             for (line, literal) in rust_strings(&text) {
                 if names.contains(literal.as_str()) {
-                    let kind = classified_kind(&rel, &text, "rust");
+                    let kind = if rust_literal_is_nonsemantic_schema_data(
+                        &rel,
+                        &text,
+                        line,
+                        &literal,
+                    ) {
+                        "rust-schema-data"
+                    } else {
+                        classified_kind(&rel, &text, "rust")
+                    };
                     out.push((kind, rel.clone(), line, literal));
                 } else if rust_literal_has_lisp_source(&literal) {
                     for (l, token, data) in lisp_tokens(&literal, line) {
@@ -498,6 +535,37 @@ fn scanners_find_names_in_lisp_and_rust() {
         "lisp-дані",
         "production Core1 data that drives compatibility must remain enforced"
     );
+
+    assert!(rust_literal_is_nonsemantic_schema_data(
+        "crates/sens/src/gpu_oracle.rs",
+        "forbidden_legacy_operation: \"numeric-buffer-map\".to_string(),",
+        1,
+        "numeric-buffer-map",
+    ));
+    assert!(rust_literal_is_nonsemantic_schema_data(
+        "crates/xtask/src/compiler_export.rs",
+        "(identity . ((domain . D3) (bits . 010)))",
+        1,
+        "identity",
+    ));
+    assert!(rust_literal_is_nonsemantic_schema_data(
+        "crates/xtask/src/compiler_export.rs",
+        "(provenance . ((repository . \"juv4uk/sens\")))",
+        1,
+        "provenance",
+    ));
+    assert!(!rust_literal_is_nonsemantic_schema_data(
+        "crates/sens/src/gpu_oracle.rs",
+        "let label = \"numeric-buffer-map\";",
+        1,
+        "numeric-buffer-map",
+    ));
+    assert!(!rust_literal_is_nonsemantic_schema_data(
+        "crates/xtask/src/compiler_export.rs",
+        "let field = \"identity\";",
+        1,
+        "identity",
+    ));
 
     let rust = rust_strings("let a = \"car\"; // \"cdr\"\nlet c = '\"'; let s = r#\"(cons 1 ())\"#;");
     let literals: Vec<&str> = rust.iter().map(|(_, s)| s.as_str()).collect();
