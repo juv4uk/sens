@@ -262,5 +262,14 @@
     "selected_after": 504,
     "remaining_after": 520,
     "rule": "D10 is one global 10-bit semantic stream. Package/domain ownership does not imply no-slot."
+  },
+  "owner_repo_donor_matrix": {
+    "artifact": "knowledge/d10-owner-repo-donor-matrix-v3.json",
+    "authority": "#4162",
+    "repositories": 87,
+    "direct_semantic_donors": 43,
+    "mechanism_gated_donors": 11,
+    "evidence_donors": 33,
+    "namespace_rule": "ONE-GLOBAL-D10-BITSTREAM"
   }
 }
