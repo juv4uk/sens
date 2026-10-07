@@ -545,6 +545,18 @@ pub(super) fn apply(
 ) -> Result<EvalStep, LanguageError> {
     match function {
         Value::DomainIdentity(identity) => {
+            // A language-owned macro resident may have an exact-domain identity
+            // without being a generic Core operation. When a macro expansion
+            // places that identity in function position, route only through the
+            // already-bound exact macro slot; do not widen DomainIdentity::core_operation().
+            if let Some(Value::Macro(closure)) = calling_environment.domain_code_slot(
+                identity.core_operation().unwrap_or_else(|| match identity {
+                    crate::CoreDomainIdentity::D6(word) => crate::CoreDomainIdentity::D6(word),
+                    _ => identity.core_operation().expect("covered by core_operation below"),
+                })
+            ) {
+                return apply_macro(closure.clone(), arguments, calling_environment, span);
+            }
             let Some(core_identity) = identity.core_operation() else {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
