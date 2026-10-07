@@ -131,18 +131,18 @@ fn exact_d5_semantics_are_proved_before_machine_fast_paths() {
 fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     let mut session = machine_session();
 
-    for (identity, expected_capability) in [
+    for (packed_bits, expected_capability) in [
         (
-            "01011",
+            11,
             "((integer-subtract bounded-u64 no-underflow))",
         ),
         (
-            "10110",
+            22,
             "((integer-multiply bounded-u32-inputs u64-result))",
         ),
     ] {
         let capability = eval_program(
-            &format!("(machine-capabilities-for-domain {identity})"),
+            &format!("(machine-capabilities-for-domain 5 {packed_bits})"),
             &mut session,
         )
         .expect("current D5 capability")
