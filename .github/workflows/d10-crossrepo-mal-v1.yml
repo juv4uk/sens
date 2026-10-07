@@ -20,12 +20,10 @@ on:
 
 jobs:
   harvest:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: GPU runner identity
-        run: nvidia-smi || true
       - name: Verify MAL historical donor harvest
         run: python3 scripts/check-d10-crossrepo-mal-v1.py
       - name: Verify global D10 inventory
