@@ -14,6 +14,7 @@
     "lib/domains/d2.lisp",
     "crates/sens/src/canonical_reader.rs",
     "crates/sens/src/source_words.rs",
+    "crates/sens/src/source_packing.rs",
     "scripts/migrate-three-pass.py",
     "scripts/translate-domain-program.py",
     "crates/sens/src/binary_framing.rs",
@@ -26,5 +27,90 @@
     "canonical Control2",
     "(dot . human-reader-only)",
     "Control2/FASL"
+  ],
+  "audit_results": [
+    {
+      "path": "README.md",
+      "status": "PASS",
+      "role": "human doctrine",
+      "evidence": "D2-exclusive source/structural ownership banner"
+    },
+    {
+      "path": "language-contract.lisp",
+      "status": "PASS",
+      "role": "language authority",
+      "evidence": "D2 sole structural owner; transport metadata non-semantic"
+    },
+    {
+      "path": "lib/domains/d2.lisp",
+      "status": "PASS",
+      "role": "canonical D2 table",
+      "evidence": "00 separator, 01 close, 10 open, 11 dot"
+    },
+    {
+      "path": "crates/sens/src/canonical_reader.rs",
+      "status": "PASS",
+      "role": "canonical reader",
+      "evidence": "W2 consumed structurally before D3+ semantic lifting"
+    },
+    {
+      "path": "crates/sens/src/source_words.rs",
+      "status": "PASS",
+      "role": "exact-width source carrier",
+      "evidence": "W2 lifts only to Racana2; width remains attached"
+    },
+    {
+      "path": "crates/sens/src/source_packing.rs",
+      "status": "PASS",
+      "role": "dense pack/unpack mechanics",
+      "evidence": "W2 packed as exact payload; reconstruction requires caller-owned width schedule; no in-band D2 delimiter"
+    },
+    {
+      "path": "scripts/migrate-three-pass.py",
+      "status": "PASS",
+      "role": "migration",
+      "evidence": "D2 structural-only and rejected as executable head/ordinary data"
+    },
+    {
+      "path": "scripts/translate-domain-program.py",
+      "status": "PASS",
+      "role": "surface translation",
+      "evidence": "D2 labels documentation-only; never token rewrites"
+    },
+    {
+      "path": "crates/sens/src/binary_framing.rs",
+      "status": "PASS",
+      "role": "transport framing",
+      "evidence": "private WIRE tags are not Core.D2 semantic objects; D2:11 non-alias witness"
+    },
+    {
+      "path": "knowledge/structure-not-ontology-inventory.lisp",
+      "status": "PASS",
+      "role": "structure inventory",
+      "evidence": "dot recorded as D2:11; stale human-reader-only claim removed"
+    },
+    {
+      "path": "crates/sens/tests/text7_canonical_wire.rs",
+      "status": "PASS",
+      "role": "wire witness",
+      "evidence": "transport wording no longer claims Control2/FASL semantic authority"
+    }
+  ],
+  "resolved_debt": [
+    {
+      "path": "crates/sens/src/binary_framing.rs",
+      "previous": "CONTROL_ESCAPE / canonical Control2 transport terminology",
+      "resolution": "private WIRE_* mechanism tags"
+    },
+    {
+      "path": "crates/sens/tests/text7_canonical_wire.rs",
+      "previous": "Control2/FASL wording",
+      "resolution": "transport-only wording"
+    },
+    {
+      "path": "knowledge/structure-not-ontology-inventory.lisp",
+      "previous": "dot = human-reader-only",
+      "resolution": "dot = d2-11"
+    }
   ]
 }
