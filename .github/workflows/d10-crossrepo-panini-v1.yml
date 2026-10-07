@@ -1,0 +1,45 @@
+name: D10 crossrepo Panini v1
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-crossrepo-panini-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-crossrepo-panini-v1.py"
+      - "scripts/check-d10-single-stream-restoration-v1.py"
+      - "scripts/check-island-ownership-gate.py"
+      - "scripts/check-d10-library-harvest-v1.py"
+      - "scripts/check-d10-forward-harvest-v1.py"
+      - "scripts/check-d10-knowledge-harvest-v1.py"
+      - ".github/workflows/d10-crossrepo-panini-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-crossrepo-panini-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-crossrepo-panini-v1.py"
+      - ".github/workflows/d10-crossrepo-panini-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  panini:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: GPU runner identity
+        run: nvidia-smi || true
+      - name: Verify Panini donor tranche
+        run: python3 scripts/check-d10-crossrepo-panini-v1.py
+      - name: Verify restoration baseline survives growth
+        run: python3 scripts/check-d10-single-stream-restoration-v1.py
+      - name: Verify historical ownership gate survives growth
+        run: python3 scripts/check-island-ownership-gate.py
+      - name: Verify historical library harvest survives growth
+        run: python3 scripts/check-d10-library-harvest-v1.py
+      - name: Verify historical forward harvest survives growth
+        run: python3 scripts/check-d10-forward-harvest-v1.py
+      - name: Verify historical knowledge harvest survives growth
+        run: python3 scripts/check-d10-knowledge-harvest-v1.py
