@@ -131,45 +131,22 @@ fn traverse_program_operations(
                 // Track domain usage
                 domains.entry(domain.clone()).or_insert_with(Vec::new).push(bits.clone());
 
-                // Infer required mechanism from operation
-                if id.width() == 3 {
-                    let op_name = match id.packed_bits() {
-                        0b001 => Some("quote"),
-                        0b010 => Some("atom?"),
-                        0b011 => Some("cdr"),
-                        0b100 => Some("car"),
-                        0b101 => Some("eq?"),
-                        0b110 => Some("cond"),
-                        0b111 => Some("cons"),
-                        _ => None,
+                // Keep mechanism identity in the same exact coordinate space.
+                // Do not reconstruct a human surface name from DomainIdentity.
+                let mechanism_identity = match (id.width(), id.packed_bits()) {
+                    (3, 0b001..=0b111) => Some(format!("D3:{}", bits)),
+                    (4, 0b0010 | 0b0011) => Some(format!("D4:{}", bits)),
+                    _ => None,
+                };
+                if let Some(exact_identity) = mechanism_identity {
+                    let mech = crate::compilation_artifact::MechanismRequirement {
+                        name: exact_identity.clone(),
+                        domain_identity: exact_identity,
+                        required: true,
+                        capability_level: Some("basic".to_string()),
                     };
-                    if let Some(name) = op_name {
-                        let mech = crate::compilation_artifact::MechanismRequirement {
-                            name: format!("core-{}", name),
-                            domain_identity: format!("D3:{}", bits),
-                            required: true,
-                            capability_level: Some("basic".to_string()),
-                        };
-                        if !mechanisms.iter().any(|m| m.name == mech.name) {
-                            mechanisms.push(mech);
-                        }
-                    }
-                } else if id.width() == 4 {
-                    let op_name = match id.packed_bits() {
-                        0b0010 => Some("lambda"),
-                        0b0011 => Some("define"),
-                        _ => None,
-                    };
-                    if let Some(name) = op_name {
-                        let mech = crate::compilation_artifact::MechanismRequirement {
-                            name: format!("core-{}", name),
-                            domain_identity: format!("D4:{:0width$b}", id.packed_bits(), width = 4),
-                            required: true,
-                            capability_level: Some("basic".to_string()),
-                        };
-                        if !mechanisms.iter().any(|m| m.name == mech.name) {
-                            mechanisms.push(mech);
-                        }
+                    if !mechanisms.iter().any(|m| m.name == mech.name) {
+                        mechanisms.push(mech);
                     }
                 }
 
