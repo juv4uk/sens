@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "gc-mccarthy-donor",
+  "wing": "GC",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Which representation-independent GC law can be extracted from the historical Lisp mark/sweep donor?",
+  "claim": "Historical donor witness only: explicit roots → reachability mark → linear sweep → reusable slots, cross-checked by an independent reachability oracle; it is not a SENS collector implementation.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "HISTORICAL-DONOR-WITNESS",
+  "generation": "historical-donor",
+  "axis": "gc/mccarthy-mark-sweep",
+  "reproduce": "python3 benchmarks/gc-mccarthy-donor/run.py"
+}
