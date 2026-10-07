@@ -902,7 +902,10 @@ def binary_rewrite(
                     quoted_value = ast.literal_eval(token)
                 except (SyntaxError, ValueError):
                     quoted_value = None
-                if isinstance(quoted_value, str) and re.fullmatch(r"[01]+", quoted_value):
+                if isinstance(quoted_value, str) and re.fullmatch(
+                    r"[01]+",
+                    quoted_value,
+                ):
                     raise BinaryMigrationError(
                         "quoted binary semantic identity "
                         f"{quoted_value!r} is not canonical source; "
