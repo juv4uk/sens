@@ -126,26 +126,6 @@ def build_binary_authority(data, domains=CONTRACT_DOMAINS):
     return out
 
 
-def canonical_reader_supports_width(
-    source_words: Path,
-    canonical_reader: Path,
-    width: int,
-) -> bool:
-    """Enable a source width only when both carrier and canonical reader expose it."""
-    try:
-        source = source_words.read_text(encoding="utf-8")
-        reader = canonical_reader.read_text(encoding="utf-8")
-    except OSError:
-        return False
-    marker = f"W{width}"
-    return marker in source and marker in reader
-
-
-def canonical_reader_supports_w9(source_words: Path, canonical_reader: Path) -> bool:
-    """Compatibility wrapper for the explicit W9 gate."""
-    return canonical_reader_supports_width(source_words, canonical_reader, 9)
-
-
 def validate_contract_binary_output(
     rendered: str,
     authority: dict[tuple[int, str], Entry],
@@ -897,20 +877,8 @@ def binary_rewrite(
             else:
                 raise BinaryMigrationError("unterminated string")
             token = source[start:i]
-            if contract_authority:
-                try:
-                    quoted_value = ast.literal_eval(token)
-                except (SyntaxError, ValueError):
-                    quoted_value = None
-                if isinstance(quoted_value, str) and re.fullmatch(
-                    r"[01]+",
-                    quoted_value,
-                ):
-                    raise BinaryMigrationError(
-                        "quoted binary semantic identity "
-                        f"{quoted_value!r} is not canonical source; "
-                        "use the exact unquoted domain word"
-                    )
+            # Quoted digits are ordinary Text7 string data.  Only an unquoted
+            # binary source word may carry exact domain identity.
             out.extend(encode_text7_spelling(token, text7_candidates))
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
@@ -1095,18 +1063,6 @@ def main():
         action="store_true",
         help="strict current Contract 11.8 binary-source authority mode",
     )
-    parser.add_argument(
-        "--canonical-reader",
-        type=Path,
-        default=Path("crates/sens/src/canonical_reader.rs"),
-        help="canonical reader used to detect exact W9 support",
-    )
-    parser.add_argument(
-        "--source-words",
-        type=Path,
-        default=Path("crates/sens/src/source_words.rs"),
-        help="exact source-word carrier used to detect exact W9 support",
-    )
     parser.add_argument("--apply", action="store_true", help="rewrite supported source in place")
     parser.add_argument("--mirror", type=Path, help="write conservative migrated mirror")
     parser.add_argument(
@@ -1151,23 +1107,20 @@ def main():
         parser.error("--contract-authority requires --binary-mirror")
 
     foundation, digest = load_foundation(args.foundation)
-    d1_enabled = (
-        args.contract_authority
-        and canonical_reader_supports_width(args.source_words, args.canonical_reader, 1)
-    )
-    d9_enabled = (
-        args.contract_authority
-        and canonical_reader_supports_w9(args.source_words, args.canonical_reader)
-    )
+    # Contract-authority mode is intentionally stacked on tested W1/W9 reader
+    # ancestry (#4292 on the merged #4258 W9 main cut).  Capability is a release
+    # prerequisite, never inferred from grep-able implementation text.
+    d1_enabled = bool(args.contract_authority)
+    d9_enabled = bool(args.contract_authority)
     selected_domains = list(args.domains)
     selected_surfaces = list(args.domain_surfaces)
     current_resolver_domains = tuple(dict.fromkeys(selected_domains))
     if args.contract_authority:
-        selected_domains = [
-            domain
-            for domain in CONTRACT_SURFACE_DOMAINS
-            if domain != "D9" or d9_enabled
-        ]
+        # Only already-callable domains may enter the human/source-head map.
+        # D8/D9 remain resolver evidence so attempted executable use can fail
+        # named/non-callable, while semantic membership itself is owned by the
+        # exact (width,bits) binary_authority below.
+        selected_domains = list(CONTRACT_CALL_DOMAINS)
         selected_surfaces.extend(
             path
             for path in (
@@ -1176,7 +1129,7 @@ def main():
             )
             if path not in selected_surfaces and path.exists()
         )
-        current_resolver_domains = tuple(selected_domains)
+        current_resolver_domains = tuple(CONTRACT_SURFACE_DOMAINS)
     code_map = build_map(foundation, selected_domains)
     code_map = augment_code_map_with_domain_surfaces(code_map, selected_surfaces)
     if not args.contract_authority:
