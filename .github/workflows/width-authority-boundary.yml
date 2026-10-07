@@ -1,0 +1,24 @@
+name: width-authority-boundary
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "scripts/check-width-authority-boundary.py"
+      - ".github/workflows/width-authority-boundary.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "scripts/check-width-authority-boundary.py"
+      - ".github/workflows/width-authority-boundary.yml"
+
+jobs:
+  no-host-width-authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Reject hand-maintained Dn/Wn width tables
+        run: python3 scripts/check-width-authority-boundary.py
