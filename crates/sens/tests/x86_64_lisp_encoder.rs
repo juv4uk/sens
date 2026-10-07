@@ -762,6 +762,89 @@ fn lisp_encodes_jmp_rel8_with_the_pinned_opcode_and_correct_displacement() {
     );
 }
 
+/// Independent decoder for Group-8 register/immediate bit operations:
+/// REX.W(+B) + 0F BA + ModRM(mod=3,/4..7,rm) + imm8.
+/// This is deliberately reconstructed from bytes rather than sharing the
+/// encoder's helper/arithmetic.
+fn decode_group8_bitop_imm8(bytes: &[u8]) -> Option<(&'static str, u8, u8)> {
+    let [rex, escape, opcode, modrm, bit_index] = bytes else {
+        return None;
+    };
+    if (rex & 0xFE) != 0x48 || *escape != 0x0F || *opcode != 0xBA {
+        return None;
+    }
+    if modrm >> 6 != 0b11 {
+        return None;
+    }
+    let opcode_extension = (modrm >> 3) & 0b111;
+    let mnemonic = match opcode_extension {
+        4 => "bt",
+        5 => "bts",
+        6 => "btr",
+        7 => "btc",
+        _ => return None,
+    };
+    let register = (modrm & 0b111) | ((rex & 0x01) << 3);
+    Some((mnemonic, register, *bit_index))
+}
+
+#[test]
+fn lisp_group8_bitops_imm8_round_trip_independently_and_match_xed_extensions() {
+    let mut session = encoder_session();
+    let operations = [("bt", 4u8), ("bts", 5), ("btr", 6), ("btc", 7)];
+    let registers = [("rax", 0u8), ("r9", 9), ("r15", 15)];
+
+    for (mnemonic, expected_extension) in operations {
+        for (register_name, register_code) in registers {
+            for bit_index in [0u8, 3, 63, 255] {
+                let form = format!(
+                    "(x86-encode-{mnemonic}-r64-imm8 (quote {register_name}) {bit_index})"
+                );
+                let rendered = eval_bytes(&form, &mut session);
+                let bytes: Vec<u8> = rendered
+                    .trim_start_matches('(')
+                    .trim_end_matches(')')
+                    .split_whitespace()
+                    .map(|token| token.parse().expect("byte must be a small integer"))
+                    .collect();
+
+                assert_eq!(bytes.len(), 5, "{form} must be REX+0F+BA+ModRM+imm8");
+                assert_eq!((bytes[3] >> 3) & 0b111, expected_extension, "{form}: {bytes:?}");
+
+                let decoded = decode_group8_bitop_imm8(&bytes)
+                    .unwrap_or_else(|| panic!("{form} produced undecodable bytes {bytes:?}"));
+                assert_eq!(
+                    decoded,
+                    (mnemonic, register_code, bit_index),
+                    "{form} round-tripped to {decoded:?} from bytes {bytes:?}"
+                );
+            }
+        }
+    }
+
+    let vendor_path = repo_root().join("lib/machine/xed/vendor/base/xed-isa.txt");
+    let vendor_source = fs::read_to_string(&vendor_path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", vendor_path.display()));
+
+    for (iclass, extension_bits) in [
+        ("BT", "100"),
+        ("BTS", "101"),
+        ("BTR", "110"),
+        ("BTC", "111"),
+    ] {
+        assert!(
+            vendor_source.contains(&format!("ICLASS    : {iclass}")),
+            "pinned XED evidence must name {iclass}"
+        );
+        assert!(
+            vendor_source.contains(&format!(
+                "PATTERN   : 0x0F 0xBA MOD[0b11] MOD=3 REG[0b{extension_bits}] RM[nnn] UIMM8()"
+            )),
+            "pinned XED evidence must contain the register/immediate {iclass} Group-8 pattern"
+        );
+    }
+}
+
 #[test]
 fn encoder_source_contains_no_process_or_assembler_escape_hatch() {
     let path = repo_root().join("lib/machine/encoding/x86-64.lisp");
