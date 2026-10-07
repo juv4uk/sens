@@ -1,7 +1,7 @@
 use sens::{
-    domain_identity_shape_or_empty_mechanism, eval_program, expr_to_exact_program_data,
-    load_core_library, lower_program, parse, Bit4, CoreD4, DomainIdentity, ExprKind, Session,
-    Value,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
+    expr_to_exact_program_data, load_core_library, lower_program, parse,
+    parse_mixed_exact_domain, Bit4, CoreD4, DomainIdentity, ExprKind, Session, Value,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -19,13 +19,23 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         .unwrap_or_else(|error| panic!("{} must load: {error}", path.display()));
 }
 
+fn load_mixed_exact_lisp_file(path: &str, session: &mut Session) {
+    let path = repo_root().join(path);
+    let source = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
+    let expressions = parse_mixed_exact_domain(&source)
+        .unwrap_or_else(|error| panic!("{} mixed parse failed: {error}", path.display()));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{} must load: {error}", path.display()));
+}
+
 fn native_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
     load_lisp_file("lib/machine/layout/pair-x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/operands/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/dispatch/native-first.lisp", &mut session);
+    load_mixed_exact_lisp_file("lib/machine/dispatch/native-first.lisp", &mut session);
     session
 }
 
