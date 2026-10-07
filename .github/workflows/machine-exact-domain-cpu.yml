@@ -123,9 +123,15 @@ jobs:
         env:
           SENS_REAL_SILICON_ARTIFACT: ${{ github.workspace }}/real-silicon-sweep.json
         run: cargo test -p sens-host --test real_silicon_sweep -- --nocapture
+      - name: Derive silicon coverage from the same ledger
+        run: |
+          python3 scripts/silicon-coverage.py real-silicon-sweep.json \
+            --output real-silicon-coverage.json
       - name: Upload real-silicon evidence
         uses: actions/upload-artifact@v4
         with:
           name: real-silicon-sweep-${{ github.sha }}
-          path: real-silicon-sweep.json
+          path: |
+            real-silicon-sweep.json
+            real-silicon-coverage.json
           if-no-files-found: error
