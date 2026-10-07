@@ -97,6 +97,15 @@ pub mod semantic_registry_export {
     pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sens8> {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
+    /// Current exact-domain identity for a source-routable admitted surface.
+    ///
+    /// This is a read-only migration/source projection. It never widens an
+    /// exact coordinate to the historical eight-bit compatibility carrier.
+    pub fn domain_identity_for_admitted_surface(
+        name: &str,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::domain_identity_for_surface(name)
+    }
 
     /// Legacy packed-byte export for external projection consumers.
     ///
