@@ -30,7 +30,7 @@ def foundation():
             "authority": f"test-D{width}",
             "residents": residents,
         }
-    domains["D7"]["reserved_coordinates"] = ["0100001", "0101010"]
+    domains["D7"]["owner_reserved_pinned"] = ["0100001", "0101010"]
     return {
         "status": "owner-ratified",
         "authority": "#4008",
