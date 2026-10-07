@@ -11,6 +11,7 @@
 mod bignum;
 mod bit9;
 mod binary_number;
+mod binary_contract;
 mod bits;
 mod canonical_reader;
 pub mod compilation_artifact;
@@ -139,6 +140,9 @@ mod text7_projection_generated;
 mod value;
 
 pub use binary_number::{BinaryNumber, BinaryNumberError};
+pub use binary_contract::{
+    inventory_binary_contract, parse_binary_contract_identities, BinaryContractInventory,
+};
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::parse_canonical_binary;
