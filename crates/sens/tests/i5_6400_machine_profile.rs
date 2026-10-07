@@ -82,6 +82,7 @@ fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() 
     assert!(current.contains("(key-shape width+packed-bits)"));
 
     for (width, packed_bits, expected_machine_path) in [
+        (5, 8, "CMP+SETE+MOVZX"), // D5 ZEROP
         (5, 10, "ADD"),       // D5 PLUS
         (5, 11, "SUB"),       // D5 DIFFERENCE
         (5, 22, "IMUL"),      // D5 TIMES
