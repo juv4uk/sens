@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 398,
+    "selected_semantic_candidates": 420,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 142,
-    "remaining_semantic_inventory": 626,
+    "unplaced_selected_candidates": 164,
+    "remaining_semantic_inventory": 604,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -637,6 +637,468 @@
       ],
       "donor_repo": "juv4uk/lisp-koans",
       "donor_source_file": "koans-solved/type-checking.lisp",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0818540bbb725701",
+      "semantic_name": "CAPTURE-ENVIRONMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ENVIRONMENT-VALUE-ALGEBRA",
+      "behavior": "construct a new environment value whose parent is the supplied environment, preserving that binding context as an explicit language value",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "capture-environment",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0a9e280f95dd5d31",
+      "semantic_name": "FIXNUM->FLONUM",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "NUMERIC-CONVERSION-ALGEBRA",
+      "behavior": "convert an exact fixnum to a floating numeric value while leaving an already floating value unchanged",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "fixnum->flonum",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0e0677665249b8f9",
+      "semantic_name": "MAKE-CHANNEL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CHANNEL-COMMUNICATION-ALGEBRA",
+      "behavior": "construct an abstract communication channel value",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "make-channel",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.2982bc0cfd701ac8",
+      "semantic_name": "EOF-OBJECT?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PORT-IO-ALGEBRA",
+      "behavior": "test whether a value is the distinguished end-of-input object",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "eof-object?",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.3ce9ccba86133181",
+      "semantic_name": "NULL-ENVIRONMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ENVIRONMENT-VALUE-ALGEBRA",
+      "behavior": "construct an empty lexical environment value with no parent bindings",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "null-environment",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.4542c71c3a466ab4",
+      "semantic_name": "CHANNEL-SEND",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CHANNEL-COMMUNICATION-ALGEBRA",
+      "behavior": "send one language value through an abstract channel according to its synchronization law",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "channel-send",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.50799e42b2372493",
+      "semantic_name": "CALL-WITH-VALUES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "MULTIPLE-VALUE-ALGEBRA",
+      "behavior": "call a zero-argument producer and pass all values it returns as arguments to a consumer, treating a single ordinary result as one value",
+      "provenance": [
+        "#4077",
+        "juv4uk/pascal-lisp",
+        "lispprimitives.pas"
+      ],
+      "donor_repo": "juv4uk/pascal-lisp",
+      "donor_source_file": "lispprimitives.pas",
+      "donor_source_name": "call-with-values",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.66ee8572b7f5ca2b",
+      "semantic_name": "VECTOR->LIST",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "behavior": "convert a vector to a proper list preserving element order",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "vector->list",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.67589d8479d4fb82",
+      "semantic_name": "DEFINE-CUSTOM-TYPE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CUSTOM-TYPE-CONSTRUCTION",
+      "behavior": "define a named custom wrapper protocol that exposes constructor, accessor and mutation operations for values of the new type",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "define-type",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.6890a34598686969",
+      "semantic_name": "STRING-JOIN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRING-SEQUENCE-ALGEBRA",
+      "behavior": "join an ordered list of strings using a separator string",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "string-join",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.74c97450ed90f255",
+      "semantic_name": "LIST->VECTOR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "behavior": "convert a proper list to a vector preserving element order",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "list->vector",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.80421dbd5105fc9d",
+      "semantic_name": "VECTOR->STRING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "behavior": "convert a vector of character/rune values to a string preserving order",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "vector->string",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.85258dd87cc637d5",
+      "semantic_name": "MODULO",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ARITHMETIC-SIGN-ALGEBRA",
+      "behavior": "return the modulus whose nonzero result has the divisor's sign, adjusting the raw remainder when operand signs differ",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "modulo",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.973740e9c6dde448",
+      "semantic_name": "FLUSH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PORT-IO-ALGEBRA",
+      "behavior": "request that buffered output on an abstract output port become externally committed",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "flush",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.98d243fba8537473",
+      "semantic_name": "STRING->VECTOR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "REPRESENTATION-CONVERSION-ALGEBRA",
+      "behavior": "convert a string to a vector of character/rune values preserving order",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "string->vector",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.b5af0a7c928c4f4f",
+      "semantic_name": "READ-CHAR",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PORT-IO-ALGEBRA",
+      "behavior": "read one character value from an abstract input port",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "read-char",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.c33147d6a05ec2d0",
+      "semantic_name": "CHANNEL-RECEIVE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CHANNEL-COMMUNICATION-ALGEBRA",
+      "behavior": "receive one language value from an abstract channel according to its synchronization law",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "channel-receive",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.c9c19f2cbb116818",
+      "semantic_name": "VECTOR-SLICE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "VECTOR-SEQUENCE-ALGEBRA",
+      "behavior": "return the half-open vector slice selected by lower and upper indices",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "vector-slice",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.e6b54318e4ed5eb1",
+      "semantic_name": "WRITE-STRING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PORT-IO-ALGEBRA",
+      "behavior": "write a string value to an abstract output port",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "write-string",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.e9c5e4e05dd5691c",
+      "semantic_name": "STRING-SPLIT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "STRING-SEQUENCE-ALGEBRA",
+      "behavior": "split a string by a separator string into an ordered list of substrings",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "string-split",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.f43f640178fb2bb8",
+      "semantic_name": "READ-BYTE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PORT-IO-ALGEBRA",
+      "behavior": "read one byte value from an abstract input port",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "read-byte",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.fbdaffd8cdf97d55",
+      "semantic_name": "WRITE-BYTE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSSREPO-GOLISP-PASCAL-HARVEST",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "PORT-IO-ALGEBRA",
+      "behavior": "write one byte value to an abstract output port",
+      "provenance": [
+        "#4077",
+        "juv4uk/golisp",
+        "lisp/primitives.go"
+      ],
+      "donor_repo": "juv4uk/golisp",
+      "donor_source_file": "lisp/primitives.go",
+      "donor_source_name": "write-byte",
       "ownership": "CORE-CANDIDATE",
       "law_status": "DONOR-ATTESTED-UNPLACED",
       "ratified_resident": false
@@ -7526,6 +7988,7 @@
     "knowledge/d10-noncore-reclassification-v1.json",
     "knowledge/d10-crossrepo-mal-v1.json",
     "knowledge/d10-crossrepo-early-lisp-v1.json",
-    "knowledge/d10-crossrepo-lisp-koans-v1.json"
+    "knowledge/d10-crossrepo-lisp-koans-v1.json",
+    "knowledge/d10-crossrepo-golisp-pascal-v1.json"
   ]
 }
