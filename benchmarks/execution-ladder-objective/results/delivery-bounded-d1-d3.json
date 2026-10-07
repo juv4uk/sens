@@ -1,0 +1,41 @@
+{
+  "artifact": "benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl",
+  "artifact_sha256": "6191206e889830b5dbcfbe453d50e85a7deb0ad2106567973ba52c69d046882a",
+  "format_constants": {
+    "artifact_digest_bytes": 32,
+    "case_count_bytes": 4,
+    "case_id_bytes": 32,
+    "contract_bytes": 4,
+    "frame_length_bytes": 4,
+    "magic_bytes": 16,
+    "observable_digest_bytes": 32,
+    "version_bytes": 1
+  },
+  "format_status": "research-model-not-production-protocol",
+  "interpretation": "Only the supplied artifact and optional runtime file are measured; channel, compression, encryption, signatures, retries and loader behavior are excluded.",
+  "measurement_kind": "delivery-size-model",
+  "models": {
+    "canonical_text_utf8": {
+      "bytes": 1432,
+      "includes": "program text only"
+    },
+    "dense_semantic_payload_lower_bound": {
+      "bytes": 142,
+      "includes": "bit payload only; no framing or metadata"
+    },
+    "framed_semantic_package": {
+      "bytes": 2651,
+      "header_bytes": 57,
+      "includes": "header, artifact digest, case ids, observable digests, widths, lengths, packed bits"
+    },
+    "self_contained_package": {
+      "bytes": null,
+      "includes": "framed semantic package plus supplied runtime file",
+      "runtime_bytes": null
+    }
+  },
+  "parity_failures": 0,
+  "schema": "sens-execution-ladder-delivery-cost/v1",
+  "validated_cases": 28,
+  "wall_clock_measured": false
+}
