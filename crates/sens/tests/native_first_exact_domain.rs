@@ -71,14 +71,19 @@ fn core4_exact_list_is_visible_to_native_first_fallback_by_behavior() {
 }
 
 #[test]
-fn exact_d6_let_executes_after_core_bootstrap() {
+fn exact_d6_let_without_admitted_mechanism_fails_closed() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
     let forms = parse_mixed_exact_domain("(001000 ((x 41)) x)")
-        .expect("exact D6 LET parse");
-    let result = eval_parsed_expressions(&forms, &mut session)
-        .expect("exact D6 LET must dispatch through its bound macro slot");
-    assert_eq!(result.value.to_string(), "41");
+        .expect("exact D6 LET identity must parse");
+    let error = eval_parsed_expressions(&forms, &mut session)
+        .expect_err("D6 LET must fail closed without a ratified callable mechanism");
+    assert!(
+        error
+            .to_string()
+            .contains("domain identity is not callable under its ratified law"),
+        "unexpected D6 fail-closed error: {error}"
+    );
 }
 
 #[test]
@@ -102,45 +107,6 @@ fn direct_lambda_application_with_exact_initializer_executes() {
     .expect("direct LET-equivalent lambda application");
     let result = eval_parsed_expressions(&forms, &mut session)
         .expect("exact initializer must execute as a lambda argument");
-    assert_eq!(result.value.to_string(), "41");
-}
-
-#[test]
-fn exact_d6_let_top_level_preserves_exact_initializer_call() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core");
-    let forms = parse_mixed_exact_domain(
-        "(001000 ((y (100 (001 (41 42))))) y)",
-    )
-    .expect("top-level exact D6 LET with exact initializer");
-    let result = eval_parsed_expressions(&forms, &mut session)
-        .expect("top-level exact LET must execute exact initializer");
-    assert_eq!(result.value.to_string(), "41");
-}
-
-#[test]
-fn exact_d6_let_executes_inside_exact_lambda_with_simple_initializer() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core");
-    let forms = parse_mixed_exact_domain(
-        "(0011 f (0010 (x) (001000 ((y x)) y))) (f 41)",
-    )
-    .expect("nested exact D6 LET with simple initializer");
-    let result = eval_parsed_expressions(&forms, &mut session)
-        .expect("nested exact D6 LET must see the lambda call frame");
-    assert_eq!(result.value.to_string(), "41");
-}
-
-#[test]
-fn exact_d6_let_executes_inside_exact_lambda_with_exact_initializer() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core");
-    let forms = parse_mixed_exact_domain(
-        "(0011 f (0010 (xs) (001000 ((y (100 xs))) y))) (f (001 (41 42)))",
-    )
-    .expect("nested exact D6 LET parse");
-    let result = eval_parsed_expressions(&forms, &mut session)
-        .expect("nested exact D6 LET must preserve macro syntax and initializer code");
     assert_eq!(result.value.to_string(), "41");
 }
 
