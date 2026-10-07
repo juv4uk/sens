@@ -1,5 +1,5 @@
 use sens::{
-    installed_capabilities, parse, semantic_registry_export, Expr, ExprKind, Sens8,
+    installed_capabilities, parse, semantic_registry_export, DomainIdentity, Expr, ExprKind, Sens8,
 };
 use std::collections::HashSet;
 use std::env;
@@ -54,6 +54,15 @@ fn head_kind(sens: Sens8) -> HeadKind {
         HeadKind::LetStar
     } else {
         HeadKind::Other
+    }
+}
+fn exact_head_kind(identity: DomainIdentity) -> HeadKind {
+    match (identity.width(), identity.packed_bits()) {
+        (3, 0b001) => HeadKind::Quote,
+        (3, 0b110) => HeadKind::Cond,
+        (4, 0b0010) => HeadKind::Lambda,
+        (4, 0b0011) => HeadKind::Define,
+        _ => HeadKind::Other,
     }
 }
 
@@ -254,6 +263,86 @@ fn walk_let(
     );
 }
 
+fn walk_known_head(
+    kind: HeadKind,
+    arguments: &[Expr],
+    bound: &mut HashSet<String>,
+    host_capabilities: &HashSet<String>,
+    analysis: &mut Analysis,
+    top_level: bool,
+) -> bool {
+    match kind {
+        HeadKind::Quote => true,
+        HeadKind::Lambda => {
+            if arguments.is_empty() {
+                return true;
+            }
+            let mut local = bound.clone();
+            collect_parameter_names(&arguments[0], &mut local);
+            walk_sequence(
+                &arguments[1..],
+                &mut local,
+                host_capabilities,
+                analysis,
+                false,
+            );
+            true
+        }
+        HeadKind::Define => {
+            if arguments.is_empty() {
+                return true;
+            }
+            if let ExprKind::Symbol(name) = &arguments[0].kind {
+                // Generic source migration must preserve lexical/surface
+                // shadowing. #1468 pins exact code slots to the first
+                // language definition, so a later top-level surface
+                // redefinition must NOT be rewritten to that old slot.
+                if !(analysis.language && top_level && is_language_definition(name)) {
+                    bound.insert(name.to_string());
+                }
+            }
+            walk_sequence(
+                &arguments[1..],
+                bound,
+                host_capabilities,
+                analysis,
+                false,
+            );
+            true
+        }
+        HeadKind::Defmacro => {
+            if arguments.len() < 2 {
+                return true;
+            }
+            if let ExprKind::Symbol(name) = &arguments[0].kind {
+                bound.insert(name.to_string());
+            }
+            let mut local = bound.clone();
+            collect_parameter_names(&arguments[1], &mut local);
+            walk_sequence(
+                &arguments[2..],
+                &mut local,
+                host_capabilities,
+                analysis,
+                false,
+            );
+            true
+        }
+        HeadKind::Let => {
+            walk_let(arguments, bound, host_capabilities, analysis, false);
+            true
+        }
+        HeadKind::LetStar => {
+            walk_let(arguments, bound, host_capabilities, analysis, true);
+            true
+        }
+        HeadKind::Cond => {
+            walk_cond_clauses(arguments, bound, host_capabilities, analysis);
+            true
+        }
+        HeadKind::Other => false,
+    }
+}
 fn walk_expr(
     expression: &Expr,
     bound: &mut HashSet<String>,
@@ -272,106 +361,32 @@ fn walk_expr(
     let arguments = &items[1..];
     let resolved = resolve_head(head, bound, host_capabilities, analysis);
 
-    if let Some((surface, sens)) = resolved {
+    let kind = if let Some((surface, sens)) = resolved {
         if surface.is_some() {
             analysis.named_calls += 1;
         }
-
-        let kind = head_kind(sens);
         if let Some(surface) = surface {
             push_head_edit(head, surface, sens, analysis);
         } else {
             push_compatibility_head_edit(head, sens, analysis);
         }
+        Some(head_kind(sens))
+    } else if let ExprKind::DomainIdentity(identity) = &head.kind {
+        Some(exact_head_kind(*identity))
+    } else {
+        None
+    };
 
-        match kind {
-            HeadKind::Quote => return,
-            HeadKind::Lambda => {
-                if arguments.is_empty() {
-                    return;
-                }
-                let mut local = bound.clone();
-                collect_parameter_names(&arguments[0], &mut local);
-                walk_sequence(
-                    &arguments[1..],
-                    &mut local,
-                    host_capabilities,
-                    analysis,
-                    false,
-                );
-                return;
-            }
-            HeadKind::Define => {
-                if arguments.is_empty() {
-                    return;
-                }
-                if let ExprKind::Symbol(name) = &arguments[0].kind {
-                    // Generic source migration must preserve lexical/surface
-                    // shadowing. #1468 pins exact code slots to the first
-                    // language definition, so a later top-level surface
-                    // redefinition must NOT be rewritten to that old slot.
-                    // With `--language` the file *is* that first definition:
-                    // its calls reach the same function through the code.
-                    if !(analysis.language && top_level && is_language_definition(name)) {
-                        bound.insert(name.to_string());
-                    }
-                }
-                walk_sequence(
-                    &arguments[1..],
-                    bound,
-                    host_capabilities,
-                    analysis,
-                    false,
-                );
-                return;
-            }
-            HeadKind::Defmacro => {
-                if arguments.len() < 2 {
-                    return;
-                }
-                if let ExprKind::Symbol(name) = &arguments[0].kind {
-                    // A macro definition shadows the human surface just like an
-                    // ordinary definition. Exact SENS remains pinned to its
-                    // existing function slot, so later calls through this
-                    // spelling must stay textual.
-                    bound.insert(name.to_string());
-                }
-                let mut local = bound.clone();
-                collect_parameter_names(&arguments[1], &mut local);
-                walk_sequence(
-                    &arguments[2..],
-                    &mut local,
-                    host_capabilities,
-                    analysis,
-                    false,
-                );
-                return;
-            }
-            HeadKind::Let => {
-                walk_let(
-                    arguments,
-                    bound,
-                    host_capabilities,
-                    analysis,
-                    false,
-                );
-                return;
-            }
-            HeadKind::LetStar => {
-                walk_let(
-                    arguments,
-                    bound,
-                    host_capabilities,
-                    analysis,
-                    true,
-                );
-                return;
-            }
-            HeadKind::Cond => {
-                walk_cond_clauses(arguments, bound, host_capabilities, analysis);
-                return;
-            }
-            HeadKind::Other => {}
+    if let Some(kind) = kind {
+        if walk_known_head(
+            kind,
+            arguments,
+            bound,
+            host_capabilities,
+            analysis,
+            top_level,
+        ) {
+            return;
         }
     } else {
         let mut head_bound = bound.clone();
@@ -383,7 +398,6 @@ fn walk_expr(
             false,
         );
     }
-
     for argument in arguments {
         let mut local = bound.clone();
         walk_expr(
@@ -714,6 +728,14 @@ mod tests {
         assert_eq!(rewrite_exact(source).unwrap(), expected);
     }
 
+    #[test]
+    fn exact_domain_heads_preserve_quote_and_binding_boundaries_on_replay() {
+        let hosts = no_host();
+        let source = "(001 (перше x)) (0011 перше (0010 (x) x)) (перше 1)";
+        let analysis = analyze_with(source, &hosts, false, true).expect("exact source parses");
+        assert!(analysis.edits.is_empty());
+        assert_eq!(analysis.blocked_exact_domain, 0);
+    }
     #[test]
     fn exact_domain_mode_retires_mapped_legacy_eight_bit_heads() {
         let source = "(00001001 f (00001000 (x) (00000101 x)))";
