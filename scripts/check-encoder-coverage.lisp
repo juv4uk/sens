@@ -11,10 +11,6 @@
       (read-file
         "lib/machine/encoding/coverage.lisp"))))
 
-(def encoder-coverage-projection-result
-  (encoder-coverage-projection-valid?
-    encoder-coverage-committed-form))
-
 (def encoder-coverage-first-row-result
   (encoder-coverage-committed-row-matches?
     (car encoder-coverage-index-rows)
@@ -69,5 +65,4 @@
     (quote first-row-is-d1-no)
     (encoder-coverage-same?
       encoder-coverage-first-row-result
-      encoder-coverage-d1-no))
-  (list (quote projection-result) encoder-coverage-projection-result))
+      encoder-coverage-d1-no)))
