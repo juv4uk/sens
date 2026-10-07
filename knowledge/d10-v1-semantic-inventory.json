@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 428,
+    "selected_semantic_candidates": 434,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 172,
-    "remaining_semantic_inventory": 596,
+    "unplaced_selected_candidates": 178,
+    "remaining_semantic_inventory": 590,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -25,6 +25,126 @@
     "Definite island/package-owned semantics identified by #4033 do not consume Core D10 slots; preserved in knowledge/d10-noncore-reclassification-v1.json."
   ],
   "rows": [
+    {
+      "stable_id": "d10.bridge.16592788ef60fafb",
+      "semantic_name": "MISSING-CAPABILITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "ISLAND-BRIDGE-FACTORIZATION",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "represent typed absence of an execution capability such as kernel or bridge without changing semantic identity or registry numbering",
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ],
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "FACTORED-SEAM-LAW",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.6898d14e7d0fafc5",
+      "semantic_name": "RESULT-COUNT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "ISLAND-BRIDGE-FACTORIZATION",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "observe the result cardinality of one completed native observation without coercing the native results",
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ],
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "FACTORED-SEAM-LAW",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.9348ac86d4d019d4",
+      "semantic_name": "ISLAND-CALL",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "ISLAND-BRIDGE-FACTORIZATION",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "invoke one semantic identity on an autonomous execution island using opaque native payload while preserving producer-native observation and provenance",
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ],
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "FACTORED-SEAM-LAW",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.949b87c2b4e57649",
+      "semantic_name": "EXECUTION-WITNESS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "ISLAND-BRIDGE-FACTORIZATION",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "represent one admissible execution mechanism witness for a semantic identity without granting semantic authority or changing identity",
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ],
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "FACTORED-SEAM-LAW",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.b5ea21fb87af4ee7",
+      "semantic_name": "NATIVE-OBSERVATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "ISLAND-BRIDGE-FACTORIZATION",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "represent an opaque producer-native observation without universal truth or result coercion",
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ],
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "FACTORED-SEAM-LAW",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.c66ef27c9d2bfe4c",
+      "semantic_name": "BRIDGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "ISLAND-BRIDGE-FACTORIZATION",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ISLAND-BRIDGE-ALGEBRA",
+      "behavior": "perform an explicit partial conversion from a source native result representation toward a target representation while preserving source observation and making no semantic-equivalence assumption",
+      "provenance": [
+        "#4036",
+        "#4054",
+        "#4094",
+        "contracts/island-compat-contract.lisp",
+        "knowledge/d10-owner-repo-donor-matrix-v2.json"
+      ],
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "FACTORED-SEAM-LAW",
+      "ratified_resident": false
+    },
     {
       "stable_id": "d10.crossrepo.early.7e7576e6a5af03b7",
       "semantic_name": "IF",
@@ -8127,6 +8247,7 @@
     "knowledge/d10-crossrepo-lisp-koans-v1.json",
     "knowledge/d10-crossrepo-golisp-pascal-v1.json",
     "knowledge/d10-crossrepo-paip-v1.json",
-    "knowledge/d10-review-reclassification-v2.json"
+    "knowledge/d10-review-reclassification-v2.json",
+    "knowledge/d10-island-bridge-factorization-v1.json"
   ]
 }
