@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "authority": "#4157",
+  "invariant": "D2 alone owns canonical language source/structural control",
+  "d2": {
+    "10": "open",
+    "11": "dot",
+    "00": "separator",
+    "01": "close"
+  },
+  "active_paths": [
+    "README.md",
+    "language-contract.lisp",
+    "lib/domains/d2.lisp",
+    "crates/sens/src/canonical_reader.rs",
+    "crates/sens/src/source_words.rs",
+    "scripts/migrate-three-pass.py",
+    "scripts/translate-domain-program.py",
+    "crates/sens/src/binary_framing.rs",
+    "knowledge/structure-not-ontology-inventory.lisp",
+    "crates/sens/tests/text7_canonical_wire.rs"
+  ],
+  "transport_rule": "private framing metadata is not D2 semantic identity",
+  "forbidden_active_claims": [
+    "CONTROL_ESCAPE",
+    "canonical Control2",
+    "(dot . human-reader-only)",
+    "Control2/FASL"
+  ]
+}
