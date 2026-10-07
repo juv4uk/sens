@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   critical:
@@ -31,35 +31,8 @@ jobs:
           python3 scripts/sens8-semantic-ratchet.py --summary
       - name: Build SENS CLI
         run: cargo build -p sens-cli --bin sens
-      - name: Bootstrap current Core4 FASL for #3658
-        run: cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
-      - name: Upload current Core4 FASL for #3658
-        uses: actions/upload-artifact@v4
-        with:
-          name: bootstrap-core4-fasl-3658
-          path: lib/core4.lisp.fasl
-          if-no-files-found: error
-          retention-days: 1
-      - name: Commit fresh Core4 FASL to bootstrap branch
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        shell: bash
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-          cp lib/core4.lisp.fasl /tmp/core4.lisp.fasl
-          git fetch origin "${HEAD_REF}"
-          git checkout -B "${HEAD_REF}" FETCH_HEAD
-          cp /tmp/core4.lisp.fasl lib/core4.lisp.fasl
-          if git diff --quiet -- lib/core4.lisp.fasl; then
-            echo "Core4 FASL already fresh"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/core4.lisp.fasl
-          git commit -m "fix(3658): regenerate current Core4 FASL"
-          git push origin "HEAD:${HEAD_REF}"
+      - name: Current Core4 FASL freshness
+        run: cargo test -p sens --test core_fasl_freshness -- --nocapture
       - name: Current semantic slice
         run: bash scripts/test-current-semantic-slice.sh
       - name: Critical machine and surface witnesses
