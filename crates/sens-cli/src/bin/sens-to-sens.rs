@@ -62,6 +62,8 @@ fn exact_head_kind(identity: DomainIdentity) -> HeadKind {
         (3, 0b110) => HeadKind::Cond,
         (4, 0b0010) => HeadKind::Lambda,
         (4, 0b0011) => HeadKind::Define,
+        (6, 0b001000) => HeadKind::Let,
+        (6, 0b001001) => HeadKind::LetStar,
         _ => HeadKind::Other,
     }
 }
@@ -748,6 +750,19 @@ mod tests {
         let source = "(0010 (перше) (перше 7))";
         assert_eq!(rewrite_exact(source).unwrap(), source);
     }
+    #[test]
+    fn exact_d6_let_replay_preserves_bound_surface_head() {
+        let source = "(001000 ((перше (111 7 ()))) (перше 1))";
+        assert_eq!(rewrite_exact(source).unwrap(), source);
+    }
+
+    #[test]
+    fn exact_d6_let_star_replay_preserves_sequential_binding_scope() {
+        let source =
+            "(001001 ((перше (111 7 ())) (решта (перше 1))) (решта 2))";
+        assert_eq!(rewrite_exact(source).unwrap(), source);
+    }
+
     #[test]
     fn exact_domain_mode_retires_mapped_legacy_eight_bit_heads() {
         let source = "(00001001 f (00001000 (x) (00000101 x)))";
