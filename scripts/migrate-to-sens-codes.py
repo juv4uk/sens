@@ -926,48 +926,31 @@ def binary_rewrite(
         resolved_label = None
 
         if is_head and not quoted:
-            # Canonical Contract source is already binary-authoritative. A bare
-            # binary token must be resolved by exact (domain,bits) first; never
-            # reinterpret a valid W8/D8 coordinate as historical SID8->D3/D4.
             if contract_authority and re.fullmatch(r"[01]+", token):
-                exact = binary_authority.get((len(token), token))
-                if exact is None:
+                identity = binary_authority.get((len(token), token))
+                if identity is None:
                     raise BinaryMigrationError(
                         f"unadmitted exact binary executable head {token!r}"
                     )
-                if exact.domain not in CONTRACT_CALL_DOMAINS or exact.label == "EMPTY":
-                    raise BinaryMigrationError(
-                        f"non-callable authority resident used as executable head: "
-                        f"{exact.domain}:{exact.bits}"
-                    )
-                out.append(exact.bits)
-                resolved_label = exact.label
-                line, col = line_col(source, start)
-                hits.append(Hit(
-                    line,
-                    col,
-                    exact.label,
-                    exact.bits,
-                    exact.domain,
-                ))
             else:
                 if resolver is None:
                     raise BinaryMigrationError(
                         "history-aware SourceResolver is required for binary migration"
                     )
-            resolution = resolver.resolve_head(token)
-            if not resolution.resolved:
-                detail = (
-                    ", ".join(resolution.ambiguous)
-                    if resolution.ambiguous
-                    else "no proven current exact-domain identity"
-                )
-                raise BinaryMigrationError(
-                    f"unresolved executable head {token!r}: "
-                    f"{resolution.kind}; {detail}"
-                )
-            identity = resolution.current
-            assert identity is not None
+                resolution = resolver.resolve_head(token)
+                if not resolution.resolved:
+                    detail = (
+                        ", ".join(resolution.ambiguous)
+                        if resolution.ambiguous
+                        else "no proven current exact-domain identity"
+                    )
+                    raise BinaryMigrationError(
+                        f"unresolved executable head {token!r}: "
+                        f"{resolution.kind}; {detail}"
+                    )
+                identity = resolution.current
+                assert identity is not None
+
             if contract_authority and identity.domain not in CONTRACT_CALL_DOMAINS:
                 raise BinaryMigrationError(
                     f"non-callable authority resident used as executable head: "
@@ -977,6 +960,7 @@ def binary_rewrite(
                 raise BinaryMigrationError(
                     "structural EMPTY/000 cannot be used as a callable head"
                 )
+
             out.append(identity.bits)
             resolved_label = identity.label
             line, col = line_col(source, start)
