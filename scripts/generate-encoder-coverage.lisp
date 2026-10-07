@@ -1,0 +1,22 @@
+; #604 — regenerate encoder coverage from Lisp-owned derived machine coverage inputs.
+(load "lib/core.lisp")
+(load "lib/machine/encoding/coverage-generator.lisp")
+
+(cond
+  (encoder-coverage-index-valid?
+   ((lambda ()
+      (write-file
+        "lib/machine/encoding/coverage.lisp"
+        (encoder-coverage-render))
+      (print
+        (list
+          (quote encoder-coverage-generate)
+          (quote (status written))
+          (list (quote forms) encoder-coverage-form-count)
+          (list (quote partial) (length encoder-coverage-partials)))))))
+  (encoder-coverage-d1-yes
+   (print
+     (quote
+       (encoder-coverage-generate
+         (status rejected)
+         (reason invalid-coverage-input-projection))))))
