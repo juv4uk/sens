@@ -147,3 +147,5 @@ fn exact_domain_classifier_block_has_no_spelling_or_sid_match() {
     assert!(block.contains("native-first-domain-d3-cons?"));
     assert!(block.contains("shape-or-empty"));
 }
+
+// diagnostic trigger for #4242; no production semantics
