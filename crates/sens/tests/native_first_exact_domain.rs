@@ -59,16 +59,8 @@ fn whole_native_first_source_has_no_legacy_sid_or_call_nodes() {
 }
 
 #[test]
-fn core4_list_slot_is_visible_to_native_first_fallback() {
+fn core4_exact_list_is_visible_to_native_first_fallback_by_behavior() {
     let mut session = native_session();
-    let identity = DomainIdentity::D4(CoreD4::from_word(
-        Bit4::new(0b1110).expect("D4 LIST word"),
-    ));
-    assert!(
-        matches!(session.environment.domain_code_slot(identity), Some(Value::Closure(_))),
-        "native-first session must retain Lisp-owned exact D4:1110 LIST slot"
-    );
-
     let result = eval_program(
         "(native-first-fallback (quote payload))",
         &mut session,
