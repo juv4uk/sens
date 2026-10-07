@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-nth-maplist-direction",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE"
+  ],
+  "question": "Does REVERSE induce a coherent left/right traversal-direction axis for NTH and MAPLIST?",
+  "claim": "Tests traversal geometry and conjugation through the current REVERSE law only; it does not admit D8 residency or callability.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3744-d8-nth-maplist-direction.md",
+    "../../docs/research/3744-d8-nth-maplist-direction.uk.md"
+  ],
+  "status": "PRODUCT-CANDIDATE-TYPED",
+  "generation": "unknown",
+  "axis": "d8/traversal-direction",
+  "reproduce": "python3 benchmarks/d8-nth-maplist-direction/run.py --out /tmp/d8-nth-maplist-direction"
+}
