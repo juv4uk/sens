@@ -112,13 +112,6 @@ fn push_head_edit(head: &Expr, surface: &str, sens: Sens8, analysis: &mut Analys
                 )
             })
         else {
-            eprintln!(
-                "blocked-exact surface={} legacy={} span={}..{}",
-                surface,
-                sens,
-                head.span.start,
-                head.span.end
-            );
             analysis.blocked_exact_domain += 1;
             return;
         };
@@ -145,12 +138,6 @@ fn push_compatibility_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysi
     let Some(identity) =
         semantic_registry_export::exact_domain_successor_for_compatibility_id(sens)
     else {
-        eprintln!(
-            "blocked-exact legacy={} span={}..{}",
-            sens,
-            head.span.start,
-            head.span.end
-        );
         analysis.blocked_exact_domain += 1;
         return;
     };
