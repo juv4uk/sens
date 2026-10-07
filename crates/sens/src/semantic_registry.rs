@@ -49,7 +49,7 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
 /// lib/domains/d1.lisp ... lib/domains/d6.lisp. The source-routable human
 /// namespaces are generated from those rows; this lookup never consults a
 /// historical packed byte to recover domain identity.
-fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
+pub(crate) fn exact_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
     DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
         let matches_human_surface = row.source_routable
             && row
@@ -124,9 +124,37 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
 /// projection. The byte-backed lookup remains only as a bounded
 /// compatibility fallback for still-unmigrated spellings.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    direct_domain_identity_for_surface(name).or_else(|| {
+    exact_domain_identity_for_surface(name).or_else(|| {
         registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
     })
+}
+
+/* Migration-only evidence bridge.
+ *
+ * A historical eight-bit source identity may be retired only when all current
+ * exact-domain surfaces reachable from that compatibility row agree on one
+ * exact identity. The legacy payload itself is never interpreted by width,
+ * truncation, prefix, or zero-extension.
+ */
+pub(crate) fn exact_domain_successor_for_compatibility_id(
+    semantic_id: SemanticId,
+) -> Option<CoreDomainIdentity> {
+    let row = live_rows()
+        .iter()
+        .find(|row| row.semantic_id == semantic_id.packed_byte())?;
+
+    let mut successor = None;
+    for surface in row.surfaces {
+        let Some(identity) = exact_domain_identity_for_surface(surface.name) else {
+            continue;
+        };
+        match successor {
+            None => successor = Some(identity),
+            Some(previous) if previous == identity => {}
+            Some(_) => return None,
+        }
+    }
+    successor
 }
 
 pub(crate) fn surface_for_domain_identity(
@@ -351,7 +379,7 @@ mod tests {
             ("length", 6, 0b000000),
             ("нехай", 6, 0b001000),
         ] {
-            let identity = direct_domain_identity_for_surface(surface)
+            let identity = exact_domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("exact-domain surface must resolve directly: {surface}"));
             assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
             assert_eq!(domain_identity_for_surface(surface), Some(identity));
@@ -375,7 +403,7 @@ mod tests {
             ("зворот", 0b10100),
             ("п-р-п", 0b10010),
         ] {
-            let identity = direct_domain_identity_for_surface(surface)
+            let identity = exact_domain_identity_for_surface(surface)
                 .unwrap_or_else(|| panic!("D5 surface must resolve directly: {surface}"));
             assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
             assert_eq!(domain_identity_for_surface(surface), Some(identity));
@@ -386,6 +414,28 @@ mod tests {
                 .and_then(legacy_domain_identity_from_registry_byte),
             None,
             "D5 selector surface must not require the legacy byte registry"
+        );
+    }
+
+    #[test]
+    fn compatibility_rows_migrate_only_through_unique_exact_surfaces() {
+        for (legacy, width, bits) in [
+            (crate::sens!(00000001), 3, 0b001), // quote
+            (crate::sens!(00001000), 4, 0b0010), // lambda
+            (crate::sens!(00001100), 5, 0b01010), // plus
+            (crate::sens!(10011100), 6, 0b001000), // let
+        ] {
+            let identity = exact_domain_successor_for_compatibility_id(legacy)
+                .expect("compatibility row must have one current exact successor");
+            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+        }
+    }
+
+    #[test]
+    fn compatibility_row_without_unique_exact_surface_fails_closed() {
+        assert_eq!(
+            exact_domain_successor_for_compatibility_id(crate::sens!(11111111)),
+            None
         );
     }
 
@@ -415,9 +465,9 @@ mod tests {
         assert_eq!(surface_for_domain_identity(lambda, "sa"), Some("phalana"));
         assert_eq!(surface_for_domain_identity(lambda, "en"), Some("lambda"));
 
-        assert_eq!(direct_domain_identity_for_surface("так"), None);
-        assert_eq!(direct_domain_identity_for_surface("відкрити"), None);
-        assert_eq!(direct_domain_identity_for_surface("порожнє"), None);
+        assert_eq!(exact_domain_identity_for_surface("так"), None);
+        assert_eq!(exact_domain_identity_for_surface("відкрити"), None);
+        assert_eq!(exact_domain_identity_for_surface("порожнє"), None);
     }
 
     #[test]
