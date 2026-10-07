@@ -76,7 +76,7 @@
                       (00000001 rax))))
                  (t (00000001 x86-projection-rejected))))
               (t (00000001 x86-projection-rejected))))
-           (t (00000001 x86-projection-rejected)))))
+           (t (00000001 x86-projection-rejected))))
 
       ((x86-machine-effect-form? effect (00000001 load-u64) 4)
        (10011100
@@ -103,7 +103,7 @@
                       offset)))
                  (t (00000001 x86-projection-rejected))))
               (t (00000001 x86-projection-rejected))))
-           (t (00000001 x86-projection-rejected)))))
+           (t (00000001 x86-projection-rejected))))
 
       ((x86-machine-effect-form? effect (00000001 return-u64) 2)
        (10011100 ((slot (00000101 (00000110 effect))))
