@@ -371,7 +371,7 @@ mod tests {
     }
 
     #[test]
-    fn d1_through_d8_bridges_are_exact_and_lossless() {
+    fn d1_through_d9_bridges_are_exact_and_lossless() {
         for raw in 0..=1 {
             let source = BinarySourceWord::W1(Bit1::new(raw).unwrap());
             assert_eq!(BinarySourceWord::from(source.d1().unwrap()), source);
@@ -466,6 +466,20 @@ mod tests {
             assert!(source.d5().is_none());
             assert!(source.d6().is_none());
             assert!(source.d7().is_none());
+            assert!(source.d9().is_none());
+        }
+
+        for raw in 0..=511 {
+            let source = BinarySourceWord::W9(Bit9::new(raw).unwrap());
+            assert_eq!(BinarySourceWord::from(source.d9().unwrap()), source);
+            assert!(source.d1().is_none());
+            assert!(source.d2().is_none());
+            assert!(source.d3().is_none());
+            assert!(source.d4().is_none());
+            assert!(source.d5().is_none());
+            assert!(source.d6().is_none());
+            assert!(source.d7().is_none());
+            assert!(source.d8().is_none());
         }
     }
 
@@ -491,11 +505,11 @@ mod tests {
     }
 
     #[test]
-    fn word_wider_than_bounded_carrier_fails_named() {
-        let error = parse_binary_source_words("000000000").expect_err("nine bits must fail");
+    fn word_wider_than_current_w9_carrier_fails_named() {
+        let error = parse_binary_source_words("0000000000").expect_err("ten bits must fail");
         assert_eq!(error.kind, ErrorKind::Parse);
-        assert!(error.message.contains("exceeds bounded 8-bit carrier"));
-        assert_eq!(error.span, Span { start: 0, end: 9 });
+        assert!(error.message.contains("exceeds current 9-bit carrier"));
+        assert_eq!(error.span, Span { start: 0, end: 10 });
     }
 
     #[test]
