@@ -38,7 +38,9 @@ jobs:
       - name: Current semantic slice
         run: bash scripts/test-current-semantic-slice.sh
       - name: Critical machine and surface witnesses
-        run: cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_block_roundtrip --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract --test english_names_in_code
+        run: |
+          cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_block_roundtrip --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract --test english_names_in_code
+          cargo clippy -p sens --test machine_block_roundtrip -- -D warnings
       - name: Native CPU vertical witnesses
         run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
       - name: CLI smoke
