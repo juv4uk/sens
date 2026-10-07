@@ -74,35 +74,46 @@ fn legacy_i5_6400_rows_are_unique_8bit_compatibility_keys() {
 }
 
 #[test]
-fn current_i5_6400_profile_uses_exact_domain_keys_for_migrated_cpu_slice() {
+fn current_i5_6400_profile_uses_width_safe_domain_keys_for_migrated_cpu_slice() {
     let current = include_str!("../../../lib/machine/profile/current-domain-x86-64.lisp");
 
-    assert!(current.contains("(machine-domain-profile/1"));
+    assert!(current.contains("(machine-domain-profile/2"));
     assert!(current.contains("(cpu intel-core-i5-6400)"));
-    assert!(current.contains("Keys are exact domain literals"));
+    assert!(current.contains("(key-shape width+packed-bits)"));
 
-    for (exact_key, expected_machine_path) in [
-        ("01010", "ADD"),       // D5 PLUS
-        ("01011", "SUB"),       // D5 DIFFERENCE
-        ("10110", "IMUL"),      // D5 TIMES
-        ("10111", "CQO+IDIV"),  // D5 QUOTIENT
-        ("11010", "CMP+SETL"),  // D5 LESSP
-        ("11011", "CMP+SETG"),  // D5 GREATERP
-        ("101", "CMP/SETE"),    // D3 EQ
-        ("110", "CMP+Jcc"),     // D3 COND
-        ("111", "STORE-pair"),  // D3 CONS
-        ("100", "LOAD-pair-head"), // D3 CAR
-        ("011", "LOAD-pair-tail"), // D3 CDR
+    for (width, packed_bits, expected_machine_path) in [
+        (5, 10, "ADD"),       // D5 PLUS
+        (5, 11, "SUB"),       // D5 DIFFERENCE
+        (5, 22, "IMUL"),      // D5 TIMES
+        (5, 23, "CQO+IDIV"),  // D5 QUOTIENT
+        (5, 26, "CMP+SETL"),  // D5 LESSP
+        (5, 27, "CMP+SETG"),  // D5 GREATERP
+        (3, 5, "CMP/SETE"),   // D3 EQ
+        (3, 6, "CMP+Jcc"),    // D3 COND
+        (3, 7, "STORE-pair"), // D3 CONS
+        (3, 4, "LOAD-pair-head"), // D3 CAR
+        (3, 3, "LOAD-pair-tail"), // D3 CDR
     ] {
-        let row_prefix = format!("({exact_key} ");
+        let row_prefix = format!("({width} {packed_bits} ");
         let row = current
             .lines()
             .map(str::trim_start)
             .find(|line| line.starts_with(&row_prefix))
-            .unwrap_or_else(|| panic!("current profile missing exact-domain key {exact_key}"));
+            .unwrap_or_else(|| {
+                panic!("current profile missing width-safe key ({width},{packed_bits})")
+            });
         assert!(
             row.contains(expected_machine_path),
-            "exact-domain key {exact_key} must advertise {expected_machine_path:?}; row: {row}"
+            "width-safe key ({width},{packed_bits}) must advertise {expected_machine_path:?}; row: {row}"
+        );
+    }
+
+    // Same packed payload under D4 must never inherit current D5 rows.
+    for packed_bits in [8, 10, 11] {
+        let row_prefix = format!("(4 {packed_bits} ");
+        assert!(
+            !current.lines().map(str::trim_start).any(|line| line.starts_with(&row_prefix)),
+            "D4 packed payload {packed_bits} must not inherit a D5 machine row"
         );
     }
 }

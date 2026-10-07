@@ -72,39 +72,39 @@ fn current_structural_surfaces_lower_to_exact_d3_identities() {
 fn exact_d3_structural_identities_select_existing_bounded_x86_forms() {
     let mut session = machine_session();
 
-    for (identity, expected_forms) in [
+    for (packed_bits, expected_forms) in [
         (
-            "111",
+            7,
             "((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax))",
         ),
         (
-            "100",
+            4,
             "((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 0) (ret))",
         ),
         (
-            "011",
+            3,
             "((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 8) (ret))",
         ),
     ] {
         let forms = eval_value(
-            &format!("(x86-lower-current-structural-u64-forms {identity} 2 3)"),
+            &format!("(x86-lower-current-structural-u64-forms 3 {packed_bits} 2 3)"),
             &mut session,
         );
-        assert_eq!(forms, expected_forms, "D3:{identity}");
+        assert_eq!(forms, expected_forms, "D3 packed={packed_bits}");
 
         let encoded = eval_value(
-            &format!("(x86-encode-current-structural-u64 {identity} 2 3)"),
+            &format!("(x86-encode-current-structural-u64 3 {packed_bits} 2 3)"),
             &mut session,
         );
         assert!(
             encoded.starts_with('(') && !encoded.contains("rejected"),
-            "D3:{identity} must reach admitted x86 bytes, got {encoded}"
+            "D3 packed={packed_bits} must reach admitted x86 bytes, got {encoded}"
         );
 
         let bytes = parse_bytes(&encoded);
         let decoded = x86_64_block_decoder::decode_machine_block(&bytes)
-            .unwrap_or_else(|error| panic!("D3:{identity} bytes rejected by independent decoder: {error}"));
-        assert_eq!(render_decoded(&decoded), forms, "D3:{identity}");
+            .unwrap_or_else(|error| panic!("D3 packed={packed_bits} bytes rejected by independent decoder: {error}"));
+        assert_eq!(render_decoded(&decoded), forms, "D3 packed={packed_bits}");
     }
 }
 
@@ -112,7 +112,7 @@ fn exact_d3_structural_identities_select_existing_bounded_x86_forms() {
 fn unsupported_exact_domain_identity_fails_closed() {
     let mut session = machine_session();
     let result = eval_value(
-        "(x86-encode-current-structural-u64 101 2 3)",
+        "(x86-encode-current-structural-u64 3 5 2 3)",
         &mut session,
     );
     assert_eq!(result, "unsupported-current-domain-structural-u64");
