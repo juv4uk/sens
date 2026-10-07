@@ -141,8 +141,9 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
             "((integer-multiply bounded-u32-inputs u64-result))",
         ),
     ] {
+        let packed_bits = u8::from_str_radix(identity, 2).expect("binary D5 payload");
         let capability = eval_program(
-            &format!("(machine-capabilities-for-domain {identity})"),
+            &format!("(machine-capabilities-for-domain 5 {packed_bits})"),
             &mut session,
         )
         .expect("current D5 capability")
@@ -152,7 +153,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     }
 
     let sub_forms = eval_program(
-        "(x86-lower-current-binary-u64-forms 01011 9 4)",
+        "(x86-lower-current-binary-u64-forms 5 11 9 4)",
         &mut session,
     )
     .expect("D5 DIFFERENCE forms")
@@ -164,7 +165,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     );
 
     let sub_bytes = eval_program(
-        "(x86-encode-current-binary-u64 01011 9 4)",
+        "(x86-encode-current-binary-u64 5 11 9 4)",
         &mut session,
     )
     .expect("D5 DIFFERENCE bytes")
@@ -179,7 +180,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     );
 
     let times_forms = eval_program(
-        "(x86-lower-current-binary-u64-forms 10110 6 7)",
+        "(x86-lower-current-binary-u64-forms 5 22 6 7)",
         &mut session,
     )
     .expect("D5 TIMES forms")
@@ -191,7 +192,7 @@ fn exact_d5_difference_and_times_reach_admitted_x86_bytes() {
     );
 
     let times_bytes = eval_program(
-        "(x86-encode-current-binary-u64 10110 6 7)",
+        "(x86-encode-current-binary-u64 5 22 6 7)",
         &mut session,
     )
     .expect("D5 TIMES bytes")
@@ -211,10 +212,10 @@ fn exact_d5_fast_paths_fail_closed_when_u64_would_change_meaning() {
     let mut session = machine_session();
 
     for form in [
-        "(x86-encode-current-binary-u64 01011 1 2)",
-        "(x86-encode-current-binary-u64 10110 18446744073709551615 2)",
-        "(x86-encode-current-binary-u64 01010 18446744073709551615 1)",
-        "(x86-encode-current-binary-u64 01011 -1 1)",
+        "(x86-encode-current-binary-u64 5 11 1 2)",
+        "(x86-encode-current-binary-u64 5 22 18446744073709551615 2)",
+        "(x86-encode-current-binary-u64 5 10 18446744073709551615 1)",
+        "(x86-encode-current-binary-u64 5 11 -1 1)",
     ] {
         let actual = eval_program(form, &mut session)
             .unwrap_or_else(|error| panic!("guard expression failed: {form}: {error}"))
