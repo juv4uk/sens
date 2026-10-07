@@ -86,14 +86,15 @@ fn exact_d3_structural_identities_select_existing_bounded_x86_forms() {
             "((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 8) (ret))",
         ),
     ] {
+        let packed_bits = u8::from_str_radix(identity, 2).expect("binary D3 payload");
         let forms = eval_value(
-            &format!("(x86-lower-current-structural-u64-forms {identity} 2 3)"),
+            &format!("(x86-lower-current-structural-u64-forms 3 {packed_bits} 2 3)"),
             &mut session,
         );
         assert_eq!(forms, expected_forms, "D3:{identity}");
 
         let encoded = eval_value(
-            &format!("(x86-encode-current-structural-u64 {identity} 2 3)"),
+            &format!("(x86-encode-current-structural-u64 3 {packed_bits} 2 3)"),
             &mut session,
         );
         assert!(
@@ -112,7 +113,7 @@ fn exact_d3_structural_identities_select_existing_bounded_x86_forms() {
 fn unsupported_exact_domain_identity_fails_closed() {
     let mut session = machine_session();
     let result = eval_value(
-        "(x86-encode-current-structural-u64 101 2 3)",
+        "(x86-encode-current-structural-u64 5 5 2 3)",
         &mut session,
     );
     assert_eq!(result, "unsupported-current-domain-structural-u64");
