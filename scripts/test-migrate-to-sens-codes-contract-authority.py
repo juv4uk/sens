@@ -91,7 +91,7 @@ def main():
         contract_authority=True,
         authority_index=authority,
     )
-    assert rewritten == "10 001 00 1 01\\n", rewritten
+    assert rewritten == "10 001 00 1 01\n", rewritten
     assert hits[0].domain == "D3"
     assert hits[0].bits == "001"
 
