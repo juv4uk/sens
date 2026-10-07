@@ -69,9 +69,12 @@
 (def encoder-coverage-all?
   (lambda (answers)
     (cond
-      ((encoder-coverage-empty? answers) encoder-coverage-d1-yes)
-      ((car answers)
+      ((encoder-coverage-empty? answers)
+       encoder-coverage-d1-yes)
+      ((encoder-coverage-same? (car answers) encoder-coverage-d1-yes)
        (encoder-coverage-all? (cdr answers)))
+      ((encoder-coverage-same? (car answers) encoder-coverage-d1-no)
+       encoder-coverage-d1-no)
       (encoder-coverage-d1-yes
        encoder-coverage-d1-no))))
 
@@ -200,12 +203,12 @@
            (status
              (cond
                ((encoder-coverage-empty? partial) (quote not-yet-implemented))
-               (t (quote partial))))
+               (encoder-coverage-d1-yes (quote partial))))
            (reason
              (cond
                ((encoder-coverage-empty? partial)
                 (encoder-coverage-not-yet-reason extension))
-               (t encoder-coverage-partial-reason))))
+               (encoder-coverage-d1-yes encoder-coverage-partial-reason))))
       (encoder-coverage-str+
         "  (coverage\n"
         "    (iclass " (write-to-string iclass) ")\n"
