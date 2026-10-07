@@ -713,7 +713,6 @@ pub(super) fn apply_macro(
 
     let expanded_value = evaluate(last, &local_environment)?;
     let expanded_expr = value_to_expr(expanded_value, span)?;
-    eprintln!("SENS_DEBUG_MACRO_EXPANSION: {expanded_expr:?}");
 
     Ok(EvalStep::TailCall {
         expression: expanded_expr,
