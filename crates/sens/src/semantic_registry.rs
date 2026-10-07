@@ -119,6 +119,22 @@ pub(crate) fn legacy_macro_domain_identity_from_registry_byte(
     }
 }
 
+/// Binding-only compatibility projection for Lisp-owned definitions that
+/// already have a ratified exact-domain resident.
+///
+/// This does not reinterpret historical calls. It only lets the first root
+/// language definition install the SAME closure in its exact slot while the
+/// old code-slot alias remains available to unmigrated callers.
+pub(crate) fn legacy_language_definition_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+    match byte {
+        0b0010_0111 => Some(d4(0b1110)), // LIST -> D4
+        _ => None,
+    }
+}
+
 /// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
 ///
 /// This MUST NOT be used to reinterpret historical Sens8 calls. Its only
@@ -356,6 +372,19 @@ mod tests {
                 .expect("migration tooling must retain the ratified exact successor");
             assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
         }
+    }
+
+    #[test]
+    fn list_definition_binding_has_exact_d4_successor_without_runtime_remap() {
+        let legacy = 0b0010_0111;
+        assert_eq!(
+            legacy_domain_identity_from_registry_byte(legacy),
+            None,
+            "LIST must not regain a generic legacy invocation route"
+        );
+        let identity = legacy_language_definition_identity_from_registry_byte(legacy)
+            .expect("LIST definition must bind its ratified exact D4 resident");
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1110));
     }
 
     #[test]
