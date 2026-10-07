@@ -110,6 +110,11 @@ fn push_head_edit(head: &Expr, surface: &str, sens: Sens8, analysis: &mut Analys
                 )
             })
         else {
+            eprintln!(
+                "blocked-exact surface={} compatibility={}",
+                surface,
+                target_sens(sens)
+            );
             analysis.blocked_exact_domain += 1;
             return;
         };
@@ -136,6 +141,7 @@ fn push_compatibility_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysi
     let Some(identity) =
         semantic_registry_export::exact_domain_successor_for_compatibility_id(sens)
     else {
+        eprintln!("blocked-exact compatibility={}", sens);
         analysis.blocked_exact_domain += 1;
         return;
     };
