@@ -82,6 +82,32 @@ fn exact_d6_let_executes_after_core_bootstrap() {
 }
 
 #[test]
+fn exact_d6_let_top_level_preserves_exact_initializer_call() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    let forms = parse_mixed_exact_domain(
+        "(001000 ((y (100 (001 (41 42))))) y)",
+    )
+    .expect("top-level exact D6 LET with exact initializer");
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("top-level exact LET must execute exact initializer");
+    assert_eq!(result.value.to_string(), "41");
+}
+
+#[test]
+fn exact_d6_let_executes_inside_exact_lambda_with_simple_initializer() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    let forms = parse_mixed_exact_domain(
+        "(0011 f (0010 (x) (001000 ((y x)) y))) (f 41)",
+    )
+    .expect("nested exact D6 LET with simple initializer");
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("nested exact D6 LET must see the lambda call frame");
+    assert_eq!(result.value.to_string(), "41");
+}
+
+#[test]
 fn exact_d6_let_executes_inside_exact_lambda_with_exact_initializer() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
