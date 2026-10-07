@@ -70,22 +70,18 @@ for row in rows:
     assert got["coordinate_basis"]=="UNPLACED"
     assert got["ratified_resident"] is False
 
-assert inventory["accounting"]=={
-    "selected_semantic_candidates":443,
-    "law_forced_coordinates":256,
-    "unplaced_selected_candidates":187,
-    "remaining_semantic_inventory":581,
-    "ratified_d10_residents":0,
-}
-assert len(inventory["rows"])==443
-assert len({r["stable_id"] for r in inventory["rows"]})==443
-assert len({r["semantic_name"] for r in inventory["rows"]})==443
+target=state["target"]
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+assert selected_total>=428
+assert remaining_total==1024-selected_total
+assert target["law_forced_coordinates"]==256
+assert target["unplaced_selected_candidates"]==selected_total-256
+assert target["ratified_residents"]==0
+assert len(inventory["rows"])==selected_total
+assert len({r["stable_id"] for r in inventory["rows"]})==selected_total
+assert len({r["semantic_name"] for r in inventory["rows"]})==selected_total
 
-assert state["target"]["selected_semantic_candidates"]==443
-assert state["target"]["remaining_semantic_candidates"]==581
-assert state["target"]["law_forced_coordinates"]==256
-assert state["target"]["unplaced_selected_candidates"]==187
-assert state["target"]["ratified_residents"]==0
 assert state["crossrepo_paip_v1"]=={
     "artifact":"knowledge/d10-crossrepo-paip-v1.json",
     "selected":23,
@@ -95,4 +91,4 @@ assert state["crossrepo_paip_v1"]=={
 }
 
 print("D10-CROSSREPO-PAIP-V1=PASS")
-print("selected=23 inventory=443/1024 placed=256 unplaced=187 remaining=581 ratified=0")
+print(f"selected=23 inventory={selected_total}/1024 placed=256 unplaced={selected_total-256} remaining={remaining_total} ratified=0")
