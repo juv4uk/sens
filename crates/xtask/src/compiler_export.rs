@@ -238,8 +238,8 @@ mod tests {
         let input = compiler_semantic_input_from_sens(parse_identity("D4", "0010").unwrap())
             .unwrap()
             .expect("LAMBDA compiler input");
-        let request = render_request("lambda", &input, "0123456789abcdef0123456789abcdef01234567");
-        let artifact = render_artifact("lambda", &request).to_ascii_lowercase();
+        let request = render_request("d4-0010", &input, "0123456789abcdef0123456789abcdef01234567");
+        let artifact = render_artifact("d4-0010", &request).to_ascii_lowercase();
 
         for forbidden in [
             "cuda",

@@ -219,7 +219,7 @@ mod tests {
     fn equivalence_check_marks_complete() {
         let bootstrap = C0Facts {
             implementation_sha: "abc".to_string(),
-            program_sha: "def".to_string(),
+            program_sha: "def456".to_string(),
             contract_sha: "ghi".to_string(),
             target_profile: "x86_64".to_string(),
             accepts_exact_domain: true,
