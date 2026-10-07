@@ -19,16 +19,17 @@ permissions:
 
 jobs:
   objective:
-    name: validate and measure ladder encoding
+    name: validate and measure historical 11.6 ladder encoding
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Validate the conformance artifact
+      - name: Validate historical Contract 11.6 conformance artifact
         run: |
           python3 benchmarks/execution-ladder-conformance/validate.py \
+            --contract 11.6 \
             benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl
 
       - name: Run structural transmission benchmark
