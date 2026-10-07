@@ -91,7 +91,6 @@ pub struct GpuOracleBlock {
     pub missing_law: String,
     pub reasons: Vec<String>,
     pub current_candidates_reviewed: Vec<GpuCandidateReview>,
-    pub forbidden_legacy_operation: String,
     pub forbidden_legacy_identity: String,
     pub unblock_rule: String,
 }
@@ -194,7 +193,6 @@ impl GpuConformanceCorpus {
                 "D7 has current semantic residency but no callable Core-operation projection.".to_string(),
             ],
             current_candidates_reviewed: current_candidates_reviewed.clone(),
-            forbidden_legacy_operation: "numeric-buffer-map".to_string(),
             forbidden_legacy_identity: FORBIDDEN_LEGACY_NUMERIC_BUFFER_MAP.to_string(),
             unblock_rule: "SENS must ratify or expose a current exact-domain law that semantically defines the batched/buffer workload and emits a Contract 11.6 L0 ORACLE row with deterministic digests.".to_string(),
         };
