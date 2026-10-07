@@ -13,6 +13,8 @@ struct SiliconRow<'a> {
     expression: &'a str,
     expected: &'a str,
     observed: String,
+    classification: &'a str,
+    feature_gate: &'a str,
 }
 
 fn repo_root() -> PathBuf {
@@ -73,7 +75,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
 
     let mut json = String::new();
     json.push_str("{\n");
-    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v1\",\n");
+    json.push_str("  \"schema\": \"sens-real-silicon-sweep-v2\",\n");
     json.push_str(&format!("  \"sens_commit\": \"{}\",\n", json_escape(&sha)));
     json.push_str("  \"target\": \"x86_64-linux-owner-self-hosted\",\n");
     json.push_str(&format!(
@@ -84,7 +86,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
         "  \"cpu_flags\": \"{}\",\n",
         json_escape(cpu_flags)
     ));
-    json.push_str("  \"classification\": \"execute-safe\",\n");
+    json.push_str("  \"classification_policy\": \"per-row\",\n");
     json.push_str(
         "  \"admission_boundary\": \"lib/machine/admission/x86-64.lisp:x86-call-admitted-u64\",\n",
     );
@@ -99,12 +101,14 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
     for (index, row) in rows.iter().enumerate() {
         json.push_str("    {");
         json.push_str(&format!(
-            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"status\":\"pass\"",
+            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"classification\":\"{}\",\"feature_gate\":\"{}\",\"status\":\"pass\"",
             json_escape(row.id),
             json_escape(row.families),
             json_escape(row.expression),
             json_escape(row.expected),
             json_escape(&row.observed),
+            json_escape(row.classification),
+            json_escape(row.feature_gate),
         ));
         json.push('}');
         if index + 1 != rows.len() {
@@ -352,6 +356,8 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             expression,
             expected,
             observed,
+            classification: "execute-safe",
+            feature_gate: "none",
         });
     }
 
