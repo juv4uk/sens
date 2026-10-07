@@ -877,8 +877,22 @@ def binary_rewrite(
             else:
                 raise BinaryMigrationError("unterminated string")
             token = source[start:i]
-            # Quoted digits are ordinary Text7 string data.  Only an unquoted
-            # binary source word may carry exact domain identity.
+            if contract_authority:
+                try:
+                    quoted_value = ast.literal_eval(token)
+                except (SyntaxError, ValueError):
+                    quoted_value = None
+                if isinstance(quoted_value, str) and re.fullmatch(
+                    r"[01]+",
+                    quoted_value,
+                ):
+                    raise BinaryMigrationError(
+                        "quoted binary semantic identity "
+                        f"{quoted_value!r} is not canonical source; "
+                        "use the exact unquoted domain word"
+                    )
+            # Quoted digits are ordinary Text7 string data unless they are
+            # pretending to carry canonical semantic identity.
             out.extend(encode_text7_spelling(token, text7_candidates))
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
