@@ -1,0 +1,268 @@
+{
+  "schema": "d10-wsm-os-lisp-ownership-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4045",
+  "date": "2026-10-07",
+  "foundation": "#4008 / Contract 11.8 / D1-D9",
+  "wsm_repo": "juv4uk/wsm-os-lisp",
+  "wsm_issue": "#74",
+  "principle": "SENS Core owns universal language meaning; wsm-os-lisp owns the living Lisp machine, OS services, debugger/image/task semantics and physical target mechanisms.",
+  "current_d10_accounting": {
+    "selected_semantic_candidates": 400,
+    "law_forced_coordinates": 256,
+    "unplaced_selected_candidates": 144,
+    "remaining_semantic_inventory": 624,
+    "ratified_d10_residents": 0
+  },
+  "core_review": [
+    {
+      "semantic_name": "SIGNAL-CONDITION",
+      "decision": "HOLD-FUTURE-SEMANTIC-REVIEW",
+      "reason": "D8 already owns ERROR as explicit error signaling and D9 owns DEFINE-CONDITION. A distinct continuable/general condition dispatch law is not yet proved. Current WSM M5G condition records are explicitly non-resumable.",
+      "coordinate": null,
+      "d10_slot_effect": 0
+    },
+    {
+      "semantic_name": "RESTART-AVAILABLE?",
+      "decision": "HOLD-FUTURE-SEMANTIC-REVIEW",
+      "reason": "No ratified restart object/capability model exists yet. This may collapse to ordinary lookup over explicit restart data.",
+      "coordinate": null,
+      "d10_slot_effect": 0
+    },
+    {
+      "semantic_name": "INVOKE-RESTART",
+      "decision": "HOLD-FUTURE-SEMANTIC-REVIEW",
+      "reason": "May reduce to APPLY/FUNCALL over a future explicit restart continuation capability; no independent law is proved yet.",
+      "coordinate": null,
+      "d10_slot_effect": 0
+    },
+    {
+      "semantic_name": "USE-VALUE",
+      "decision": "DERIVED-NAMED-RESTART-CONVENTION-HOLD",
+      "reason": "Likely a named restart convention rather than an independent primitive semantic identity unless a stronger law proves otherwise.",
+      "coordinate": null,
+      "d10_slot_effect": 0
+    }
+  ],
+  "wsm_owned": [
+    {
+      "family": "definition-inspection",
+      "semantic_name": "INSTALL-DEFINITION",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp M10 live image"
+      ]
+    },
+    {
+      "family": "definition-inspection",
+      "semantic_name": "DESCRIBE-DEFINITION",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp Lisp-machine feature research"
+      ]
+    },
+    {
+      "family": "definition-inspection",
+      "semantic_name": "INSPECT-OBJECT",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp Lisp-machine feature research"
+      ]
+    },
+    {
+      "family": "definition-inspection",
+      "semantic_name": "BACKTRACE-TASK",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp Lisp-machine feature research"
+      ]
+    },
+    {
+      "family": "definition-inspection",
+      "semantic_name": "HEAP-SUMMARY",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp Lisp-machine feature research"
+      ]
+    },
+    {
+      "family": "definition-inspection",
+      "semantic_name": "DISASSEMBLE-DEFINITION",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp Lisp-machine feature research"
+      ]
+    },
+    {
+      "family": "task-control",
+      "semantic_name": "TASK-STATE",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp stack-group/task design"
+      ]
+    },
+    {
+      "family": "task-control",
+      "semantic_name": "SUSPEND-TASK",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp stack-group/task design"
+      ]
+    },
+    {
+      "family": "task-control",
+      "semantic_name": "RESUME-TASK",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp stack-group/task design"
+      ]
+    },
+    {
+      "family": "task-control",
+      "semantic_name": "ABORT-TASK",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp restart/task design"
+      ]
+    },
+    {
+      "family": "live-image",
+      "semantic_name": "SAVE-LIVE-IMAGE",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp M10 live image"
+      ]
+    },
+    {
+      "family": "live-image",
+      "semantic_name": "RESTORE-LIVE-IMAGE",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp M10 live image"
+      ]
+    },
+    {
+      "family": "live-image",
+      "semantic_name": "REBIND-CAPABILITIES",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp image capability-rebind design"
+      ]
+    },
+    {
+      "family": "history",
+      "semantic_name": "EVENT-HISTORY",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp bounded typed event-ring design"
+      ]
+    },
+    {
+      "family": "history",
+      "semantic_name": "EVENT-RING-APPEND",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp bounded typed event-ring design"
+      ]
+    },
+    {
+      "family": "target-device",
+      "semantic_name": "MMIO-CAPABILITY",
+      "status": "EVIDENCE-EXISTS",
+      "evidence": [
+        "wsm-os-lisp D1/D2 MMIO capability witnesses"
+      ]
+    },
+    {
+      "family": "target-device",
+      "semantic_name": "MMIO-READ",
+      "status": "EVIDENCE-EXISTS",
+      "evidence": [
+        "wsm-os-lisp MMIO bounded-read witnesses"
+      ]
+    },
+    {
+      "family": "target-device",
+      "semantic_name": "MMIO-WRITE",
+      "status": "EVIDENCE-EXISTS",
+      "evidence": [
+        "wsm-os-lisp MMIO bounded-write witnesses"
+      ]
+    },
+    {
+      "family": "target-device",
+      "semantic_name": "PCI-CONFIG-READ",
+      "status": "EVIDENCE-EXISTS",
+      "evidence": [
+        "wsm-os-lisp D1 PCI config capability"
+      ]
+    },
+    {
+      "family": "target-device",
+      "semantic_name": "BLOCK-READ",
+      "status": "PARTIAL-EVIDENCE",
+      "evidence": [
+        "wsm-os-lisp block mechanism / VirtIO work"
+      ]
+    },
+    {
+      "family": "target-device",
+      "semantic_name": "BLOCK-WRITE",
+      "status": "PARTIAL-EVIDENCE",
+      "evidence": [
+        "wsm-os-lisp block mechanism / VirtIO work"
+      ]
+    },
+    {
+      "family": "target-device",
+      "semantic_name": "BLOCK-FLUSH",
+      "status": "PARTIAL-EVIDENCE",
+      "evidence": [
+        "wsm-os-lisp block mechanism / VirtIO work"
+      ]
+    },
+    {
+      "family": "memory",
+      "semantic_name": "GC-COLLECT",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp M7 / constitution GC"
+      ]
+    },
+    {
+      "family": "memory",
+      "semantic_name": "ROOT-ENUMERATION",
+      "status": "PLANNED",
+      "evidence": [
+        "wsm-os-lisp GC/root-map work"
+      ]
+    }
+  ],
+  "mechanism_only": [
+    "RDTSC instruction lowering",
+    "raw page-table walk",
+    "PCI BAR discovery",
+    "VirtIO descriptor/ring mechanics",
+    "serial UART polling",
+    "QEMU/UEFI handoff details",
+    "native stack layout",
+    "copying-GC algorithm choice"
+  ],
+  "accounting": {
+    "core_review_rows": 4,
+    "new_d10_candidates_selected": 0,
+    "wsm_owned_package_rows": 24,
+    "mechanism_only_rows": 8,
+    "d10_selected_after_review": 400,
+    "d10_remaining_after_review": 624,
+    "d10_coordinates_assigned": 0,
+    "ratified_d10_residents": 0
+  },
+  "hard_rules": [
+    "wsm-os-lisp implementation evidence does not mint SENS Core authority",
+    "WSM package semantics may be first-class in the Lisp machine without consuming D10 Core slots",
+    "target/backend mechanism never becomes semantic identity merely because Lisp can invoke it",
+    "future Core restart admission requires independent executable laws and explicit owner review",
+    "no D10 coordinate assignment is made by this ownership review"
+  ]
+}
