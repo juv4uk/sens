@@ -1155,11 +1155,12 @@ def main():
     selected_surfaces = list(args.domain_surfaces)
     current_resolver_domains = tuple(dict.fromkeys(selected_domains))
     if args.contract_authority:
-        selected_domains = [
-            domain
-            for domain in CONTRACT_SURFACE_DOMAINS
-            if domain != "D9" or d9_enabled
-        ]
+        # Human/source-head resolution is migration evidence only and is
+        # deliberately limited to the domains that may already head calls.
+        # D8/D9 residents belong exclusively to binary_authority below; putting
+        # their labels in this global map would incorrectly require human names
+        # to be unique across semantic domains.
+        selected_domains = list(CONTRACT_CALL_DOMAINS)
         selected_surfaces.extend(
             path
             for path in (
