@@ -81,6 +81,48 @@ fn binary_number_refuses_implicit_legacy_numeric_coercion() {
 }
 
 #[test]
+fn equal_rendering_does_not_collapse_binary_and_legacy_number_carriers() {
+    let mut session = Session::default();
+
+    let binary = eval_program("#b1001000", &mut session)
+        .expect("binary Number")
+        .value;
+    let legacy = eval_program("#d72", &mut session)
+        .expect("legacy/mechanical exact Number")
+        .value;
+
+    assert_eq!(
+        render_value_for_presentation(&binary, PresentationLanguage::English),
+        "72"
+    );
+    assert_eq!(
+        render_value_for_presentation(&legacy, PresentationLanguage::English),
+        "72"
+    );
+    assert_ne!(binary, legacy, "presentation equality must not erase carrier identity");
+
+    let distinct = eval_program("(equal? #b1001000 #d72)", &mut session)
+        .expect("EQUAL compares distinct carriers without coercion")
+        .value;
+    assert_eq!(
+        distinct,
+        Value::DomainIdentity(DomainIdentity::D1(PredicateBit::from_word(
+            Bit1::new(0).unwrap()
+        )))
+    );
+
+    let same = eval_program("(equal? #d72 #d72)", &mut session)
+        .expect("EQUAL accepts identical mechanical Number carriers")
+        .value;
+    assert_eq!(
+        same,
+        Value::DomainIdentity(DomainIdentity::D1(PredicateBit::from_word(
+            Bit1::new(1).unwrap()
+        )))
+    );
+}
+
+#[test]
 fn binary_number_round_trips_fasl_wire_and_binary_frame_as_exact_bits() {
     let parsed = parse("#b101001").expect("parse");
     let hash = [0x30u8; 32];
