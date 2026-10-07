@@ -13,7 +13,7 @@
 
 use crate::{
     canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
-    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, parse_mixed_exact_domain,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
     load_core_library, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
     CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
     Session, Span, Value,
@@ -593,12 +593,6 @@ fn compiler_program_artifact_call() -> Expr {
     }
 }
 
-fn eval_compiler_nucleus(session: &mut Session) -> Result<(), LanguageError> {
-    let expressions = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)?;
-    eval_parsed_expressions(&expressions, session)?;
-    Ok(())
-}
-
 fn decode_language_lowering_role(
     value: &Value,
 ) -> Result<Option<CompilerLoweringRole>, LanguageError> {
@@ -662,7 +656,7 @@ pub fn compiler_lowering_role_from_sens(
         .environment
         .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
 
-    eval_compiler_nucleus(&mut session)?;
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_lowering_role(&result)
@@ -715,7 +709,7 @@ pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, Lang
     let mut session = Session::default();
     load_core_library(&mut session)?;
     install_compiler_program_bindings(&mut session, program)?;
-    eval_compiler_nucleus(&mut session)?;
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
 }
 
@@ -770,7 +764,7 @@ pub fn compiler_program_artifact_from_sens(
             Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
         ]),
     );
-    eval_compiler_nucleus(&mut session)?;
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
 }
 
@@ -804,3 +798,763 @@ pub fn verify_compiler_program_artifact_from_sens(
     };
     if schema.as_ref() == "compiler-compilation-error/1" {
         return Err(invalid_projection(
+            "compiler-compilation-error/1 cannot enter executable lowering",
+        ));
+    }
+    if schema.as_ref() != "compiler-compilation-artifact/1" {
+        return Err(invalid_projection(format!(
+            "unknown compiler program artifact schema: {schema}"
+        )));
+    }
+
+    const ALLOWED_FIELDS: [&str; 7] = [
+        "artifact-kind",
+        "program-wire-sha256",
+        "semantic-requests-sha256",
+        "authority-provenance",
+        "semantic-requests",
+        "required-capabilities",
+        "artifact-status",
+    ];
+    for row in &rows[1..] {
+        let parts = compiler_artifact_list(row, "compiler artifact field")?;
+        if parts.len() != 2 {
+            return Err(invalid_projection(
+                "compiler artifact fields must contain exactly name and value",
+            ));
+        }
+        let Value::Symbol(name) = parts[0] else {
+            return Err(invalid_projection(
+                "compiler artifact field name must be a symbol",
+            ));
+        };
+        if !ALLOWED_FIELDS.contains(&name.as_ref()) {
+            return Err(invalid_projection(format!(
+                "compiler artifact contains unsupported field {name}"
+            )));
+        }
+    }
+
+    let kind = compiler_artifact_field(&rows[1..], "artifact-kind")?;
+    if !matches!(kind, Value::Symbol(name) if name.as_ref() == "whole-program") {
+        return Err(invalid_projection(
+            "compiler artifact kind must be whole-program",
+        ));
+    }
+    let status = compiler_artifact_field(&rows[1..], "artifact-status")?;
+    if !matches!(status, Value::Symbol(name) if name.as_ref() == "canonical-backend-neutral") {
+        return Err(invalid_projection(
+            "compiler artifact status must be canonical-backend-neutral",
+        ));
+    }
+    if !matches!(
+        compiler_artifact_field(&rows[1..], "required-capabilities")?,
+        Value::Nil
+    ) {
+        return Err(invalid_projection(
+            "compiler artifact required-capabilities must be empty",
+        ));
+    }
+
+    let program_wire_sha256 = compiler_artifact_string(
+        compiler_artifact_field(&rows[1..], "program-wire-sha256")?,
+        "program-wire-sha256",
+    )?;
+    if program_wire_sha256 != expected_program_wire_sha256 {
+        return Err(invalid_projection(
+            "compiler artifact program wire digest does not match caller provenance",
+        ));
+    }
+
+    let provenance =
+        compiler_artifact_list(
+            compiler_artifact_field(&rows[1..], "authority-provenance")?,
+            "compiler artifact authority provenance",
+        )?;
+    if provenance.len() != 5 {
+        return Err(invalid_projection(
+            "compiler artifact authority provenance must contain revision, path, authority digest, contract version and nucleus digest",
+        ));
+    }
+    let sens_revision = compiler_artifact_string(provenance[0], "SENS revision")?;
+    let authority_path = compiler_artifact_string(provenance[1], "authority path")?;
+    let authority_sha256 = compiler_artifact_string(provenance[2], "authority digest")?;
+    let language_contract_version =
+        compiler_artifact_string(provenance[3], "language contract version")?;
+    let compiler_nucleus_sha256 =
+        compiler_artifact_string(provenance[4], "compiler nucleus digest")?;
+
+    if sens_revision != expected_sens_revision
+        || authority_path != COMPILER_AUTHORITY_PATH
+        || authority_sha256 != sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        || language_contract_version != COMPILER_CONTRACT_VERSION
+        || compiler_nucleus_sha256 != sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
+    {
+        return Err(invalid_projection(
+            "compiler artifact authority provenance disagrees with current SENS authority",
+        ));
+    }
+
+    let semantic_requests =
+        compiler_artifact_field(&rows[1..], "semantic-requests")?.clone();
+    let requests = compiler_artifact_list(&semantic_requests, "compiler semantic requests")?;
+    if requests.is_empty() {
+        return Err(invalid_projection(
+            "compiler whole-program artifact must contain semantic requests",
+        ));
+    }
+    let semantic_requests_sha256 = compiler_artifact_string(
+        compiler_artifact_field(&rows[1..], "semantic-requests-sha256")?,
+        "semantic-requests-sha256",
+    )?;
+    let canonical_requests = crate::compiler_evidence_canonical_bytes(&semantic_requests)
+        .map_err(invalid_projection)?;
+    if sha256_hex(&canonical_requests) != semantic_requests_sha256 {
+        return Err(invalid_projection(
+            "compiler artifact semantic request digest mismatch",
+        ));
+    }
+
+    let mut role_session = Session::default();
+    load_core_library(&mut role_session)?;
+    role_session
+        .environment
+        .define(SHAPE_MECHANISM_NAME, domain_identity_shape_mechanism());
+    role_session
+        .environment
+        .define(LAW_VALUE_NAME, compiler_l1_l5_law_value()?);
+    role_session
+        .environment
+        .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
+    eval_program(COMPILER_NUCLEUS_SOURCE, &mut role_session)?;
+
+    let verified_requests = requests
+        .into_iter()
+        .map(|request| verify_compiler_program_request(request, &mut role_session))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(VerifiedCompilerProgramArtifact {
+        program_wire_sha256,
+        sens_revision,
+        authority_path,
+        authority_sha256,
+        language_contract_version,
+        compiler_nucleus_sha256,
+        semantic_requests_sha256,
+        semantic_requests,
+        requests: verified_requests,
+    })
+}
+
+/// Backward-compatible three-role view used by the already-landed selector/pair
+/// compiler bridge. It delegates to the same full SENS-owned role law and never
+/// reconstructs identity-to-role meaning in Rust.
+/// Produce the canonical proof-carrying compiler semantic input for one exact
+/// current identity.
+///
+/// Role meaning and D3/D4 proof ownership are selected inside SENS. Downstream
+/// consumers may verify and bind a private mechanism, but must not reconstruct
+/// either fact from coordinates, names, or a legacy callable identity.
+fn proof_ref_for_lowering_role(role: CompilerLoweringRole) -> &'static str {
+    match role {
+        CompilerLoweringRole::LambdaForm | CompilerLoweringRole::DefineForm => {
+            COMPILER_D4_PROOF_REF
+        }
+        CompilerLoweringRole::QuoteForm
+        | CompilerLoweringRole::AtomPredicate
+        | CompilerLoweringRole::SelectorTail
+        | CompilerLoweringRole::SelectorHead
+        | CompilerLoweringRole::AtomEquality
+        | CompilerLoweringRole::CondForm
+        | CompilerLoweringRole::PairConstruct => COMPILER_D3_PROOF_REF,
+    }
+}
+
+pub fn compiler_semantic_input_from_sens(
+    identity: CoreDomainIdentity,
+) -> Result<Option<CompilerSemanticInput>, LanguageError> {
+    let Some(lowering_role) = compiler_lowering_role_from_sens(identity)? else {
+        return Ok(None);
+    };
+
+    let proof_ref = proof_ref_for_lowering_role(lowering_role);
+
+    Ok(Some(CompilerSemanticInput {
+        identity,
+        lowering_role,
+        authority_ref: COMPILER_ROLE_LAW_REF,
+        proof_ref,
+        semantic_status: "current",
+        authority_path: COMPILER_AUTHORITY_PATH,
+        authority_sha256: sha256_hex(LANGUAGE_CONTRACT.as_bytes()),
+        language_contract_version: COMPILER_CONTRACT_VERSION,
+    }))
+}
+
+pub fn compiler_execution_role_from_sens(
+    identity: CoreDomainIdentity,
+) -> Result<Option<CompilerExecutionRole>, LanguageError> {
+    match compiler_lowering_role_from_sens(identity)? {
+        Some(CompilerLoweringRole::SelectorHead) => {
+            Ok(Some(CompilerExecutionRole::SelectorHead))
+        }
+        Some(CompilerLoweringRole::SelectorTail) => {
+            Ok(Some(CompilerExecutionRole::SelectorTail))
+        }
+        Some(CompilerLoweringRole::PairConstruct) => {
+            Ok(Some(CompilerExecutionRole::PairConstruct))
+        }
+        Some(_) | None => Ok(None),
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn d3(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(raw).expect("D3 test word")),
+        )
+    }
+
+    fn d4(raw: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D4(
+            crate::CoreD4::from_word(crate::Bit4::new(raw).expect("D4 test word")),
+        )
+    }
+
+    #[test]
+    fn compiled_driver_bootstrap_bundle_contains_verified_representation_only_inputs() {
+        let bundle = compiler_program_bootstrap_bundle().expect("verified compiler bootstrap bundle");
+
+        assert_eq!(bundle.d3_law, compiler_l1_l5_law_value().unwrap());
+        assert_eq!(bundle.d4_law, compiler_d4_bootstrap_law_value().unwrap());
+        assert_eq!(bundle.d3_proof_ref, COMPILER_D3_PROOF_REF);
+        assert_eq!(bundle.d4_proof_ref, COMPILER_D4_PROOF_REF);
+        assert_eq!(bundle.authority_path, COMPILER_AUTHORITY_PATH);
+        assert_eq!(bundle.language_contract_version, COMPILER_CONTRACT_VERSION);
+        assert_eq!(bundle.authority_sha256, sha256_hex(LANGUAGE_CONTRACT.as_bytes()));
+        assert_eq!(
+            bundle.compiler_nucleus_sha256,
+            sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
+        );
+
+        let provenance = list_values(&bundle.request_provenance);
+        assert_eq!(provenance.len(), 3);
+        assert!(matches!(
+            provenance[0],
+            Value::String(value) if value.as_ref() == COMPILER_AUTHORITY_PATH
+        ));
+        assert!(matches!(
+            provenance[1],
+            Value::String(value) if value.as_ref() == bundle.authority_sha256.as_str()
+        ));
+        assert!(matches!(
+            provenance[2],
+            Value::String(value) if value.as_ref() == COMPILER_CONTRACT_VERSION
+        ));
+
+        // Ratchet: the bundle is structural/provenance transport only.
+        let rendered = format!("{bundle:?}");
+        for forbidden in [
+            "QuoteForm",
+            "AtomPredicate",
+            "SelectorTail",
+            "SelectorHead",
+            "AtomEquality",
+            "Conditional",
+            "PairConstruct",
+            "LambdaForm",
+            "DefineForm",
+        ] {
+            assert!(
+                !rendered.contains(forbidden),
+                "bootstrap bundle leaked compiler role meaning: {forbidden}"
+            );
+        }
+    }
+
+    #[test]
+    fn stale_law_authority_is_a_bootstrap_failure_before_role_execution() {
+        let stale_authority = format!("{LAW_AUTHORITY}\n; parity-test-stale-authority");
+        let error = verify_projection_authority(LAW_PROJECTION, &stale_authority)
+            .expect_err("stale authority must be rejected before SENS role execution");
+
+        assert!(
+            error
+                .to_string()
+                .contains("stale against its ratified authority"),
+            "unexpected stale-projection error: {error}"
+        );
+    }
+
+    #[test]
+    fn d4_projection_authority_is_verified_before_role_execution() {
+        let stale_authority = format!("{D4_LAW_AUTHORITY}\n; parity-test-stale-authority");
+        let error = verify_projection_authority(D4_LAW_PROJECTION, &stale_authority)
+            .expect_err("stale D4 authority must be rejected before SENS role execution");
+
+        assert!(
+            error
+                .to_string()
+                .contains("stale against its ratified authority"),
+            "unexpected D4 stale-projection error: {error}"
+        );
+    }
+
+    #[test]
+    fn semantic_input_api_owns_law_proof_and_root_authority_facts() {
+        let d3_input = compiler_semantic_input_from_sens(d3(0b010))
+            .expect("D3 semantic input")
+            .expect("ATOM is in compiler closure");
+        assert_eq!(d3_input.lowering_role, CompilerLoweringRole::AtomPredicate);
+        assert_eq!(d3_input.authority_ref, COMPILER_ROLE_LAW_REF);
+        assert_eq!(d3_input.proof_ref, COMPILER_D3_PROOF_REF);
+        assert_eq!(d3_input.semantic_status, "current");
+        assert_eq!(d3_input.authority_path, "language-contract.lisp");
+        assert_eq!(d3_input.authority_sha256.len(), 64);
+        assert_eq!(d3_input.language_contract_version, "11.8");
+
+        let d4_input = compiler_semantic_input_from_sens(d4(0b0010))
+            .expect("D4 semantic input")
+            .expect("LAMBDA is in compiler closure");
+        assert_eq!(d4_input.lowering_role, CompilerLoweringRole::LambdaForm);
+        assert_eq!(d4_input.authority_ref, COMPILER_ROLE_LAW_REF);
+        assert_eq!(d4_input.proof_ref, COMPILER_D4_PROOF_REF);
+        assert_eq!(d4_input.authority_sha256, d3_input.authority_sha256);
+
+        assert!(
+            compiler_semantic_input_from_sens(d3(0b000))
+                .expect("D3 empty transport")
+                .is_none()
+        );
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        assert!(
+            compiler_semantic_input_from_sens(d8)
+                .expect("D8 must fail closed as no compiler input")
+                .is_none()
+        );
+    }
+
+    fn list_values(value: &Value) -> Vec<&Value> {
+        let mut out = Vec::new();
+        let mut cursor = value;
+        loop {
+            match cursor {
+                Value::Nil => return out,
+                Value::Pair(head, tail) => {
+                    out.push(head.as_ref());
+                    cursor = tail.as_ref();
+                }
+                other => panic!("expected proper list, got {other}"),
+            }
+        }
+    }
+
+    fn exact_value(identity: CoreDomainIdentity) -> Value {
+        Value::DomainIdentity(DomainIdentity::from_source_word(identity.source_word()))
+    }
+
+    fn expr_program_data(expr: &Expr) -> Value {
+        crate::expr_to_exact_program_data(expr)
+            .expect("compiler program-data must be exact-domain source-shaped data")
+    }
+
+    fn field_value<'a>(artifact: &'a Value, field: &str) -> &'a Value {
+        for entry in list_values(artifact).into_iter().skip(1) {
+            let parts = list_values(entry);
+            if parts.len() == 2
+                && matches!(parts[0], Value::Symbol(name) if name.as_ref() == field)
+            {
+                return parts[1];
+            }
+        }
+        panic!("artifact field {field} not found: {artifact}");
+    }
+
+    #[test]
+    fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
+        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let lowered = crate::lower_program(&parsed);
+        let wire = crate::wire_encode_program(&lowered);
+        let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
+        let program = Value::list(decoded.iter().map(expr_program_data));
+        let digest = sha256_hex(&wire);
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+
+        let artifact = compiler_program_artifact_from_sens(program, &digest, revision)
+            .expect("SENS whole-program artifact");
+        let verified =
+            verify_compiler_program_artifact_from_sens(&artifact, &digest, revision)
+                .expect("current SENS artifact verifies");
+
+        assert_eq!(verified.program_wire_sha256, digest);
+        assert_eq!(verified.sens_revision, revision);
+        assert_eq!(verified.authority_path, COMPILER_AUTHORITY_PATH);
+        assert_eq!(verified.language_contract_version, COMPILER_CONTRACT_VERSION);
+        assert!(!verified.requests.is_empty());
+        for role in [
+            CompilerLoweringRole::QuoteForm,
+            CompilerLoweringRole::AtomPredicate,
+            CompilerLoweringRole::SelectorTail,
+            CompilerLoweringRole::SelectorHead,
+            CompilerLoweringRole::AtomEquality,
+            CompilerLoweringRole::CondForm,
+            CompilerLoweringRole::PairConstruct,
+            CompilerLoweringRole::LambdaForm,
+            CompilerLoweringRole::DefineForm,
+        ] {
+            assert!(
+                verified.requests.iter().any(|request| request.lowering_role == role),
+                "verified whole-program artifact omitted role {role:?}"
+            );
+        }
+        assert_eq!(
+            verified.semantic_requests_sha256,
+            sha256_hex(
+                &crate::compiler_evidence_canonical_bytes(&verified.semantic_requests)
+                    .expect("request evidence bytes")
+            )
+        );
+        for request in &verified.requests {
+            assert_eq!(
+                request.proof_ref,
+                proof_ref_for_lowering_role(request.lowering_role)
+            );
+        }
+    }
+
+    #[test]
+    fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
+        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let lowered = crate::lower_program(&parsed);
+        let wire = crate::wire_encode_program(&lowered);
+        let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
+        let program = Value::list(decoded.iter().map(expr_program_data));
+        let digest = sha256_hex(&wire);
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+        let artifact = compiler_program_artifact_from_sens(program, &digest, revision)
+            .expect("SENS whole-program artifact");
+
+        assert!(
+            verify_compiler_program_artifact_from_sens(
+                &artifact,
+                &"00".repeat(32),
+                revision
+            )
+            .is_err()
+        );
+        assert!(
+            verify_compiler_program_artifact_from_sens(
+                &artifact,
+                &digest,
+                "fedcba9876543210fedcba9876543210fedcba98"
+            )
+            .is_err()
+        );
+
+        let mut rows = list_values(&artifact)
+            .into_iter()
+            .cloned()
+            .collect::<Vec<_>>();
+        rows.push(Value::list([
+            Value::Symbol(Rc::from("cuda-target")),
+            Value::String(Rc::from("sm_61")),
+        ]));
+        let smuggled = Value::list(rows);
+        assert!(
+            verify_compiler_program_artifact_from_sens(&smuggled, &digest, revision)
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
+        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let lowered = crate::lower_program(&parsed);
+        let wire = crate::wire_encode_program(&lowered);
+        let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
+        let program = Value::list(decoded.iter().map(expr_program_data));
+        let digest = sha256_hex(&wire);
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+
+        let artifact = compiler_program_artifact_from_sens(program.clone(), &digest, revision)
+            .expect("SENS whole-program artifact");
+        let repeated = compiler_program_artifact_from_sens(program, &digest, revision)
+            .expect("deterministic repeated SENS whole-program artifact");
+        assert_eq!(artifact, repeated);
+
+        let rows = list_values(&artifact);
+        assert!(matches!(
+            rows.first(),
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-artifact/1"
+        ));
+        assert!(matches!(
+            field_value(&artifact, "program-wire-sha256"),
+            Value::String(found) if found.as_ref() == digest
+        ));
+        assert!(matches!(
+            field_value(&artifact, "artifact-kind"),
+            Value::Symbol(found) if found.as_ref() == "whole-program"
+        ));
+        let provenance = list_values(field_value(&artifact, "authority-provenance"));
+        assert_eq!(provenance.len(), 5);
+        assert!(matches!(
+            provenance[0],
+            Value::String(found) if found.as_ref() == revision
+        ));
+        assert!(matches!(
+            provenance[1],
+            Value::String(found) if found.as_ref() == COMPILER_AUTHORITY_PATH
+        ));
+        assert!(matches!(
+            provenance[2],
+            Value::String(found)
+                if found.as_ref() == sha256_hex(LANGUAGE_CONTRACT.as_bytes())
+        ));
+        assert!(matches!(
+            provenance[3],
+            Value::String(found) if found.as_ref() == COMPILER_CONTRACT_VERSION
+        ));
+        assert!(matches!(
+            provenance[4],
+            Value::String(found)
+                if found.as_ref() == sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes())
+        ));
+        assert!(matches!(
+            field_value(&artifact, "required-capabilities"),
+            Value::Nil
+        ));
+        assert!(matches!(
+            field_value(&artifact, "artifact-status"),
+            Value::Symbol(status) if status.as_ref() == "canonical-backend-neutral"
+        ));
+
+        let request_value = field_value(&artifact, "semantic-requests");
+        let requests = list_values(request_value);
+        assert!(!requests.is_empty(), "whole artifact must carry SENS-produced requests");
+        let expected_request_digest = match crate::eval::invoke_value(
+            &canonical_value_sha256_mechanism(),
+            &[request_value.clone()],
+            &crate::Environment::root(),
+            Span::default(),
+        )
+        .expect("representation-only request digest")
+        {
+            Value::String(ref value) => value.to_string(),
+            other => panic!("request digest mechanism returned non-string: {other}"),
+        };
+        assert!(matches!(
+            field_value(&artifact, "semantic-requests-sha256"),
+            Value::String(found) if found.as_ref() == expected_request_digest
+        ));
+        let roles = requests
+            .iter()
+            .map(|request| {
+                let request = list_values(request);
+                match request.get(1) {
+                    Some(Value::Symbol(role)) => role.to_string(),
+                    other => panic!("request has no symbolic role: {other:?}"),
+                }
+            })
+            .collect::<std::collections::HashSet<_>>();
+        for role in [
+            "quote-form",
+            "atom-predicate",
+            "selector-tail",
+            "selector-head",
+            "atom-equality",
+            "cond-form",
+            "pair-construct",
+            "lambda-form",
+            "define-form",
+        ] {
+            assert!(roles.contains(role), "whole artifact omitted role {role}");
+        }
+
+        let rendered = artifact.to_string().to_ascii_lowercase();
+        for forbidden in ["cuda", "ptx", "sass", "futhark", "graal", "install-target"] {
+            assert!(
+                !rendered.contains(forbidden),
+                "whole artifact leaked backend policy: {forbidden}"
+            );
+        }
+    }
+
+    #[test]
+    fn rejected_program_returns_sens_owned_error_artifact() {
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        let program = Value::list([Value::list([exact_value(d8)])]);
+        let digest = "00".repeat(32);
+        let artifact = compiler_program_artifact_from_sens(
+            program,
+            &digest,
+            "0123456789abcdef0123456789abcdef01234567",
+        )
+        .expect("semantic rejection is an artifact value, not a host traversal error");
+        let rows = list_values(&artifact);
+        assert!(matches!(
+            rows.first(),
+            Some(Value::Symbol(name)) if name.as_ref() == "compiler-compilation-error/1"
+        ));
+        assert!(matches!(
+            field_value(&artifact, "program-wire-sha256"),
+            Value::String(found) if found.as_ref() == digest
+        ));
+    }
+
+    #[test]
+    fn whole_program_artifact_rejects_non_digest_transport_metadata() {
+        let program = Value::Nil;
+        let error = compiler_program_artifact_from_sens(
+            program.clone(),
+            "not-a-sha",
+            "0123456789abcdef0123456789abcdef01234567",
+        )
+        .expect_err("malformed mechanical provenance must fail before SENS invocation");
+        assert!(
+            error
+                .to_string()
+                .contains("64 lowercase hexadecimal characters")
+        );
+
+        let error = compiler_program_artifact_from_sens(
+            program,
+            &"00".repeat(32),
+            "not-a-revision",
+        )
+        .expect_err("malformed SENS revision must fail before SENS invocation");
+        assert!(error.to_string().contains("40 lowercase hexadecimal characters"));
+    }
+
+    #[test]
+    fn sens_program_traversal_is_role_aware_and_quote_shields_domain_data() {
+        let lambda = exact_value(d4(0b0010));
+        let quote = exact_value(d3(0b001));
+        let atom = exact_value(d3(0b010));
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+
+        // Canonical D4 LAMBDA is variadic in its body: parameters followed
+        // by one-or-more body expressions. Keep both forms inside the Lambda
+        // so this proves variadic traversal and QUOTE shielding together.
+        let program = Value::list([Value::list([
+            lambda,
+            Value::list([Value::Symbol(Rc::from("x"))]),
+            Value::list([quote, exact_value(d8)]),
+            Value::list([atom, Value::Symbol(Rc::from("x"))]),
+        ])]);
+
+        let result = compiler_program_requests_from_sens(program).expect("SENS program traversal");
+        let rows = list_values(&result);
+        assert_eq!(
+            rows[0].as_predicate_bit(),
+            Some(true),
+            "quoted D8 data must not be traversed as a compiler call"
+        );
+        assert_eq!(rows.len(), 4, "success bit plus Lambda/Quote/Atom requests");
+
+        let observed_roles = rows[1..]
+            .iter()
+            .map(|request| {
+                let request = list_values(request);
+                match request[1] {
+                    Value::Symbol(role) => role.to_string(),
+                    other => panic!("request role must be symbolic, got {other}"),
+                }
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(observed_roles, ["lambda-form", "quote-form", "atom-predicate"]);
+    }
+
+    #[test]
+    fn same_payload_wrong_domain_with_wrong_shape_fails_closed() {
+        // D3:010 is AtomPredicate and one argument is valid.
+        let d3_program = Value::list([Value::list([
+            exact_value(d3(0b010)),
+            Value::Symbol(Rc::from("x")),
+        ])]);
+        let d3_result =
+            compiler_program_requests_from_sens(d3_program).expect("D3 atom traversal");
+        let d3_rows = list_values(&d3_result);
+        assert_eq!(d3_rows[0].as_predicate_bit(), Some(true));
+
+        // Same numeric payload under width 4 is D4:0010 LambdaForm.
+        // Reusing the one-child D3 source shape must fail rather than silently
+        // reinterpret the node as a valid lambda request.
+        let d4_program = Value::list([Value::list([
+            exact_value(d4(0b0010)),
+            Value::Symbol(Rc::from("x")),
+        ])]);
+        let d4_result =
+            compiler_program_requests_from_sens(d4_program).expect("normal fail-closed result");
+        let d4_rows = list_values(&d4_result);
+        assert_eq!(d4_rows.len(), 1);
+        assert_eq!(d4_rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn malformed_exact_d3_cond_clause_fails_closed_before_request_emission() {
+        let cond = exact_value(d3(0b110));
+        let malformed_clause = Value::list([Value::Symbol(Rc::from("test-only"))]);
+        let program = Value::list([Value::list([cond, malformed_clause])]);
+
+        let result =
+            compiler_program_requests_from_sens(program).expect("normal fail-closed result");
+        let rows = list_values(&result);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn direct_d8_domain_call_fails_closed_in_sens_program_traversal() {
+        let d8 = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b0000_0010).expect("D8 word"),
+        ));
+        let program = Value::list([Value::list([exact_value(d8)])]);
+
+        let result = compiler_program_requests_from_sens(program).expect("normal fail-closed result");
+        let rows = list_values(&result);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn current_nucleus_roles_are_derived_by_the_single_sens_owned_law() {
+        let expected = [
+            (d3(0b001), CompilerLoweringRole::QuoteForm),
+            (d3(0b010), CompilerLoweringRole::AtomPredicate),
+            (d3(0b011), CompilerLoweringRole::SelectorTail),
+            (d3(0b100), CompilerLoweringRole::SelectorHead),
+            (d3(0b101), CompilerLoweringRole::AtomEquality),
+            (d3(0b110), CompilerLoweringRole::CondForm),
+            (d3(0b111), CompilerLoweringRole::PairConstruct),
+            (d4(0b0010), CompilerLoweringRole::LambdaForm),
+            (d4(0b0011), CompilerLoweringRole::DefineForm),
+        ];
+
+        for (identity, expected_role) in expected {
+            assert_eq!(
+                compiler_lowering_role_from_sens(identity).expect("SENS role law"),
+                Some(expected_role),
+                "unexpected role for {identity:?}"
+            );
+        }
+
+        assert_eq!(
+            compiler_lowering_role_from_sens(d3(0b000)).expect("D3 empty"),
+            None
+        );
+        assert_eq!(
+            compiler_lowering_role_from_sens(d4(0b0111)).expect("D4 non-bootstrap"),
+            None
+        );
+    }
+}
