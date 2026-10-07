@@ -59,6 +59,26 @@ fn whole_native_first_source_has_no_legacy_sid_or_call_nodes() {
 }
 
 #[test]
+fn core4_list_slot_is_visible_to_native_first_fallback() {
+    let mut session = native_session();
+    let identity = DomainIdentity::D4(CoreD4::from_word(
+        Bit4::new(0b1110).expect("D4 LIST word"),
+    ));
+    assert!(
+        matches!(session.environment.domain_code_slot(identity), Some(Value::Closure(_))),
+        "native-first session must retain Lisp-owned exact D4:1110 LIST slot"
+    );
+
+    let result = eval_program(
+        "(native-first-fallback (quote payload))",
+        &mut session,
+    )
+    .expect("native-first fallback must execute exact D4 LIST")
+    .value;
+    assert_eq!(result.to_string(), "(evaluator-fallback payload)");
+}
+
+#[test]
 fn lowered_exact_domain_data_selects_native_car_cons_without_spelling_match() {
     let parsed = parse("(перше (сполучити 2 3))").expect("current Ukrainian source");
     let lowered = lower_program(&parsed);
