@@ -5,8 +5,8 @@
 
 (xed-machine-evidence/1
   (pinned-commit "0bcb6237345c5066726dcc08b3d87928df3b5b26")
-  (source-digest "sha256:e7ff543c7fd22e599941393fd50799799ed4be3235449e19b3e6eab4da6ee524")
-  (form-count #b10010010111)
+  (source-digest "sha256:a1ba2df05efeed958d4c639764b68066037d6ed930e3ad878e5fb8dacc283d98")
+  (form-count #b10010011000)
   (form
     (extension AES-NI)
     (xed-extension AES)
@@ -3571,6 +3571,15 @@
     (form-count #b110)
     (operand-summary "REG0=VGPR32_N():w:d MEM0:r:d")
     (source-file "bmi/hsw-bmi-vex-isa.xed.txt"))
+  (form
+    (extension BMI1)
+    (xed-extension BMI1)
+    (iclass "TZCNT")
+    (category "BMI1")
+    (isa-set ())
+    (form-count #b10)
+    (operand-summary "REG0=GPRv_R():w MEM0:r:v")
+    (source-file "bmi/tzcnt-isa.xed.txt"))
   (form
     (extension BMI2)
     (xed-extension BMI2)
@@ -7591,7 +7600,7 @@
     (iclass "BSF")
     (category "BITBYTE")
     (isa-set "I386")
-    (form-count #b10)
+    (form-count #b110)
     (operand-summary "REG0=GPRv_R():cw MEM0:r:v")
     (source-file "base/xed-isa.txt"))
   (form
