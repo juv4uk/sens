@@ -597,11 +597,22 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         }
     }
 
-    // Compatibility-only lane for registry rows that do not yet have a
-    // canonical domain identity.
+    // Compatibility-only lane for already-ratified exact-domain residents whose
+    // current surface projection is not yet in the generated D3-D5 table.
+    // In particular, legacy LET/LET* macro definitions must occupy their exact
+    // D6 slots so a legacy byte cannot fall through to non-callable identity.
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
+    if let Some(identity) =
+        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+    {
+        if matches!(identity, CoreDomainIdentity::D6(_)) && matches!(value, Value::Macro(_)) {
+            environment.bind_domain_code_slot_once(identity, value.clone());
+            environment.bind_code_slot_once(sid, value.clone());
+            return;
+        }
+    }
     // #3070 transitional bootstrap.
     //
     // Canonical storage/routing is the exact D5 slot. The historical code slot
