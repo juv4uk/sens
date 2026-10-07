@@ -27,13 +27,12 @@
       "#b"
       (encoder-coverage-binary-digits-onto value ""))))
 
-; Normalize structural equality to the old t/() predicate protocol so helper
-; composition never relies on relation objects being truthy.
+; equal? is already the canonical Core4 structural predicate: (1) for YES,
+; (0) for NO.  Keep the helper only as a local name; do not reintroduce the
+; retired structural-relation/t compatibility layer.
 (def encoder-coverage-same?
   (lambda (left right)
-    (cond
-      ((equal? left right) (structural-relation same) t)
-      ((equal? left right) (structural-relation distinct) (quote ())))))
+    (equal? left right)))
 
 (def encoder-coverage-pair=?
   (lambda (left right)
@@ -312,7 +311,6 @@
     (cond
       ((atom coverage-row) (quote ()))
       ((equal? (length coverage-row) #b101)
-       (structural-relation same)
        (let* ((expected-status
                 (cond
                   ((atom partial-row) (quote not-yet-implemented))
@@ -403,7 +401,6 @@
     (cond
       ((atom coverage-form) (quote ()))
       ((equal? (length coverage-form) (+ encoder-coverage-form-count #b11))
-       (structural-relation same)
        (and
          (encoder-coverage-same?
            (car coverage-form)
