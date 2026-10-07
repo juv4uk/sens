@@ -82,6 +82,30 @@ fn exact_d6_let_executes_after_core_bootstrap() {
 }
 
 #[test]
+fn direct_exact_car_from_mixed_source_executes() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    let forms = parse_mixed_exact_domain("(100 (001 (41 42)))")
+        .expect("direct exact CAR source");
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("direct exact CAR must execute");
+    assert_eq!(result.value.to_string(), "41");
+}
+
+#[test]
+fn direct_lambda_application_with_exact_initializer_executes() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    let forms = parse_mixed_exact_domain(
+        "((00001000 (y) y) (100 (001 (41 42))))",
+    )
+    .expect("direct LET-equivalent lambda application");
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("exact initializer must execute as a lambda argument");
+    assert_eq!(result.value.to_string(), "41");
+}
+
+#[test]
 fn exact_d6_let_top_level_preserves_exact_initializer_call() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
