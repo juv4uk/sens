@@ -474,6 +474,11 @@ fn main() {
         }
 
         // Run file
+        //
+        // Generic CLI execution stays on the lexical/compatibility parser until
+        // the current fixture corpus is atomically migrated by #4247. Exact
+        // current sources use explicit mixed-domain loaders at their ownership
+        // boundaries; a bare W8 token must not silently change meaning here.
         let filename = arg;
 
         // `*argv*` (PLAN.md item 21's follow-up, for scripts/release.lisp
