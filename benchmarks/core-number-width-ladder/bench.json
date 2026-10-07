@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "core-number-width-ladder",
+  "wing": "Core-Math / Core Number",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Given the ratified Number24→48→96→192 width framing, which internal signed, overflow, widening, dyadic, and layout models remain lawful?",
+  "claim": "Does not reopen the ratified carrier widths; it researches semantics inside those carriers and keeps mechanism-only Limb24 as a negative control.",
+  "witness": [
+    "run.py",
+    "../../knowledge/number-width-ratified.json"
+  ],
+  "status": "WIDTH-FRAMING-RATIFIED; INTERNAL-SEMANTICS-RESEARCH",
+  "generation": "2026-10-06",
+  "axis": "core-number/width-ladder",
+  "reproduce": "python3 benchmarks/core-number-width-ladder/run.py --out /tmp/core-number-width-ladder"
+}
