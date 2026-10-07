@@ -37,11 +37,12 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     load_lisp_file("lib/machine/capability-axis.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
-    let identity_source = format!("{identity}");
-    assert_eq!(identity_source, "01010");
+    let width = identity.width();
+    let packed_bits = identity.packed_bits();
+    assert_eq!((width, packed_bits), (5, 10));
 
     let capabilities = eval_program(
-        &format!("(machine-capabilities-for-domain {identity_source})"),
+        &format!("(machine-capabilities-for-domain {width} {packed_bits})"),
         &mut session,
     )
     .expect("exact-domain machine capability lookup")
@@ -50,7 +51,7 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     assert_eq!(capabilities, "((integer-add bounded-u32-inputs u64-result))");
 
     let bytes = eval_program(
-        &format!("(x86-encode-current-binary-u64 {identity_source} 2 3)"),
+        &format!("(x86-encode-current-binary-u64 {width} {packed_bits} 2 3)"),
         &mut session,
     )
     .expect("exact D5 PLUS must reach admitted x86 bytes")
@@ -63,7 +64,7 @@ fn current_d5_plus_selects_x86_add_without_legacy_sid_join() {
     );
 
     let unsupported = eval_program(
-        "(x86-encode-current-binary-u64 101 2 3)",
+        "(x86-encode-current-binary-u64 3 5 2 3)",
         &mut session,
     )
     .expect("unsupported current identity fails closed as named data")
@@ -78,24 +79,24 @@ fn current_d3_machine_capabilities_are_keyed_by_exact_domain_identity() {
     load_core_library(&mut session).expect("core");
     load_lisp_file("lib/machine/capability-axis.lisp", &mut session);
 
-    for (identity, expected) in [
-        ("101", "((identity-compare bounded-u64))"),
-        ("110", "((conditional-branch bounded-u64))"),
+    for (packed_bits, expected) in [
+        (5, "((identity-compare bounded-u64))"),
+        (6, "((conditional-branch bounded-u64))"),
         (
-            "111",
+            7,
             "((pair-field-store head bounded-u64) (pair-field-store tail bounded-u64))",
         ),
-        ("100", "((pair-field-load head bounded-u64))"),
-        ("011", "((pair-field-load tail bounded-u64))"),
+        (4, "((pair-field-load head bounded-u64))"),
+        (3, "((pair-field-load tail bounded-u64))"),
     ] {
         let actual = eval_program(
-            &format!("(machine-capabilities-for-domain {identity})"),
+            &format!("(machine-capabilities-for-domain 3 {packed_bits})"),
             &mut session,
         )
-        .unwrap_or_else(|error| panic!("D3:{identity} capability lookup failed: {error}"))
+        .unwrap_or_else(|error| panic!("D3 packed={packed_bits} capability lookup failed: {error}"))
         .value
         .to_string();
-        assert_eq!(actual, expected, "D3:{identity}");
+        assert_eq!(actual, expected, "D3 packed={packed_bits}");
     }
 }
 
@@ -103,7 +104,7 @@ fn current_d3_machine_capabilities_are_keyed_by_exact_domain_identity() {
 fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
     let axis = fs::read_to_string(repo_root().join("lib/machine/capability-axis.lisp"))
         .expect("capability axis");
-    assert!(axis.contains("machine-capability-axis-v2"));
+    assert!(axis.contains("machine-capability-axis-v3"));
     assert!(axis.contains("machine-capabilities-for-domain"));
     assert!(!axis.contains("machine-capability-legacy-sid-axis"));
     assert!(!axis.contains("machine-capabilities-for-sid"));
@@ -112,10 +113,10 @@ fn current_machine_axis_and_profile_do_not_claim_sid8_as_authority() {
     let profile =
         fs::read_to_string(repo_root().join("lib/machine/profile/current-domain-x86-64.lisp"))
             .expect("current exact-domain x86 profile");
-    for exact_identity in ["01010", "101", "110", "111", "100", "011"] {
+    for (width, packed_bits) in [(5, 10), (3, 5), (3, 6), (3, 7), (3, 4), (3, 3)] {
         assert!(
-            profile.contains(&format!("({exact_identity} ")),
-            "current profile missing exact identity {exact_identity}"
+            profile.contains(&format!("({width} {packed_bits} ")),
+            "current profile missing width-safe key ({width},{packed_bits})"
         );
     }
     assert!(!profile.contains("semantic-registry"));
