@@ -746,17 +746,8 @@ def resolve_contract_binary_token(
                 f"D2 word {token!r} is structural control only"
             )
 
-        if width == 8 and resolver is not None:
-            legacy = resolver.resolve_legacy_sid8(token)
-            if legacy.resolved:
-                identity = legacy.current
-                assert identity is not None
-                if identity.domain != exact.domain or identity.bits != exact.bits:
-                    raise BinaryMigrationError(
-                        f"ambiguous W8 token {token!r}: current D8 coordinate "
-                        f"{exact.domain}:{exact.bits} conflicts with legacy SID8 "
-                        f"evidence {identity.domain}:{identity.bits}"
-                    )
+        # In Contract-authority mode a bare exact binary word is already canonical.
+        # Historical SID8 evidence is never allowed to reinterpret it here.
         return token
 
     raise BinaryMigrationError(
@@ -774,6 +765,7 @@ def binary_rewrite(
     *,
     contract_authority: bool = False,
     binary_authority: dict[tuple[int, str], Entry] | None = None,
+    d1_enabled: bool = False,
     d9_enabled: bool = False,
 ):
     """Encode one source file as exact-width visible binary SENS words."""
@@ -1233,6 +1225,7 @@ def main():
                     resolver,
                     contract_authority=args.contract_authority,
                     binary_authority=binary_authority,
+                    d1_enabled=d1_enabled,
                     d9_enabled=d9_enabled,
                 )
                 if not converted.strip():
