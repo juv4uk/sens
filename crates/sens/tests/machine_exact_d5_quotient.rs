@@ -111,7 +111,7 @@ fn equal_positive_i64_quotient_reaches_admitted_idiv_bytes() {
     let mut session = machine_session();
 
     let capability = eval_program(
-        "(machine-capabilities-for-domain 10111)",
+        "(machine-capabilities-for-domain 5 23)",
         &mut session,
     )
     .expect("D5 QUOTIENT capability")
@@ -123,7 +123,7 @@ fn equal_positive_i64_quotient_reaches_admitted_idiv_bytes() {
     );
 
     let forms = eval_program(
-        "(x86-lower-current-quotient-i64-forms 10111 5 5)",
+        "(x86-lower-current-quotient-i64-forms 5 23 5 5)",
         &mut session,
     )
     .expect("bounded QUOTIENT forms")
@@ -135,7 +135,7 @@ fn equal_positive_i64_quotient_reaches_admitted_idiv_bytes() {
     );
 
     let rendered = eval_program(
-        "(x86-encode-current-quotient-i64 10111 5 5)",
+        "(x86-encode-current-quotient-i64 5 23 5 5)",
         &mut session,
     )
     .expect("bounded QUOTIENT bytes")
@@ -150,11 +150,11 @@ fn quotient_native_slice_fails_closed_outside_the_proved_equal_operand_relation(
     let mut session = machine_session();
 
     for form in [
-        "(x86-encode-current-quotient-i64 10111 6 3)",
-        "(x86-encode-current-quotient-i64 10111 1 2)",
-        "(x86-encode-current-quotient-i64 10111 0 0)",
-        "(x86-encode-current-quotient-i64 10111 -5 -5)",
-        "(x86-encode-current-quotient-i64 10111 9223372036854775808 9223372036854775808)",
+        "(x86-encode-current-quotient-i64 5 23 6 3)",
+        "(x86-encode-current-quotient-i64 5 23 1 2)",
+        "(x86-encode-current-quotient-i64 5 23 0 0)",
+        "(x86-encode-current-quotient-i64 5 23 -5 -5)",
+        "(x86-encode-current-quotient-i64 5 23 9223372036854775808 9223372036854775808)",
     ] {
         let actual = eval_program(form, &mut session)
             .unwrap_or_else(|error| panic!("guard expression failed: {form}: {error}"))
@@ -168,7 +168,7 @@ fn quotient_native_slice_fails_closed_outside_the_proved_equal_operand_relation(
 
     assert_eq!(
         eval_program(
-            "(x86-encode-current-quotient-i64 10110 5 5)",
+            "(x86-encode-current-quotient-i64 5 22 5 5)",
             &mut session,
         )
         .expect("wrong identity must fail closed")
