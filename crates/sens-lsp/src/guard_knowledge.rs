@@ -179,7 +179,7 @@ fn surface_domain_coordinate(surface: &str) -> Option<(usize, u16)> {
         .into_iter()
         .find(|item| item.name == surface)
         .and_then(|item| item.domain_identity)
-        .map(|identity| (identity.width(), identity.packed_bits()))
+        .map(|identity| (identity.width(), u16::from(identity.packed_bits())))
 }
 
 /// Domain-first head matcher.
