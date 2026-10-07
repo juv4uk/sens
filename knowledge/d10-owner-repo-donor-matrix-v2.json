@@ -23,11 +23,12 @@
     "No donor repository contributes coordinates."
   ],
   "class_counts": {
-    "REFERENCE-OR-UPSTREAM": 33,
-    "PACKAGE-OR-DOMAIN": 33,
-    "BACKEND-OR-MECHANISM": 11,
+    "CORE-LANGUAGE-DONOR": 1,
     "CORE-HISTORICAL-DONOR": 9,
-    "CORE-LANGUAGE-DONOR": 1
+    "BACKEND-OR-MECHANISM": 11,
+    "PACKAGE-OR-DOMAIN": 33,
+    "REFERENCE-OR-UPSTREAM": 33,
+    "REVIEW-REQUIRED": 0
   },
   "rows": [
     {
