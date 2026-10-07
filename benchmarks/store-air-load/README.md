@@ -51,6 +51,55 @@ carrier_payload_bits = semantic_payload_bits
 нулю, тому чинні exact-bit fixtures зберігають ті самі результати. Це робить
 схему напряму сумісною з `juv4uk/radio-log#36/#38`.
 
+## AIR adapter boundary (#4173)
+
+AIR тепер має виконуваний transport-neutral шов у
+`air_adapter.py`. Він навмисно **не реалізує Tantu**: у цьому репозиторії
+немає ратифікованого Tantu wire contract, тому назва протоколу не може
+підмінити відсутню специфікацію.
+
+Контракт адаптера односторонній щодо семантики:
+
+```text
+STORE canonical exact bits
+        |
+        v
+AIR adapter.encode
+        |
+        |  framing / integrity / profile mechanism only
+        v
+AIR frame
+        |
+        v
+AIR adapter.decode
+        |
+        v
+exact same canonical bits
+        |
+        v
+LOAD
+```
+
+Два reference witnesses фіксують межу:
+
+- `IdentityAirAdapter` — нульовий AIR baseline: без framing/integrity overhead;
+- `ReferenceIntegrityAirAdapter` — тестовий, **не-Tantu** формат
+  `32-bit length | exact payload bits | SHA-256(length:payload)`.
+
+Другий потрібен не як кандидат протоколу, а як фальсифікатор межі:
+payload bit flip дає integrity failure, пошкодження length/truncation дає
+frame failure. Жоден AIR adapter не отримує права змінювати semantic identity.
+
+Відтворення:
+
+```sh
+python3 benchmarks/store-air-load/air_adapter.py --self-test
+```
+
+Майбутній Tantu adapter має реалізувати той самий `encode/decode` шов і
+надати власний wire/profile contract; до того часу його статус —
+`UNBOUND-NO-REPOSITORY-WIRE-CONTRACT`.
+
 ## Semantic identity guard
 
 `paired-program` fixture спочатку проходить чинний
