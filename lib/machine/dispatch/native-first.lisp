@@ -123,89 +123,89 @@
 ; This block never matches CAR/CONS by spelling and never relies on a raw W3
 ; source token whose leading zero/width could be lost by the ordinary reader.
 
-(визначити native-first-domain-true
-  (функція (seed)
-    (атом? seed)))
+(00001001 native-first-domain-true
+  (00001000 (seed)
+    (00000010 seed)))
 
-(визначити native-first-domain-false
-  (функція (seed)
-    (атом? (сполучити seed ()))))
+(00001001 native-first-domain-false
+  (00001000 (seed)
+    (00000010 (00000100 seed ()))))
 
-(визначити native-first-domain-key3-shape?
-  (функція (shape bit0 bit1 bit2)
-    (за-умовою
-      ((атом? shape)
+(00001001 native-first-domain-key3-shape?
+  (00001000 (shape bit0 bit1 bit2)
+    (00000111
+      ((00000010 shape)
        (native-first-domain-false ()))
-      ((тотожне? (перше shape) 3)
+      ((00000011 (00000101 shape) 3)
        (native-first-domain-key3-bits?
-         (перше (решта shape))
+         (00000101 (00000110 shape))
          bit0 bit1 bit2))
       ((native-first-domain-true ())
        (native-first-domain-false ())))))
 
-(визначити native-first-domain-key3-bits?
-  (функція (bits bit0 bit1 bit2)
-    (за-умовою
-      ((тотожне? (перше bits) bit0)
-       (за-умовою
-         ((тотожне? (перше (решта bits)) bit1)
-          (тотожне?
-            (перше (решта (решта bits)))
+(00001001 native-first-domain-key3-bits?
+  (00001000 (bits bit0 bit1 bit2)
+    (00000111
+      ((00000011 (00000101 bits) bit0)
+       (00000111
+         ((00000011 (00000101 (00000110 bits)) bit1)
+          (00000011
+            (00000101 (00000110 (00000110 bits)))
             bit2))
          ((native-first-domain-true ())
           (native-first-domain-false ()))))
       ((native-first-domain-true ())
        (native-first-domain-false ())))))
 
-(визначити native-first-domain-d3-car?
-  (функція (shape-or-empty value)
+(00001001 native-first-domain-d3-car?
+  (00001000 (shape-or-empty value)
     (native-first-domain-key3-shape?
       (shape-or-empty value)
       (native-first-domain-true ())
       (native-first-domain-false ())
       (native-first-domain-false ()))))
 
-(визначити native-first-domain-d3-cons?
-  (функція (shape-or-empty value)
+(00001001 native-first-domain-d3-cons?
+  (00001000 (shape-or-empty value)
     (native-first-domain-key3-shape?
       (shape-or-empty value)
       (native-first-domain-true ())
       (native-first-domain-true ())
       (native-first-domain-true ()))))
 
-(визначити native-first-plan-domain-cons-argument
-  (функція (shape-or-empty expression argument)
-    (за-умовою
-      ((атом? argument)
+(00001001 native-first-plan-domain-cons-argument
+  (00001000 (shape-or-empty expression argument)
+    (00000111
+      ((00000010 argument)
        (native-first-fallback expression))
-      ((native-first-domain-d3-cons? shape-or-empty (перше argument))
+      ((native-first-domain-d3-cons? shape-or-empty (00000101 argument))
        (native-first-plan-car-cons-u64 expression argument))
       ((native-first-domain-true ())
        (native-first-fallback expression)))))
 
-(визначити native-first-plan-domain-car
-  (функція (shape-or-empty expression)
-    (за-умовою
-      ((атом? (решта expression))
+(00001001 native-first-plan-domain-car
+  (00001000 (shape-or-empty expression)
+    (00000111
+      ((00000010 (00000110 expression))
        (native-first-fallback expression))
-      ((атом? (решта (решта expression)))
-       (за-умовою
-         ((тотожне? (решта (решта expression)) ())
+      ((00000010 (00000110 (00000110 expression)))
+       (00000111
+         ((00000011 (00000110 (00000110 expression)) ())
           (native-first-plan-domain-cons-argument
             shape-or-empty
             expression
-            (перше (решта expression))))
+            (00000101 (00000110 expression))))
          ((native-first-domain-true ())
           (native-first-fallback expression))))
       ((native-first-domain-true ())
        (native-first-fallback expression)))))
 
-(визначити native-first-plan-domain
-  (функція (shape-or-empty expression)
-    (за-умовою
-      ((атом? expression)
+(00001001 native-first-plan-domain
+  (00001000 (shape-or-empty expression)
+    (00000111
+      ((00000010 expression)
        (native-first-fallback expression))
-      ((native-first-domain-d3-car? shape-or-empty (перше expression))
+      ((native-first-domain-d3-car? shape-or-empty (00000101 expression))
        (native-first-plan-domain-car shape-or-empty expression))
       ((native-first-domain-true ())
        (native-first-fallback expression)))))
