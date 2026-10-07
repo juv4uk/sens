@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 434,
-    "remaining_semantic_candidates": 590,
+    "selected_semantic_candidates": 504,
+    "remaining_semantic_candidates": 520,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 178,
+    "unplaced_selected_candidates": 248,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -130,12 +130,12 @@
   "ownership_gate": {
     "authority": "#4033",
     "artifact": "knowledge/island-ownership-gate-v1.json",
-    "status": "OWNERSHIP-DEBT-CLEARED",
+    "status": "SUPERSEDED-BY-OWNER-CORRECTION-4162",
     "definite_noncore_selected": 0,
     "definite_noncore_reclassified": 55,
     "review_required_selected": 0,
     "no_new_definite_noncore": true,
-    "rule": "All 55 definite non-Core and all 15 former REVIEW-REQUIRED package/domain rows have been removed from Core D10 and preserved in reclassification ledgers. No known D10 ownership debt remains."
+    "rule": "Ownership-only exclusion is superseded. All owner repositories are D10 semantic donors; only duplicates, aliases, mechanism-only rows and falsified semantics are excluded."
   },
   "historical_maclisp_v1": {
     "artifact": "knowledge/d10-historical-maclisp-v1.json",
@@ -172,7 +172,9 @@
     "selected_after": 345,
     "selector_coordinates_preserved": 256,
     "review_required_still_selected": 15,
-    "ratification_effect": "NONE"
+    "ratification_effect": "NONE",
+    "status": "HISTORICAL-REVERSED-BY-4162",
+    "restored_to_d10": 55
   },
   "crossrepo_mal_v1": {
     "authority": "#4053",
@@ -222,7 +224,9 @@
     "selected_after": 428,
     "selector_coordinates_preserved": 256,
     "review_required_still_selected": 0,
-    "ratification_effect": "NONE"
+    "ratification_effect": "NONE",
+    "status": "HISTORICAL-REVERSED-BY-4162",
+    "restored_to_d10": 15
   },
   "island_bridge_v1": {
     "authority": "#4094",
@@ -245,7 +249,18 @@
     ],
     "repository_count": 87,
     "core_bridge_meanings": 6,
-    "ownership_rule": "Core owns semantic border/bridges; islands/packages/substrates own native semantics.",
-    "ownership_debt_selected": 0
+    "ownership_rule": "Execution islands may remain mechanisms, but semantic package/domain ownership no longer creates separate D10 namespaces. Distinct language-visible meanings share the single D10 bitstream.",
+    "ownership_debt_selected": 0,
+    "status": "EXECUTION-MECHANISM-ONLY"
+  },
+  "owner_correction_single_stream": {
+    "authority": "#4162",
+    "artifact": "knowledge/d10-single-stream-restoration-v1.json",
+    "restored_from_cleanup_v1": 55,
+    "restored_from_cleanup_v2": 15,
+    "restored_total": 70,
+    "selected_after": 504,
+    "remaining_after": 520,
+    "rule": "D10 is one global 10-bit semantic stream. Package/domain ownership does not imply no-slot."
   }
 }
