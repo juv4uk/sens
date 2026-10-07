@@ -124,7 +124,7 @@ fn ratchet_enforced_kind(kind: &str) -> bool {
 
 fn rust_nonsemantic_data_kind(
     rel: &str,
-    text: &str,
+    line_text: &str,
     literal: &str,
 ) -> Option<&'static str> {
     let source = literal.trim_start();
@@ -137,7 +137,7 @@ fn rust_nonsemantic_data_kind(
 
     if rel == "crates/sens/src/gpu_oracle.rs"
         && literal == "numeric-buffer-map"
-        && text.contains("forbidden_legacy_operation: \"numeric-buffer-map\".to_string()")
+        && line_text.contains("forbidden_legacy_operation: \"numeric-buffer-map\".to_string()")
     {
         return Some("rust-evidence-data");
     }
@@ -351,7 +351,8 @@ fn places() -> Vec<Place> {
         let Ok(text) = fs::read_to_string(&path) else { continue };
         if rel.ends_with(".rs") {
             for (line, literal) in rust_strings(&text) {
-                let data_kind = rust_nonsemantic_data_kind(&rel, &text, &literal);
+                let line_text = text.lines().nth(line.saturating_sub(1)).unwrap_or("");
+                let data_kind = rust_nonsemantic_data_kind(&rel, line_text, &literal);
                 if names.contains(literal.as_str()) {
                     let kind =
                         data_kind.unwrap_or_else(|| classified_kind(&rel, &text, "rust"));
