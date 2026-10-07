@@ -119,7 +119,13 @@ def load_historical_rows(path: Path) -> list[HistoricalRow]:
     return rows
 
 
-def load_current_foundation(path: Path) -> tuple[
+DEFAULT_CURRENT_DOMAINS = ("D3", "D4", "D5", "D6")
+
+
+def load_current_foundation(
+    path: Path,
+    current_domains: Iterable[str] = DEFAULT_CURRENT_DOMAINS,
+) -> tuple[
     dict[str, CurrentIdentity],
     dict[tuple[int, str], CurrentIdentity],
 ]:
@@ -129,7 +135,7 @@ def load_current_foundation(path: Path) -> tuple[
 
     by_label: dict[str, CurrentIdentity] = {}
     by_word: dict[tuple[int, str], CurrentIdentity] = {}
-    for domain in ("D3", "D4", "D5", "D6"):
+    for domain in current_domains:
         desc = data["domains"][domain]
         width = int(desc["width"])
         for bits, label in desc["residents"].items():
@@ -291,10 +297,41 @@ class SourceResolver:
             ) if len(ordered) > 1 else (),
         )
 
+    def resolve_legacy_sid8(self, token: str) -> Resolution:
+        """Resolve only legacy SID8 evidence, without current-width precedence."""
+        if not re.fullmatch(r"[01]{8}", token):
+            return Resolution(
+                kind="not-sid8",
+                pass_number=0,
+                token=token,
+                current=None,
+                evidence=("not an 8-bit legacy SID token",),
+            )
+
+        rows = self.hist_by_sid.get(token, [])
+        candidates = self.current_candidates_for_sid(token)
+        evidence = [f"legacy SID8/Sens8 {token}"]
+        evidence += [f"historical:{r.historical}" for r in rows]
+        evidence += [
+            f"registry:{ns}:{spelling}"
+            for ns, spelling in self.registry_sid_fields.get(token, [])
+        ]
+        return self._choose(
+            "sid8-sens8",
+            1,
+            token,
+            candidates,
+            legacy_sid8=token,
+            rows=rows,
+            evidence=evidence,
+        )
+
     def resolve_head(self, token: str) -> Resolution:
         # Already-current operation-domain source is not one of the historical
-        # passes; preserve exact width and identity.
-        if re.fullmatch(r"[01]{3,6}", token):
+        # passes; preserve exact width and identity for every admitted
+        # current operation domain (currently D3-D6 and, in authority mode,
+        # D8/D9).  Width is semantic and is checked before legacy SID8.
+        if re.fullmatch(r"[01]+", token):
             identity = self.current_by_word.get((len(token), token))
             if identity is not None:
                 return Resolution(
@@ -333,7 +370,10 @@ class SourceResolver:
             candidates = set(self.current_surface.get(token, set()))
             if rows or token in self.registry_surface_sids or candidates:
                 evidence = ["my-lisp/admitted surface spelling"]
-                evidence += [f"legacy-sid:{sid}" for sid in sorted(self.registry_surface_sids.get(token, ()))]
+                evidence += [
+                    f"legacy-sid:{sid}"
+                    for sid in sorted(self.registry_surface_sids.get(token, ()))
+                ]
                 return self._choose(
                     "my-lisp-surface",
                     2,
@@ -379,9 +419,13 @@ def build_resolver(
     foundation: Path,
     registry: Path,
     domain_surfaces: Iterable[Path],
+    current_domains: Iterable[str] = DEFAULT_CURRENT_DOMAINS,
 ) -> SourceResolver:
     historical_rows = load_historical_rows(historical_map)
-    current_by_label, current_by_word = load_current_foundation(foundation)
+    current_by_label, current_by_word = load_current_foundation(
+        foundation,
+        current_domains=current_domains,
+    )
     surfaces = load_domain_surfaces(domain_surfaces, current_by_word)
     sid_fields, surface_sids = load_registry(registry)
     return SourceResolver(
