@@ -144,13 +144,12 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(LIST #b101)\n")
 
-    def test_contract_authority_preserves_quoted_binary_as_text7(self):
-        converted, _, _ = self.contract_binary('(LIST "101")\n')
-        bare, _, _ = self.contract_binary("(LIST 101)\n")
-        self.assertNotEqual(converted, bare)
-        self.assertTrue(converted.startswith("10 1110 00 "), converted)
-        self.assertNotIn(" 101 ", f" {converted} ")
-        self.assertRegex(converted, r"^[01\\s]+$")
+    def test_contract_authority_rejects_quoted_binary_identity(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "quoted binary semantic identity",
+        ):
+            self.contract_binary('(LIST "101")\n')
 
     def test_contract_authority_rejects_noncanonical_d2_data_word(self):
         with self.assertRaisesRegex(
