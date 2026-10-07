@@ -468,6 +468,10 @@ pub(crate) fn invoke_domain_identity(
         return canonicalize_domain_result(identity, value, span);
     }
 
+    if let Some(result) = super::d6_arithmetic::invoke(identity, args, environment, span) {
+        return result;
+    }
+
     if let Some(primitive) = domain_primitive(identity) {
         let value = primitive(args, environment, span)?;
         return canonicalize_domain_result(identity, value, span);
