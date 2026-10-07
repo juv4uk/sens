@@ -229,6 +229,67 @@ fn interpreter_pair_reference_witnesses_remain_two_and_three() {
 }
 
 #[test]
+fn raw_executor_accepts_canonical_binary_number_machine_bytes() {
+    let _serial = test_lock();
+    install();
+    let mut session = Session::default();
+    load_core_library(&mut session)
+        .expect("core must bootstrap before BinaryNumber machine-byte witness");
+
+    // mov rax,42 ; ret
+    let result = eval_program(
+        "(native-call-u64-raw (quote (#b1001000 #b10111000 #b101010 #b0 #b0 #b0 #b0 #b0 #b0 #b0 #b11000011)))",
+        &mut session,
+    )
+    .expect("raw machine boundary must explicitly decode <=8-bit BinaryNumber cells");
+
+    assert_eq!(result.value.to_string(), "42");
+}
+
+#[test]
+fn raw_executor_accepts_mixed_legacy_and_binary_machine_byte_carriers() {
+    let _serial = test_lock();
+    install();
+    let mut session = Session::default();
+    load_core_library(&mut session)
+        .expect("core must bootstrap before mixed machine-byte witness");
+
+    // Same bounded program, deliberately mixing canonical BinaryNumber with
+    // the historical exact-integer carrier. This is byte-boundary decoding,
+    // not general numeric coercion in the language.
+    let result = eval_program(
+        "(native-call-u64-raw (quote (#b1001000 184 #b101011 0 #b0 0 #b0 0 #b0 0 #b11000011)))",
+        &mut session,
+    )
+    .expect("raw machine boundary must accept both explicitly supported byte carriers");
+
+    assert_eq!(result.value.to_string(), "43");
+}
+
+#[test]
+fn raw_executor_rejects_binary_number_wider_than_one_byte() {
+    let _serial = test_lock();
+    install();
+    let mut session = Session::default();
+    load_core_library(&mut session)
+        .expect("core must bootstrap before over-width machine-byte witness");
+
+    let error = eval_program(
+        "(native-call-u64-raw (quote (#b100000000)))",
+        &mut session,
+    )
+    .expect_err("9-bit BinaryNumber must fail closed before executable memory");
+
+    assert_eq!(error.kind, sens::ErrorKind::Type);
+    assert!(
+        error
+            .to_string()
+            .contains("<=8-bit BinaryNumber"),
+        "error must identify the bounded machine-byte carrier: {error}"
+    );
+}
+
+#[test]
 fn semantics_blind_raw_executor_accepts_optional_arena_bytes() {
     let _serial = test_lock();
     install();
