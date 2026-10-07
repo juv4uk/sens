@@ -225,7 +225,7 @@ fn evaluate_list(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
-    if let Some(identity) = binary_head_domain_identity(&items[0]) {
+    if let Some(identity) = binary_head_domain_identity(&items[0], environment) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
     dispatch_call(
@@ -393,7 +393,9 @@ fn dispatch_call(
     // domain slot; we merely preserve raw argument syntax before evaluation.
     if let Some(sid) = head_sid {
         if let Some(identity) =
-            crate::semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+            crate::semantic_registry::legacy_macro_domain_identity_from_registry_byte(
+                sid.packed_byte(),
+            )
         {
             if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
                 return closures::apply_macro(closure.clone(), arguments, environment, span);
@@ -487,11 +489,27 @@ fn dispatch_call(
 /// A fixed-width binary token names a semantic identity only as a list head.
 /// The same SID remains `Value::Sid` when it occurs as data or under
 /// QUOTE, so a source file can carry bit data without making it executable.
-fn binary_head_domain_identity(expression: &Expr) -> Option<CoreDomainIdentity> {
+fn binary_head_domain_identity(
+    expression: &Expr,
+    environment: &Environment,
+) -> Option<CoreDomainIdentity> {
     let ExprKind::DomainIdentity(identity) = expression.kind else {
         return None;
     };
-    identity.core_operation()
+    if let Some(core_identity) = identity.core_operation() {
+        return Some(core_identity);
+    }
+
+    // Exact D6 residency alone does not grant callability. LET/LET* become
+    // executable only when the canonical exact slot actually contains a macro
+    // mechanism installed by the language bootstrap.
+    if let crate::DomainIdentity::D6(word) = identity {
+        let exact = CoreDomainIdentity::D6(word);
+        if matches!(environment.domain_code_slot(exact), Some(Value::Macro(_))) {
+            return Some(exact);
+        }
+    }
+    None
 }
 
 fn binary_head_sid(expression: &Expr) -> Option<Sens8> {
