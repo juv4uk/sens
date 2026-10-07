@@ -395,7 +395,7 @@ fn dispatch_call(
         if let Some(identity) =
             crate::semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
         {
-            if let Some(Value::Macro(closure)) = environment.domain_code_slot(identity) {
+            if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
                 return closures::apply_macro(closure.clone(), arguments, environment, span);
             }
         }
