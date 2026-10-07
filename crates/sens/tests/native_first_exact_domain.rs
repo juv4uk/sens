@@ -71,19 +71,14 @@ fn core4_exact_list_is_visible_to_native_first_fallback_by_behavior() {
 }
 
 #[test]
-fn exact_d6_let_without_admitted_mechanism_fails_closed() {
+fn exact_d6_let_uses_only_its_lisp_owned_macro_mechanism() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
     let forms = parse_mixed_exact_domain("(001000 ((x 41)) x)")
         .expect("exact D6 LET identity must parse");
-    let error = eval_parsed_expressions(&forms, &mut session)
-        .expect_err("D6 LET must fail closed without a ratified callable mechanism");
-    assert!(
-        error
-            .to_string()
-            .contains("domain identity is not callable under its ratified law"),
-        "unexpected D6 fail-closed error: {error}"
-    );
+    let result = eval_parsed_expressions(&forms, &mut session)
+        .expect("ratified D6 LET macro mechanism must execute");
+    assert_eq!(result.value, Value::Number(41.0, sens::Exactness::Exact));
 }
 
 #[test]
