@@ -1,0 +1,630 @@
+{
+  "schema": "d10-crossrepo-lisp-koans-v1/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4074",
+  "date": "2026-10-07",
+  "parent": "#4053",
+  "foundation": "#4008 / Contract 11.8 / D1-D9",
+  "donor": {
+    "repository": "juv4uk/lisp-koans",
+    "head": "57b901f8d4b16d66696896a745110b7561120da3",
+    "role": "CORE-HISTORICAL-DONOR",
+    "review_status": "EXHAUSTED-FOR-SELECTED-LANGUAGE-SLICE"
+  },
+  "coordinate_policy": "No donor implementation coordinate, hash bucket, class layout or handler-stack address has D10 placement authority. Every selected row remains UNPLACED.",
+  "accounting": {
+    "donor_attested_reviewed": 36,
+    "selected_d10_candidates": 25,
+    "rejected_exact_d1_d9_duplicates": 11,
+    "d10_selected_before": 373,
+    "d10_selected_after": 398,
+    "d10_remaining_after": 626,
+    "ratified_d10_residents": 0
+  },
+  "exact_duplicate_review": [
+    {
+      "semantic_name": "VALUES",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:00110100 VALUES"
+    },
+    {
+      "semantic_name": "MULTIPLE-VALUE-BIND",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:00100101 MULTIPLE-VALUE-BIND"
+    },
+    {
+      "semantic_name": "MAKE-CONDITION",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:00100000 MAKE-CONDITION"
+    },
+    {
+      "semantic_name": "HANDLER-BIND",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:11010111 HANDLER-BIND"
+    },
+    {
+      "semantic_name": "SIGNAL",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:11000010 SIGNAL"
+    },
+    {
+      "semantic_name": "HANDLER-CASE",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:11100101 HANDLER-CASE"
+    },
+    {
+      "semantic_name": "SUBSEQ",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:00100001 SUBSEQ"
+    },
+    {
+      "semantic_name": "CHAR",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:01011011 CHAR"
+    },
+    {
+      "semantic_name": "POSITION",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:00000110 POSITION"
+    },
+    {
+      "semantic_name": "FLET",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:01011110 FLET"
+    },
+    {
+      "semantic_name": "LABELS",
+      "decision": "REJECT-EXACT-D1-D9-DUPLICATE",
+      "current_target": "D8:10110000 LABELS"
+    }
+  ],
+  "explicit_nonselection": [
+    {
+      "semantic_name": "FUNCTIONP",
+      "reason": "already current in ratified D9 and excluded before the 36-name review set"
+    },
+    {
+      "semantic_name": "HASH-TABLE-TEST",
+      "reason": "donor discusses table test selection but this slice does not claim an independently attested operation identity"
+    },
+    {
+      "semantic_name": "CLASS-OF",
+      "reason": "not independently attested in the reviewed donor slice"
+    },
+    {
+      "semantic_name": "SLOT-BOUNDP",
+      "reason": "not independently attested in the reviewed donor slice"
+    },
+    {
+      "semantic_name": "UNWIND-PROTECT",
+      "reason": "not independently attested in the reviewed donor slice"
+    }
+  ],
+  "rows": [
+    {
+      "stable_id": "d10.crossrepo.koans.46801b92169fff06",
+      "semantic_name": "MULTIPLE-VALUE-LIST",
+      "behavior": "evaluate a form and materialize all of its returned values as an ordinary list",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/multiple-values.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/multiple-values.lisp"
+      ],
+      "relation_class": "MULTIPLE-VALUE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.b0637ddab7192426",
+      "semantic_name": "CHECK-TYPE",
+      "behavior": "verify a value/place satisfies a type specifier and signal a typed error when it does not",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/condition-handlers.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/condition-handlers.lisp"
+      ],
+      "relation_class": "TYPE-CONDITION-BRIDGE",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.34a32de6e93ef9e9",
+      "semantic_name": "MAKE-HASH-TABLE",
+      "behavior": "construct a mutable key/value table with an explicit or default equality predicate",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/hash-tables.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.38e9791ae8a745fe",
+      "semantic_name": "HASH-TABLE-P",
+      "behavior": "test whether a value is a hash-table object",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/hash-tables.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.96ccb98390f405d8",
+      "semantic_name": "HASH-TABLE-COUNT",
+      "behavior": "return the number of key/value entries currently stored in a hash table",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/hash-tables.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.740762c2f021d8bf",
+      "semantic_name": "GETHASH",
+      "behavior": "lookup a key and return both its associated value and an independent found/not-found result",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/hash-tables.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/hash-tables.lisp"
+      ],
+      "relation_class": "HASH-TABLE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.41f530f6bb388791",
+      "semantic_name": "TYPEP",
+      "behavior": "test whether a value belongs to the set denoted by a general type specifier",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/type-checking.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.e929ed55d5400863",
+      "semantic_name": "TYPE-OF",
+      "behavior": "return a type specifier describing the dynamic type of a value",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/type-checking.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.7cb614c79c6b9e69",
+      "semantic_name": "SUBTYPEP",
+      "behavior": "test the subset relation between two type specifiers",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/type-checking.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.06aa667b66eda1fc",
+      "semantic_name": "COERCE",
+      "behavior": "convert a value to a requested representable target type according to language coercion rules",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/type-checking.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "relation_class": "TYPE-SPECIFIER-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.2ebc9090d1217cbf",
+      "semantic_name": "CHARACTERP",
+      "behavior": "test whether a value is a character",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/type-checking.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "relation_class": "TYPE-PREDICATE",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.09ef6cea8657b6ce",
+      "semantic_name": "BIT-VECTOR-P",
+      "behavior": "test whether a value is a bit-vector",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/type-checking.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/type-checking.lisp"
+      ],
+      "relation_class": "TYPE-PREDICATE",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.4bc8bc0337f5abe6",
+      "semantic_name": "CONCATENATE",
+      "behavior": "concatenate multiple sequences into a result sequence of an explicitly requested type",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/strings.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/strings.lisp"
+      ],
+      "relation_class": "GENERIC-SEQUENCE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.192017552cbfb355",
+      "semantic_name": "SEARCH",
+      "behavior": "return the first index at which one sequence occurs as a subsequence of another or the no-match result",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/strings.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/strings.lisp"
+      ],
+      "relation_class": "GENERIC-SEQUENCE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.a915f51c8cabeae5",
+      "semantic_name": "WHEN",
+      "behavior": "evaluate a body only when its predicate is true and otherwise produce the language false/empty result",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/control-statements.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/control-statements.lisp"
+      ],
+      "relation_class": "DERIVED-CONTROL-FORM",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.58f0048925c7dcf2",
+      "semantic_name": "UNLESS",
+      "behavior": "evaluate a body only when its predicate is false and otherwise produce the language false/empty result",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/control-statements.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/control-statements.lisp"
+      ],
+      "relation_class": "DERIVED-CONTROL-FORM",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.cab801cf8e258449",
+      "semantic_name": "FORMAT",
+      "behavior": "interpret a format-control language over arguments to produce text or directed output",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/format.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/format.lisp"
+      ],
+      "relation_class": "STRUCTURED-FORMATTING-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.0edca11200ae5700",
+      "semantic_name": "DEFCLASS",
+      "behavior": "define a named class with superclasses, slots and slot options",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/clos.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "relation_class": "OBJECT-SYSTEM-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.15060349336a3708",
+      "semantic_name": "MAKE-INSTANCE",
+      "behavior": "construct an instance of a class using initialization arguments",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/clos.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "relation_class": "OBJECT-SYSTEM-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.0f1de1be19160f5a",
+      "semantic_name": "SLOT-VALUE",
+      "behavior": "read or designate the value stored in a named slot of an object instance",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/clos.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "relation_class": "OBJECT-SYSTEM-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.45aba00bce4b45f3",
+      "semantic_name": "DEFGENERIC",
+      "behavior": "define a named generic function and its dispatch interface",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/clos.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "relation_class": "GENERIC-FUNCTION-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.756f9665e03d3108",
+      "semantic_name": "DEFMETHOD",
+      "behavior": "define a specialized method attached to a generic function",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/clos.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/clos.lisp"
+      ],
+      "relation_class": "GENERIC-FUNCTION-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.82ab0f11504ad273",
+      "semantic_name": "DESTRUCTURING-BIND",
+      "behavior": "bind variables by destructuring a value according to a lambda-list shaped pattern",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/functions.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/functions.lisp"
+      ],
+      "relation_class": "BINDING-DESTRUCTURE-ALGEBRA",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.6ff4f70d305014a4",
+      "semantic_name": "BLOCK",
+      "behavior": "establish a named lexical return target around a body",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/condition-handlers.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/condition-handlers.lisp"
+      ],
+      "relation_class": "LEXICAL-NONLOCAL-CONTROL",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.21c5d59e5d2abd0e",
+      "semantic_name": "RETURN-FROM",
+      "behavior": "transfer control to a lexically enclosing named block with an optional result value",
+      "donor_repo": "juv4uk/lisp-koans",
+      "donor_head": "57b901f8d4b16d66696896a745110b7561120da3",
+      "source_file": "koans-solved/condition-handlers.lisp",
+      "provenance": [
+        "#4074",
+        "juv4uk/lisp-koans",
+        "koans-solved/condition-handlers.lisp"
+      ],
+      "relation_class": "LEXICAL-NONLOCAL-CONTROL",
+      "exact_d1_d9_duplicate": false,
+      "exact_current_d10_duplicate": false,
+      "ownership": "CORE-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false
+    }
+  ]
+}
