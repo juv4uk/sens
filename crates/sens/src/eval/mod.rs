@@ -417,6 +417,9 @@ fn dispatch_call(
             environment,
         )?,
     };
+    if head_sid.is_none() && span.start < 50 && span.end < 50 {
+        eprintln!("SENS_DEBUG_COMPUTED_HEAD: head={head_expr:?} function={function:?}");
+    }
     match &function {
         Value::DomainIdentity(identity) => {
             // A language-owned D6 macro has an exact-domain identity but is not
