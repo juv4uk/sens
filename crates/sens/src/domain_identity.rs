@@ -87,10 +87,11 @@ impl DomainIdentity {
     /// Це projection саме до callable/mechanism routing, а не реєстр
     /// семантичної residency.
     ///
-    /// D3/D4/D5 зараз мають admitted Core-operation projection. D6 є
-    /// OWNER-RATIFIED 64/64 під #3393, але на цій межі ще не має загального
-    /// callable projection: відсутній механізм лишається fail-closed і не
-    /// скасовує D6 semantic identity. D8 так само OWNER-RATIFIED #3960.
+    /// D3/D4/D5 мають admitted Core-operation projection. D6 є OWNER-RATIFIED
+    /// 64/64 під #3393, але callable projection тут точковий: лише D6:001110
+    /// ADD1 і D6:001111 SUB1 admitted під #3394 як LOWER_DOMAIN_COMPOSITION.
+    /// Інші D6 residents лишаються fail-closed; residency не дорівнює mechanism.
+    /// D8 так само OWNER-RATIFIED #3960.
     /// D9 OWNER-RATIFIED #4008, але цей W1-W8 carrier ще не матеріалізує D9;
     /// відсутній W9/mechanism support fail-closed і не скасовує D9 residency.
     pub const fn core_operation(self) -> Option<CoreDomainIdentity> {
@@ -98,6 +99,11 @@ impl DomainIdentity {
             Self::D3(value) => Some(CoreDomainIdentity::D3(value)),
             Self::D4(value) => Some(CoreDomainIdentity::D4(value)),
             Self::D5(value) => Some(CoreDomainIdentity::D5(value)),
+            Self::D6(value)
+                if matches!(value.word().packed_bits(), 0b001110 | 0b001111) =>
+            {
+                Some(CoreDomainIdentity::D6(value))
+            }
             Self::D1(_) | Self::D2(_) | Self::D6(_) | Self::D7(_) | Self::D8(_) => None,
         }
     }
