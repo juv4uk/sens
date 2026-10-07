@@ -668,6 +668,32 @@ mod tests {
         );
     }
 
+    fn rewrite_exact(source: &str) -> Result<String, Analysis> {
+        let hosts = no_host();
+        let analysis = analyze_with(source, &hosts, false, true).expect("source parses");
+        if analysis.blocked_exact_domain != 0 {
+            return Err(analysis);
+        }
+        Ok(apply_edits(source, &analysis.edits).expect("edits apply"))
+    }
+
+    #[test]
+    fn exact_domain_mode_emits_current_width_not_sens8_compatibility() {
+        let source =
+            "(визначити f (функція (x) (як-є x) (атом? x) (решта x) (перше x) (тотожне? x x) (за-умовою ((атом? x) x)) (сполучити x ())))";
+        let expected =
+            "(0011 f (0010 (x) (001 x) (010 x) (011 x) (100 x) (101 x x) (110 ((010 x) x)) (111 x ())))";
+        assert_eq!(rewrite_exact(source).unwrap(), expected);
+    }
+
+    #[test]
+    fn exact_domain_mode_fails_closed_without_exact_successor() {
+        let hosts = no_host();
+        let analysis = analyze_with("(+ 1 2)", &hosts, false, true).expect("source parses");
+        assert!(analysis.edits.is_empty());
+        assert_eq!(analysis.named_calls, 1);
+        assert_eq!(analysis.blocked_exact_domain, 1);
+    }
     #[test]
     fn compatibility_def_maps_to_define_code() {
         assert_eq!(
