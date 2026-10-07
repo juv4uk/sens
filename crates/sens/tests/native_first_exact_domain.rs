@@ -50,23 +50,23 @@ fn lowered_exact_domain_data_selects_native_car_cons_without_spelling_match() {
         .define("__native_first_shape", domain_identity_shape_or_empty_mechanism());
     session.environment.define("__native_first_expr", data.clone());
 
-    let shape = eval_program(
-        "(__native_first_shape __native_first_expr)",
-        &mut session,
-    ).expect("shape witness").value;
     let head = eval_program(
-        "(перше __native_first_expr)",
+        "(00000101 __native_first_expr)",
         &mut session,
     ).expect("head witness").value;
+    let shape = eval_program(
+        "(__native_first_shape (00000101 __native_first_expr))",
+        &mut session,
+    ).expect("shape witness").value;
+    let key3_direct = eval_program(
+        "(native-first-domain-key3-shape? (shape-or-empty (00000101 __native_first_expr)) 1 0 0)",
+        &mut session,
+    ).expect("direct key3 witness").value;
     let car_pred = eval_program(
-        "(native-first-domain-d3-car? __native_first_shape (перше __native_first_expr))",
+        "(native-first-domain-d3-car? __native_first_shape (00000101 __native_first_expr))",
         &mut session,
     ).expect("car predicate witness").value;
-    let key3_pred = eval_program(
-        "(native-first-domain-key3-shape? __native_first_shape 1 0 0)",
-        &mut session,
-    ).expect("key3 predicate witness").value;
-    eprintln!("native-first diagnostics: shape={shape:?} head={head:?} car_pred={car_pred:?} key3_pred={key3_pred:?}");
+    eprintln!("native-first diagnostics: shape={shape:?} head={head:?} car_pred={car_pred:?} key3_direct={key3_direct:?}");
     let actual = eval_program(
         "(native-first-plan-domain __native_first_shape __native_first_expr)",
         &mut session,
