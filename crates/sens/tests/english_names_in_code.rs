@@ -21,8 +21,9 @@
 //! Файли даних, які читаються через `read-all` без `quote`, сканер не
 //! відрізняє від коду — вони йдуть як `lisp`.
 //!
-//! Сама таблиця функцій і згенеровані з неї проєкції (`*_generated.rs`,
-//! `lib/generated/`) — не код, а джерело імен; вони не скануються.
+//! Сама таблиця функцій, канонічні `lib/domains/d*.lisp` таблиці поверхонь
+//! і згенеровані з них проєкції (`*_generated.rs`, `lib/generated/`) — не
+//! executable-код, а джерела імен; вони не скануються.
 //!
 //! Храповик: `tests/data/english-names-baseline.tsv` (вид, файл, ім'я,
 //! кількість). Тест падає, якщо місць стало більше, і показує рядки.
@@ -64,6 +65,7 @@ fn is_table_source(rel: &str) -> bool {
         || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
         || rel == "lib/machine/encoding/coverage.lisp"
         || rel.starts_with("lib/generated/")
+        || rel.starts_with("lib/domains/")
         || rel.ends_with("_generated.rs")
         || rel.starts_with("crates/sens/tests/data/")
         // Сам цей тест: імена в його перевірках сканера — вхідні дані.
@@ -451,6 +453,8 @@ fn scanners_find_names_in_lisp_and_rust() {
         ]
     );
     assert_eq!(lisp[3].0, 2);
+
+    assert!(is_table_source("lib/domains/d9.lisp"));
 
     assert_eq!(
         classified_kind("crates/sens/tests/numeric_wire.rs", "", "rust-lisp"),
