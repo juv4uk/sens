@@ -1,21 +1,21 @@
 {
   "schema": "d6-mechanism-ledger/v1",
-  "authority": "#3393 / Contract 11.5",
+  "authority": "#3393 / Contract 11.8",
   "mechanism_issue": "#3394",
   "domain": "D6",
   "identity_occupancy": 64,
   "executable_coverage": {
-    "count": 0,
+    "count": 2,
     "total": 64,
     "basis": "current admitted exact-domain runtime routes"
   },
   "status_counts": {
     "DIRECT_LAW": 0,
-    "LOWER_DOMAIN_COMPOSITION": 0,
+    "LOWER_DOMAIN_COMPOSITION": 2,
     "LISP_OWNED": 0,
-    "MISSING": 64
+    "MISSING": 62
   },
-  "rule": "Ratified residency is not callability. A row moves out of MISSING only with an admitted exact-domain mechanism and executable witness; no legacy eight-bit compatibility identity or surface spelling may select D6 meaning.",
+  "rule": "Ratified residency is not callability. Only D6:001110 ADD1 and D6:001111 SUB1 are currently admitted here, as LOWER_DOMAIN_COMPOSITION over exact D5 arithmetic; every other D6 resident remains MISSING until separate mechanism evidence exists.",
   "rows": [
     {
       "coordinate": "000000",
@@ -203,27 +203,25 @@
       "coordinate": "001110",
       "resident": "ADD1",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "LOWER_DOMAIN_COMPOSITION",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "crates/sens/src/domain_identity.rs: callable projection admits only D6:001110/001111",
+        "crates/sens/src/eval/d6_arithmetic.rs: composes through admitted D5 PLUS/DIFFERENCE with exact integer 1",
+        "crates/sens/tests/d6_add1_sub1_mechanisms.rs: exact-Q positive witness and arity/type controls"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "crates/sens/tests/d6_add1_sub1_mechanisms.rs: equal packed payloads in D5/D7/D8 do not inherit the D6 mechanism"
     },
     {
       "coordinate": "001111",
       "resident": "SUB1",
       "identity_status": "RATIFIED",
-      "mechanism_status": "MISSING",
+      "mechanism_status": "LOWER_DOMAIN_COMPOSITION",
       "evidence": [
-        "crates/sens/src/eval/selector_law.rs: production decoder admits widths 3..=5 only",
-        "crates/sens/src/eval/canon.rs: direct domain primitive owns D3 only",
-        "crates/sens/src/eval/necessary_forms.rs: exact necessary-form mechanism owns D4 only",
-        "crates/sens/src/semantic_registry.rs: direct exact surface/binding projection admits D3/D4/D5 only"
+        "crates/sens/src/domain_identity.rs: callable projection admits only D6:001110/001111",
+        "crates/sens/src/eval/d6_arithmetic.rs: composes through admitted D5 PLUS/DIFFERENCE with exact integer 1",
+        "crates/sens/tests/d6_add1_sub1_mechanisms.rs: exact-Q positive witness and arity/type controls"
       ],
-      "negative_cross_domain_control": null
+      "negative_cross_domain_control": "crates/sens/tests/d6_add1_sub1_mechanisms.rs: equal packed payloads in D5/D7/D8 do not inherit the D6 mechanism"
     },
     {
       "coordinate": "010000",
