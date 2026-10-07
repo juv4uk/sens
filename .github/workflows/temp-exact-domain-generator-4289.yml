@@ -17,6 +17,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
       - uses: dtolnay/rust-toolchain@stable
       - name: Build exact-domain writer
         run: cargo build --quiet -p sens-cli --bin sens-to-sens
