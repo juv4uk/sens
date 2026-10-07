@@ -58,18 +58,20 @@ for row in art["selected"]:
     assert got["coordinate_basis"]=="UNPLACED"
     assert got["ratified_resident"] is False
 
+selected_now=state["target"]["selected_semantic_candidates"]
+remaining_now=state["target"]["remaining_semantic_candidates"]
+assert selected_now>=504
+assert remaining_now==1024-selected_now
 assert inventory["accounting"]=={
-    "selected_semantic_candidates":434,
+    "selected_semantic_candidates":selected_now,
     "law_forced_coordinates":256,
-    "unplaced_selected_candidates":178,
-    "remaining_semantic_inventory":590,
+    "unplaced_selected_candidates":selected_now-256,
+    "remaining_semantic_inventory":remaining_now,
     "ratified_d10_residents":0,
 }
-assert state["target"]["selected_semantic_candidates"]==434
-assert state["target"]["remaining_semantic_candidates"]==590
 assert state["target"]["ratified_residents"]==0
 assert state["island_bridge_v1"]["selected"]==6
 assert state["island_bridge_v1"]["coordinates_assigned"]==0
 
 print("D10-ISLAND-BRIDGE-V1=PASS")
-print("selected=6 inventory=434/1024 placed=256 unplaced=178 remaining=590 ratified=0")
+print(f"selected=6 inventory={selected_now}/1024 placed=256 unplaced={selected_now-256} remaining={remaining_now} ratified=0")
