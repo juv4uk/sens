@@ -209,3 +209,5 @@
        (native-first-plan-domain-car shape-or-empty expression))
       ((native-first-domain-true ())
        (native-first-fallback expression)))))
+
+; debug trigger #4242: no semantic change
