@@ -68,6 +68,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
       - name: Validate canonical domain tables
         run: python3 scripts/check-domain-tables.py
       - name: Check D1-D5 runtime projection
