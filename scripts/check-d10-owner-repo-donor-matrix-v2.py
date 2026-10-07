@@ -22,7 +22,6 @@ expected={
     "BACKEND-OR-MECHANISM":11,
     "PACKAGE-OR-DOMAIN":33,
     "REFERENCE-OR-UPSTREAM":31,
-    "REVIEW-REQUIRED":0,
 }
 assert m["class_counts"]==expected
 actual={}
