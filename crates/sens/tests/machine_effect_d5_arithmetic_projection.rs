@@ -51,7 +51,7 @@ fn machine_session() -> Session {
     session
 }
 
-fn lowered_identity(source: &str) -> (u8, u8) {
+fn lowered_identity(source: &str) -> (usize, u8) {
     let parsed = parse(source).unwrap_or_else(|error| panic!("{source}: {error}"));
     let lowered = lower_program(&parsed);
     let ExprKind::DomainCall(identity, _) = &lowered[0].kind else {
