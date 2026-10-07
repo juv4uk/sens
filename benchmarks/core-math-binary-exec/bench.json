@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "core-math-binary-exec",
+  "wing": "Core-Math",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can exact-width binary objects remain domain-qualified and reusable under admitted laws while cross-domain application fails closed?",
+  "claim": "Implements the minimal experimental binary executor and domain firewall with independent falsifiers; mechanism reuse does not erase domain identity.",
+  "witness": [
+    "README.md",
+    "Cargo.toml",
+    "src/main.rs"
+  ],
+  "status": "EXPERIMENTAL-WITNESS",
+  "generation": "unknown",
+  "axis": "core-math/domain-qualified-binary-exec",
+  "reproduce": "cargo test --quiet --manifest-path benchmarks/core-math-binary-exec/Cargo.toml && cargo run --quiet --manifest-path benchmarks/core-math-binary-exec/Cargo.toml"
+}
