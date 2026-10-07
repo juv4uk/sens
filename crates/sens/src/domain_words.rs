@@ -233,4 +233,18 @@ mod tests {
             assert!(CoreD8::from_word(word).word() == word);
         }
     }
+
+    #[test]
+    fn host_container_size_is_separate_from_domain_width() {
+        use std::mem::size_of;
+
+        assert_eq!(size_of::<PredicateBit>(), 1);
+        assert_eq!(size_of::<Racana2>(), 1);
+        assert_eq!(size_of::<Bija3>(), 1);
+        assert_eq!(size_of::<CoreD4>(), 1);
+        assert_eq!(size_of::<CoreD5>(), 1);
+        assert_eq!(size_of::<CoreD6>(), 1);
+        assert_eq!(size_of::<SoundD7>(), 1);
+        assert_eq!(size_of::<CoreD8>(), 1);
+    }
 }

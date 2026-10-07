@@ -289,6 +289,17 @@ mod tests {
     }
 
     #[test]
+    fn eight_d1_values_are_one_physical_byte() {
+        let tokens = parse_binary_source_words("1 1 1 1 1 1 1 1").unwrap();
+        let packed = pack_binary_source_tokens(&tokens);
+
+        assert_eq!(packed.bit_len(), 8);
+        assert_eq!(packed.byte_len(), 1);
+        assert_eq!(packed.bytes(), &[0b1111_1111]);
+        assert_eq!(packed.valid_bits_in_last_byte(), 8);
+    }
+
+    #[test]
     fn canonical_transport_accounting_keeps_payload_framing_and_tail_separate() {
         let tokens = parse_binary_source_words("10 001 01").unwrap();
         let packed = pack_binary_source_tokens(&tokens);

@@ -223,4 +223,28 @@ mod tests {
         assert_eq!(word.bit(2), Some(true));
         assert_eq!(word.bit(3), None);
     }
+
+    #[test]
+    fn host_container_size_is_not_semantic_width() {
+        use std::mem::size_of;
+
+        assert_eq!(Bits::<1>::width(), 1);
+        assert_eq!(Bits::<2>::width(), 2);
+        assert_eq!(Bits::<3>::width(), 3);
+        assert_eq!(Bits::<4>::width(), 4);
+        assert_eq!(Bits::<5>::width(), 5);
+        assert_eq!(Bits::<6>::width(), 6);
+        assert_eq!(Bits::<7>::width(), 7);
+        assert_eq!(Bits::<8>::width(), 8);
+
+        // Rust's byte-addressed host representation is a container fact only.
+        assert_eq!(size_of::<Bit1>(), 1);
+        assert_eq!(size_of::<Bit2>(), 1);
+        assert_eq!(size_of::<Bit3>(), 1);
+        assert_eq!(size_of::<Bit4>(), 1);
+        assert_eq!(size_of::<Bit5>(), 1);
+        assert_eq!(size_of::<Bit6>(), 1);
+        assert_eq!(size_of::<Bit7>(), 1);
+        assert_eq!(size_of::<Bit8>(), 1);
+    }
 }
