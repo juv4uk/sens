@@ -158,3 +158,43 @@
        (native-first-domain-false ())))))
 
 (00001001 native-first-domain-d3-car?
+  (00001000 (shape-or-empty value)
+    (native-first-domain-key3-shape?
+      (shape-or-empty value)
+      (native-first-domain-true ())
+      (native-first-domain-false ())
+      (native-first-domain-false ()))))
+
+(00001001 native-first-domain-d3-cons?
+  (00001000 (shape-or-empty value)
+    (native-first-domain-key3-shape?
+      (shape-or-empty value)
+      (native-first-domain-true ())
+      (native-first-domain-true ())
+      (native-first-domain-true ()))))
+
+(00001001 native-first-plan-domain-cons-argument
+  (00001000 (shape-or-empty expression argument)
+    (00000111
+      ((00000010 argument)
+       (native-first-fallback expression))
+      ((native-first-domain-d3-cons? shape-or-empty (00000101 argument))
+       (native-first-plan-car-cons-u64 expression argument))
+      ((native-first-domain-true ())
+       (native-first-fallback expression)))))
+
+(00001001 native-first-plan-domain-car
+  (00001000 (shape-or-empty expression)
+    (00000111
+      ((00000010 (00000110 expression))
+       (native-first-fallback expression))
+      ((00000010 (00000110 (00000110 expression)))
+       (00000111
+         ((00000011 (00000110 (00000110 expression)) ())
+          (native-first-plan-domain-cons-argument
+            shape-or-empty
+            expression
+            (00000101 (00000110 expression))))
+         ((native-first-domain-true ())
+          (native-first-fallback expression))))
+      ((native-first-domain-true ())
