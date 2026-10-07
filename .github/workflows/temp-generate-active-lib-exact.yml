@@ -6,6 +6,7 @@ on:
     branches: [gen/active-lib-exact-domain-4305]
     paths:
       - ".github/workflows/temp-generate-active-lib-exact.yml"
+      - "crates/sens-cli/src/bin/sens-to-sens.rs"
 
 permissions:
   contents: write
