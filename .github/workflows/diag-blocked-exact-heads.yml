@@ -1,0 +1,23 @@
+name: Diagnostic blocked exact-domain heads
+
+on:
+  push:
+    branches: [fix/4320-native-first-consumers-exact]
+    paths:
+      - ".github/workflows/diag-blocked-exact-heads.yml"
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/4320-native-first-consumers-exact
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Print blocked exact-domain heads
+        run: |
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain \
+            lib/machine/dispatch/native-first-execute.lisp \
+            tests/fixtures/native-first-totality-witness.lisp \
+            tests/fixtures/native-first-coverage-ledger-witness.lisp
