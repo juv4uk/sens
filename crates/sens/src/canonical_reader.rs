@@ -2,7 +2,7 @@
 //!
 //! This path is intentionally separate from the human/compatibility parser.
 //! It consumes already-bounded binary source words, applies the ratified D2
-//! structural law, and lifts W3-W9 payloads directly into DomainIdentity.
+//! structural law, and lifts W1 plus W3-W9 payloads directly into DomainIdentity.
 //! D8/D9 stay domain-qualified; no legacy Sens8/Function8 identity is constructed.
 
 use crate::{
@@ -20,7 +20,7 @@ const D2_DOT: u8 = 0b11;
 /// Parse canonical visible-binary SENS source directly into AST.
 ///
 /// Human punctuation/names are not accepted by the underlying source-word
-/// lexer. This function grants no callability: W3-W8 payloads become
+/// lexer. This function grants no callability: W1 plus W3-W9 payloads become
 /// DomainIdentity nodes and later lowering/routing decides whether an identity
 /// may head a call.
 pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> {
@@ -91,15 +91,8 @@ impl<'a> CanonicalReader<'a> {
             }
         }
 
-        if matches!(token.word, BinarySourceWord::W1(_)) {
-            return Err(self.error(
-                "D1 predicate cells are not expression payloads in this reader slice",
-                token.span,
-            ));
-        }
-
-        // D2 has already been consumed structurally above. Every remaining
-        // W3..W9 word carries exact ratified domain identity here; occupancy
+        // D2 has already been consumed structurally above. W1 and every
+        // W3..W9 word carry exact ratified domain identity here; occupancy
         // and callability remain later law-owned decisions.
         let identity = crate::DomainIdentity::from_source_word(token.word);
 
@@ -371,10 +364,14 @@ mod tests {
     }
 
     #[test]
-    fn d1_remains_a_dedicated_value_domain_not_expression_identity() {
-        let source = "1";
-        let error = parse_canonical_binary(source).unwrap_err();
-        assert_eq!(error.kind, ErrorKind::Parse, "{source}");
+    fn d1_is_an_exact_non_callable_value_identity() {
+        for (source, expected) in [("0", 0u16), ("1", 1u16)] {
+            let identity = domain(&only(source));
+            assert_eq!((identity.width(), identity.packed_bits()), (1, expected));
+            assert!(identity.core_operation().is_none());
+        }
+
+        assert_ne!(domain(&only("0")), domain(&only("000")));
     }
 
     #[test]
