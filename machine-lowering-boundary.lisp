@@ -21,6 +21,7 @@
   (lowering-direction semantic-to-machine)
   (canonical-machine-effect-layer lib/machine/effect-boundary.lisp)
   (lowering-stage semantic-to-machine-effect required)
+  (semantic-to-machine-effect-owner lib/machine/lowering/semantic-effects.lisp)
   (lowering-stage machine-effect-to-target-projection required)
   (target-specific-data-before-machine-effect forbidden)
   (machine-effect-semantic-authority forbidden)
