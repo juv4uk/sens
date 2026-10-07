@@ -61,7 +61,7 @@ on:
 
 jobs:
   canonical-domain-tables:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - name: Validate canonical domain tables
