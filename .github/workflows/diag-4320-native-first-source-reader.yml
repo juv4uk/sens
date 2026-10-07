@@ -1,0 +1,30 @@
+name: diag-4320-native-first-source-reader
+
+on:
+  push:
+    branches:
+      - diag/4320-native-first-source-reader
+
+jobs:
+  witness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: current exact source-string witness
+        continue-on-error: true
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-execution-witness.lisp
+      - name: compatibility source-string control
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("tests/fixtures/native-first-execution-witness.lisp")
+          s = p.read_text()
+          old = '"(+ 1 2)\n(100 (111 7 9))"'
+          new = '"(+ 1 2)\n(car (cons 7 9))"'
+          if old not in s:
+              raise SystemExit("expected exact source-string fixture not found")
+          p.write_text(s.replace(old, new, 1))
+          PY
+          cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-execution-witness.lisp
