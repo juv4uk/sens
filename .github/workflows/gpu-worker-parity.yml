@@ -31,6 +31,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  cpu-oracle-conformance:
+    name: CPU oracle conformance corpus
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Current GPU oracle fixtures match the CPU evaluator
+        run: cargo test -p sens --lib gpu_oracle_conformance::tests::every_fixture_matches_the_cpu_oracle -- --nocapture
+
   gpu-worker-parity:
     # Лише GPU-runner: ніколи не падаємо назад на CPU-runner.
     runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
