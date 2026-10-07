@@ -1209,3 +1209,76 @@
         (00101001
           (00000101 instructions)
           (x86-encode-program (00000110 instructions)))))))
+
+; #2372 corrected reusable VEX3 law, replayed from #4083 + #4110.
+; Intel byte layout:
+;   byte1 = C4
+;   byte2 = ~R ~X ~B m-mmmm
+;   byte3 = W ~vvvv L pp
+; Inversion is exact arithmetic over bounded fields, never predicate truth.
+(00001001 x86-vex3-byte2
+  (00001000 (map r x b)
+    (00001100
+      (00001110 (00001101 1 r) 128)
+      (00001100
+        (00001110 (00001101 1 x) 64)
+        (00001100
+          (00001110 (00001101 1 b) 32)
+          map)))))
+
+(00001001 x86-vex3-byte3
+  (00001000 (w vvvv l pp)
+    (00001100
+      (00001110 w 128)
+      (00001100
+        (00001110 (00001101 15 vvvv) 8)
+        (00001100
+          (00001110 l 4)
+          pp)))))
+
+; Generic VEX3 XMM/XMM/XMM register form.
+; map=1 selects 0F; L=0 selects the 128-bit XMM form.
+(00001001 x86-encode-vex3-xmm-xmm-xmm
+  (00001000 (map w l pp opcode dst src1 src2)
+    (10011100
+      ((dst-code (x86-xmm-reg-code dst))
+       (src1-code (x86-xmm-reg-code src1))
+       (src2-code (x86-xmm-reg-code src2)))
+      (00100111
+        #b11000100
+        (x86-vex3-byte2
+          map
+          (x86-high1 dst-code)
+          0
+          (x86-high1 src2-code))
+        (x86-vex3-byte3 w src1-code l pp)
+        opcode
+        (x86-encode-modrm
+          3
+          (x86-low3 dst-code)
+          (x86-low3 src2-code))))))
+
+; VANDNPS xmm,xmm,xmm: VEX.128.0F.WIG 55 /r, pp=00.
+(00001001 x86-encode-vandnps-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 0 #b01010101 dst src1 src2)))
+
+; VANDNPD xmm,xmm,xmm: VEX.128.66.0F.WIG 55 /r, pp=01.
+(00001001 x86-encode-vandnpd-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 1 #b01010101 dst src1 src2)))
+
+; VADDPD xmm,xmm,xmm: VEX.128.66.0F.WIG 58 /r, pp=01.
+(00001001 x86-encode-vaddpd-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 1 #b01011000 dst src1 src2)))
+
+; VADDPS xmm,xmm,xmm: VEX.128.0F.WIG 58 /r, pp=00.
+(00001001 x86-encode-vaddps-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 0 #b01011000 dst src1 src2)))
+
