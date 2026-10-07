@@ -1,0 +1,52 @@
+name: TEMP diagnose 4320 Lisp witnesses
+on:
+  push:
+    branches:
+      - diag/4320-semantic-slice-529e
+    paths:
+      - ".github/workflows/tmp-diagnose-4320-witnesses.yml"
+jobs:
+  witnesses:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: 01 exact-quantity-arithmetic-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp
+      - name: 02 meta-eval-empty-program-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/meta-eval-empty-program-witness.lisp
+      - name: 03 meta-semantic-registry-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/meta-semantic-registry-witness.lisp
+      - name: 04 process-load-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/process-load-witness.lisp
+      - name: 05 narrate-outcome-authority-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/narrate-outcome-authority-witness.lisp
+      - name: 06 persistent-vector-balance-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/persistent-vector-balance-witness.lisp
+      - name: 07 reason-index-authority-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/reason-index-authority-witness.lisp
+      - name: 08 explicit-negative-reason-observe-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/explicit-negative-reason-observe-witness.lisp
+      - name: 09 x86-64-instruction-set-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/x86-64-instruction-set-witness.lisp
+      - name: 10 machine-register-width-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/machine-register-width-witness.lisp
+      - name: 11 machine-current-gpr-atoms-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/machine-current-gpr-atoms-witness.lisp
+      - name: 12 native-first-totality-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-totality-witness.lisp
+      - name: 13 native-first-execution-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-execution-witness.lisp
+      - name: 14 native-first-parity-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-parity-witness.lisp
+      - name: 15 native-first-coverage-ledger-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/native-first-coverage-ledger-witness.lisp
+      - name: 16 scientific-constant-knowledge-projection-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/scientific-constant-knowledge-projection-witness.lisp
+      - name: 17 mechanism-selector-1047-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/mechanism-selector-1047-witness.lisp
+      - name: 18 island-lowering-1048-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/island-lowering-1048-witness.lisp
+      - name: 19 translation-symbol-boundary-witness.lisp
+        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/translation-symbol-boundary-witness.lisp
