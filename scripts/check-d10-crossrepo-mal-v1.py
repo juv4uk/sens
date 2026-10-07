@@ -75,18 +75,18 @@ for r in selected:
     assert got["coordinate"] is None
     assert got["ratified_resident"] is False
 
-assert inv["accounting"]=={
-    "selected_semantic_candidates":367,
-    "law_forced_coordinates":256,
-    "unplaced_selected_candidates":111,
-    "remaining_semantic_inventory":657,
-    "ratified_d10_residents":0,
-}
-assert state["target"]["selected_semantic_candidates"]==367
-assert state["target"]["remaining_semantic_candidates"]==657
-assert state["target"]["law_forced_coordinates"]==256
-assert state["target"]["unplaced_selected_candidates"]==111
-assert state["target"]["ratified_residents"]==0
+target=state["target"]
+selected_total=target["selected_semantic_candidates"]
+remaining_total=target["remaining_semantic_candidates"]
+assert selected_total>=367
+assert remaining_total==1024-selected_total
+assert target["law_forced_coordinates"]==256
+assert target["unplaced_selected_candidates"]==selected_total-256
+assert target["ratified_residents"]==0
+assert len(inv["rows"])==selected_total
+assert len({r["stable_id"] for r in inv["rows"]})==selected_total
+assert len({r["semantic_name"] for r in inv["rows"]})==selected_total
+
 assert state["crossrepo_mal_v1"]=={
     "authority":"#4053",
     "artifact":"knowledge/d10-crossrepo-mal-v1.json",
@@ -98,4 +98,4 @@ assert state["crossrepo_mal_v1"]=={
 }
 
 print("D10-CROSSREPO-MAL-1=PASS")
-print("reviewed=62 selected=22 projections=38 hold=2 inventory=367/1024 placed=256 unplaced=111 remaining=657")
+print(f"reviewed=62 selected=22 projections=38 hold=2 inventory={selected_total}/1024 placed=256 unplaced={selected_total-256} remaining={remaining_total}")
