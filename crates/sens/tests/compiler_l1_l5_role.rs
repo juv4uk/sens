@@ -175,6 +175,7 @@ fn d3_empty_identity_decomposes_to_exact_shape() {
     };
     assert!(matches!(tail.as_ref(), Value::Nil));
     assert_eq!(format!("{}", bits), "000");
+}
 
 #[test]
 fn sens_l1_l5_derivation_matches_rust_oracle_for_all_d3_identities() {
