@@ -110,8 +110,15 @@ fn packed_bits_do_not_cross_domain_widths() {
     );
 
     assert_eq!(
+        eval_program("(machine-capabilities-for-domain 5 8)", &mut s)
+            .expect("D5:01000 ZEROP")
+            .value
+            .to_string(),
+        "((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary))"
+    );
+    assert_eq!(
         eval_program("(machine-capabilities-for-domain 4 8)", &mut s)
-            .expect("D4:1000 CAAR must fail closed")
+            .expect("D4:1000 CAAR must not inherit ZEROP")
             .value
             .to_string(),
         "()"
@@ -133,6 +140,7 @@ fn active_machine_capability_axis_has_no_sid8_lookup() {
 #[test]
 fn capability_names_do_not_mint_semantic_identities() {
     for capability in [
+        "integer-zero-test",
         "integer-add",
         "integer-subtract",
         "integer-multiply",
@@ -184,6 +192,7 @@ fn x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning
         .expect("x86 semantic lowering");
 
     for name in [
+        "x86-lower-zerop-u64-forms",
         "x86-lower-add-u64-forms",
         "x86-lower-difference-u64-forms",
         "x86-lower-times-u64-forms",
