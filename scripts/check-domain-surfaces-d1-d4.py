@@ -23,8 +23,8 @@ def fail(message: str) -> None:
 def parse_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     for row in read_domain_tables(SOURCES):
-        if row.en is None or row.uk is None or row.san is None:
-            fail(f"{row.domain}:{row.bits}: en/uk/san must be present")
+        if row.en is None or row.uk is None or row.ukr is None or row.san is None:
+            fail(f"{row.domain}:{row.bits}: en/uk/ukr/san must be present")
         rows.append(
             {
                 "domain": row.domain,
@@ -32,6 +32,7 @@ def parse_rows() -> list[dict[str, str]]:
                 "role": row.role,
                 "en": row.en,
                 "uk": row.uk,
+                "ukr": row.ukr,
                 "sa": row.san,
             }
         )
@@ -76,9 +77,19 @@ def render_generated(rows: list[dict[str, str]]) -> str:
                 + rust_string(row["uk"])
                 + " }",
                 "DomainSurfaceName { namespace: "
+                + rust_string("ukr")
+                + ", name: "
+                + rust_string(row["ukr"])
+                + " }",
+                "DomainSurfaceName { namespace: "
                 + rust_string("sa")
                 + ", name: "
                 + rust_string(row["sa"])
+                + " }",
+                "DomainSurfaceName { namespace: "
+                + rust_string("en")
+                + ", name: "
+                + rust_string(row["en"])
                 + " }",
             ]
         )
@@ -110,7 +121,7 @@ def validate(rows: list[dict[str, str]]) -> None:
         if actual_bits != expected_bits:
             fail(f"{domain}: table is not complete exact-width coverage")
 
-    for language in ("uk", "sa"):
+    for language in ("uk", "ukr", "sa", "en"):
         seen: dict[str, tuple[str, str]] = {}
         for row in rows:
             spelling = row[language]
@@ -163,7 +174,7 @@ def main() -> int:
         )
 
     print("D1-D5-SURFACE-GUARD: PASS")
-    print("rows=62 source=lib/domains/d1..d5 uk+san exact-domain")
+    print("rows=62 source=lib/domains/d1..d5 uk+ukr+san+en exact-domain")
     return 0
 
 
