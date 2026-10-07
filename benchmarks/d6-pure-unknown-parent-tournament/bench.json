@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d6-pure-unknown-parent-tournament",
+  "wing": "D6 PURE-UNKNOWN",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Does any unresolved capability earn a D6 PURE-UNKNOWN candidate from an admitted parent plus exactly two independent witnessed semantic deltas?",
+  "claim": "Searches semantic families rather than free labels; NO-CANDIDATE is explicitly a successful theorem outcome.",
+  "witness": [
+    "run.py",
+    "README.md"
+  ],
+  "status": "NO-CANDIDATE-ALLOWED-AS-SUCCESS",
+  "generation": "unknown",
+  "axis": "d6/pure-unknown/parent-tournament",
+  "reproduce": "python3 benchmarks/d6-pure-unknown-parent-tournament/run.py --out /tmp/d6-pure-unknown-parent-tournament"
+}
