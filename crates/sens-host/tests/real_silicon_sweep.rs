@@ -388,8 +388,8 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
         });
     }
 
-    // #4086 C2: deterministic feature-gated register witnesses. Encoding and
-    // admission already exist; this lane only records physical owner-silicon
+    // #4086 C2/C3: deterministic feature-gated register witnesses. Encoding
+    // and admission already exist; this lane only records physical owner-silicon
     // execution and refuses to run when the advertised CPU feature is absent.
     for (id, feature, families, expression, expected) in [
         (
@@ -405,6 +405,23 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             "TZCNT r64,r64",
             "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 24) (tzcnt-r64-r64 rax rax) (ret))) 0)",
             "3",
+        ),
+        (
+            "sse2-xorpd-zero",
+            "sse2",
+            "MOVQ GPR->XMM + XORPD + MOVQ XMM->GPR",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 1311768467463790320) (movq-xmm-r64 xmm0 rax) (xorpd-xmm-xmm xmm0 xmm0) (movq-r64-xmm rax xmm0) (ret))) 0)",
+            "0",
+        ),
+        // AESENC zero-state/zero-key has every output byte 0x63:
+        // SubBytes(0)=0x63; equal-byte columns stay equal through ShiftRows/
+        // MixColumns; the zero round key does not change the round output.
+        (
+            "aesenc-zero-round-low64",
+            "aes",
+            "MOVQ zero state/key + AESENC + MOVQ low64",
+            "(x86-call-admitted-u64 (quote ((xor-r64-r64 rax rax) (movq-xmm-r64 xmm0 rax) (movq-xmm-r64 xmm1 rax) (aesenc-xmm-xmm xmm0 xmm1) (movq-r64-xmm rax xmm0) (ret))) 0)",
+            "7161677110969590627",
         ),
     ] {
         assert!(
