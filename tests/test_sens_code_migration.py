@@ -71,7 +71,7 @@ class SensCodeMigrationTests(unittest.TestCase):
     @classmethod
     def contract_setup(cls):
         data, _ = mod.load_foundation(CONTRACT_FOUNDATION)
-        domains = ["D3", "D4", "D5", "D6", "D8"]
+        domains = list(mod.CONTRACT_CALL_DOMAINS)
         code_map = mod.build_map(data, domains)
         code_map = mod.augment_code_map_with_domain_surfaces(
             code_map,
@@ -120,6 +120,14 @@ class SensCodeMigrationTests(unittest.TestCase):
             "non-callable authority resident used as executable head",
         ):
             self.contract_binary("(ROUND x)\n")
+
+    def test_contract_authority_human_call_map_excludes_noncallable_d8_d9(self):
+        _, code_map, _, resolver, authority = self.contract_setup()
+        self.assertTrue(all(entry.domain in mod.CONTRACT_CALL_DOMAINS for entry in code_map.values()))
+        self.assertTrue(all(identity.domain in mod.CONTRACT_CALL_DOMAINS for identity in resolver.current_by_label.values()))
+        self.assertIn((8, "00000101"), authority)
+        self.assertNotIn("ROUND", code_map)
+
 
     def test_contract_authority_preserves_bare_d7_word_instead_of_spelling_digits(self):
         converted, _, _ = self.contract_binary("(LIST 0011001)\n")
