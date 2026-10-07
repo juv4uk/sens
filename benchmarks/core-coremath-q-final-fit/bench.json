@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "core-coremath-q-final-fit",
+  "wing": "Core-Math / Core Number",
+  "roles": [
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does the repaired DIV final-fit classification commute with an independent exact Fraction oracle across the Q bridge?",
+  "claim": "Replays complementary bounded cases after the final-fit repair; it validates the bridge slice and does not ratify the Q carrier model itself.",
+  "witness": [
+    "run.py",
+    "../core-number-q-product-ladder/run.py"
+  ],
+  "status": "COMPLEMENTARY-BOUNDED",
+  "generation": "unknown",
+  "axis": "core-number/q-final-fit",
+  "reproduce": "python3 benchmarks/core-coremath-q-final-fit/run.py --out /tmp/core-coremath-q-final-fit"
+}
