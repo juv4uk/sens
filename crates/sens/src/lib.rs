@@ -35,6 +35,8 @@ mod environment;
 mod error;
 pub(crate) mod eval;
 mod language_items;
+mod mixed_source;
+pub use mixed_source::parse_mixed_exact_domain;
 mod parser;
 mod presentation;
 mod semantic_registry;
@@ -98,6 +100,23 @@ pub mod semantic_registry_export {
     pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sens8> {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
+    /// Current exact-domain identity for a source-routable admitted surface.
+    pub fn domain_identity_for_admitted_surface(
+        name: &str,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::domain_identity_for_surface(name)
+    }
+
+    /// Bounded transition from a historical eight-bit callable identity to
+    /// its already-ratified exact-domain successor.
+    pub fn exact_domain_successor_for_compatibility_id(
+        semantic_id: super::Sens8,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::migration_domain_identity_from_registry_byte(
+            semantic_id.packed_byte(),
+        )
+    }
+
 
     /// Legacy packed-byte export for external projection consumers.
     ///
@@ -363,9 +382,52 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         };
 
+        // Some already-admitted compatibility surfaces have ratified exact-domain
+        // successors whose generated D3-D5 surface projection is intentionally
+        // not the binding source. Populate that exact slot from the existing
+        // Lisp-owned value, without inventing a new identity or widening
+        // callability. This is needed for D6 LET/LET* after FASL bootstrap.
+        if let Some(identity) =
+            semantic_registry::legacy_macro_domain_identity_from_registry_byte(
+                semantic_id.packed_byte(),
+            )
+        {
+            if matches!(value, Value::Macro(_)) {
+                environment.bind_domain_code_slot_once(identity, value.clone());
+            }
+        }
+
         for peer in peers {
             if environment.get(peer).is_none() {
                 environment.define(peer, value.clone());
+            }
+        }
+    }
+}
+
+/// Complete exact-domain mechanism slots from already-bound admitted surfaces.
+/// This is a mechanical compatibility pass: the semantic registry supplies the
+/// historical lookup only to recover an already-ratified exact-domain identity.
+/// No surface name or packed byte becomes semantic authority.
+fn bind_missing_exact_domain_macro_slots(environment: &Environment) {
+    for semantic_id in semantic_registry::admitted_semantic_ids() {
+        let Some(identity) =
+            semantic_registry::legacy_macro_domain_identity_from_registry_byte(
+                semantic_id.packed_byte(),
+            )
+        else {
+            continue;
+        };
+        if environment.domain_code_slot(identity).is_some() {
+            continue;
+        }
+        for surface in semantic_registry::admitted_surfaces_for_semantic_id(semantic_id) {
+            let Some(value) = environment.get(surface) else {
+                continue;
+            };
+            if matches!(value, Value::Macro(_)) {
+                environment.bind_domain_code_slot_once(identity, value);
+                break;
             }
         }
     }
@@ -400,6 +462,7 @@ fn load_core_library_with_fasl(
     };
 
     bind_missing_stable_surface_peers(&session.environment);
+    bind_missing_exact_domain_macro_slots(&session.environment);
     Ok(result)
 }
 
