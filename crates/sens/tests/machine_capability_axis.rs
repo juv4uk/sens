@@ -37,7 +37,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
 
     let mut s = session();
     let add = eval_program(
-        "(machine-capabilities-for-domain 01010)",
+        "(machine-capabilities-for-domain 5 10)",
         &mut s,
     )
     .expect("D5 PLUS capability lookup")
@@ -46,7 +46,7 @@ fn current_exact_domain_identities_project_to_target_neutral_capabilities() {
     assert_eq!(add, "((integer-add bounded-u32-inputs u64-result))");
 
     let car = eval_program(
-        "(machine-capabilities-for-domain 100)",
+        "(machine-capabilities-for-domain 3 4)",
         &mut s,
     )
     .expect("D3 CAR capability lookup")
