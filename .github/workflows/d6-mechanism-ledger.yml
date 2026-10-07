@@ -26,9 +26,17 @@ on:
       - "knowledge/d6-ratified.json"
       - "crates/sens/src/eval/selector_law.rs"
       - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/src/eval/d6_arithmetic.rs"
+      - "crates/sens/src/eval/mod.rs"
       - "crates/sens/src/eval/necessary_forms.rs"
       - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/tests/d6_add1_sub1_mechanisms.rs"
+      - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
+      - "lib/machine/profile/current-domain-x86-64.lisp"
+      - "lib/machine/capability-axis.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
       - "scripts/check-d6-mechanism-ledger.py"
+      - ".github/workflows/d6-mechanism-ledger.yml"
 
 jobs:
   ledger:
