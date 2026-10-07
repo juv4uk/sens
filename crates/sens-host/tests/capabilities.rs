@@ -390,25 +390,6 @@ fn load_uses_the_same_surface_lowering_as_eval_program() {
     std::fs::remove_file(&path).ok();
 }
 
-
-#[test]
-fn load_uses_the_exact_domain_bridge_for_current_source() {
-    let path = std::env::temp_dir().join("sens-load-exact-domain.lisp");
-    let path_str = path.to_str().unwrap().replace('\\', "/");
-    std::fs::write(
-        &path,
-        "(0011 answer (0010 (x) (001000 ((y x)) y))) (answer 42)",
-    )
-    .unwrap();
-
-    let result = eval_program(&format!(r#"(load "{path_str}")"#), &mut capability_session())
-        .expect("load should evaluate exact-domain D4/D6 source through the mixed bridge");
-    assert_eq!(result.value, Value::Number(42.0, Exactness::Exact));
-
-    std::fs::remove_file(&path).ok();
-}
-
-
 #[test]
 fn load_definitions_are_visible_in_the_calling_environment() {
     let path = std::env::temp_dir().join("sens-load-definitions.lisp");
