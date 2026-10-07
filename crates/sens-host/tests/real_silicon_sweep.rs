@@ -121,7 +121,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
 }
 
 #[test]
-fn owner_i5_6400_executes_admitted_slice_a_and_emits_evidence() {
+fn owner_i5_6400_executes_admitted_safe_slices_and_emits_evidence() {
     install();
 
     let cpu_model = cpuinfo_field("model name");
@@ -180,6 +180,78 @@ fn owner_i5_6400_executes_admitted_slice_a_and_emits_evidence() {
             "MOV + XOR r64,r64 + RET",
             "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 10) (mov-r64-imm64 rcx 12) (xor-r64-r64 rax rcx) (ret))) 0)",
             "6",
+        ),
+        (
+            "inc-reg",
+            "MOV + INC r64 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 41) (inc-r64 rax) (ret))) 0)",
+            "42",
+        ),
+        (
+            "dec-reg",
+            "MOV + DEC r64 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 43) (dec-r64 rax) (ret))) 0)",
+            "42",
+        ),
+        (
+            "not-reg-masked",
+            "MOV + NOT r64 + AND mask + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 0) (not-r64 rax) (mov-r64-imm64 rcx 255) (and-r64-r64 rax rcx) (ret))) 0)",
+            "255",
+        ),
+        (
+            "neg-reg-balanced",
+            "MOV + NEG r64 + ADD balance + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 5) (neg-r64 rax) (mov-r64-imm64 rcx 5) (add-r64-r64 rax rcx) (ret))) 0)",
+            "0",
+        ),
+        (
+            "shl-imm",
+            "MOV + SHL r64,imm8 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 3) (shl-r64-imm8 rax 4) (ret))) 0)",
+            "48",
+        ),
+        (
+            "shr-imm",
+            "MOV + SHR r64,imm8 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 128) (shr-r64-imm8 rax 3) (ret))) 0)",
+            "16",
+        ),
+        (
+            "sar-imm-signed",
+            "MOV + NEG + SAR r64,imm8 + NEG + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 16) (neg-r64 rax) (sar-r64-imm8 rax 2) (neg-r64 rax) (ret))) 0)",
+            "4",
+        ),
+        (
+            "rol-imm",
+            "MOV + ROL r64,imm8 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 1) (rol-r64-imm8 rax 8) (ret))) 0)",
+            "256",
+        ),
+        (
+            "ror-imm",
+            "MOV + ROR r64,imm8 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 256) (ror-r64-imm8 rax 8) (ret))) 0)",
+            "1",
+        ),
+        (
+            "bswap-reg",
+            "MOV + BSWAP r64 + SHR normalize + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 1) (bswap-r64 rax) (shr-r64-imm8 rax 56) (ret))) 0)",
+            "1",
+        ),
+        (
+            "xchg-reg",
+            "MOV pair + XCHG r64,r64 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 11) (mov-r64-imm64 rcx 29) (xchg-r64-r64 rax rcx) (ret))) 0)",
+            "29",
+        ),
+        (
+            "setz-movzx",
+            "MOV pair + CMP + SETZ r8 + MOVZX r64,r8 + RET",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 5) (mov-r64-imm64 rcx 5) (cmp-r64-r64 rax rcx) (setz-r8 rax) (movzx-r64-r8 rax rax) (ret))) 0)",
+            "1",
         ),
         (
             "cmp-jnz-equal",
