@@ -82,6 +82,7 @@ fn active_machine_capability_axis_has_no_sid8_lookup() {
 #[test]
 fn capability_names_do_not_mint_semantic_identities() {
     for capability in [
+        "integer-zero-test",
         "integer-add",
         "integer-subtract",
         "integer-multiply",
@@ -133,6 +134,7 @@ fn x86_target_witnesses_reference_existing_lowering_names_without_owning_meaning
         .expect("x86 semantic lowering");
 
     for name in [
+        "x86-lower-zerop-u64-forms",
         "x86-lower-add-u64-forms",
         "x86-lower-difference-u64-forms",
         "x86-lower-times-u64-forms",
