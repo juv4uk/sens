@@ -112,7 +112,7 @@ fn program_digest_deterministic(exprs: &[Expr]) -> String {
 ///
 /// This is deliberately coordinate-only: it does not reconstruct a human role
 /// name and it does not widen callability.
-fn admitted_mechanism_identity(width: usize, packed_bits: u8) -> Option<String> {
+fn admitted_mechanism_identity(width: usize, packed_bits: u16) -> Option<String> {
     let admitted = match (width, packed_bits) {
         (3, 0b001..=0b111) => true,
         (4, 0b0010 | 0b0011) => true,
@@ -148,6 +148,10 @@ fn traverse_program_operations(
                 // Infer the required mechanism from exact-domain identity only.
                 // Human surface names are presentation data and must not become
                 // compiler mechanism keys.
+                // The admission table itself is the callable boundary.
+                // Universal DomainIdentity may carry W9/u16 payloads, but only
+                // the explicitly whitelisted D3/D4 coordinates below produce
+                // mechanism requirements; every D9 coordinate fails closed.
                 if let Some(domain_identity) =
                     admitted_mechanism_identity(id.width(), id.packed_bits())
                 {

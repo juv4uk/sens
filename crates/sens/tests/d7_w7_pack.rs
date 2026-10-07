@@ -67,6 +67,6 @@ fn w7_is_a_mechanical_width_not_sound_admission() {
     // Explicit construction of Text7 is the semantic wrapper. Equal payload
     // bits alone do not collapse the W7 source word into Text7 identity.
     let text = Text7::from_cells(vec![1]).unwrap();
-    assert_eq!(word.packed_bits(), text.cells()[0]);
+    assert_eq!(word.packed_bits(), u16::from(text.cells()[0]));
     assert_eq!(text.to_canonical_wire_token(), "#t7:01");
 }

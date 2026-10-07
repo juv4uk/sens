@@ -1,7 +1,7 @@
 use sens::{
     fasl_decode_program, fasl_encode_program, wire_decode_program, wire_encode_program, Bija3,
-    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, CoreD4, CoreD5, CoreD6, CoreD8,
-    CoreDomainIdentity, DomainIdentity, Exactness, Expr, ExprKind, PredicateBit, Racana2,
+    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, CoreD4, CoreD5, CoreD6, CoreD8,
+    CoreD9, CoreDomainIdentity, DomainIdentity, Exactness, Expr, ExprKind, PredicateBit, Racana2,
     SoundD7, Span, Value,
 };
 use std::rc::Rc;
@@ -29,6 +29,9 @@ fn d7(raw: u8) -> DomainIdentity {
 }
 fn d8(raw: u8) -> DomainIdentity {
     CoreD8::from_word(Bit8::new(raw).unwrap()).into()
+}
+fn d9(raw: u16) -> DomainIdentity {
+    CoreD9::from_word(Bit9::new(raw).unwrap()).into()
 }
 
 fn expr(identity: DomainIdentity) -> Expr {
@@ -68,8 +71,8 @@ fn predicate_value_bridge_uses_only_exact_d1_domain_identity() {
 }
 
 #[test]
-fn same_payload_across_all_d1_d8_remains_distinct_in_ast_and_value() {
-    let identities = [d1(1), d2(1), d3(1), d4(1), d5(1), d6(1), d7(1), d8(1)];
+fn same_payload_across_all_d1_d9_remains_distinct_in_ast_and_value() {
+    let identities = [d1(1), d2(1), d3(1), d4(1), d5(1), d6(1), d7(1), d8(1), d9(1)];
 
     for identity in identities {
         assert_eq!(identity.packed_bits(), 1);
@@ -89,11 +92,14 @@ fn same_payload_across_all_d1_d8_remains_distinct_in_ast_and_value() {
     assert_eq!(Value::DomainIdentity(d2(1)).to_string(), "01");
     assert_eq!(Value::DomainIdentity(d7(1)).to_string(), "0000001");
     assert_eq!(Value::DomainIdentity(d8(1)).to_string(), "00000001");
+    assert_eq!(Value::DomainIdentity(d9(1)).to_string(), "000000001");
+    assert_eq!(d9(257).packed_bits(), 257);
+    assert_ne!(d9(257), d9(1));
 }
 
 #[test]
-fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_d6_d7_d8() {
-    for identity in [d1(1), d2(1), d6(1), d7(1), d8(1)] {
+fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_d6_d7_d8_d9() {
+    for identity in [d1(1), d2(1), d6(1), d7(1), d8(1), d9(1)] {
         assert_eq!(Value::DomainIdentity(identity).as_core_domain_identity(), None);
     }
 
@@ -118,6 +124,7 @@ fn every_domain_identity_round_trips_through_fasl_and_wire_without_width_loss() 
         d6(0b101010),
         d7(0b1010101),
         d8(0b10101010),
+        d9(0b1_01010101),
     ] {
         let original = vec![expr(identity)];
 

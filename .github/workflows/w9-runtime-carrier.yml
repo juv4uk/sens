@@ -1,0 +1,75 @@
+name: W9 runtime carrier
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/bit9.rs"
+      - "crates/sens/src/bits.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/packed_bits.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/compiler_bootstrap.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/presentation.rs"
+      - "scripts/check-d9-current-authority.py"
+      - "scripts/check-d1-d5-foundation.py"
+      - "crates/sens/tests/machine_exact_d3_structural.rs"
+      - ".github/workflows/w9-runtime-carrier.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/bit9.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/packed_bits.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/src/syntax.rs"
+      - "scripts/check-d9-current-authority.py"
+      - ".github/workflows/w9-runtime-carrier.yml"
+  workflow_dispatch:
+
+jobs:
+  exact-w9:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify D9 and foundation authority boundaries
+        run: |
+          python3 scripts/check-d9-current-authority.py
+          python3 scripts/check-d1-d5-foundation.py
+      - name: Exact Bit9 and DomainIdentity carrier
+        run: |
+          cargo test -p sens bit9::
+          cargo test -p sens domain_identity::tests::w9_
+          cargo test -p sens domain_identity::tests::d9_does_not_collapse
+      - name: Exact W9 source and canonical reader
+        run: |
+          cargo test -p sens source_words::tests::w9_
+          cargo test -p sens canonical_reader::tests::w9_
+      - name: Dense W9 packing
+        run: |
+          cargo test -p sens packed_bits::tests::w9_
+          cargo test -p sens source_packing::tests::grammar_bound_w9_
+      - name: Explicit W9 standalone framing
+        run: |
+          cargo test -p sens binary_framing::tests::d9_uses_explicit_wide_domain_extension
+          cargo test -p sens binary_framing::tests::wide_domain_extension_fails_closed
+      - name: W9 wire and FASL persistence
+        run: cargo test -p sens syntax::wire_tests::w9_domain_identity_round_trips
+      - name: D9 human presentation stays non-authoritative
+        run: cargo test -p sens presentation::tests::d9_without_runtime_surface
+      - name: D9 identity does not gain callability from width
+        run: cargo test -p sens eval::lower::tests::d9_identity_does_not_gain_domain_callability
+      - name: D1-D9 AST and Value anti-collapse integration
+        run: cargo test -p sens --test domain_ast_value_identity
+      - name: Existing D3 machine witness stays on callable u8 projection
+        run: cargo test -p sens --test machine_exact_d3_structural

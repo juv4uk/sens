@@ -56,7 +56,7 @@ pub enum ExprKind {
     /// uses `DomainIdentity`; this variant remains for historical parser,
     /// FASL/wire, and backend paths during #2817 migration.
     Sid(Sens8),
-    /// Canonical exact domain identity across the ratified D1→D8 ladder.
+    /// Canonical exact domain identity across the ratified D1→D9 ladder.
     /// Domain membership does not itself grant callability.
     DomainIdentity(DomainIdentity),
     String(Rc<str>),
@@ -172,7 +172,13 @@ pub(crate) mod fasl {
 
     fn put_domain_identity(out: &mut Vec<u8>, identity: crate::DomainIdentity) {
         out.push(identity.width() as u8);
-        out.push(identity.packed_bits());
+        if identity.width() <= 8 {
+            // Preserve D1-D8 FASL/wire bytes exactly.
+            out.push(identity.packed_bits() as u8);
+        } else {
+            // W9 requires two payload bytes; no byte truncation is permitted.
+            out.extend_from_slice(&identity.packed_bits().to_le_bytes());
+        }
     }
 
     fn get_domain_identity(
@@ -180,17 +186,31 @@ pub(crate) mod fasl {
         pos: &mut usize,
     ) -> Option<crate::DomainIdentity> {
         let domain = *bytes.get(*pos)?;
-        let payload = *bytes.get(*pos + 1)?;
-        *pos += 2;
+        *pos += 1;
+
+        let payload = if domain <= 8 {
+            let value = u16::from(*bytes.get(*pos)?);
+            *pos += 1;
+            value
+        } else if domain == 9 {
+            let slice = bytes.get(*pos..*pos + 2)?;
+            *pos += 2;
+            u16::from_le_bytes(slice.try_into().ok()?)
+        } else {
+            return None;
+        };
+
+        let small = || u8::try_from(payload).ok();
         match domain {
-            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
-            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
-            3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
-            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
-            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
-            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
-            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(payload)?).into()),
-            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(small()?)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(small()?)?).into()),
+            3 => Some(crate::Bija3::from_word(crate::Bit3::new(small()?)?).into()),
+            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(small()?)?).into()),
+            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(small()?)?).into()),
+            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(small()?)?).into()),
+            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(small()?)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(small()?)?).into()),
+            9 => Some(crate::CoreD9::from_word(crate::Bit9::new(payload)?).into()),
             _ => None,
         }
     }
@@ -473,7 +493,13 @@ pub(crate) mod wire {
 
     fn put_domain_identity(out: &mut Vec<u8>, identity: crate::DomainIdentity) {
         out.push(identity.width() as u8);
-        out.push(identity.packed_bits());
+        if identity.width() <= 8 {
+            // Preserve D1-D8 FASL/wire bytes exactly.
+            out.push(identity.packed_bits() as u8);
+        } else {
+            // W9 requires two payload bytes; no byte truncation is permitted.
+            out.extend_from_slice(&identity.packed_bits().to_le_bytes());
+        }
     }
 
     fn get_domain_identity(
@@ -481,17 +507,31 @@ pub(crate) mod wire {
         pos: &mut usize,
     ) -> Option<crate::DomainIdentity> {
         let domain = *bytes.get(*pos)?;
-        let payload = *bytes.get(*pos + 1)?;
-        *pos += 2;
+        *pos += 1;
+
+        let payload = if domain <= 8 {
+            let value = u16::from(*bytes.get(*pos)?);
+            *pos += 1;
+            value
+        } else if domain == 9 {
+            let slice = bytes.get(*pos..*pos + 2)?;
+            *pos += 2;
+            u16::from_le_bytes(slice.try_into().ok()?)
+        } else {
+            return None;
+        };
+
+        let small = || u8::try_from(payload).ok();
         match domain {
-            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(payload)?).into()),
-            2 => Some(crate::Racana2::from_word(crate::Bit2::new(payload)?).into()),
-            3 => Some(crate::Bija3::from_word(crate::Bit3::new(payload)?).into()),
-            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(payload)?).into()),
-            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(payload)?).into()),
-            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(payload)?).into()),
-            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(payload)?).into()),
-            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(payload)?).into()),
+            1 => Some(crate::PredicateBit::from_word(crate::Bit1::new(small()?)?).into()),
+            2 => Some(crate::Racana2::from_word(crate::Bit2::new(small()?)?).into()),
+            3 => Some(crate::Bija3::from_word(crate::Bit3::new(small()?)?).into()),
+            4 => Some(crate::CoreD4::from_word(crate::Bit4::new(small()?)?).into()),
+            5 => Some(crate::CoreD5::from_word(crate::Bit5::new(small()?)?).into()),
+            6 => Some(crate::CoreD6::from_word(crate::Bit6::new(small()?)?).into()),
+            7 => Some(crate::SoundD7::from_word(crate::Bit7::new(small()?)?).into()),
+            8 => Some(crate::CoreD8::from_word(crate::Bit8::new(small()?)?).into()),
+            9 => Some(crate::CoreD9::from_word(crate::Bit9::new(payload)?).into()),
             _ => None,
         }
     }
@@ -800,6 +840,34 @@ mod wire_tests {
         assert_eq!(decoded_hash, hash);
         assert_eq!(decoded[0].kind, ExprKind::Local { depth: 1, index: 4 });
         assert_eq!(fasl::encode_program(&decoded, &hash), encoded);
+    }
+
+    #[test]
+    fn w9_domain_identity_round_trips_through_wire_and_fasl_without_byte_alias() {
+        let expr = Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::D9(
+                crate::CoreD9::from_word(crate::Bit9::new(0b1_00000001).unwrap()),
+            )),
+            span: crate::Span { start: 0, end: 9 },
+        };
+
+        let wire = encode_program(&[expr.clone()]);
+        let decoded_wire = decode_program(&wire).expect("wire decodes W9 identity");
+        assert_eq!(decoded_wire[0].kind, expr.kind);
+        assert_eq!(encode_program(&decoded_wire), wire);
+
+        let hash = [9u8; 32];
+        let fasl_bytes = fasl::encode_program(&[expr.clone()], &hash);
+        let (decoded_fasl, decoded_hash) =
+            fasl::decode_program(&fasl_bytes).expect("fasl decodes W9 identity");
+        assert_eq!(decoded_hash, hash);
+        assert_eq!(decoded_fasl[0].kind, expr.kind);
+        assert_eq!(fasl::encode_program(&decoded_fasl, &hash), fasl_bytes);
+
+        let ExprKind::DomainIdentity(identity) = decoded_wire[0].kind else {
+            panic!("expected exact W9 domain identity");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (9, 257));
     }
 
     #[test]
