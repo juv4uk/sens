@@ -13,7 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Legacy LET-star parity witness
-        run: cargo test -p sens --test let_code_parity_1678 -- --nocapture
-      - name: Exact quantity witness
-        run: cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp
+      - name: Compare LET-star compatibility and quantity witness
+        shell: bash
+        run: |
+          set +e
+          cargo test -p sens --test let_code_parity_1678 -- --nocapture
+          let_status=$?
+          cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp
+          quantity_status=$?
+          set -e
+          echo "LET_STAR_STATUS=$let_status"
+          echo "QUANTITY_STATUS=$quantity_status"
+          test "$let_status" -eq 0
+          test "$quantity_status" -eq 0
