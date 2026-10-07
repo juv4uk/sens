@@ -15,7 +15,11 @@
   (machine-effect-semantic-authority forbidden)
 
   (canonical-machine-effect target-neutral)
+  (machine-effect-contract-owner sens)
   (effect-vocabulary-status bounded-derived-from-witness)
+  (effect-vocabulary-from-isa forbidden)
+  (effect-vocabulary-from-target-profile forbidden)
+  (effect-vocabulary-from-compiler-ir forbidden)
   (global-machine-opcode-enum forbidden)
   (semantic-id-from-machine-effect forbidden)
   (semantic-id-from-target-projection forbidden)
