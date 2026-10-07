@@ -16,18 +16,20 @@ assert len({r["repository"] for r in rows})==87
 assert len({r["name"] for r in rows})==87
 assert all(r["repository"]==f"juv4uk/{r['name']}" for r in rows)
 
-expected={
+expected_stored={
     "CORE-LANGUAGE-DONOR":1,
     "CORE-HISTORICAL-DONOR":11,
     "BACKEND-OR-MECHANISM":11,
     "PACKAGE-OR-DOMAIN":33,
     "REFERENCE-OR-UPSTREAM":31,
+    "REVIEW-REQUIRED":0,
 }
-assert m["class_counts"]==expected
+assert m["class_counts"]==expected_stored
 actual={}
 for r in rows:
     actual[r["primary_class"]]=actual.get(r["primary_class"],0)+1
-assert actual==expected
+expected_actual={k:v for k,v in expected_stored.items() if v}
+assert actual==expected_actual
 
 by={r["name"]:r for r in rows}
 
