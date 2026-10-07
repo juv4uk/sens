@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-do-while-product",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does the D6 DO/WHILE family support independent condition-sense and terminal-projection dimensions?",
+  "claim": "Screens the full bounded three-state function product; it allocates no D8 coordinates and claims no runtime callability.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3770-d8-do-while-product.uk.md"
+  ],
+  "status": "PRODUCT-CANDIDATE",
+  "generation": "unknown",
+  "axis": "d8/condition-sense-terminal-projection",
+  "reproduce": "python3 benchmarks/d8-do-while-product/run.py --out /tmp/d8-do-while-product"
+}
