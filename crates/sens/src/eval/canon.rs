@@ -652,6 +652,19 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn core4_bootstrap_binds_exact_d6_let_macro_slot() {
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core4 bootstrap");
+        let identity = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b001000).expect("D6 LET coordinate"),
+        ));
+        assert!(
+            matches!(session.environment.domain_code_slot(identity), Some(Value::Macro(_))),
+            "Core4 must expose the Lisp-owned LET macro through exact D6:001000"
+        );
+    }
+
     use super::*;
 
     #[test]
