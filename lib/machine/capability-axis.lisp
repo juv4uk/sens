@@ -1,53 +1,50 @@
-; #3989 — target-neutral machine capability axis.
+; #3989/#4068 — target-neutral machine capability axis.
 ;
 ; This file does NOT define language semantics and does NOT define an ISA.
 ; Current semantic meaning is exact-domain: exact bits + exact domain +
 ; ratified law (Contract 11.8). Human spellings and historical SID8 bytes are
 ; not machine-capability authority.
 ;
-; Current axis:
-;   exact DomainIdentity -> 0..N machine capabilities -> 0..N target witnesses
+; LIVE MACHINE KEY:
+;   (domain-width, packed-bits)
 ;
-; Historical SID8 machine-capability projections are no longer live code.
-; Provenance remains in git history; current machine work uses
-; machine-capabilities-for-domain exclusively.
+; Width is explicit mechanism data derived from Rust DomainIdentity::width().
+; Packed bits are derived from DomainIdentity::packed_bits(). This remains
+; width-safe even while ordinary Lisp source cannot preserve W1-W7 leading
+; zero width (#3946).
 ;
-; A capability name never mints a semantic identity. A target may honestly have
-; no witness yet. Target-specific lowering remains under lib/machine/lowering/*.
+; Examples:
+;   D5:01010 PLUS  -> (5, 10)
+;   D4:1010 LOOKUP -> (4, 10)
+; Same packed payload, different key. No spelling or quoted bit string enters.
+;
+; A capability name never mints a semantic identity. Target-specific lowering
+; remains under lib/machine/lowering/*.
 
-; Current exact-domain machine-capability slice.
-;
-; The keys below are exact domain literals, not zero-padded bytes:
-;   D5:01010 = PLUS
-;   D3:101   = EQ
-;   D3:110   = COND
-;   D3:111   = CONS
-;   D3:100   = CAR
-;   D3:011   = CDR
-(00001001 machine-capability-axis-v2
+(00001001 machine-capability-axis-v3
   (00000001
-    ((01010
+    ((5 10
        ((integer-add bounded-u32-inputs u64-result)))
-     (01011
+     (5 11
        ((integer-subtract bounded-u64 no-underflow)))
-     (10110
+     (5 22
        ((integer-multiply bounded-u32-inputs u64-result)))
-     (10111
+     (5 23
        ((integer-quotient bounded-positive-i64 equal-operands-only)))
-     (11010
+     (5 26
        ((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary)))
-     (11011
+     (5 27
        ((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary)))
-     (101
+     (3 5
        ((identity-compare bounded-u64)))
-     (110
+     (3 6
        ((conditional-branch bounded-u64)))
-     (111
+     (3 7
        ((pair-field-store head bounded-u64)
         (pair-field-store tail bounded-u64)))
-     (100
+     (3 4
        ((pair-field-load head bounded-u64)))
-     (011
+     (3 3
        ((pair-field-load tail bounded-u64))))))
 
 (00001001 machine-capability-target-witnesses-v2
@@ -102,6 +99,35 @@
      (risc-v absent)
      (fpga absent))))
 
+(00001001 machine-capability-find-domain-row
+  (00001000 (width bits rows)
+    (00000111
+      ((00000010 rows) () ())
+      ((00000010 rows) (1) ())
+      ((00100010 width (00000101 (00000101 rows)))
+       (00000111
+         ((00100010 bits (00000101 (00000110 (00000101 rows))))
+          (00000101 rows))
+         (t
+          (machine-capability-find-domain-row
+            width bits (00000110 rows)))))
+      (t
+       (machine-capability-find-domain-row
+         width bits (00000110 rows))))))
+
+; Current lookup: explicit width + packed-bits mechanism key only.
+(00001001 machine-capabilities-for-domain
+  (00001000 (width bits)
+    (10011100
+      ((row
+         (machine-capability-find-domain-row
+           width bits machine-capability-axis-v3)))
+      (00000111
+        ((00000010 row) () ())
+        ((00000010 row) (1) ())
+        (t
+         (00000101 (00000110 (00000110 row))))))))
+
 (00001001 machine-capability-find-row
   (00001000 (key rows)
     (00000111
@@ -109,15 +135,6 @@
       ((00000010 rows) (1) ())
       ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
       (t (machine-capability-find-row key (00000110 rows))))))
-
-; Current lookup: exact domain identity only.
-(00001001 machine-capabilities-for-domain
-  (00001000 (identity)
-    (10011100 ((row (machine-capability-find-row identity machine-capability-axis-v2)))
-      (00000111
-        ((00000010 row) () ())
-        ((00000010 row) (1) ())
-        (t (00000101 (00000110 row)))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
