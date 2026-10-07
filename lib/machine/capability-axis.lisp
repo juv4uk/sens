@@ -37,6 +37,10 @@
        ((integer-order-less bounded-nonnegative-i63 internal-bit-d1-boundary)))
      (5 27
        ((integer-order-greater bounded-nonnegative-i63 internal-bit-d1-boundary)))
+     (6 14
+       ((integer-increment bounded-u64 no-overflow)))
+     (6 15
+       ((integer-decrement bounded-u64 no-underflow)))
      (3 5
        ((identity-compare bounded-u64)))
      (3 6
@@ -80,6 +84,12 @@
          (admitted-form setg-r8)
          (admitted-form movzx-r64-r8)
          (lowering x86-lower-order-i64-forms))
+       (integer-increment bounded-u64 no-overflow
+         (admitted-form add-r64-r64)
+         (lowering x86-lower-add-u64-forms))
+       (integer-decrement bounded-u64 no-underflow
+         (admitted-form sub-r64-r64)
+         (lowering x86-lower-difference-u64-forms))
        (identity-compare bounded-u64
          (admitted-form cmp-r64-r64)
          (lowering x86-lower-eq-cond-u64-forms))
