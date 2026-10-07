@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-zip-unzip-orientation",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What orientation, if any, is earned by the historical ZIP/UNZIP pair under the current D8 research laws?",
+  "claim": "Produces bounded orientation evidence and falsifiers only; it does not admit a D8 coordinate, resident, or callability by itself.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3710-d8-zip-unzip-orientation.md",
+    "../../docs/research/3710-d8-zip-unzip-orientation.uk.md"
+  ],
+  "status": "PRODUCT-CANDIDATE-TYPED",
+  "generation": "unknown",
+  "axis": "d8/zip-unzip/orientation",
+  "reproduce": "python3 benchmarks/d8-zip-unzip-orientation/run.py --out /tmp/d8-zip-unzip-orientation"
+}
