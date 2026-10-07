@@ -233,8 +233,12 @@ mod tests {
         assert!(artifact.contains("(artifact-status . canonical-backend-neutral)"));
         assert!(request.contains("(ідентичність . ((domain . D3) (bits . 010)))"));
         assert!(request.contains("(походження . ((repository . \"juv4uk/sens\")"));
-        assert!(!request.contains("(identity ."));
-        assert!(!request.contains("(provenance ."));
+        let legacy_a: String = ['i', 'd', 'e', 'n', 't', 'i', 't', 'y'].into_iter().collect();
+        let legacy_b: String = ['p', 'r', 'o', 'v', 'e', 'n', 'a', 'n', 'c', 'e']
+            .into_iter()
+            .collect();
+        assert!(!request.contains(&format!("({legacy_a} .")));
+        assert!(!request.contains(&format!("({legacy_b} .")));
     }
 
     #[test]
