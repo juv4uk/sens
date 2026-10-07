@@ -527,6 +527,23 @@ mod single_pass_eval_tests {
     }
 
     #[test]
+    fn nested_legacy_let_inside_let_star_keeps_macro_value_callable() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        assert!(matches!(
+            session.environment.get("let"),
+            Some(Value::Macro(_)),
+        ), "let surface must remain bound to the Lisp-owned Macro value");
+
+        let result = crate::eval_program(
+            "(10011101 ((x 41)) (let ((y x)) y))",
+            &mut session,
+        )
+        .expect("legacy let* must expand an inner let without producing a DomainIdentity callee");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
+    }
+
+    #[test]
     fn canonical_define_introduces_a_binding() {
         let source = "(define x 41) (+ x 1)";
         let mut session = Session::default();
