@@ -408,7 +408,9 @@ mod tests {
         assert_eq!(surface_for_domain_identity(open, "uk"), Some("відкрити"));
         assert_eq!(surface_for_domain_identity(empty, "sa"), Some("śūnya"));
         assert_eq!(surface_for_domain_identity(lambda, "uk"), Some("функція"));
+        assert_eq!(surface_for_domain_identity(lambda, "ukr"), Some("функція"));
         assert_eq!(surface_for_domain_identity(lambda, "sa"), Some("phalana"));
+        assert_eq!(surface_for_domain_identity(lambda, "en"), Some("lambda"));
 
         assert_eq!(direct_domain_identity_for_surface("так"), None);
         assert_eq!(direct_domain_identity_for_surface("відкрити"), None);
