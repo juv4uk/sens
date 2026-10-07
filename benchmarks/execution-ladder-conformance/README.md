@@ -1,6 +1,13 @@
-# Execution-ladder conformance — Contract 11.6
+# Execution-ladder conformance — Contract 11.8
 
-Current semantic cut: **D1–D7 current; D8 research**. D7 residency is 126/128 under #3572; generic callability/mechanism remains a separate fact.
+Current semantic authority: **D1–D9 owner-ratified**. Residency is separate
+from callability/mechanism admission; an unsupported D9 mechanism must remain
+`BLOCKED-MECHANISM`, never fall back to historical 8-bit identity.
+
+The schema shape remains `sens-execution-conformance/v1`. Fresh rows default
+to Contract 11.8 and exact identities D1..D9. Historical committed Contract
+11.6 artifacts remain immutable provenance and may be validated only with the
+explicit `--contract 11.6` compatibility mode.
 
 Parent: #3561. Architecture: #3560.
 
@@ -140,7 +147,7 @@ Principle: **one case, one oracle digest, many machines.**
 ## Lane C — bounded-exhaustive D1-D3 structural slice
 
 The first bounded generator is intentionally smaller than the current language.
-It proves one finite slice only; it does **not** claim exhaustive D1-D7 coverage.
+It proves one finite slice only; it does **not** claim exhaustive D1-D9 coverage.
 
 Declared bound:
 
@@ -198,3 +205,15 @@ produces one L0 `ORACLE` row and one L1 `PASS` row: 56 evidence rows total,
 CI runs the generator twice and requires byte-identical JSONL, then validates
 the shared schema. No runtime mechanism, parser rule, domain placement or
 legacy identity is added by this lane.
+
+
+## Generation replay policy
+
+The committed `artifacts/bounded-d1-d3.*` files are historical Contract 11.6
+evidence and are not rewritten by the Contract 11.8 cut. Current CI regenerates
+the same bounded grammar under Contract 11.8 into run artifacts. Because
+`contract` participates in `case_id`, current case IDs intentionally differ
+from their 11.6 predecessors even when canonical source text is identical.
+
+This preserves the scientific distinction between **same bounded program
+grammar** and **different semantic contract generation**.
