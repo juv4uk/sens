@@ -1,0 +1,1011 @@
+{
+  "schema": "d10-noncore-reclassification-v1/v1",
+  "status": "PRESERVED-RECLASSIFIED",
+  "authority": "#4047",
+  "date": "2026-10-07",
+  "source_inventory": "knowledge/d10-v1-semantic-inventory.json",
+  "ownership_gate": "#4033 / knowledge/island-ownership-gate-v1.json",
+  "accounting": {
+    "reclassified_rows": 55,
+    "forward_clips": 26,
+    "knowledge_datalog_package": 23,
+    "world_package": 6,
+    "d10_before": 400,
+    "d10_after": 345,
+    "selector_coordinates_preserved": 256,
+    "ratified_d10_residents": 0
+  },
+  "rule": "Rows leave Core D10 residency competition but remain preserved ecosystem semantics with provenance and explicit destination ownership.",
+  "rows": [
+    {
+      "stable_id": "d10.forward.022a97b1bb7244c8",
+      "semantic_name": "MATCH-ONE-CONDITION",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "dispatch one rule condition to its matching law",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.03cb5c7dfe52ee7d",
+      "semantic_name": "CONDITION-IS-AND?",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-RECOGNIZER",
+      "original_behavior": "test whether a rule condition has AND form",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.0605416682d9c37c",
+      "semantic_name": "MATCH-EXISTS-CONDITION",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "match an existential condition against candidate facts",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.13fee7a6e2cdd322",
+      "semantic_name": "CONDITION-IS-FORALL?",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-RECOGNIZER",
+      "original_behavior": "test whether a rule condition has universal-quantification form",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.14697462da4366f2",
+      "semantic_name": "JTMS-STATE-SUBST",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "JTMS-STATE-ALGEBRA",
+      "original_behavior": "retrieve the substitution carried by an explicit JTMS matching state",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.1a2d7526901bc272",
+      "semantic_name": "MATCH-NEGATED-CONDITION",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "match a negated rule condition under current substitution/fact evidence",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.1d0d6a4c58de4fa6",
+      "semantic_name": "MATCH-CONDITIONS",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "match a sequence/conjunction of rule conditions while threading substitutions",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.272b65957473a815",
+      "semantic_name": "CONDITION-IS-NOT?",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-RECOGNIZER",
+      "original_behavior": "test whether a rule condition has negation form",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.28bd75f0f882b92f",
+      "semantic_name": "MATCH-CONDITIONS-JTMS",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "JTMS-CONDITION-MATCHING",
+      "original_behavior": "match a conjunction/list of JTMS rule conditions while threading explicit matching state",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.2ebd0001d13e0700",
+      "semantic_name": "MATCH-TEST-CONDITION",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "evaluate/match an explicit test condition under current substitution",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.4da32404e28cdd68",
+      "semantic_name": "CONDITION-IS-EXISTS?",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-RECOGNIZER",
+      "original_behavior": "test whether a rule condition has existential form",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.57b3e4f93d9bb02d",
+      "semantic_name": "MATCH-CONDITION-AGAINST-FACTS",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "match one rule condition against an explicit fact set",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.62f4c67a5e87460d",
+      "semantic_name": "MATCH-AND-CONDITION",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "match a conjunction of rule conditions",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.6f5786573ba8603d",
+      "semantic_name": "MATCH-PLAIN-CONDITION-JTMS",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "JTMS-CONDITION-MATCHING",
+      "original_behavior": "match one ordinary rule condition against JTMS facts while carrying explicit matching state",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.7d09083d7dbc0951",
+      "semantic_name": "FORALL-EVERY-CANDIDATE-SATISFIES?",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "test whether every candidate satisfying the quantified domain also satisfies the universal condition",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.8877867473fd3e2a",
+      "semantic_name": "FIRE-RULES-MULTI",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "MULTI-FORWARD-EXECUTION",
+      "original_behavior": "fire a rule set over all matching substitutions",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.8b4a53a013867ebf",
+      "semantic_name": "JTMS-MAKE-STATE",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "JTMS-STATE-ALGEBRA",
+      "original_behavior": "construct an explicit JTMS matching state from substitution and used-fact/support data",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.8ea4e7248eb20e1a",
+      "semantic_name": "MATCH-FORALL-CONDITION",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "match a universal condition against an explicit fact set",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.ab10f3b5553d2070",
+      "semantic_name": "JTMS-STATE-USED",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "JTMS-STATE-ALGEBRA",
+      "original_behavior": "retrieve the used-fact/support set carried by an explicit JTMS matching state",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.c5d5059e75133175",
+      "semantic_name": "MATCH-ONE-CONDITION-JTMS",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "JTMS-CONDITION-MATCHING",
+      "original_behavior": "dispatch one JTMS rule condition to the appropriate matching law",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.d4850df00d1f1d84",
+      "semantic_name": "CONDITION-IS-TEST?",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-RECOGNIZER",
+      "original_behavior": "test whether a rule condition has explicit test form",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.d4f31203838f06cd",
+      "semantic_name": "FIRE-RULE-MULTI",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "MULTI-FORWARD-EXECUTION",
+      "original_behavior": "fire one rule over all matching substitutions instead of only one match",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.e6388253c74f02d9",
+      "semantic_name": "MATCH-OR-CONDITION",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-MATCHING",
+      "original_behavior": "match a disjunction of rule conditions and return the alternative matches",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.ec697a4164384b8d",
+      "semantic_name": "RUN-MULTI",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "MULTI-FORWARD-EXECUTION",
+      "original_behavior": "iterate multi-match forward reasoning to its language-defined result",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.eec8fab861521eea",
+      "semantic_name": "MATCH-OR-CONDITION-JTMS",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "JTMS-CONDITION-MATCHING",
+      "original_behavior": "match an OR condition against JTMS facts and return the resulting state alternatives",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.forward.ef4703c320091533",
+      "semantic_name": "CONDITION-IS-OR?",
+      "original_source_class": "FORWARD-JTMS-HARVEST",
+      "original_relation_class": "RULE-CONDITION-RECOGNIZER",
+      "original_behavior": "test whether a rule condition has OR form",
+      "original_provenance": [
+        "#4028",
+        "lib/forward.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "ISLAND-DELEGATED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "wsm-clips-kernel or optional package",
+      "ownership_audit_key": "forward-rule-engine",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.065ff6c037cda600",
+      "semantic_name": "CHECK-CONFLICT",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "compute the explicit conflict result for a proposed knowledge clause",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.0b9406e2c91bc7b5",
+      "semantic_name": "ADVICE-NEGATIVE-HEAD-CONFLICT",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "compute the conflict relation induced by a negative knowledge head",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.0d9b5d35f817a690",
+      "semantic_name": "ADVICE-ALL-DECISION",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "classify a batch of proposed advice clauses under the Advice Taker boundary",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.0ffd261daf815c3f",
+      "semantic_name": "MODULE-JOURNAL-EVENTS",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "select the journal events belonging to one knowledge module",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.1cf280cba4d5c6a6",
+      "semantic_name": "ADVICE-DECISION",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "classify one proposed clause as accepted, conflicting, or rejected under the Advice Taker boundary",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.280389ace9a9d7e5",
+      "semantic_name": "KNOWLEDGE-PACKAGE-ENTRIES-VALID?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "validate every entry in a versioned knowledge package",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.2c3e5a5392de9409",
+      "semantic_name": "KNOWLEDGE-CLAUSE-VALID?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "validate one clause against the admitted knowledge-clause grammar",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.45369b21a80b3c99",
+      "semantic_name": "CLAUSES->TELL-EVENTS",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "convert a clause sequence into explicit tell-journal events",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.476a5d13244efd9e",
+      "semantic_name": "MODULE-JOURNAL-HAS-MODULE?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "test whether a knowledge journal contains any event for a named module",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.4aba51353ffe338c",
+      "semantic_name": "APPLY-JOURNAL-EVENT",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "apply one tell/retract journal event to an explicit clause set",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.58252b08812d5f7e",
+      "semantic_name": "OPPOSITE-KNOWLEDGE-HEAD",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "compute the explicit positive/negative opposite of a knowledge head",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.789a0b4818ce6303",
+      "semantic_name": "KNOWLEDGE-PACKAGE-FIELD",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "retrieve a named field from a versioned knowledge package",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.7f63897ae35ce464",
+      "semantic_name": "KNOWLEDGE-CLAUSES-VALID?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "validate a batch of knowledge clauses",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.7fecac9e596977c7",
+      "semantic_name": "MAKE-KNOWLEDGE-PACKAGE",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "construct the explicit versioned knowledge-package data shape",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.83302489268459c7",
+      "semantic_name": "KNOWLEDGE-TERMS-VALID?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "validate every term in a knowledge term collection",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.891bc9722190ee5d",
+      "semantic_name": "ADVICE-BATCH-CONFLICT",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "find the conflict carried by a proposed batch of advice clauses",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.a7e206d384237270",
+      "semantic_name": "KNOWLEDGE-TERM-VALID?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "validate one knowledge term against the admitted term grammar",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.a7e3aaefbaf29ee4",
+      "semantic_name": "KNOWLEDGE-PROPER-LIST?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "test the proper-list shape required by knowledge protocol values",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.cc2a52e60bbb9647",
+      "semantic_name": "KNOWLEDGE-PACKAGE-DECISION",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "classify a knowledge package as admissible or rejected without mutating knowledge state",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.cd4bae7128135b89",
+      "semantic_name": "KNOWLEDGE-NOT-HEAD?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "test whether a knowledge head is the explicit negation form",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.e16499916ff26cdb",
+      "semantic_name": "KNOWLEDGE-GOAL-VALID?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "validate one goal against the admitted knowledge-goal grammar",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.f879dbd07a26a666",
+      "semantic_name": "KNOWLEDGE-GOALS-VALID?",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "validate a collection/conjunction of knowledge goals",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.knowledge.fa417329836bc401",
+      "semantic_name": "ADVICE-CONFLICT-PROOF",
+      "original_source_class": "EPISTEMIC-KNOWLEDGE-HARVEST",
+      "original_relation_class": "KNOWLEDGE-ADMISSION-PROTOCOL",
+      "original_behavior": "produce the structured conflict evidence for a proposed advice clause when conflict exists",
+      "original_provenance": [
+        "#4030",
+        "lib/knowledge.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OR-ISLAND",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/knowledge or datalog relations",
+      "ownership_audit_key": "knowledge-journal-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.lib.29770976affe40e3",
+      "semantic_name": "WORLD-CLIMB-TO-DEPTH",
+      "original_source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "original_relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "original_behavior": "climb an immutable world ancestry chain to a requested depth",
+      "original_provenance": [
+        "#4026",
+        "lib/world.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OWNED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/world-simulation",
+      "ownership_audit_key": "immutable-world-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.lib.317eeffc73342b18",
+      "semantic_name": "WORLD-JOURNAL-PREFIX",
+      "original_source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "original_relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "original_behavior": "compute the journal prefix between a descendant world and an ancestor journal tail",
+      "original_provenance": [
+        "#4026",
+        "lib/world.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OWNED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/world-simulation",
+      "ownership_audit_key": "immutable-world-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.lib.55de5f0b3896dc6e",
+      "semantic_name": "WORLD-NO-COMMON-ANCESTOR?",
+      "original_source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "original_relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "original_behavior": "test whether two immutable worlds have no common ancestor",
+      "original_provenance": [
+        "#4026",
+        "lib/world.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OWNED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/world-simulation",
+      "ownership_audit_key": "immutable-world-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.lib.8b93a8112ea17a80",
+      "semantic_name": "WORLD-NOT-ANCESTOR?",
+      "original_source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "original_relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "original_behavior": "test that one immutable world is not an ancestor of another",
+      "original_provenance": [
+        "#4026",
+        "lib/world.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OWNED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/world-simulation",
+      "ownership_audit_key": "immutable-world-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.lib.8f52d5785c044a9a",
+      "semantic_name": "WORLD-COMMON-ANCESTOR-ALIGNED",
+      "original_source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "original_relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "original_behavior": "find the common ancestor of two depth-aligned immutable worlds",
+      "original_provenance": [
+        "#4026",
+        "lib/world.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OWNED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/world-simulation",
+      "ownership_audit_key": "immutable-world-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    },
+    {
+      "stable_id": "d10.lib.d2f580d906911b06",
+      "semantic_name": "WORLD-AT-DEPTH-FROM",
+      "original_source_class": "CANONICAL-LISP-LIBRARY-HARVEST",
+      "original_relation_class": "IMMUTABLE-WORLD-ANCESTRY",
+      "original_behavior": "walk from an immutable world toward its parent until a requested ancestry depth is reached",
+      "original_provenance": [
+        "#4026",
+        "lib/world.lisp"
+      ],
+      "original_coordinate": null,
+      "ownership": "PACKAGE-OWNED",
+      "ownership_status": "DEFINITE-NONCORE",
+      "target_destination": "packages/world-simulation",
+      "ownership_audit_key": "immutable-world-system",
+      "decision": "RECLASSIFIED-NONCORE",
+      "core_d10_selected": false
+    }
+  ]
+}
