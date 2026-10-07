@@ -105,14 +105,21 @@ class SensCodeMigrationTests(unittest.TestCase):
             resolver=resolver,
             contract_authority=True,
             binary_authority=authority,
+            d1_enabled=False,
             d9_enabled=False,
         )
 
-    def test_contract_authority_preserves_exact_d8_word(self):
-        converted, hits, _ = self.contract_binary("(ROUND x)\n")
-        self.assertTrue(converted.startswith("10 10101000 00 "), converted)
-        self.assertEqual(hits[0].label, "ROUND")
-        self.assertNotIn("000000001", converted)
+    def test_contract_authority_preserves_exact_d8_word_as_data(self):
+        converted, _, _ = self.contract_binary("(LIST 10101000)\n")
+        self.assertTrue(converted.startswith("10 1110 00 10101000 01\n"), converted)
+        self.assertNotIn("1100001 1100001 1100001", converted)
+
+    def test_contract_authority_rejects_d8_head_as_non_callable(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "non-callable authority resident used as executable head",
+        ):
+            self.contract_binary("(ROUND x)\n")
 
     def test_contract_authority_preserves_bare_d7_word_instead_of_spelling_digits(self):
         converted, _, _ = self.contract_binary("(LIST 0011001)\n")
@@ -151,16 +158,15 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.contract_binary("(LIST 100000001)\n")
 
-    def test_contract_authority_migrates_legacy_sid8_to_current_exact_width(self):
-        converted, hits, _ = self.contract_binary("(00000101 x)\n")
-        self.assertTrue(converted.startswith("10 100 00 "), converted)
-        self.assertEqual(hits[0].label, "CAR")
-        self.assertNotIn("00000101", converted.split())
+    def test_contract_authority_rejects_ambiguous_w8_sid8_input(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "ambiguous W8 token",
+        ):
+            self.contract_binary("(LIST 00000101)\n")
 
-    def test_contract_authority_keeps_exact_width_and_never_relabels_d8_as_padded_d3(self):
-        converted, hits, _ = self.contract_binary("(00000000 x)\n")
-        self.assertEqual(hits[0].domain, "D8")
-        self.assertEqual(hits[0].bits, "00000000")
+    def test_contract_authority_never_relabels_d8_as_padded_d3(self):
+        converted, _, _ = self.contract_binary("(LIST 00000000)\n")
         words = converted.split()
         self.assertIn("00000000", words)
         self.assertNotIn("0", words)
@@ -174,6 +180,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             mod.validate_contract_binary_output(
                 "10 111 00 000001011 01\n",
                 authority,
+                d1_enabled=False,
                 d9_enabled=False,
             )
 
