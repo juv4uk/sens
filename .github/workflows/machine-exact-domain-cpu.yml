@@ -29,6 +29,8 @@ on:
       - "crates/sens-host/src/native_exec.rs"
       - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
+      - "scripts/silicon-census.py"
+      - "scripts/silicon-coverage.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
   push:
     branches: [main]
@@ -55,6 +57,8 @@ on:
       - "crates/sens-host/src/native_exec.rs"
       - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
+      - "scripts/silicon-census.py"
+      - "scripts/silicon-coverage.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
 
 jobs:
@@ -93,6 +97,11 @@ jobs:
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Derived machine coverage inputs
         run: python3 scripts/generate-encoder-coverage-input.py --check
+      - name: Full silicon census projection self-test
+        run: |
+          python3 scripts/silicon-census.py --self-test
+          python3 scripts/silicon-census.py --output target/silicon-census-hosted.json
+          python3 scripts/silicon-coverage.py target/silicon-census-hosted.json --output target/silicon-coverage-hosted.json
       - name: Existing x86 lowering boundary
         run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
       - name: Lisp-owned x86 encoder bytes
@@ -129,9 +138,14 @@ jobs:
         env:
           SENS_REAL_SILICON_ARTIFACT: ${{ github.workspace }}/real-silicon-sweep.json
         run: cargo test -p sens-host --test real_silicon_sweep -- --nocapture
-      - name: Derive silicon coverage from the same ledger
+      - name: Derive full silicon census from the same ledger
         run: |
-          python3 scripts/silicon-coverage.py real-silicon-sweep.json \
+          python3 scripts/silicon-census.py \
+            --ledger real-silicon-sweep.json \
+            --output real-silicon-census.json
+      - name: Derive silicon coverage from the full census
+        run: |
+          python3 scripts/silicon-coverage.py real-silicon-census.json \
             --output real-silicon-coverage.json
       - name: Upload real-silicon evidence
         uses: actions/upload-artifact@v4
@@ -139,5 +153,6 @@ jobs:
           name: real-silicon-sweep-${{ github.sha }}
           path: |
             real-silicon-sweep.json
+            real-silicon-census.json
             real-silicon-coverage.json
           if-no-files-found: error
