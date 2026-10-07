@@ -12,6 +12,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'release/4242-native-first-migrate'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -29,6 +31,17 @@ jobs:
           git diff -- lib/machine/dispatch/native-first.lisp > /tmp/native-first.diff
           test -s /tmp/native-first.diff
           cp lib/machine/dispatch/native-first.lisp /tmp/native-first.after.lisp
+      - name: Commit generated source
+        run: |
+          if git diff --quiet -- lib/machine/dispatch/native-first.lisp; then
+            echo "native-first already clean"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/machine/dispatch/native-first.lisp
+          git commit -m "wip(4242): commit parser-aware native-first migration"
+          git push
       - uses: actions/upload-artifact@v4
         with:
           name: native-first-sens-migration
