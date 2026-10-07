@@ -157,7 +157,10 @@ fn bounded_order_predicates_reach_admitted_internal_bit_bytes() {
     ] {
         assert_eq!(
             eval_program(
-                &format!("(machine-capabilities-for-domain {identity})"),
+                &format!(
+                    "(machine-capabilities-for-domain 5 {})",
+                    u8::from_str_radix(identity, 2).expect("binary D5 payload")
+                ),
                 &mut session,
             )
             .expect("order capability")
@@ -168,7 +171,7 @@ fn bounded_order_predicates_reach_admitted_internal_bit_bytes() {
     }
 
     let less_forms = eval_program(
-        "(x86-lower-order-i64-forms 11010 2 3)",
+        "(x86-lower-order-i64-forms 5 26 2 3)",
         &mut session,
     )
     .expect("LESSP forms")
@@ -180,7 +183,7 @@ fn bounded_order_predicates_reach_admitted_internal_bit_bytes() {
     );
 
     let less_bytes = eval_program(
-        "(x86-encode-current-order-bit 11010 2 3)",
+        "(x86-encode-current-order-bit 5 26 2 3)",
         &mut session,
     )
     .expect("LESSP bytes")
@@ -196,7 +199,7 @@ fn bounded_order_predicates_reach_admitted_internal_bit_bytes() {
     );
 
     let greater_forms = eval_program(
-        "(x86-lower-order-i64-forms 11011 3 2)",
+        "(x86-lower-order-i64-forms 5 27 3 2)",
         &mut session,
     )
     .expect("GREATERP forms")
@@ -208,7 +211,7 @@ fn bounded_order_predicates_reach_admitted_internal_bit_bytes() {
     );
 
     let greater_bytes = eval_program(
-        "(x86-encode-current-order-bit 11011 3 2)",
+        "(x86-encode-current-order-bit 5 27 3 2)",
         &mut session,
     )
     .expect("GREATERP bytes")
@@ -229,10 +232,10 @@ fn order_native_slice_fails_closed_outside_first_proved_integer_rectangle() {
     let mut session = machine_session();
 
     for form in [
-        "(x86-encode-current-order-bit 11010 -1 0)",
-        "(x86-encode-current-order-bit 11011 0 -1)",
-        "(x86-encode-current-order-bit 11010 9223372036854775808 1)",
-        "(x86-encode-current-order-bit 11011 1 9223372036854775808)",
+        "(x86-encode-current-order-bit 5 26 -1 0)",
+        "(x86-encode-current-order-bit 5 27 0 -1)",
+        "(x86-encode-current-order-bit 5 26 9223372036854775808 1)",
+        "(x86-encode-current-order-bit 5 27 1 9223372036854775808)",
     ] {
         assert_eq!(
             eval_program(form, &mut session)
@@ -246,7 +249,7 @@ fn order_native_slice_fails_closed_outside_first_proved_integer_rectangle() {
 
     assert_eq!(
         eval_program(
-            "(x86-encode-current-order-bit 101 2 3)",
+            "(x86-encode-current-order-bit 3 5 2 3)",
             &mut session,
         )
         .expect("wrong exact identity fails closed")
