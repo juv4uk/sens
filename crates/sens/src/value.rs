@@ -661,7 +661,7 @@ impl Value {
         self.as_sens8()
     }
 
-    /// Returns the exact D1→D8 domain identity if this value carries one.
+    /// Returns the exact D1→D9 domain identity if this value carries one.
     pub fn as_domain_identity(&self) -> Option<DomainIdentity> {
         match self {
             Self::DomainIdentity(identity) => Some(*identity),
@@ -693,8 +693,8 @@ impl Value {
 
     /// Explicit callable/Core-operation projection.
     ///
-    /// D1/D2/D7 return None; D8 returns a Core identity only as a coordinate,
-    /// and execution still requires a separately admitted law.
+    /// D1/D2/D7/D9 return None; D8 may still exist as a Core coordinate,
+    /// and execution always requires a separately admitted law.
     pub fn as_core_domain_identity(&self) -> Option<CoreDomainIdentity> {
         self.as_domain_identity().and_then(DomainIdentity::core_operation)
     }
