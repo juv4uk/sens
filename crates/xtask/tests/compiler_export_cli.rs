@@ -60,7 +60,11 @@ fn compiler_export_emits_full_sens_owned_d3_d4_closure() {
     assert!(stdout.contains("(repository . \"juv4uk/sens\")"));
     assert!(stdout.contains("(contract . 11.8)"));
     assert!(stdout.contains("(mechanism-status . unknown)"));
-    assert!(stdout.contains("(mechanism-ref . ())"));\n    assert!(stdout.contains("(ідентичність . ((domain . D3) (bits . 010)))"));\n    assert!(stdout.contains("(походження . ((repository . \\"juv4uk/sens\\")"));\n    assert!(!stdout.contains("(identity ."));\n    assert!(!stdout.contains("(provenance ."));\n
+    assert!(stdout.contains("(mechanism-ref . ())"));
+    assert!(stdout.contains("(ідентичність . ((domain . D3) (bits . 010)))"));
+    assert!(stdout.contains("(походження . ((repository . \"juv4uk/sens\")"));
+    assert!(!stdout.contains("(identity ."));
+    assert!(!stdout.contains("(provenance ."));
 
     for forbidden in [
         "cuda",
