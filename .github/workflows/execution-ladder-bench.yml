@@ -33,8 +33,33 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build bounded current oracle/P1 probe
-        run: cargo build --release -p sens --example execution_ladder_bounded_probe
+      - name: Validate current Contract 11.8 schema selftest
+        run: python3 benchmarks/execution-ladder-conformance/selftest.py
+
+      - name: Build current oracle helpers
+        run: |
+          cargo build --release -p sens \
+            --example execution_ladder_bounded_probe \
+            --example current_en_vs_d1d8_cpu
+
+      - name: Emit and validate first real Contract 11.8 L0 oracle rows
+        run: |
+          python3 benchmarks/execution-ladder-conformance/emit_oracle.py \
+            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
+            --helper target/release/examples/current_en_vs_d1d8_cpu \
+            --out /tmp/d3-oracle-current.jsonl
+          python3 benchmarks/execution-ladder-conformance/validate.py \
+            /tmp/d3-oracle-current.jsonl
+          test "$(wc -l < /tmp/d3-oracle-current.jsonl)" -eq 2
+          python3 - <<'PY'
+          import json
+          rows=[json.loads(line) for line in open('/tmp/d3-oracle-current.jsonl', encoding='utf-8') if line.strip()]
+          assert {row['contract'] for row in rows} == {'11.8'}
+          assert {row['producer_layer'] for row in rows} == {'L0'}
+          assert {row['parity_status'] for row in rows} == {'ORACLE'}
+          assert all(row['legacy_identity_used'] is False for row in rows)
+          print('first real Contract 11.8 L0 oracle rows: PASS')
+          PY
 
       - name: Generate current Contract 11.8 conformance artifact
         run: |
@@ -121,6 +146,7 @@ jobs:
         with:
           name: execution-ladder-objective-11-8-${{ github.sha }}
           path: |
+            /tmp/d3-oracle-current.jsonl
             /tmp/bounded-current.jsonl
             /tmp/ladder-structural.json
             /tmp/ladder-delivery.json
