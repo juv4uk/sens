@@ -388,6 +388,46 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
         });
     }
 
+    // #4086 C2: deterministic feature-gated register witnesses. Encoding and
+    // admission already exist; this lane only records physical owner-silicon
+    // execution and refuses to run when the advertised CPU feature is absent.
+    for (id, feature, families, expression, expected) in [
+        (
+            "popcnt-22",
+            "popcnt",
+            "POPCNT r64,r64",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 22) (popcnt-r64-r64 rax rax) (ret))) 0)",
+            "3",
+        ),
+        (
+            "tzcnt-24",
+            "bmi1",
+            "TZCNT r64,r64",
+            "(x86-call-admitted-u64 (quote ((mov-r64-imm64 rax 24) (tzcnt-r64-r64 rax rax) (ret))) 0)",
+            "3",
+        ),
+    ] {
+        assert!(
+            cpu_flags.split_whitespace().any(|flag| flag == feature),
+            "owner i5-6400 silicon lane expected CPU feature {feature}, flags were: {cpu_flags}"
+        );
+        let observed = eval_value(expression, &mut session);
+        assert_eq!(
+            observed, expected,
+            "owner silicon mismatch for {id}: expected {expected}, observed {observed}"
+        );
+        rows.push(SiliconRow {
+            id,
+            families,
+            expression,
+            expected,
+            observed,
+            classification: "platform-gated",
+            feature_gate: feature,
+            witness_kind: "deterministic-exact-value",
+        });
+    }
+
     // ADR-012 / #4154: nondeterministic hardware witnesses assert only
     // guaranteed invariants, never one sampled random payload.
     for (id, feature, expression) in [
