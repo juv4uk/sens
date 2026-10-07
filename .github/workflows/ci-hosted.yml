@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   critical:
@@ -59,6 +59,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build canonical migration tool
@@ -83,6 +85,19 @@ jobs:
           git add lib/compiler-nucleus.lisp
           git commit -m "wip(4225): commit parser-aware compiler nucleus migration"
           git push
+      - name: Commit generated compiler nucleus to the PR branch
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/compiler-nucleus.lisp
+          if git diff --cached --quiet; then
+            echo "generated compiler nucleus already committed"
+          else
+            git commit -m "refactor(4225): migrate compiler nucleus executable heads to exact SENS"
+            git push origin "HEAD:$HEAD_BRANCH"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: compiler-nucleus-sens-migration
