@@ -118,7 +118,7 @@
 ;   (DomainIdentity arg...)
 ; The caller supplies a representation-only SHAPE-OR-EMPTY mechanism:
 ;   DomainIdentity -> (width (PredicateBit...))
-  any other value -> ()
+;   any other value -> ()
 ;
 ; This block never matches CAR/CONS by spelling and never relies on a raw W3
 ; source token whose leading zero/width could be lost by the ordinary reader.
