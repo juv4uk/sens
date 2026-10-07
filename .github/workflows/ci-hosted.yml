@@ -49,3 +49,34 @@ jobs:
           cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
       - name: Clippy
         run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
+
+  temp-compiler-nucleus-migrate:
+    if: github.event_name == 'pull_request' && github.head_ref == 'release/4225-compiler-nucleus-migrate'
+    name: TEMP compiler nucleus migration generator
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build canonical migration tool
+        run: cargo build --release -p sens-cli --bin sens-to-sens
+      - name: Rewrite and prove compiler nucleus
+        run: |
+          cp lib/compiler-nucleus.lisp /tmp/compiler-nucleus.before.lisp
+          target/release/sens-to-sens lib/compiler-nucleus.lisp | tee /tmp/migrate.txt
+          target/release/sens-to-sens --check lib/compiler-nucleus.lisp | tee /tmp/check.txt
+          grep -F "lib/compiler-nucleus.lisp: convertible=0" /tmp/check.txt
+          git diff -- lib/compiler-nucleus.lisp > /tmp/compiler-nucleus.diff
+          test -s /tmp/compiler-nucleus.diff
+          cp lib/compiler-nucleus.lisp /tmp/compiler-nucleus.after.lisp
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compiler-nucleus-sens-migration
+          path: |
+            /tmp/compiler-nucleus.before.lisp
+            /tmp/compiler-nucleus.after.lisp
+            /tmp/compiler-nucleus.diff
+            /tmp/migrate.txt
+            /tmp/check.txt
+          retention-days: 3
