@@ -13,6 +13,8 @@ struct SiliconRow<'a> {
     expression: &'a str,
     expected: &'a str,
     observed: String,
+    classification: &'a str,
+    feature_gate: &'a str,
 }
 
 fn repo_root() -> PathBuf {
@@ -42,6 +44,10 @@ fn cpuinfo_field(name: &str) -> String {
         .filter_map(|line| line.split_once(':'))
         .find_map(|(key, value)| (key.trim() == name).then(|| value.trim().to_owned()))
         .unwrap_or_else(|| format!("missing-{name}"))
+}
+
+fn cpu_has_flag(flags: &str, flag: &str) -> bool {
+    flags.split_whitespace().any(|candidate| candidate == flag)
 }
 
 fn json_escape(value: &str) -> String {
@@ -84,7 +90,7 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
         "  \"cpu_flags\": \"{}\",\n",
         json_escape(cpu_flags)
     ));
-    json.push_str("  \"classification\": \"execute-safe\",\n");
+    json.push_str("  \"classification_policy\": \"per-row\",\n");
     json.push_str(
         "  \"admission_boundary\": \"lib/machine/admission/x86-64.lisp:x86-call-admitted-u64\",\n",
     );
@@ -99,12 +105,14 @@ fn write_artifact(cpu_model: &str, cpu_flags: &str, rows: &[SiliconRow<'_>]) {
     for (index, row) in rows.iter().enumerate() {
         json.push_str("    {");
         json.push_str(&format!(
-            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"status\":\"pass\"",
+            "\"id\":\"{}\",\"families\":\"{}\",\"expression\":\"{}\",\"expected\":\"{}\",\"observed\":\"{}\",\"classification\":\"{}\",\"feature_gate\":\"{}\",\"status\":\"pass\"",
             json_escape(row.id),
             json_escape(row.families),
             json_escape(row.expression),
             json_escape(row.expected),
             json_escape(&row.observed),
+            json_escape(row.classification),
+            json_escape(row.feature_gate),
         ));
         json.push('}');
         if index + 1 != rows.len() {
@@ -352,6 +360,42 @@ fn owner_i5_6400_executes_admitted_safe_sweep_and_emits_evidence() {
             expression,
             expected,
             observed,
+            classification: "execute-safe",
+            feature_gate: "none",
+        });
+    }
+
+    for (id, family, flag, expression) in [
+        (
+            "rdrand-status",
+            "RDRAND r64 + SETC + MOVZX",
+            "rdrand",
+            "(x86-call-admitted-u64 (quote ((rdrand-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
+        ),
+        (
+            "rdseed-status",
+            "RDSEED r64 + SETC + MOVZX",
+            "rdseed",
+            "(x86-call-admitted-u64 (quote ((rdseed-r64 rax) (setc-r8 al) (movzx-r64-r8 rax al) (ret))) 0)",
+        ),
+    ] {
+        assert!(
+            cpu_has_flag(&cpu_flags, flag),
+            "owner i5-6400 real-silicon lane requires CPU feature {flag} before executing {id}"
+        );
+        let observed = eval_value(expression, &mut session);
+        assert!(
+            observed == "0" || observed == "1",
+            "{id} must expose only the architectural CF status bit 0|1, observed {observed}"
+        );
+        rows.push(SiliconRow {
+            id,
+            families: family,
+            expression,
+            expected: "status-bit 0|1",
+            observed,
+            classification: "platform-gated",
+            feature_gate: flag,
         });
     }
 
