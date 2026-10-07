@@ -227,9 +227,11 @@ fn zerop_machine_proof_does_not_publish_numeric_boolean_language_semantics() {
     let source =
         fs::read_to_string(repo_root().join("lib/machine/lowering/semantic-x86-64.lisp"))
             .expect("semantic x86 lowering");
+    let marker = "exact D5:01000 ZEROP bounded machine proof.";
     let start = source
-        .find("; #4064 exact D5:01000 ZEROP bounded machine proof.")
-        .expect("#4064 ZEROP proof block");
+        .find(marker)
+        .and_then(|offset| source[..offset].rfind(';'))
+        .expect("ZEROP bounded machine proof block");
     let end = source[start..]
         .find("; #3996 exact-domain structural D3 dispatcher.")
         .map(|offset| start + offset)
