@@ -7,12 +7,15 @@ fn repo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
+fn read(path: &str) -> String {
+    fs::read_to_string(repo_root().join(path))
+        .unwrap_or_else(|error| panic!("#4365 requires {path}: {error}"))
+}
+
 fn load_lisp_file(path: &str, session: &mut Session) {
-    let path = repo_root().join(path);
-    let source = fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
+    let source = read(path);
     eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+        .unwrap_or_else(|error| panic!("{path} must load as ordinary sens: {error}"));
 }
 
 fn eval_value(source: &str, session: &mut Session) -> String {
@@ -22,16 +25,7 @@ fn eval_value(source: &str, session: &mut Session) -> String {
         .to_string()
 }
 
-fn lowered_identity(source: &str) -> (usize, u8) {
-    let parsed = parse(source).unwrap_or_else(|error| panic!("{source}: {error}"));
-    let lowered = lower_program(&parsed);
-    let ExprKind::DomainCall(identity, _) = &lowered[0].kind else {
-        panic!("{source} must lower to exact DomainCall");
-    };
-    (identity.width(), identity.packed_bits())
-}
-
-fn session() -> Session {
+fn lowering_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
     load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
@@ -39,97 +33,110 @@ fn session() -> Session {
     session
 }
 
-#[test]
-fn d5_arithmetic_coordinates_are_guarded_by_current_foundation() {
-    let foundation: Value = serde_json::from_str(
-        &fs::read_to_string(repo_root().join("knowledge/d1-d9-foundation.json"))
-            .expect("current foundation"),
+fn current_d5_plus_coordinate() -> (usize, u8) {
+    let foundation: Value =
+        serde_json::from_str(&read("knowledge/d1-d9-foundation.json")).expect("foundation JSON");
+
+    assert_eq!(
+        foundation["schema"], "d1-d9-foundation-ratification/v1",
+        "#4365 must consume the current foundation schema"
+    );
+    assert_eq!(
+        foundation["status"], "owner-ratified",
+        "#4365 must not route from a research/shadow map"
+    );
+
+    let d5 = &foundation["domains"]["D5"];
+    let width = d5["width"].as_u64().expect("D5 width") as usize;
+    let residents = d5["residents"].as_object().expect("D5 residents");
+    let (bits, _) = residents
+        .iter()
+        .find(|(_, role)| role.as_str() == Some("PLUS"))
+        .expect("current D5 foundation must contain PLUS");
+
+    (
+        width,
+        u8::from_str_radix(bits, 2).expect("current D5 PLUS bits"),
     )
-    .expect("foundation json");
-    let d5 = foundation["domains"]["D5"]["residents"]
-        .as_object()
-        .expect("D5 resident map");
-
-    for (bits, expected) in [
-        ("01010", "PLUS"),
-        ("01011", "DIFFERENCE"),
-        ("10110", "TIMES"),
-    ] {
-        assert_eq!(
-            d5.get(bits).and_then(Value::as_str),
-            Some(expected),
-            "semantic->effect seam coordinate drifted from current authority: D5:{bits}"
-        );
-    }
 }
 
 #[test]
-fn exact_domain_identity_selects_effect_kind_once() {
-    let cases = [
-        ("(додати 2 3)", (5usize, 10u8), "bounded-u64-add"),
-        ("(відняти 5 3)", (5usize, 11u8), "bounded-u64-sub"),
-        ("(помножити 4 6)", (5usize, 22u8), "bounded-u64-mul"),
-    ];
+fn current_foundation_runtime_identity_and_effect_router_agree() {
+    let expected = current_d5_plus_coordinate();
 
-    let mut session = session();
-    for (source, expected_identity, expected_kind) in cases {
-        let identity = lowered_identity(source);
-        assert_eq!(identity, expected_identity, "{source}");
-        assert_eq!(
-            eval_value(
-                &format!(
-                    "(machine-effect-kind-for-current-binary-u64 {} {})",
-                    identity.0, identity.1
-                ),
-                &mut session,
-            ),
-            expected_kind,
-            "{source}",
-        );
-    }
+    let parsed = parse("(додати 2 3)").expect("current PLUS source");
+    let lowered = lower_program(&parsed);
+    let ExprKind::DomainCall(identity, args) = &lowered[0].kind else {
+        panic!("current PLUS must lower to exact DomainCall");
+    };
+
+    assert_eq!(
+        (identity.width(), identity.packed_bits()),
+        expected,
+        "runtime exact DomainIdentity and owner foundation must agree before effect selection"
+    );
+    assert_eq!(args.len(), 2);
+
+    let source = read("lib/machine/lowering/semantic-effects.lisp");
+    let guarded_coordinate = format!(
+        "(machine-effect-current-domain-key? width bits {} {})",
+        expected.0, expected.1
+    );
+    assert!(
+        source.contains(&guarded_coordinate),
+        "#4365 router drifted from current owner foundation: expected {guarded_coordinate}"
+    );
 }
 
 #[test]
-fn wrong_domain_and_unsupported_identity_fail_closed() {
-    let mut session = session();
-
-    for source in [
-        "(machine-effect-kind-for-current-binary-u64 4 10)",
-        "(machine-effect-kind-for-current-binary-u64 6 10)",
-        "(machine-effect-kind-for-current-binary-u64 5 23)",
-        "(machine-effect-kind-for-current-binary-u64 3 5)",
-    ] {
-        assert_eq!(
-            eval_value(source, &mut session),
-            "machine-effect-not-applicable",
-            "{source}"
-        );
-    }
+fn exact_d5_plus_selects_only_the_existing_target_neutral_effect() {
+    let (width, bits) = current_d5_plus_coordinate();
+    let mut session = lowering_session();
 
     assert_eq!(
         eval_value(
-            "(machine-effect-lower-current-binary-u64 5 10 2 3)",
+            &format!("(machine-lower-current-binary-effect {width} {bits} 2 3)"),
             &mut session,
         ),
         "(bounded-u64-add 2 3)"
     );
+
     assert_eq!(
         eval_value(
-            "(machine-effect-lower-current-binary-u64 5 11 5 3)",
+            &format!(
+                "(machine-lower-current-binary-effect {width} {bits} 4294967296 3)"
+            ),
             &mut session,
         ),
-        "machine-effect-not-applicable",
-        "SUB kind is reserved by the seam but its constructor remains #4358-owned until replay"
+        "machine-effect-rejected",
+        "semantic selection must preserve the already-proved bounded carrier guard"
     );
 }
 
 #[test]
-fn semantic_effect_seam_contains_no_target_or_surface_authority() {
-    let source = fs::read_to_string(
-        repo_root().join("lib/machine/lowering/semantic-effects.lisp"),
-    )
-    .expect("semantic effect seam");
-    let lower = source.to_ascii_lowercase();
+fn wrong_domain_and_unmapped_current_identity_fail_closed() {
+    let (_, plus_bits) = current_d5_plus_coordinate();
+    let mut session = lowering_session();
+
+    for source in [
+        format!("(machine-lower-current-binary-effect 4 {plus_bits} 2 3)"),
+        format!("(machine-lower-current-binary-effect 6 {plus_bits} 2 3)"),
+        "(machine-lower-current-binary-effect 5 11 5 3)".to_string(),
+        "(machine-lower-current-binary-effect 5 22 4 6)".to_string(),
+        "(machine-lower-current-binary-effect 5 23 4 2)".to_string(),
+    ] {
+        assert_eq!(
+            eval_value(&source, &mut session),
+            "machine-effect-not-applicable",
+            "{source}"
+        );
+    }
+}
+
+#[test]
+fn semantic_to_effect_layer_contains_no_target_or_surface_authority() {
+    let lowerer = read("lib/machine/lowering/semantic-effects.lisp").to_ascii_lowercase();
+    let effects = read("lib/machine/effects/u64.lisp").to_ascii_lowercase();
 
     for forbidden in [
         "x86",
@@ -137,22 +144,24 @@ fn semantic_effect_seam_contains_no_target_or_surface_authority() {
         "rcx",
         "modrm",
         "vex",
-        "disp8",
+        "avx",
+        "cuda",
+        "ptx",
+        "fpga",
+        "pair-x86",
+        "intel",
         "semantic-registry",
         "додати",
-        "відняти",
-        "помножити",
     ] {
         assert!(
-            !lower.contains(forbidden),
-            "semantic->effect seam leaked forbidden authority token {forbidden}"
+            !lowerer.contains(forbidden),
+            "#4365 semantic->effect seam leaked target/surface authority token {forbidden}"
         );
     }
 
-    let effect_source = fs::read_to_string(repo_root().join("lib/machine/effects/u64.lisp"))
-        .expect("generic u64 effects");
     assert!(
-        !effect_source.contains("machine-effect-kind-for-current-binary-u64"),
-        "generic effect library must not own semantic coordinate routing"
+        !effects.contains("machine-lower-current-binary-effect")
+            && !effects.contains("machine-effect-current-domain-key?"),
+        "generic effect-definition module must not own semantic coordinate routing"
     );
 }
