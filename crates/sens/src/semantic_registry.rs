@@ -135,21 +135,6 @@ pub(crate) fn legacy_language_definition_identity_from_registry_byte(
     }
 }
 
-/// Binding-only compatibility successor for a Core4 language definition.
-///
-/// The English `list` definition is preserved for source compatibility, while
-/// Contract 11.8 reserves D4:1110 as the exact LIST identity. This helper is
-/// consumed only by the language-definition binder; it does not affect parser
-/// routing or generic source migration.
-pub(crate) fn core4_definition_exact_identity(name: &str) -> Option<CoreDomainIdentity> {
-    let sid = admitted_semantic_id_for_surface(name)?;
-    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    match sid.packed_byte() {
-        0b0010_0111 if name == "list" => Some(d4(0b1110)),
-        _ => None,
-    }
-}
-
 /// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
 ///
 /// This MUST NOT be used to reinterpret historical Sens8 calls. Its only
