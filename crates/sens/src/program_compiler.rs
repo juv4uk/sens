@@ -107,6 +107,20 @@ fn program_digest_deterministic(exprs: &[Expr]) -> String {
     format!("{:x}", hash.iter().fold(0u64, |acc, b| (acc << 8) | *b as u64))
 }
 
+/// Return the backend-neutral requirement key for the exact coordinate set
+/// that this compiler slice already admitted before the English-surface cleanup.
+///
+/// This is deliberately coordinate-only: it does not reconstruct a human role
+/// name and it does not widen callability.
+fn admitted_mechanism_identity(width: usize, packed_bits: u8) -> Option<String> {
+    let admitted = match (width, packed_bits) {
+        (3, 0b001..=0b111) => true,
+        (4, 0b0010 | 0b0011) => true,
+        _ => false,
+    };
+    admitted.then(|| format!("D{width}:{packed_bits:0width$b}"))
+}
+
 /// Traverse program and collect exact-domain identities and required mechanisms.
 fn traverse_program_operations(
     exprs: &[Expr],
@@ -131,45 +145,20 @@ fn traverse_program_operations(
                 // Track domain usage
                 domains.entry(domain.clone()).or_insert_with(Vec::new).push(bits.clone());
 
-                // Infer required mechanism from operation
-                if id.width() == 3 {
-                    let op_name = match id.packed_bits() {
-                        0b001 => Some("quote"),
-                        0b010 => Some("atom?"),
-                        0b011 => Some("cdr"),
-                        0b100 => Some("car"),
-                        0b101 => Some("eq?"),
-                        0b110 => Some("cond"),
-                        0b111 => Some("cons"),
-                        _ => None,
+                // Infer the required mechanism from exact-domain identity only.
+                // Human surface names are presentation data and must not become
+                // compiler mechanism keys.
+                if let Some(domain_identity) =
+                    admitted_mechanism_identity(id.width(), id.packed_bits())
+                {
+                    let mech = crate::compilation_artifact::MechanismRequirement {
+                        name: format!("domain-call:{domain_identity}"),
+                        domain_identity,
+                        required: true,
+                        capability_level: Some("basic".to_string()),
                     };
-                    if let Some(name) = op_name {
-                        let mech = crate::compilation_artifact::MechanismRequirement {
-                            name: format!("core-{}", name),
-                            domain_identity: format!("D3:{}", bits),
-                            required: true,
-                            capability_level: Some("basic".to_string()),
-                        };
-                        if !mechanisms.iter().any(|m| m.name == mech.name) {
-                            mechanisms.push(mech);
-                        }
-                    }
-                } else if id.width() == 4 {
-                    let op_name = match id.packed_bits() {
-                        0b0010 => Some("lambda"),
-                        0b0011 => Some("define"),
-                        _ => None,
-                    };
-                    if let Some(name) = op_name {
-                        let mech = crate::compilation_artifact::MechanismRequirement {
-                            name: format!("core-{}", name),
-                            domain_identity: format!("D4:{:0width$b}", id.packed_bits(), width = 4),
-                            required: true,
-                            capability_level: Some("basic".to_string()),
-                        };
-                        if !mechanisms.iter().any(|m| m.name == mech.name) {
-                            mechanisms.push(mech);
-                        }
+                    if !mechanisms.iter().any(|m| m.name == mech.name) {
+                        mechanisms.push(mech);
                     }
                 }
 
@@ -221,5 +210,37 @@ mod tests {
         let (domains, _mechanisms) = traverse_program_operations(&empty_program)
             .expect("empty program should not fail");
         assert!(domains.is_empty());
+    }
+
+    #[test]
+    fn mechanism_admission_preserves_the_existing_exact_coordinate_set() {
+        let admitted = [
+            (3, 0b001, "D3:001"),
+            (3, 0b010, "D3:010"),
+            (3, 0b011, "D3:011"),
+            (3, 0b100, "D3:100"),
+            (3, 0b101, "D3:101"),
+            (3, 0b110, "D3:110"),
+            (3, 0b111, "D3:111"),
+            (4, 0b0010, "D4:0010"),
+            (4, 0b0011, "D4:0011"),
+        ];
+        for (width, bits, identity) in admitted {
+            assert_eq!(
+                admitted_mechanism_identity(width, bits).as_deref(),
+                Some(identity)
+            );
+        }
+
+        for rejected in [
+            (3, 0b000),
+            (4, 0b0000),
+            (4, 0b0001),
+            (4, 0b0100),
+            (5, 0b00000),
+            (8, 0b00000000),
+        ] {
+            assert_eq!(admitted_mechanism_identity(rejected.0, rejected.1), None);
+        }
     }
 }
