@@ -103,8 +103,8 @@ fn eq_cond_composition_fails_closed_on_wrong_exact_identity() {
     let mut session = machine_session();
 
     for source in [
-        "(x86-encode-current-eq-cond-u64 100 110 2 3 111 222)",
-        "(x86-encode-current-eq-cond-u64 101 111 2 3 111 222)",
+        "(x86-encode-current-eq-cond-u64 3 4 3 6 2 3 111 222)",
+        "(x86-encode-current-eq-cond-u64 3 5 3 7 2 3 111 222)",
     ] {
         assert_eq!(
             eval_value(source, &mut session),
