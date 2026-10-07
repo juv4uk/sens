@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "core-math-goal-proof-gate",
+  "wing": "Core-Math",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Which finite-signature candidate equalities survive held-out exact-rational attacks and a proof gate?",
+  "claim": "Treats finite semantic signatures as search evidence only; a bounded collision is not accepted as a mathematical identity without the proof gate.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "core-math/goal-proof-gate",
+  "reproduce": "python3 benchmarks/core-math-goal-proof-gate/run.py --out /tmp/core-math-goal-proof-gate"
+}
