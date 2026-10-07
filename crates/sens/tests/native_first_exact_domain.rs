@@ -50,6 +50,16 @@ fn lowered_exact_domain_data_selects_native_car_cons_without_spelling_match() {
         .define("__native_first_shape", domain_identity_shape_or_empty_mechanism());
     session.environment.define("__native_first_expr", data.clone());
 
+    let symbolic_cond = eval_program(
+        "(за-умовою ((native-first-domain-true ()) 1) ((native-first-domain-false ()) 0))",
+        &mut session,
+    ).expect("symbolic cond witness").value;
+    let binary_cond = eval_program(
+        "(00000111 ((native-first-domain-true ()) 1) ((native-first-domain-false ()) 0))",
+        &mut session,
+    ).expect("binary cond witness").value;
+    eprintln!("native-first cond diagnostics: symbolic={symbolic_cond:?} binary={binary_cond:?}");
+
     let head = eval_program(
         "(00000101 __native_first_expr)",
         &mut session,
