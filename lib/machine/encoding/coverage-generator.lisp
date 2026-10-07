@@ -49,9 +49,7 @@
 
 (def encoder-coverage-atom-same?
   (lambda (left right)
-    (тотожне?
-      (write-to-string left)
-      (write-to-string right))))
+    (тотожне? left right)))
 
 (def encoder-coverage-same?
   (lambda (left right)
