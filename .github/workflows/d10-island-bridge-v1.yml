@@ -24,12 +24,10 @@ on:
 
 jobs:
   bridge:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: GPU runner identity
-        run: nvidia-smi || true
       - name: Replay bridge factorization witness
         run: python3 scripts/research-d10-island-bridge-v1.py
       - name: Verify bridge selection
