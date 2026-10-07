@@ -38,24 +38,30 @@
 
 
 ; Coverage authority uses exact D1 PredicateBit for every control decision.
-; equal? is the historical deep structural comparator and returns a one-element
-; structural (1)/(0) answer carrier. Its ordinary Number payload is normalized
-; only through current exact-D5 ZEROP, whose language result boundary is D1.
-; For equality payload 0 means different and 1 means same, so the exact-D1
-; ZEROP result is inverted by D3 COND without comparing predicate bits as data.
+; Deep structural equality is Lisp-owned here and is built only from current
+; exact D3 laws: ATOM classifies pair-vs-atom and EQ compares admitted atoms.
+; Historical deep-equality carriers do not cross into the authority path.
 (def encoder-coverage-d1-yes
-  (нуль? 0))
+  (тотожне? (quote encoder-coverage-yes) (quote encoder-coverage-yes)))
 
 (def encoder-coverage-d1-no
-  (нуль? 1))
+  (тотожне? (quote encoder-coverage-yes) (quote encoder-coverage-no)))
 
 (def encoder-coverage-same?
   (lambda (left right)
     (cond
-      ((нуль? (car (equal? left right)))
+      ((атом? left)
+       (cond
+         ((атом? right)
+          (тотожне? left right))
+         (encoder-coverage-d1-yes
+          encoder-coverage-d1-no)))
+      ((атом? right)
        encoder-coverage-d1-no)
+      ((encoder-coverage-same? (car left) (car right))
+       (encoder-coverage-same? (cdr left) (cdr right)))
       (encoder-coverage-d1-yes
-       encoder-coverage-d1-yes))))
+       encoder-coverage-d1-no))))
 
 ; Traversal needs structural EMPTY, not the broader ATOM classification.
 ; This preserves the D1:0 != D3:000 distinction and avoids using ATOM as NIL.
