@@ -1201,7 +1201,23 @@ mod tests {
         assert_eq!(verified.sens_revision, revision);
         assert_eq!(verified.authority_path, COMPILER_AUTHORITY_PATH);
         assert_eq!(verified.language_contract_version, COMPILER_CONTRACT_VERSION);
-        assert_eq!(verified.requests.len(), 31);
+        assert!(!verified.requests.is_empty());
+        for role in [
+            CompilerLoweringRole::QuoteForm,
+            CompilerLoweringRole::AtomPredicate,
+            CompilerLoweringRole::SelectorTail,
+            CompilerLoweringRole::SelectorHead,
+            CompilerLoweringRole::AtomEquality,
+            CompilerLoweringRole::CondForm,
+            CompilerLoweringRole::PairConstruct,
+            CompilerLoweringRole::LambdaForm,
+            CompilerLoweringRole::DefineForm,
+        ] {
+            assert!(
+                verified.requests.iter().any(|request| request.lowering_role == role),
+                "verified whole-program artifact omitted role {role:?}"
+            );
+        }
         assert_eq!(
             verified.semantic_requests_sha256,
             sha256_hex(
