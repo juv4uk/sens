@@ -6,6 +6,7 @@ set -euo pipefail
 # host-authored Canon truth assertions; deep/current-contract lanes retain
 # broader mechanism and integration evidence.
 cargo test -p sens \
+  --test d1_canonical_source_value \
   --test witness_authority \
   --test structural_observation_contract \
   --test exact_q_binary_contract \
