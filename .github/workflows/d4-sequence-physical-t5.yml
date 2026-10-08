@@ -1,0 +1,46 @@
+name: Ratified D4 LIST APPEND physical T5 runtime
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/eval/d4_sequence.rs"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/tests/d4_sequence_exact.rs"
+      - ".github/workflows/d4-sequence-physical-t5.yml"
+      - "lib/domains/d4.lisp"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/eval/d4_sequence.rs"
+      - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/tests/d4_sequence_exact.rs"
+      - ".github/workflows/d4-sequence-physical-t5.yml"
+      - "lib/domains/d4.lisp"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d4-value-execution:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Ratified D4 sequence mechanism unit and physically packed execution
+        run: |
+          set -euo pipefail
+          cargo test -q -p sens --lib d4_sequence -- --nocapture
+          cargo test -q -p sens --test d4_sequence_exact -- --nocapture
+      - name: Independently derived historical APPEND structure stays equal
+        run: cargo test -q -p sens --test post_d4_append_derivation -- --nocapture
+      - name: Real D4 selector stays distinct from value operators
+        run: cargo test -q -p sens --test migration_d4_selector_cohort -- --nocapture
+      - name: No historical original binaries were created
+        shell: bash
+        run: |
+          test ! -f lib/machine/block.sens
+          test -z "$(git status --porcelain --untracked-files=all)" || { git status --short; exit 1; }
