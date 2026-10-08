@@ -21,11 +21,11 @@ class PairCheckTests(unittest.TestCase):
         self.uk = self.root / "lib" / "тест.lisp"
         self.bin = self.root / "lib" / "тест"
         self.uk.write_text("(так)", encoding="utf-8")
-        self.bin.write_bytes(b"1001101")
+        self.bin.write_bytes(bytes.fromhex("d7090100"))
         self.enc = self.root / "encode.py"
         self.dec = self.root / "decode.py"
-        self.enc.write_text("import sys\ns=sys.stdin.buffer.read()\nsys.stdout.buffer.write(b'1001101' if s == '(так)'.encode() else b'BAD')\n", encoding="utf-8")
-        self.dec.write_text("import sys\ns=sys.stdout.buffer.write('(так)'.encode() if sys.stdin.buffer.read() == b'1001101' else b'BAD')\n", encoding="utf-8")
+        self.enc.write_text("import sys\ns=sys.stdin.buffer.read()\nsys.stdout.buffer.write(bytes.fromhex('d7090100') if s == '(так)'.encode() else b'BAD')\n", encoding="utf-8")
+        self.dec.write_text("import sys\ns=sys.stdout.buffer.write('(так)'.encode() if sys.stdin.buffer.read() == bytes.fromhex('d7090100') else b'BAD')\n", encoding="utf-8")
 
     def scan(self, inventory_only=False):
         return _pairs.check(self.root, ["lib/**/*.lisp"], self.enc, self.dec, inventory_only)
@@ -38,9 +38,14 @@ class PairCheckTests(unittest.TestCase):
         self.bin.unlink()
         self.assertIn("missing adjacent binary twin", self.scan()[1][0])
 
-    def test_binary_whitespace_fails(self):
-        self.bin.write_bytes(b"1001\n101")
-        self.assertIn("expected nonempty exact visible-binary", self.scan()[1][0])
+    def test_visible_binary_text_fails(self):
+        for payload in (b"1001101", b"1001\n101", b"1 0 0 1"):
+            with self.subTest(payload=payload):
+                self.bin.write_bytes(payload)
+                self.assertIn("ASCII visible-binary text is forbidden", self.scan()[1][0])
+
+    def test_packed_binary_is_opaque_to_guard(self):
+        _pairs.validate_binary(bytes.fromhex("d7090100"), "fixture")
 
     def test_nonkeyboard_and_confusables_fail(self):
         for value in ["(TAK)", "(тaк)", "(так)\u200b", "(так)\r\n"]:
@@ -73,7 +78,7 @@ class PairCheckTests(unittest.TestCase):
 
     def test_orphan_binary_fails(self):
         (self.root / "lib" / "сирота").write_bytes(b"10101")
-        self.assertIn("bit-only binary orphan", self.scan()[1][0])
+        self.assertIn("legacy visible-binary orphan", self.scan()[1][0])
 
     def test_inventory_is_not_codec_evidence(self):
         n, errors = self.scan(inventory_only=True)
