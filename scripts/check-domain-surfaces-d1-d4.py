@@ -122,6 +122,8 @@ def validate(rows: list[dict[str, str]]) -> None:
 
     for row in rows:
         key = (row["domain"], row["bits"])
+        if key == ("D3", "000") and any(row[name] != "()" for name in ("en", "uk", "sa")):
+            fail("D3:000 must project literally as () in every language")
         if row["role"] == "predicate":
             if not row["uk"].endswith("?"):
                 fail(f"{key}: predicate UK surface must end in ?")
