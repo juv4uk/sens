@@ -116,6 +116,24 @@
            (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
            (00100111 (00000001 add-r64-r64) (00000001 rax) (00000001 rcx))
            (00100111 (00000001 ret)))))
+      ((machine-effect-bounded-u64-sub-form? effect)
+       (10011100
+         ((left (00000101 (00000110 effect)))
+          (right (00000101 (00000110 (00000110 effect)))))
+         (00100111
+           (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+           (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+           (00100111 (00000001 sub-r64-r64) (00000001 rax) (00000001 rcx))
+           (00100111 (00000001 ret)))))
+      ((machine-effect-bounded-u64-mul-form? effect)
+       (10011100
+         ((left (00000101 (00000110 effect)))
+          (right (00000101 (00000110 (00000110 effect)))))
+         (00100111
+           (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
+           (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
+           (00100111 (00000001 imul-r64-r64) (00000001 rax) (00000001 rcx))
+           (00100111 (00000001 ret)))))
       ((x86-structural-machine-effect? effect)
        (x86-project-structural-machine-effect-with-layout
          effect x86-pair-car-offset x86-pair-cdr-offset))
