@@ -27,6 +27,7 @@ PAIR_RE = re.compile(r'^\s*\(pair\s+([^\s()]+)\s+"([^"]+)"\)\s*$')
 PARTIAL_RE = re.compile(
     r'^\s*\(partial\s+([^\s()]+)\s+"([^"]+)"\s+\(heads\s+([^)]*)\)\)\s*$'
 )
+PARTIAL_COUNT_RE = re.compile(r'^\s*\(partial-pair-count\s+#b([01]+)\)\s*$')
 
 # Admitted forms intentionally not physically executed by the generic owner
 # sweep until they have a dedicated bounded side-effect/control-flow witness.
@@ -67,7 +68,15 @@ def load_pairs(path: Path = INDEX) -> list[tuple[str, str]]:
 def load_projection(path: Path = PROJECTION) -> tuple[dict[tuple[str, str], list[str]], dict[str, tuple[str, str]]]:
     pairs: dict[tuple[str, str], list[str]] = {}
     head_to_pair: dict[str, tuple[str, str]] = {}
+    declared_pair_count: int | None = None
     for line in path.read_text(encoding="utf-8").splitlines():
+        count_match = PARTIAL_COUNT_RE.match(line)
+        if count_match:
+            if declared_pair_count is not None:
+                raise CensusError("duplicate partial-pair-count in admission projection")
+            declared_pair_count = int(count_match.group(1), 2)
+            continue
+
         match = PARTIAL_RE.match(line)
         if not match:
             continue
@@ -82,10 +91,13 @@ def load_projection(path: Path = PROJECTION) -> tuple[dict[tuple[str, str], list
                 raise CensusError(f"admission head {head!r} maps to both {previous} and {pair}")
             head_to_pair[head] = pair
 
-    if len(pairs) != 122:
-        raise CensusError(f"expected 122 admitted partial pairs, found {len(pairs)}")
+    if declared_pair_count is None:
+        raise CensusError("admission projection missing partial-pair-count")
+    if len(pairs) != declared_pair_count:
+        raise CensusError(
+            f"admission projection declares {declared_pair_count} partial pairs, found {len(pairs)}"
+        )
     return pairs, head_to_pair
-
 
 def load_ledger(path: Path | None) -> dict[str, Any] | None:
     if path is None:
