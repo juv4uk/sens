@@ -643,7 +643,7 @@ def encode_text7_spelling(text: str, candidates):
 
 def _emit_item(out, words, need_separator):
     if need_separator and out and out[-1] not in (d2_structure.open, d2_structure.separator):
-        out.append(D2_SEPARATOR)
+        out.append(d2_structure.separator)
     out.extend(words)
 
 
@@ -684,12 +684,12 @@ def binary_rewrite(
         if frames:
             frame = frames[-1]
             need = frame["items"] > 0
-            if need and (not out or out[-1] != D2_SEPARATOR):
-                out.append(D2_SEPARATOR)
+            if need and (not out or out[-1] != d2_structure.separator):
+                out.append(d2_structure.separator)
             frame["items"] += 1
             return
-        if top_has_item and (not out or out[-1] != D2_SEPARATOR):
-            out.append(D2_SEPARATOR)
+        if top_has_item and (not out or out[-1] != d2_structure.separator):
+            out.append(d2_structure.separator)
         top_has_item = True
 
     while i < len(source):
@@ -719,7 +719,7 @@ def binary_rewrite(
                 "quote_children": False,
                 "items": 0,
             })
-            out.append(D2_OPEN)
+            out.append(d2_structure.open)
             i += 1
             pending_quote = False
             continue
@@ -877,12 +877,12 @@ def binary_rewrite(
     # Collapse accidental duplicate separators and never leave edge separators.
     compact = []
     for word in out:
-        if word == D2_SEPARATOR and (not compact or compact[-1] in (D2_OPEN, D2_SEPARATOR)):
+        if word == d2_structure.separator and (not compact or compact[-1] in (d2_structure.open, d2_structure.separator)):
             continue
-        if word == D2_CLOSE and compact and compact[-1] == D2_SEPARATOR:
+        if word == d2_structure.close and compact and compact[-1] == d2_structure.separator:
             compact.pop()
         compact.append(word)
-    while compact and compact[-1] == D2_SEPARATOR:
+    while compact and compact[-1] == d2_structure.separator:
         compact.pop()
 
     rendered = " ".join(compact)
