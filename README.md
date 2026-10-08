@@ -373,16 +373,53 @@ Surface можна повністю перейменувати без зміни
 
 У репозиторії вже є корисне tooling-ядро.
 
-### migrate-to-sens-codes.py
+### Єдина команда для міграції `.lisp` → фізичний `.sens`
 
-Основний мігратор source → visible binary SENS:
+**Запускайте з кореня репозиторію:** `scripts/migrate.py` — перевірений
+маршрутизатор до вже реалізованих трьохпрохідного мігратора, T5-кодека,
+Git-атестації й справжнього SENS Rust-оракула. Він не додає нових функцій
+мови, не конвертує непідтверджені символи за схожістю назв і не пише в
+`main` автоматично.
 
 ~~~bash
-python3 scripts/migrate-to-sens-codes.py . \
-  --binary-mirror /tmp/sens-binary
+# 1. Назви конкретних ще не допущених файлів та причини, БЕЗ запису
+python3 scripts/migrate.py candidates --report /tmp/sens-candidates.json
+
+# 2. Пробний запуск справжнього мігратора на ОДНОМУ старому файлі
+python3 scripts/migrate.py preview benchmarks/lists.lisp \
+  --mirror /tmp/sens-preview --report /tmp/sens-preview.json
+# Якщо повернуло BLOCKED — потрібний доказ/закон, а НЕ вимкнення захисту
+
+# 3. Збірка чинного Rust D2 рідера
+cargo build -p sens-cli --bin sens-trit
+
+# 4. Допуск тільки після незалежно доведеного source→T5→oracle
+python3 scripts/migrate.py admit \
+  --manifest /tmp/approved-original-proof.json \
+  --mirror /tmp/sens-approved \
+  --reader target/debug/sens-trit \
+  --report /tmp/sens-admission.json
+
+# 5. Лише якщо попередній звіт VERIFIED_NOT_WRITTEN
+python3 scripts/migrate.py admit \
+  --manifest /tmp/approved-original-proof.json \
+  --mirror /tmp/sens-approved \
+  --reader target/debug/sens-trit \
+  --report /tmp/sens-written.json --write
 ~~~
 
-Він уже вміє відтворювати D2 structure, exact-width executable words і fail-closed migration cases. Його подальший cutover до current Contract 11.8 ведеться окремо, без створення другого мігратора.
+`preview` ніколи не має `--write`. Публікація доступна **тільки**
+через `admit --write`: маніфест фіксує вихідний Git blob,
+фізичний SHA256, typed-word SHA256 і команди незалежного оракула.
+Запис — лише нового файла `name.sens` у зовнішньому mirror; старий
+`name.lisp` зберігається, перезапис заборонено. Результат
+`BLOCKED` не вважати міграцією. Нові контрольні приклади не рахувати
+як перенесення старих файлів.
+
+Для агентів обов'язкові три окремі класи доказів: **правильні T5-байти,
+валідна D2-структура, семантична еквівалентність у незалежному оракулі**.
+Деталі маніфесту: [допуск міграції](docs/ADMIT-T5-MIGRATION.uk.md);
+[координація #4449](https://github.com/juv4uk/sens/issues/4449).
 
 ### Exact-width witness-и
 
