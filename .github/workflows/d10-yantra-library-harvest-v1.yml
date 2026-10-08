@@ -1,0 +1,35 @@
+name: D10 Yantra library harvest v1
+
+on:
+  pull_request:
+    paths:
+      - "lib/yantra.lisp"
+      - "knowledge/d10-yantra-library-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - "scripts/check-d10-crossrepo-panini-v1.py"
+      - ".github/workflows/d10-yantra-library-harvest-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/yantra.lisp"
+      - "knowledge/d10-yantra-library-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - ".github/workflows/d10-yantra-library-harvest-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  harvest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify current D10 Yantra candidate definitions and dedup
+        run: python3 scripts/check-d10-yantra-library-harvest-v1.py
+      - name: Verify previous D10 Panini harvest can grow
+        run: python3 scripts/check-d10-crossrepo-panini-v1.py
+      - name: Verify D10 seed authority and accounting
+        run: python3 scripts/check-d10-fill-v1-seed.py
