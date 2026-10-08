@@ -72,23 +72,20 @@ fn migration_only_cond_truthy(value: &Value) -> bool {
 enum ExactD3CondControl {
     Select,
     SkipNo,
-    SkipEmpty,
 }
 
 /// Canonical D3:110 control projection.
 ///
-/// D1:1 selects. D1:0 is explicit NO. Structural () is EMPTY/no-witness.
-/// NO and EMPTY have the same control action but remain different values.
+/// Contract 11.8: only exact D1 PredicateBit answers may control COND.
+/// D1:1 selects and D1:0 skips. Structural (), Number 0/1, T/NIL and
+/// every other non-D1 value are wrong-domain control inputs and fail closed.
 fn exact_d3_cond_control(value: &Value, span: Span) -> Result<ExactD3CondControl, LanguageError> {
     match value.as_predicate_bit() {
         Some(true) => Ok(ExactD3CondControl::Select),
         Some(false) => Ok(ExactD3CondControl::SkipNo),
-        None if matches!(value, Value::Nil) => Ok(ExactD3CondControl::SkipEmpty),
         None => Err(LanguageError::new(
             ErrorKind::Type,
-            format!(
-                "D3:110 COND expects exact D1:1 / D1:0 / structural EMPTY (); got {value}"
-            ),
+            format!("D3:110 COND expects exact D1:1 / D1:0; got {value}"),
             span,
         )),
     }
@@ -122,7 +119,7 @@ pub(crate) fn evaluate_domain_cond(
         let value = evaluate(&parts[0], environment)?;
         match exact_d3_cond_control(&value, parts[0].span)? {
             ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
-            ExactD3CondControl::SkipNo | ExactD3CondControl::SkipEmpty => {}
+            ExactD3CondControl::SkipNo => {}
         }
     }
 
