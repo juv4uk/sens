@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import copy
 import importlib.util
 from pathlib import Path
 import sys
@@ -48,6 +49,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         cls.code_map = mod.augment_code_map_with_registry_aliases(
             cls.code_map, REGISTRY
         )
+        cls.d2_structure = mod.load_d2_structure(data)
         cls.text7 = mod.build_text7_encoder(data, TEXT7)
         cls.legacy = mod.build_legacy_sid_map(REGISTRY, cls.code_map)
         cls.registry_surfaces = mod.build_registry_surface_sid_map(REGISTRY)
@@ -66,6 +68,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.legacy,
             self.registry_surfaces,
             self.resolver,
+            d2_structure=self.d2_structure,
         )
 
     @classmethod
@@ -98,17 +101,52 @@ class SensCodeMigrationTests(unittest.TestCase):
         )
 
     def contract_binary(self, source: str):
-        _, code_map, text7, resolver, authority = self.contract_setup()
+        data, code_map, text7, resolver, authority = self.contract_setup()
         return mod.binary_rewrite(
             source,
             code_map,
             text7,
             resolver=resolver,
+            d2_structure=mod.load_d2_structure(data),
             contract_authority=True,
             binary_authority=authority,
             d1_enabled=True,
             d9_enabled=True,
         )
+
+    def test_d2_structure_is_loaded_from_owner_foundation(self):
+        self.assertEqual(self.data["domains"]["D2"]["authority"], "#1702")
+        self.assertEqual(
+            self.d2_structure,
+            mod.D2Structure(separator="00", close="01", open="10", dot="11"),
+        )
+
+    def test_d2_structure_fails_closed_if_owner_foundation_role_is_missing(self):
+        drifted = copy.deepcopy(self.data)
+        del drifted["domains"]["D2"]["residents"]["11"]
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError, "D2 structural authority mismatch"
+        ):
+            mod.load_d2_structure(drifted)
+
+    def test_d2_structure_fails_closed_if_owner_foundation_role_moves_bits(self):
+        drifted = copy.deepcopy(self.data)
+        drifted["domains"]["D2"]["residents"] = {
+            "00": "OPEN",
+            "01": "CLOSE",
+            "10": "SEPARATOR",
+            "11": "DOT",
+        }
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError, "D2 structural authority mismatch"
+        ):
+            mod.load_d2_structure(drifted)
+
+    def test_d2_structure_fails_closed_if_owner_foundation_authority_drifts(self):
+        drifted = copy.deepcopy(self.data)
+        drifted["domains"]["D2"]["authority"] = "#surface-projection"
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "D2 authority mismatch"):
+            mod.load_d2_structure(drifted)
 
     def test_contract_authority_preserves_exact_d8_word_as_data(self):
         converted, _, _ = self.contract_binary("(LIST 11111111)\n")
