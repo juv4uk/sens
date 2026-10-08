@@ -1,0 +1,35 @@
+name: Declarative research source truth (no executable false exclusions)
+
+on:
+  pull_request:
+    paths:
+      - 'docs/research/declarative-path-manifest.json'
+      - 'tests/test_declarative_path_manifest.py'
+      - 'knowledge/migration-nonprogram-*.json'
+      - 'lib/**/*.lisp'
+      - '.github/workflows/declarative-research-source-truth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/research/declarative-path-manifest.json'
+      - 'tests/test_declarative_path_manifest.py'
+      - 'knowledge/migration-nonprogram-*.json'
+      - 'lib/**/*.lisp'
+      - '.github/workflows/declarative-research-source-truth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  no-false-nonprogram-exclusions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove declared DATA roots and preserve four actual executable modules
+        run: python3 -m unittest discover -s tests -p 'test_declarative_path_manifest.py' -v
+      - name: Classification is NOT a physical executable migration
+        run: |
+          echo '35 research declarative candidate paths, including 27 already approved, 8 unreviewed; 4 source modules explicitly remain executable (139 DEFINEs).' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Actual new .sens original executable migrations proven by this workflow: 0.' >> "$GITHUB_STEP_SUMMARY"
