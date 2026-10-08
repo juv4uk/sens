@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import subprocess
 import sys
 import tempfile
 
@@ -108,7 +109,28 @@ def _atomic_new_view(output: Path, view: bytes, staging_root: Path) -> None:
             Path(name).unlink(missing_ok=True)
 
 
-def check_or_stage(root: Path, relative: str, *, stage: Path | None = None) -> dict:
+def verify_actual_rust_d2(reader: Path, source: Path, canonical_view: bytes) -> None:
+    """Ask EXISTING compiled Rust reader; typed transport != D2 executable syntax.
+
+    This is an additional structural gate only, never an independent source
+    semantic oracle. The reader must echo exactly the physically decoded words.
+    """
+    reader = reader.resolve(strict=True)
+    if not reader.is_file():
+        raise ViewError("Rust D2 reader is not a real file")
+    try:
+        response = subprocess.run(
+            [str(reader), "open", str(source)], capture_output=True,
+            timeout=30, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ViewError(f"Rust D2 reader failed to run: {error}") from error
+    if response.returncode or response.stderr or response.stdout != canonical_view:
+        raise ViewError("Rust D2 reader rejected physical T5 or typed-word projection")
+
+
+def check_or_stage(root: Path, relative: str, *, stage: Path | None = None,
+                   preview: bool = False, reader: Path | None = None) -> dict:
     rel = _relative_sens(relative)
     source = _source_path(root, rel)
     lisp_name, lisp_bytes = _source_lisp(source)
@@ -119,6 +141,10 @@ def check_or_stage(root: Path, relative: str, *, stage: Path | None = None) -> d
     view = render_view(words)
     if encode_words(parse_view(view)) != packed:
         raise ViewError("view -> T5 did not reproduce source bytes")
+    if preview and stage is None:
+        raise ViewError("preview requires a staging target")
+    if reader is not None:
+        verify_actual_rust_d2(reader, source, view)
     if stage is None:
         target = source.with_suffix("")
         if target.is_symlink() or not target.is_file():
@@ -138,8 +164,19 @@ def check_or_stage(root: Path, relative: str, *, stage: Path | None = None) -> d
             raise ViewError("staging output escaped root")
         if source.read_bytes() != packed or Path(lisp_name).read_bytes() != lisp_bytes:
             raise ViewError("source changed during verification")
-        _atomic_new_view(target, view, staging_root)
-        mode = "STAGED_NO_CLOBBER"
+        if preview:
+            # Validate the same write target without touching the filesystem.
+            if target.exists() or target.is_symlink():
+                raise ViewError("view already exists; never overwrite")
+            parent = staging_root
+            for part in rel.with_suffix("").parts[:-1]:
+                parent = parent / part
+                if parent.is_symlink() or (parent.exists() and not parent.is_dir()):
+                    raise ViewError("unsafe staging ancestor")
+            mode = "PREVIEW_NO_WRITE"
+        else:
+            _atomic_new_view(target, view, staging_root)
+            mode = "STAGED_NO_CLOBBER"
     return {
         "schema": "sens-t5-spaced-view/v1",
         "status": mode,
@@ -152,6 +189,7 @@ def check_or_stage(root: Path, relative: str, *, stage: Path | None = None) -> d
         "sens_sha256": _sha256(packed),
         "view_sha256": _sha256(view),
         "typed_word_sha256": typed_sha256(words),
+        "d2_reader": "PASS" if reader is not None else "NOT_CHECKED",
         "semantic_oracle": "NOT_VERIFIED_BY_VIEW_TOOL",
         "release_admitted": False,
     }
@@ -164,9 +202,16 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_mutually_exclusive_group(required=True)
     commands.add_argument("--verify", action="store_true", help="read-only check committed triple")
     commands.add_argument("--stage", type=Path, help="existing OUTSIDE-repo staging directory; no overwrite")
+    commands.add_argument("--preview-stage", type=Path,
+                          help="inspect external target without creating directories or files")
+    parser.add_argument("--reader", type=Path,
+                        help="optional real Rust sens-trit binary; D2 open must echo exact view")
     args = parser.parse_args(argv)
     try:
-        record = check_or_stage(args.root, args.sens, stage=args.stage)
+        target = args.stage if args.stage is not None else args.preview_stage
+        record = check_or_stage(args.root, args.sens, stage=target,
+                                preview=args.preview_stage is not None,
+                                reader=args.reader)
     except (ViewError, SensT5Error, OSError, ValueError, UnicodeError) as error:
         print(f"BLOCKED: {error}", file=sys.stderr)
         return 2
