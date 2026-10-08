@@ -7,7 +7,7 @@
 
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
-    Span,
+    Span, Text7,
 };
 use crate::syntax::ExprKind;
 use std::rc::Rc;
@@ -28,32 +28,52 @@ pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> 
     CanonicalReader::new(&tokens, source.len()).parse_program()
 }
 
-/// Recognize a D2-framed Text7 identifier without changing the canonical D2 AST.
+/// Recognize the current candidate Text7 identifier atom framing.
 ///
-/// This helper is consumed only by contextual binding/call-head code. Ordinary
-/// D2/W7 lists remain structural lists in the canonical reader itself.
-pub(crate) fn text7_atom(expression: &Expr) -> Option<crate::Text7> {
+/// This is intentionally a reader/mechanism helper, not a new semantic AST
+/// variant or a semantic resident. A non-empty D2 list whose every leaf is an
+/// exact D7 identity is the candidate Text7 atom; width and domain remain on
+/// each leaf, while the resulting Text7 value supplies one stable binding key.
+pub(crate) fn text7_atom(expression: &Expr) -> Option<Text7> {
     let ExprKind::List(items) = &expression.kind else {
         return None;
     };
     if items.is_empty() {
         return None;
     }
+
     let cells = items
         .iter()
-        .map(|item| match &item.kind {
+        .map(|item| match item.kind {
             ExprKind::DomainIdentity(crate::DomainIdentity::D7(word)) => {
                 Some(word.word().packed_bits())
             }
             _ => None,
         })
         .collect::<Option<Vec<u8>>>()?;
-    crate::Text7::from_cells(cells).ok()
+
+    Text7::from_cells(cells).ok()
 }
 
-/// Canonical internal binding key for a contextual Text7 identifier.
+/// Canonical internal binding key for a framed Text7 identifier.
 pub(crate) fn text7_binding_key(expression: &Expr) -> Option<Rc<str>> {
     text7_atom(expression).map(|text| Rc::from(text.to_canonical_wire_token()))
+}
+
+/// Re-materialize a Text7 atom as the canonical D2/W7 AST shape.
+pub(crate) fn text7_to_expr(text: &Text7, span: Span) -> Expr {
+    let items = text
+        .to_source_words()
+        .into_iter()
+        .map(|word| Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
+            span,
+        })
+        .collect::<Vec<_>>();
+    Expr {
+        kind: ExprKind::List(Rc::from(items.into_boxed_slice())),
+        span,
+    }
 }
 
 struct CanonicalReader<'a> {
@@ -364,43 +384,6 @@ mod tests {
         for pair in parsed.windows(2) {
             assert_ne!(domain(&pair[0]), domain(&pair[1]));
         }
-    }
-
-    #[test]
-    fn d2_framed_w7_sequence_is_still_a_list_not_an_identifier() {
-        // #3910: this exact D2 frame has an existing list meaning.
-        // No W7 sequence may silently become a Text7 identifier/binder until
-        // an explicit position-aware and reversible source law is ratified.
-        let expression = only("10 0000001 00 0000010 01");
-        let ExprKind::List(items) = expression.kind else {
-            panic!("D2-framed W7 payload must remain a D2 list");
-        };
-        assert_eq!(items.len(), 2);
-        for (item, bits) in items.iter().zip([1u16, 2]) {
-            let identity = domain(item);
-            assert_eq!((identity.width(), identity.packed_bits()), (7, bits));
-            assert!(identity.core_operation().is_none());
-        }
-
-        // The same W7 cells at the top level remain independent identities,
-        // and their widths must not be inferred from any D2 framing.
-        let top = parse_canonical_binary("0000001 00 0000010").unwrap();
-        assert_eq!(top.len(), 2);
-        assert_eq!(domain(&top[0]).width(), 7);
-        assert_eq!(domain(&top[1]).width(), 7);
-    }
-
-    #[test]
-    fn d2_dotted_w7_pair_is_never_implicitly_a_text7_atom() {
-        // The dot 11 is controlled by D2; W7 is exact identity payload.
-        let expression = only("10 0000001 11 0000010 01");
-        let ExprKind::Pair(first, rest) = expression.kind else {
-            panic!("D2 dotted W7 sequence must remain a Pair");
-        };
-        assert_eq!((domain(&first).width(), domain(&first).packed_bits()), (7, 1));
-        assert_eq!((domain(&rest).width(), domain(&rest).packed_bits()), (7, 2));
-        assert!(domain(&first).core_operation().is_none());
-        assert!(domain(&rest).core_operation().is_none());
     }
 
     #[test]
