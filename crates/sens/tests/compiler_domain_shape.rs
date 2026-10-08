@@ -7,7 +7,7 @@
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
     domain_identity_shape_mechanism, eval_parsed_expressions, eval_program, load_core_library,
-    Bija3, Bit3, Bit4, Bit8, CoreD4, CoreD8, DomainIdentity, ErrorKind, Exactness, Session, Value,
+    parse_mixed_exact_domain, Bija3, Bit3, Bit4, Bit8, CoreD4, CoreD8, DomainIdentity, ErrorKind, Exactness, Session, Value,
 };
 use std::rc::Rc;
 
