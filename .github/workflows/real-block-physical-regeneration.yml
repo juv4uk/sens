@@ -40,14 +40,11 @@ jobs:
           target="$RUNNER_TEMP/block-mirror/lib/machine/block.sens"
           test -f "$target"
           target/debug/sens-trit open "$target"
-      - name: Verify source unchanged and candidate differs from stale bytes
+      - name: Verify source unchanged and committed physical bytes are reproducible
         run: |
           set -euo pipefail
           test "$(git hash-object -- lib/machine/block.lisp)" = "200201b741787c4e144ad4194848acf51d7b439e"
-          cmp -s "$RUNNER_TEMP/block-mirror/lib/machine/block.sens" lib/machine/block.sens && {
-            echo "candidate still equals stale artifact"
-            exit 1
-          } || true
+          cmp -s "$RUNNER_TEMP/block-mirror/lib/machine/block.sens" lib/machine/block.sens
           python3 - "$RUNNER_TEMP/block-mirror/lib/machine/block.sens" <<'PY'
           import hashlib,sys
           from pathlib import Path
@@ -58,6 +55,7 @@ jobs:
           words=decode_bytes(p)
           print("bytes",len(p))
           print("sha256",hashlib.sha256(p).hexdigest())
+          assert hashlib.sha256(p).hexdigest() == "b6542822c6e19716287e670ba7a47f296bec5b803479d56bed18795d99c66719"
           print("typed",typed_sha256(words))
           assert typed_sha256(words) == "d7084d46e7e0e6946daab13b0087824db21e7097477bf4c2c09a23985426de3a"
           PY
