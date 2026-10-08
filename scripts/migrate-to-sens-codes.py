@@ -752,7 +752,7 @@ def binary_rewrite(
             else:
                 raise BinaryMigrationError("unterminated string")
             token = source[start:i]
-            emit_text7_atom(token, text7_candidates))
+            emit_text7_atom(token)
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
             elif frames and frames[-1]["data_slots"] > 0:
@@ -763,20 +763,20 @@ def binary_rewrite(
         # Reader abbreviations stay spelling, but are now D7 cells.
         if source.startswith("#'", i):
             begin_item()
-            emit_text7_atom("#'", text7_candidates))
+            emit_text7_atom("#'")
             i += 2
             pending_quote = True
             continue
         if ch in ("'", "`"):
             begin_item()
-            emit_text7_atom(ch, text7_candidates))
+            emit_text7_atom(ch)
             i += 1
             pending_quote = True
             continue
         if ch == ",":
             begin_item()
             token = ",@" if i + 1 < len(source) and source[i + 1] == "@" else ","
-            emit_text7_atom(token, text7_candidates))
+            emit_text7_atom(token)
             i += len(token)
             pending_quote = True
             continue
@@ -874,7 +874,7 @@ def binary_rewrite(
                     "numeric lowering is not yet supplied by this migration"
                 )
             else:
-                emit_text7_atom(token, text7_candidates))
+                emit_text7_atom(token)
 
         if frame and frame["head"]:
             frame["head"] = False
