@@ -3,7 +3,7 @@
   "batch": "D10-CROSSREPO-LINGUISTIC-V1",
   "parent": "#4300",
   "authority": "#4162",
-  "base_main": "3670283f476c0bc2bd1f191ba137346eb96ff4d5",
+  "base_main": "9f20e0c0a29384f2ead1fa584ed215f2fa9e27f3",
   "d10_state": {
     "selected": 527,
     "capacity": 1024,
@@ -254,7 +254,8 @@
     "selected_candidates_in_artifact": 5,
     "projected_candidates_in_artifact": 1,
     "hold_candidates_in_artifact": 3,
-    "next_gate": "Independent-law witnesses for all five SELECT rows are recorded at source level; remaining gate is explicit reviewer agreement and consolidated D10 admission as UNPLACED only."
+    "next_gate": "Independent-law witnesses for all five SELECT rows are recorded at source level; remaining gate is explicit reviewer agreement and consolidated D10 admission as UNPLACED only.",
+    "base_revalidated_against_current_main": "9f20e0c0a29384f2ead1fa584ed215f2fa9e27f3"
   },
   "duplicate_audit": {
     "lower_domain_sources": [
