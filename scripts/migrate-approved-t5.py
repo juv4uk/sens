@@ -112,10 +112,13 @@ def load_engine_maps(root: Path):
     return legacy, my, upper, text7
 
 
-def migrate_one(source: Path, root: Path, maps):
+def migrate_one(source: Path, root: Path, maps, original: bytes | None = None):
+    """Migrate ONE immutable source snapshot; never hash/re-read another version."""
     legacy, my, upper, text7 = maps
     resolver = engine.Resolver(legacy, my, upper)
-    source_text = source.read_text(encoding="utf-8")
+    if original is None:
+        original = source.read_bytes()
+    source_text = original.decode("utf-8")
 
     signal.signal(signal.SIGALRM, engine._timeout_handler)
     signal.alarm(5)
@@ -134,7 +137,8 @@ def migrate_one(source: Path, root: Path, maps):
     return dest, payload, {
         "path": rel.as_posix(),
         "output": dest.as_posix(),
-        "source_sha256": source_sha256(source),
+        "source_sha256": hashlib.sha256(original).hexdigest(),
+        "typed_word_sha256": engine.typed_sha256(words),
         "physical_sha256": hashlib.sha256(payload).hexdigest(),
         "bytes": len(payload),
         "semantic_word_count": len(words),
@@ -186,9 +190,14 @@ def main() -> int:
     manifest = args.manifest.resolve()
     output = args.out.resolve()
     report_path = args.report.resolve()
+    if output == root or output.is_relative_to(root):
+        ap.error("--out must be a separate mirror OUTSIDE the source repository")
+    if report_path.is_relative_to(root):
+        ap.error("--report must be outside the source repository")
 
     rows: list[dict] = []
     staged: list[tuple[Path, bytes]] = []
+    source_snapshots: dict[Path, bytes] = {}
     requested = 0
 
     try:
@@ -216,12 +225,16 @@ def main() -> int:
                 continue
 
             try:
-                actual_sha = source_sha256(source)
+                # One immutable source snapshot supplies BOTH the digest and
+                # the exact content passed through the three-pass converter.
+                original = source.read_bytes()
+                actual_sha = hashlib.sha256(original).hexdigest()
                 if expected_sha is not None and actual_sha != expected_sha:
                     raise engine.SensT5Error(
                         f"source sha256 mismatch: expected {expected_sha}, got {actual_sha}"
                     )
-                dest_path, payload, row = migrate_one(source, root, maps)
+                dest_path, payload, row = migrate_one(source, root, maps, original)
+                source_snapshots[rel] = original
                 if expected_sha is not None:
                     row["manifest_sha256"] = expected_sha
                 if dest_path != dest:
@@ -240,6 +253,14 @@ def main() -> int:
         if blocked:
             staged.clear()
         elif not args.dry_run:
+            # Final integrity gate before publishing any physical bytes:
+            # protect against source mutation after manifest admission.
+            for rel, snapshot in source_snapshots.items():
+                source = root / rel
+                if source.is_symlink() or source.read_bytes() != snapshot:
+                    raise engine.SensT5Error(
+                        f"source changed after admission, abort entire batch: {rel}"
+                    )
             publish_batch(staged, output)
     except Exception as exc:
         rows.append({"status": "error", "reason": str(exc)})
