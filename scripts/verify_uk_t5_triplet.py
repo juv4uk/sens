@@ -41,7 +41,7 @@ class ProjectionBlocked(ValueError):
 
 def uk_surface(width: int) -> dict[str, str]:
     """Read exact 'ук' cells from owner's domain table, never English aliases."""
-    if width not in (1, 3):
+    if width not in (1, 3, 4):
         raise ProjectionBlocked("no ratified Ukrainian renderer for this width")
     # Parse structural () through the canonical table reader. Regex token
     # matching excluded D3:000 and wrongly blocked the whole D3 authority.
@@ -88,7 +88,7 @@ class WordParser:
             return ("empty",)
         if token in ("0", "1"):
             return ("predicate", token)
-        if token in ("001", "010", "011", "100", "101", "110", "111"):
+        if token in ("001", "010", "011", "100", "101", "110", "111", "1000"):
             return ("head", token)
         raise ProjectionBlocked(f"outside bounded D1/D3 callable or data law: {token!r}")
 
@@ -101,7 +101,33 @@ class WordParser:
         return result
 
 
-def render_uk(node, d1: dict[str, str], d3: dict[str, str]) -> str:
+def proved_nil_pair_tree(node) -> bool:
+    """Bounded shape proof: QUOTE(EMPTY) or recursively nested D3 CONS.
+
+    Not a general typed pair theorem and not approval of D7/number/lexical
+    quotation. CAAR needs a CONS whose CAR is itself a proved CONS pair.
+    """
+    if node[0] != "list":
+        return False
+    items = node[1]
+    if len(items) == 2 and items[0] == ("head", "001"):
+        return items[1] == ("empty",)
+    if len(items) == 3 and items[0] == ("head", "111"):
+        return proved_nil_pair_tree(items[1]) and proved_nil_pair_tree(items[2])
+    return False
+
+
+def proved_caar_input(node) -> bool:
+    if node[0] != "list" or len(node[1]) != 3:
+        return False
+    head, car, cdr = node[1]
+    return (head == ("head", "111") and car[0] == "list"
+            and len(car[1]) == 3 and car[1][0] == ("head", "111")
+            and proved_nil_pair_tree(car) and proved_nil_pair_tree(cdr))
+
+
+def render_uk(node, d1: dict[str, str], d3: dict[str, str],
+              d4: dict[str, str]) -> str:
     kind = node[0]
     if kind == "empty":
         return "()"
@@ -113,6 +139,10 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str]) -> str:
     if not items or items[0][0] != "head":
         raise ProjectionBlocked("unknown callable head or COND clause context")
     opcode = items[0][1]
+    if opcode == "1000":
+        if len(items) != 2 or not proved_caar_input(items[1]):
+            raise ProjectionBlocked("D4 CAAR requires a proved nested CONS pair")
+        return "(" + d4[opcode] + " " + render_uk(items[1], d1, d3, d4) + ")"
     # Each admitted spelling comes from the owner's D3 domain table. A
     # callable D3 slot is not permission to invent unproved datum grammar.
     if opcode == "001":
@@ -120,16 +150,16 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str]) -> str:
             raise ProjectionBlocked("D3 QUOTE requires exactly one datum")
         if items[1][0] not in ("predicate", "empty"):
             raise ProjectionBlocked("D3 QUOTE structured/Text7 data not proven")
-        return "(" + d3[opcode] + " " + render_uk(items[1], d1, d3) + ")"
+        return "(" + d3[opcode] + " " + render_uk(items[1], d1, d3, d4) + ")"
     if opcode in ("010", "011", "100"):
         if len(items) != 2:
             raise ProjectionBlocked("D3 unary ATOM/CDR/CAR requires one argument")
-        return "(" + d3[opcode] + " " + render_uk(items[1], d1, d3) + ")"
+        return "(" + d3[opcode] + " " + render_uk(items[1], d1, d3, d4) + ")"
     if opcode in ("101", "111"):
         if len(items) != 3:
             raise ProjectionBlocked("D3 binary EQ/CONS requires two arguments")
-        return ("(" + d3[opcode] + " " + render_uk(items[1], d1, d3)
-                + " " + render_uk(items[2], d1, d3) + ")")
+        return ("(" + d3[opcode] + " " + render_uk(items[1], d1, d3, d4)
+                + " " + render_uk(items[2], d1, d3, d4) + ")")
     if opcode == "110":
         if len(items) < 2:
             raise ProjectionBlocked("D3 COND requires at least one paired clause")
@@ -137,15 +167,15 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str]) -> str:
         for item in items[1:]:
             if item[0] != "list" or len(item[1]) != 2:
                 raise ProjectionBlocked("D3 COND requires two-part D2 clause records")
-            clauses.append("(" + " ".join(render_uk(x, d1, d3)
+            clauses.append("(" + " ".join(render_uk(x, d1, d3, d4)
                                           for x in item[1]) + ")")
         return "(" + d3[opcode] + " " + " ".join(clauses) + ")"
     raise ProjectionBlocked("unratified callable in bounded renderer")
 
 
 def canonical_uk_from_words(words: list[str]) -> str:
-    d1, d3 = uk_surface(1), uk_surface(3)
-    return render_uk(WordParser(words).parse(), d1, d3) + "\n"
+    d1, d3, d4 = uk_surface(1), uk_surface(3), uk_surface(4)
+    return render_uk(WordParser(words).parse(), d1, d3, d4) + "\n"
 
 
 def project_current_uk(source: str) -> list[str]:
@@ -212,7 +242,7 @@ def verify(lisp: Path, sens: Path, view: Path) -> dict:
     return {
         "schema": SCHEMA,
         "status": "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION",
-        "scope": "D1 predicates / D3 exact-call syntax & restricted QUOTE data / D2",
+        "scope": "D1 predicates / D3 exact-call syntax / D4 CAAR of proved nested nil CONS / D2",
         "source": str(lisp),
         "sens": str(sens),
         "view": str(view),
