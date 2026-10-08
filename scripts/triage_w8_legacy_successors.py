@@ -19,6 +19,9 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = str(ROOT / "scripts")
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
 SCHEMA = "sens-w8-provenance-next-barrier/v1"
 
 spec = importlib.util.spec_from_file_location(
