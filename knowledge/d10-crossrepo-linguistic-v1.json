@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "batch": "D10-CROSSREPO-LINGUISTIC-V1",
+  "parent": "#4300",
+  "authority": "#4162",
+  "base_main": "e3434699a96eb7613dbaeb9eec7bcb6c3d352fd5",
+  "d10_state": {
+    "selected": 527,
+    "capacity": 1024,
+    "law_forced_coordinates": 256,
+    "unplaced_selected": 271,
+    "remaining": 497,
+    "ratified": 0,
+    "status": "RESEARCH-UNRATIFIED"
+  },
+  "donor_scope": [
+    "juv4uk/dict_uk",
+    "juv4uk/latynka",
+    "juv4uk/nlp_uk",
+    "juv4uk/russian-lang",
+    "juv4uk/sanskritworld_texts",
+    "juv4uk/vidyut"
+  ],
+  "nonduplication_exclusions": [
+    "my-lisp-panini#52",
+    "shiva-sutras#124",
+    "panca-vac#11"
+  ],
+  "rows": [
+    {
+      "stable_id": "d10.ling.latynka.contextual-rewrite.v1",
+      "repository": "juv4uk/latynka",
+      "source": [
+        "src/js/translit.js@52166a26220cb5fdd63ec834d0693f4ad49181cd",
+        "spec/translit.spec.js@52166a26220cb5fdd63ec834d0693f4ad49181cd"
+      ],
+      "semantic_name": "CONTEXTUAL-TEXT-REWRITE",
+      "behavior": "Apply a finite rule table whose rewrite for a matched input depends on lexical context classes (word-start, after-consonant, default), with deterministic longest-key matching and preserved case variants.",
+      "decision": "HOLD",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No current D10 semantic-name match found for contextual rewrite; exact D1-D9 behavioral audit still required.",
+      "coordinate": null,
+      "provenance_note": "Actual transliteration operation; admission withheld until carrier-independent restatement and lower-domain duplicate audit."
+    },
+    {
+      "stable_id": "d10.ling.vidyut.unicode-normalization.v1",
+      "repository": "juv4uk/vidyut",
+      "source": [
+        "vidyut-lipi/src/unicode_norm.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea",
+        "vidyut-lipi/src/transliterate.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea",
+        "vidyut-lipi/tests/basic.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea"
+      ],
+      "semantic_name": "CANONICAL-UNICODE-NORMALIZE",
+      "behavior": "Map Unicode-equivalent representations to a canonical NFC or NFD representation, with equivalent input variants receiving the same transliteration behavior.",
+      "decision": "HOLD",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D10 semantic-name match found for NFC/NFD normalization; exact D1-D9 semantic audit still required.",
+      "coordinate": null,
+      "provenance_note": "Executable to_nfc/to_nfd semantics with Unicode equivalence tests; retain as portable text-equivalence evidence."
+    },
+    {
+      "stable_id": "d10.ling.vidyut.greedy-span-mapping.v1",
+      "repository": "juv4uk/vidyut",
+      "source": [
+        "vidyut-lipi/src/transliterate.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea",
+        "vidyut-lipi/src/mapping.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea"
+      ],
+      "semantic_name": "LONGEST-MATCH-TEXT-MAPPING",
+      "behavior": "At each input position choose the longest defined mapping key beginning at that position; preserve token-kind context where required.",
+      "decision": "HOLD",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "Potentially derivable from generic matching; do not admit without proof that longest-match behavior itself is language-visible rather than an implementation strategy.",
+      "coordinate": null,
+      "provenance_note": "Evidence only; max-by-key implementation detail is not semantic authority."
+    }
+  ],
+  "negative_evidence": [
+    {
+      "repository": "juv4uk/dict_uk",
+      "query_scope": "lookup",
+      "result": "NO_CODE_SEARCH_MATCH",
+      "note": "Search absence is not proof of semantic absence."
+    },
+    {
+      "repository": "juv4uk/nlp_uk",
+      "query_scope": "token",
+      "result": "NO_CODE_SEARCH_MATCH",
+      "note": "Search absence is not proof of semantic absence."
+    },
+    {
+      "repository": "juv4uk/russian-lang",
+      "query_scope": "grammar",
+      "result": "NO_CODE_SEARCH_MATCH",
+      "note": "Search absence is not proof of semantic absence."
+    },
+    {
+      "repository": "juv4uk/sanskritworld_texts",
+      "query_scope": "normalize",
+      "result": "NO_CODE_SEARCH_MATCH",
+      "note": "Corpus review remains possible; no semantics selected from this negative signal."
+    }
+  ],
+  "acceptance_state": {
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE",
+    "inventory_mutation": "NONE",
+    "next_gate": "Exact D1-D9 behavioral duplicate audit, then independent-law review before any SELECT admission."
+  }
+}
