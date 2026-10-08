@@ -8,6 +8,7 @@ The positive T5 fixture is *not* independent oracle/native execution evidence.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -121,9 +122,10 @@ def main() -> int:
         with PHYSICAL.open("xb") as out:
             out.write(physical)
     size, typed_digest = verify_checked_in()
+    physical_sha = hashlib.sha256(PHYSICAL.read_bytes()).hexdigest()
     print(f"PASS: C1-SECOND existing-source -> exact D2/D3 -> T5 {size} bytes "
-          f"typed_sha256={typed_digest}")
-    print("NOTE: transport/cutover fixture only; semantic oracle/native parity PENDING")
+          f"typed_sha256={typed_digest} physical_sha256={physical_sha}")
+    print("NOTE: current SENS oracle checked independently in Rust CI; native WSM parity PENDING")
     return 0
 
 
