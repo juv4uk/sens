@@ -14,6 +14,11 @@ import json
 from pathlib import Path, PurePosixPath
 import sys
 
+SCRIPTS = str(Path(__file__).resolve().parent)
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
+from migration_source_scope import archived_benchmark_source
+
 SOURCE_SCHEMA = "sens-original-three-pass-eligibility/v1"
 OUTPUT_SCHEMA = "sens-t5-disjoint-agent-workshards/v1"
 SHARD_STATUS = "UNCLAIMED__BLOCKED_NOT_ADMITTED"
@@ -130,6 +135,27 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             raise PlanError(f"canonical original does not confirm nonprogram policy: {path}")
         reviewed[path] = item
 
+    # A frozen historical benchmark is archive evidence even if its old
+    # `(print 0)` becomes mechanically parseable after successor repairs.
+    # Verify the claimed source scope against the already-merged path law.
+    archives: dict[str, dict] = {}
+    for row in [*authoritative, *candidates]:
+        path = checked_path(row.get("path"))
+        is_archive = archived_benchmark_source(path)
+        if is_archive:
+            if row.get("source_scope") != "ARCHIVED_BENCHMARK_NONPROGRAM":
+                raise PlanError(f"archived source scope missing: {path}")
+            item = checked_source(row, status=("BLOCKED" if row.get("status") == "BLOCKED"
+                                               else "CANDIDATE"))
+            if path in reviewed or path in archives:
+                raise PlanError(f"archived/nonprogram source overlaps or duplicates: {path}")
+            archives[path] = item
+        elif row.get("source_scope") == "ARCHIVED_BENCHMARK_NONPROGRAM":
+            raise PlanError(f"forged archive scope for active source: {path}")
+    if ("archived_benchmark_data_sources" in summary and
+            summary["archived_benchmark_data_sources"] != len(archives)):
+        raise PlanError("archived source total disagrees with canonical report")
+
     seen: set[str] = set()
     groups: list[tuple[str, str, list[dict]]] = []
     sum_blocked = 0
@@ -166,7 +192,7 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             seen.add(item["path"])
             members.append(item)
         sum_blocked += len(members)
-        active = [item for item in members if item["path"] not in reviewed]
+        active = [item for item in members if item["path"] not in reviewed and item["path"] not in archives]
         if active:
             groups.append((family, action, sorted(active, key=lambda x: x["path"])))
 
@@ -174,6 +200,7 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
         raise PlanError("cohorts do not cover canonical blocked sources exactly")
 
     pending = []
+    archived_candidates = []
     for row in candidates:
         if not isinstance(row, dict) or row.get("status") != "CANDIDATE_NOT_ADMITTED":
             raise PlanError("mechanical candidate claims admission or invalid state")
@@ -181,19 +208,26 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
         if item["path"] in seen:
             raise PlanError(f"candidate duplicates blocked source: {item['path']}")
         seen.add(item["path"])
-        pending.append(item)
+        if item["path"] in archives:
+            archived_candidates.append(item)
+        else:
+            pending.append(item)
     if reviewed:
         groups.append(("reviewed-nonprogram-data",
             "Owner-reviewed immutable schema/ISA/evidence/expr records need a DATA format contract; NEVER publish or count as executable .sens migration.",
             sorted(({"path": path, "source_git_blob_sha": item["source_git_blob_sha"]}
                     for path, item in reviewed.items()), key=lambda x: x["path"])))
+    if archives:
+        groups.append(("archived-benchmark-data",
+            "Frozen historical performance snapshots are NONPROGRAM evidence; preserve original bytes/measurements, NEVER publish executable .sens.",
+            sorted(archives.values(), key=lambda x: x["path"])))
     if pending:
         groups.append(("oracle-pending",
             "Independent source-law, Rust D2 parser, behavior oracle and file SHA required; never publish on mechanical parity alone.",
             sorted(pending, key=lambda x: x["path"])))
 
     if (sum_blocked != summary.get("blocked") or
-            len(pending) != summary.get("mechanical_candidates") or
+            len(pending) + len(archived_candidates) != summary.get("mechanical_candidates") or
             len(seen) != summary.get("original_unpaired_sources_scanned") or
             len(seen) != summary.get("scanned")):
         raise PlanError("exhaustive source/candidate counts disagree")
@@ -211,7 +245,7 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             for item in group:
                 digest.update(item["path"].encode("utf-8") + b"\0")
                 digest.update(item["source_git_blob_sha"].encode("ascii") + b"\n")
-            is_data = family == "reviewed-nonprogram-data"
+            is_data = family in ("reviewed-nonprogram-data", "archived-benchmark-data")
             shards.append({
                 "shard_id": shard_id, "family": family,
                 "status": ("UNCLAIMED__NONPROGRAM_DATA_ONLY" if is_data else SHARD_STATUS),
@@ -234,7 +268,8 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             "blocked": sum_blocked,
             "mechanical_pending_oracle": len(pending),
             "reviewed_nonprogram_originals": len(reviewed),
-            "executable_or_unclassified_originals": len(seen) - len(reviewed),
+            "archived_benchmark_nonprogram_originals": len(archives),
+            "executable_or_unclassified_originals": len(seen) - len(reviewed) - len(archives),
             "shards": len(shards),
             "files_per_shard_limit": max_files,
             "claimed": 0,
