@@ -272,5 +272,53 @@ class OriginalCandidateTests(unittest.TestCase):
             mod.load_nonprogram_classification(self.root)
 
 
+    def test_priority_queue_excludes_reviewed_data_but_retains_raw_census(self):
+        for name in ("record.lisp", "program.lisp"):
+            (self.root / name).write_text("(unknown)\n", encoding="utf-8")
+        raw = {
+            "mode": "dry-run",
+            "summary": {
+                "files_seen": 2, "files_written": 0,
+                "files_would_write": 0, "files_blocked": 2,
+                "files_skipped_paired": 0,
+            },
+            "skipped_paired_paths": [],
+            "files": [
+                {"path": "record.lisp", "status": "blocked", "reason": "word 2"},
+                {"path": "program.lisp", "status": "blocked",
+                 "reason": "ambiguous 8-bit head 00001001"},
+            ],
+        }
+        verified_data = {
+            "record.lisp": {
+                "path": "record.lisp",
+                "source_class": "NONPROGRAM_DATA_REVIEWED",
+                "cohort": "schema",
+                "source_git_blob_sha": mod.git_blob_sha(self.root / "record.lisp"),
+                "automatic_sens_companion": False,
+                "semantic_oracle_admitted": False,
+            }
+        }
+        def fake_run(command, **kwargs):
+            Path(command[command.index("--report") + 1]).write_text(
+                json.dumps(raw), encoding="utf-8"
+            )
+            return subprocess.CompletedProcess(command, 2, "", "")
+        with patch.object(mod.subprocess, "run", side_effect=fake_run), \
+             patch.object(mod, "load_nonprogram_classification",
+                          return_value=verified_data):
+            result = mod.build_report(self.root)
+        summary = result["summary"]
+        self.assertEqual(summary["scanned"], 2)
+        self.assertEqual(summary["blocked"], 2)
+        self.assertEqual(summary["classified_nonprogram"], 1)
+        self.assertEqual(summary["blocked_excluding_classified_nonprogram"], 1)
+        self.assertEqual(summary["mechanical_candidates"], 0)
+        self.assertEqual(summary["physical_outputs_created"], 0)
+        self.assertEqual(result["priority_blocker_sample"][0]["path"], "program.lisp")
+        self.assertEqual(result["nonprogram_classification"][0]["path"], "record.lisp")
+        self.assertEqual(result["blocked_sources"][0]["path"], "program.lisp")
+
+
 if __name__ == "__main__":
     unittest.main()
