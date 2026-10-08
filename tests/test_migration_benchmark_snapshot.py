@@ -15,11 +15,24 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "knowledge/migration-benchmark-snapshot-2026-10-08.json"
+ADMISSIONS_DIR = ROOT / "knowledge/migration-admissions"
 
 
 def git_blob_sha(content: bytes) -> str:
     header = b"blob " + str(len(content)).encode("ascii") + b"\0"
     return hashlib.sha1(header + content).hexdigest()
+
+
+def proof_gated_archive_sources() -> set[str]:
+    approved = set()
+    for manifest in sorted(ADMISSIONS_DIR.glob("*.json")):
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        if data.get("schema") != "sens-t5-proof-admission/v1":
+            continue
+        source = data.get("source")
+        if isinstance(source, str) and archived_program_path(source):
+            approved.add(source)
+    return approved
 
 
 def archived_program_path(path: str) -> bool:
@@ -48,8 +61,8 @@ class ArchivedBenchmarkMigrationGuard(unittest.TestCase):
         self.assertEqual(record["schema"], "sens-t5-archive-evidence/v1")
         self.assertEqual(record["status"], "NONPROGRAM_ARCHIVED_BENCHMARK_EVIDENCE")
         self.assertEqual(record["source_scan_print_blocked_rows"], 75)
-        self.assertEqual(record["admitted_as_executable"], 0)
-        self.assertEqual(record["emitted_physical_sens"], 0)
+        self.assertEqual(record["admitted_as_executable"], 1)
+        self.assertEqual(record["emitted_physical_sens"], 1)
         self.assertIs(record["allow_bulk_conversion"], False)
         self.assertIs(record["allow_release_pin_change"], False)
 
@@ -99,14 +112,20 @@ class ArchivedBenchmarkMigrationGuard(unittest.TestCase):
         )
         self.assertTrue(records, "expected at least one archived benchmark source")
         self.assertIn(ROOT / self.record["representative"]["path"], records)
+        approved = proof_gated_archive_sources()
         for source in records:
-            with self.subTest(file=str(source.relative_to(ROOT))):
+            rel = source.relative_to(ROOT).as_posix()
+            with self.subTest(file=rel):
                 self.assertFalse(source.is_symlink())
-                self.assertTrue(archived_program_path(source.relative_to(ROOT).as_posix()))
-                # This is a non-publishing *read-only* guard.
-                self.assertFalse(
-                    source.with_suffix(".sens").exists(),
-                    f"unreviewed binary twin beside historic snapshot: {source}",
+                self.assertTrue(archived_program_path(rel))
+                twin = source.with_suffix(".sens").exists()
+                # Archive remains read-only by default. A same-stem T5 twin is
+                # legal only when a separate proof-gated admission manifest
+                # names this exact archived source.
+                self.assertEqual(
+                    twin,
+                    rel in approved,
+                    f"archive T5 twin policy mismatch for {source}",
                 )
 
 

@@ -1,0 +1,12 @@
+{
+  "schema": "sens-t5-proof-admission/v1",
+  "source": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/empty-en.lisp",
+  "source_era": "historical-legacy",
+  "source_git_blob_sha1": "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f",
+  "source_sha256": "c97efcddf8d8f991016ffdbe57805fea26421d9b34ee6259f37e11cd814e870e",
+  "expected_physical_sha256": "1d75b0eb32dfb00f9eee11745777cfc1823ff671183b5908f9e581707162baa1",
+  "expected_typed_sha256": "1595e6aa1be09e89933ada17302741eaa133f6dc382493fd0d759799f9ac2de9",
+  "oracle_commands": [
+    ["python3", "tests/test_migration_print0_oracle.py", "-q"]
+  ]
+}
