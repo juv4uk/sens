@@ -44,12 +44,31 @@ def _sha(data: bytes) -> str:
 
 
 def inspect(root: Path, *, strict_semantic: bool = False,
-            include_untracked: bool = False) -> dict:
+            include_untracked: bool = False,
+            require_view_for: list[str] | None = None) -> dict:
     root = root.resolve(strict=True)
     if not root.is_dir():
         raise ValueError("root must be directory")
+    required: set[str] = set()
+    for name in require_view_for or []:
+        # Explicit reviewed scope only: no wildcard implies all .sens are
+        # executable; no empty/missing/adversarial path is permitted to pass.
+        if (not isinstance(name, str) or not name.endswith(".sens")
+                or name.startswith("/") or "\\" in name
+                or "//" in name or any(bit in ("", ".", "..")
+                                       for bit in name.split("/"))):
+            raise ValueError(f"unsafe scoped T5 view requirement: {name!r}")
+        from pathlib import PurePosixPath
+        if PurePosixPath(name).as_posix() != name or name in required:
+            raise ValueError(f"duplicate/noncanonical T5 view scope: {name!r}")
+        required.add(name)
+    available = candidates(root, include_untracked)
+    found = {file.relative_to(root).as_posix() for file in available}
+    if required - found:
+        raise ValueError("required verified T5 view has no tracked .sens: "
+                         + ", ".join(sorted(required - found)))
     entries: list[dict] = []
-    for file in candidates(root, include_untracked):
+    for file in available:
         try:
             rel = file.relative_to(root)
         except ValueError:
@@ -59,6 +78,8 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             "source": rel.with_suffix(".lisp").as_posix(),
             "physical_status": "BLOCKED",
             "source_status": "NOT_CHECKED",
+            "view": rel.with_suffix("").as_posix(),
+            "view_status": ("BLOCKED" if rel.as_posix() in required else "NOT_REQUIRED"),
         }
         entries.append(row)
         source = root / rel.with_suffix(".lisp")
@@ -85,6 +106,27 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             })
             source_bytes = source.read_bytes()
             row["source_sha256"] = _sha(source_bytes)
+            if rel.as_posix() in required:
+                # Treat the third file as a READ-ONLY ASCII projection of
+                # decoded, exact-width T5 words, never as source authority.
+                view = root / rel.with_suffix("")
+                if view.is_symlink() or not view.is_file():
+                    raise ValueError("missing/symlink same-stem spaced-bit view")
+                displayed = view.read_bytes()
+                expected = (" ".join(words) + "\n").encode("ascii")
+                if displayed != expected:
+                    raise ValueError(
+                        "noncanonical/mismatched spaced-bit view: "
+                        "requires exactly one ASCII space, LF and exact word widths"
+                    )
+                parsed = parse_words(displayed.decode("ascii"))
+                if parsed != words or encode_words(parsed) != data:
+                    raise ValueError("reverse view-to-physical T5 identity mismatch")
+                if typed_sha256(parsed) != typed_sha256(words):
+                    raise ValueError("spaced view changed exact typed-word identity")
+                row["view_status"] = "PASS"
+                row["view_sha256"] = _sha(displayed)
+                row["view_typed_word_sha256"] = typed_sha256(parsed)
             try:
                 source_text = source_bytes.decode("utf-8")
             except UnicodeError:
@@ -108,6 +150,7 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             if row["source_status"] == "NOT_CHECKED":
                 row["source_status"] = "BLOCKED"
     physical_blockers = sum(row["physical_status"] == "BLOCKED" for row in entries)
+    view_blockers = sum(row["view_status"] == "BLOCKED" for row in entries)
     pending_oracle = sum(row["source_status"] == "PENDING_ORACLE" for row in entries)
     exact_binary = sum(row["source_status"] == "EXACT_BINARY_SOURCE" for row in entries)
     return {
@@ -119,12 +162,15 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             "sens_files": len(entries),
             "physical_pass": len(entries) - physical_blockers,
             "physical_blocked": physical_blockers,
+            "required_spaced_views": len(required),
+            "spaced_view_pass": sum(row["view_status"] == "PASS" for row in entries),
+            "spaced_view_blocked": view_blockers,
             "exact_binary_source_pairs": exact_binary,
             "pending_oracle": pending_oracle,
             "admitted_executable_semantics": None,
         },
         "status": (
-            "BLOCKED" if physical_blockers or (strict_semantic and pending_oracle)
+            "BLOCKED" if physical_blockers or view_blockers or (strict_semantic and pending_oracle)
             else "NO_FILES" if not entries else
             "MECHANICAL_ONLY" if pending_oracle else "EXACT_BINARY_PAIRS"
         ),
@@ -140,6 +186,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path, nargs="?", default=Path("."))
     parser.add_argument("--output", type=Path, help="JSON report path (not inside .sens)")
+    parser.add_argument("--require-view-for", action="append", default=[],
+                        metavar="RELATIVE_PATH.sens",
+                        help="fail closed unless this specific tracked .sens has exact same-stem ASCII view")
     parser.add_argument("--strict-semantic", action="store_true",
                         help="require exact 0/1 source identity; block symbolic .lisp")
     parser.add_argument("--include-untracked", action="store_true",
@@ -147,7 +196,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         report = inspect(args.root, strict_semantic=args.strict_semantic,
-                         include_untracked=args.include_untracked)
+                         include_untracked=args.include_untracked,
+                         require_view_for=args.require_view_for)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(
