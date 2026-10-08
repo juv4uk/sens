@@ -19,6 +19,7 @@ sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 
 F = ROOT / "tests/fixtures/migration-d1-cond-cohort"
+PAIR = ROOT / "tests/fixtures/migration-pair-cohort-main"
 WORDS = "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01"
 UK = "(за-умовою (ні (перше ())) (так так))\n"
 
@@ -71,6 +72,63 @@ class BoundedUkTripletTests(unittest.TestCase):
             with self.subTest(word=word):
                 with self.assertRaises(mod.ProjectionBlocked):
                     mod.canonical_uk_from_words(word)
+
+    def test_existing_real_uk_pair_cons_triple_is_reversible_without_rewriting(self):
+        # Previously BLOCKED by bounded CAR/COND-only renderer despite an
+        # owner-reviewed Ukrainian source and unchanged current D3 T5 bytes.
+        lisp = PAIR / "pair-cons.lisp"
+        sens = PAIR / "pair-cons.sens"
+        view = PAIR / "pair-cons"
+        original = (lisp.read_bytes(), sens.read_bytes(), view.read_bytes())
+        self.assertEqual(lisp.read_text(encoding="utf-8"),
+                         "(сполучити (як-є ()) (як-є ()))\\n")
+        expected = "10 111 00 10 001 00 000 01 00 10 001 00 000 01 01"
+        self.assertEqual(view.read_text(encoding="ascii"), expected + "\\n")
+        report = mod.verify(lisp, sens, view)
+        self.assertEqual(report["physical_bytes"], 10)
+        self.assertEqual(report["typed_word_count"], len(expected.split()))
+        self.assertTrue(report["canonical_uk_roundtrip"])
+        self.assertTrue(report["canonical_view_roundtrip"])
+        self.assertFalse(report["runtime_oracle_admitted_by_this_audit"])
+        self.assertEqual(report["old_originals_migrated_by_this_audit"], 0)
+        self.assertEqual((lisp.read_bytes(), sens.read_bytes(),
+                          view.read_bytes()), original)
+
+    def test_ratifed_d3_call_arities_and_atomic_quote_roundtrip(self):
+        # D3 callable spellings are always owner uk surfaces; 000 is literal
+        # (), not NIL, a missing alias or a D2 empty-list special case.
+        rows = [
+            ("10 001 00 000 01", "(як-є ())\\n"),
+            ("10 010 00 000 01", "(атом? ())\\n"),
+            ("10 011 00 000 01", "(решта ())\\n"),
+            ("10 100 00 000 01", "(перше ())\\n"),
+            ("10 101 00 10 001 00 1 01 00 10 001 00 1 01 01",
+             "(тотожне? (як-є так) (як-є так))\\n"),
+            ("10 111 00 10 001 00 000 01 00 10 001 00 000 01 01",
+             "(сполучити (як-є ()) (як-є ()))\\n"),
+        ]
+        for visible, uk in rows:
+            words = visible.split()
+            with self.subTest(visible=visible):
+                self.assertEqual(mod.canonical_uk_from_words(words), uk)
+                self.assertEqual(mod.project_current_uk(uk), words)
+                physical = mod.encode_words(words)
+                self.assertEqual(mod.decode_bytes(physical), words)
+        self.assertEqual(mod.uk_surface(3)["000"], "()")
+
+    def test_quote_rejects_structural_data_without_a_proven_d7_law(self):
+        for words in (
+            ["10", "001", "00", "10", "000", "01", "01"],
+            ["10", "001", "00", "10", "001", "00", "000", "01", "01"],
+            ["10", "001", "00", "101", "01"],
+            ["10", "101", "00", "0", "01"],
+            ["10", "010", "00", "000", "00", "1", "01"],
+            ["10", "011", "01"],
+            ["10", "111", "00", "0", "00", "1", "00", "0", "01"],
+        ):
+            with self.subTest(words=words):
+                with self.assertRaises(mod.ProjectionBlocked):
+                    mod.canonical_uk_from_words(words)
 
     def test_tampered_view_fails_even_if_t5_remains_canonical(self):
         original = self.view.read_bytes()
@@ -137,7 +195,7 @@ class BoundedUkTripletTests(unittest.TestCase):
             ["10", "110", "00", "10", "0", "01", "01"],   # clause not pair
             ["10", "100", "01"],                         # CAR missing arg
             ["10", "110", "00", "10", "0", "00", "1", "01"], # unclosed outer
-            ["10", "111", "00", "1", "01"],               # no CONS law here
+            ["10", "111", "00", "1", "01"],               # CONS wrong arity
             ["10", "0010", "00", "1", "01"],              # D4 binder
             ["10", "110", "00", "0000011", "01"],         # Text7 unknown
             ["10", "110", "00", "01010", "01"],           # D5 number/other
