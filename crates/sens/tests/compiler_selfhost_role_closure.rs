@@ -53,7 +53,7 @@ fn collect_roles(expr: &Expr, roles: &mut Vec<CompilerLoweringRole>) {
 
 #[test]
 fn real_compiler_nucleus_is_closed_over_nine_sens_derived_roles() {
-    let parsed = parse(NUCLEUS).expect("current compiler nucleus parses");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus parses");
     let lowered = lower_program(&parsed);
 
     let mut roles = Vec::new();
