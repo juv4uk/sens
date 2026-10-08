@@ -547,7 +547,7 @@ class Resolver:
             for name, tok in bindings
         }
 
-    def head(self,tok: Tok):
+    def head(self,tok: Tok,count=True):
         t=tok.text
         # D2 is structural control only. A two-bit word in executable-head
         # position is ambiguous/corrupt source, never a callable identity.
@@ -558,7 +558,7 @@ class Resolver:
             )
         # Exact current function words are already migrated.
         if 3<=len(t)<=6 and set(t)<=set("01"):
-            self.counts["already-exact"]+=1
+            if count: self.counts["already-exact"]+=1
             return [t],"already-exact"
         # The same eight visible bits can be historical SID8 or CURRENT D8.
         # Auto must BLOCK: without source-era provenance these are ambiguous.
@@ -573,7 +573,7 @@ class Resolver:
                     raise MigrationError(
                         f"unratified current D8 executable head {t}",tok
                     )
-                self.counts["already-exact"]+=1
+                if count: self.counts["already-exact"]+=1
                 return [t],"already-exact"
             if t not in self.legacy:
                 raise MigrationError(
@@ -591,7 +591,7 @@ class Resolver:
                     f"legacy SID8/Sens8 {t} resolves to structural EMPTY, not a callable head",
                     tok,
                 )
-            self.counts["pass1-sens8"]+=1
+            if count: self.counts["pass1-sens8"]+=1
             return [ident[0]],"pass1-sens8"
 
         # Pass 2: known my-lisp/current admitted surfaces. A surface known to
@@ -603,7 +603,7 @@ class Resolver:
                     f"legacy-unmapped my-lisp function {t!r}: no current D3-D6 resident",
                     tok,
                 )
-            self.counts["pass2-my-lisp"]+=1
+            if count: self.counts["pass2-my-lisp"]+=1
             return [ident[0]],"pass2-my-lisp"
 
         # Pass 3: historical LISP I / Lisp 1.5 UPPERCASE names.
@@ -614,16 +614,16 @@ class Resolver:
                     f"legacy-unmapped Lisp 1-1.5 function {t}: no current D3-D6 resident",
                     tok,
                 )
-            self.counts["pass3-lisp15"]+=1
+            if count: self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
         # A source-proven global DEFINE target is a contextual Text7 binding,
         # not a semantic function identity. Its call head uses the exact same
         # D2/W7 frame as the DEFINE target.
         if t in self.global_binding_words:
-            self.counts["pass4-text7-global"]+=1
+            if count: self.counts["pass4-text7-global"]+=1
             return self.global_binding_words[t],"pass4-text7-global"
         # D1/D2 or any unresolved dynamic/user function stays exactly as written.
-        self.counts["passthrough-head"]+=1
+        if count: self.counts["passthrough-head"]+=1
         return [t],"passthrough-head"
 
 def frame_text7(cells, tok: Tok):
@@ -721,7 +721,8 @@ def encode_define_shorthand(node: ListNode,resolver,text7,lexical_env=()):
     head, target, body = node.items
     if not (isinstance(head, Atom) and isinstance(target, ListNode)):
         return None
-    head_words, _ = resolver.head(head.tok)
+    # This is a pure lookahead: do not count the same executable head twice.
+    head_words, _ = resolver.head(head.tok,count=False)
     if not head_words or head_words[0] != "0011":
         return None
     if target.tail is not None or not target.items or not isinstance(target.items[0], Atom):
