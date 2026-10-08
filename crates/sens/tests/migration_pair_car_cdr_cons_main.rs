@@ -23,6 +23,13 @@ fn car_cdr_executes_and_roundtrips_exact_t5() {
 #[test]
 fn cons_executes_and_roundtrips_exact_t5() {
     let expected = "10 111 00 10 001 00 000 01 00 10 001 00 000 01 01";
+    const UK_SOURCE: &str = include_str!("../../../tests/fixtures/migration-pair-cohort-main/pair-cons.lisp");
+    const VIEW: &str = include_str!("../../../tests/fixtures/migration-pair-cohort-main/pair-cons");
+    assert_eq!(UK_SOURCE, "(сполучити (як-є ()) (як-є ()))\n");
+    assert_eq!(VIEW, format!("{expected}\n"));
+    assert_eq!(VIEW.lines().count(), 1);
+    assert!(VIEW.bytes().all(|b| matches!(b, b'0' | b'1' | b' ' | b'\n')));
+    assert_eq!(encode_binary_projection_ternary(VIEW.trim_end()).unwrap(), CONS_T5);
     let words = decode_ternary_program(CONS_T5).expect("canonical physical T5");
     let visible = open_ternary_program(CONS_T5).expect("T5 opens");
     assert_eq!(visible, expected);
