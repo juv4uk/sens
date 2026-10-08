@@ -121,7 +121,8 @@ def audited_current_head(historical_w8: str) -> dict:
     }
 
 
-def lower_lambda(node, env: tuple[tuple[str, ...], ...], *, depth: int = 0) -> dict:
+def lower_lambda(node, env: tuple[tuple[str, ...], ...], *, depth: int = 0,
+                 declared_globals: dict[str, int] | None = None) -> dict:
     if depth > 128:
         raise BindingBlocked("bounded lexical nesting depth exceeded")
     parts = plain_list(node)
@@ -130,14 +131,16 @@ def lower_lambda(node, env: tuple[tuple[str, ...], ...], *, depth: int = 0) -> d
     params = tuple(map(binder_name, plain_list(parts[1])))
     if len(params) != len(set(params)):
         raise BindingBlocked("duplicate local parameter")
-    result = lower_expr(parts[2], (params,) + env, depth=depth + 1)
+    result = lower_expr(parts[2], (params,) + env, depth=depth + 1,
+                        declared_globals=declared_globals)
     return {"kind": "lambda-local-coordinates",
             "historical_head_successor": audited_current_head(LAMBDA),
             "arity": len(params),
             "body": result}
 
 
-def lower_expr(node, env: tuple[tuple[str, ...], ...], *, depth: int = 0):
+def lower_expr(node, env: tuple[tuple[str, ...], ...], *, depth: int = 0,
+               declared_globals: dict[str, int] | None = None):
     if depth > 128:
         raise BindingBlocked("bounded lexical nesting depth exceeded")
     if isinstance(node, (parser.Quote, parser.String)):
@@ -148,6 +151,12 @@ def lower_expr(node, env: tuple[tuple[str, ...], ...], *, depth: int = 0):
             if value in frame:
                 return {"kind": "Local", "depth": lexical_depth,
                         "index": frame.index(value)}
+        if declared_globals is not None and value in declared_globals:
+            # Source-only declaration-order pointer, NOT current T5 global law.
+            return {"kind": "GlobalReferenceCandidate",
+                    "declaration_ordinal_source_only": declared_globals[value],
+                    "source_name_provenance_only": value,
+                    "runtime_binding_admitted": False}
         raise BindingBlocked("unresolved free variable; no implicit global/symbol fallback")
     parts = plain_list(node)
     if not parts:
@@ -161,13 +170,26 @@ def lower_expr(node, env: tuple[tuple[str, ...], ...], *, depth: int = 0):
         return {"kind": "quote-empty-historical-w8", "datum": "D3:000",
                 "historical_head_successor": audited_current_head(QUOTE)}
     if head == LAMBDA:
-        return lower_lambda(node, env, depth=depth + 1)
+        return lower_lambda(node, env, depth=depth + 1,
+                            declared_globals=declared_globals)
+    if declared_globals is not None and head in declared_globals:
+        # A local head takes precedence: do not accidentally call a global.
+        if any(head in frame for frame in env):
+            raise BindingBlocked("shadowed global callable requires local-call law")
+        return {"kind": "GlobalCallCandidate",
+                "declaration_ordinal_source_only": declared_globals[head],
+                "source_name_provenance_only": head,
+                "runtime_binding_admitted": False,
+                "arguments": [lower_expr(x, env, depth=depth + 1,
+                                          declared_globals=declared_globals)
+                              for x in parts[1:]]}
     if head not in ALLOWED_CALLS:
         raise BindingBlocked("unknown historical/global callable head; no name dispatch")
     return {"kind": "historical-call-proven-current-head-not-admitted",
             "historical_w8": head,
             "historical_head_successor": audited_current_head(head),
-            "arguments": [lower_expr(x, env, depth=depth + 1)
+            "arguments": [lower_expr(x, env, depth=depth + 1,
+                                      declared_globals=declared_globals)
                           for x in parts[1:]]}
 
 
@@ -176,27 +198,32 @@ def lower_definitions(source: str, *, expected_names: tuple[str, ...] | None = N
     forms = source_forms(source)
     if not forms:
         raise BindingBlocked("no historical executable definitions")
-    definitions = []
-    seen: set[str] = set()
+    # Pass 1: stable source-order candidate binding slots, not a new D-code.
+    # A complete pass before lowering permits forward global references.
+    items_by_form = []
+    declared_globals: dict[str, int] = {}
     for form in forms:
         items = plain_list(form)
         if len(items) != 3 or atom(items[0]) != DEFINE:
             raise BindingBlocked("top-level must be historical DEFINE name LAMBDA")
         name = binder_name(items[1])
-        if name in seen:
+        if name in declared_globals:
             raise BindingBlocked("duplicate top-level DEFINE name")
-        seen.add(name)
-        # Top-level textual name stays here only as provenance; it is NOT
-        # lowered into a D7 token or invented current callable identity.
-        expression = lower_lambda(items[2], ())
+        declared_globals[name] = len(items_by_form)
+        items_by_form.append((name, items[2]))
+    names = tuple(name for name, _ in items_by_form)
+    if expected_names is not None and names != expected_names:
+        raise BindingBlocked("expected original definitions changed")
+    definitions = []
+    for ordinal, (name, body) in enumerate(items_by_form):
+        expression = lower_lambda(body, (), declared_globals=declared_globals)
         definitions.append({
             "source_global_name_provenance_only": name,
+            "global_declaration_ordinal_source_only": ordinal,
+            "global_binding_runtime_admitted": False,
             "historical_define_successor": audited_current_head(DEFINE),
             "local_coordinate_body": expression,
         })
-    names = tuple(item["source_global_name_provenance_only"] for item in definitions)
-    if expected_names is not None and names != expected_names:
-        raise BindingBlocked("expected original definitions changed")
     expected = RATIFIED_FOCUS_SUCCESSORS
     # A small exact original witness MUST agree with independently ratified
     # resident coordinates; no historical integer-to-width fallback.
@@ -208,6 +235,15 @@ def lower_definitions(source: str, *, expected_names: tuple[str, ...] | None = N
         "schema": "sens-historical-local-coordinate-evidence/v1",
         "status": "LEXICAL_COORDINATES_PROVEN__PHYSICAL_NOT_ADMITTED",
         "global_names_encoded": False,
+        "global_declaration_order_source_only_proven": True,
+        "global_binding_runtime_admitted": False,
+        "global_declaration_count": len(definitions),
+        "source_global_export_manifest": [
+            {"ordinal_source_only": item["global_declaration_ordinal_source_only"],
+             "source_name_provenance_only": item["source_global_name_provenance_only"],
+             "runtime_binding_admitted": False}
+            for item in definitions
+        ],
         "d2_or_d7_framing_defined": False,
         "current_callable_domain_identity_proven": False,
         "historical_head_successors_proven": True,
