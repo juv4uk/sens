@@ -20,7 +20,7 @@ SPEC.loader.exec_module(mod)
 
 from sens_source_resolver import build_resolver
 
-FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
+FOUNDATION = ROOT / "knowledge" / "d1-d9-foundation.json"
 NUMBER_WIDTHS = ROOT / "knowledge" / "number-width-ratified.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
