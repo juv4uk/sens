@@ -360,5 +360,26 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(summary["summary"]["files_written"], 1)
 
 
+    def test_minimal_cli_defaults_to_current_ratified_foundation(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "old.lisp"
+            source.write_text("()\n", encoding="utf-8")
+            out = base / "mirror"
+            done = subprocess.run(
+                [sys.executable, str(SCRIPT), str(source), "--out", str(out)],
+                cwd=base, text=True, capture_output=True,
+            )
+            self.assertEqual(done.returncode, 0, done.stderr)
+            self.assertEqual((out / "old.sens").read_bytes(),
+                             mod.encode_projection("000"))
+            report = base / "mirror.report.json"
+            self.assertTrue(report.is_file())
+            state = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(state["summary"]["files_written"], 1)
+            self.assertEqual(state["summary"]["files_seen"], 1)
+            self.assertEqual(source.read_text(), "()\n")
+
+
 if __name__=="__main__":
     unittest.main()
