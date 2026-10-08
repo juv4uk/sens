@@ -831,6 +831,10 @@ def binary_rewrite(
                 identity = resolution.current
                 assert identity is not None
                 out.append(identity.bits)
+            elif token in {"0", "1"}:
+                # Canonical source spelling for the exact D1 PredicateBit.
+                # Do not treat these as Number-domain values.
+                out.append(token)
             elif re.fullmatch(
                 r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)"
                 r"(?:[eE][+-]?[0-9]+)?(?:/[0-9]+)?",
