@@ -494,6 +494,44 @@ class ThreePassMigrationTests(unittest.TestCase):
         )
 
 
+    def test_real_original_machine_block_physical_t5_candidate_roundtrip_not_admission(self):
+        # Pinned historical executable: actual program, not a created canary.
+        # This only proves the candidate can be physically packed and decoded.
+        # Canonical Text7 binder law and independent runtime parity must still
+        # be ratified before committing lib/machine/block.sens to main.
+        import hashlib
+        from sens_t5_codec import encode_projection, decode_bytes, encode_words, typed_sha256
+        raw=(ROOT/"lib"/"machine"/"block.lisp").read_bytes()
+        blob=hashlib.sha1(
+            b"blob "+str(len(raw)).encode("ascii")+b"\0"+raw
+        ).hexdigest()
+        self.assertEqual(blob,"200201b741787c4e144ad4194848acf51d7b439e")
+        projection,resolver=self.migrate(raw.decode("utf-8"),source_era="legacy")
+        words=projection.split()
+        self.assertTrue(words)
+        self.assertTrue(all(1 <= len(word) <= 9 and set(word) <= {"0","1"}
+                            for word in words))
+        self.assertEqual(resolver.counts["pass1-sens8"],17)
+        physical=encode_projection(projection)
+        self.assertGreater(len(physical),0)
+        self.assertEqual(decode_bytes(physical),words)
+        self.assertEqual(encode_words(words),physical)
+        self.assertEqual(typed_sha256(decode_bytes(physical)),typed_sha256(words))
+        receipt={
+            "schema":"sens-original-machine-block-T5-candidate/v1",
+            "source_git_blob_sha":blob,
+            "typed_word_count":len(words),
+            "typed_word_sha256":typed_sha256(words),
+            "physical_bytes":len(physical),
+            "physical_sha256":hashlib.sha256(physical).hexdigest(),
+            "historical_callable_heads_proven":17,
+            "runtime_oracle":"NOT_VERIFIED_BY_CANDIDATE",
+            "release_admitted":False,
+            "committed_to_main":False,
+        }
+        self.assertFalse(receipt["release_admitted"])
+        print("MACHINE_BLOCK_T5_CANDIDATE "+json.dumps(receipt,sort_keys=True),flush=True)
+
     def test_local_binding_shadows_global_and_builtin_in_nested_machine_style_source(self):
         source="""(00001001 first
   (00001000 (first)
