@@ -35,6 +35,31 @@ class RealBlockProofFixtureTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(payload).hexdigest(), PHYSICAL_SHA256)
         self.assertNotRegex(payload.decode("utf-8", "ignore"), r"^[012\\s]+$")
 
+    def test_print_current_migrator_candidate_for_probe(self):
+        import base64
+        import json
+        import tempfile
+        import subprocess
+        with tempfile.TemporaryDirectory(prefix="sens-block-current-migrator-") as td:
+            root = Path(td)
+            out = root / "out"
+            report = root / "report.json"
+            run = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/migrate-three-pass.py"),
+                 str(SOURCE), "--out", str(out), "--report", str(report),
+                 "--source-era", "legacy"],
+                cwd=ROOT, capture_output=True, text=True, timeout=120,
+            )
+            print(run.stdout)
+            print(run.stderr)
+            self.assertEqual(run.returncode, 0, report.read_text(encoding="utf-8") if report.exists() else run.stdout + run.stderr)
+            payload = (out / "lib/machine/block.sens").read_bytes()
+            print("CURRENT_BLOCK_BYTES", len(payload))
+            print("CURRENT_BLOCK_B64_BEGIN")
+            print(base64.b64encode(payload).decode())
+            print("CURRENT_BLOCK_B64_END")
+            print("CURRENT_BLOCK_REPORT", json.dumps(json.loads(report.read_text(encoding="utf-8")), sort_keys=True))
+
 
 if __name__ == "__main__":
     unittest.main()
