@@ -58,6 +58,25 @@ jobs:
           if-no-files-found: error
       - name: Build SENS CLI
         run: cargo build -p sens-cli --bin sens
+      - name: Exact-domain migrator canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          canary="$RUNNER_TEMP/exact-domain-canary.lisp"
+          clean="$RUNNER_TEMP/exact-domain-clean.out"
+          printf '%s\n' '(функція (x) (перше (сполучити x ())))' > "$canary"
+          set +e
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain "$canary" > "$RUNNER_TEMP/exact-domain-before.out" 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --exact-domain "$canary"
+          grep -Fq '(0010 (x) (100 (111 x ())))' "$canary"
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain "$canary" > "$clean" 2>&1
+          grep -Fq 'convertible=0' "$clean"
+          cat "$RUNNER_TEMP/exact-domain-before.out"
+          cat "$clean"
+
       - name: D7 domain table is canonical-parser re-readable
         run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
       - name: Current Core4 FASL freshness
