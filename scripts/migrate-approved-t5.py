@@ -23,6 +23,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import subprocess
 import sys
 import tempfile
 
@@ -153,6 +154,31 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
     }
 
 
+def verify_rust_d2(payload: bytes, words: list[str], reader: Path) -> None:
+    """Use the actual Rust D2 parser, not a duplicated Python grammar.
+
+    This is structural syntax evidence ONLY, not semantic/oracle parity.
+    """
+    with tempfile.TemporaryDirectory(prefix="sens-d2-admission-") as td:
+        candidate = Path(td) / "candidate.sens"
+        candidate.write_bytes(payload)
+        try:
+            result = subprocess.run(
+                [str(reader), "open", str(candidate)],
+                capture_output=True, text=True, timeout=15,
+                stdin=subprocess.DEVNULL, check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise engine.SensT5Error(f"Rust D2 reader unavailable/timeout: {exc}") from exc
+        if result.returncode != 0:
+            reason = result.stderr.strip()[:300] or f"exit={result.returncode}"
+            raise engine.SensT5Error(f"Rust D2 reader rejected physical program: {reason}")
+        if result.stdout != " ".join(words) + "\n":
+            raise engine.SensT5Error(
+                "Rust D2 projection differs from staged exact-width words"
+            )
+
+
 def publish_batch(staged: list[tuple[Path, bytes]], output_root: Path) -> None:
     created: list[Path] = []
     try:
@@ -190,6 +216,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--reader", type=Path, help="real built Rust sens-trit; REQUIRED for publication")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
                     help="auto blocks ambiguous W8; legacy requires proven historical source; current preserves ratified D8")
     args = ap.parse_args()
@@ -198,10 +225,18 @@ def main() -> int:
     manifest = args.manifest.resolve()
     output = args.out.resolve()
     report_path = args.report.resolve()
+    reader = args.reader.resolve() if args.reader else None
     if output == root or output.is_relative_to(root):
         ap.error("--out must be a separate mirror OUTSIDE the source repository")
     if report_path.is_relative_to(root):
         ap.error("--report must be outside the source repository")
+
+    # A packed T5 byte stream need not be a valid D2 program. Without the
+    # independent Rust reader only a dry-run is admissible.
+    if not args.dry_run and (reader is None or not reader.is_file()):
+        ap.error("physical T5 publication requires --reader path/to/sens-trit")
+    if reader is not None and not reader.is_file():
+        ap.error("--reader must name an existing executable")
 
     rows: list[dict] = []
     staged: list[tuple[Path, bytes]] = []
@@ -248,6 +283,12 @@ def main() -> int:
                     row["manifest_sha256"] = expected_sha
                 if dest_path != dest:
                     raise engine.SensT5Error("destination derivation changed")
+                if reader is not None:
+                    verify_rust_d2(payload, engine.decode_bytes(payload), reader)
+                    row["d2_syntax"] = "PASS"
+                else:
+                    row["d2_syntax"] = "NOT_VERIFIED"
+                row["semantic_oracle"] = "NOT_VERIFIED"
                 staged.append((dest_path, payload))
                 rows.append(row)
             except (engine.MigrationError, engine.SensT5Error, UnicodeError, OSError) as exc:
@@ -284,6 +325,8 @@ def main() -> int:
         "schema": "sens-approved-t5-migration/v2",
         "mode": "dry-run" if args.dry_run else "write-transaction",
         "source_era": args.source_era,
+        "d2_reader": str(reader) if reader is not None else None,
+        "d2_rule": "Rust D2 syntax only; independent semantic oracle NOT VERIFIED",
         "manifest": str(manifest),
         "root": str(root),
         "out": str(output),
