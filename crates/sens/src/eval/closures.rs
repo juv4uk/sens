@@ -63,7 +63,9 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             let mut parameters = Vec::with_capacity(parameter_forms.len());
             let mut unique = HashSet::new();
             for parameter in parameter_forms.iter() {
-                let name = match &parameter.kind {
+                let name = match bindable_parameter_name(parameter)? {
+                    Some(name) => name,
+                    None => match &parameter.kind {
                     ExprKind::Symbol(name) => {
                         canon::ensure_bindable(name, parameter.span)?;
                         name.clone()
@@ -85,6 +87,7 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
                             parameter.span,
                         ));
                     }
+                },
                 };
                 if !unique.insert(name.clone()) {
                     return Err(LanguageError::new(
