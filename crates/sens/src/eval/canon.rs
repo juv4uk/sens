@@ -448,6 +448,40 @@ fn canonicalize_domain_result(
     }
 }
 
+/// D4:1111 APPEND uses exactly two proper-list values and preserves order.
+/// This is an existing ratified resident mechanism, not a new semantic identity.
+fn d4_append_proper_lists(
+    args: &[Value],
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if args.len() != 2 {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            format!("D4 APPEND requires exactly two proper lists, got {}", args.len()),
+            span,
+        ));
+    }
+    let mut values = Vec::new();
+    for (index, list) in args.iter().enumerate() {
+        let mut cursor = list;
+        loop {
+            match cursor {
+                Value::Nil => break,
+                Value::Pair(head, tail) => {
+                    values.push(head.as_ref().clone());
+                    cursor = tail.as_ref();
+                }
+                _ => return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!("D4 APPEND argument {} must be a proper list", index + 1),
+                    span,
+                )),
+            }
+        }
+    }
+    Ok(Value::list(values))
+}
+
 pub(crate) fn invoke_domain_identity(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -470,6 +504,17 @@ pub(crate) fn invoke_domain_identity(
 
     if let Some(result) = super::d6_arithmetic::invoke(identity, args, environment, span) {
         return result;
+    }
+
+    // These are owner-ratified D4 residents whose value-call mechanisms
+    // are already defined by the language contract. All arguments have been
+    // evaluated by the canonical caller before reaching this boundary.
+    if let CoreDomainIdentity::D4(word) = identity {
+        match word.word().packed_bits() {
+            0b1110 => return Ok(Value::list(args.iter().cloned())),
+            0b1111 => return d4_append_proper_lists(args, span),
+            _ => {}
+        }
     }
 
     if let Some(primitive) = domain_primitive(identity) {
