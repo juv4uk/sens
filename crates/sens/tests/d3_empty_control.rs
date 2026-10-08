@@ -1,8 +1,7 @@
-//! #3161 — mechanism witness for strong structural EMPTY on canonical D3:110.
+//! #4395 — Contract 11.8 witness for exact PredicateBit-only D3:110 control.
 //!
-//! Semantic authority lives in #3161/#1663. These tests only prove that the
-//! current exact-domain evaluator preserves 0 != () while projecting both to
-//! COND's "continue" control action.
+//! Structural EMPTY remains distinct from D1:0, but it is not a predicate
+//! answer and therefore cannot control canonical exact-domain COND.
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
@@ -72,34 +71,32 @@ fn d1_no_and_empty_stay_distinct_values() {
 }
 
 #[test]
-fn empty_has_control_force_without_becoming_false() {
-    let value = run(cond(vec![
+fn structural_empty_is_not_an_exact_d3_cond_predicate() {
+    let error = run(cond(vec![
         clause(empty(), d1(1)),
         clause(d1(1), d1(0)),
     ]))
-    .expect("EMPTY is an admitted no-witness COND input");
+    .expect_err("structural EMPTY is not PredicateBit");
 
-    assert_eq!(value.as_predicate_bit(), Some(false));
+    assert_eq!(error.kind, ErrorKind::Type);
 }
 
 #[test]
-fn explicit_no_and_empty_both_continue_but_exhaustion_is_empty() {
-    let value = run(cond(vec![
-        clause(d1(0), d1(1)),
-        clause(empty(), d1(1)),
-    ]))
-    .expect("D1:0 and EMPTY both project to continue");
+fn explicit_d1_no_continues_and_exhaustion_is_structural_empty() {
+    let value = run(cond(vec![clause(d1(0), d1(1))]))
+        .expect("D1:0 is the only exact skip control");
 
     assert!(matches!(value, Value::Nil));
     assert_eq!(value.as_predicate_bit(), None);
 }
 
 #[test]
-fn only_exact_d1_or_empty_are_admitted_as_cond_tests() {
-    let error = run(cond(vec![clause(number(1.0), d1(1))]))
-        .expect_err("Number 1 is not PredicateBit 1");
-
-    assert_eq!(error.kind, ErrorKind::Type);
+fn non_d1_values_fail_closed_as_cond_tests() {
+    for wrong in [number(0.0), number(1.0), empty()] {
+        let error = run(cond(vec![clause(wrong, d1(1))]))
+            .expect_err("non-D1 control must fail closed");
+        assert_eq!(error.kind, ErrorKind::Type);
+    }
 }
 
 #[test]
