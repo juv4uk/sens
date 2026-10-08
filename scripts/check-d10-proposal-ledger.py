@@ -146,7 +146,26 @@ def self_test() -> None:
         assert validate(header + "\t".join(mutant) + "\n"), (index, bad)
     assert validate(header + row + row), "подвійний запис не допускається"
     assert validate("wrong\n"), "зміна схеми має бути відхилена"
-    print("D10-PROPOSAL-LEDGER self-test: PASS (schema + 8 negative controls)")
+    projection_inventory = {
+        "capacity": 1024,
+        "accounting": {
+            "selected_semantic_candidates": 625,
+            "law_forced_coordinates": 256,
+            "unplaced_selected_candidates": 369,
+            "remaining_semantic_inventory": 399,
+            "ratified_d10_residents": 0,
+        },
+    }
+    projection = """D10 selected              625/1024
+law-forced                256
+unplaced                  369
+remaining                 399
+ratified                    0
+"""
+    assert not inventory_projection_errors(projection_inventory, projection), "matching projection must pass"
+    stale = projection.replace("625/1024", "434/1024")
+    assert inventory_projection_errors(projection_inventory, stale), "stale copied counts must fail closed"
+    print("D10-PROPOSAL-LEDGER self-test: PASS (schema + negative controls + inventory drift)")
 
 
 def main() -> int:
@@ -164,8 +183,22 @@ def main() -> int:
         for error in errors:
             print(f"D10-PROPOSAL-LEDGER: BLOCK {error}")
         return 1
+    inventory_path = ROOT / "knowledge" / "d10-v1-semantic-inventory.json"
+    architecture_path = ROOT / "docs" / "architecture" / "ARCHIPELAGO-V1.uk.md"
+    try:
+        inventory = __import__("json").loads(inventory_path.read_text(encoding="utf-8"))
+        projection = architecture_path.read_text(encoding="utf-8")
+    except (OSError, ValueError) as exc:
+        print(f"D10-PROPOSAL-LEDGER: BLOCK cannot read D10 machine inventory/projection: {exc}")
+        return 1
+    projection_errors = inventory_projection_errors(inventory, projection)
+    if projection_errors:
+        for error in projection_errors:
+            print(f"D10-PROPOSAL-LEDGER: BLOCK {error}")
+        return 1
+
     count = max(0, len(args.ledger.read_text(encoding="utf-8").splitlines()) - 1)
-    print(f"D10-PROPOSAL-LEDGER: PASS rows={count}; no semantic admission implied")
+    print(f"D10-PROPOSAL-LEDGER: PASS rows={count}; inventory projection synced; no semantic admission implied")
     return 0
 
 
