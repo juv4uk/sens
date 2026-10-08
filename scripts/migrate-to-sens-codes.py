@@ -42,12 +42,6 @@ SKIP_DIRS = {
     "dist", "build", "__pycache__",
 }
 
-D2_OPEN = "10"
-D2_CLOSE = "01"
-D2_DOT = "11"
-D2_SEPARATOR = "00"
-
-
 @dataclass(frozen=True)
 class Entry:
     domain: str
@@ -76,6 +70,37 @@ def load_foundation(path: Path):
     if data.get("status") != "owner-ratified":
         raise SystemExit(f"{path}: foundation is not owner-ratified")
     return data, sha256(raw).hexdigest()
+
+
+@dataclass(frozen=True)
+class D2Structure:
+    separator: str
+    close: str
+    open: str
+    dot: str
+
+
+def load_d2_structure(path: Path) -> D2Structure:
+    rows = read_domain_table(path)
+    if not rows or any(row.domain != "D2" or row.width != 2 for row in rows):
+        raise BinaryMigrationError(f"{path}: expected canonical D2 width-2 domain table")
+    by_label = {str(row.en).upper(): row.bits for row in rows if row.en}
+    expected = {
+        "SEPARATOR": "00",
+        "CLOSE": "01",
+        "OPEN": "10",
+        "DOT": "11",
+    }
+    if by_label != expected:
+        raise BinaryMigrationError(
+            f"{path}: D2 structural authority mismatch: expected {expected}, found {by_label}"
+        )
+    return D2Structure(
+        separator=by_label["SEPARATOR"],
+        close=by_label["CLOSE"],
+        open=by_label["OPEN"],
+        dot=by_label["DOT"],
+    )
 
 
 def build_map(data, domains):
@@ -617,7 +642,7 @@ def encode_text7_spelling(text: str, candidates):
 
 
 def _emit_item(out, words, need_separator):
-    if need_separator and out and out[-1] not in (D2_OPEN, D2_SEPARATOR):
+    if need_separator and out and out[-1] not in (d2_structure.open, d2_structure.separator):
         out.append(D2_SEPARATOR)
     out.extend(words)
 
@@ -629,6 +654,8 @@ def binary_rewrite(
     legacy_sid_map=None,
     registry_surface_sid_map=None,
     resolver: SourceResolver | None = None,
+    *,
+    d2_structure: D2Structure,
 ):
     """Encode one source file as exact-width visible binary SENS words."""
     source = strip_comments(text)
@@ -701,7 +728,7 @@ def binary_rewrite(
             if not frames:
                 raise BinaryMigrationError("unexpected closing parenthesis")
             frames.pop()
-            out.append(D2_CLOSE)
+            out.append(d2_structure.close)
             i += 1
             pending_quote = False
             continue
@@ -754,7 +781,7 @@ def binary_rewrite(
             after_ok = i + 1 == len(source) or source[i + 1].isspace() or source[i + 1] == ")"
             if before_ok and after_ok:
                 begin_item()
-                out.append(D2_DOT)
+                out.append(d2_structure.dot)
                 i += 1
                 pending_quote = False
                 continue
@@ -921,7 +948,9 @@ def main():
     if selected_modes > 1:
         parser.error("--apply, --mirror and --binary-mirror are mutually exclusive")
 
+    root = args.root.resolve()
     foundation, digest = load_foundation(args.foundation)
+    d2_structure = load_d2_structure(root / "lib" / "domains" / "d2.lisp")
     code_map = build_map(foundation, args.domains)
     code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
     code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
@@ -947,7 +976,6 @@ def main():
         else None
     )
 
-    root = args.root.resolve()
     rows = []
     rewritten_files = 0
     blocked_files = 0
@@ -966,6 +994,7 @@ def main():
                     legacy_sid_map,
                     registry_surface_sid_map,
                     resolver,
+                    d2_structure=d2_structure,
                 )
                 if not converted.strip():
                     status = "empty"
