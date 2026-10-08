@@ -12,6 +12,7 @@
 
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::{parse_binary_source_words, DomainIdentity, ErrorKind, LanguageError};
+use crate::canonical_reader::text7_binding_key;
 use std::collections::HashSet;
 use std::rc::Rc;
 
