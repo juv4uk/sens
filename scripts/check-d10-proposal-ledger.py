@@ -99,7 +99,7 @@ def self_test() -> None:
         assert validate(header + "\t".join(mutant) + "\n"), (index, bad)
     assert validate(header + row + row), "подвійний запис не допускається"
     assert validate("wrong\n"), "зміна схеми має бути відхилена"
-    print("D10-PROPOSAL-LEDGER self-test: PASS (schema + 9 negative controls)")
+    print("D10-PROPOSAL-LEDGER self-test: PASS (schema + 8 negative controls)")
 
 
 def main() -> int:
