@@ -56,6 +56,23 @@ jobs:
           assert result['summary']['files_blocked']==0
           PY
           test ! -f "$RUNNER_TEMP/preview/tests/fixtures/migration-multiform-cohort/two-forms.sens"
+      - name: Historical Core1 preview through the canonical front door (no physical publication)
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate.py preview \
+            tests/fixtures/core1-third-domain-canary/third.lisp \
+            --source-era legacy --mirror "$RUNNER_TEMP/legacy-third" \
+            --report "$RUNNER_TEMP/legacy-third.json"
+          python3 - "$RUNNER_TEMP/legacy-third.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert r['summary']['source_era']=='legacy', r['summary']
+          assert r['summary']['files_seen']==1, r['summary']
+          assert r['summary']['files_would_write']==1, r['summary']
+          assert r['summary']['files_written']==0, r['summary']
+          assert r['summary']['files_blocked']==0, r['summary']
+          PY
+          test ! -f "$RUNNER_TEMP/legacy-third/tests/fixtures/core1-third-domain-canary/third.sens"
       - name: Build ACTUAL SENS Rust D2 reader
         run: cargo build -q -p sens-cli --bin sens-trit
       - name: Build independently source-pinned existing Core/QUOTE/CONS oracle manifest
