@@ -26,6 +26,76 @@ ARGS = [
     "--text7", "crates/sens/src/text7_projection_generated.rs",
 ]
 
+# First blocking symptom only. This is scheduling metadata, NEVER evidence that
+# a Lisp record is an executable, or that a domain law has been admitted.
+BLOCKER_ACTIONS = {
+    "w8-provenance": "Pin original source Git blob and prove legacy SID8 vs ratified current D8 before an explicit --source-era retry.",
+    "host-effect": "Prove host I/O/effect semantics and independent old/current observable parity; do not guess PRINT mappings.",
+    "unmapped-function": "Resolve function identity against owner-ratified D1-D9 and historical successor ledger; unknown stays BLOCKED.",
+    "d2-or-domain-data": "Inspect non-binary token and classify executable vs schema/archive/typed D2-as-data before any conversion.",
+    "lexical-binding": "Prove lambda/define variable binding and call-head scope; keep symbolic locals blocked without a law.",
+    "numeric-law": "Prove exact-width numeric representation and operations before emitting any words.",
+    "text-or-quote": "Prove D7 Text7/quoted-data handling and code/data boundaries; no raw text masquerading as a program.",
+    "other-unproved": "Review exact source/reason and request one authoritative law plus Rust D2 and independent oracle proof.",
+}
+
+
+def blocker_family(reason: str) -> str:
+    """Stable first-symptom classification; does NOT attest executable meaning."""
+    if not isinstance(reason, str):
+        raise ValueError("blocker reason must be text")
+    r = reason.casefold()
+    if ("ambiguous" in r or "ambiguity" in r or "двознач" in r) and any(
+        marker in r for marker in ("w8", "d8", "8-bit", "eight-bit", "8 bit")
+    ):
+        return "w8-provenance"
+    if any(marker in r for marker in ("print", "host-effect", "host effect", "unproven io", "host io")):
+        return "host-effect"
+    if any(marker in r for marker in ("binding", "bound", "lambda", "local variable", "dynamic call", "lexical")):
+        return "lexical-binding"
+    if any(marker in r for marker in ("numeric", "number-width", "integer literal", "number-law")):
+        return "numeric-law"
+    if any(marker in r for marker in ("text7", "quoted", "quote datum", "string literal", "text law")):
+        return "text-or-quote"
+    if (r.startswith("word ") or "non-bit" in r or "not a binary" in r
+            or "structural d2" in r or "d2-as-data" in r):
+        return "d2-or-domain-data"
+    if any(marker in r for marker in ("unmapped", "unknown function", "unratified function",
+                                       "function head", "missing successor")):
+        return "unmapped-function"
+    return "other-unproved"
+
+
+def blocker_cohorts(blocked_sources: list[dict]) -> list[dict]:
+    """Build exhaustive disjoint source-blob-locked cohorts in stable order."""
+    by_family: dict[str, list[dict]] = {}
+    seen: set[str] = set()
+    for row in blocked_sources:
+        path = row["path"]
+        if path in seen:
+            raise ValueError(f"duplicate unpaired original source in ledger: {path}")
+        seen.add(path)
+        if row["status"] != "BLOCKED" or row["same_stem_sens_already_exists"]:
+            raise ValueError(f"not an unpaired BLOCKED source: {path}")
+        family = blocker_family(row["reason"])
+        by_family.setdefault(family, []).append({
+            "path": path,
+            "source_git_blob_sha": row["source_git_blob_sha"],
+            "first_blocker": row["reason"],
+        })
+    return [
+        {
+            "family": family,
+            "count": len(rows),
+            "next_action": BLOCKER_ACTIONS[family],
+            "original_sources": sorted(rows, key=lambda row: row["path"]),
+            "status": "BLOCKED_NOT_ORACLE_ADMITTED",
+        }
+        for family, rows in sorted(by_family.items(),
+                                   key=lambda item: (-len(item[1]), item[0]))
+    ]
+
+
 def git_blob_sha(path: Path) -> str:
     data = path.read_bytes()
     return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
@@ -105,6 +175,15 @@ def build_report(root: Path = ROOT) -> dict:
         blocked = len(rows) - len(candidates)
         if len(rows) != report["summary"]["files_seen"] or blocked != report["summary"]["files_blocked"]:
             raise RuntimeError("migrator report totals inconsistent")
+        blocked_sources = sorted(
+            (row for row in rows if row["status"] == "BLOCKED"),
+            key=lambda row: row["path"],
+        )
+        cohorts = blocker_cohorts(blocked_sources)
+        if sum(cohort["count"] for cohort in cohorts) != blocked:
+            raise RuntimeError("source blocker cohort totals inconsistent")
+        if len({row["path"] for row in rows}) != len(rows):
+            raise RuntimeError("duplicate original source in migration ledger")
         return {
             "schema": "sens-original-three-pass-eligibility/v1",
             "authority": "candidate discovery only; parser/codec parity is NOT oracle parity",
@@ -114,6 +193,7 @@ def build_report(root: Path = ROOT) -> dict:
                 "original_unpaired_sources_scanned": len(rows),
                 "already_paired_sources_excluded": len(excluded),
                 "blocked": blocked,
+                "blocker_family_counts": {cohort["family"]: cohort["count"] for cohort in cohorts},
                 "mechanical_candidates": len(candidates),
                 "already_paired_candidates": len(candidates)-len(unpaired),
                 "unpaired_candidates_needing_original_oracle": len(unpaired),
@@ -124,7 +204,9 @@ def build_report(root: Path = ROOT) -> dict:
             "authority": "original unpaired current D1-D9 source; candidate only; no oracle admission",
             "already_paired_sources_excluded": excluded,
             "mechanical_candidates": candidates,
-            "unpaired_blocker_sample": [r for r in rows if r["status"] == "BLOCKED" and not r["same_stem_sens_already_exists"]][:20],
+            "blocked_sources": blocked_sources,
+            "blocker_cohorts": cohorts,
+            "unpaired_blocker_sample": blocked_sources[:20],
             "required_evidence": [
                 "prove original file is an executable SENS program, not an archive/catalogue",
                 "prove exact historical function successor, D1/D2/w8 era and no host/IO effects",
