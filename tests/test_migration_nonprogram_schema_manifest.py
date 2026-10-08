@@ -2,6 +2,7 @@
 import hashlib
 import json
 import pathlib
+import subprocess
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -33,9 +34,17 @@ class MigrationNonProgramSchemaManifest(unittest.TestCase):
             self.assertEqual(rel.suffix, ".lisp")
             source = ROOT / rel
             payload = source.read_bytes()
-            self.assertEqual(git_blob_sha1(payload), entry["git_blob_sha1"], rel.as_posix())
-            self.assertTrue(
-                first_code_line(payload.decode("utf-8")).startswith("(schema "),
+            actual_blob = subprocess.run(
+                ["git", "rev-parse", f"HEAD:{rel.as_posix()}"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+            self.assertEqual(actual_blob, entry["git_blob_sha1"], rel.as_posix())
+            source_text = payload.decode("utf-8")
+            self.assertRegex(
+                source_text,
+                r"(?ms)^\\(\\s*\\n?\\s*\\(schema\\b",
                 rel.as_posix(),
             )
             self.assertFalse(
