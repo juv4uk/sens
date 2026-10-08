@@ -192,7 +192,7 @@
 (00001001 x86-project-machine-effects
   (00001000 (effects)
     (00000111
-      ((00000010 effects) ())
+      ((00000011 effects (00000001 ())) ())
       (t
        (10011100
          ((projected (x86-project-machine-effect (00000101 effects))))
@@ -212,7 +212,7 @@
 (00001001 x86-project-machine-effects-with-layout
   (00001000 (effects field0-offset field1-offset)
     (00000111
-      ((00000010 effects) ())
+      ((00000011 effects (00000001 ())) ())
       (t
        (10011100
          ((projected
