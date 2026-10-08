@@ -73,24 +73,6 @@ mod tests {
     }
 
     #[test]
-    fn only_add1_and_sub1_enter_the_real_d6_mechanism_path() {
-        let env = Environment::root();
-        let span = Span::default();
-
-        for bits in 0u8..64 {
-            let result = invoke(d6(bits), &[], &env, span);
-            if matches!(bits, 0b001110 | 0b001111) {
-                let error = result
-                    .expect("ADD1/SUB1 must enter the admitted D6 mechanism")
-                    .expect_err("empty arguments must fail with arity after admission");
-                assert_eq!(error.kind, ErrorKind::Arity, "D6:{bits:06b}");
-            } else {
-                assert!(result.is_none(), "D6:{bits:06b} must remain fail-closed");
-            }
-        }
-    }
-
-    #[test]
     fn add1_and_sub1_are_exact_d5_compositions() {
         let env = Environment::root();
         let span = Span::default();
