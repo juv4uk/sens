@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - AGENTS.md
+      - docs/architecture/ARCHIPELAGO-V1.uk.md
       - docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md
       - knowledge/d10-proposal-ledger.tsv
       - scripts/check-d10-proposal-ledger.py
