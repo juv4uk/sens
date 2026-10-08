@@ -50,6 +50,9 @@ def build_report() -> dict:
         state = json.loads(report.read_text(encoding="utf-8"))
         summary = state["summary"]
         reasons = collections.Counter(classify(row.get("reason", "")) for row in state["files"])
+        would_write_paths = [
+            row["path"] for row in state["files"] if row.get("status") == "would-write"
+        ]
         written = list(output.rglob("*.sens")) if output.exists() else []
         result = {
             "schema": "sens-t5-migration-readiness/v1",
@@ -58,6 +61,7 @@ def build_report() -> dict:
             "migrator_exit_code": completed.returncode,
             "migrator_summary": summary,
             "reason_counts": dict(reasons.most_common()),
+            "would_write_paths": would_write_paths,
             "physical_outputs_created": [str(path.relative_to(output)) for path in written],
             "gate": {
                 "pass": (
@@ -80,7 +84,7 @@ def main() -> int:
     result = build_report()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"summary": result["migrator_summary"], "reason_counts": result["reason_counts"], "gate": result["gate"]}, ensure_ascii=False))
+    print(json.dumps({"summary": result["migrator_summary"], "reason_counts": result["reason_counts"], "would_write_paths": result["would_write_paths"], "gate": result["gate"]}, ensure_ascii=False))
     if not result["gate"]["pass"]:
         return 1
     return 0
