@@ -30,6 +30,11 @@ from pathlib import Path
 import re
 import signal
 import tempfile
+import sys
+
+SCRIPTS = str(Path(__file__).resolve().parent)
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
 
 from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
 
