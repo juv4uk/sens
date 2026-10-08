@@ -1,0 +1,94 @@
+{
+  "schema": "sens-migration-nonprogram-manifest/1",
+  "generated_from_main": "a4e5032466f1e4e31042639559592aeb2d296ced",
+  "issue": 4460,
+  "classification": "lisp-data-nonprogram",
+  "reason": "strict T5 preview classified these files by their top-level schema/data form; they are not executable SENS source",
+  "automatic_sens_companion": false,
+  "entries": [
+    {
+      "path": "contracts/bija3-l1-l5-ratification.lisp",
+      "git_blob_sha1": "2dff6997345baad3bedf989b8772ea97c2e7d46a"
+    },
+    {
+      "path": "contracts/compiler-bootstrap-boundary-v1.lisp",
+      "git_blob_sha1": "99251d076cb50387cc023843acf540510b22d371"
+    },
+    {
+      "path": "contracts/compiler-program-data-v1.lisp",
+      "git_blob_sha1": "dd39f5d6bb94bf7a1f1bfbe8d0c3435b521ee031"
+    },
+    {
+      "path": "contracts/compiler-selfhost-lineage-v1.lisp",
+      "git_blob_sha1": "8643ee1955189b1ebe48fee70d3410f56a748aa5"
+    },
+    {
+      "path": "contracts/d1-d5-foundation-ratification.lisp",
+      "git_blob_sha1": "2947d65942116aaade8c19ac036a17c2ca5f8c86"
+    },
+    {
+      "path": "contracts/d1-d6-foundation-ratification.lisp",
+      "git_blob_sha1": "cd649539291cab2d2abc7aba91b22cf93ed60610"
+    },
+    {
+      "path": "contracts/d1-d7-foundation-ratification.lisp",
+      "git_blob_sha1": "090973d8961dc0ba37283e7f344a95427c294151"
+    },
+    {
+      "path": "contracts/d1-d8-foundation-ratification.lisp",
+      "git_blob_sha1": "51b3240c20c64ef63f156feb3493d4015a20eb3a"
+    },
+    {
+      "path": "contracts/d1-d9-foundation-ratification.lisp",
+      "git_blob_sha1": "9ee79df9d0f0d4a980b860fddf9c7d2900c9768a"
+    },
+    {
+      "path": "contracts/d4-bootstrap-ratification.lisp",
+      "git_blob_sha1": "9f398d9b5fff4c724603f5339bbb248109ec3c34"
+    },
+    {
+      "path": "contracts/d5-ratification.lisp",
+      "git_blob_sha1": "cfdd14762ef27a636d7427373bca227a8528ff3a"
+    },
+    {
+      "path": "contracts/d6-ratification.lisp",
+      "git_blob_sha1": "91b7cefabf896bc8ced9a919503557336cc65fd4"
+    },
+    {
+      "path": "contracts/d7-ratification.lisp",
+      "git_blob_sha1": "c51ec57ca40ddf585a22ca8cbddab5efb4f11028"
+    },
+    {
+      "path": "contracts/d8-ratification.lisp",
+      "git_blob_sha1": "8ab8ea0557348fb528bb61b5a19badc474e62f3e"
+    },
+    {
+      "path": "contracts/d9-ratification.lisp",
+      "git_blob_sha1": "a9ae10790b08165bf787f0d7722c3329b196f3cc"
+    },
+    {
+      "path": "lib/function-table-mechanisms.lisp",
+      "git_blob_sha1": "e749d5696205efb335447859388630c493cf8df2"
+    },
+    {
+      "path": "lib/island-math-evidence.lisp",
+      "git_blob_sha1": "17a624e0d5bb6097ce2f77a10419d4825737fde5"
+    },
+    {
+      "path": "tests/fixtures/island-math-evidence/duplicate-route.lisp",
+      "git_blob_sha1": "577737093d61a0abe0e55b2862b4a625ccee61ce"
+    },
+    {
+      "path": "tests/fixtures/island-math-evidence/semantic-field-leak.lisp",
+      "git_blob_sha1": "d4bbcc448d7c466256f4b01a362b89e63ba8b14a"
+    },
+    {
+      "path": "tests/fixtures/island-math-evidence/unadmitted-route.lisp",
+      "git_blob_sha1": "b904bf8feca8b3106482e28325b11033fad4c751"
+    },
+    {
+      "path": "tests/fixtures/island-math-evidence/unsupported-executor.lisp",
+      "git_blob_sha1": "f2f2b48b0cc835cb01e1645dd19bf82a4831fb66"
+    }
+  ]
+}

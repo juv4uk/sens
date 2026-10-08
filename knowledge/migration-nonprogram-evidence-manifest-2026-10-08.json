@@ -1,0 +1,42 @@
+{
+  "schema": "sens-migration-nonprogram-manifest/1",
+  "generated_from_main": "a4e5032466f1e4e31042639559592aeb2d296ced",
+  "issue": 4460,
+  "classification": "lisp-data-nonprogram",
+  "reason": "strict T5 preview classified these sources by their top-level (evidence ...) record; they are evidence/data, not executable SENS programs",
+  "automatic_sens_companion": false,
+  "entries": [
+    {
+      "path": "evidence/G5/my-lisp/196d7f2.lisp",
+      "git_blob_sha1": "844eac0659475c32ead2f672a1c71c14d82289a3"
+    },
+    {
+      "path": "evidence/G5/my-lisp/6943f51.lisp",
+      "git_blob_sha1": "3472b05456d275dc1c04c7ce2eedcf6eb3bd9749"
+    },
+    {
+      "path": "evidence/G5/my-lisp/e85a6ea.lisp",
+      "git_blob_sha1": "47c26da73e12062a72b7ff0579a25cad79fec374"
+    },
+    {
+      "path": "evidence/G8/my-lisp/6943f51.lisp",
+      "git_blob_sha1": "79eb98112b6dc7520c9aff43b47992a093ead472"
+    },
+    {
+      "path": "evidence/GUIX-WITNESS-01/ganaka-wsl/374c0c4.lisp",
+      "git_blob_sha1": "f2f381756e4cd3567d838400708d7ae2fb378e1d"
+    },
+    {
+      "path": "evidence/MYLISP-LINTER-THRESHOLDS/my-lisp/2168f4f.lisp",
+      "git_blob_sha1": "02402e076ef5e85d0421153d0d7f41a737ccd874"
+    },
+    {
+      "path": "evidence/S1/wolfram/151e83a.lisp",
+      "git_blob_sha1": "11381073d7e01cb9f11cc9b76894f318cc606d25"
+    },
+    {
+      "path": "tests/fixtures/semantic-authority-guard/allowed-lisp-host-evidence.lisp",
+      "git_blob_sha1": "075a4b7a50655f3f241348782bce57b1df5489f9"
+    }
+  ]
+}
