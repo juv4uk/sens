@@ -32,7 +32,9 @@ pub use capabilities::{
 pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
+use crate::canonical_reader::text7_binding_key;
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::canonical_reader::text7_binding_key;
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -189,13 +191,14 @@ pub(crate) fn evaluate_step(
                 expression.span,
             ))
         }
-        // Empty structure is a structural value, not any function SID.
-        ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
         ExprKind::List(items) => {
-            // A whole D2/W7 frame is a Text7 identifier only when the
-            // executable context already has the corresponding binding.
-            // This is the value-reference case for local/global variables;
-            // quoted/data lists never reach here as executable references.
+            if items.is_empty() {
+                // Empty structure is a structural value, not any function SID.
+                return Ok(EvalStep::Value(Value::Nil));
+            }
+            // Position-aware Text7 reference: an exact D2/W7 frame is treated
+            // as an identifier only when its canonical binding key already
+            // exists. Otherwise it remains an ordinary structural list.
             if let Some(key) = text7_binding_key(expression) {
                 if let Some(value) = environment.get(&key) {
                     return Ok(EvalStep::Value(value));
@@ -239,10 +242,9 @@ fn evaluate_list(
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
-    // A D2/W7 frame becomes a Text7 binding only in executable call-head
-    // position. Ordinary D2 lists, quoted data and dotted data remain governed
-    // solely by the canonical D2 reader.
-    if let Some(key) = text7_binding_key(&items[0]) {
+    // A D2/W7 frame is a Text7 identifier only in the syntactic role of a
+    // call head. Ordinary D2/W7 lists elsewhere retain their structural law.
+    if let Some(key) = crate::canonical_reader::text7_binding_key(&items[0]) {
         let function = environment.get(&key).ok_or_else(|| {
             LanguageError::new(
                 ErrorKind::UnknownSymbol,
