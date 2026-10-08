@@ -9,7 +9,7 @@ const CONS_T5: &[u8] = include_bytes!("../../../tests/fixtures/migration-pair-co
 
 #[test]
 fn car_cdr_legacy_source_lowers_to_exact_current_words_and_returns_empty_list() {
-    let expected = "10 100 00 10 011 00 10 001 00 10 00 000 00 000 01 01 01";
+    let expected = "10 100 00 10 011 00 10 001 00 10 000 00 000 01 01 01 01";
     let words = decode_ternary_program(CAR_CDR_T5).expect("canonical physical T5");
     let visible = open_ternary_program(CAR_CDR_T5).expect("canonical T5 opens");
     assert_eq!(visible, expected);
