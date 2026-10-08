@@ -434,6 +434,24 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
 
+    def test_define_shorthand_normalizes_to_text7_name_and_lambda(self):
+        source="(00001001 (foo x) x)\n"
+        projection,resolver=self.migrate(source)
+        frame_foo=" ".join(mod.frame_text7(
+            mod.text7_encode("foo",self.text7,mod.Tok("ATOM","foo",0)),
+            mod.Tok("ATOM","foo",0),
+        ))
+        frame_x=" ".join(mod.frame_text7(
+            mod.text7_encode("x",self.text7,mod.Tok("ATOM","x",0)),
+            mod.Tok("ATOM","x",0),
+        ))
+        self.assertIn("10 0011 00 "+frame_foo+" 00 10 0010 00 10 "+frame_x+" 01 00 "+frame_x+" 01 01",
+                      projection)
+        self.assertNotIn("foo",projection)
+        self.assertNotIn("x",projection)
+        self.assertEqual(resolver.counts["pass1-sens8"],1)
+        self.assertEqual(resolver.counts["passthrough-head"],0)
+
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
         source="""\\
 (00001001 foo
