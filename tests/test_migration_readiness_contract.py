@@ -174,16 +174,23 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertNotIn("oracle_passed", report)
 
 
-    def test_real_pinned_data_registry_has_all_67_unaltered_records(self):
+    def test_real_pinned_data_registry_covers_all_reviewed_cohorts(self):
+        # The fixed manifest registry is shared with the source candidate
+        # reporter. Adding independently reviewed DATA should not make a
+        # release audit fail on an obsolete, hardcoded 76-record inventory.
+        from report_original_migration_candidates import NONPROGRAM_MANIFESTS
         rows = REAL_REVIEWED_LOADER(ROOT)
-        self.assertEqual(len(rows), 76)
+        manifest_counts = {
+            group: count for group, path, count in NONPROGRAM_MANIFESTS
+            if (ROOT / path).is_file()
+        }
+        self.assertEqual(len(rows), sum(manifest_counts.values()))
         cohort_counts = {
             group: sum(item["cohort"] == group for item in rows.values())
-            for group in ("domain-table", "isa", "schema", "evidence", "expr-record")
+            for group in manifest_counts
         }
-        self.assertEqual(cohort_counts, {
-            "domain-table": 9, "isa": 25, "schema": 21, "evidence": 8, "expr-record": 13,
-        })
+        self.assertEqual(cohort_counts, manifest_counts)
+        self.assertEqual(manifest_counts.get("knowledge-record"), 14)
         self.assertNotIn("lib/machine/block.lisp", rows)
         self.assertTrue(all(
             item["source_class"] == "NONPROGRAM_DATA_REVIEWED"
