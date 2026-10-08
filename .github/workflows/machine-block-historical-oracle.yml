@@ -1,0 +1,51 @@
+name: historical original machine-block oracle
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block.lisp"
+      - "tests/test_machine_block_historical_oracle.py"
+      - ".github/workflows/machine-block-historical-oracle.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/block.lisp"
+      - "tests/test_machine_block_historical_oracle.py"
+      - ".github/workflows/machine-block-historical-oracle.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-source-law:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Independently execute all six original definitions
+        run: python3 -m unittest discover -s tests -p 'test_machine_block_historical_oracle.py' -v
+      - name: Emit original observable evidence pinned to source SHA
+        run: |
+          python3 tests/test_machine_block_historical_oracle.py \
+            --emit-json "$RUNNER_TEMP/old-machine-block.json"
+          python3 - "$RUNNER_TEMP/old-machine-block.json" <<'PY'
+          import json, sys
+          from pathlib import Path
+          report=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert report["source_git_blob_sha1"]=="200201b741787c4e144ad4194848acf51d7b439e"
+          assert report["case_count"]==9 and len(report["cases"])==9
+          assert report["status"]=="HISTORICAL_SIDE_ONLY"
+          assert report["current_sens_semantic_parity"]=="NOT_VERIFIED"
+          assert report["release_admitted"] is False
+          assert report["physical_t5_verified"] is False
+          print("ORIGINAL_SIDE_ONLY; nine original cases; current SENS parity PENDING")
+          PY
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+      - name: Upload immutable original-side observable contract
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-machine-block-historical-observables
+          path: ${{ runner.temp }}/old-machine-block.json
+          if-no-files-found: error
