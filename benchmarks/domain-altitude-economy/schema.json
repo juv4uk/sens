@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SENS domain-altitude-economy manifest v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "authority",
+    "corpora",
+    "rows"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sens-domain-altitude-economy/v1"
+    },
+    "authority": {
+      "type": "object",
+      "required": [
+        "semantic_bits_owner"
+      ],
+      "properties": {
+        "semantic_bits_owner": {
+          "type": "string",
+          "const": "#4367/#4372"
+        },
+        "d8_residency_owner": {
+          "type": "string"
+        },
+        "d9_residency_owner": {
+          "type": "string"
+        }
+      }
+    },
+    "corpora": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "corpus_id",
+          "corpus_sha"
+        ],
+        "properties": {
+          "corpus_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "corpus_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40,64}$"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "corpus_id",
+          "resident_id",
+          "resident_domain",
+          "resident_bits",
+          "resident_max_width",
+          "expansion_bits",
+          "expansion_max_width",
+          "resident_result_digest",
+          "expansion_result_digest",
+          "resident_program_sha256",
+          "expansion_program_sha256"
+        ],
+        "properties": {
+          "corpus_id": {
+            "type": "string"
+          },
+          "resident_id": {
+            "type": "string"
+          },
+          "resident_domain": {
+            "enum": [
+              "D8",
+              "D9"
+            ]
+          },
+          "resident_bits": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "resident_max_width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "expansion_bits": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "expansion_max_width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "resident_result_digest": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expansion_result_digest": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resident_program_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "expansion_program_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "authority_evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cachegrind": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "resident_i_refs": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "expansion_i_refs": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
