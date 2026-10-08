@@ -70,7 +70,7 @@ jobs:
                   or summary['executable_semantics_certified']!=0):
               raise SystemExit('BLOCKED: physical T5 + Rust D2 required; syntax does not certify semantics')
           PY
-      - name: Real end-to-end original: source existed first, new packed .sens demands oracle
+      - name: "Real end-to-end original: source existed first, new packed .sens demands oracle"
         shell: bash
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target
