@@ -1,0 +1,62 @@
+name: plan-t5-agent-work
+
+on:
+  pull_request:
+    paths:
+      - "scripts/plan_t5_agent_work.py"
+      - "tests/test_plan_t5_agent_work.py"
+      - "docs/T5-AGENT-SHARDS.uk.md"
+      - ".github/workflows/plan-t5-agent-work.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-agent-shards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test exhaustive disjoint family shards and all fail-closed blockers
+        run: python3 -m unittest discover -s tests -p "test_plan_t5_agent_work.py" -v
+      - name: Transform real current source blocker census into exclusive SHA-pinned queues
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate.py candidates --report "$RUNNER_TEMP/t5-candidates.json"
+          python3 scripts/plan_t5_agent_work.py \
+            --candidates "$RUNNER_TEMP/t5-candidates.json" \
+            --out "$RUNNER_TEMP/t5-agent-shards.json" \
+            --max-files 20
+          python3 - "$RUNNER_TEMP/t5-candidates.json" "$RUNNER_TEMP/t5-agent-shards.json" <<'PY'
+          import json, sys
+          candidates=json.load(open(sys.argv[1],encoding="utf-8"))
+          plan=json.load(open(sys.argv[2],encoding="utf-8"))
+          paths=[source["path"] for shard in plan["shards"] for source in shard["sources"]]
+          summary=candidates["summary"]
+          assert len(paths)==summary["original_unpaired_sources_scanned"]
+          assert len(set(paths))==len(paths)
+          assert not any(s["claimed_by"] for s in plan["shards"])
+          assert all(s["status"]=="UNCLAIMED__BLOCKED_NOT_ADMITTED" for s in plan["shards"])
+          assert plan["summary"]["claimed"]==0 and plan["summary"]["admitted"]==0
+          assert len(paths)==plan["summary"]["blocked"]+plan["summary"]["mechanical_pending_oracle"]
+          print("DISJOINT_T5_AGENT_SHARDS_CONFIRMED",len(paths),"sources",len(plan["shards"]),"shards")
+          PY
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            echo "ERROR: read-only work planning mutated repository"
+            git status --short
+            exit 1
+          }
+      - name: Attach read-only candidate and agent shard ledgers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t5-agent-shards-no-publish
+          if-no-files-found: ignore
+          path: |
+            ${{ runner.temp }}/t5-candidates.json
+            ${{ runner.temp }}/t5-agent-shards.json
