@@ -36,7 +36,8 @@ fn physical_car_returns_the_head_of_cons_without_sid_fallback() {
 fn physical_cdr_returns_the_pair_tail_not_the_car_head() {
     assert_eq!(CDR_SOURCE.trim(), "(00000110 (00000100 (00000001 ()) (00000001 (()))))");
     assert_eq!(CDR_T5, b"\x64\x89\x67\x89\x63\x89\x06\x89\x63\x89\x63\x3b\x2e\xb3");
-    match eval_file(CDR_T5) {
+    let observed = eval_file(CDR_T5);
+    match &observed {
         Value::Pair(head, tail) => {
             assert!(matches!(&*head, Value::Nil));
             assert!(matches!(&*tail, Value::Nil));
