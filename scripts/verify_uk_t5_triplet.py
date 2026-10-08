@@ -140,8 +140,14 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str],
         return "(" + d3[opcode] + " " + " ".join(
             render_uk(part, d1, d3, d4) for part in items[1:]) + ")"
     if opcode == "1000":
-        if len(items) != 2 or not is_nil_pair_expression(items[1]):
-            raise ProjectionBlocked("D4 CAAR requires one proved nested CONS argument")
+        # CAAR on QUOTE(EMPTY) must NOT pass merely because QUOTE(EMPTY)
+        # also qualifies as a valid *operand* of the proven CONS subtree.
+        # A real D3 CONS head is required in the CAAR argument position.
+        candidate = items[1] if len(items) == 2 else None
+        if (candidate is None or candidate[0] != "list"
+                or not candidate[1] or candidate[1][0] != ("head", "111")
+                or not is_nil_pair_expression(candidate)):
+            raise ProjectionBlocked("D4 CAAR requires one proved CONS pair argument")
         return "(" + d4[opcode] + " " + render_uk(items[1], d1, d3, d4) + ")"
     if opcode == "100":
         if len(items) != 2:
