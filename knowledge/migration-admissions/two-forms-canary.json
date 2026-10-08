@@ -7,7 +7,19 @@
   "expected_physical_sha256": "fafd77ff776795c95bb678c42f90c875b65f22bb98cf73a74daf2047b17e38df",
   "expected_typed_sha256": "bbdb4b0a4fc4b3cc84d6748239ee87fdbfdb7ea00dfa719d799f8b6819451d43",
   "oracle_commands": [
-    ["python3", "tests/test_migration_multiform_cohort.py", "-q"],
-    ["cargo", "test", "-p", "sens", "--test", "migration_multiform_cohort"]
-  ]
+    [
+      "python3",
+      "tests/test_migration_multiform_cohort.py",
+      "-q"
+    ],
+    [
+      "cargo",
+      "test",
+      "-p",
+      "sens",
+      "--test",
+      "migration_multiform_cohort"
+    ]
+  ],
+  "expected_current_eval_stdout": "(())\n"
 }

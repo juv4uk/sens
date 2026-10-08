@@ -127,6 +127,9 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
                 str(ROOT / "crates/sens/src/text7_projection_generated.rs"),
                 "--report",
                 str(report),
+                # These four SHA-pinned fixtures are explicitly historical
+                # SID8; AUTO must otherwise block before the binder evidence.
+                "--source-era", "legacy",
             ]
             run = subprocess.run(
                 arguments,
@@ -139,6 +142,7 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
 
             state = json.loads(report.read_text(encoding="utf-8"))
             self.assertEqual(state["schema"], "sens-three-pass-t5-migration/v3")
+            self.assertEqual(state["source_era"], "legacy")
             self.assertEqual(state["summary"]["files_seen"], 4)
             self.assertEqual(state["summary"]["files_written"], 0)
             self.assertEqual(state["summary"]["files_blocked"], 4)

@@ -128,6 +128,20 @@ def manifests_for(root: Path, source: Path) -> list[tuple[Path, dict]]:
     return manifests
 
 
+def expected_current_execution(proof: dict) -> bytes:
+    """Owner-reviewed exact current-runtime observable, not a D2-only check.
+
+    This must be paired with a genuinely independent source-side oracle;
+    an arbitrary claimed output alone is never proof of old/current parity.
+    """
+    expected = proof.get("expected_current_eval_stdout")
+    if not isinstance(expected, str) or not expected or len(expected.encode("utf-8")) > 16384:
+        raise Blocked("CURRENT_EVAL: reviewed expected_current_eval_stdout must be nonempty UTF-8 (<=16 KiB)")
+    if "\r" in expected or not expected.endswith("\n"):
+        raise Blocked("CURRENT_EVAL: stdout must be exact LF-terminated output")
+    return expected.encode("utf-8")
+
+
 def attest(root: Path, reader: Path, file: Path, manifest: Path,
            mirror: Path) -> dict:
     report = mirror.parent / "publisher-report.json"
@@ -152,9 +166,24 @@ def attest(root: Path, reader: Path, file: Path, manifest: Path,
         raise Blocked("OUTPUT: publisher created no regular .sens")
     if target.read_bytes() != (root / file).read_bytes():
         raise Blocked("OUTPUT: committed .sens not byte-identical to independently admitted T5")
+    # D2 open does not execute the artifact. Require the real capability-free
+    # CURRENT SENS runtime to execute these exact SOURCE-derived physical bytes.
+    # Nonzero exit, unexpected host output or any stdout drift must BLOCK.
+    proof = json.loads(manifest.read_text(encoding="utf-8"))
+    expected = expected_current_execution(proof)
+    result = call(str(reader), "eval", str(target), cwd=root, timeout=60)
+    if result.returncode != 0:
+        error = result.stderr.decode("utf-8", "replace")[-350:]
+        raise Blocked(f"CURRENT_EVAL: actual sens-trit eval rejected physical .sens: {error}")
+    if result.stderr:
+        raise Blocked("CURRENT_EVAL: unexpected stderr from current pure SENS runtime")
+    if result.stdout != expected:
+        raise Blocked("CURRENT_EVAL: exact historical-contract expected stdout differs from real current .sens execution")
     return {
         "physical_sha256": hashlib.sha256(target.read_bytes()).hexdigest(),
         "d2_reader": state.get("d2_reader"),
+        "current_eval": "PASS",
+        "current_eval_stdout_sha256": hashlib.sha256(result.stdout).hexdigest(),
         "oracle_commands_passed": state.get("oracle_commands_passed", 0),
         "publisher_status": state.get("status"),
     }
@@ -206,6 +235,11 @@ def inspect(root: Path, base: str, reader: Path,
         if proof.get("expected_physical_sha256") != physical_hash:
             row["reason"] = "PHYSICAL: manifest SHA256 differs from checked-in file"
             continue
+        try:
+            expected_current_execution(proof)
+        except Blocked as exc:
+            row["reason"] = str(exc)
+            continue
         with tempfile.TemporaryDirectory(prefix="sens-proof-carrying-") as td:
             temp = Path(td)
             try:
@@ -214,8 +248,9 @@ def inspect(root: Path, base: str, reader: Path,
                 row["reason"] = str(exc)
                 continue
         row.update(witness)
-        if row.get("d2_reader") != "PASS" or int(row.get("oracle_commands_passed", 0)) < 1:
-            row["reason"] = "ORACLE: no independent semantic witness execution"
+        if (row.get("d2_reader") != "PASS" or row.get("current_eval") != "PASS"
+                or int(row.get("oracle_commands_passed", 0)) < 1):
+            row["reason"] = "ORACLE/CURRENT_EVAL: source-specific oracle and actual .sens execution required"
             continue
         row["status"] = "PROOF_GATE_PASS"
         row["semantic_oracle"] = "NAMED_TESTS_PASSED_REVIEW_REQUIRED"

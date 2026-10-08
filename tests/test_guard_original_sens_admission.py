@@ -63,6 +63,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
             "source_sha256": hashlib.sha256((self.root / self.src).read_bytes()).hexdigest(),
             "expected_physical_sha256": hashlib.sha256((self.root / self.dst).read_bytes()).hexdigest(),
             "expected_typed_sha256": "0" * 64,
+            "expected_current_eval_stdout": "(())\n",
             "oracle_commands": [["cargo", "test", "--test", "actual_source_oracle"]],
         }
         path = self.root / gate.MANIFEST_DIR / "real.json"
@@ -74,7 +75,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         return None
 
     def approved(self, _root, _reader, _file, _manifest, _mirror):
-        return {"d2_reader": "PASS", "oracle_commands_passed": 1,
+        return {"d2_reader": "PASS", "current_eval": "PASS", "oracle_commands_passed": 1,
                 "physical_sha256": hashlib.sha256((self.root / self.dst).read_bytes()).hexdigest()}
 
     def test_missing_reviewed_proof_is_block_not_physical_success(self):
@@ -130,6 +131,34 @@ class ProofCarryingOriginalTests(unittest.TestCase):
             self.fail("must not run publisher after physical SHA drift")
         state = gate.inspect(self.root, self.base, self.reader, should_not_run, self.safe_kind)
         self.assertIn("PHYSICAL", state["files"][0]["reason"])
+
+    def test_missing_current_runtime_expected_output_blocks_before_publisher(self):
+        self.add_original_binary()
+        path = self.proof()
+        obj = json.loads(path.read_text(encoding="utf-8"))
+        obj.pop("expected_current_eval_stdout")
+        path.write_text(json.dumps(obj), encoding="utf-8")
+        def cannot_run(*args):
+            self.fail("unreviewed current runtime result must never invoke publisher")
+        state = gate.inspect(self.root, self.base, self.reader, cannot_run, self.safe_kind)
+        self.assertEqual(state["status"], "BLOCKED")
+        self.assertIn("CURRENT_EVAL", state["files"][0]["reason"])
+
+    def test_wrong_current_runtime_result_or_skipped_execution_blocks(self):
+        self.add_original_binary()
+        path = self.proof()
+        obj = json.loads(path.read_text(encoding="utf-8"))
+        obj["expected_current_eval_stdout"] = "incorrect\n"
+        path.write_text(json.dumps(obj), encoding="utf-8")
+        def unexecuted(*args):
+            return {"d2_reader": "PASS", "oracle_commands_passed": 3}
+        state = gate.inspect(self.root, self.base, self.reader, unexecuted, self.safe_kind)
+        self.assertEqual(state["status"], "BLOCKED")
+        self.assertIn("CURRENT_EVAL", state["files"][0]["reason"])
+        for value in ("", "not LF", "\r\n", None, 23):
+            obj["expected_current_eval_stdout"] = value
+            with self.subTest(value=value), self.assertRaises(gate.Blocked):
+                gate.expected_current_execution(obj)
 
     def test_claim_of_oracle_pass_with_no_named_tests_blocks(self):
         self.add_original_binary()
