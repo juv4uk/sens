@@ -183,7 +183,8 @@ fn session(law: &LawProjection) -> Session {
     session
         .environment
         .define(PROVENANCE_NAME, provenance_value(law));
-    eval_program(NUCLEUS, &mut session).expect("compiler nucleus loads");
+    let expressions = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus parses");
+    eval_parsed_expressions(&expressions, &mut session).expect("compiler nucleus loads");
     session
 }
 
