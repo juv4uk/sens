@@ -5,7 +5,10 @@ Two outputs are deliberately different:
 
 1. --mirror
    Conservative source migration: rewrite only admitted executable call heads.
-2. --binary-mirror
+2. --sens-mirror (NEW canonical migration destination)
+   Preserve the input name, replacing .lisp with .sens, and write real
+   physically packed T5 bytes; block non-binary leftovers; no overwrite.
+3. --binary-mirror (legacy staging ONLY, NEVER a .sens deliverable)
    Produce visible-binary SENS source:
    - D2 owns list structure: 10=open, 01=close, 11=dot, 00=separator;
    - executable admitted heads use their exact D3-D6 words;
@@ -38,7 +41,7 @@ from domain_tables import read_domain_table
 from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
-LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
+LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt"}  # .sens is packed BYTES, NEVER text
 BINARY_MASTER_EXTS = {".lisp"}
 SKIP_DIRS = {
     ".git", ".hg", ".svn", "target", "node_modules", ".venv", "venv",
