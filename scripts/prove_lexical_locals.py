@@ -25,6 +25,16 @@ QUOTE = "00000001"
 HISTORICAL_LIST = "00100111"
 HISTORICAL_APPEND = "00101001"
 ALLOWED_CALLS = {HISTORICAL_LIST, HISTORICAL_APPEND}
+# Independent cross-check against owner-ratified D3/D4 tables. Never used
+# to *create* a mapping: the canonical historical successor map must provide
+# exactly these already proven current identities first.
+RATIFIED_FOCUS_SUCCESSORS = {
+    DEFINE: ("D4", "0011"),
+    LAMBDA: ("D4", "0010"),
+    QUOTE: ("D3", "001"),
+    HISTORICAL_LIST: ("D4", "1110"),
+    HISTORICAL_APPEND: ("D4", "1111"),
+}
 IDENTIFIER = re.compile(r"[A-Za-z][A-Za-z0-9-]*\Z")
 
 spec = importlib.util.spec_from_file_location("lexical_local_existing_three_pass", MIGRATOR)
@@ -99,7 +109,8 @@ def audited_current_head(historical_w8: str) -> dict:
     if (pass_name != "pass1-sens8" or identity is None or
             len(words) != 1 or identity[0] != words[0] or
             identity[1] not in ("D3", "D4") or
-            len(words[0]) != int(identity[1][1:])):
+            len(words[0]) != int(identity[1][1:]) or
+            (identity[1], words[0]) != RATIFIED_FOCUS_SUCCESSORS[historical_w8]):
         raise BindingBlocked("historical successor is not a single D3/D4 current resident")
     return {
         "old_w8": historical_w8,
@@ -186,11 +197,7 @@ def lower_definitions(source: str, *, expected_names: tuple[str, ...] | None = N
     names = tuple(item["source_global_name_provenance_only"] for item in definitions)
     if expected_names is not None and names != expected_names:
         raise BindingBlocked("expected original definitions changed")
-    expected = {
-        DEFINE: ("D4", "0011"), LAMBDA: ("D4", "0010"),
-        QUOTE: ("D3", "001"), HISTORICAL_LIST: ("D4", "1110"),
-        HISTORICAL_APPEND: ("D4", "1111"),
-    }
+    expected = RATIFIED_FOCUS_SUCCESSORS
     # A small exact original witness MUST agree with independently ratified
     # resident coordinates; no historical integer-to-width fallback.
     for old_w8, (domain, bits) in expected.items():
