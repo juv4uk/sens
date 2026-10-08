@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 546,
-    "remaining_semantic_candidates": 478,
+    "selected_semantic_candidates": 558,
+    "remaining_semantic_candidates": 466,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 290,
+    "unplaced_selected_candidates": 302,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -284,6 +284,13 @@
     "artifact": "knowledge/d10-yantra-library-harvest-v1.json",
     "donor": "lib/yantra.lisp",
     "selected": 19,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "clips_library_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-clips-library-harvest-v1.json",
+    "selected": 12,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
   }
