@@ -1,9 +1,9 @@
-use sens::{eval_program, Session};
+use sens::{eval_program, load_core_library, Session};
 
 fn store_session() -> Session {
     let mut session = Session::default();
+    load_core_library(&mut session).expect("core library must load through canonical bootstrap");
     for source in [
-        include_str!("../../../lib/core.lisp"),
         include_str!("../../../lib/unify.lisp"),
         include_str!("../../../lib/reason.lisp"),
         include_str!("../../../lib/forward.lisp"),
@@ -18,13 +18,13 @@ fn store_session() -> Session {
     session
 }
 
+
 fn observe(session: &mut Session, source: &str) -> String {
     eval_program(source, session)
         .expect("content-store observation must execute")
         .value
         .to_string()
 }
-
 #[test]
 fn content_store_semantic_relations_are_owned_by_lisp_witness() {
     let mut session = store_session();

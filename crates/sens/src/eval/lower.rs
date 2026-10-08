@@ -85,6 +85,18 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
 
+            // An explicit exact-domain resident that has no context-free Core
+            // operation is not ours to recursively lower. It may be an
+            // environment-bound macro (for example current D6 LET/LET*) or a
+            // non-callable resident. In both cases its operands are raw syntax
+            // until a later admitted mechanism decides otherwise.
+            if matches!(
+                &items[0].kind,
+                ExprKind::DomainIdentity(identity) if identity.core_operation().is_none()
+            ) {
+                return expression.clone();
+            }
+
             if let Some(identity) = head_domain_identity(&items[0]) {
                 return Expr {
                     kind: if is_d3(identity, 0b001) {
@@ -189,6 +201,39 @@ mod tests {
             }
             other => panic!("expected DomainCall, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn unresolved_exact_domain_head_preserves_raw_operands_for_later_mechanism() {
+        let parsed = crate::parse_mixed_exact_domain(
+            "(001000 ((y (100 xs))) y)",
+        )
+        .expect("exact D6 macro-shaped source");
+        let lowered = lower_program(&parsed);
+        let ExprKind::List(items) = &lowered[0].kind else {
+            panic!("unresolved exact-domain head must remain a raw list");
+        };
+        assert!(matches!(
+            items[0].kind,
+            ExprKind::DomainIdentity(crate::DomainIdentity::D6(_))
+        ));
+        let ExprKind::List(bindings) = &items[1].kind else {
+            panic!("LET bindings must remain raw syntax");
+        };
+        let ExprKind::List(binding) = &bindings[0].kind else {
+            panic!("LET binding must remain raw syntax");
+        };
+        let ExprKind::List(initializer) = &binding[1].kind else {
+            panic!("initializer call must remain source-shaped");
+        };
+        assert!(matches!(
+            initializer[0].kind,
+            ExprKind::DomainIdentity(crate::DomainIdentity::D3(_))
+        ));
+        assert!(
+            !matches!(binding[1].kind, ExprKind::DomainCall(_, _)),
+            "raw macro initializer must not become DomainCall before expansion"
+        );
     }
 
     #[test]

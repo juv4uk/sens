@@ -25,6 +25,7 @@ fn is_explicit_non_implementation(rel: &str) -> bool {
     rel.starts_with("lib/generated/")
         || rel.starts_with("lib/surface/")
         || rel == "lib/machine/encoding/coverage.lisp"
+        || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
 }
 
 fn is_language_definition_file(rel: &str) -> bool {
@@ -119,9 +120,21 @@ fn active_authored_lib_has_no_parser_convertible_surface_heads() {
 }
 
 #[test]
+fn generated_iclass_evidence_never_enters_active_census() {
+    let files = active_lisp_files();
+    assert!(
+        !files.iter().any(|(rel, _)| rel == "lib/machine/encoding/admitted-iclass-index.lisp"),
+        "generated admitted-iclass index must remain evidence-only"
+    );
+}
+
+#[test]
 fn completion_gate_exclusions_are_narrow_and_explicit() {
     assert!(is_explicit_non_implementation(
         "lib/machine/encoding/coverage.lisp"
+    ));
+    assert!(is_explicit_non_implementation(
+        "lib/machine/encoding/admitted-iclass-index.lisp"
     ));
     assert!(is_explicit_non_implementation(
         "lib/surface/uk-acceptance.lisp"
@@ -131,6 +144,7 @@ fn completion_gate_exclusions_are_narrow_and_explicit() {
     ));
 
     assert!(!is_explicit_non_implementation("lib/meta-eval.lisp"));
+    assert!(!is_explicit_non_implementation("lib/machine/encoding/admission-iclass-projection.lisp"));
     assert!(!is_explicit_non_implementation(
         "lib/machine/dispatch/native-first-coverage.lisp"
     ));

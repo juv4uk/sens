@@ -228,6 +228,18 @@ fn evaluate_list(
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
+
+    // D6 LET/LET* are ratified exact residents whose callable mechanism is
+    // supplied by a Lisp-owned Macro in the exact domain slot. They are not
+    // Core-operation identities in general, so context-free lowering preserves
+    // their raw head; the evaluator must still route an actually-bound macro
+    // before falling through to first-class Value invocation.
+    if let ExprKind::DomainIdentity(crate::DomainIdentity::D6(word)) = &items[0].kind {
+        let identity = CoreDomainIdentity::D6(*word);
+        if matches!(environment.domain_code_slot(identity), Some(Value::Macro(_))) {
+            return dispatch_domain_call(identity, &items[1..], environment, span);
+        }
+    }
     dispatch_call(
         items[0].kind.as_symbol(),
         binary_head_sid(&items[0]),
@@ -346,6 +358,14 @@ fn dispatch_domain_call(
     environment: &Environment,
     span: Span,
 ) -> Result<EvalStep, LanguageError> {
+    // Lisp-owned macro residents (including D6 LET/LET*) have callable
+    // mechanism through their already-bound exact domain slot. Check that
+    // mechanism before Core-operation admission: D6 residency alone must not
+    // make arbitrary D6 values callable.
+    if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
+        return closures::apply_macro(closure.clone(), arguments, environment, span);
+    }
+
     if is_d3(identity, 0b001) {
         special_forms::exact_arity("D3:001", arguments, 1, span)?;
         return special_forms::quoted(&arguments[0]).map(EvalStep::Value);
@@ -429,6 +449,19 @@ fn dispatch_call(
     }
     if routed_head_sid == Some(crate::sens!(00000111)) {
         return special_forms::evaluate_cond(arguments, environment, span);
+    }
+
+    // Legacy byte compatibility for Lisp-owned macro surfaces whose exact
+    // successor is already ratified. The macro stays owned by its exact
+    // domain slot; we merely preserve raw argument syntax before evaluation.
+    if let Some(sid) = head_sid {
+        if let Some(identity) =
+            crate::semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
+        {
+            if let Some(Value::Macro(ref closure)) = environment.domain_code_slot(identity) {
+                return closures::apply_macro(closure.clone(), arguments, environment, span);
+            }
+        }
     }
 
     if let Some(name) = head_name {
@@ -548,6 +581,27 @@ mod single_pass_eval_tests {
     }
 
     #[test]
+    fn legacy_d6_let_star_delegates_to_exact_macro_slot() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let result = crate::eval_program("(10011101 ((x 41)) x)", &mut session)
+            .expect("legacy D6 let* compatibility should delegate to exact macro");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
+    }
+
+    #[test]
+    fn exact_d6_let_macro_executes_through_domain_slot() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let parsed = crate::parse_mixed_exact_domain("(001000 ((x 41)) x)")
+            .expect("exact D6 LET source");
+        let lowered = crate::eval::lower::lower_program(&parsed);
+        let result = eval_lowered_expressions(&lowered, &mut session)
+            .expect("exact D6 LET macro should execute through its bound domain slot");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
+    }
+
+    #[test]
     fn canonical_define_introduces_a_binding() {
         let source = "(define x 41) (+ x 1)";
         let mut session = Session::default();
@@ -556,6 +610,17 @@ mod single_pass_eval_tests {
     }
 
     #[test]
+    #[test]
+    fn exact_d6_macro_head_routes_before_first_class_value_invocation() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let forms = crate::parse_mixed_exact_domain("(001000 ((x 41)) x)")
+            .expect("exact D6 LET source");
+        let result = crate::eval_parsed_expressions(&forms, &mut session)
+            .expect("exact D6 LET macro head should route through its domain slot");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
+    }
+
     fn binary_sids_dispatch_canon_and_necessary_forms_in_list_head() {
         let source = r#"
             (00001001 make-pair

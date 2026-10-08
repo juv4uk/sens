@@ -8,7 +8,7 @@
 (load "lib/machine/operands/x86-64.lisp")
 (load "lib/machine/admission/x86-64.lisp")
 (load "lib/machine/lowering/semantic-x86-64.lisp")
-(load "lib/machine/dispatch/native-first.lisp")
+(load-mixed-exact-domain "lib/machine/dispatch/native-first.lisp")
 (load "lib/machine/dispatch/native-first-execute.lisp")
 
 (00001001 native-first-execution-witness-check
@@ -27,7 +27,7 @@
       ; Supported bounded structural slice really reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (00000001 (car (cons 2 3))))
+          (00000001 (100 (111 2 3))))
         (00000001
           (execution-route native
             (status completed)
@@ -57,7 +57,7 @@
                (value 7))))))
 
       ; Once a native plan exists, admission rejection stays visibly native.
-      ; The bridge must NOT hide this bug by evaluating (+ 40 2) instead.
+      ; The bridge must NOT hide this native rejection by silently retrying through the evaluator.
       (native-first-execution-witness-check
         (native-first-execute-plan
           (00000001

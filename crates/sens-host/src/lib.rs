@@ -624,6 +624,37 @@ fn evaluate_load(
     sens::eval_parsed_expressions(&expressions, &mut session).map(|result| result.value)
 }
 
+fn evaluate_load_mixed_exact_domain(
+    arguments: &[(Value, Span)],
+    environment: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    let (evaluated, argument_span) = &arguments[0];
+    let Value::String(path) = evaluated else {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "load-mixed-exact-domain expects a string path",
+            *argument_span,
+        ));
+    };
+    ensure_fs_read_allowed(environment, "load-mixed-exact-domain", path, span)?;
+    let source = std::fs::read_to_string(path.as_ref()).map_err(|error| {
+        LanguageError::new(
+            ErrorKind::InvalidForm,
+            format!("load-mixed-exact-domain: failed to read file {path}: {error}"),
+            span,
+        )
+    })?;
+    let expressions = sens::parse_mixed_exact_domain(&source).map_err(|mut error| {
+        error.span = span;
+        error
+    })?;
+    let mut session = sens::Session {
+        environment: environment.clone(),
+    };
+    sens::eval_parsed_expressions(&expressions, &mut session).map(|result| result.value)
+}
+
 pub fn install() {
     register_evaluated_capability("read-dir", 1, evaluate_read_dir);
     register_evaluated_capability("read-file-bytes", 1, evaluate_read_file_bytes);
@@ -631,6 +662,11 @@ pub fn install() {
     register_capability("write-file-bytes", evaluate_write_file_bytes);
     register_capability("process-run-raw", process_raw::evaluate_process_run_raw);
     register_evaluated_capability("load", 1, evaluate_load);
+    register_evaluated_capability(
+        "load-mixed-exact-domain",
+        1,
+        evaluate_load_mixed_exact_domain,
+    );
     register_capability("tcp-connect", evaluate_tcp_connect);
     register_capability("tcp-listen-raw", evaluate_tcp_listen_raw);
     register_evaluated_capability("tcp-accept", 1, evaluate_tcp_accept);

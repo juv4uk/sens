@@ -2,7 +2,7 @@
 //! Pobudova `lambda` ta zastosuvannia zamykan/makrosiv do arhumentiv.
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
-use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
+use super::{canon, capabilities, evaluate, lower, necessary_forms, special_forms::quoted, EvalStep};
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 use std::{
@@ -296,6 +296,17 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
     if !canon::has_primitive(sid) && matches!(environment.code_slot(sid), Some(Value::Macro(_))) {
         return Head::Opaque;
     }
+    // Legacy 8-bit spellings may project to ratified exact-domain macros.
+    // Their arguments are macro syntax, so resolver must keep them opaque too.
+    if let Some(identity) =
+        crate::semantic_registry::legacy_macro_domain_identity_from_registry_byte(
+            sid.packed_byte(),
+        )
+    {
+        if matches!(environment.domain_code_slot(identity), Some(Value::Macro(_))) {
+            return Head::Opaque;
+        }
+    }
     Head::Call
 }
 
@@ -537,6 +548,18 @@ pub(super) fn apply(
 ) -> Result<EvalStep, LanguageError> {
     match function {
         Value::DomainIdentity(identity) => {
+            // A language-owned macro resident may have an exact-domain identity
+            // without being a generic Core operation. When a macro expansion
+            // places that identity in function position, route only through the
+            // already-bound exact macro slot; do not widen DomainIdentity::core_operation().
+            if let crate::DomainIdentity::D6(word) = identity {
+                let exact = crate::CoreDomainIdentity::D6(word);
+                if let Some(Value::Macro(closure)) =
+                    calling_environment.domain_code_slot(exact).as_ref()
+                {
+                    return apply_macro(closure.clone(), arguments, calling_environment, span);
+                }
+            }
             let Some(core_identity) = identity.core_operation() else {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
@@ -576,7 +599,8 @@ pub(super) fn apply(
             // Argumente gehören zum Aufrufer, Parameter zum erfassten lexikalischen Frame.
             let mut slots = Vec::with_capacity(closure.slot_names.len());
             for argument in &arguments[..closure.parameters.len()] {
-                slots.push(evaluate(argument, calling_environment)?);
+                let value = evaluate(argument, calling_environment)?;
+                slots.push(value);
             }
             if closure.rest.is_some() {
                 let mut rest_values = Vec::with_capacity(arguments.len() - closure.parameters.len());
@@ -691,6 +715,10 @@ pub(super) fn apply_macro(
 
     let expanded_value = evaluate(last, &local_environment)?;
     let expanded_expr = value_to_expr(expanded_value, span)?;
+    let expanded_expr = lower::lower_program(std::slice::from_ref(&expanded_expr))
+        .into_iter()
+        .next()
+        .expect("lowering one macro expansion returns one expression");
 
     Ok(EvalStep::TailCall {
         expression: expanded_expr,

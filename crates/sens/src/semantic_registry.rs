@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, DomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -79,6 +79,58 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0011_0011 => Some(d4(0b1000)), // CAAR
         0b0011_0100 => Some(d4(0b1001)), // CADR
         0b0011_0101 => Some(d4(0b0111)), // CDDR
+        _ => None,
+    }
+}
+
+/// Tooling-only compatibility successor used by parser-aware source migration.
+///
+/// These extra successors must never change historical runtime invocation.
+/// They are permitted only so old source spellings can retire into already-
+/// ratified exact-domain identities.
+pub(crate) fn migration_domain_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    legacy_domain_identity_from_registry_byte(byte).or_else(|| {
+        let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+        let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
+        match byte {
+            0b0010_0111 => Some(d4(0b1110)),   // LIST -> D4
+            0b1001_1100 => Some(d6(0b001000)), // LET -> D6
+            0b1001_1101 => Some(d6(0b001001)), // LET* -> D6
+            _ => None,
+        }
+    })
+}
+
+/// Compatibility projection for legacy macro syntax only.
+///
+/// LET/LET* must keep raw arguments when an old eight-bit call reaches the
+/// exact D6 macro slot. LIST is intentionally absent: this map is not general
+/// runtime migration and must not widen callable authority.
+pub(crate) fn legacy_macro_domain_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
+    match byte {
+        0b1001_1100 => Some(d6(0b001000)), // LET -> D6
+        0b1001_1101 => Some(d6(0b001001)), // LET* -> D6
+        _ => None,
+    }
+}
+
+/// Binding-only compatibility projection for Lisp-owned definitions that
+/// already have a ratified exact-domain resident.
+///
+/// This does not reinterpret historical calls. It only lets the first root
+/// language definition install the SAME closure in its exact slot while the
+/// old code-slot alias remains available to unmigrated callers.
+pub(crate) fn legacy_language_definition_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
+    match byte {
+        0b0010_0111 => Some(d4(0b1110)), // LIST -> D4
         _ => None,
     }
 }
@@ -304,6 +356,54 @@ mod tests {
             assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
         }
     }
+    #[test]
+    fn source_migration_successors_do_not_change_generic_legacy_runtime_routing() {
+        for (legacy_byte, width, bits) in [
+            (0b0010_0111, 4, 0b1110),   // LIST -> D4
+            (0b1001_1100, 6, 0b001000), // LET -> D6
+            (0b1001_1101, 6, 0b001001), // LET* -> D6
+        ] {
+            assert_eq!(
+                legacy_domain_identity_from_registry_byte(legacy_byte),
+                None,
+                "migration-only successor must not alter generic historical invocation"
+            );
+            let identity = migration_domain_identity_from_registry_byte(legacy_byte)
+                .expect("migration tooling must retain the ratified exact successor");
+            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
+        }
+    }
+
+    #[test]
+    fn list_definition_binding_has_exact_d4_successor_without_runtime_remap() {
+        let legacy = 0b0010_0111;
+        assert_eq!(
+            legacy_domain_identity_from_registry_byte(legacy),
+            None,
+            "LIST must not regain a generic legacy invocation route"
+        );
+        let identity = legacy_language_definition_identity_from_registry_byte(legacy)
+            .expect("LIST definition must bind its ratified exact D4 resident");
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1110));
+    }
+
+    #[test]
+    fn macro_compatibility_projection_is_d6_let_only() {
+        assert_eq!(
+            legacy_macro_domain_identity_from_registry_byte(0b0010_0111),
+            None,
+            "LIST is not a raw-argument macro compatibility route"
+        );
+        for (legacy_byte, bits) in [
+            (0b1001_1100, 0b001000),
+            (0b1001_1101, 0b001001),
+        ] {
+            let identity = legacy_macro_domain_identity_from_registry_byte(legacy_byte)
+                .expect("LET/LET* keep a bounded raw-argument compatibility route");
+            assert_eq!((identity.width(), identity.packed_bits()), (6, bits));
+        }
+    }
+
     #[test]
     fn append_surface_projects_only_to_ratified_d4() {
         let identity = domain_identity_for_surface("приєднати")
