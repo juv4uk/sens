@@ -33,6 +33,12 @@ jobs:
         run: cargo build -p sens-cli --bin sens
       - name: D7 domain table is canonical-parser re-readable
         run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
+      - name: Packed Ukrainian source codec regression (#4430)
+        run: |
+          if [[ -f scripts/test_ukrainian_packed_source_codec.py ]]; then
+            python3 -m unittest tests/test_ukrainian_packed_source_codec.py -v
+            python3 -m py_compile               scripts/domain_word_carrier.py               scripts/sens_source_pair_codec.py               scripts/sens-uk-encode.py               scripts/sens-uk-decode.py
+          fi
       - name: Current Core4 FASL freshness
         run: cargo test -p sens --test core_fasl_freshness -- --nocapture
       - name: Current semantic slice
