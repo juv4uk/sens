@@ -1,0 +1,55 @@
+name: sens-t5-space-view
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/Cargo.toml"
+      - ".github/workflows/sens-t5-space-view.yml"
+      - "docs/sens-t5-space-view.uk.md"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/Cargo.toml"
+      - ".github/workflows/sens-t5-space-view.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ternary-internal-space-external:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify T5 binary source exact-width identity and hidden trits
+        run: cargo test -p sens ternary_transport::tests:: -- --nocapture
+      - name: Verify physical file opens as space-separated exact binary words
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- verify "$RUNNER_TEMP/sample.lisp"
+          test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/opened.txt"
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/expected.txt"
+          cmp "$RUNNER_TEMP/opened.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- view "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/viewed.txt"
+          cmp "$RUNNER_TEMP/viewed.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/direct.txt"
+          cmp "$RUNNER_TEMP/direct.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/vertical.txt"
+          printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/expected-vertical.txt"
+          cmp "$RUNNER_TEMP/vertical.txt" "$RUNNER_TEMP/expected-vertical.txt"
+          printf '\000' >> "$RUNNER_TEMP/sample.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.sens"; then
+            echo "ERROR: invalid trailing byte accepted"
+            exit 1
+          fi
