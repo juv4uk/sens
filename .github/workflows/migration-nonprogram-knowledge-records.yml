@@ -1,0 +1,27 @@
+name: Migration nonprogram knowledge records
+on:
+  pull_request:
+    paths:
+      - 'knowledge/*.lisp'
+      - 'knowledge/migration-nonprogram-knowledge-records-2026-10-08.json'
+      - 'scripts/report_original_migration_candidates.py'
+      - 'tests/test_migration_nonprogram_knowledge_records.py'
+      - '.github/workflows/migration-nonprogram-knowledge-records.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/*.lisp'
+      - 'knowledge/migration-nonprogram-knowledge-records-2026-10-08.json'
+      - 'scripts/report_original_migration_candidates.py'
+      - 'tests/test_migration_nonprogram_knowledge_records.py'
+      - '.github/workflows/migration-nonprogram-knowledge-records.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify all 14 SHA-pinned knowledge DATA records, exclusions and canonical queue
+        run: python3 -m unittest discover -s tests -p 'test_migration_nonprogram_knowledge_records.py' -v
