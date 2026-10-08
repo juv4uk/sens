@@ -5,6 +5,7 @@ on:
     paths:
       - 'tests/fixtures/migration-d1-cond-cohort/**'
       - 'tests/test_migration_d1_cond_cohort.py'
+      - 'tests/test_migration_d1_cond_integrated_audit.py'
       - 'crates/sens/tests/migration_d1_cond_cohort.rs'
       - '.github/workflows/migration-d1-cond-cohort.yml'
   push:
@@ -12,6 +13,7 @@ on:
     paths:
       - 'tests/fixtures/migration-d1-cond-cohort/**'
       - 'tests/test_migration_d1_cond_cohort.py'
+      - 'tests/test_migration_d1_cond_integrated_audit.py'
       - 'crates/sens/tests/migration_d1_cond_cohort.rs'
       - '.github/workflows/migration-d1-cond-cohort.yml'
 
@@ -27,5 +29,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Actual 3-pass source-to-T5 bytes and fail-closed Python guard
         run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_cohort.py' -v
+      - name: Independent repository T5 pair audit - physical PASS, symbolic pending oracle
+        run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_integrated_audit.py' -v
       - name: Current Rust D1-only COND oracle reads committed physical bytes
         run: cargo test -p sens --test migration_d1_cond_cohort -- --nocapture
