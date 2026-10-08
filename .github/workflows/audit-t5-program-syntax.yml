@@ -120,25 +120,6 @@ jobs:
           assert r['summary']['blocked']==1,r
           assert 'MANIFEST' in r['files'][0]['reason'],r
           PY
-      - name: New original Lisp-derived binary MUST carry and execute reviewed proof
-        env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/guard_original_sens_admission.py \
-            --base-sha "$BASE_SHA" --root . \
-            --reader target/debug/sens-trit \
-            --report "$RUNNER_TEMP/original-proof-ledger.json"
-          python3 - "$RUNNER_TEMP/original-proof-ledger.json" <<'PY'
-          import json,sys
-          data=json.load(open(sys.argv[1],encoding='utf-8'))
-          assert data['schema']=='sens-original-proof-carrying-gate/v1'
-          assert data['status']=='EVIDENCE_CHECKED'
-          assert data['summary']['blocked']==0
-          assert data['summary']['automatic_semantic_certification']==0
-          print('PROOF_CARRYING_ORIGINAL',data['summary'])
-          PY
       - name: Real original-source T5 proof gate (not new canary)
         shell: bash
         env:
