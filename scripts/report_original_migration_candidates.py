@@ -267,6 +267,12 @@ def build_report(root: Path = ROOT) -> dict:
         cohorts = blocker_cohorts(blocked_sources)
         if sum(cohort["count"] for cohort in cohorts) != blocked:
             raise RuntimeError("source blocker cohort totals inconsistent")
+        priority_blocked = [
+            row for row in blocked_sources if row["path"] not in classified
+        ]
+        priority_cohorts = blocker_cohorts(priority_blocked)
+        if sum(cohort["count"] for cohort in priority_cohorts) != len(priority_blocked):
+            raise RuntimeError("unclassified priority cohort totals inconsistent")
         if len({row["path"] for row in rows}) != len(rows):
             raise RuntimeError("duplicate original source in migration ledger")
         return {
@@ -286,6 +292,11 @@ def build_report(root: Path = ROOT) -> dict:
                     if any(value["cohort"] == cohort for value in classified.values())
                 },
                 "blocked": blocked,
+                "blocked_excluding_classified_nonprogram": len(priority_blocked),
+                "priority_first_blocker_counts": {
+                    cohort["family"]: cohort["count"]
+                    for cohort in priority_cohorts
+                },
                 "blocker_family_counts": {cohort["family"]: cohort["count"] for cohort in cohorts},
                 "mechanical_candidates": len(candidates),
                 "already_paired_candidates": len(candidates)-len(unpaired),
@@ -306,6 +317,8 @@ def build_report(root: Path = ROOT) -> dict:
             "mechanical_candidates": candidates,
             "blocked_sources": blocked_sources,
             "blocker_cohorts": cohorts,
+            "priority_blocker_cohorts_excluding_nonprogram": priority_cohorts,
+            "priority_blocker_sample": priority_blocked[:20],
             "unpaired_blocker_sample": blocked_sources[:20],
             "required_evidence": [
                 "prove original file is an executable SENS program, not an archive/catalogue",
