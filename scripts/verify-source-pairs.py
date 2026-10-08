@@ -97,6 +97,20 @@ def check(root: Path, globs: list[str], encoder: Path | None,
     errors = []
     if not sources:
         errors.append("no .lisp source matched --include patterns (fail closed)")
+    # Probe only source-bearing directories: unrelated extensionless build files
+    # are not SENS source, but any bit-only orphan in a source directory is.
+    expected_twins = {src.with_suffix("") for src in sources}
+    for directory in sorted({src.parent for src in sources}):
+        for item in sorted(directory.iterdir()):
+            if item in expected_twins or item.suffix or not item.is_file():
+                continue
+            # Reading other extensionless files is limited; this is a narrow
+            # orphan detector, not a repo-wide content classification.
+            if item.stat().st_size > 10_000_000:
+                continue
+            payload = item.read_bytes()
+            if payload and all(c in (48, 49) for c in payload):
+                errors.append(f"{item}: bit-only binary orphan with no adjacent .lisp")
     for src in sources:
         if root not in src.parents:
             errors.append(f"{src}: outside requested root")
