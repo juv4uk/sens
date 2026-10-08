@@ -91,7 +91,7 @@ class QuoteCohort(unittest.TestCase):
                 projection, counts = self.project(source_text)
                 self.assertEqual(projection, EXPECTED)
                 self.assertEqual(counts[phase], 1)
-                self.assertEqual(physical.read_bytes(), b"\\x63\\x89\\x06\\xa1")
+                self.assertEqual(physical.read_bytes(), bytes.fromhex("638906a1"))
                 self.assertEqual(module.encode_projection(projection), physical.read_bytes())
                 self.assertEqual(module.decode_bytes(physical.read_bytes()), EXPECTED.split())
 
