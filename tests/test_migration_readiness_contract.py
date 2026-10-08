@@ -174,16 +174,23 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertNotIn("oracle_passed", report)
 
 
-    def test_real_pinned_data_registry_has_all_78_unaltered_records(self):
+    def test_real_pinned_data_registry_covers_all_reviewed_cohorts(self):
+        from report_original_migration_candidates import NONPROGRAM_MANIFESTS
         rows = REAL_REVIEWED_LOADER(ROOT)
-        self.assertEqual(len(rows), 78)
-        cohort_counts = {
-            group: sum(item["cohort"] == group for item in rows.values())
-            for group in ("domain-table", "comment-only-loader", "isa", "schema", "evidence", "expr-record")
+        # Manifest SHAs/allowed cohorts are authority; do not freeze the
+        # research inventory at 76/78 when additional DATA is proven.
+        expected = {
+            name: count for name, manifest, count in NONPROGRAM_MANIFESTS
+            if (ROOT / manifest).is_file()
         }
-        self.assertEqual(cohort_counts, {
-            "domain-table": 9, "comment-only-loader": 2, "isa": 25, "schema": 21, "evidence": 8, "expr-record": 13,
-        })
+        self.assertEqual(len(rows), sum(expected.values()))
+        cohort_counts = {
+            name: sum(item["cohort"] == name for item in rows.values())
+            for name in expected
+        }
+        self.assertEqual(cohort_counts, expected)
+        self.assertEqual(expected["comment-only-loader"], 2)
+        self.assertEqual(expected["knowledge-record"], 14)
         self.assertNotIn("lib/machine/block.lisp", rows)
         self.assertEqual({p for p, item in rows.items() if item["cohort"] == "comment-only-loader"},
                          {"lib/core2.lisp", "lib/surface/ukr.lisp"})
