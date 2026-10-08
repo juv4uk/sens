@@ -685,18 +685,28 @@ def binary_rewrite(
                 j += 1
             if j < len(source) and source[j] == ")":
                 begin_item()
+                if frames and frames[-1]["head"]:
+                    frames[-1]["head"] = False
                 out.append("000")
                 i = j + 1
                 pending_quote = False
                 continue
 
             begin_item()
-            parent_quoted = bool(frames and (frames[-1]["quoted"] or frames[-1]["quote_children"]))
+            parent = frames[-1] if frames else None
+            parent_quoted = bool(parent and (parent["quoted"] or parent["quote_children"]))
+            parent_data_slot = bool(parent and parent["data_slots"] > 0)
+            if parent is not None and parent["head"]:
+                # A nested list consumed the parent's first item. The next
+                # sibling is an argument/data position, never another head.
+                parent["head"] = False
             frames.append({
-                "quoted": parent_quoted or pending_quote,
+                "quoted": parent_quoted or pending_quote or parent_data_slot,
                 "head": True,
                 "quote_children": False,
                 "items": 0,
+                "data_slots": 0,
+                "parent_data_slot": parent_data_slot,
             })
             out.append(D2_OPEN)
             i += 1
@@ -706,10 +716,12 @@ def binary_rewrite(
         if ch == ")":
             if not frames:
                 raise BinaryMigrationError("unexpected closing parenthesis")
-            frames.pop()
+            closing = frames.pop()
             out.append(D2_CLOSE)
             i += 1
             pending_quote = False
+            if frames and closing["parent_data_slot"] and frames[-1]["data_slots"] > 0:
+                frames[-1]["data_slots"] -= 1
             continue
 
         if ch == '"':
@@ -730,6 +742,8 @@ def binary_rewrite(
             out.extend(encode_text7_spelling(token, text7_candidates))
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
+            elif frames and frames[-1]["data_slots"] > 0:
+                frames[-1]["data_slots"] -= 1
             pending_quote = False
             continue
 
@@ -779,7 +793,8 @@ def binary_rewrite(
         begin_item()
         frame = frames[-1] if frames else None
         is_head = bool(frame and frame["head"])
-        quoted = current_quoted()
+        is_data_slot = bool(frame and frame["data_slots"] > 0 and not frame["head"])
+        quoted = current_quoted() or is_data_slot
         resolved_label = None
 
         if is_head and not quoted:
@@ -852,6 +867,10 @@ def binary_rewrite(
             frame["head"] = False
             if resolved_label == "QUOTE":
                 frame["quote_children"] = True
+            elif resolved_label in {"LAMBDA", "DEFINE"}:
+                frame["data_slots"] = 1
+        elif frame and is_data_slot and frame["data_slots"] > 0:
+            frame["data_slots"] -= 1
         pending_quote = False
 
     if frames:
