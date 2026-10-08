@@ -254,10 +254,20 @@ def verify_published(report: dict, output: Path, dry_run: bool) -> int:
     if dry_run:
         return count
 
+    # Publication is a *physical T5 + D2 syntax* attestation, NOT execution
+    # parity. Fail closed if a lower-level publisher loses or forges that split.
+    reader = report.get("d2_reader")
+    if not isinstance(reader, str) or not reader or not Path(reader).is_file():
+        raise MigrationBlocked("physical publication requires a recorded real Rust D2 reader")
+
     verified = 0
     for row in rows:
         if row.get("status") != "ready":
             raise MigrationBlocked(f"unadmitted result: {row}")
+        if row.get("d2_syntax") != "PASS":
+            raise MigrationBlocked("published T5 lacks current Rust D2 syntax proof")
+        if row.get("semantic_oracle") != "NOT_VERIFIED":
+            raise MigrationBlocked("unsupported semantic oracle claim in physical-only publisher")
         raw = row.get("output")
         if not isinstance(raw, str) or "\\" in raw:
             raise MigrationBlocked("missing or unsafe output path")
@@ -325,8 +335,14 @@ def main(argv: list[str] | None = None) -> int:
 
         result = json.loads(report.read_text(encoding="utf-8"))
         verified = verify_published(result, output, args.dry_run)
-        print(json.dumps({"status": "DRY_RUN_READY" if args.dry_run else "VERIFIED",
-                          "files": verified, "report": str(report)}, ensure_ascii=False))
+        print(json.dumps({
+            "status": ("DRY_RUN_READY" if args.dry_run
+                       else "PHYSICAL_AND_D2_VERIFIED_ORACLE_PENDING"),
+            "files": verified,
+            "report": str(report),
+            "semantic_oracle": "NOT_VERIFIED",
+            "release_admitted": False,
+        }, ensure_ascii=False))
         return 0
     except (MigrationBlocked, OSError, ValueError, json.JSONDecodeError) as error:
         print(f"BLOCKED: {error}", file=sys.stderr)
