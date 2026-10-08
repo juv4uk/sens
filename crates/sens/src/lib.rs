@@ -40,6 +40,7 @@ mod presentation;
 mod semantic_registry;
 mod source_words;
 mod source_packing;
+mod paired_sens;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -175,6 +176,7 @@ pub use sens::{Sens, Sens8};
 pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
 };
+pub use paired_sens::{sens_bytes_from_binary_lisp, verify_sens_with_binary_lisp, PairedSensError, PairedSensProof};
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, packed_transport_accounting,
     semantic_source_bits, unpack_binary_source_words, PackedTransportAccounting,
