@@ -47,6 +47,13 @@ jobs:
           assert s['scanned']==s['original_unpaired_sources_scanned']
           assert s['already_paired_sources_excluded']==len(r['already_paired_sources_excluded'])
           assert s['physical_outputs_created']==0
+          partition=r['first_blocker_partition']
+          assert partition['status']=='TRIAGE_ONLY_NO_ORACLE'
+          assert partition['first_blocked_total']==s['blocked']
+          assert sum(x['first_blocked_sources'] for x in partition['cohorts'])==s['blocked']
+          assert partition['semantically_admitted_executable_sources']==0
+          assert len({m['path'] for group in partition['cohorts'] for m in group['original_sources']})==s['blocked']
+          assert all(group['not_executable_or_semantic_admission'] for group in partition['cohorts'])
           assert r['source_era']=='auto'
           assert 'D1-D9' in r['authority']
           assert all(not x['same_stem_sens_already_exists'] for x in r['mechanical_candidates'])
@@ -62,6 +69,16 @@ jobs:
               out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
+              out.write('### Ranked FIRST-BLOCKER cohorts (not executable admission)\n\n')
+              out.write(f"- Disjoint groups: **{len(partition['cohorts'])}**, covering **{partition['first_blocked_total']}** blocked originals\n")
+              out.write('- A file may have OTHER blockers after its first; no independent oracle admitted here\n\n')
+              for group in partition['cohorts'][:12]:
+                  examples=', '.join(p for p in group['example_paths'][:3])
+                  out.write(
+                      f"- **{group['first_blocked_sources']}** x {group['family']} "
+                      f"{group['coordinate']} -> {group['owner_issue']}; {examples}\n"
+                  )
+              out.write('\nFull SHA-pinned per-source membership and reasons are in the JSON artifact.\n\n')
               out.write('### First blocked originals (exact source paths)\n\n')
               for row in r['unpaired_blocker_sample'][:12]:
                   reason=row.get('reason','unknown').replace('\n',' ')[:200]
