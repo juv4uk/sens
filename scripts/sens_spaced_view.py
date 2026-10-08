@@ -93,11 +93,11 @@ def rust_open(source: Path, reader: Path, words: list[str]) -> None:
 
 
 def safe_stage(out_root: Path, source_root: Path, relative: Path, payload: bytes) -> Path:
+    if out_root.is_symlink():
+        raise ViewBlocked("unsafe staging root symlink")
     root = out_root.resolve()
     if root == source_root or root.is_relative_to(source_root):
         raise ViewBlocked("view staging must be outside the source repository")
-    if root.is_symlink():
-        raise ViewBlocked("unsafe staging root symlink")
     destination = root / relative.with_suffix("")
     # Refuse symlink components before creating any path.
     cur = root
