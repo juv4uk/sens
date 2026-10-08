@@ -25,6 +25,7 @@ fn is_explicit_non_implementation(rel: &str) -> bool {
     rel.starts_with("lib/generated/")
         || rel.starts_with("lib/surface/")
         || rel == "lib/machine/encoding/coverage.lisp"
+        || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
 }
 
 fn is_language_definition_file(rel: &str) -> bool {
