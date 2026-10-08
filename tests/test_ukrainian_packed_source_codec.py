@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from domain_word_carrier import CarrierError, DomainWord, MAGIC, decode, encode
 from sens_source_pair_codec import decode_ukrainian, encode_ukrainian
