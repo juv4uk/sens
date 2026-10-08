@@ -458,6 +458,12 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
+    // Ratified exact D4 LIST/APPEND use structural value laws (#2347),
+    // not old Function8 SID dispatch or invented domain opcodes.
+    if let Some(result) = super::d4_sequence::invoke(identity, args, span) {
+        return result;
+    }
+
     if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
         let value = result?;
         return canonicalize_domain_result(identity, value, span);
