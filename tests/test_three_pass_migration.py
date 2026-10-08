@@ -79,14 +79,13 @@ class ThreePassMigrationTests(unittest.TestCase):
         frame_text=" ".join(frame)
         self.assertEqual(
             out,
-            f"10 0011 00 {frame_text} 00 000 01\n"
-            f"10 {frame_text} 01\n",
+            f"10 0011 00 {frame_text} 00 000 01 00 10 {frame_text} 01\n",
         )
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
 
     def test_unproven_global_name_stays_fail_closed(self):
         resolver=mod.Resolver(self.legacy,self.my,self.upper,source_era="legacy")
-        out,_=mod.migrate_file("(00001001 foo ())\n(bar)\n",resolver,self.text7)
+        out=mod.migrate_file("(00001001 foo ())\n(bar)\n",resolver,self.text7)
         self.assertIn("bar",out)
         self.assertEqual(resolver.counts["pass4-text7-global"],0)
 
