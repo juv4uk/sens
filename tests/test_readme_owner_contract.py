@@ -45,6 +45,25 @@ class ReadmeOwnerTripletContract(unittest.TestCase):
         self.assertIn("(перше (сполучити () ()))", self.doc)
         self.assertNotIn("(перше (сполучити порожнє порожнє))", self.doc)
 
+    def test_historical_compatibility_markdown_exactly_matches_reviewed_140(self):
+        # This is a deprecated 8-bit API compatibility index, not the
+        # ratified current exact-width D1-D9 authority.
+        registry = (ROOT/"lib/surface/semantic-registry.lisp").read_text(encoding="utf-8")
+        authority = (ROOT/"lib/surface/uk-docs.lisp").read_text(encoding="utf-8")
+        markdown = (ROOT/"docs/ukrainian-api.md").read_text(encoding="utf-8")
+        legacy = markdown.split("## Історичний Function8/SID8 індекс сумісності", 1)
+        self.assertEqual(len(legacy), 2)
+        indexed = dict(re.findall(r"^\| \x60([^|\x60]+)\x60 \| \x60([01]{8})\x60 \| [a-z-]+ \|$", legacy[1], re.M))
+        by_id = dict(re.findall(
+            r"^\s*\(([01]{8})\s+\(en [^)]+\)\s+\(ук ([^)]+)\)",
+            registry, re.M,
+        ))
+        docs = re.findall(r"^\s*\(doc \S+ ([01]{8})\b", authority, re.M)
+        self.assertEqual(len(docs), 140)
+        self.assertEqual(len(indexed), 140)
+        self.assertEqual({by_id[k]: k for k in docs}, indexed)
+        self.assertIn("не** первинні коди сучасної мови", legacy[1])
+
     def test_contract_same_as_real_governance_script(self):
         owner = (ROOT/"scripts/verify-repo.lisp").read_text(encoding="utf-8")
         self.assertIn('": must describe Rust as a reference implementation"', owner)
