@@ -59,35 +59,24 @@ jobs:
           test ! -f "$RUNNER_TEMP/preview/tests/fixtures/migration-multiform-cohort/two-forms.sens"
       - name: Build ACTUAL SENS Rust D2 reader
         run: cargo build -q -p sens-cli --bin sens-trit
-      - name: Build independently source-pinned existing Core/QUOTE/CONS oracle manifest
+      - name: Use committed two-sided historical/current oracle manifest
         run: |
           set -euo pipefail
+          # The publisher now requires two IMMUTABLE reviewed oracle witnesses.
+          # Never synthesize unreviewed witness SHA or bypass required evidence.
+          cp knowledge/migration-admissions/two-forms-canary.json "$RUNNER_TEMP/approved-proof.json"
           python3 - "$RUNNER_TEMP/approved-proof.json" <<'PY'
-          import hashlib,json,sys
+          import hashlib, json, sys
           from pathlib import Path
-          from importlib.util import module_from_spec,spec_from_file_location
-          repo=Path.cwd()
-          source="tests/fixtures/migration-multiform-cohort/two-forms.lisp"
-          physical="tests/fixtures/migration-multiform-cohort/two-forms.sens"
-          spec=spec_from_file_location('codec',repo/'scripts/sens_t5_codec.py')
-          codec=module_from_spec(spec)
-          spec.loader.exec_module(codec)
-          raw=(repo/source).read_bytes()
-          binary=(repo/physical).read_bytes()
-          proof={
-            "schema":"sens-t5-proof-admission/v1",
-            "source":source,
-            "source_era":"historical-legacy",
-            "source_git_blob_sha1":hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest(),
-            "source_sha256":hashlib.sha256(raw).hexdigest(),
-            "expected_physical_sha256":hashlib.sha256(binary).hexdigest(),
-            "expected_typed_sha256":codec.typed_sha256(codec.decode_bytes(binary)),
-            "oracle_commands":[
-              [sys.executable, "tests/test_migration_multiform_cohort.py", "-q"],
-              ["cargo", "test", "-p", "sens", "--test", "migration_multiform_cohort"]
-            ]
-          }
-          Path(sys.argv[1]).write_text(json.dumps(proof),encoding='utf-8')
+          proof = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert proof["schema"] == "sens-t5-proof-admission/v1"
+          assert proof["source_era"] == "historical-legacy"
+          assert set(proof["oracle_witnesses"]) == {"historical", "current"}
+          for witness in proof["oracle_witnesses"].values():
+              path = Path(witness["path"])
+              data = path.read_bytes()
+              sha = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+              assert sha == witness["git_blob_sha1"], path
           PY
       - name: Real proof-gated .lisp → .sens and bitwise parity / no-clobber
         run: |
