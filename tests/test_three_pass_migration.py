@@ -34,8 +34,10 @@ class ThreePassMigrationTests(unittest.TestCase):
         )
         cls.text7=mod.build_text7(data,TEXT7)
 
-    def migrate(self,source):
-        resolver=mod.Resolver(self.legacy,self.my,self.upper)
+    def migrate(self,source,source_era="legacy"):
+        # Direct unit fixtures are historical unless a test explicitly asks
+        # for current/auto semantics. Production CLI default is tested below.
+        resolver=mod.Resolver(self.legacy,self.my,self.upper,source_era=source_era)
         return mod.migrate_file(source,resolver,self.text7),resolver
 
     def test_empty_list_is_compact_d3_empty(self):
@@ -379,6 +381,34 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_written"], 1)
             self.assertEqual(state["summary"]["files_seen"], 1)
             self.assertEqual(source.read_text(), "()\n")
+
+
+    def test_default_source_era_blocks_ambiguous_w8_without_guessing(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "ambiguous.lisp"
+            source.write_text("(00000101 ())\n", encoding="utf-8")
+            out = base / "mirror"
+            report = base / "report.json"
+            process = subprocess.run([
+                sys.executable, str(SCRIPT), str(source),
+                "--out", str(out),
+                "--report", str(report),
+                "--foundation", str(ROOT / "knowledge" / "d1-d9-foundation.json"),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--historical-map", str(HISTORICAL),
+                "--text7", str(TEXT7),
+            ], capture_output=True, text=True)
+            self.assertEqual(process.returncode, 2, process.stderr)
+            self.assertFalse((out / "ambiguous.sens").exists())
+            state = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(state["source_era"], "auto")
+            self.assertEqual(state["summary"]["files_blocked"], 1)
+            self.assertIn("ambiguous W8", state["files"][0]["reason"])
+
 
 
 if __name__=="__main__":
