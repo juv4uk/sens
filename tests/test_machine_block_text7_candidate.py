@@ -153,7 +153,8 @@ class OriginalPhysicalCandidate(unittest.TestCase):
                 observed = process(reader, "eval", packed)
                 self.assertEqual(observed.returncode, 0,
                                  "ACTUAL original global call current eval BLOCKED: "
-                                 + observed.stderr[-1200:])
+                                 + " FIRST: " + observed.stderr[:1700]
+                                 + " LAST: " + observed.stderr[-500:])
                 self.assertEqual(observed.stdout.strip().splitlines()[-1], expected)
                 self.assertEqual(SOURCE.read_bytes(), self.original)
 
