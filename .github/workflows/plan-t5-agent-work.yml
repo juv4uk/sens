@@ -5,7 +5,17 @@ on:
     paths:
       - "scripts/plan_t5_agent_work.py"
       - "tests/test_plan_t5_agent_work.py"
+      - "scripts/report_original_migration_candidates.py"
+      - "knowledge/migration-nonprogram-*.json"
       - "docs/T5-AGENT-SHARDS.uk.md"
+      - ".github/workflows/plan-t5-agent-work.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/plan_t5_agent_work.py"
+      - "tests/test_plan_t5_agent_work.py"
+      - "scripts/report_original_migration_candidates.py"
+      - "knowledge/migration-nonprogram-*.json"
       - ".github/workflows/plan-t5-agent-work.yml"
   workflow_dispatch:
 
@@ -41,10 +51,37 @@ jobs:
           assert len(paths)==summary["original_unpaired_sources_scanned"]
           assert len(set(paths))==len(paths)
           assert not any(s["claimed_by"] for s in plan["shards"])
-          assert all(s["status"]=="UNCLAIMED__BLOCKED_NOT_ADMITTED" for s in plan["shards"])
+          assert all(s["status"] in ("UNCLAIMED__BLOCKED_NOT_ADMITTED",
+                                     "UNCLAIMED__NONPROGRAM_DATA_ONLY")
+                     for s in plan["shards"])
+          reviewed = [s for s in plan["shards"] if s["family"] == "reviewed-nonprogram-data"]
+          archived = [s for s in plan["shards"] if s["family"] == "archived-benchmark-data"]
+          data_shards = reviewed + archived
+          assert all(s["status"] == "UNCLAIMED__NONPROGRAM_DATA_ONLY"
+                     and s["release_gate"] == "DATA_CONTRACT_NO_EXECUTABLE_T5"
+                     for s in data_shards)
+          assert all(s["release_gate"] == "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"
+                     for s in plan["shards"] if s not in data_shards)
+          reviewed_count=sum(s["source_count"] for s in reviewed)
+          archived_count=sum(s["source_count"] for s in archived)
+          assert reviewed_count == plan["summary"]["reviewed_nonprogram_originals"]
+          assert reviewed_count == summary.get("classified_nonprogram", 0)
+          assert archived_count == plan["summary"]["archived_benchmark_nonprogram_originals"]
+          assert archived_count == summary.get("archived_benchmark_data_sources", 0)
+          count=reviewed_count+archived_count
+          assert plan["summary"]["executable_or_unclassified_originals"] + count == len(paths)
           assert plan["summary"]["claimed"]==0 and plan["summary"]["admitted"]==0
           assert len(paths)==plan["summary"]["blocked"]+plan["summary"]["mechanical_pending_oracle"]
-          print("DISJOINT_T5_AGENT_SHARDS_CONFIRMED",len(paths),"sources",len(plan["shards"]),"shards")
+          print("DISJOINT_T5_AGENT_SHARDS_CONFIRMED",len(paths),"sources",len(plan["shards"]),
+                "shards",reviewed_count,"reviewed data plus",archived_count,"archived data-only")
+          import os
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summaryfile:
+              summaryfile.write("## Original Lisp agent work allocation\\n\\n")
+              summaryfile.write(f"- Unpaired originals: **{len(paths)}**\\n")
+              summaryfile.write(f"- Reviewed DATA original sources: **{reviewed_count}** (no executable .sens)\\n")
+              summaryfile.write(f"- Archived benchmark sources: **{archived_count}** (nonprogram)\\n")
+              summaryfile.write(f"- Executable/unclassified originals: **{len(paths)-count}** (oracle required)\\n")
+              summaryfile.write(f"- Distinct claimable shards: **{len(plan['shards'])}**\\n")
           PY
           test -z "$(git status --porcelain --untracked-files=all)" || {
             echo "ERROR: read-only work planning mutated repository"

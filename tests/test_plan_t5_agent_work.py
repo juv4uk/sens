@@ -87,6 +87,142 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         b["blocker_cohorts"][0]["original_sources"].reverse()
         self.assertEqual(mod.build_plan(a, 2), mod.build_plan(b, 2))
 
+    def test_reviewed_nonprogram_original_gets_separate_no_t5_data_shard(self):
+        a = fixture()
+        src = a["blocked_sources"][0]
+        src["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
+        src["automatic_sens_companion"] = False
+        a["reviewed_nonprogram_sources"] = [{
+            "path": src["path"],
+            "source_git_blob_sha": src["source_git_blob_sha"],
+            "source_class": "NONPROGRAM_DATA_REVIEWED",
+            "automatic_sens_companion": False,
+            "semantic_oracle_admitted": False,
+        }]
+        a["summary"]["classified_nonprogram"] = 1
+        plan = mod.build_plan(a, 2)
+        self.assertEqual(plan["summary"]["original_unpaired"], 4)
+        self.assertEqual(plan["summary"]["reviewed_nonprogram_originals"], 1)
+        self.assertEqual(plan["summary"]["executable_or_unclassified_originals"], 3)
+        data = [x for x in plan["shards"] if x["family"] == "reviewed-nonprogram-data"]
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["source_count"], 1)
+        self.assertEqual(data[0]["sources"][0]["path"], src["path"])
+        self.assertEqual(data[0]["release_gate"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertEqual(data[0]["status"], "UNCLAIMED__NONPROGRAM_DATA_ONLY")
+        other = [x for x in plan["shards"] if x["family"] != "reviewed-nonprogram-data"]
+        self.assertTrue(all(x["release_gate"] == "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"
+                            for x in other))
+        seen = [x["path"] for shard in plan["shards"] for x in shard["sources"]]
+        self.assertEqual(len(seen), 4)
+        self.assertEqual(len(set(seen)), 4)
+
+    def test_nonprogram_classification_must_equal_canonical_sha_and_policy(self):
+        variants = ("wrong-pin", "wrong-source", "duplicate", "unreviewed",
+                    "automatic-publish", "oracle-claim", "missing-canonical-label",
+                    "incorrect-count", "missing-records", "candidate-reclassified")
+        for variant in variants:
+            a = fixture()
+            src = a["blocked_sources"][0]
+            src["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
+            src["automatic_sens_companion"] = False
+            row = {
+                "path": src["path"],
+                "source_git_blob_sha": src["source_git_blob_sha"],
+                "source_class": "NONPROGRAM_DATA_REVIEWED",
+                "automatic_sens_companion": False,
+                "semantic_oracle_admitted": False,
+            }
+            a["reviewed_nonprogram_sources"] = [row]
+            a["summary"]["classified_nonprogram"] = 1
+            if variant == "wrong-pin":
+                row["source_git_blob_sha"] = "f" * 40
+            elif variant == "wrong-source":
+                row["path"] = "lib/not-canonical.lisp"
+            elif variant == "duplicate":
+                a["reviewed_nonprogram_sources"].append(dict(row))
+                a["summary"]["classified_nonprogram"] = 2
+            elif variant == "unreviewed":
+                row["source_class"] = "EXECUTABLE"
+            elif variant == "automatic-publish":
+                row["automatic_sens_companion"] = True
+            elif variant == "oracle-claim":
+                row["semantic_oracle_admitted"] = True
+            elif variant == "missing-canonical-label":
+                src.pop("source_scope")
+            elif variant == "incorrect-count":
+                a["summary"]["classified_nonprogram"] = 2
+            elif variant == "missing-records":
+                a.pop("reviewed_nonprogram_sources")
+            else:
+                row["path"] = "test/ready.lisp"
+                row["source_git_blob_sha"] = "a" * 40
+            with self.subTest(variant=variant), self.assertRaises(mod.PlanError):
+                mod.build_plan(a, 2)
+
+    def test_simultaneous_conflicting_old_and_current_classifications_fail_closed(self):
+        a = fixture()
+        src = a["blocked_sources"][0]
+        src["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
+        src["automatic_sens_companion"] = False
+        reviewed = [{
+            "path": src["path"],
+            "source_git_blob_sha": src["source_git_blob_sha"],
+            "source_class": "NONPROGRAM_DATA_REVIEWED",
+            "automatic_sens_companion": False,
+            "semantic_oracle_admitted": False,
+        }]
+        a["reviewed_nonprogram_sources"] = reviewed
+        a["nonprogram_classification"] = [dict(reviewed[0],
+                                               source_git_blob_sha="f" * 40)]
+        a["summary"]["classified_nonprogram"] = 1
+        with self.assertRaisesRegex(mod.PlanError, "conflicting"):
+            mod.build_plan(a, 2)
+
+    def test_sha_pinned_archived_benchmark_gets_data_only_shard(self):
+        a = fixture()
+        archived = ("benchmarks/sens-surface/results/"
+                    "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        a["blocked_sources"][0]["path"] = archived
+        a["blocked_sources"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+        a["blocked_sources"][0]["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
+        a["blocker_cohorts"][0]["original_sources"][0]["path"] = archived
+        a["blocker_cohorts"][0]["original_sources"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+        a["summary"]["archived_benchmark_data_sources"] = 1
+        result = mod.build_plan(a, 2)
+        archive = [shard for shard in result["shards"]
+                   if shard["family"] == "archived-benchmark-data"]
+        self.assertEqual(len(archive), 1)
+        self.assertEqual(archive[0]["status"], "UNCLAIMED__NONPROGRAM_DATA_ONLY")
+        self.assertEqual(archive[0]["release_gate"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertEqual(archive[0]["sources"][0]["path"], archived)
+        self.assertEqual(result["summary"]["archived_benchmark_nonprogram_originals"], 1)
+        self.assertEqual(result["summary"]["executable_or_unclassified_originals"], 3)
+        self.assertEqual(result["summary"]["original_unpaired"], 4)
+
+    def test_mechanically_convertible_archive_does_not_enter_oracle_worker(self):
+        a = fixture()
+        archived = ("benchmarks/sens-surface/results/"
+                    "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        a["mechanical_candidates"][0]["path"] = archived
+        a["mechanical_candidates"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+        a["mechanical_candidates"][0]["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
+        a["summary"]["archived_benchmark_data_sources"] = 1
+        a["summary"]["unpaired_candidates_needing_original_oracle"] = 0
+        result = mod.build_plan(a, 2)
+        self.assertEqual(result["summary"]["mechanical_pending_oracle"], 0)
+        self.assertFalse(any(x["family"] == "oracle-pending" for x in result["shards"]))
+        self.assertEqual(result["summary"]["archived_benchmark_nonprogram_originals"], 1)
+        self.assertTrue(any(shard["family"] == "archived-benchmark-data"
+                            and shard["sources"][0]["path"] == archived
+                            for shard in result["shards"]))
+
+    def test_archived_scope_cannot_be_forged_from_active_source(self):
+        a = fixture()
+        a["blocked_sources"][0]["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
+        with self.assertRaisesRegex(mod.PlanError, "forged archive"):
+            mod.build_plan(a, 2)
+
     def test_no_paired_source_or_duplicate_can_enter_plan(self):
         a = fixture()
         a["blocker_cohorts"][0]["original_sources"][0]["path"] = "test/ready.lisp"
