@@ -11,7 +11,8 @@
 ; Current generic COND requires the explicit
 ;   (query expected-result expression)
 ; shape. Structural predicates return exact symbolic t / () answers, so each
-; query names t explicitly. No target-specific information enters this layer.
+; slot predicates return explicit t/() data; the shared u64 carrier preserves
+; its existing exact 1/0 machine-effect contract. No target-specific information enters this layer.
 
 (00001001
   machine-effect-structural-slot?
@@ -20,7 +21,7 @@
     (00000111
       ((00000011 slot (00000001 field0)) (00000001 (1)) t)
       ((00000011 slot (00000001 field1)) (00000001 (1)) t)
-      ((00000001 (1)) (00000001 (1)) (00000001 ())))))
+      ((00000001 1) 1 (00000001 ())))))
 
 (00001001
   machine-effect-bounded-two-field-store-load
@@ -28,10 +29,10 @@
     (first-value second-value first-slot second-slot observed-slot)
     (00000111
       ((machine-effect-u64-carrier? first-value)
-        t
+        1
         (00000111
           ((machine-effect-u64-carrier? second-value)
-            t
+            1
             (00000111
               ((machine-effect-structural-slot? first-slot)
                 t
@@ -60,8 +61,8 @@
                             (00000001 arena)
                             observed-slot)
                           (00100111 (00000001 return-u64) (00000001 result))))
-                      ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
-                  ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
-              ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
-          ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
-      ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected)))))
+                      ((00000001 1) 1 (00000001 machine-effect-rejected))))
+                  ((00000001 1) 1 (00000001 machine-effect-rejected))))
+              ((00000001 1) 1 (00000001 machine-effect-rejected))))
+          ((00000001 1) 1 (00000001 machine-effect-rejected))))
+      ((00000001 1) 1 (00000001 machine-effect-rejected)))))
