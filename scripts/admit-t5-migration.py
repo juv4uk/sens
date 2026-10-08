@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -77,6 +78,48 @@ def run(argv: list[str], *, cwd: Path, timeout: int = 90) -> subprocess.Complete
     return result
 
 
+def verified_witness_spec(manifest: dict) -> list[tuple[str, Path, str]]:
+    """Reject no-op oracle commands; admit pinned tests of both execution eras.
+
+    This syntactic safeguard is NOT a proof that reviewed assertions are
+    correct: source-specific, historical/current observations need human
+    review and must be executed by the independent CI proof publisher.
+    """
+    raw = manifest.get("oracle_witnesses")
+    if not isinstance(raw, dict) or set(raw) != {"historical", "current"}:
+        raise Blocked("ORACLE: require separately pinned historical and current witnesses")
+    commands = manifest.get("oracle_commands")
+    if not isinstance(commands, list) or len(commands) != 2:
+        raise Blocked("ORACLE: exactly two independent Python and Rust witnesses required")
+    result = []
+    for role in ("historical", "current"):
+        witness = raw[role]
+        if not isinstance(witness, dict) or set(witness) != {"path", "git_blob_sha1"}:
+            raise Blocked(f"ORACLE: {role} witness needs path and immutable Git blob")
+        name, sha = witness["path"], witness["git_blob_sha1"]
+        if not isinstance(name, str) or not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}", sha):
+            raise Blocked(f"ORACLE: invalid {role} witness provenance")
+        path = Path(name)
+        if path.as_posix() != name or path.is_absolute() or ".." in path.parts or "." in path.parts:
+            raise Blocked("ORACLE: witness path must be repository-relative without traversal")
+        result.append((role, path, sha))
+    historical, current = result
+    hpath, cpath = historical[1].as_posix(), current[1].as_posix()
+    if not re.fullmatch(r"tests/test_[a-zA-Z0-9_]+\\.py", hpath):
+        raise Blocked("ORACLE: historical witness must be a reviewed Python test file")
+    if not re.fullmatch(r"crates/sens/tests/[a-zA-Z0-9_]+\\.rs", cpath):
+        raise Blocked("ORACLE: current witness must be a reviewed Rust integration test")
+    hcmd, ccmd = commands
+    if (not isinstance(hcmd, list) or len(hcmd) not in (2, 3)
+            or not all(isinstance(x, str) for x in hcmd)
+            or not Path(hcmd[0]).name.startswith("python")
+            or hcmd[1] != hpath or (len(hcmd) == 3 and hcmd[2] != "-q")):
+        raise Blocked("ORACLE: historical runner must execute pinned Python witness directly")
+    if ccmd != ["cargo", "test", "-p", "sens", "--test", current[1].stem]:
+        raise Blocked("ORACLE: current runner must execute pinned Rust integration test")
+    return result
+
+
 def checked_manifest(path: Path) -> dict:
     try:
         obj = json.loads(path.read_text(encoding="utf-8"))
@@ -104,6 +147,7 @@ def checked_manifest(path: Path) -> dict:
             not isinstance(x, str) or not x for x in argv
         ):
             raise Blocked("ORACLE: argv must be a list of nonempty strings")
+    verified_witness_spec(obj)
     return obj
 
 
@@ -167,6 +211,20 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
         raise Blocked("SOURCE_PROVENANCE: source SHA digest changed")
     ensure_tracked(root, source, blob)
 
+    # Reviewable, pinned oracle file contents are a precondition of admission.
+    # A successful `true`, `echo`, or unrelated test does not certify SENS.
+    witnesses = verified_witness_spec(manifest)
+    witness_snapshots: dict[Path, bytes] = {}
+    for role, rel, expected_blob in witnesses:
+        full = root / rel
+        if not full.is_file() or full.is_symlink() or not full.resolve().is_relative_to(root):
+            raise Blocked(f"ORACLE: {role} witness file missing/unsafe: {rel}")
+        raw = full.read_bytes()
+        if git_blob_sha(raw) != expected_blob:
+            raise Blocked(f"ORACLE: {role} witness changed from approved Git blob")
+        ensure_tracked(root, rel, expected_blob)
+        witness_snapshots[rel] = raw
+
     target = mirror / source.with_suffix(".sens")
     if target.exists() or target.is_symlink():
         raise Blocked("DESTINATION: existing .sens must never be overwritten")
@@ -216,6 +274,13 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
         # not dynamic program meaning. Each command must pass independently.
         for oracle in manifest["oracle_commands"]:
             run(oracle, cwd=root, timeout=240)
+        # A witness that modified itself or the source during execution cannot
+        # attest the immutable semantics identified by the manifest.
+        if src_path.read_bytes() != src:
+            raise Blocked("ORACLE: original source modified during witness execution")
+        for rel, original in witness_snapshots.items():
+            if (root / rel).read_bytes() != original:
+                raise Blocked(f"ORACLE: witness changed during execution: {rel}")
 
         if write:
             publish(target, payload, mirror)
@@ -231,6 +296,11 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
             "typed_sha256": typed_sha256(words),
             "d2_reader": "PASS",
             "oracle_commands_passed": len(manifest["oracle_commands"]),
+            "oracle_witnesses_pinned": {
+                role: {"path": rel.as_posix(), "git_blob_sha1": sha}
+                for role, rel, sha in witnesses
+            },
+            "semantic_review": "NAMED_TESTS_PASSED_OWNER_REVIEW_REQUIRED",
             "warning": "Proof is bounded to named tests; not a general 491-file or release claim.",
         }
 
