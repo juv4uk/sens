@@ -16,7 +16,7 @@ fn car_cdr_executes_and_roundtrips_exact_t5() {
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), CAR_CDR_T5);
     let expressions = parse_canonical_binary(&visible).expect("current exact source parses");
     let result = eval_parsed_expressions(&expressions, &mut Session::default()).expect("CAR/CDR executes");
-    assert!(matches!(result.value, Value::Nil));
+    assert!(matches!(&result.value, Value::Nil));
     assert_eq!(words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" "), expected);
 }
 
