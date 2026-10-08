@@ -41,136 +41,68 @@
   (00001000
     (effect field0-offset field1-offset)
     (00000111
-      ((x86-machine-effect-form?
-         effect
-         (00000001 materialize-u64)
-         3)
+      ((x86-machine-effect-form? effect (00000001 materialize-u64) 3)
         (10011100
-          ((slot
-             (00000101
-               (00000110 effect)))
-            (value
-              (00000101
-                (00000110
-                  (00000110 effect)))))
+          ((slot (00000101 (00000110 effect))) (value (00000101 (00000110 (00000110 effect)))))
           (00000111
-            ((00000011
-               slot
-               (00000001 work))
-              (00100111
-                (00100111
-                  (00000001 mov-r64-imm64)
-                  (00000001 rax)
-                  value)))
-            (t
-              (00000001 x86-projection-rejected)))))
-      ((x86-machine-effect-form?
-         effect
-         (00000001 store-u64)
-         4)
+            ((00000011 slot (00000001 work))
+              (00100111 (00100111 (00000001 mov-r64-imm64) (00000001 rax) value)))
+            (t (00000001 x86-projection-rejected)))))
+      ((x86-machine-effect-form? effect (00000001 store-u64) 4)
         (10011100
-          ((base
-             (00000101
-               (00000110 effect)))
-            (field-slot
-              (00000101
-                (00000110
-                  (00000110 effect))))
-            (value-slot
-              (00000101
-                (00000110
-                  (00000110
-                    (00000110 effect))))))
+          ((base (00000101 (00000110 effect)))
+            (field-slot (00000101 (00000110 (00000110 effect))))
+            (value-slot (00000101 (00000110 (00000110 (00000110 effect))))))
           (10011100
             ((offset
                (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
             (00000111
-            ((x86-projection-rejected? offset)
-              (00000001 x86-projection-rejected))
-            ((00000011
-               base
-               (00000001 arena))
-              (00000111
-                ((00000011
-                   value-slot
-                   (00000001 work))
-                  (00000111
-                    ((x86-admission-disp8? offset)
-                      (00100111
+              ((x86-projection-rejected? offset) (00000001 x86-projection-rejected))
+              ((00000011 base (00000001 arena))
+                (00000111
+                  ((00000011 value-slot (00000001 work))
+                    (00000111
+                      ((x86-admission-disp8? offset)
                         (00100111
-                          (00000001 mov-mem-disp8-r64)
-                          (00000001 rdi)
-                          offset
-                          (00000001 rax))))
-                    (t
-                      (00000001 x86-projection-rejected))))
-                (t
-                  (00000001 x86-projection-rejected))))
-            (t
-              (00000001 x86-projection-rejected)))))
-      ((x86-machine-effect-form?
-         effect
-         (00000001 load-u64)
-         4)
+                          (00100111
+                            (00000001 mov-mem-disp8-r64)
+                            (00000001 rdi)
+                            offset
+                            (00000001 rax))))
+                      (t (00000001 x86-projection-rejected))))
+                  (t (00000001 x86-projection-rejected))))
+              (t (00000001 x86-projection-rejected))))))
+      ((x86-machine-effect-form? effect (00000001 load-u64) 4)
         (10011100
-          ((result-slot
-             (00000101
-               (00000110 effect)))
-            (base
-              (00000101
-                (00000110
-                  (00000110 effect))))
-            (field-slot
-              (00000101
-                (00000110
-                  (00000110
-                    (00000110 effect))))))
+          ((result-slot (00000101 (00000110 effect)))
+            (base (00000101 (00000110 (00000110 effect))))
+            (field-slot (00000101 (00000110 (00000110 (00000110 effect))))))
           (10011100
             ((offset
                (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
             (00000111
-            ((x86-projection-rejected? offset)
-              (00000001 x86-projection-rejected))
-            ((00000011
-               result-slot
-               (00000001 result))
-              (00000111
-                ((00000011
-                   base
-                   (00000001 arena))
-                  (00000111
-                    ((x86-admission-disp8? offset)
-                      (00100111
+              ((x86-projection-rejected? offset) (00000001 x86-projection-rejected))
+              ((00000011 result-slot (00000001 result))
+                (00000111
+                  ((00000011 base (00000001 arena))
+                    (00000111
+                      ((x86-admission-disp8? offset)
                         (00100111
-                          (00000001 mov-r64-mem-disp8)
-                          (00000001 rax)
-                          (00000001 rdi)
-                          offset)))
-                    (t
-                      (00000001 x86-projection-rejected))))
-                (t
-                  (00000001 x86-projection-rejected))))
-            (t
-              (00000001 x86-projection-rejected)))))
-      ((x86-machine-effect-form?
-         effect
-         (00000001 return-u64)
-         2)
+                          (00100111
+                            (00000001 mov-r64-mem-disp8)
+                            (00000001 rax)
+                            (00000001 rdi)
+                            offset)))
+                      (t (00000001 x86-projection-rejected))))
+                  (t (00000001 x86-projection-rejected))))
+              (t (00000001 x86-projection-rejected))))))
+      ((x86-machine-effect-form? effect (00000001 return-u64) 2)
         (10011100
-          ((slot
-             (00000101
-               (00000110 effect))))
+          ((slot (00000101 (00000110 effect))))
           (00000111
-            ((00000011
-               slot
-               (00000001 result))
-              (00100111
-                (00100111
-                  (00000001 ret))))
-            (t
-              (00000001 x86-projection-rejected)))))
-      (t
-        (00000001 x86-projection-rejected)))))))
+            ((00000011 slot (00000001 result)) (00100111 (00100111 (00000001 ret))))
+            (t (00000001 x86-projection-rejected)))))
+      (t (00000001 x86-projection-rejected)))))
 
 (00001001 x86-project-machine-effect
   (00001000 (effect)
