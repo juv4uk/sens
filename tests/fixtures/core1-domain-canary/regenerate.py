@@ -115,7 +115,9 @@ def main() -> int:
         if PROJECTION.exists() or PHYSICAL.exists():
             ap.error("BLOCK: refusing to overwrite existing projection or physical .sens")
         projection, physical, _digest = expected_artifacts()
-        PROJECTION.write_text(projection, encoding="utf-8")
+        # Exclusive creates, even if another agent races the prior exists-check.
+        with PROJECTION.open("x", encoding="utf-8") as out:
+            out.write(projection)
         with PHYSICAL.open("xb") as out:
             out.write(physical)
     size, typed_digest = verify_checked_in()
