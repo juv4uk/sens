@@ -1,5 +1,5 @@
 {
-  "schema": "sens-domain-width-certificate/v1",
+  "schema": "sens-domain-width-certificate/v2",
   "status": "generated-projection-non-authoritative",
   "source": {
     "path": "knowledge/d1-d9-foundation.json",
@@ -22,45 +22,101 @@
   "domains": {
     "D1": {
       "width": 1,
-      "authority": "#1699"
+      "authority": "#1699",
+      "canonical_table": {
+        "path": "lib/domains/d1.lisp",
+        "key_width": 1,
+        "rows": 2,
+        "git_blob_sha1": "6700f6680046e1d610f2ff269407d440ca44c2e3"
+      }
     },
     "D2": {
       "width": 2,
-      "authority": "#1702"
+      "authority": "#1702",
+      "canonical_table": {
+        "path": "lib/domains/d2.lisp",
+        "key_width": 2,
+        "rows": 4,
+        "git_blob_sha1": "484451cf3c73047158a7886e0874335a9bf8d7f9"
+      }
     },
     "D3": {
       "width": 3,
-      "authority": "#3202"
+      "authority": "#3202",
+      "canonical_table": {
+        "path": "lib/domains/d3.lisp",
+        "key_width": 3,
+        "rows": 8,
+        "git_blob_sha1": "610bf7df6e4101e12ab8add52496717a2f715e6f"
+      }
     },
     "D4": {
       "width": 4,
-      "authority": "#3272"
+      "authority": "#3272",
+      "canonical_table": {
+        "path": "lib/domains/d4.lisp",
+        "key_width": 4,
+        "rows": 16,
+        "git_blob_sha1": "03bca09faf5a5299384a5413b0a16ba42eb0a741"
+      }
     },
     "D5": {
       "width": 5,
-      "authority": "#3331 via #3305/#3330"
+      "authority": "#3331 via #3305/#3330",
+      "canonical_table": {
+        "path": "lib/domains/d5.lisp",
+        "key_width": 5,
+        "rows": 32,
+        "git_blob_sha1": "c186b589e10cafce7817f7bec5eb5adada6a9c09"
+      }
     },
     "D6": {
       "width": 6,
-      "authority": "#3393"
+      "authority": "#3393",
+      "canonical_table": {
+        "path": "lib/domains/d6.lisp",
+        "key_width": 6,
+        "rows": 64,
+        "git_blob_sha1": "b7882a5c06625d1818d69a21d507e41f801332eb"
+      }
     },
     "D7": {
       "width": 7,
-      "authority": "#3572"
+      "authority": "#3572",
+      "canonical_table": {
+        "path": "lib/domains/d7.lisp",
+        "key_width": 7,
+        "rows": 126,
+        "git_blob_sha1": "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726"
+      }
     },
     "D8": {
       "width": 8,
-      "authority": "#3960"
+      "authority": "#3960",
+      "canonical_table": {
+        "path": "lib/domains/d8.lisp",
+        "key_width": 8,
+        "rows": 256,
+        "git_blob_sha1": "97cdd8e8509214468f340492aff71f19da8720b7"
+      }
     },
     "D9": {
       "width": 9,
-      "authority": "#4008"
+      "authority": "#4008",
+      "canonical_table": {
+        "path": "lib/domains/d9.lisp",
+        "key_width": 9,
+        "rows": 512,
+        "git_blob_sha1": "b013ad78384ebb0174e0c73205e4b6c85dc344db"
+      }
     }
   },
   "verified": {
     "binary_coordinate_lengths_match_declared_width": true,
     "declared_capacities_match_power_of_two_width": true,
-    "declared_occupancies_match_resident_count": true
+    "declared_occupancies_match_resident_count": true,
+    "canonical_sens_table_key_widths_match_declared_width": true,
+    "canonical_sens_table_coordinates_match_ratified_residents": true
   },
-  "law": "Widths are copied from current SENS authority. This generated projection cannot mint, infer, widen, narrow, or otherwise redefine a domain width."
+  "law": "Canonical SENS table coordinate width and the ratified foundation must agree exactly. This generated projection only verifies and carries that agreement; it cannot mint, infer, widen, narrow, or otherwise redefine a domain width."
 }
