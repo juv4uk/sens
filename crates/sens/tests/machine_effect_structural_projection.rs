@@ -158,7 +158,7 @@ fn each_structural_effect_form_projects_or_rejects_explicitly() {
     );
     assert_eq!(
         eval_value(&format!("(x86-structural-machine-effect? {store})"), &mut session),
-        "(1)",
+        "t",
         "store effect must be admitted to the structural machine-effect family"
     );
     assert_eq!(
