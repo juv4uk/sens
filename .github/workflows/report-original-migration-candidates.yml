@@ -8,6 +8,9 @@ on:
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'tests/test_report_original_migration_candidates.py'
+      - 'knowledge/migration-nonprogram-*-manifest-2026-10-08.json'
+      - 'knowledge/migration-nonprogram-expr-records-2026-10-08.json'
+      - 'knowledge/migration-nonprogram-isa-manifest-2026-10-08.json'
       - 'knowledge/d1-d9-foundation.json'
       - 'contracts/core1-historical-sid-map.lisp'
       - '.github/workflows/report-original-migration-candidates.yml'
@@ -45,6 +48,10 @@ jobs:
           assert r['schema']=='sens-original-three-pass-eligibility/v1'
           assert s['scanned']==s['blocked']+s['mechanical_candidates']
           assert s['scanned']==s['original_unpaired_sources_scanned']
+          assert s['classified_nonprogram']==len(r['nonprogram_classification'])
+          assert s['executable_or_unclassified_unpaired']+s['classified_nonprogram']==s['scanned']
+          assert all(x['automatic_sens_companion'] is False for x in r['nonprogram_classification'])
+          assert all(x['semantic_oracle_admitted'] is False for x in r['nonprogram_classification'])
           assert s['already_paired_sources_excluded']==len(r['already_paired_sources_excluded'])
           assert len(r['blocked_sources'])==s['blocked']
           assert sum(c['count'] for c in r['blocker_cohorts'])==s['blocked']
