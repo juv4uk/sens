@@ -124,6 +124,14 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     })
 }
 
+/// Tooling-only lookup for an already-ratified exact-domain successor.
+/// Historical compatibility bytes remain evidence, never semantic authority.
+pub(crate) fn migration_domain_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    legacy_domain_identity_from_registry_byte(byte)
+}
+
 pub(crate) fn surface_for_domain_identity(
     identity: DomainIdentity,
     namespace: &str,
