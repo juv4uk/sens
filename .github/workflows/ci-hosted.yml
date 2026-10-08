@@ -62,6 +62,8 @@ jobs:
         run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
       - name: Current Core4 FASL freshness
         run: cargo test -p sens --test core_fasl_freshness -- --nocapture
+      - name: Real exact-width D4 LIST physical T5 and D3 QUOTE value-call witnesses
+        run: cargo test -p sens --test d4_list_exact_value_call -- --nocapture
       - name: Current semantic slice
         run: bash scripts/test-current-semantic-slice.sh
       - name: Critical machine and surface witnesses
