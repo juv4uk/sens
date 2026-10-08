@@ -400,7 +400,7 @@ mod tests {
         let words_b = parse_binary_source_words("000").unwrap();
         let packed_a = crate::pack_binary_source_tokens(&words_a);
         let packed_b = crate::pack_binary_source_tokens(&words_b);
-        assert_eq!(packed_a, packed_b);
+        assert!(packed_a == packed_b);
         assert_eq!(packed_a.bit_len(), 3);
     }
 
