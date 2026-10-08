@@ -1,0 +1,31 @@
+name: Migration exact D1 COND physical T5 cohort
+
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/migration-d1-cond-cohort/**'
+      - 'tests/test_migration_d1_cond_cohort.py'
+      - 'crates/sens/tests/migration_d1_cond_cohort.rs'
+      - '.github/workflows/migration-d1-cond-cohort.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/fixtures/migration-d1-cond-cohort/**'
+      - 'tests/test_migration_d1_cond_cohort.py'
+      - 'crates/sens/tests/migration_d1_cond_cohort.rs'
+      - '.github/workflows/migration-d1-cond-cohort.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  actual-t5-to-current-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Actual 3-pass source-to-T5 bytes and fail-closed Python guard
+        run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_cohort.py' -v
+      - name: Current Rust D1-only COND oracle reads committed physical bytes
+        run: cargo test -p sens --test migration_d1_cond_cohort -- --nocapture
