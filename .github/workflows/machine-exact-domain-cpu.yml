@@ -176,3 +176,5 @@ jobs:
           if-no-files-found: error
 
 # 4349 structural replay CI rerun after D3 predicate-value guard repair
+
+# 4349 D3 predicate-value rejection guards repaired
