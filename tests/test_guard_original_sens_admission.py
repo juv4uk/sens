@@ -63,7 +63,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
             "source_sha256": hashlib.sha256((self.root / self.src).read_bytes()).hexdigest(),
             "expected_physical_sha256": hashlib.sha256((self.root / self.dst).read_bytes()).hexdigest(),
             "expected_typed_sha256": "0" * 64,
-            "expected_current_eval_stdout": "(())\\n",
+            "expected_current_eval_stdout": "(())\n",
             "oracle_commands": [["cargo", "test", "--test", "actual_source_oracle"]],
         }
         path = self.root / gate.MANIFEST_DIR / "real.json"
@@ -148,14 +148,14 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         self.add_original_binary()
         path = self.proof()
         obj = json.loads(path.read_text(encoding="utf-8"))
-        obj["expected_current_eval_stdout"] = "incorrect\\n"
+        obj["expected_current_eval_stdout"] = "incorrect\n"
         path.write_text(json.dumps(obj), encoding="utf-8")
         def unexecuted(*args):
             return {"d2_reader": "PASS", "oracle_commands_passed": 3}
         state = gate.inspect(self.root, self.base, self.reader, unexecuted, self.safe_kind)
         self.assertEqual(state["status"], "BLOCKED")
         self.assertIn("CURRENT_EVAL", state["files"][0]["reason"])
-        for value in ("", "not LF", "\\r\\n", None, 23):
+        for value in ("", "not LF", "\r\n", None, 23):
             obj["expected_current_eval_stdout"] = value
             with self.subTest(value=value), self.assertRaises(gate.Blocked):
                 gate.expected_current_execution(obj)
