@@ -1,0 +1,35 @@
+name: DRAFT 3910 real original physical machine-block candidate
+
+on:
+  pull_request:
+    paths:
+      - 'tests/test_machine_block_text7_candidate.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'crates/sens/src/canonical_reader.rs'
+      - 'crates/sens/src/eval/**'
+      - '.github/workflows/machine-block-text7-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-physical-candidate-not-admitted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build actual Rust canonical D2/T5 reader, not Python approximation
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Generate ORIGINAL historical lib/machine/block.lisp to external T5 and test Rust open/eval
+        env:
+          SENS_TRIT_BIN: ${{ github.workspace }}/target/debug/sens-trit
+        run: python3 -m unittest discover -s tests -p 'test_machine_block_text7_candidate.py' -v
+      - name: Run separately pinned 9-case historical observations, NOT physical parity
+        run: python3 -m unittest discover -s tests -p 'test_machine_block_historical_oracle.py' -v
+      - name: Confirm no admission / no checked-in candidate file
+        run: |
+          test ! -e lib/machine/block.sens
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo 'DRAFT #3910 probe only; source+reader passes do not ratify Text7 or certify historical/current nine-case physical parity.' >> "$GITHUB_STEP_SUMMARY"
