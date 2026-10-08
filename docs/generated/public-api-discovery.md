@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 50
-- top-level функцій: 893
+- top-level функцій: 892
 - top-level макросів: 34
-- усього визначень: 927
+- усього визначень: 926
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -148,7 +148,6 @@
 | `lib/core4.lisp` | function | `my-postcore-build-definitions` | unreviewed |
 | `lib/core4.lisp` | macro | `my-postcore-materialize-stable-peers` | unreviewed |
 | `lib/core4.lisp` | function | `divmod` | unreviewed |
-| `lib/core4.lisp` | function | `null?` | unreviewed |
 | `lib/core4.lisp` | function | `subst` | unreviewed |
 | `lib/core4.lisp` | function | `sublis-pair` | unreviewed |
 | `lib/core4.lisp` | function | `sublis` | unreviewed |
