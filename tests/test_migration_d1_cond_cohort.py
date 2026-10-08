@@ -15,7 +15,7 @@ SCRIPT = ROOT / "scripts/migrate-three-pass.py"
 FIXTURES = ROOT / "tests/fixtures/migration-d1-cond-cohort"
 READABLE = FIXTURES / "branch.lisp"
 BINARY = FIXTURES / "branch.sens"
-SOURCE = "(110 (0 (100 ())) (1 1))\n"
+SOURCE = "(за-умовою (ні (перше ())) (так так))\n"
 WORDS = "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01"
 BYTES = bytes.fromhex("67386515bf123b2dc4a9b1a1")
 ARGS = {
@@ -49,13 +49,15 @@ class D1CondPhysicalCohort(unittest.TestCase):
         result = module.migrate_file(source, resolver, self.text7)
         return result, resolver.counts
 
-    def test_real_exact_d1_cond_source_has_binary_same_stem(self):
+    def test_ukrainian_d1_cond_source_has_binary_same_stem(self):
         self.assertEqual(READABLE.read_text(encoding="utf-8"), SOURCE)
         projection, counts = self.project(SOURCE)
         self.assertEqual(projection, WORDS + "\n")
-        self.assertEqual(counts["already-exact"], 2)  # D3 COND and CAR
+        self.assertEqual(counts["already-exact"], 0)
+        self.assertEqual(counts["pass2-my-lisp"], 2)  # D3 Ukrainian COND and CAR
+        self.assertEqual(module.load_d1_uk_surfaces(), {"ні": "0", "так": "1"})
+        self.assertEqual(module.D1_UK_SURFACES["так"], "1")
         self.assertEqual(counts["pass1-sens8"], 0)
-        self.assertEqual(counts["pass2-my-lisp"], 0)
         self.assertEqual(counts["pass3-lisp15"], 0)
         self.assertEqual(BINARY.read_bytes(), BYTES)
         self.assertNotEqual(BINARY.read_bytes(), projection.encode("ascii"))
