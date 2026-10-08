@@ -8,8 +8,8 @@
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
     compiler_execution_role, domain_identity_shape_mechanism, eval_parsed_expressions,
-    eval_program, load_core_library, sha256_source, Bija3, Bit3, Bit4, Bit8,
-    CompilerExecutionRole, CoreD4, CoreD8, CoreDomainIdentity, DomainIdentity, Exactness,
+    load_core_library, parse_mixed_exact_domain, sha256_source, Bija3, Bit3, Bit4, Bit8,
+    CompilerExecutionRole, CoreD4, CoreD8, DomainIdentity, Exactness,
     Session, Value,
 };
 use std::rc::Rc;
@@ -179,7 +179,8 @@ fn session(law: &LawProjection) -> Session {
     session
         .environment
         .define(PROVENANCE_NAME, provenance_value(law));
-    eval_program(NUCLEUS, &mut session).expect("compiler nucleus loads");
+    let expressions = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus parses");
+    eval_parsed_expressions(&expressions, &mut session).expect("compiler nucleus loads");
     session
 }
 
