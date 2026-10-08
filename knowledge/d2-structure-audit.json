@@ -1,0 +1,59 @@
+{
+  "schema": "d2-structure-audit/v1",
+  "status": "CURRENT-AUDIT",
+  "authority": "#4160",
+  "parent": "#4157",
+  "implementation_owner": "#4164",
+  "contract": "11.8",
+  "invariant": {
+    "language_structure_owner": "D2 only",
+    "d2_roles": {
+      "10": "OPEN",
+      "11": "DOT",
+      "00": "SEPARATOR",
+      "01": "CLOSE"
+    },
+    "payload_domains": "D1 and D3-D9 are payload/value/identity domains, never source delimiters",
+    "transport_rule": "transport framing metadata is private mechanism state, never Core.D2 semantic identity"
+  },
+  "paths": [
+    {
+      "path": "crates/sens/src/canonical_reader.rs",
+      "status": "PASS",
+      "claim": "Canonical visible-binary reader consumes W2 structurally with exact 00/01/10/11 roles; W1 and W3-W9 are payload identities."
+    },
+    {
+      "path": "crates/sens/src/source_words.rs",
+      "status": "PASS",
+      "claim": "Source lexer preserves exact W1-W9 width; W2 is a typed two-bit source word and receives no competing structural semantics here."
+    },
+    {
+      "path": "scripts/migrate-three-pass.py",
+      "status": "PASS",
+      "claim": "Migration emits D2 10/00/11/01 for list structure and rejects two-bit words as executable heads or ordinary data."
+    },
+    {
+      "path": "scripts/translate-domain-program.py",
+      "status": "PASS",
+      "claim": "Surface translation skips display-only structural labels; it never rewrites D2 open/close/separator/dot as human semantic tokens."
+    },
+    {
+      "path": "crates/sens/src/source_packing.rs",
+      "status": "PASS",
+      "claim": "Dense packing carries exact source bits only; structural bit patterns are payload and framing/word-boundary metadata stays caller-owned and separate."
+    },
+    {
+      "path": "crates/sens/src/binary_framing.rs",
+      "status": "DEBT-OWNED",
+      "owner": "#4164",
+      "claim": "Standalone transport framing is already documented as non-semantic, but current main still names private 2-bit tags CONTROL_* and retains stale 'canonical Control2' wording. #4164 renames them WIRE_* and explicitly separates D2:11 DOT from wire escape."
+    }
+  ],
+  "summary": {
+    "pass": 5,
+    "debt_owned": 1,
+    "debt_unowned": 0,
+    "blocking_semantic_conflict": 0
+  },
+  "release_rule": "For l0.42.0 the owned debt must be resolved by #4164 before release freeze; this audit must never be satisfied by reclassifying transport tags as D2."
+}
