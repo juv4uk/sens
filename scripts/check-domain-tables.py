@@ -47,6 +47,13 @@ def validate_dense_table(path: Path, width: int, residents: dict[str, str], requ
         if resident is None:
             fail(f"{domain}:{row.bits}: absent from ratified authority")
 
+        if domain == "D3" and row.bits == "000":
+            # Every projection of the structural EMPTY value is literally ().
+            surfaces = ("uk", "ukr", "san", "en", "lisp", "sym")
+            if any(getattr(row, name) != "()" for name in surfaces):
+                fail("D3:000: all six columns must be literal ()")
+            continue
+
         if row.en is None:
             fail(f"{domain}:{row.bits}: missing en")
         if not en_matches_resident(row.en, resident):
