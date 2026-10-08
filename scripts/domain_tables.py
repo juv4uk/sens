@@ -96,3 +96,52 @@ def read_domain_tables(paths=DOMAIN_TABLES) -> list[DomainTableRow]:
     for path in paths:
         rows.extend(read_domain_table(Path(path)))
     return rows
+
+def validate_ratified_ladder(data: dict, number_policy: dict | None = None) -> dict:
+    """Audit current D1-D9 table authority before *any* historical migration.
+
+    This is not an executable-head admission rule: D7 encodes text, D8/D9
+    carry ratified residents but source-call admissibility is separate.
+    """
+    if data.get("status") != "owner-ratified":
+        raise ValueError("domain ladder foundation is not owner-ratified")
+    domains = data.get("domains", {})
+    expected = {f"D{width}" for width in range(1, 10)}
+    if not expected.issubset(domains):
+        raise ValueError(f"missing ratified domains: {sorted(expected - set(domains))}")
+    if "D10" in domains and domains["D10"].get("status") == "owner-ratified":
+        raise ValueError("D10 has no ratified source authority")
+
+    counts = {}
+    for width in range(1, 10):
+        label = f"D{width}"
+        descriptor = domains[label]
+        if int(descriptor["width"]) != width:
+            raise ValueError(f"{label}: foundation bit width drift")
+        residents = descriptor["residents"]
+        if any(len(bits) != width or set(bits) - {"0", "1"} for bits in residents):
+            raise ValueError(f"{label}: malformed exact-width resident")
+        rows = read_domain_table(ROOT / "lib" / "domains" / f"d{width}.lisp")
+        actual = [row.bits for row in rows]
+        if len(set(actual)) != len(actual) or set(actual) != set(residents):
+            raise ValueError(f"{label}: canonical table/foundation coordinate mismatch")
+        counts[label] = len(actual)
+
+    if domains["D1"]["residents"] != {"0": "NO", "1": "YES"}:
+        raise ValueError("D1 predicate authority drift")
+    if domains["D2"]["residents"] != {
+        "00": "SEPARATOR", "01": "CLOSE", "10": "OPEN", "11": "DOT"
+    }:
+        raise ValueError("D2 structure authority drift")
+
+    if number_policy is not None:
+        if number_policy.get("status") != "owner-ratified":
+            raise ValueError("Number width authority is not ratified")
+        widths = number_policy.get("ratified_prefix_bits", [])
+        if widths[:3] != [24, 48, 96] or any(
+            later != prior * 2 for prior, later in zip(widths, widths[1:])
+        ):
+            raise ValueError("Number width ladder drift: expected D24/D48/D96 doubling")
+        if number_policy.get("first_width_bits") != 24:
+            raise ValueError("D24 Number initial width drift")
+    return counts
