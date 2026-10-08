@@ -25,6 +25,16 @@ jobs:
           assert os.environ["RELEASE_TAG"] == "l" + package["version"], "tag/package version mismatch"
           PY
           python3 -m unittest discover -s packaging/tests -v
+      - name: P0 binary/Ukrainian exact two-way pair release gate (#4430)
+        run: |
+          python3 -m unittest discover -s tests -p 'test_verify_source_pairs.py' -v
+          python3 scripts/verify-source-pairs.py --root . \
+            --include 'lib/**/*.lisp' \
+            --include 'contracts/**/*.lisp' \
+            --include 'knowledge/**/*.lisp' \
+            --encoder scripts/sens-uk-encode.py \
+            --decoder scripts/sens-uk-decode.py
+
       - name: Узгодженість версій усіх релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
       - name: translation boundary regression
