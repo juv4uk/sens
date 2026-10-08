@@ -20,10 +20,11 @@ SOURCE = ROOT / "lib/machine/block.lisp"
 PHYSICAL = ROOT / "lib/machine/block.sens"
 EXPECTED_PHYSICAL_SHA256 = "b6542822c6e19716287e670ba7a47f296bec5b803479d56bed18795d99c66719"
 EXPECTED_TYPED_SHA256 = "d7084d46e7e0e6946daab13b0087824db21e7097477bf4c2c09a23985426de3a"
+sys.path.insert(0, str(ROOT / "scripts"))
 SOURCE_GIT_BLOB = "200201b741787c4e144ad4194848acf51d7b439e"
 
 
-class RealBlockQuarantineTests(unittest.TestCase):
+class RealBlockIntegrityTests(unittest.TestCase):
     def test_committed_physical_artifact_is_valid_and_source_preserved(self):
         self.assertTrue(SOURCE.is_file())
         self.assertTrue(PHYSICAL.is_file())
