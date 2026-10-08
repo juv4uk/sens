@@ -45,6 +45,26 @@ class MigrateOneToSensTests(unittest.TestCase):
         self.assertIn("refusing overwrite", result.stderr)
         self.assertEqual(target.read_bytes(), before)
 
+    def test_real_executable_guard_can_be_migrated_to_binary_t5(self):
+        source = ROOT / "scripts" / "machine-authority-guard.lisp"
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "machine-authority-guard.sens"
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), str(source), "--output", str(target)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["status"], "written")
+            self.assertGreater(report["bytes"], 0)
+            self.assertTrue(target.is_file())
+            import hashlib
+            self.assertEqual(report["physical_sha256"], hashlib.sha256(target.read_bytes()).hexdigest())
+            self.assertNotIn(b" ", target.read_bytes())
+            self.assertEqual(source.suffix, ".lisp")
+
     def test_source_outside_repo_is_blocked(self):
         with tempfile.TemporaryDirectory() as td:
             source = Path(td) / "outside.lisp"
