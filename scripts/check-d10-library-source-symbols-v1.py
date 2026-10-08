@@ -40,7 +40,7 @@ def historical_top_level_define_rows(lines: list[str]) -> list[dict]:
     depth = 0
     in_string = False
     escape = False
-    pattern = re.compile(r"^\\(00001011[ \\t]+([^\\s()'\";]+)(?=\\s|\\))")
+    pattern = re.compile(r"^\(00001011[ \t]+([^\s()'\";]+)(?=\s|\))")
     for number, line in enumerate(lines, 1):
         if depth == 0 and not in_string:
             found = pattern.match(line)
@@ -55,7 +55,7 @@ def historical_top_level_define_rows(lines: list[str]) -> list[dict]:
             if in_string:
                 if escape:
                     escape = False
-                elif char == "\\\\":
+                elif char == "\\":
                     escape = True
                 elif char == '"':
                     in_string = False
