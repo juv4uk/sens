@@ -60,6 +60,47 @@ class RealBlockQuarantineTests(unittest.TestCase):
             self.assertFalse((mirror / "lib/machine/block.sens").exists())
             self.assertEqual(SOURCE.read_bytes(), source_before)
 
+    def test_canonical_preview_reports_block_reason_and_keeps_original_untouched(self):
+        """#4556: the public front door must expose BLOCK, not only exit 2.
+
+        This protects every future original-source lane: mechanical T5 output
+        does NOT certify executable semantics or allow source overwrites.
+        """
+        front = ROOT / "scripts/migrate.py"
+        original = SOURCE.read_bytes()
+        with tempfile.TemporaryDirectory(prefix="sens-block-frontdoor-") as td:
+            temp = Path(td)
+            mirror = temp / "mirror"
+            report = temp / "preview.json"
+            run = subprocess.run(
+                [sys.executable, str(front), "preview",
+                 "lib/machine/block.lisp", "--mirror", str(mirror),
+                 "--report", str(report)],
+                cwd=ROOT, capture_output=True, text=True, timeout=120,
+            )
+            self.assertEqual(run.returncode, 2, run.stdout + run.stderr)
+            self.assertTrue(report.is_file(), run.stdout + run.stderr)
+            ledger = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(ledger["summary"]["files_seen"], 1)
+            self.assertEqual(ledger["summary"]["files_admitted"], 0)
+            self.assertEqual(ledger["summary"]["files_written"], 0)
+            self.assertEqual(ledger["summary"]["files_blocked"], 1)
+            row, = ledger["files"]
+            self.assertEqual(row["path"], "lib/machine/block.lisp")
+            self.assertEqual(row["status"], "blocked")
+            self.assertEqual(row["source_era"], "auto")
+            self.assertTrue(row["reason"])
+            # The reason cannot be hidden behind a generic exit code.
+            self.assertIn("BLOCKED lib/machine/block.lisp:", run.stderr)
+            normalized = row["reason"][:100].replace("\\n", " ").replace("\\r", " ")
+            self.assertIn(normalized, run.stderr)
+            self.assertEqual(
+                row["source_sha256"], hashlib.sha256(original).hexdigest()
+            )
+            self.assertFalse((mirror / "lib/machine/block.sens").exists())
+            self.assertFalse(NOT_ADMITTED.exists())
+            self.assertEqual(SOURCE.read_bytes(), original)
+
     def test_blocked_source_does_not_overwrite_existing_t5(self):
         with tempfile.TemporaryDirectory(prefix="sens-block-no-clobber-") as td:
             temp = Path(td)
