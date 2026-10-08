@@ -71,6 +71,53 @@ def validate(content: str) -> list[str]:
     return errors
 
 
+
+def inventory_projection_errors(inventory: dict, document: str) -> list[str]:
+    """Keep Archipelago's human counts in sync with machine D10 authority."""
+    accounting = inventory.get("accounting")
+    capacity = inventory.get("capacity")
+    if not isinstance(accounting, dict) or not isinstance(capacity, int):
+        return ["machine D10 inventory lacks accounting/capacity"]
+
+    expected = {
+        "D10 selected": (
+            re.compile(r"(?m)^D10 selected\\s+(\\d+)/(\\d+)\\s*$"),
+            (accounting.get("selected_semantic_candidates"), capacity),
+        ),
+        "law-forced": (
+            re.compile(r"(?m)^law-forced\\s+(\\d+)\\s*$"),
+            (accounting.get("law_forced_coordinates"),),
+        ),
+        "unplaced": (
+            re.compile(r"(?m)^unplaced\\s+(\\d+)\\s*$"),
+            (accounting.get("unplaced_selected_candidates"),),
+        ),
+        "remaining": (
+            re.compile(r"(?m)^remaining\\s+(\\d+)\\s*$"),
+            (accounting.get("remaining_semantic_inventory"),),
+        ),
+        "ratified": (
+            re.compile(r"(?m)^ratified\\s+(\\d+)\\s*$"),
+            (accounting.get("ratified_d10_residents"),),
+        ),
+    }
+    errors: list[str] = []
+    for label, (pattern, wanted) in expected.items():
+        matches = pattern.findall(document)
+        if len(matches) != 1:
+            errors.append(f"Archipelago projection must contain exactly one {label!r} count")
+            continue
+        found = matches[0]
+        observed = tuple(int(value) for value in found) if isinstance(found, tuple) else (int(found),)
+        if any(value is None for value in wanted):
+            errors.append(f"machine D10 inventory misses the {label!r} accounting value")
+            continue
+        target = tuple(int(value) for value in wanted)
+        if observed != target:
+            errors.append(f"Archipelago {label}={observed} disagrees with machine inventory={target}")
+    return errors
+
+
 def self_test() -> None:
     sha = "a" * 40
     reference = f"juv4uk/sens@{sha}:lib/core1.lisp:42"
