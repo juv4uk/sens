@@ -135,6 +135,21 @@ class IncrementalTripletGate(unittest.TestCase):
         self.commit("replace view with symlink")
         self.assertEqual(self.scan()["status"], "BLOCKED")
 
+    def test_existing_view_typechange_to_symlink_never_bypasses_delta(self):
+        old = self.root / "old"
+        old.write_bytes(VIEW)
+        self.commit("regular baseline view")
+        self.base = self.cmd("rev-parse", "HEAD").strip()
+        original = self.root / "other-view"
+        original.write_bytes(VIEW)
+        old.unlink()
+        old.symlink_to(original)
+        self.commit("T status replaces tracked regular view by a symlink")
+        result = self.scan()
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["files"][0]["view_status"], "UNSAFE_LINK")
+        self.assertTrue(any(row["change"] == "T" for row in result["changed_paths"]))
+
     def test_nested_pair_uses_relative_same_stem(self):
         self.new_pair(sens="lib/диво.sens", with_view=True)
         result = self.scan()
