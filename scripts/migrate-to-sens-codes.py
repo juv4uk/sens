@@ -45,10 +45,12 @@ SKIP_DIRS = {
     "dist", "build", "__pycache__",
 }
 
-D2_OPEN = "10"
-D2_CLOSE = "01"
-D2_DOT = "11"
-D2_SEPARATOR = "00"
+@dataclass(frozen=True)
+class D2Structure:
+    separator: str
+    close: str
+    open: str
+    dot: str
 
 
 @dataclass(frozen=True)
@@ -71,6 +73,37 @@ class Hit:
 
 class BinaryMigrationError(ValueError):
     pass
+
+
+def load_d2_structure(foundation: dict) -> D2Structure:
+    """Load D2 structure from owner-ratified foundation, never a surface label."""
+    d2 = foundation.get("domains", {}).get("D2")
+    if not isinstance(d2, dict) or int(d2.get("width", -1)) != 2:
+        raise BinaryMigrationError("foundation: expected canonical D2 width=2 authority")
+    if str(d2.get("authority")) != "#1702":
+        raise BinaryMigrationError(
+            f"foundation: D2 authority mismatch: expected #1702, found {d2.get('authority')!r}"
+        )
+
+    residents = d2.get("residents")
+    expected = {
+        "00": "SEPARATOR",
+        "01": "CLOSE",
+        "10": "OPEN",
+        "11": "DOT",
+    }
+    if residents != expected:
+        raise BinaryMigrationError(
+            f"foundation: D2 structural authority mismatch: expected {expected}, found {residents}"
+        )
+
+    by_role = {role: bits for bits, role in residents.items()}
+    return D2Structure(
+        separator=by_role["SEPARATOR"],
+        close=by_role["CLOSE"],
+        open=by_role["OPEN"],
+        dot=by_role["DOT"],
+    )
 
 
 def load_foundation(path: Path):
@@ -689,9 +722,12 @@ def encode_text7_spelling(text: str, candidates):
     return words
 
 
-def _emit_item(out, words, need_separator):
-    if need_separator and out and out[-1] not in (D2_OPEN, D2_SEPARATOR):
-        out.append(D2_SEPARATOR)
+def _emit_item(out, words, need_separator, d2_structure: D2Structure):
+    if need_separator and out and out[-1] not in (
+        d2_structure.open,
+        d2_structure.separator,
+    ):
+        out.append(d2_structure.separator)
     out.extend(words)
 
 
@@ -780,6 +816,7 @@ def binary_rewrite(
     registry_surface_sid_map=None,
     resolver: SourceResolver | None = None,
     *,
+    d2_structure: D2Structure,
     contract_authority: bool = False,
     binary_authority: dict[tuple[int, str], Entry] | None = None,
     d1_enabled: bool = False,
@@ -813,12 +850,12 @@ def binary_rewrite(
         if frames:
             frame = frames[-1]
             need = frame["items"] > 0
-            if need and (not out or out[-1] != D2_SEPARATOR):
-                out.append(D2_SEPARATOR)
+            if need and (not out or out[-1] != d2_structure.separator):
+                out.append(d2_structure.separator)
             frame["items"] += 1
             return
-        if top_has_item and (not out or out[-1] != D2_SEPARATOR):
-            out.append(D2_SEPARATOR)
+        if top_has_item and (not out or out[-1] != d2_structure.separator):
+            out.append(d2_structure.separator)
         top_has_item = True
 
     while i < len(source):
@@ -848,7 +885,7 @@ def binary_rewrite(
                 "quote_children": False,
                 "items": 0,
             })
-            out.append(D2_OPEN)
+            out.append(d2_structure.open)
             i += 1
             pending_quote = False
             continue
@@ -857,7 +894,7 @@ def binary_rewrite(
             if not frames:
                 raise BinaryMigrationError("unexpected closing parenthesis")
             frames.pop()
-            out.append(D2_CLOSE)
+            out.append(d2_structure.close)
             i += 1
             pending_quote = False
             continue
@@ -912,7 +949,7 @@ def binary_rewrite(
             after_ok = i + 1 == len(source) or source[i + 1].isspace() or source[i + 1] == ")"
             if before_ok and after_ok:
                 begin_item()
-                out.append(D2_DOT)
+                out.append(d2_structure.dot)
                 i += 1
                 pending_quote = False
                 continue
@@ -1019,12 +1056,12 @@ def binary_rewrite(
     # Collapse accidental duplicate separators and never leave edge separators.
     compact = []
     for word in out:
-        if word == D2_SEPARATOR and (not compact or compact[-1] in (D2_OPEN, D2_SEPARATOR)):
+        if word == d2_structure.separator and (not compact or compact[-1] in (d2_structure.open, d2_structure.separator)):
             continue
-        if word == D2_CLOSE and compact and compact[-1] == D2_SEPARATOR:
+        if word == d2_structure.close and compact and compact[-1] == d2_structure.separator:
             compact.pop()
         compact.append(word)
-    while compact and compact[-1] == D2_SEPARATOR:
+    while compact and compact[-1] == d2_structure.separator:
         compact.pop()
 
     rendered = " ".join(compact)
@@ -1107,6 +1144,7 @@ def main():
         parser.error("--contract-authority requires --binary-mirror")
 
     foundation, digest = load_foundation(args.foundation)
+    d2_structure = load_d2_structure(foundation)
     # Contract-authority mode is intentionally stacked on tested W1/W9 reader
     # ancestry (#4292 on the merged #4258 W9 main cut).  Capability is a release
     # prerequisite, never inferred from grep-able implementation text.
@@ -1189,6 +1227,7 @@ def main():
                     legacy_sid_map,
                     registry_surface_sid_map,
                     resolver,
+                    d2_structure=d2_structure,
                     contract_authority=args.contract_authority,
                     binary_authority=binary_authority,
                     d1_enabled=d1_enabled,
