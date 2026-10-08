@@ -5,6 +5,7 @@ on:
       - '**/*.lisp'
       - '**/*.sens'
       - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migration_source_scope.py'
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'tests/test_report_original_migration_candidates.py'
@@ -17,6 +18,7 @@ on:
       - '**/*.lisp'
       - '**/*.sens'
       - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migration_source_scope.py'
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'knowledge/d1-d9-foundation.json'
@@ -59,6 +61,8 @@ jobs:
           assert 'D1-D9' in r['authority']
           assert all(not x['same_stem_sens_already_exists'] for x in r['mechanical_candidates'])
           assert s['original_unpaired_executables_migrated_by_this_tool']==0
+          assert s['mechanical_candidates']==s['archived_nonprogram_mechanical_candidates']+s['nonarchive_mechanical_unproved']
+          assert s['unpaired_candidates_needing_original_oracle']==s['nonarchive_mechanical_unproved']
           assert all(not x['independent_semantic_oracle_passed'] for x in r['mechanical_candidates'])
           print('ORIGINAL_LISP_CANDIDATES',r['mechanical_candidates'])
           from pathlib import Path
