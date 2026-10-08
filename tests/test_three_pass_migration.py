@@ -463,11 +463,28 @@ class ThreePassMigrationTests(unittest.TestCase):
             "real machine-block projection must contain no unresolved symbolic atoms",
         )
         self.assertEqual(resolver.counts["pass1-sens8"], 17)
-        self.assertEqual(resolver.counts["pass4-text7-global"], 6)
-        self.assertGreater(
-            projection.count("10 " + "00"),
-            0,
-            "binding frames must contribute D2 structure",
+        for name in (
+            "machine-block",
+            "machine-block-empty",
+            "machine-block-one",
+            "machine-block-append",
+            "machine-block-concat",
+            "machine-block-forms",
+        ):
+            frame=mod.frame_text7(
+                mod.text7_encode(name,self.text7,mod.Tok("ATOM",name,0)),
+                mod.Tok("ATOM",name,0),
+            )
+            self.assertIn(" ".join(frame), projection,
+                          f"global DEFINE frame missing for {name}")
+        forms_frame=mod.frame_text7(
+            mod.text7_encode("forms",self.text7,mod.Tok("ATOM","forms",0)),
+            mod.Tok("ATOM","forms",0),
+        )
+        self.assertGreaterEqual(
+            projection.count(" ".join(forms_frame)),
+            2,
+            "lambda parameter and body reference must share the same Text7 frame",
         )
         payload=mod.encode_projection(projection)
         self.assertEqual(mod.decode_bytes(payload), words)
