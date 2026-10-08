@@ -1,0 +1,59 @@
+name: real original block physical migration
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block.lisp"
+      - "lib/machine/block.sens"
+      - "scripts/migrate-to-sens-codes.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/test_sens_code_migration.py"
+      - "tests/test_migration_real_block.py"
+      - ".github/workflows/real-original-block-physical-migration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build current Rust D2 reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Reproduce committed block.sens with canonical physical migrator
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate-to-sens-codes.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --sens-mirror "$RUNNER_TEMP/block-mirror" \
+            --report "$RUNNER_TEMP/block-report.json"
+          python3 - "$RUNNER_TEMP/block-report.json" <<'PY'
+          import json
+          import sys
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          rows = [r for r in data["files"] if r["path"] == "lib/machine/block.lisp"]
+          assert len(rows) == 1, rows
+          assert rows[0]["status"] == "sens-written", rows[0]
+          print(json.dumps(rows[0], ensure_ascii=False, indent=2))
+          assert rows[0]["physical_sha256"] == "b6542822c6e19716287e670ba7a47f296bec5b803479d56bed18795d99c66719"
+          assert rows[0]["typed_word_sha256"] == "d7084d46e7e0e6946daab13b0087824db21e7097477bf4c2c09a23985426de3a"
+          PY
+          cmp "$RUNNER_TEMP/block-mirror/lib/machine/block.sens" lib/machine/block.sens
+      - name: Current Rust D2 acceptance
+        run: target/debug/sens-trit open lib/machine/block.sens
+      - name: Original source remains byte-identical
+        run: |
+          test "$(git hash-object -- lib/machine/block.lisp)" = "200201b741787c4e144ad4194848acf51d7b439e"
+          git diff --exit-code -- lib/machine/block.lisp
+      - name: Upload proof report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-original-block-proof
+          path: |
+            ${{ runner.temp }}/block-report.json
+          if-no-files-found: error
