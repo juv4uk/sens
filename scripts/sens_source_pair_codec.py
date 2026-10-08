@@ -237,7 +237,7 @@ def decode_words(words: list[DomainWord]) -> str:
             d7_buffer = []
 
     def add_space() -> None:
-        if out and out[-1] not in ("(", " ", "."):
+        if out and out[-1] not in ("(", " "):
             out.append(" ")
 
     for word in words:
