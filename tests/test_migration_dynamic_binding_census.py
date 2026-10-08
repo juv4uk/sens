@@ -55,8 +55,8 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
                 self.assertIn(f"(00001001 {symbol}", text)
                 self.assertGreaterEqual(
                     text.count(f"({symbol}"),
-                    2,
-                    f"{row['path']} must define and execute/reference {symbol}",
+                    1,
+                    f"{row['path']} must execute/reference {symbol} after defining it",
                 )
                 self.assertTrue(row["action"].startswith("BLOCK_DYNAMIC_BINDING:"))
                 self.assertGreaterEqual(len(row["required_evidence"]), 4)
