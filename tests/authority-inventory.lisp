@@ -105,3 +105,4 @@
 (authority "crates/my-lisp/tests/sens_host_registration_admission_1406.rs" observer)
 (authority "crates/my-lisp/tests/core3_profile_runtime_1414.rs" observer)
 (authority "crates/sens/tests/machine_asm_differential.rs" mechanism)
+(authority "crates/sens/tests/machine_semantic_effect_lowering.rs" observer)

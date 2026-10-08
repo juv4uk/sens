@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "knowledge/d1-d9-foundation.json"
+      - "knowledge/domain-width-authority.generated.json"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
@@ -18,12 +19,14 @@ on:
       - "lib/domains/d8.lisp"
       - "lib/domains/d9.lisp"
       - "scripts/domain_tables.py"
+      - "scripts/generate-domain-width-certificate.py"
       - "scripts/check-domain-tables.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
       - "scripts/sens_source_resolver.py"
       - "scripts/migrate-to-sens-codes.py"
+      - "crates/sens/tests/domain_width_authority_test.rs"
       - "crates/sens/src/domain_surface_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
@@ -33,6 +36,7 @@ on:
     branches: [main]
     paths:
       - "knowledge/d1-d9-foundation.json"
+      - "knowledge/domain-width-authority.generated.json"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "knowledge/d8-ratified.json"
@@ -47,12 +51,14 @@ on:
       - "lib/domains/d8.lisp"
       - "lib/domains/d9.lisp"
       - "scripts/domain_tables.py"
+      - "scripts/generate-domain-width-certificate.py"
       - "scripts/check-domain-tables.py"
       - "scripts/check-domain-surfaces-d1-d4.py"
       - "scripts/check-domain-surfaces-d5.py"
       - "scripts/translate-domain-program.py"
       - "scripts/sens_source_resolver.py"
       - "scripts/migrate-to-sens-codes.py"
+      - "crates/sens/tests/domain_width_authority_test.rs"
       - "crates/sens/src/domain_surface_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
@@ -66,6 +72,10 @@ jobs:
       - uses: actions/checkout@v5
       - name: Validate canonical domain tables
         run: python3 scripts/check-domain-tables.py
+      - name: Check generated SENS domain-width certificate
+        run: python3 scripts/generate-domain-width-certificate.py --check
+      - name: Prove Rust exact-width carriers match SENS certificate
+        run: cargo test -p sens --test domain_width_authority_test
       - name: Check D1-D5 runtime projection
         run: python3 scripts/check-domain-surfaces-d1-d4.py
       - name: Check D5 authority

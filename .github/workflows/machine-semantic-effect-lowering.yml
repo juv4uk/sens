@@ -1,0 +1,30 @@
+name: machine-semantic-effect-lowering
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/effects/**"
+      - "lib/machine/lowering/semantic-effects.lisp"
+      - "knowledge/d1-d9-foundation.json"
+      - "crates/sens/tests/machine_semantic_effect_lowering.rs"
+      - ".github/workflows/machine-semantic-effect-lowering.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/effects/**"
+      - "lib/machine/lowering/semantic-effects.lisp"
+      - "knowledge/d1-d9-foundation.json"
+      - "crates/sens/tests/machine_semantic_effect_lowering.rs"
+      - ".github/workflows/machine-semantic-effect-lowering.yml"
+  workflow_dispatch:
+
+jobs:
+  semantic-effect-seam:
+    name: exact DomainIdentity to target-neutral effect
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Prove semantic-to-effect authority seam
+        run: cargo test --locked -p sens --test machine_semantic_effect_lowering -- --nocapture

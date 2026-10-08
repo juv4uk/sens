@@ -73,6 +73,19 @@ pub fn append_binary_source_word(packer: &mut BitPacker, word: BinarySourceWord)
     }
 }
 
+/// Count the exact semantic payload bits carried by canonical source tokens.
+///
+/// This function performs no semantic role lookup and invents no domain width.
+/// Each token already carries its exact SENS source width; Rust only adds those
+/// widths. Source whitespace/comments are absent from `tokens`, while D2
+/// structural words remain ordinary exact-width source tokens and therefore
+/// contribute their bits.
+///
+/// Wire framing and final-byte slack are intentionally excluded.
+pub fn semantic_source_bits(tokens: &[BinarySourceToken]) -> usize {
+    tokens.iter().map(|token| token.word.width()).sum()
+}
+
 /// Pack exact source words in program order with zero interior byte padding.
 ///
 /// Source token spans and semantic word-boundary policy stay outside the packed
@@ -80,7 +93,7 @@ pub fn append_binary_source_word(packer: &mut BitPacker, word: BinarySourceWord)
 /// to source word widths. Canonical wire/EOS and boundary metadata are owned
 /// separately by framing work.
 pub fn pack_binary_source_tokens(tokens: &[BinarySourceToken]) -> PackedBitstream {
-    let total_bits = tokens.iter().map(|token| token.word.width()).sum();
+    let total_bits = semantic_source_bits(tokens);
     let mut packer = BitPacker::with_capacity_bits(total_bits);
 
     for token in tokens {
@@ -153,10 +166,31 @@ mod tests {
     use crate::parse_binary_source_words;
 
     #[test]
+    fn semantic_source_measure_counts_d2_structure_and_d3_word() {
+        let tokens = parse_binary_source_words("10 001 01").unwrap();
+
+        assert_eq!(semantic_source_bits(&tokens), 7);
+        assert_eq!(tokens.iter().map(|token| token.word.width()).collect::<Vec<_>>(), [2, 3, 2]);
+    }
+
+    #[test]
+    fn semantic_source_measure_matches_dense_payload_across_d1_d9() {
+        let tokens = parse_binary_source_words(
+            "1 10 101 1010 10101 101010 1010101 10101010 100000001"
+        ).unwrap();
+        let packed = pack_binary_source_tokens(&tokens);
+
+        assert_eq!(semantic_source_bits(&tokens), 45);
+        assert_eq!(packed.bit_len(), semantic_source_bits(&tokens));
+        assert_eq!(packed.byte_len(), 6);
+    }
+
+    #[test]
     fn canonical_source_example_becomes_one_dense_seven_bit_payload() {
         let tokens = parse_binary_source_words("10 001 01").unwrap();
         let packed = pack_binary_source_tokens(&tokens);
 
+        assert_eq!(semantic_source_bits(&tokens), 7);
         assert_eq!(packed.bit_len(), 7);
         assert_eq!(packed.byte_len(), 1);
         assert_eq!(packed.bytes(), &[0b1000_1010]);
@@ -201,7 +235,7 @@ mod tests {
     fn mixed_widths_one_to_eight_reach_the_payload_lower_bound() {
         let tokens =
             parse_binary_source_words("1 10 101 1010 10101 101010 1010101 10101010").unwrap();
-        let payload_bits: usize = tokens.iter().map(|token| token.word.width()).sum();
+        let payload_bits = semantic_source_bits(&tokens);
         let packed = pack_binary_source_tokens(&tokens);
 
         assert_eq!(payload_bits, 36);
@@ -368,6 +402,7 @@ mod tests {
         let tokens = parse_binary_source_words("10 ; open\n 001\t01 ; close\n").unwrap();
         let packed = pack_binary_source_tokens(&tokens);
 
+        assert_eq!(semantic_source_bits(&tokens), 7);
         assert_eq!(packed.bit_len(), 7);
         assert_eq!(packed.bytes(), &[0b1000_1010]);
     }
