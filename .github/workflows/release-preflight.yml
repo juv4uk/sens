@@ -33,6 +33,16 @@ jobs:
         with:
           shared-key: release-preflight
 
+      - name: P0 binary/Ukrainian exact two-way pair preflight (#4430)
+        run: |
+          python3 -m unittest discover -s tests -p 'test_verify_source_pairs.py' -v
+          python3 scripts/verify-source-pairs.py --root . \
+            --include 'lib/**/*.lisp' \
+            --include 'contracts/**/*.lisp' \
+            --include 'knowledge/**/*.lisp' \
+            --encoder scripts/sens-uk-encode.py \
+            --decoder scripts/sens-uk-decode.py
+
       - name: Версійна паритетність релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
 
