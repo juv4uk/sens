@@ -322,8 +322,10 @@ mod tests {
     }
 
     #[test]
-    fn d6_current_head_is_preserved_and_lowers_to_exact_domain_call() {
-        let parsed = parse_mixed_exact_domain("(000001 x)").expect("D6 mixed parse");
+    fn d6_exact_identity_does_not_invent_callability_and_admitted_mechanism_lowers() {
+        // Every D6 binary word has a source identity, but not all D6 words
+        // are current executable mechanisms. 000001 is noncallable.
+        let parsed = parse_mixed_exact_domain("(000001 x)").expect("D6 source");
         let ExprKind::List(items) = &parsed[0].kind else {
             panic!("expected list");
         };
@@ -332,12 +334,24 @@ mod tests {
             ExprKind::DomainIdentity(identity)
                 if identity.width() == 6 && identity.packed_bits() == 1
         ));
-
         let lowered = only(lower_program(&parsed));
+        let ExprKind::List(items) = &lowered.kind else {
+            panic!("unadmitted D6 must not be an executable DomainCall");
+        };
         assert!(matches!(
-            lowered.kind,
+            &items[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 6 && identity.packed_bits() == 1
+        ));
+
+        // The ratified exact D6 mechanism 001110 is callable.
+        let current = parse_mixed_exact_domain("(001110 x)")
+            .expect("ratified D6 mechanism source");
+        let admitted = only(lower_program(&current));
+        assert!(matches!(
+            admitted.kind,
             ExprKind::DomainCall(CoreDomainIdentity::D6(word), _)
-                if word.word().packed_bits() == 1
+                if word.word().packed_bits() == 0b001110
         ));
     }
 
