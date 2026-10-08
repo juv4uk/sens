@@ -1,0 +1,75 @@
+name: SENS tracked T5 three-projection inventory
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit_t5_triplets.py'
+      - 'tests/test_audit_t5_triplets.py'
+      - '.github/workflows/audit-t5-triplets.yml'
+      - 'scripts/audit_t5_file_pairs.py'
+      - 'scripts/sens_t5_codec.py'
+      - '**/*.sens'
+      - '**/*.lisp'
+      - 'tests/fixtures/migration-d1-cond-cohort/branch'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit_t5_triplets.py'
+      - 'tests/test_audit_t5_triplets.py'
+      - '.github/workflows/audit-t5-triplets.yml'
+      - '**/*.sens'
+      - 'tests/fixtures/migration-d1-cond-cohort/branch'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-existing-triplets-no-write:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test real triple plus source/view/tamper/missing controls
+        run: python3 -m unittest discover -s tests -p 'test_audit_t5_triplets.py' -v
+      - name: Full tracked original source / physical T5 / human view inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_t5_triplets.py . \
+            --output "$RUNNER_TEMP/sens-t5-triplet-inventory.json"
+          python3 - "$RUNNER_TEMP/sens-t5-triplet-inventory.json" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          data=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          s=data["summary"]
+          assert data["schema"]=="sens-t5-same-stem-triplet-inventory/v1"
+          assert s["tracked_physical_pairs"] > 0
+          assert s["views_verified"] >= 1, "known branch view missing"
+          assert s["views_invalid"]==0 and s["physical_pairs_blocked"]==0
+          assert s["views_verified"]+s["views_missing"]==s["tracked_physical_pairs"]
+          assert s["uk_semantic_oracles_certified_by_this_audit"]==0
+          assert s["original_executables_migrated_by_this_audit"]==0
+          assert len({r["stem"] for r in data["files"]})==s["tracked_physical_pairs"]
+          assert all(not r["executable_semantics_admitted"] for r in data["files"])
+          view={r["stem"]:r for r in data["files"]}
+          assert view["tests/fixtures/migration-d1-cond-cohort/branch"]["view_status"]=="VIEW_PASS"
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a",encoding="utf-8") as f:
+              f.write("## T5 three-projection inventory (physical/view only)\n\n")
+              f.write(f"- Tracked physical .lisp/.sens pairs: **{s['tracked_physical_pairs']}**\n")
+              f.write(f"- Extensionless canonical views checked: **{s['views_verified']}**\n")
+              f.write(f"- Missing extensionless views: **{s['views_missing']}**\n")
+              f.write(f"- Invalid views: **{s['views_invalid']}**\n")
+              f.write("- Ukrainian semantic/parity release admission: **NOT VERIFIED BY THIS AUDIT**\n\n")
+              for row in data["files"]:
+                  f.write(f"- {row['stem']}: {row['view_status']} ({row['uk_projection_status']})\n")
+              f.write("\nFull SHA evidence is in the attached JSON. Missing view is unfinished work, not a release PASS.\n")
+          PY
+      - name: Upload source-physical-view coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-t5-three-projection-inventory
+          path: ${{ runner.temp }}/sens-t5-triplet-inventory.json
+          if-no-files-found: warn
+          retention-days: 14
