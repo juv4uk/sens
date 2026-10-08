@@ -83,7 +83,7 @@ class DeclarativeResearchTruthTests(unittest.TestCase):
                 # No top-level binary executable head may hide behind a name/N
                 # embedded deeper in source DATA.
                 self.assertIsNone(re.search(
-                    rb"(?m)^\\([01]{3,9}(?=\\s|\\))", raw), row["path"]
+                    rb"(?m)^\([01]{3,9}(?=\s|\))", raw), row["path"]
                 )
         self.assertTrue(paths.isdisjoint(EXECUTABLE))
         self.assertEqual(self.doc["counts"]["excluded_executable_modules"], 4)
@@ -98,9 +98,9 @@ class DeclarativeResearchTruthTests(unittest.TestCase):
                 row = rows[name]
                 self.assertEqual(row["classification"], "EXECUTABLE_NOT_NONPROGRAM")
                 raw, first = checked_source(row)
-                self.assertRegex(first, r"^\\(000010(?:01|11)\\b")
+                self.assertRegex(first, r"^\(000010(?:01|11)\b")
                 actual = len(re.findall(
-                    rb"(?m)^\\(000010(?:01|11)(?=\\s|\\))", raw))
+                    rb"(?m)^\(000010(?:01|11)(?=\s|\))", raw))
                 self.assertEqual(actual, expected)
                 self.assertEqual(row["top_level_define_count"], expected)
 
