@@ -1,0 +1,28 @@
+name: Migration non-program print cohort
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/migration-nonprogram-print-manifest-2026-10-08.json"
+      - "tests/test_migration_nonprogram_print_manifest.py"
+      - "crates/sens/tests/data/english-names-baseline.tsv"
+      - ".github/workflows/migration-nonprogram-print.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/migration-nonprogram-print-manifest-2026-10-08.json"
+      - "tests/test_migration_nonprogram_print_manifest.py"
+      - "crates/sens/tests/data/english-names-baseline.tsv"
+      - ".github/workflows/migration-nonprogram-print.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify exact 75-file historical benchmark cohort
+        run: python3 -m unittest tests.test_migration_nonprogram_print_manifest -v
