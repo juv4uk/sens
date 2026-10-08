@@ -3,7 +3,7 @@
   "batch": "D10-CROSSREPO-LINGUISTIC-V1",
   "parent": "#4300",
   "authority": "#4162",
-  "base_main": "e3434699a96eb7613dbaeb9eec7bcb6c3d352fd5",
+  "base_main": "3670283f476c0bc2bd1f191ba137346eb96ff4d5",
   "d10_state": {
     "selected": 527,
     "capacity": 1024,
@@ -92,7 +92,16 @@
       "duplicate_target": null,
       "duplicate_audit": "No D1-D9/D10 exact semantic-name match for sentence tokenization; STRING-SPLIT exists but does not encode language-specific sentence boundary behavior.",
       "coordinate": null,
-      "provenance_note": "Executable Ukrainian-specific sentence segmentation."
+      "provenance_note": "Executable Ukrainian-specific sentence segmentation.",
+      "independent_law_witness": {
+        "canonical_input_shape": "UTF-8 paragraph/string text; sentence mode consumes each paragraph buffer.",
+        "canonical_output_relation": "ordered sentence units in source order, with configured line-separator normalization.",
+        "positive_witness": "TokenizeText.splitSentences calls SRXSentenceTokenizer.tokenize(text) and emits each returned sentence as one output unit.",
+        "boundary_witness": "A generic STRING-SPLIT cannot express tokenizer state/context; this implementation delegates sentence boundaries to the Ukrainian SRX tokenizer rather than a fixed separator.",
+        "near_match_identity": "STRING-SPLIT",
+        "provenance_sha": "9ee55703fbdd003ae217d83347db40f520fdb29c",
+        "witness_kind": "source-level-static"
+      }
     },
     {
       "stable_id": "d10.ling.nlp-uk.tokenize-words.v1",
@@ -108,7 +117,16 @@
       "duplicate_target": null,
       "duplicate_audit": "No D1-D9/D10 exact semantic-name match; generic STRING-SPLIT is not equivalent to language-specific token boundary rules.",
       "coordinate": null,
-      "provenance_note": "Executable Ukrainian-specific word segmentation."
+      "provenance_note": "Executable Ukrainian-specific word segmentation.",
+      "independent_law_witness": {
+        "canonical_input_shape": "One sentence unit from the Ukrainian sentence tokenizer; optional onlyWords mode filters the resulting lexical items.",
+        "canonical_output_relation": "ordered token units, optionally reduced to lexical words, after UkrainianWordTokenizer plus token-adjustment rules.",
+        "positive_witness": "TokenizeText.splitWords calls wordTokenizer.tokenize(sent), then TextUtils.adjustTokens(words, true), and in onlyWords mode applies WORD_PATTERN filtering before joining the tokens.",
+        "boundary_witness": "For punctuation-attached text or mixed token classes, generic STRING-SPLIT would preserve separator-defined chunks; this implementation additionally applies Ukrainian tokenization and TextUtils.adjustTokens.",
+        "near_match_identity": "STRING-SPLIT",
+        "provenance_sha": "9ee55703fbdd003ae217d83347db40f520fdb29c",
+        "witness_kind": "source-level-static"
+      }
     },
     {
       "stable_id": "d10.ling.nlp-uk.lemmatize-text.v1",
@@ -124,7 +142,16 @@
       "duplicate_target": null,
       "duplicate_audit": "No D1-D9/D10 exact semantic-name match for lemmatization; current STRING/MAP/translation validation rows are not the same operation.",
       "coordinate": null,
-      "provenance_note": "LanguageTool-backed executable lemma mapping with an explicit ambiguity policy."
+      "provenance_note": "LanguageTool-backed executable lemma mapping with an explicit ambiguity policy.",
+      "independent_law_witness": {
+        "canonical_input_shape": "UTF-8 text analyzed as LanguageTool Ukrainian sentences and token readings.",
+        "canonical_output_relation": "each analyzable token is mapped to one or more unique lemmas; optional firstLemmaOnly applies an explicit frequency-based ambiguity policy.",
+        "positive_witness": "LemmatizeText.analyzeText calls MultiThreadedJLanguageTool.analyzeText(text), reads token lemma fields, and emits unique lemma values; findSingleLemma selects among surviving lemmas by lemmaFreqs when ambiguity remains.",
+        "boundary_witness": "STRING/MAP/translation rows can transform or validate representations but do not derive morphological lemma representatives from analyzed token readings.",
+        "near_match_identity": "UNDERSTAND-QUERY / TRANSLATION-*",
+        "provenance_sha": "e33b3c5f02ac742ced189db1f9a5a4e012230f5f",
+        "witness_kind": "source-level-static"
+      }
     },
     {
       "stable_id": "d10.ling.nlp-uk.inflect-word.v1",
@@ -141,7 +168,16 @@
       "duplicate_target": null,
       "duplicate_audit": "No D1-D9/D10 exact semantic-name match for morphological inflection; donor affix rules are supporting evidence, not independent slots.",
       "coordinate": null,
-      "provenance_note": "Executable synthesizer plus Ukrainian affix-rule evidence."
+      "provenance_note": "Executable synthesizer plus Ukrainian affix-rule evidence.",
+      "independent_law_witness": {
+        "canonical_input_shape": "lemma/token string + morphological tag or tag regular expression + regexp mode.",
+        "canonical_output_relation": "set/list of synthesized word forms satisfying the requested morphological tag constraint.",
+        "positive_witness": "Inflect.inflectWord constructs an AnalyzedToken from the lemma and directly calls UkrainianSynthesizer.synthesize(token, tag, regexp). The CLI documents `місто` + `noun:inanim:n:v_rod` as a concrete witness shape.",
+        "boundary_witness": "DERIVE-VERB-LAKARA is a staged Paninian verb derivation law; this operation instead accepts an arbitrary lemma plus morphological tag constraint and synthesizes the matching word forms.",
+        "near_match_identity": "DERIVE-VERB-LAKARA",
+        "provenance_sha": "a59975b48b1771de90136d512606e831a855ab0a",
+        "witness_kind": "source-level-static"
+      }
     },
     {
       "stable_id": "d10.ling.nlp-uk.pos-morph-tag.v1",
@@ -157,7 +193,16 @@
       "duplicate_target": null,
       "duplicate_audit": "No D1-D9/D10 exact semantic-name match for POS/morphological tagging.",
       "coordinate": null,
-      "provenance_note": "Executable analysis operation with structured token readings."
+      "provenance_note": "Executable analysis operation with structured token readings.",
+      "independent_law_witness": {
+        "canonical_input_shape": "UTF-8 text analyzed into LanguageTool Ukrainian token readings.",
+        "canonical_output_relation": "structured per-token readings exposing token value, lemma, POS/morphological tags, with explicit punctuation/symbol/unknown/unclassified handling.",
+        "positive_witness": "TagText.tagAsObject constructs token records containing value, lemma and tags for analyzed readings; the fallback branches explicitly emit `punct`, `symb`, `unknown`, `xmltag`, or `unclass` tags.",
+        "boundary_witness": "STRING->SYMBOL / STRING-VECTOR families change representation only; they do not compute or expose POS/morphological readings or the explicit linguistic fallback classes.",
+        "near_match_identity": "STRING->SYMBOL / STRING-VECTOR families",
+        "provenance_sha": "64da8876e4ca877d3c129bbd5e4d594df4977422",
+        "witness_kind": "source-level-static"
+      }
     },
     {
       "stable_id": "d10.ling.dict-uk.affix-generation.v1",
@@ -209,7 +254,7 @@
     "selected_candidates_in_artifact": 5,
     "projected_candidates_in_artifact": 1,
     "hold_candidates_in_artifact": 3,
-    "next_gate": "Lower-domain audit completed for the five SELECT rows; remaining gate is independent-law confirmation and explicit reviewer agreement before consolidated D10 admission as UNPLACED only."
+    "next_gate": "Independent-law witnesses for all five SELECT rows are recorded at source level; remaining gate is explicit reviewer agreement and consolidated D10 admission as UNPLACED only."
   },
   "duplicate_audit": {
     "lower_domain_sources": [
@@ -258,5 +303,9 @@
     "donor_projection": {
       "AFFIX-RULE-WORDFORM-GENERATION": "INFLECT-WORD"
     }
+  },
+  "evidence_standard": {
+    "law_witnesses": "Five SELECT rows now each carry canonical input shape, canonical output relation, positive witness, boundary/negative witness, exact near-match identity, provenance SHA, and witness kind.",
+    "scope": "Evidence-only; no coordinates, no ratification, no D10 inventory mutation."
   }
 }
