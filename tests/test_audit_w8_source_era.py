@@ -79,7 +79,7 @@ class W8ProvenanceTests(unittest.TestCase):
         src = cohort(("old.lisp", OLD))
         with self.assertRaisesRegex(proof.EvidenceError, "tracked stage-0"):
             proof.report(ROOT, src, {"old.lisp": OLD}, {"old.lisp": NEW})
-        with self.assertRaisesRegex(proof.EvidenceError, "exact Git blob"):
+        with self.assertRaisesRegex(proof.EvidenceError, "tracked stage-0 Git blob"):
             proof.report(ROOT, cohort(("old.lisp", "0"*39)),
                          {"old.lisp": OLD}, {"old.lisp": "0"*39})
 
