@@ -88,7 +88,7 @@
          (00000111
            ; Crucial asymmetry: do not even inspect host implementation text.
            ((00100001 (language-authority-source? path))
-            (scan (00000110 rows)))
+            (101111 (00000110 rows)))
            (t
             (10011100 ((raw-source (10100110 path)))
               (00000111
@@ -108,6 +108,6 @@
                         class
                         "Lisp language authority must not derive semantic truth from host/Rust implementation artifacts"))
                      (t
-                      (scan (00000110 rows)))))))))))))))
+                      (101111 (00000110 rows)))))))))))))))
 
-(01001000 (scan changed))
+(01001000 (101111 changed))
