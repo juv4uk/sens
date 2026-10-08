@@ -5,6 +5,7 @@ on:
       - '**/*.lisp'
       - '**/*.sens'
       - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migration_source_scope.py'
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'tests/test_report_original_migration_candidates.py'
@@ -17,6 +18,7 @@ on:
       - '**/*.lisp'
       - '**/*.sens'
       - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migration_source_scope.py'
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'knowledge/d1-d9-foundation.json'
@@ -51,6 +53,9 @@ jobs:
           assert 'D1-D9' in r['authority']
           assert all(not x['same_stem_sens_already_exists'] for x in r['mechanical_candidates'])
           assert s['original_unpaired_executables_migrated_by_this_tool']==0
+          assert s['mechanical_candidates']==s['archived_nonprogram_mechanical_candidates']+s['active_or_unclassified_mechanical_candidates']
+          assert s['unpaired_candidates_needing_original_oracle']==s['active_or_unclassified_mechanical_candidates']
+          assert all(x['source_scope']=='ARCHIVED_BENCHMARK_NONPROGRAM' for x in r['archived_benchmark_nonprogram_candidates'])
           assert all(not x['independent_semantic_oracle_passed'] for x in r['mechanical_candidates'])
           print('ORIGINAL_LISP_CANDIDATES',r['mechanical_candidates'])
           from pathlib import Path
@@ -59,9 +64,16 @@ jobs:
               out.write('## Original Lisp → physical SENS — current ratified D1–D9\n\n')
               out.write(f"- Historical unpaired originals scanned: **{s['scanned']}**\n")
               out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
-              out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
+              out.write(f"- Active/or unclassified mechanically eligible (NOT oracle-proven): **{s['unpaired_candidates_needing_original_oracle']}**\n")
+              out.write(f"- Archived nonprogram mechanically eligible (NOT executable): **{s['archived_nonprogram_mechanical_candidates']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
+              out.write('### Agent queues by first blocker\\n\\n')
+              for q in r['agent_work_queues']:
+                  out.write(f"- {q['cohort']}: {q['blocked_count']} paths; first \`{q['source_examples'][0]['path']}\`\\n")
+              out.write('\\n### Archive-only mechanical candidates (NOT apps)\\n')
+              for row in r['archived_benchmark_nonprogram_candidates']:
+                  out.write(f"- \`{row['path']}\`\\n")
               out.write('### First blocked originals (exact source paths)\n\n')
               for row in r['unpaired_blocker_sample'][:12]:
                   reason=row.get('reason','unknown').replace('\n',' ')[:200]
