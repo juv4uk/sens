@@ -1,0 +1,31 @@
+name: universal domain growth through D7
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/domain-growth-qn/**"
+      - ".github/workflows/domain-growth-qn.yml"
+      - "knowledge/exact-width-admitted-corpus.json"
+      - "knowledge/d5-historical-full-map.json"
+      - "knowledge/d6-historical-full-map.json"
+      - "benchmarks/d7-ratification-conformance/validate.py"
+  workflow_dispatch:
+
+jobs:
+  growth-law:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify universal growth through D7
+        run: |
+          python3 benchmarks/domain-growth-qn/run.py --json-out /tmp/domain-growth.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/domain-growth.json'))
+          assert [x['capacity'] for x in d['cube_levels']] == [2,4,8,16,32,64,128]
+          assert [x['selector_count'] for x in d['selector_positive_control']['levels']] == [2,4,8,16,32]
+          assert d['external_non_authoritative_audit']['prefix_fibre_coherence']['D5_to_D6']['same_category_pairs'] == [29,32]
+          assert d['external_non_authoritative_audit']['global_complement_category_coherence']['D6_same_category'] == [0,32]
+          assert d['D7_conclusion']['pure_geometry_capacity'] == 128
+          print('universal domain growth through D7: PASS')
+          PY

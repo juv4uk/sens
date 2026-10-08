@@ -191,6 +191,88 @@ fn packed_width(widths: &PackedBitstream, index: usize) -> u8 {
     widths.read::<3>(index * 3).unwrap().packed_bits() + 1
 }
 
+fn boundary_bitvector(words: &[Word], k: usize) -> (Vec<u64>, Vec<u32>) {
+    assert!(k > 0);
+    let total = total_bits(words);
+    let mut bits = vec![0u64; total.div_ceil(64)];
+    let mut checkpoints = Vec::with_capacity(words.len().div_ceil(k));
+    let mut bit = 0usize;
+    for (index, word) in words.iter().enumerate() {
+        if index % k == 0 {
+            checkpoints.push(u32::try_from(bit).expect("boundary checkpoint fits u32"));
+        }
+        bits[bit / 64] |= 1u64 << (bit % 64);
+        bit += word.width as usize;
+    }
+    (bits, checkpoints)
+}
+
+fn nth_set_bit(mut word: u64, ordinal: usize) -> usize {
+    debug_assert!(ordinal > 0);
+    for _ in 1..ordinal {
+        word &= word - 1;
+    }
+    word.trailing_zeros() as usize
+}
+
+fn select_boundary(
+    bits: &[u64],
+    checkpoints: &[u32],
+    k: usize,
+    index: usize,
+) -> (usize, u64) {
+    let block = index / k;
+    let within = index % k;
+    let checkpoint = checkpoints[block] as usize;
+    if within == 0 {
+        return (checkpoint, 0);
+    }
+
+    let mut remaining = within;
+    let mut word_index = checkpoint / 64;
+    let mut bit_in_word = checkpoint % 64 + 1;
+    let mut probes = 0u64;
+
+    loop {
+        let mut word = bits[word_index];
+        if bit_in_word < 64 {
+            word &= u64::MAX << bit_in_word;
+        } else {
+            word = 0;
+        }
+        probes += 1;
+        let count = word.count_ones() as usize;
+        if remaining <= count {
+            return (
+                word_index * 64 + nth_set_bit(word, remaining),
+                probes,
+            );
+        }
+        remaining -= count;
+        word_index += 1;
+        bit_in_word = 0;
+    }
+}
+
+fn next_boundary(bits: &[u64], start: usize, total: usize) -> (usize, u64) {
+    let mut cursor = start + 1;
+    let mut probes = 0u64;
+    while cursor < total {
+        let word_index = cursor / 64;
+        let bit_in_word = cursor % 64;
+        let word = bits[word_index] & (u64::MAX << bit_in_word);
+        probes += 1;
+        if word != 0 {
+            return (
+                word_index * 64 + word.trailing_zeros() as usize,
+                probes,
+            );
+        }
+        cursor = (word_index + 1) * 64;
+    }
+    (total, probes)
+}
+
 enum Index {
     Formula { width: u8 },
     FullUsize { offsets: Vec<usize> },
@@ -215,6 +297,12 @@ enum Index {
         checkpoints: Vec<u32>,
         locals: Vec<u8>,
         widths: PackedBitstream,
+    },
+    BoundarySelect {
+        k: usize,
+        checkpoints: Vec<u32>,
+        boundaries: Vec<u64>,
+        total_bits: usize,
     },
     Cache2 {
         widths: Vec<u8>,
@@ -244,6 +332,13 @@ impl Index {
                 ..
             } => {
                 checkpoints.len() * size_of::<u32>() + locals.len() + widths.byte_len()
+            }
+            Self::BoundarySelect {
+                checkpoints,
+                boundaries,
+                ..
+            } => {
+                checkpoints.len() * size_of::<u32>() + boundaries.len() * size_of::<u64>()
             }
             Self::Cache2 { widths, raws } => widths.len() + raws.len(),
         }
@@ -315,6 +410,22 @@ impl Index {
                 let width = packed_width2(widths, index);
                 (width, read_word(packed, offset, width), 0)
             }
+            Self::BoundarySelect {
+                k,
+                checkpoints,
+                boundaries,
+                total_bits,
+            } => {
+                let (start, select_probes) =
+                    select_boundary(boundaries, checkpoints, *k, index);
+                let (end, next_probes) = next_boundary(boundaries, start, *total_bits);
+                let width = u8::try_from(end - start).expect("bounded width");
+                (
+                    width,
+                    read_word(packed, start, width),
+                    select_probes + next_probes,
+                )
+            }
             Self::Cache2 { widths, raws } => (widths[index], raws[index], 0),
         }
     }
@@ -371,6 +482,15 @@ fn build_index(candidate: &str, case: &str, words: &[Word], packed: &PackedBitst
             checkpoints: checkpoint_offsets(words, k),
             locals: block_local_offsets_u8(words, k)?,
             widths: packed_width_stream2(words)?,
+        });
+    }
+    if let Some(k) = parse_checkpoint(candidate, "sel-") {
+        let (boundaries, checkpoints) = boundary_bitvector(words, k);
+        return Some(Index::BoundarySelect {
+            k,
+            checkpoints,
+            boundaries,
+            total_bits: total_bits(words),
         });
     }
     if candidate == "cache2" {

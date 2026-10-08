@@ -255,3 +255,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Benchmark refresh: 2026-10-04 evidence run; no executable semantics changed.

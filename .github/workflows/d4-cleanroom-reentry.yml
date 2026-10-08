@@ -1,0 +1,39 @@
+name: D4 clean-room re-entry research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d4-cleanroom-reentry/**"
+      - ".github/workflows/d4-cleanroom-reentry.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d4-cleanroom-reentry/**"
+      - ".github/workflows/d4-cleanroom-reentry.yml"
+  workflow_dispatch:
+
+jobs:
+  lower-bound:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run clean-room re-entry lower bound
+        run: |
+          rm -rf /tmp/d4-cleanroom-reentry
+          python3 benchmarks/d4-cleanroom-reentry/run.py             --max-unroll 8             --deep-length 256             --out /tmp/d4-cleanroom-reentry
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d4-cleanroom-reentry/report.md; then
+            cat /tmp/d4-cleanroom-reentry/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d4-cleanroom-reentry
+          path: /tmp/d4-cleanroom-reentry/
+          retention-days: 14
