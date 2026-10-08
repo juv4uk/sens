@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 
 from audit_t5_file_pairs import inspect as inspect_pairs
 from sens_t5_codec import decode_bytes, encode_words, typed_sha256
@@ -182,6 +183,50 @@ def inspect(root: Path, *, include_untracked: bool = False,
     }
 
 
+
+def write_receipt_once(root: Path, destination: Path, report: dict) -> None:
+    """Create an immutable JSON evidence file outside the source corpus.
+
+    Hard-linking a flushed temporary file is exclusive; a concurrent write
+    cannot replace a source .lisp, physical .sens, human view or earlier report.
+    """
+    source_root = root.resolve(strict=True)
+    if not source_root.is_dir():
+        raise ValueError("corpus root must be a directory")
+    target = destination.absolute()
+    if target.exists() or target.is_symlink():
+        raise ValueError("report already exists; no overwrite")
+    if target.resolve(strict=False).is_relative_to(source_root):
+        raise ValueError("report must be outside original source repository")
+    ancestor = target.parent
+    while True:
+        if ancestor.is_symlink():
+            raise ValueError("report path has symlink ancestor")
+        if ancestor == ancestor.parent:
+            break
+        ancestor = ancestor.parent
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.parent.is_symlink() or target.parent.resolve() != target.parent:
+        raise ValueError("report parent changed to a symlink during staging")
+    staged = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=target.parent,
+            prefix=".sens-triplet-receipt-", suffix=".tmp", delete=False,
+        ) as stream:
+            staged = Path(stream.name)
+            json.dump(report, stream, ensure_ascii=False, indent=2, sort_keys=True)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.link(staged, target)  # atomic create-if-absent
+    except FileExistsError as error:
+        raise ValueError("report already exists; no overwrite") from error
+    finally:
+        if staged is not None:
+            staged.unlink(missing_ok=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path, nargs="?", default=Path("."))
@@ -200,11 +245,7 @@ def main(argv: list[str] | None = None) -> int:
             required=tuple(args.require_view), strict=args.strict,
         )
         if args.report:
-            args.report.parent.mkdir(parents=True, exist_ok=True)
-            args.report.write_text(
-                json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8",
-            )
+            write_receipt_once(args.root, args.report, report)
         print(json.dumps({"status": report["status"], **report["summary"],
                           "failed_required": report["failed_required"]},
                          ensure_ascii=False, sort_keys=True))
