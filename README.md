@@ -51,6 +51,8 @@ cargo run -q -p sens-cli --bin sens-trit -- encode path/program.lisp
 cargo run -q -p sens-cli --bin sens-trit -- open path/program.sens
 ~~~
 
+**Правило міграції репозиторіїв:** існуючий `каталог/назва.lisp` має відповідник `каталог/назва.sens`, який містить справжні T5-байти з транспортною `2` лише між точними двійковими словами. Не створювати файлів `каталог/назва` без розширення і не зберігати текст `0/1/2` у `.sens`. [Міграція `.lisp → .sens`](docs/SENS-LISP-TO-T5-MIGRATION-2026-10-08.uk.md), [координація агентів #4449](https://github.com/juv4uk/sens/issues/4449).
+
 Файл `.sens` **фізично двійковий**, не ASCII. `open/view` декодує його у текст для людини; звичайному редактору потрібен окремий codec provider або file association. Деталі й обмеження: [T5 `.sens` — відображення пробілів](docs/sens-t5-space-view.uk.md). Формальна ратифікація всього wire-v1, зокрема EOS, лишається окремою задачею #4444.
 
 ---
