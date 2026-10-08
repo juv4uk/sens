@@ -70,18 +70,27 @@ class SpacedViewTests(unittest.TestCase):
 
     def test_corrupt_physical_padding_and_trailer_fail_closed(self):
         for broken in (b"", b"\xf3", b"\xf2", PHYSICAL + b"\xf2",
-                       PHYSICAL + b"\xf3", PHYSICAL[:-1]):
+                       PHYSICAL + b"\xf3"):
             with self.subTest(hex=broken.hex()):
                 with self.assertRaises(view.SensT5Error):
                     view.decode_bytes(broken)
 
     def test_stale_missing_and_symlink_existing_view_block(self):
+        # Truncation can accidentally produce another canonical shorter T5;
+        # it still cannot match the fixed source's typed-word/physical digest.
+        try:
+            truncated = view.decode_bytes(PHYSICAL[:-1])
+        except view.SensT5Error:
+            pass
+        else:
+            self.assertNotEqual(truncated, WORDS.split())
+
         with tempfile.TemporaryDirectory(prefix="sens-view-negative-") as td:
             root = Path(td)
             (root / "p.lisp").write_text("(ук джерело)\n", encoding="utf-8")
             (root / "p.sens").write_bytes(PHYSICAL)
             with self.assertRaisesRegex(view.ViewBlocked, "missing"):
-                view.inspect(root, Path("p.sens"), reader=None, verify_existing=True)
+                view.checked_path(root, Path("p"), "")
             # Existing view verification needs Rust, even if ASCII looks correct.
             (root / "p").write_bytes((WORDS + "\n").encode("ascii"))
             with self.assertRaisesRegex(view.ViewBlocked, "Rust"):
