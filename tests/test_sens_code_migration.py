@@ -29,6 +29,7 @@ DOMAIN_SURFACES = [
     ROOT / "lib" / "domains" / f"d{width}.lisp"
     for width in range(1, 7)
 ]
+D2_TABLE = ROOT / "lib" / "domains" / "d2.lisp"
 
 
 class SensCodeMigrationTests(unittest.TestCase):
@@ -36,6 +37,7 @@ class SensCodeMigrationTests(unittest.TestCase):
     def setUpClass(cls):
         data, _ = mod.load_foundation(FOUNDATION)
         cls.data = data
+        cls.d2_structure = mod.load_d2_structure(D2_TABLE)
         cls.code_map = mod.build_map(data, ["D3", "D4", "D5", "D6"])
         cls.code_map = mod.augment_code_map_with_domain_surfaces(
             cls.code_map, DOMAIN_SURFACES
@@ -61,6 +63,12 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.legacy,
             self.registry_surfaces,
             self.resolver,
+        )
+
+    def test_d2_structure_is_loaded_from_canonical_domain_table(self):
+        self.assertEqual(
+            self.d2_structure,
+            mod.D2Structure(separator="00", close="01", open="10", dot="11"),
         )
 
     def test_current_d3_authority_is_used(self):
