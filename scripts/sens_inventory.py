@@ -1,38 +1,71 @@
 #!/usr/bin/env python3
-"""#4453 triple inventory: .lisp (uk) / .sens (T5) / extensionless view.
+"""Read-only, fail-closed inventory of real SENS .lisp/.sens/view triplets.
 
-Classifies candidate sources, and for each admitted executable reports the
-same-stem triple with SHAs and a typed-word digest:
+IMPORTANT: a successful mechanical migration or a correct physical view is
+NOT semantic admission, original-source credit, or a release authorization.
+This inventory never guesses historical W8 era and NEVER runs a migrator.
+Use the separate proof-gated original-source publisher for admitted migrations.
 
-    { path, kind, status, sha256(.lisp), sha256(.sens), sha256(view),
-      typed_words_sha256, words }
-
-Kinds: executable | declarative (schema/document head) | blocked (other reason).
-Reuses the repo codec + migrator; no new codec/parser/domain table.
-
-Usage: sens_inventory.py [root ...] [--json OUT]
+Example:
+    python3 scripts/sens_inventory.py lib tests/fixtures --json /tmp/sens-inventory.json
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-import pathlib
+from pathlib import Path, PurePosixPath
 import re
-import subprocess
 import sys
-import tempfile
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import sens_t5_codec as C  # noqa: E402
+from sens_spaced_view import ViewError, check_or_stage  # noqa: E402
+from sens_t5_codec import SensT5Error  # noqa: E402
+from verify_uk_t5_triplet import ProjectionBlocked, verify as prove_bounded_uk  # noqa: E402
 
+SCHEMA = "sens-triple-inventory-failclosed/v2"
 SCHEMA_HEAD = re.compile(r"^[A-Za-z][\w./-]*/\d+$")
 KNOWN_DECL = {"schema", "token"}
+SAFE_ROOT = re.compile(r"^[A-Za-z0-9_./-]+$")
+GOOD_UK = "BOUNDED_UK_PROVEN_ORACLE_PENDING"
+PHYSICAL_ONLY = "PHYSICAL_VIEW_ONLY_UK_PENDING"
+MISSING = "MISSING_TRIPLET"
+NONPROGRAM = "NONPROGRAM_CANDIDATE"
+BLOCKED = "BLOCKED_INVALID_TRIPLET"
 
 
-def head_of(text: str) -> str | None:
-    for line in text.splitlines():
+class InventoryBlocked(ValueError):
+    pass
+
+
+def sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def safe_scope(root: Path, raw: str) -> Path:
+    """Do not search outside root or traverse symlinked directories."""
+    if not isinstance(raw, str) or not raw or not SAFE_ROOT.fullmatch(raw) or "\\" in raw:
+        raise InventoryBlocked("unsafe scope")
+    rel = PurePosixPath(raw)
+    if rel.is_absolute() or any(part in ("", ".", "..") for part in raw.split("/")):
+        raise InventoryBlocked("scope must be repo-relative with no traversal")
+    target = root.joinpath(*rel.parts)
+    node = root
+    for part in rel.parts:
+        node = node / part
+        if node.is_symlink():
+            raise InventoryBlocked("symlinked scope forbidden")
+    if not target.resolve().is_relative_to(root.resolve()):
+        raise InventoryBlocked("scope escaped repository")
+    if not target.is_dir():
+        raise InventoryBlocked("scope directory missing")
+    return target
+
+
+def head_of(source: str) -> str | None:
+    """Heuristic only! A Lisp datum's apparent head is NOT an executable proof."""
+    for line in source.splitlines():
         line = line.split(";", 1)[0].strip()
         if line.startswith("("):
             m = re.match(r"\(\s*([^\s()]+)", line)
@@ -41,65 +74,137 @@ def head_of(text: str) -> str | None:
     return None
 
 
-def classify(path: pathlib.Path) -> str:
-    h = head_of(path.read_text(encoding="utf-8"))
-    if h and (SCHEMA_HEAD.match(h) or h in KNOWN_DECL):
-        return "declarative"
-    return "executable"
+def classify(source: bytes) -> str:
+    try:
+        head = head_of(source.decode("utf-8", errors="strict"))
+    except UnicodeError:
+        return "unknown"
+    if head and (SCHEMA_HEAD.fullmatch(head) or head in KNOWN_DECL):
+        return "declarative_candidate"  # NOT an authoritative nonprogram finding
+    return "unknown_executable_candidate"  # never automatically executable
 
 
-def sha(p: pathlib.Path) -> str | None:
-    return hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else None
-
-
-def migrate(path: pathlib.Path, outdir: pathlib.Path) -> pathlib.Path | None:
-    subprocess.run(
-        [sys.executable, str(ROOT / "scripts/migrate-three-pass.py"),
-         "--out", str(outdir), "--source-era", "legacy", str(path)],
-        capture_output=True, text=True, cwd=str(ROOT))
-    s = outdir / (path.stem + ".sens")
-    return s if s.is_file() else None
-
-
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("roots", nargs="*", default=["lib", "tests/fixtures"])
-    ap.add_argument("--json")
-    ns = ap.parse_args()
-
+def inspect(root: Path = ROOT, roots: tuple[str, ...] = ("lib", "tests/fixtures")) -> dict:
+    if not root.is_dir() or root.is_symlink():
+        raise InventoryBlocked("repository root must be a real directory")
+    root = root.resolve()
+    paths: set[Path] = set()
+    for name in roots:
+        directory = safe_scope(root, name)
+        for path in directory.rglob("*.lisp"):
+            if not path.is_symlink() and path.is_file():
+                paths.add(path)
     rows = []
-    with tempfile.TemporaryDirectory() as td:
-        outdir = pathlib.Path(td)
-        for root in ns.roots:
-            for p in sorted((ROOT / root).rglob("*.lisp")):
-                rel = p.relative_to(ROOT).as_posix()
-                kind = classify(p)
-                row = {"path": rel, "kind": kind, "status": "declarative" if kind == "declarative" else "unknown",
-                       "sha_lisp": sha(p)}
-                if kind == "executable":
-                    s = migrate(p, outdir)
-                    if s is None:
-                        row["status"] = "blocked"
-                    else:
-                        words = C.decode_bytes(s.read_bytes())
-                        row["status"] = "admitted"
-                        row["sha_sens"] = sha(s)
-                        row["words"] = words
-                        row["typed_words_sha256"] = hashlib.sha256(
-                            "\n".join(words).encode()).hexdigest()
-                rows.append(row)
+    for src in sorted(paths, key=lambda path: path.relative_to(root).as_posix()):
+        rel = src.relative_to(root).as_posix()
+        source_data = src.read_bytes()
+        kind = classify(source_data)
+        sens = src.with_suffix(".sens")
+        view = src.with_suffix("")
+        row = {
+            "path": rel,
+            "source_kind": kind,
+            "source_sha256": sha(source_data),
+            "sens": sens.relative_to(root).as_posix(),
+            "view": view.relative_to(root).as_posix(),
+            "status": MISSING,
+            "release_admitted": False,
+            "original_executable_migration_credit": 0,
+            "independent_execution_oracle": "NOT_VERIFIED",
+            "source_era": "UNKNOWN_NOT_INFERRED",
+        }
+        # No name-only or width-only inference of an executable from a schema.
+        if kind == "declarative_candidate":
+            row["status"] = NONPROGRAM
+            row["reason"] = "heuristic declarative head; needs independent review"
+        elif any(p.is_symlink() for p in (src, sens, view)):
+            row["status"] = BLOCKED
+            row["reason"] = "symlinked artifact forbidden"
+        elif not sens.is_file() or not view.is_file():
+            row["status"] = MISSING
+            row["reason"] = "physical .sens and spaced view must both exist"
+        else:
+            try:
+                physical = check_or_stage(root, row["sens"])
+                row.update({
+                    "sens_sha256": physical["sens_sha256"],
+                    "view_sha256": physical["view_sha256"],
+                    "typed_word_sha256": physical["typed_word_sha256"],
+                    "words": physical["words"],
+                    "physical_bytes": physical["physical_bytes"],
+                })
+                row["status"] = PHYSICAL_ONLY
+                row["reason"] = "T5/view verified; Ukrainian meaning still unknown"
+                try:
+                    uk = prove_bounded_uk(src, sens, view)
+                    if (uk["typed_word_sha256"] != physical["typed_word_sha256"]
+                            or uk["physical_sha256"] != physical["sens_sha256"]
+                            or uk["view_sha256"] != physical["view_sha256"]
+                            or uk["source_sha256"] != physical["source_sha256"]):
+                        raise InventoryBlocked("bounded Ukrainian proof disagrees with T5 receipt")
+                    row["status"] = GOOD_UK
+                    row["reason"] = "bounded D1/D3 UK parity; runtime and original oracle still pending"
+                except ProjectionBlocked as error:
+                    row["uk_blocker"] = str(error)
+            except (ViewError, SensT5Error, InventoryBlocked, OSError, ValueError) as error:
+                row["status"] = BLOCKED
+                row["reason"] = str(error)
+        rows.append(row)
+    statuses = (MISSING, NONPROGRAM, BLOCKED, PHYSICAL_ONLY, GOOD_UK)
+    counts = {status: sum(r["status"] == status for r in rows) for status in statuses}
+    return {
+        "schema": SCHEMA,
+        "status": "INVENTORY_ONLY_NO_RELEASE_ADMISSION",
+        "summary": {
+            "files_seen": len(rows),
+            "mechanically_admitted": 0,
+            "release_admitted": 0,
+            "original_executable_migrations_certified": 0,
+            "by_status": counts,
+        },
+        "files": rows,
+    }
 
-    adm = [r for r in rows if r["status"] == "admitted"]
-    decl = [r for r in rows if r["status"] == "declarative"]
-    blk = [r for r in rows if r["status"] == "blocked"]
-    print(f"scanned {len(rows)}: admitted={len(adm)} declarative={len(decl)} blocked={len(blk)}")
-    for r in adm:
-        print(f"  ADMITTED {r['path']}  words={len(r['words'])}  typed={r['typed_words_sha256'][:16]}")
-    if ns.json:
-        pathlib.Path(ns.json).write_text(json.dumps({"schema": "sens-triple-inventory/1", "rows": rows},
-                                                    ensure_ascii=False, indent=1))
-        print("wrote", ns.json)
-    return 0
+
+def write_receipt(path: Path, report: dict, root: Path) -> None:
+    """Separate, new .json only; never clobber sources, T5 or extensionless view."""
+    if path.suffix != ".json" or path.is_symlink():
+        raise InventoryBlocked("receipt must be a new regular .json file")
+    if path.resolve().is_relative_to(root.resolve()):
+        raise InventoryBlocked("receipts must be stored outside source repository")
+    payload = (json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
+    with path.open("x", encoding="utf-8", newline="\n") as output:
+        output.write(payload)
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("roots", nargs="*", default=["lib", "tests/fixtures"],
+                   help="scoped repo-relative directories; no implicit original approval")
+    p.add_argument("--root", type=Path, default=ROOT)
+    p.add_argument("--json", type=Path, help="new report file OUTSIDE repository; no clobber")
+    p.add_argument("--require-bounded-uk", action="append", default=[],
+                   help="require named existing .lisp to pass bounded UK proof, not oracle")
+    args = p.parse_args(argv)
+    try:
+        data = inspect(args.root, tuple(args.roots))
+        found = {row["path"]: row for row in data["files"]}
+        missing = [path for path in args.require_bounded_uk
+                   if path not in found or found[path]["status"] != GOOD_UK]
+        if missing:
+            data["status"] = "BLOCKED"
+            data["failed_required"] = missing
+        if args.json is not None:
+            write_receipt(args.json, data, args.root)
+        print(json.dumps({
+            "status": data["status"],
+            "summary": data["summary"],
+            "failed_required": data.get("failed_required", []),
+        }, ensure_ascii=False, sort_keys=True))
+        return 2 if missing else 0
+    except (InventoryBlocked, OSError, ValueError, UnicodeError) as error:
+        print("INVENTORY BLOCKED: " + str(error), file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
