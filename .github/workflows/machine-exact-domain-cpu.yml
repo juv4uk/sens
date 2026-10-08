@@ -184,3 +184,5 @@ jobs:
 # 4349 isolate structural store projection diagnostic rerun
 
 # 4349 helper witness aligned to exact predicate value
+
+# 4349 structural-family helper witness contract
