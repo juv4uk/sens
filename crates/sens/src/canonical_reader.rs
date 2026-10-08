@@ -379,6 +379,32 @@ mod tests {
     }
 
     #[test]
+    fn two_parse_valid_programs_collide_without_exact_domain_word_boundaries() {
+        // A readable line/space is projection; the physical reader cannot
+        // recover these two distinct ASTs from naked concatenated bits "000".
+        let d1_then_d2 = parse_canonical_binary("0 00").unwrap();
+        let d3_empty = parse_canonical_binary("000").unwrap();
+        assert_eq!(d1_then_d2.len(), 1);
+        assert_eq!(d3_empty.len(), 1);
+        assert!(matches!(
+            d1_then_d2[0].kind,
+            ExprKind::DomainIdentity(identity) if
+                (identity.width(), identity.packed_bits()) == (1, 0)
+        ));
+        assert!(matches!(
+            d3_empty[0].kind,
+            ExprKind::List(ref items) if items.is_empty()
+        ));
+
+        let words_a = parse_binary_source_words("0 00").unwrap();
+        let words_b = parse_binary_source_words("000").unwrap();
+        let packed_a = crate::pack_binary_source_tokens(&words_a);
+        let packed_b = crate::pack_binary_source_tokens(&words_b);
+        assert_eq!(packed_a, packed_b);
+        assert_eq!(packed_a.bit_len(), 3);
+    }
+
+    #[test]
     fn separators_may_separate_top_level_expressions_without_becoming_values() {
         let parsed = parse_canonical_binary("001 00 010").unwrap();
         assert_eq!(parsed.len(), 2);
