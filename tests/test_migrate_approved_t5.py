@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/migrate-approved-t5.py"
 CAAR = "tests/fixtures/migration-d4-selector-cohort/caar.lisp"
 EXPECTED_PHYSICAL = bytes.fromhex(
-    "6612c47ec47e5c5e29d42dc32da42dc32da42ea937a813b1a1"
+    "6612c47ec47ec32da42dc32da42ea937a813b1a1"
 )
 
 class ApprovedT5MigrationTests(unittest.TestCase):
@@ -89,13 +89,10 @@ class ApprovedT5MigrationTests(unittest.TestCase):
             self.assertEqual(run.returncode, 0, run.stderr + run.stdout)
             target = out / "tests/fixtures/migration-d4-selector-cohort/caar.sens"
             self.assertTrue(target.is_file())
-            expected = bytes.fromhex(
-                "6612c47ec47ec32da42dc32da42ea937a813b1a1"
-            )
-            self.assertEqual(target.read_bytes(), expected)
+            self.assertEqual(target.read_bytes(), EXPECTED_PHYSICAL)
             rerun = self.run_cli(manifest, out, report)
             self.assertNotEqual(rerun.returncode, 0)
-            self.assertEqual(target.read_bytes(), expected)
+            self.assertEqual(target.read_bytes(), EXPECTED_PHYSICAL)
 
     def test_manifest_rejects_duplicate_entries(self):
         with tempfile.TemporaryDirectory() as td:
