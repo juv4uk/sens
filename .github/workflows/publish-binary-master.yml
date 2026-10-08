@@ -65,6 +65,14 @@ jobs:
               assert typed_sha256(words)==row['typed_word_sha256'], rel
               assert sum(map(len, words))==row['semantic_bits'], rel
           print('T5_BINARY_VERIFIED',len(physical),'BLOCKED',report['summary']['files_blocked'])
+          from collections import Counter
+          counts=Counter((x.get('reason','')[:95]) for x in report['files'] if x['status']=='blocked')
+          print('BLOCKED_REASONS_TOP',counts.most_common(15))
+          for x in [x for x in report['files'] if x['status']=='blocked'][:12]:
+              print('BLOCKED_EXAMPLE',x['path'],str(x.get('reason',''))[:120])
+          if len(physical) == 0:
+              print('WARNING: no admitted .lisp -> .sens files yet; never publish the old master output')
+
           PY
       - name: Upload binary migration preview and blocker report
         if: always()
