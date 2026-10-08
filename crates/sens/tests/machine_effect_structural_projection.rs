@@ -187,7 +187,7 @@ fn each_structural_effect_form_projects_or_rejects_explicitly() {
         "((mov-mem-disp8-r64 rdi 0 rax))",
         "direct structural projection must lower store-u64"
     );
-    for (effect, expected) = [
+    for (effect, expected) in [
         (
             "(00100111 (00000001 materialize-u64) (00000001 work) 2)",
             "((mov-r64-imm64 rax 2))",
