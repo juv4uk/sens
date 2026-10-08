@@ -91,10 +91,10 @@ TOTAL              87
 Поточний стан:
 
 ```text
-D10 selected              434/1024
+D10 selected              625/1024
 law-forced                256
-unplaced                  178
-remaining                 590
+unplaced                  369
+remaining                 399
 ratified                    0
 
 definite non-Core selected  0
