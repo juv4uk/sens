@@ -131,12 +131,12 @@ class T5ProofPublisherTests(unittest.TestCase):
 
     def test_false_old_current_parity_never_succeeds(self):
         self.assertTrue(READER.is_file(), "build real sens-trit first")
-        path = ROOT / "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        path = ROOT / "tests/fixtures/migration-multiform-cohort/two-forms.sens"
         p = {
             "source": "lib/machine/block.lisp",
             "historical_observation": {
-                "command": [sys.executable, "-c", "print('different')", "{source}"],
-                "stdout_sha256": hashlib.sha256(b"different\n").hexdigest(),
+                "command": [sys.executable, "-c", "print('(different)')", "{source}"],
+                "stdout_sha256": hashlib.sha256(b"(different)\n").hexdigest(),
             },
         }
         with self.assertRaisesRegex(gate.Blocked, "OBSERVABLE_PARITY_MISMATCH"):
@@ -147,7 +147,7 @@ class T5ProofPublisherTests(unittest.TestCase):
 
     def test_old_oracle_failure_or_stderr_blocks_even_if_current_executes(self):
         self.assertTrue(READER.is_file(), "build real sens-trit first")
-        path = ROOT / "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        path = ROOT / "tests/fixtures/migration-multiform-cohort/two-forms.sens"
         for script in ("import sys;sys.exit(4)",
                        "import sys;sys.stderr.write('not proven');print('NIL')"):
             proof = {
