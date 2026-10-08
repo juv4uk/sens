@@ -316,6 +316,13 @@ mod tests {
                 Bit4::new(0b0101).unwrap()
             )))
         );
+
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core bootstrap must materialize NULL");
+        assert!(
+            session.environment.domain_code_slot(identity).is_some(),
+            "Core bootstrap must bind null? closure into the exact D4:0101 slot"
+        );
     }
 
     #[test]
