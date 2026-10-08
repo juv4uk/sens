@@ -229,6 +229,7 @@ def decode_words(words: list[DomainWord]) -> str:
     semantic = _semantic_uk_words()
     out: list[str] = []
     d7_buffer: list[str] = []
+    depth = 0
 
     def flush_d7() -> None:
         nonlocal d7_buffer
@@ -249,6 +250,7 @@ def decode_words(words: list[DomainWord]) -> str:
                 add_space()
             elif word.bits == "10":
                 out.append("(")
+                depth += 1
             elif word.bits == "01":
                 while out and out[-1] == " ":
                     out.pop()
@@ -256,7 +258,10 @@ def decode_words(words: list[DomainWord]) -> str:
                     raise CarrierError(
                         "invalid empty D2 list; canonical empty is D3:000"
                     )
+                if depth <= 0:
+                    raise CarrierError("D2 CLOSE without matching OPEN")
                 out.append(")")
+                depth -= 1
             elif word.bits == "11":
                 while out and out[-1] == " ":
                     out.pop()
@@ -287,6 +292,8 @@ def decode_words(words: list[DomainWord]) -> str:
         out.append(surface)
 
     flush_d7()
+    if depth != 0:
+        raise CarrierError("unterminated D2 structure")
     result = "".join(out).strip()
     if not result:
         raise CarrierError("decoded canonical source is empty")
