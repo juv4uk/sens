@@ -220,6 +220,13 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
         if not full.is_file() or full.is_symlink() or not full.resolve().is_relative_to(root):
             raise Blocked(f"ORACLE: {role} witness file missing/unsafe: {rel}")
         raw = full.read_bytes()
+        # Pin witnesses to THIS source/target, not merely some unrelated
+        # successfully executing test. This is a necessary, not sufficient,
+        # condition for human-reviewable semantic equivalence.
+        visible_witness = raw.decode("utf-8", "strict")
+        for filename in (source.name, source.with_suffix(".sens").name):
+            if filename not in visible_witness:
+                raise Blocked(f"ORACLE: {role} witness does not identify {filename}")
         if git_blob_sha(raw) != expected_blob:
             raise Blocked(f"ORACLE: {role} witness changed from approved Git blob")
         ensure_tracked(root, rel, expected_blob)
