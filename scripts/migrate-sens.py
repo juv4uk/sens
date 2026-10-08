@@ -57,7 +57,7 @@ ARCHIVE_POLICY = "migration-benchmark-snapshot-2026-10-08.json"
 
 def _git_blob_sha(content: bytes) -> str:
     return hashlib.sha1(
-        b"blob " + str(len(content)).encode("ascii") + b"\\0" + content
+        b"blob " + str(len(content)).encode("ascii") + bytes([0]) + content
     ).hexdigest()
 
 
@@ -82,7 +82,7 @@ def _nonprogram_manifest_paths(root: Path) -> dict[str, str]:
             if not isinstance(row, dict) or set(row) != {"path", "git_blob_sha1"}:
                 raise MigrationBlocked(f"invalid SHA-locked nonprogram row: {filename}")
             name, blob = row["path"], row["git_blob_sha1"]
-            if not isinstance(name, str) or "\\\\" in name:
+            if not isinstance(name, str) or chr(92) in name:
                 raise MigrationBlocked("nonprogram source path must be relative POSIX")
             posix = PurePosixPath(name)
             if (posix.is_absolute() or ".." in posix.parts or posix.suffix != ".lisp"
