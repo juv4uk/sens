@@ -448,13 +448,13 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
-        # Use ratified D4 identities; W8 era is tested independently.
-        source="""\
-(0011 foo
-  (0010 ()
-    1))
-(foo)
-"""
+        # Use ratified D4 identities; W8 provenance is tested independently.
+        source = (
+            "(0011 foo\\n"
+            "  (0010 ()\\n"
+            "    1))\\n"
+            "(foo)\\n"
+        )
         projection,resolver=self.migrate(source)
         frame=mod.frame_text7(
             mod.text7_encode("foo",self.text7,mod.Tok("ATOM","foo",0)),
@@ -533,11 +533,11 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
         # Exercise lexical shadowing, not historical W8 lookup.
-        source="""\
-(0011 first
-  (0010 (first)
-    (first)))
-"""
+        source = (
+            "(0011 first\\n"
+            "  (0010 (first)\\n"
+            "    (first)))\\n"
+        )
         projection,resolver=self.migrate(source)
         words=projection.split()
         self.assertTrue(all(set(word) <= {"0","1"} for word in words))
