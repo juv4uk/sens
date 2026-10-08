@@ -68,6 +68,16 @@ class D10RawNotResidents(unittest.TestCase):
                          ["real-meaning", "last-one"])
         self.assertEqual([x["line"] for x in observed], [4, 9])
 
+    def test_multiline_historical_binder_name_is_a_complete_top_level_definition(self):
+        source = [
+            "(00001011 newline-terminated",
+            "  (00001000 (x) (00000001 ())))",
+        ]
+        found = mod.historical_top_level_define_rows(source)
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0]["line"], 1)
+        self.assertEqual(found[0]["name"], "newline-terminated")
+
     def test_historical_donor_parser_rejects_unbalanced_and_string_damage(self):
         with self.assertRaisesRegex(ValueError, "unbalanced"):
             mod.historical_top_level_define_rows(["(00001011 first ())", ")"])
