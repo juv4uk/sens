@@ -1,0 +1,7 @@
+{
+  "schema": "sens-approved-t5-manifest/v1",
+  "purpose": "bounded D4:1000 CAAR migration canary",
+  "files": [
+    "tests/fixtures/migration-d4-selector-cohort/caar.lisp"
+  ]
+}
