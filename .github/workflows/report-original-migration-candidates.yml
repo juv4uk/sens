@@ -2,8 +2,25 @@ name: Report original T5 migration candidates
 on:
   pull_request:
     paths:
+      - '**/*.lisp'
+      - '**/*.sens'
       - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
       - 'tests/test_report_original_migration_candidates.py'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'contracts/core1-historical-sid-map.lisp'
+      - '.github/workflows/report-original-migration-candidates.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.lisp'
+      - '**/*.sens'
+      - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'contracts/core1-historical-sid-map.lisp'
       - '.github/workflows/report-original-migration-candidates.yml'
   workflow_dispatch:
 permissions:
@@ -27,10 +44,29 @@ jobs:
           s=r['summary']
           assert r['schema']=='sens-original-three-pass-eligibility/v1'
           assert s['scanned']==s['blocked']+s['mechanical_candidates']
+          assert s['scanned']==s['original_unpaired_sources_scanned']
+          assert s['already_paired_sources_excluded']==len(r['already_paired_sources_excluded'])
           assert s['physical_outputs_created']==0
+          assert r['source_era']=='auto'
+          assert 'D1-D9' in r['authority']
+          assert all(not x['same_stem_sens_already_exists'] for x in r['mechanical_candidates'])
           assert s['original_unpaired_executables_migrated_by_this_tool']==0
           assert all(not x['independent_semantic_oracle_passed'] for x in r['mechanical_candidates'])
           print('ORIGINAL_LISP_CANDIDATES',r['mechanical_candidates'])
+          from pathlib import Path
+          import os
+          with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a',encoding='utf-8') as out:
+              out.write('## Original Lisp → physical SENS — current ratified D1–D9\n\n')
+              out.write(f"- Historical unpaired originals scanned: **{s['scanned']}**\n")
+              out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
+              out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
+              out.write(f"- BLOCKED: **{s['blocked']}**\n")
+              out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
+              out.write('### First blocked originals (exact source paths)\n\n')
+              for row in r['unpaired_blocker_sample'][:12]:
+                  reason=row.get('reason','unknown').replace('\n',' ')[:200]
+                  out.write(f"- `{row['path']}`: {reason}\n")
+              out.write('\nFull SHA-pinned evidence is attached as the JSON artifact.\n')
           PY
       - name: Save exact source SHA and admission decision
         uses: actions/upload-artifact@v4
