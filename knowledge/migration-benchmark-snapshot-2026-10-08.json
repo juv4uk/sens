@@ -1,0 +1,27 @@
+{
+  "schema": "sens-t5-archive-evidence/v1",
+  "status": "NONPROGRAM_ARCHIVED_BENCHMARK_EVIDENCE",
+  "classification": "scope-only; does not change migrator admission",
+  "owner_issue": "https://github.com/juv4uk/sens/issues/4458",
+  "coordinator": "https://github.com/juv4uk/sens/issues/4449",
+  "source_scan_run": "https://github.com/juv4uk/sens/actions/runs/37810152645",
+  "source_scan_print_blocked_rows": 75,
+  "source_scan_note": "Original scan reports 75 legacy-unmapped print blocks. Triage in coordinator identifies historical benchmark output under benchmarks/sens-surface/results/<snapshot>/programs/*.lisp. The count is evidence from that run, not a live count or migrated-program tally.",
+  "admitted_as_executable": 0,
+  "emitted_physical_sens": 0,
+  "allow_bulk_conversion": false,
+  "allow_release_pin_change": false,
+  "path_policy": "benchmarks/sens-surface/results/YYYYMMDD-<snapshot>/programs/<filename>.lisp only",
+  "representative": {
+    "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-en.lisp",
+    "git_blob_sha": "10f0bd9df07c2b7564bfdb5ef57c243133f8796a",
+    "expected_source_line": "(print (fib 25))",
+    "measurement_path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/runs.tsv",
+    "measurement_git_blob_sha": "ecf2decc20f00b2ebb73293fa21abd3a21a7da73"
+  },
+  "unresolved": [
+    "No executable .sens program is admitted by this archive classification.",
+    "Future source promotion must create a separate claim, typed D1-D9 identity, oracle parity and real T5 binary bytes.",
+    "Do not exempt active benchmarks runners, lib, examples, or any unmatched data path."
+  ]
+}
