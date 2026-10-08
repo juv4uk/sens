@@ -159,10 +159,6 @@ def run(args) -> dict:
     if ambiguous and args.source_era == "auto":
         raise ValueError("ambiguous W8/D8 words: explicit --source-era and oracle required: " +
                          ", ".join(ambiguous[:8]))
-    if ambiguous and args.source_era == "current":
-        # The currently checked-in three-pass API predates ratified D8
-        # disambiguation. Refuse to silently turn D8:W8 into historical SID8.
-        raise ValueError("current D8 source cannot use old legacy-only resolver; BLOCK until canonical #4517 API")
     foundation = migration.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
     legacy, my, upper = migration.build_three_pass_maps(
         foundation,
@@ -171,10 +167,14 @@ def run(args) -> dict:
         ROOT / "crates/sens/src/semantic_registry.rs",
         ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
         ROOT / "contracts/core1-historical-sid-map.lisp",
+        ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
     text7 = migration.build_text7(
         foundation, ROOT / "crates/sens/src/text7_projection_generated.rs")
-    resolver = migration.Resolver(legacy, my, upper)
+    resolver = migration.Resolver(
+        legacy, my, upper, source_era=args.source_era,
+        admitted_d8=foundation["domains"]["D8"]["residents"],
+    )
     try:
         projection = migration.migrate_file(source_text, resolver, text7)
     except migration.MigrationError as exc:
