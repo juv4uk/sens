@@ -41,7 +41,7 @@ pub(crate) fn text7_atom(expression: &Expr) -> Option<crate::Text7> {
     }
     let cells = items
         .iter()
-        .map(|item| match item.kind {
+        .map(|item| match &item.kind {
             ExprKind::DomainIdentity(crate::DomainIdentity::D7(word)) => {
                 Some(word.word().packed_bits())
             }
