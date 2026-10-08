@@ -38,6 +38,7 @@ if SCRIPTS not in sys.path:
 
 from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXTS = {".lisp"}
 SKIP_DIRS = {".git","target","node_modules","vendor","dist","build",".venv","venv","__pycache__"}
 
@@ -698,14 +699,14 @@ def main():
     ap.add_argument("root", type=Path)
     ap.add_argument("--out", type=Path, required=True,
                     help="окрема вихідна папка; .lisp НЕ змінюється")
-    ap.add_argument("--foundation", type=Path, required=True)
-    ap.add_argument("--domain-surfaces", type=Path, required=True)
-    ap.add_argument("--semantic-generated", type=Path, required=True)
-    ap.add_argument("--semantic-registry", type=Path, required=True)
-    ap.add_argument("--necessary-forms", type=Path, required=True)
-    ap.add_argument("--historical-map", type=Path, required=True)
-    ap.add_argument("--text7", type=Path, required=True)
-    ap.add_argument("--report", type=Path, required=True)
+    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d9-foundation.json")
+    ap.add_argument("--domain-surfaces", type=Path, default=REPO_ROOT / "crates/sens/src/domain_surface_registry_generated.rs")
+    ap.add_argument("--semantic-generated", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry_generated.rs")
+    ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
+    ap.add_argument("--necessary-forms", type=Path, default=REPO_ROOT / "crates/sens/src/eval/necessary_forms_generated.rs")
+    ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
+    ap.add_argument("--text7", type=Path, default=REPO_ROOT / "crates/sens/src/text7_projection_generated.rs")
+    ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
     ap.add_argument("--source-era", choices=("auto","legacy","current"), default="legacy",
@@ -713,6 +714,8 @@ def main():
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
+    if args.report is None:
+        args.report = args.out.with_name(args.out.name + ".report.json")
 
     data = load_foundation(args.foundation)
     if args.source_era=="current" and "D8" not in data.get("current_domains",()):
