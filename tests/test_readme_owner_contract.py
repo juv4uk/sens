@@ -47,7 +47,8 @@ class ReadmeOwnerTripletContract(unittest.TestCase):
 
     def test_contract_same_as_real_governance_script(self):
         owner = (ROOT/"scripts/verify-repo.lisp").read_text(encoding="utf-8")
-        self.assertIn("README.md: must describe Rust as a reference implementation", owner)
+        self.assertIn('": must describe Rust as a reference implementation"', owner)
+        self.assertIn('(check-doc-identity "README.md")', owner)
         self.assertIn("legacy aliases", self.doc)
         self.assertIn("reference implementation", self.doc)
 
