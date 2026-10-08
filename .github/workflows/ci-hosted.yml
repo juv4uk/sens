@@ -33,6 +33,8 @@ jobs:
         run: cargo build -p sens-cli --bin sens
       - name: D7 domain table is canonical-parser re-readable
         run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
+      - name: Active authored lib migration census
+        run: cargo test -p sens-cli --test active_lib_sens_completion -- --nocapture
       - name: Current Core4 FASL freshness
         run: cargo test -p sens --test core_fasl_freshness -- --nocapture
       - name: Current semantic slice
