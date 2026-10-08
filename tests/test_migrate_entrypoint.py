@@ -38,6 +38,30 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
                 ["preview", "benchmarks/lists.lisp", "--mirror", "/tmp/mirror",
                  "--report", "/tmp/preview.json", "--write"])
 
+    def test_preview_source_era_is_explicit_and_stays_read_only(self):
+        p = migrate.parser()
+        for era in ("auto", "legacy", "current"):
+            args = p.parse_args(["preview",
+                "tests/fixtures/core1-third-domain-canary/third.lisp",
+                "--source-era", era,
+                "--mirror", "/tmp/m", "--report", "/tmp/report.json"])
+            cmd = migrate.command(args)
+            self.assertEqual(cmd[cmd.index("--source-era") + 1], era)
+            self.assertNotIn("--write", cmd)
+            self.assertEqual(cmd[-2:], ["--report", "/tmp/report.json"])
+            self.assertEqual(Path(cmd[1]).name, "migrate-t5-batch.py")
+        defaults = p.parse_args(["preview", "lib/",
+            "--mirror", "/tmp/m", "--report", "/tmp/report.json"])
+        self.assertEqual(defaults.source_era, "auto")
+        self.assertEqual(migrate.command(defaults)[-4:-2], ["--source-era", "auto"])
+        for bad in ("sid8", "sens8", "guess", ""):
+            with self.subTest(mode=bad), self.assertRaises(SystemExit):
+                p.parse_args(["preview", "lib/", "--source-era", bad,
+                              "--mirror", "/tmp/m", "--report", "/tmp/r"])
+        with self.assertRaises(SystemExit):
+            p.parse_args(["preview", "lib/", "--source-era", "legacy",
+                          "--write", "--mirror", "/tmp/m", "--report", "/tmp/r"])
+
     def test_admit_requires_all_independent_evidence_and_write_is_explicit(self):
         p = migrate.parser()
         with self.assertRaises(SystemExit):
