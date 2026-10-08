@@ -27,6 +27,7 @@ import json
 from pathlib import Path, PurePosixPath
 import subprocess
 import sys
+import re
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
