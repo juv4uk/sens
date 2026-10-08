@@ -15,22 +15,22 @@
 (00001001 native-first-parity-corpus
   '
     ((car-cons-u64-zero
-       (100 (111 0 1))
+       (перше (сполучити 0 1))
        0
        pure
        not-applicable)
      (car-cons-u64-small
-       (100 (111 2 3))
+       (перше (сполучити 2 3))
        2
        pure
        not-applicable)
      (car-cons-u64-independent-fields
-       (100 (111 42 99))
+       (перше (сполучити 42 99))
        42
        pure
        not-applicable)
      (car-cons-u64-max-exact-result
-       (100 (111 9007199254740991 7))
+       (перше (сполучити 9007199254740991 7))
        9007199254740991
        pure
        not-applicable))))
