@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: migration-one-canonical-two-form
-          path: "$RUNNER_TEMP/migration-one/"
+          path: ${{ runner.temp }}/migration-one/
           if-no-files-found: error
       - name: Build SENS CLI
         run: cargo build -p sens-cli --bin sens
