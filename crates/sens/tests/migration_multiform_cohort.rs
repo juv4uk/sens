@@ -39,7 +39,7 @@ fn physical_two_form_source_retains_d2_boundary_and_executes_both() {
     let second = eval_parsed_expressions(&forms[1..2], &mut Session::default())
         .expect("D3 CONS and QUOTE execute")
         .value;
-    match second {
+    match &second {
         Value::Pair(head, tail) => {
             assert!(matches!(head.as_ref(), Value::Nil));
             assert!(matches!(tail.as_ref(), Value::Nil));
