@@ -47,7 +47,7 @@ class HostEffectMigrationGate(unittest.TestCase):
                 self.assertIn("(01001000 ", lines[at["output_call"] - 1])
                 self.assertIn("(01001011 ", lines[at["host_read"] - 1])
                 self.assertIn("(00001001 ", lines[at["local_binding"] - 1])
-                self.assertGreater(len(lines), max(at.values()))
+                self.assertGreaterEqual(len(lines), max(at.values()))
 
     def test_real_three_pass_cli_must_block_not_publish(self):
         with tempfile.TemporaryDirectory(prefix="sens-print-host-") as td:
