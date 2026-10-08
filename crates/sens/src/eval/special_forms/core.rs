@@ -2,6 +2,7 @@
 //! helper), plus the compatibility `def` surface. Language-owned `defmacro`
 //! is bootstrapped from `lib/macro.lisp`; the Rust kernel no longer implements it.
 
+use crate::canonical_reader::text7_binding_key;
 use crate::eval::canon;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
 use crate::environment::{CondClauseMode, CoreProfile};
