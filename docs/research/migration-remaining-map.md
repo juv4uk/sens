@@ -1,7 +1,7 @@
 # Карта міграції SENS: блокер → доказ → admission
 
 **Оновлено:** 2026-10-09
-**Аудований main:** `d0ef7de69b61b5a7e8c65e5f3284eefac0426562`
+**Аудований main:** `3da09d77e80bfdf69d9a62f2546f1b134e429947`
 **Нормативні власники:** [#4449](https://github.com/juv4uk/sens/issues/4449), [#4430](https://github.com/juv4uk/sens/issues/4430), [#4250](https://github.com/juv4uk/sens/issues/4250)
 
 > **Облікова норма:** physical file, generated view, fixture, source-only AST cutover або успішний окремий CI job ≠ completed original migration.
@@ -34,9 +34,9 @@
 
 | Ланка | Стан на 2026-10-09 | Наступна дія |
 |---|---|---|
-| [#4799 Text7 binder replay](https://github.com/juv4uk/sens/pull/4799) | Head рухався під час цього triage; останній відомий `581bb2d8…`, свіжі CI переважно QUEUED. На попередньому head `226ce156…` дві нові негативні рамкові перевірки стали RED: global DEFINE target ↔ callable-head identity та локальне затінення binder/reference. Це не T5 packing failure; розв'язати зв'язність кадрів, не послаблюючи очікувань. Окремий Hosted blocker `convertible=311` також вимагає parser/lowering gate, а не повернення Ukrainian heads у SID8. | Перевірити фактичну послідовність декодованих W7 кадрів для DEFINE target, global call, LAMBDA binder та shadowed local call; поправити генератор/role routing і додати exact negative witnesses. Далі замінити legacy sens-to-sens census на parser/lowering proof. Unknown/ambiguous W8 мусить BLOCK; не виключати compiler-nucleus і не рахувати TEXT parity як physical admission. |
+| [#4799 Text7 binder replay](https://github.com/juv4uk/sens/pull/4799) | Latest PR head `77763e70…`; fixes are now present: commits `581bb2d8…` / `d5efe61b…` reordered resolver precedence so proven global Text7 bindings beat surface aliases and corrected malformed test fixtures. Fresh run `37861662197` Hosted plus the new binder/unit gates were QUEUED at last poll; **not yet confirmed GREEN**. Earlier #37861335042 failures exposed the exact referential-coherence bugs; preserve those assertions. Separate active-lib `convertible=311` failure needs parser/lowering proof, not rewrite of Ukrainian heads back into SID8. | Verify the exact decoded W7 sequence against both global/Local test cases on this latest head, then replace legacy sens-to-sens census with parser/lowering proof. Unknown/ambiguous W8 must BLOCK; do not exclude compiler-nucleus and do not count TEXT parity as physical admission. |
 | [#4789 explicit Core4](https://github.com/juv4uk/sens/pull/4789) | Head `8dfe0f0c…`: current focused `Physical T5 explicit Core4 oracle` PASS; triple projection, D2/W7, syntax, Compiler role та W9 carrier PASS. Full Hosted CI був IN_PROGRESS на останній poll. | Після Text7 binder law звести на один актуальний main head й повторити full Hosted. Bare `eval` лишається без Core4, `eval-core4` явно завантажує Lisp-owned `lib/core4.lisp`. Не дублювати LIST/APPEND у Rust. |
-| [#4803 shared Clippy repair](https://github.com/juv4uk/sens/pull/4803) | Семантично нейтральні mainline lint repairs у head `d5f88ac6…`; strict Clippy / Hosted новий run QUEUED. Ще не merged. | Чекати strict Clippy + full Hosted GREEN; потім упорядкувати merge/replay так, щоб #4789 і #4799 не втратили branch-specific proof. Не оголошувати CI GREEN лише на основі попереднього набору lint-ів. |
+| [#4803 shared Clippy repair](https://github.com/juv4uk/sens/pull/4803) | Latest head `d5f88ac6…`: strict Clippy and Hosted are IN_PROGRESS; **English identity vs CLI surface ratchet has FAILED** on run `37861598591`, so this PR is not green and mergeability is false at last poll. | Diagnose the exact failed ratchet job before merge; do not conflate it with Clippy. Once the red is resolved, merge/replay without losing the branch-specific #4789 / #4799 proof. |
 | [#4797 public CLI proof](https://github.com/juv4uk/sens/pull/4797) | Відкритий stacked PR на старішому #4789 head `0a7e6de…`; попередні CLI/Hosted runs RED і branch не перебазований. | Після #4799/#4789 стабілізації перенести CLI proof на один current-head parent й перевірити окремі `sens-trit` процеси з фізичними байтами. |
 | [#4650 source-pinned admission](https://github.com/juv4uk/sens/issues/4650) | Потрібен фінальний source-specific доказ. Закритий без merge #4774 не дає credit. | Оригінальний blob → canonical Ukrainian parse/lowering → physical T5 → Rust `open/eval-core4` → 9/9 OLD↔CURRENT physical observables → triple + hashes + no-clobber receipt. |
 
@@ -66,7 +66,7 @@
 
 ## D10: паралельне дослідження, не міграційний обхід
 
-Канонічні machine files на current main: **625 selected / 1024**, **399 remaining**, **369 selected-but-unplaced**, **256 law-forced**, **0 ratified**. Новий `knowledge/d10-library-harvest-v1.json` має 102 source-grounded research rows (quantity/translation/SI), але вони `research-unratified` і **не додаються автоматично до 625**. Вісім Flavors/restart proposals із #4800 — окремий ledger, теж поза selected count; #4013 отримав окремий HOLD для `NARRATE-ANSWER` із `lib/narrate.lisp` source/line, поведінковими falsifiers та dedup-застереженням.
+Канонічний inventory стан на останньому перевіреному main: **625 selected / 1024**, **399 remaining**, **369 selected-but-unplaced**, **256 law-forced**, **0 ratified**. Після #4804 `knowledge/d10-library-harvest-v1.json` зберігає свої **39** уже розібраних research rows; **102 сирі donor-symbol names** лежать окремо в `knowledge/d10-library-source-symbols-v1.json`. Вони `research-unratified` та **не додаються до 625**. Вісім Flavors/restart proposals із #4800 — окремий ledger, теж поза selected count; #4013 отримав окремий HOLD для `NARRATE-ANSWER` із `lib/narrate.lisp` source/line, behavioral falsifiers та dedup-застереженням.
 
 Пріоритет D10 — кандидати з новим універсальним observable law, а не ще одна назва для механізму. Для кожного потрібні immutable source blob + line, arity/type/preconditions, позитивні/негативні falsifiers, dedup проти всіх D1–D9 і 625 already-selected candidates, derivability analysis, cross-substrate ownership та явний owner review. `coordinate=null`, доки позицію не виведено/ратифіковано.
 
@@ -74,9 +74,9 @@
 
 ## Остання координаційна поправка — 2026-10-09
 
-- [#4799](https://github.com/juv4uk/sens/pull/4799) зараз рухає HEAD і перезапускає перевірки після двох знайдених глобальних/локальних Text7 frame-coherence контрприкладів на попередньому head. Не приймати попередні 9/9 TEXT або canary gate за physical admission.
-- [#4789](https://github.com/juv4uk/sens/pull/4789) physical Core4 focused oracle пройшов; full Hosted ще не підтверджено GREEN. [#4803](https://github.com/juv4uk/sens/pull/4803) окремо закриває повторно виявлені mainline/test-only Clippy лінти — суворі job і Hosted ще QUEUED на останньому poll.
-- [#4805](https://github.com/juv4uk/sens/pull/4805) — саме цей документ; OPEN, не змержений. D10 comment [NARRATE-ANSWER](https://github.com/juv4uk/sens/issues/4013#issuecomment-6071302444) також лише HOLD; inventory 625 без змін.
+- [#4799](https://github.com/juv4uk/sens/pull/4799) latest head `77763e70…`; two identified global/local Text7 frame failures were patched at `581bb2d8…` / `d5efe61b…`, but current-head CI is QUEUED, not proven green.
+- [#4789](https://github.com/juv4uk/sens/pull/4789) physical Core4 focused oracle passed; full Hosted is still IN_PROGRESS. [#4803](https://github.com/juv4uk/sens/pull/4803) has strict Clippy/Hosted IN_PROGRESS but English identity ratchet FAILED; do not merge yet.
+- [#4805](https://github.com/juv4uk/sens/pull/4805) is this doc, OPEN/unmerged. D10 comment [NARRATE-ANSWER](https://github.com/juv4uk/sens/issues/4013#issuecomment-6071302444) remains HOLD, 0 coordinates/ratifications; inventory 625 unchanged. #4804 preserved 39 reviewed candidate rows and moved 102 raw names to the separate source-symbol file.
 
 ## Координаційне правило
 
