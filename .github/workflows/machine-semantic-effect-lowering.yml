@@ -1,4 +1,5 @@
 # CI trigger: structural projection scope fix
+# CI trigger: re-run after structural projection syntax repair
 name: machine-semantic-effect-lowering
 
 on:
