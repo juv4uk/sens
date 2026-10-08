@@ -5,6 +5,8 @@ on:
     paths:
       - "crates/sens/src/source_packing.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "benchmarks/human-wire/t5_stream.py"
+      - "benchmarks/human-wire/test_t5_stream.py"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
@@ -14,6 +16,8 @@ on:
     paths:
       - "crates/sens/src/source_packing.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "benchmarks/human-wire/t5_stream.py"
+      - "benchmarks/human-wire/test_t5_stream.py"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
@@ -29,6 +33,23 @@ jobs:
         run: |
           cargo test -p sens source_packing::tests::
           cargo test -p sens ternary_transport::tests::
+      - name: Keyed multi-program T5 AIR streaming emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s benchmarks/human-wire -p 'test_t5_stream.py' -v
+          python3 benchmarks/human-wire/t5_stream.py send \
+            --program '10 001 01' --program '10 000 01' --program '000' \
+            --jitter 0.20 --seed 73 --events "$RUNNER_TEMP/t5-events.json" \
+            > "$RUNNER_TEMP/t5-sent.json"
+          python3 benchmarks/human-wire/t5_stream.py receive \
+            --events "$RUNNER_TEMP/t5-events.json" > "$RUNNER_TEMP/t5-received.json"
+          python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["program_count"] == 3; assert r["frame_gap_events"] == 3; assert r["exact_width_programs"] == ["10 001 01", "10 000 01", "000"]' "$RUNNER_TEMP/t5-received.json"
+          # Verify the independent Python T5 byte projection matches the Rust
+          # production codec for a concrete stream frame.
+          printf '10 001 01\n' > "$RUNNER_TEMP/wire.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/wire.lisp"
+          PYTHONPATH=benchmarks/human-wire python3 -c 'import sys; from pathlib import Path; from t5_stream import parse_program,t5_pack; assert Path(sys.argv[1]).read_bytes()==t5_pack(parse_program("10 001 01"))' "$RUNNER_TEMP/wire.sens"
       - name: Physical T5 file must open as spaces, never transport 2
         shell: bash
         run: |
