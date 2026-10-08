@@ -68,6 +68,16 @@ jobs:
           for row in report['files']:
               if row['syntax_status'] != 'PASS_D2_SYNTAX':
                   print('D2_BLOCKED',row['sens'],row.get('syntax_reason','unknown'),flush=True)
+                  hint=row.get('d2_structure_balance_hint')
+                  if hint:
+                      print('D2_EXACT_WORD_HINT',row['sens'],json.dumps({
+                          'typed_word_count':hint['typed_word_count'],
+                          'first_unclosed_open_word':hint['first_unclosed_open_word'],
+                          'last_unclosed_open_word':hint['last_unclosed_open_word'],
+                          'unclosed_open_count':hint['unclosed_open_count'],
+                          'first_unmatched_close_word':hint['first_unmatched_close_word'],
+                          'unclosed_open_contexts':hint['unclosed_open_contexts'],
+                      },sort_keys=True),flush=True)
           if (report['schema']!='sens-t5-d2-program-syntax-audit/v1'
                   or report['status']!='SYNTAX_ONLY'
                   or int(sys.argv[2])!=0
