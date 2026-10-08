@@ -1,3 +1,4 @@
+# CI trigger: structural projection scope fix
 name: machine-semantic-effect-lowering
 
 on:
