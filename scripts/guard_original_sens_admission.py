@@ -158,9 +158,13 @@ def inspect(root: Path, base: str, reader: Path,
             row["status"] = "NEW_COHORT_NOT_ORIGINAL"
             continue
         row["original_git_blob_sha"] = prior
+        # Git HEAD (the actual proposed PR content) and the working bytes
+        # BOTH must preserve the base blob; a dirty worktree must not hide a
+        # committed source mutation that would silently ship at merge time.
+        head_blob = old_source_blob(root, git(root, "rev-parse", "HEAD").decode().strip(), source)
         current_blob = git(root, "hash-object", "--", source.as_posix()).decode().strip()
-        if current_blob != prior:
-            row["reason"] = "SOURCE_CHANGED: existing original source must be immutable"
+        if head_blob != prior or current_blob != prior:
+            row["reason"] = "SOURCE_CHANGED: committed HEAD and working original must match immutable base"
             continue
         found = manifests_for(root, source)
         if len(found) != 1:
