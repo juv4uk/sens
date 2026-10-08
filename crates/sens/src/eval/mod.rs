@@ -33,6 +33,7 @@ pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::canonical_reader::text7_binding_key;
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -190,13 +191,18 @@ pub(crate) fn evaluate_step(
             ))
         }
         ExprKind::List(items) => {
-            // Empty structure is a structural value, not any function SID.
             if items.is_empty() {
+                // Empty structure is a structural value, not any function SID.
                 return Ok(EvalStep::Value(Value::Nil));
             }
-            // D2/W7 lists remain ordinary structure in value/data positions.
-            // Text7 identifier interpretation is position-aware and therefore
-            // handled only when such a list occupies a call-head slot.
+            // Position-aware Text7 reference: an exact D2/W7 frame is treated
+            // as an identifier only when its canonical binding key already
+            // exists. Otherwise it remains an ordinary structural list.
+            if let Some(key) = text7_binding_key(expression) {
+                if let Some(value) = environment.get(&key) {
+                    return Ok(EvalStep::Value(value));
+                }
+            }
             evaluate_list(items, environment, expression.span)
         },
         ExprKind::Call(sid, arguments) => {
