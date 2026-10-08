@@ -68,12 +68,12 @@ jobs:
               out.write(f"- Archived nonprogram mechanically eligible (NOT executable): **{s['archived_nonprogram_mechanical_candidates']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
-              out.write('### Agent queues by first blocker\\n\\n')
+              out.write('### Agent queues by first blocker\n\n')
               for q in r['agent_work_queues']:
-                  out.write(f"- {q['cohort']}: {q['blocked_count']} paths; first \`{q['source_examples'][0]['path']}\`\\n")
-              out.write('\\n### Archive-only mechanical candidates (NOT apps)\\n')
+                  out.write(f"- {q['cohort']}: {q['blocked_count']} paths; first `{q['source_examples'][0]['path']}`\n")
+              out.write('\n### Archive-only mechanical candidates (NOT apps)\n')
               for row in r['archived_benchmark_nonprogram_candidates']:
-                  out.write(f"- \`{row['path']}\`\\n")
+                  out.write(f"- `{row['path']}`\n")
               out.write('### First blocked originals (exact source paths)\n\n')
               for row in r['unpaired_blocker_sample'][:12]:
                   reason=row.get('reason','unknown').replace('\n',' ')[:200]
