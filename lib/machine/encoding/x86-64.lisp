@@ -1212,8 +1212,8 @@
 
 ; #2372 reusable VEX3 XMM register law.
 ; byte1 = C4; byte2 = ~R ~X ~B m-mmmm; byte3 = W ~vvvv L pp.
-; These are machine bytes in the same exact Number carrier as the existing
-; x86 encoder, so the instruction-set witness can compare identity, not print.
+; These are machine bytes in the exact Number carrier already used by the
+; x86 encoder, so the instruction-set witness compares identity, not print.
 (00001001 x86-vex3-byte2
   (00001000 (map r x b)
     (00001100
