@@ -24,7 +24,10 @@ from domain_tables import read_domain_table
 
 ROOT = Path(__file__).resolve().parents[1]
 
-DOMAIN_PATHS = [ROOT / "lib" / "domains" / f"d{width}.lisp" for width in range(3, 7)]
+DOMAIN_PATHS = [
+    ROOT / "lib" / "domains" / f"d{width}.lisp"
+    for width in range(3, 7)
+]
 REGISTRY_PATH = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 
 # Contract 11.8 compiler-call admission is a separate law from identity
@@ -38,6 +41,7 @@ ROW_RE = re.compile(r'^\s*\(([01]{8})\s+(.*)\)\s*$')
 FIELD_RE = re.compile(
     r'\((en|uk|ukr|sa|sym)\s+("(?:\\\\.|[^"\\\\])*"|\(\)|[^()\s]+)\)'
 )
+
 
 @dataclass(frozen=True)
 class Identity:
@@ -192,7 +196,11 @@ def tokens(text: str):
         yield ("atom", start, i, text[start:i])
 
 
-def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) -> list[Edit]:
+def plan(
+    text: str,
+    surfaces: dict[str, Identity],
+    legacy: dict[str, Identity],
+) -> list[Edit]:
     stack: list[dict[str, bool]] = []
     quoted_next = False
     edits: list[Edit] = []
@@ -240,7 +248,11 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
             quoted_next = False
             continue
 
-        identity = legacy.get(token) if re.fullmatch(r"[01]{8}", token) else surfaces.get(token)
+        identity = (
+            legacy.get(token)
+            if re.fullmatch(r"[01]{8}", token)
+            else surfaces.get(token)
+        )
         if identity is not None:
             if identity.bits not in ADMITTED_CALLABLES.get(identity.domain, ()):
                 quoted_next = False
