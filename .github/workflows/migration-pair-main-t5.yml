@@ -1,0 +1,28 @@
+name: migration pair physical T5 oracle
+
+on:
+  pull_request:
+    paths:
+      - crates/sens/tests/migration_pair_car_cdr_cons_main.rs
+      - tests/fixtures/migration-pair-cohort-main/**
+      - .github/workflows/migration-pair-main-t5.yml
+  push:
+    branches: [main]
+    paths:
+      - crates/sens/tests/migration_pair_car_cdr_cons_main.rs
+      - tests/fixtures/migration-pair-cohort-main/**
+      - .github/workflows/migration-pair-main-t5.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-pair-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact CAR/CDR/CONS packed T5 decode plus real evaluator parity
+        run: cargo test -p sens --test migration_pair_car_cdr_cons_main -- --nocapture
