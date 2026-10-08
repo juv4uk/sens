@@ -13,14 +13,25 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Diagnose one-file wrapper
+      - name: Compare foundation and surface-set combinations
         shell: bash
         run: |
           set +e
-          echo "=== ukr acceptance ==="
-          python3 scripts/migrate-one-to-sens.py lib/surface/ukr-acceptance.lisp --dry-run
-          echo "status=$?"
-          echo "=== peer identity ==="
-          python3 scripts/migrate-one-to-sens.py lib/surface/peer-identity-acceptance.lisp --dry-run
-          echo "status=$?"
+          run_case() {
+            name="$1"; foundation="$2"; source="$3"; shift 3
+            base="$RUNNER_TEMP/$name"
+            mkdir -p "$base/src/$(dirname "$source")" "$base/out"
+            cp "$source" "$base/src/$source"
+            echo "=== $name : $source ==="
+            python3 scripts/migrate-to-sens-codes.py "$base/src"               --foundation "$foundation"               --sens-mirror "$base/out"               --text7-projection crates/sens/src/text7_projection_generated.rs               --historical-map contracts/core1-historical-sid-map.lisp               --semantic-registry lib/surface/semantic-registry.lisp               "$@"               --report "$base/report.json"
+            rc=$?
+            echo "rc=$rc"
+            cat "$base/report.json"
+          }
+          for source in lib/surface/ukr-acceptance.lisp lib/surface/peer-identity-acceptance.lisp; do
+            run_case old-d3 knowledge/d1-d7-foundation.json "$source"               --domain-surfaces lib/domains/d3.lisp
+            run_case new-d3 knowledge/d1-d9-foundation.json "$source"               --domain-surfaces lib/domains/d3.lisp
+            run_case old-full knowledge/d1-d7-foundation.json "$source"
+            run_case new-full knowledge/d1-d9-foundation.json "$source"
+          done
           exit 0
