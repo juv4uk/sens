@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """#3648 private Core bootstrap stage decomposition.
 
-Runs one ignored sens lib-test under identical test-harness overhead. The stage
-is selected only through SENS_BOOTSTRAP_MEASURE_STAGE.
+Runs one ignored sens lib-test under identical test-harness overhead. The measured prefix level
+is selected only through the one-byte SENS_BOOTSTRAP_MEASURE_LEVEL.
 
 Primary metric: Cachegrind I refs. Wall time is auxiliary.
 """
@@ -44,7 +44,14 @@ def command(test_binary: Path) -> list[str]:
 
 def stage_env(stage: str) -> dict[str, str]:
     env = dict(os.environ)
-    env["SENS_BOOTSTRAP_MEASURE_STAGE"] = stage
+    try:
+        level = STAGES.index(stage)
+    except ValueError as exc:
+        raise ValueError(f"unknown bootstrap stage: {stage}") from exc
+    # One ASCII digit keeps selector decoding constant-shape across stages.
+    # Stage labels remain Python-side evidence only; the measured Rust path
+    # receives no variable-cost string dispatch.
+    env["SENS_BOOTSTRAP_MEASURE_LEVEL"] = str(level)
     return env
 
 
@@ -192,8 +199,9 @@ def main() -> int:
         "stage_deltas": stage_deltas,
         "stage_shares_of_full_loader": shares,
         "measurement_law": (
-            "single identical ignored test harness; adjacent stage controls share "
-            "the same prefix and differ only by the named added stage"
+            "single identical ignored test harness; levels 0..5 execute one "
+            "monotonic prefix and differ only by the next added stage; "
+            "full-loader is a separate production control"
         ),
         "api_boundary": "test-only private access; no public semantic API added",
     }
@@ -230,7 +238,7 @@ def main() -> int:
     lines += [
         "",
         "Measurement law: one identical ignored test is reused for every stage.",
-        "Adjacent controls share the same prefix and differ only by the named stage.",
+        "Levels root..eval-with-peers share one monotonic prefix; full-loader is a separate production control.",
         "The harness is cfg(test)-only and adds no public semantic API.",
         "",
     ]
