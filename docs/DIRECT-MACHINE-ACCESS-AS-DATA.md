@@ -114,6 +114,10 @@ it must be explicit before target projection.
 >
 > Directness without gates would be C; SENS is direct because every gate remains transparent and named.
 
+## Verification
+
+Current-main review anchor: `9f20e0c0a29384f2ead1fa584ed215f2fa9e27f3`.
+
 ## Authority boundaries
 
 - #4342 — canonical target-neutral machine-effect seam.
