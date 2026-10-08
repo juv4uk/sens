@@ -63,19 +63,39 @@ jobs:
         run: |
           set -euo pipefail
           canary="$RUNNER_TEMP/exact-domain-canary.lisp"
+          before="$RUNNER_TEMP/exact-domain-before.out"
+          apply="$RUNNER_TEMP/exact-domain-apply.out"
           clean="$RUNNER_TEMP/exact-domain-clean.out"
           printf '%s\n' '(функція (x) (перше (сполучити x ())))' > "$canary"
+
           set +e
-          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain "$canary" > "$RUNNER_TEMP/exact-domain-before.out" 2>&1
-          status=$?
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain "$canary" > "$before" 2>&1
+          status_before=$?
           set -e
-          test "$status" -eq 1
-          cargo run --quiet -p sens-cli --bin sens-to-sens -- --exact-domain "$canary"
+          echo "check-before exit=$status_before"
+          cat "$before"
+          test "$status_before" -eq 1
+          grep -Fq 'convertible=3' "$before"
+
+          set +e
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --exact-domain "$canary" > "$apply" 2>&1
+          status_apply=$?
+          set -e
+          echo "apply exit=$status_apply"
+          cat "$apply"
+          test "$status_apply" -eq 0
+          echo "rewritten:"
+          cat "$canary"
           grep -Fq '(0010 (x) (100 (111 x ())))' "$canary"
+
+          set +e
           cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain "$canary" > "$clean" 2>&1
-          grep -Fq 'convertible=0' "$clean"
-          cat "$RUNNER_TEMP/exact-domain-before.out"
+          status_clean=$?
+          set -e
+          echo "check-after exit=$status_clean"
           cat "$clean"
+          test "$status_clean" -eq 0
+          grep -Fq 'convertible=0' "$clean"
 
       - name: D7 domain table is canonical-parser re-readable
         run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
