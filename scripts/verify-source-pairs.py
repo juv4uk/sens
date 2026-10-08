@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Fail-closed, read-only audit for SENS canonical binary / Ukrainian source pairs.
+"""Fail-closed, read-only audit for packed SENS / Ukrainian source pairs.
 
-This is a verification seam, NOT a translator. Canonical encode/decode must be
-supplied as independent stdin->stdout executables. Without both bridges the
+This is a verification seam, NOT a translator and NOT a carrier parser. The
+extensionless canonical artifact is packed binary with typed exact-width
+identity; visible ASCII 0/1 text is explicitly forbidden. Canonical
+encode/decode must be supplied as independent stdin->stdout executables and the
+decoder owns framing/tail/schedule validation. Without both bridges the
 release-critical check fails; --inventory-only is strictly non-release evidence.
 """
 from __future__ import annotations
@@ -29,8 +32,17 @@ class PairError(ValueError):
 
 
 def validate_binary(data: bytes, name: str) -> None:
-    if not data or any(byte not in (48, 49) for byte in data):
-        raise PairError(f"{name}: expected nonempty exact visible-binary 0/1 stream (no whitespace)")
+    if not data:
+        raise PairError(f"{name}: canonical packed source must be nonempty")
+    # #4430 owner correction: the canonical twin is physical packed bytes, not
+    # a rendered bit dump. Reject both compact and whitespace-separated ASCII
+    # 0/1 artifacts. The independent decoder, not this guard, validates the
+    # typed width schedule, framing and tail bits of a real packed carrier.
+    compact = b"".join(data.split())
+    if compact and all(byte in (48, 49) for byte in compact):
+        raise PairError(
+            f"{name}: ASCII visible-binary text is forbidden; expected packed typed source"
+        )
 
 
 def validate_ukrainian(data: bytes, name: str) -> None:
@@ -97,8 +109,10 @@ def check(root: Path, globs: list[str], encoder: Path | None,
     errors = []
     if not sources:
         errors.append("no .lisp source matched --include patterns (fail closed)")
-    # Probe only source-bearing directories: unrelated extensionless build files
-    # are not SENS source, but any bit-only orphan in a source directory is.
+    # Migration-debt probe only: catch obsolete visible-bit artifacts in
+    # source-bearing directories. A packed orphan cannot be classified by
+    # content without mistaking unrelated extensionless files for SENS, so the
+    # release still requires an explicit reviewed active-source inventory.
     expected_twins = {src.with_suffix("") for src in sources}
     for directory in sorted({src.parent for src in sources}):
         for item in sorted(directory.iterdir()):
@@ -109,8 +123,11 @@ def check(root: Path, globs: list[str], encoder: Path | None,
             if item.stat().st_size > 10_000_000:
                 continue
             payload = item.read_bytes()
-            if payload and all(c in (48, 49) for c in payload):
-                errors.append(f"{item}: bit-only binary orphan with no adjacent .lisp")
+            compact = b"".join(payload.split())
+            if compact and all(c in (48, 49) for c in compact):
+                errors.append(
+                    f"{item}: legacy visible-binary orphan with no adjacent .lisp"
+                )
     for src in sources:
         if root not in src.parents:
             errors.append(f"{src}: outside requested root")
