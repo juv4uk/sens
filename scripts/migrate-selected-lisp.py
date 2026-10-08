@@ -55,6 +55,35 @@ def selection(path: str) -> tuple[Path, Path]:
         raise ValueError("missing, symlink, or redirected source")
     return rel, source
 
+def pinned_head_blob(rel: Path, requested: str) -> tuple[str, str]:
+    """Only a committed Git source, not an untracked or modified workspace file.
+
+    HEAD is a convenience spelling for the exact checked-out commit's blob SHA.
+    An explicit SHA must match BOTH HEAD and the source bytes below.
+    """
+    head = subprocess.run(
+        ["git", "rev-parse", "--verify", "HEAD"], cwd=ROOT,
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    record = subprocess.run(
+        ["git", "ls-tree", "-z", "HEAD", "--", rel.as_posix()], cwd=ROOT,
+        capture_output=True, check=True,
+    ).stdout
+    entries = [part for part in record.split(b"\x00") if part]
+    if len(entries) != 1:
+        raise ValueError("source must exist exactly once as a tracked file at HEAD")
+    header, separator, tracked_path = entries[0].partition(b"\t")
+    if not separator or tracked_path != rel.as_posix().encode("utf-8"):
+        raise ValueError("Git tree source path does not match requested path")
+    m = re.fullmatch(rb"100644 blob ([0-9a-f]{40})", header)
+    if m is None:
+        raise ValueError("source is not a regular tracked Git blob")
+    committed_blob = m.group(1).decode("ascii")
+    if requested != "HEAD" and requested != committed_blob:
+        raise ValueError("source changed: supplied SHA differs from committed HEAD blob")
+    return committed_blob, head
+
+
 def ambiguous_eight_bit_atoms(migration, source: str) -> list[str]:
     # Conservatively examine ALL eight-bit atoms, even quoted data. The
     # migration tool cannot safely guess whether a W8 is legacy or current D8.
@@ -113,12 +142,13 @@ def check_oracle(verifier: Path, source: Path, physical: Path,
 
 def run(args) -> dict:
     rel, source = selection(args.source)
-    if not HEX40.fullmatch(args.source_blob):
-        raise ValueError("must supply pinned original 40-hex Git blob SHA")
+    if args.source_blob != "HEAD" and not HEX40.fullmatch(args.source_blob):
+        raise ValueError("source-blob must be HEAD or a pinned 40-hex Git SHA")
+    committed_blob, head_commit = pinned_head_blob(rel, args.source_blob)
     raw = source.read_bytes()
     actual_blob = git_blob(raw)
-    if args.source_blob != actual_blob:
-        raise ValueError(f"source changed: expected blob {args.source_blob}; actual {actual_blob}")
+    if committed_blob != actual_blob:
+        raise ValueError(f"source changed: expected blob {committed_blob}; actual {actual_blob}")
     source_text = raw.decode("utf-8")
     out_root = args.out_root.resolve()
     out_path = out_root / rel.with_suffix(".sens")
@@ -157,7 +187,7 @@ def run(args) -> dict:
     report = {
         "schema": SCHEMA, "status": "BLOCKED", "source": str(rel),
         "destination": str(rel.with_suffix(".sens")), "source_blob_sha": actual_blob,
-        "source_era": args.source_era, "binary_bytes": len(physical),
+        "source_era": args.source_era, "source_commit": head_commit, "binary_bytes": len(physical),
         "physical_sha256": physical_sha, "typed_word_sha256": word_sha,
         "word_count": len(words), "three_pass": dict(resolver.counts),
         "syntax": "NOT_VERIFIED", "oracle": "NOT_VERIFIED",
@@ -170,6 +200,12 @@ def run(args) -> dict:
             raise ValueError("Rust D2 reader is mandatory; pass --reader")
         check_reader(args.reader, candidate, words)
         report["syntax"] = "PASS_D2_SYNTAX_ONLY"
+        if args.inspect:
+            # Reader/codec syntax evidence is useful for triage, NOT authority
+            # to publish or to claim historical/current semantic parity.
+            report["status"] = "SYNTAX_ONLY_UNVERIFIED"
+            report["files_written"] = 0
+            return report
         if not args.oracle:
             raise ValueError("historical/current independent oracle is mandatory; pass --oracle")
         report["oracle_proof"] = check_oracle(
@@ -194,13 +230,15 @@ def run(args) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--source", required=True, help="original tracked repo-relative .lisp")
-    ap.add_argument("--source-blob", required=True, help="Git blob SHA of original file")
+    ap.add_argument("--source-blob", default="HEAD", help="pinned 40-hex Git blob SHA or checked-out HEAD")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto")
     ap.add_argument("--out-root", required=True, type=Path, help="output hierarchy root")
     ap.add_argument("--reader", type=Path, help="real compiled sens-trit executable")
     ap.add_argument("--oracle", type=Path, help="independent executable verifier, source + staged T5 args")
     ap.add_argument("--report", required=True, type=Path)
-    ap.add_argument("--dry-run", action="store_true")
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true", help="require oracle but do not publish")
+    mode.add_argument("--inspect", action="store_true", help="only check physical T5 and real Rust D2; NEVER publish")
     args = ap.parse_args(argv)
     try:
         report = run(args)
