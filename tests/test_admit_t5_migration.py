@@ -58,6 +58,11 @@ class T5ProofPublisherTests(unittest.TestCase):
         batch_source = (ROOT / "scripts/migrate-t5-batch.py").read_text(encoding="utf-8")
         self.assertIn('"foundation": ROOT / "knowledge/d1-d9-foundation.json"',
                       batch_source)
+        # This proof publisher takes only historical-legacy manifests;
+        # the W8 era is explicit, never inherited from the migrator default.
+        publisher_source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('command.extend(["--source-era", "legacy"',
+                      publisher_source)
 
     def test_git_source_blob_is_real_git_identity(self):
         source = (ROOT / SOURCE).read_bytes()
