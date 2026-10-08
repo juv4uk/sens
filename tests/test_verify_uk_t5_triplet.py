@@ -149,6 +149,94 @@ class BoundedUkTripletTests(unittest.TestCase):
                 with self.assertRaises(mod.ProjectionBlocked):
                     mod.canonical_uk_from_words(invalid_words)
 
+    def test_existing_d3_cons_and_d4_caar_uktriples_recover_exact_source(self):
+        cohort = (
+            ("migration-pair-cohort-main", "pair-cons", 10,
+             "(сполучити (як-є ()) (як-є ()))\n", "111"),
+            ("migration-d4-selector-cohort", "caar", 20,
+             "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n",
+             "1000"),
+        )
+        self.assertEqual(mod.uk_surface(3)["000"], "()")
+        self.assertEqual(mod.uk_surface(3)["001"], "як-є")
+        self.assertEqual(mod.uk_surface(3)["111"], "сполучити")
+        self.assertEqual(mod.uk_surface(4)["1000"], "п-п")
+        for dirname, stem, size, uk, head in cohort:
+            with self.subTest(cohort=dirname):
+                folder = ROOT / "tests/fixtures" / dirname
+                with tempfile.TemporaryDirectory(prefix="sens-uk-extra-") as td:
+                    stage = Path(td)
+                    for suffix in (".lisp", ".sens", ""):
+                        shutil.copyfile(folder / (stem + suffix), stage / (stem + suffix))
+                    src, physical, view = (
+                        stage / (stem + ".lisp"),
+                        stage / (stem + ".sens"),
+                        stage / stem,
+                    )
+                    original = (src.read_bytes(), physical.read_bytes(),
+                                view.read_bytes())
+                    self.assertEqual(src.read_text(encoding="utf-8"), uk)
+                    words = mod.decode_bytes(original[1])
+                    self.assertEqual(words[0], "10")
+                    self.assertEqual(words[1], head)
+                    self.assertEqual(mod.canonical_uk_from_words(words), uk)
+                    self.assertEqual(mod.project_current_uk(uk), words)
+                    receipt = mod.verify(src, physical, view)
+                    self.assertEqual(receipt["physical_bytes"], size)
+                    self.assertEqual(receipt["typed_word_count"], len(words))
+                    self.assertTrue(receipt["canonical_uk_roundtrip"])
+                    self.assertTrue(receipt["canonical_view_roundtrip"])
+                    self.assertFalse(receipt["runtime_oracle_admitted_by_this_audit"])
+                    self.assertEqual(receipt["old_originals_migrated_by_this_audit"], 0)
+                    self.assertEqual(original, (
+                        src.read_bytes(), physical.read_bytes(), view.read_bytes()
+                    ))
+
+    def test_cons_quote_and_caar_fail_closed_on_unproved_semantics_or_arity(self):
+        # The only allowed quoted DATA is exact D3:000 EMPTY; 001 width does
+        # not justify evaluating arbitrary nested D3 data or D4 binders.
+        cases = [
+            ["10", "001", "00", "1", "01"],             # QUOTE D1, not EMPTY
+            ["10", "001", "00", "10", "100", "00", "000", "01", "01"],
+            ["10", "001", "01"],                       # missing QUOTE arg
+            ["10", "001", "00", "000", "00", "000", "01"],
+            ["10", "111", "00", "10", "001", "00", "000", "01", "01"],
+            ["10", "111", "00", "1", "00", "0", "01"],   # unproved CONS operands
+            ["10", "1000", "00", "10", "001", "00", "000", "01", "01"],
+            ["10", "1000", "00", "10", "111", "00", "1", "00", "0", "01", "01"],
+            ["10", "1000", "01"],                      # no CAAR arg
+            ["10", "1000", "00", "000", "00", "000", "01"],  # CAAR arity
+            ["10", "1001", "00", "000", "01"],          # D4 CADR unproved
+            ["10", "0010", "00", "000", "01"],          # binder metadata
+        ]
+        for words in cases:
+            with self.subTest(words=words):
+                with self.assertRaises(mod.ProjectionBlocked):
+                    mod.canonical_uk_from_words(words)
+
+    def test_cons_and_caar_exact_width_mutations_never_certify_unrelated_uk(self):
+        fixtures = (
+            ("migration-pair-cohort-main", "pair-cons", 1, "110"),
+            ("migration-d4-selector-cohort", "caar", 1, "100"),
+        )
+        for dirname, stem, position, wrong_word in fixtures:
+            with self.subTest(cohort=dirname):
+                folder = ROOT / "tests/fixtures" / dirname
+                with tempfile.TemporaryDirectory(prefix="sens-uk-mutant-") as td:
+                    stage = Path(td)
+                    for suffix in (".lisp", ".sens", ""):
+                        shutil.copyfile(folder / (stem + suffix), stage / (stem + suffix))
+                    src, physical, view = stage / (stem + ".lisp"), stage / (stem + ".sens"), stage / stem
+                    original = mod.decode_bytes(physical.read_bytes())
+                    forged = original.copy()
+                    forged[position] = wrong_word
+                    # Both T5 and ASCII view are consistently forged. The
+                    # canonical Ukrainian source must still catch the fraud.
+                    physical.write_bytes(mod.encode_words(forged))
+                    view.write_text(" ".join(forged) + "\n", encoding="ascii")
+                    with self.assertRaises(mod.ProjectionBlocked):
+                        mod.verify(src, physical, view)
+
     def test_cli_read_only_current_canary(self):
         cmd = [sys.executable, str(SOURCE), "--lisp", str(self.lisp),
                "--sens", str(self.sens), "--view", str(self.view)]
