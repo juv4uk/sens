@@ -47,6 +47,7 @@ class Identity:
     domain: str
     bits: str
     label: str
+    en: str
 
 @dataclass(frozen=True)
 class Edit:
@@ -73,6 +74,7 @@ def load_authority() -> tuple[dict[str, Identity], dict[str, Identity]]:
             identity = Identity(
                 row.domain,
                 row.bits,
+                row.en or row.lisp or row.bits,
                 row.en or row.lisp or row.bits,
             )
             for value in (row.en, row.uk, row.ukr, row.san, row.lisp, row.sym):
@@ -244,7 +246,8 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
             if identity.bits not in ADMITTED_CALLABLES.get(identity.domain, ()):
                 quoted_next = False
                 continue
-            edits.append(Edit(start, end, token, identity))
+            replacement = token if not re.fullmatch(r"[01]{8}", token) else identity.en
+            edits.append(Edit(start, end, token, Identity(identity.domain, identity.bits, identity.label, replacement)))
         quoted_next = False
 
     if stack:
@@ -253,7 +256,7 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
 
 def apply_edits(text: str, edits: list[Edit]) -> str:
     for edit in reversed(edits):
-        text = text[:edit.start] + edit.identity.bits + text[edit.end:]
+        text = text[:edit.start] + edit.identity.en + text[edit.end:]
     return text
 
 def main() -> int:
