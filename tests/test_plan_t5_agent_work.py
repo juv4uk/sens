@@ -66,6 +66,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         self.assertEqual(r["summary"]["original_unpaired"], 4)
         self.assertEqual(r["summary"]["blocked"], 3)
         self.assertEqual(r["summary"]["mechanical_pending_oracle"], 1)
+        self.assertEqual(r["summary"]["archived_mechanical_nonprogram_originals"], 0)
         self.assertEqual(r["summary"]["claimed"], 0)
         self.assertEqual(r["summary"]["admitted"], 0)
         shards = r["shards"]
@@ -212,6 +213,11 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         a["summary"]["unpaired_candidates_needing_original_oracle"] = 0
         result = mod.build_plan(a, 2)
         self.assertEqual(result["summary"]["mechanical_pending_oracle"], 0)
+        self.assertEqual(result["summary"]["archived_mechanical_nonprogram_originals"], 1)
+        self.assertEqual(result["summary"]["original_unpaired"], (
+            result["summary"]["blocked"]
+            + result["summary"]["mechanical_pending_oracle"]
+            + result["summary"]["archived_mechanical_nonprogram_originals"]))
         self.assertFalse(any(x["family"] == "oracle-pending" for x in result["shards"]))
         self.assertEqual(result["summary"]["archived_benchmark_nonprogram_originals"], 1)
         self.assertTrue(any(shard["family"] == "archived-benchmark-data"

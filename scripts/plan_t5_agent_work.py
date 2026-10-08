@@ -331,6 +331,11 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             len(seen) != summary.get("original_unpaired_sources_scanned") or
             len(seen) != summary.get("scanned")):
         raise PlanError("exhaustive source/candidate counts disagree")
+    # Three disjoint census classes; archived mechanical DATA is neither
+    # blocked-source status nor executable candidate awaiting an oracle.
+    # Never erase it just to make the headline blocked+pending sum match.
+    if len(seen) != sum_blocked + len(pending) + len(archived_candidates):
+        raise PlanError("archived mechanical candidate lost in source partition")
     if summary.get("unpaired_candidates_needing_original_oracle") != len(pending):
         raise PlanError("unpaired oracle candidate total does not match")
     if summary.get("already_paired_candidates") != 0:
@@ -367,6 +372,7 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             "original_unpaired": len(seen),
             "blocked": sum_blocked,
             "mechanical_pending_oracle": len(pending),
+            "archived_mechanical_nonprogram_originals": len(archived_candidates),
             "reviewed_nonprogram_originals": len(reviewed),
             "archived_benchmark_nonprogram_originals": len(archives),
             "executable_or_unclassified_originals": len(seen) - len(reviewed) - len(archives),
