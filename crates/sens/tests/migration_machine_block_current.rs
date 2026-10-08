@@ -12,24 +12,22 @@ const SOURCE: &str = include_str!("../../../lib/machine/block.lisp");
 const T5: &[u8] = include_bytes!("../../../lib/machine/block.sens");
 const SOURCE_GIT_BLOB: &str = "200201b741787c4e144ad4194848acf51d7b439e";
 
-fn git_blob_sha1(bytes: &[u8]) -> String {
-    use sha1::Sha1;
-    let mut digest = Sha1::new();
-    digest.update(format!("blob {}\\0", bytes.len()).as_bytes());
-    digest.update(bytes);
-    format!("{digest:x}")
+fn sha256_hex(bytes: &[u8]) -> String {
+    sens::sha256_source(bytes).iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
+/// Same owner-reviewed digest law as scripts/sens_t5_codec.py typed_sha256:
+/// byte(width) || unsigned packed value encoded in ceil(width / 8) big-endian bytes.
 fn typed_sha256(words: &[sens::BinarySourceWord]) -> String {
-    let mut digest = Sha256::new();
+    let mut typed_bytes = Vec::new();
     for word in words {
-        let width = word.width() as u8;
-        digest.update([width]);
-        let bytes = (word.packed_bits() as u16).to_be_bytes();
-        let count = ((width as usize) + 7) / 8;
-        digest.update(&bytes[2 - count..]);
+        let width = word.width() as usize;
+        typed_bytes.push(width as u8);
+        let packed = (word.packed_bits() as u16).to_be_bytes();
+        let count = (width + 7) / 8;
+        typed_bytes.extend_from_slice(&packed[2 - count..]);
     }
-    format!("{:x}", digest.finalize())
+    sha256_hex(&typed_bytes)
 }
 
 fn json_value(value: &Value) -> JsonValue {
@@ -126,7 +124,7 @@ fn current_machine_block_matches_historical_oracle() {
 
 #[test]
 fn block_physical_transport_has_stable_proof_digests() {
-    let physical = sens::sha256_source(T5);
+    let physical = sha256_hex(T5);
     assert_eq!(physical, "1540c7e9a69c7dcb953713469a2c6ac803ae5aebfc40e2cd1ab529e66f0271");
     let words = decode_ternary_program(T5).expect("canonical physical T5");
     assert_eq!(typed_sha256(&words), "0951a7c253644c5783e7317269e354959817932e2bf9016114760fc76f769922");
