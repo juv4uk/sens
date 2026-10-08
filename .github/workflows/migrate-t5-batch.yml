@@ -49,15 +49,20 @@ jobs:
       - name: Test real Core1 physical T5 conversion and fail-closed batch
         run: python3 -m unittest discover -s tests -p test_migrate_t5_batch.py -v
 
-      - name: TEMP Generate current block artifact for proof recovery
+      - name: TEMP Generate current block artifact with parser-aware migrator
         run: |
-          set -euo pipefail
-          rm -rf /tmp/sens-block-current /tmp/sens-block-current-report.json
           set +e
-          python3 scripts/migrate-three-pass.py lib/machine/block.lisp \
-            --out /tmp/sens-block-current \
+          rm -rf /tmp/sens-block-current /tmp/sens-block-current-report.json /tmp/sens-block-source
+          mkdir -p /tmp/sens-block-source
+          cp lib/machine/block.lisp /tmp/sens-block-source/block.lisp
+          python3 scripts/migrate-to-sens-codes.py /tmp/sens-block-source \
+            --foundation knowledge/d1-d7-foundation.json \
+            --sens-mirror /tmp/sens-block-current \
+            --text7-projection crates/sens/src/text7_projection_generated.rs \
+            --historical-map contracts/core1-historical-sid-map.lisp \
+            --semantic-registry lib/surface/semantic-registry.lisp \
             --report /tmp/sens-block-current-report.json \
-            --source-era legacy
+            --domain-surfaces lib/domains/d1.lisp lib/domains/d2.lisp lib/domains/d3.lisp lib/domains/d4.lisp lib/domains/d5.lisp lib/domains/d6.lisp
           rc=$?
           set -e
           cat /tmp/sens-block-current-report.json
@@ -68,10 +73,10 @@ jobs:
           report=json.loads(Path('/tmp/sens-block-current-report.json').read_text())
           row=report['files'][0]
           print('CURRENT_BLOCK_STATUS',row.get('status'))
-          print('CURRENT_BLOCK_REASON',row.get('reason',''))
-          if not Path('/tmp/sens-block-current/lib/machine/block.sens').is_file():
+          print('CURRENT_BLOCK_BLOCKERS',json.dumps(row.get('blockers',[]),ensure_ascii=False))
+          if not Path('/tmp/sens-block-current/block.sens').is_file():
               raise SystemExit(0)
-          payload=Path('/tmp/sens-block-current/lib/machine/block.sens').read_bytes()
+          payload=Path('/tmp/sens-block-current/block.sens').read_bytes()
           print('CURRENT_BLOCK_BYTES',len(payload))
           print('CURRENT_BLOCK_PHYSICAL_SHA256',row['physical_sha256'])
           print('CURRENT_BLOCK_TYPED_SHA256',row['typed_word_sha256'])
