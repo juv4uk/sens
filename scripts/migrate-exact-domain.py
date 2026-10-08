@@ -21,10 +21,6 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "scripts"
-if str(SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS))
-
 from domain_tables import read_domain_table
 
 DOMAIN_PATHS = [ROOT / "lib" / "domains" / f"d{width}.lisp" for width in range(3, 7)]
@@ -55,12 +51,14 @@ class Edit:
     source: str
     identity: Identity
 
+
 def decode_registry_value(raw: str) -> str | None:
     if raw == "()":
         return None
     if len(raw) >= 2 and raw[0] == '"' and raw[-1] == '"':
         return raw[1:-1]
     return raw
+
 
 def load_authority() -> tuple[dict[str, Identity], dict[str, Identity]]:
     surfaces: dict[str, Identity] = {}
@@ -110,6 +108,7 @@ def load_authority() -> tuple[dict[str, Identity], dict[str, Identity]]:
             legacy[sid] = next(iter(candidates.values()))
 
     return surfaces, legacy
+
 
 def tokens(text: str):
     i = 0
@@ -191,6 +190,7 @@ def tokens(text: str):
             raise ValueError(f"cannot tokenize {text[i]!r} at offset {i}")
         yield ("atom", start, i, text[start:i])
 
+
 def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) -> list[Edit]:
     stack: list[dict[str, bool]] = []
     quoted_next = False
@@ -251,10 +251,12 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
         raise ValueError("unterminated list")
     return edits
 
+
 def apply_edits(text: str, edits: list[Edit]) -> str:
     for edit in reversed(edits):
         text = text[:edit.start] + edit.identity.bits + text[edit.end:]
     return text
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -298,6 +300,7 @@ def main() -> int:
             failed = True
 
     return 2 if failed else 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
