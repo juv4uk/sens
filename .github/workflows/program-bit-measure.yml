@@ -33,6 +33,7 @@ jobs:
         run: |
           cargo test -p sens source_packing::tests::
           cargo test -p sens ternary_transport::tests::
+          cargo test -p sens-cli --bin sens-trit eval_tests::
       - name: Keyed multi-program T5 AIR streaming emulator
         shell: bash
         run: |
@@ -68,6 +69,21 @@ jobs:
           printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/expected-vertical.txt"
           cmp "$RUNNER_TEMP/vertical.txt" "$RUNNER_TEMP/expected-vertical.txt"
           test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          # Explicit evaluation: real Rust D2 parser + current pure oracle,
+          # using EXISTING migrated historical QUOTE as byte-accurate input.
+          cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-cohort-main/quote-legacy.sens > "$RUNNER_TEMP/quote-value.txt"
+          printf '()\n' > "$RUNNER_TEMP/quote-expected.txt"
+          cmp "$RUNNER_TEMP/quote-value.txt" "$RUNNER_TEMP/quote-expected.txt"
+          # Opening MUST NEVER execute, even when the payload is evaluable.
+          cargo run -q -p sens-cli --bin sens-trit -- open tests/fixtures/migration-quote-cohort-main/quote-legacy.sens > "$RUNNER_TEMP/quote-visible.txt"
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/quote-visible-expected.txt"
+          cmp "$RUNNER_TEMP/quote-visible.txt" "$RUNNER_TEMP/quote-visible-expected.txt"
+          # Corrupted T5 byte and unbalanced D2 must fail before evaluation.
+          printf '\363' > "$RUNNER_TEMP/bad.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- eval "$RUNNER_TEMP/bad.sens"; then
+            echo "ERROR: corrupted T5 ran in oracle"
+            exit 1
+          fi
           # Physical EOF, not a magic 22: short D2 form fits in one byte.
           printf '10 01\n' > "$RUNNER_TEMP/short.lisp"
           cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/short.lisp"
