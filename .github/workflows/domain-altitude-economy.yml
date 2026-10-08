@@ -1,0 +1,32 @@
+name: Domain altitude economy
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/domain-altitude-economy/**"
+      - "scripts/check-domain-altitude-economy.py"
+      - ".github/workflows/domain-altitude-economy.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/domain-altitude-economy/**"
+      - "scripts/check-domain-altitude-economy.py"
+      - ".github/workflows/domain-altitude-economy.yml"
+  workflow_dispatch:
+
+jobs:
+  structural-economy:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Runner identity
+        run: nvidia-smi || true
+      - name: Replay Pareto and dividend controls
+        run: python3 scripts/check-domain-altitude-economy.py
+      - name: Emit synthetic report
+        run: |
+          python3 benchmarks/domain-altitude-economy/run.py \
+            benchmarks/domain-altitude-economy/fixtures/synthetic.jsonl \
+            --out /tmp/domain-altitude-economy.json
+          cat /tmp/domain-altitude-economy.json
