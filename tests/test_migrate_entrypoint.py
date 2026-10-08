@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import importlib.util
+import contextlib
+import io
+import json
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -60,6 +64,38 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
         self.assertFalse(run.call_args.kwargs.get("check", True))
         self.assertEqual(run.call_args.kwargs["cwd"], ROOT)
 
+    def test_preview_displays_real_reason_from_report_and_preserves_block(self):
+        with tempfile.TemporaryDirectory() as td:
+            report = Path(td) / "reason.json"
+            report.write_text(json.dumps({"files": [{
+                "path": "lib/machine/block.lisp",
+                "status": "blocked",
+                "reason": "unresolved executable machine-block / missing current source law",
+            }]}), encoding="utf-8")
+            message = io.StringIO()
+            with mock.patch.object(migrate.subprocess, "run",
+                                   return_value=subprocess.CompletedProcess([], 2)):
+                with contextlib.redirect_stderr(message):
+                    code = migrate.main(["preview", "lib/machine/block.lisp",
+                                         "--mirror", str(Path(td) / "out"),
+                                         "--report", str(report)])
+            self.assertEqual(code, 2)
+            self.assertIn("lib/machine/block.lisp", message.getvalue())
+            self.assertIn("unresolved executable machine-block", message.getvalue())
+
+    def test_missing_or_malformed_blocked_report_never_becomes_success(self):
+        with tempfile.TemporaryDirectory() as td:
+            report = Path(td) / "broken.json"
+            self.assertEqual(migrate.blocked_reasons(report), [])
+            report.write_text("this is not JSON", encoding="utf-8")
+            self.assertEqual(migrate.blocked_reasons(report), [])
+            report.write_text(json.dumps({"files": [False, None, {"status": "would-write"}]}))
+            self.assertEqual(migrate.blocked_reasons(report), [])
+            with mock.patch.object(migrate.subprocess, "run",
+                                   return_value=subprocess.CompletedProcess([], 2)):
+                self.assertEqual(migrate.main(["preview", "benchmarks/lists.lisp",
+                                                "--mirror", str(Path(td) / "out"),
+                                                "--report", str(report)]), 2)
     def test_no_shell_injection_or_untrusted_extra_flags(self):
         suspicious = "benchmarks/x;touch /tmp/owned.lisp"
         args = migrate.parser().parse_args(
