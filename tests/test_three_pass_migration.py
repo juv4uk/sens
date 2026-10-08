@@ -71,6 +71,19 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 0011 00 "))
         self.assertGreaterEqual(resolver.counts["pass2-my-lisp"],2)
 
+    def test_owner_uk_define_and_lambda_have_same_candidate_wire_as_exact_heads(self):
+        ukrainian="(визначити foo (функція (x) x))\n(foo так)\n"
+        exact="(0011 foo (0010 (x) x))\n(foo 1)\n"
+        uk_words,uk_resolver=self.migrate(ukrainian,source_era="auto")
+        exact_words,_=self.migrate(exact,source_era="auto")
+        self.assertEqual(uk_words,exact_words)
+        self.assertEqual(uk_resolver.counts["pass4-text7-global"],1)
+        self.assertTrue(all(1 <= len(w) <= 9 and set(w) <= {"0","1"}
+                            for w in uk_words.split()))
+        self.assertNotIn("foo",uk_words)
+        self.assertNotIn("x",uk_words)
+
+
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
         self.assertTrue(out.startswith("10 100 00 "))
