@@ -1,0 +1,44 @@
+name: probe-current-block-t5
+on:
+  pull_request:
+    paths:
+      - 'lib/machine/block.lisp'
+      - 'scripts/migrate-three-pass.py'
+      - '.github/workflows/probe-current-block-t5.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generate current canonical T5
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/out"
+          python3 scripts/migrate-three-pass.py lib/machine/block.lisp --out "$RUNNER_TEMP/out" --report "$RUNNER_TEMP/report.json" --source-era legacy
+          test -f "$RUNNER_TEMP/out/lib/machine/block.sens"
+          cat "$RUNNER_TEMP/report.json"
+          python3 - "$RUNNER_TEMP/report.json" "$RUNNER_TEMP/out/lib/machine/block.sens" <<'PY'
+          import base64, json, pathlib, sys
+          report=json.load(open(sys.argv[1],encoding="utf-8"))
+          payload=pathlib.Path(sys.argv[2]).read_bytes()
+          row=report["files"][0]
+          assert row["status"]=="written", report
+          assert row["bytes"]==len(payload), row
+          print("BLOCK_BYTES", len(payload))
+          print("BLOCK_PHYSICAL_SHA256", row["physical_sha256"])
+          print("BLOCK_TYPED_SHA256", row["typed_word_sha256"])
+          print("BLOCK_B64_BEGIN")
+          print(base64.b64encode(payload).decode())
+          print("BLOCK_B64_END")
+          PY
+      - name: Upload generated physical .sens
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-block-t5
+          path: |
+            ${{ runner.temp }}/report.json
+            ${{ runner.temp }}/out/lib/machine/block.sens
