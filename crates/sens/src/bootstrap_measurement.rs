@@ -38,13 +38,6 @@ fn decode_current_core() -> Vec<Expr> {
     expressions
 }
 
-fn prepare_through_decode() -> (Session, Vec<Expr>) {
-    let mut session = root_session();
-    prepare_profile(&mut session);
-    load_first_macro(&mut session);
-    let expressions = decode_current_core();
-    (session, expressions)
-}
 
 fn measurement_level() -> u8 {
     let raw = std::env::var("SENS_BOOTSTRAP_MEASURE_LEVEL")
