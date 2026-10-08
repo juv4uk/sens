@@ -32,16 +32,16 @@ class ExactDomainMigrationTests(unittest.TestCase):
             self.assertEqual(self.rewrite(source), "(100 x)", source)
 
     def test_comments_quotes_strings_and_arguments_are_not_migrated(self):
-        source = '; (car x)
-\'(car x)
+        source = """; (car x)
+'(car x)
 ("car" car)
 (car (quote car) x)
-'
-        expected = '; (car x)
-\'(car x)
+"""
+        expected = """; (car x)
+'(car x)
 ("car" car)
 (100 (001 car) x)
-'
+"""
         self.assertEqual(self.rewrite(source), expected)
 
     def test_already_exact_heads_are_idempotent(self):
