@@ -461,7 +461,11 @@ class ThreePassMigrationTests(unittest.TestCase):
             mod.Tok("ATOM","foo",0),
         )
         frame_text=" ".join(frame)
-        self.assertGreaterEqual(projection.count(frame_text),2)
+        self.assertIn("foo", resolver.global_binding_words, f"global DEFINE collection failed: {projection!r}")
+        self.assertGreaterEqual(
+            projection.count(frame_text), 2,
+            f"frame={frame_text!r}; projection={projection!r}; globals={resolver.global_binding_words!r}",
+        )
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
         self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()))
         payload=mod.encode_projection(projection)
@@ -540,7 +544,10 @@ class ThreePassMigrationTests(unittest.TestCase):
         )
         projection,resolver=self.migrate(source)
         words=projection.split()
-        self.assertTrue(all(set(word) <= {"0","1"} for word in words))
+        self.assertTrue(
+            all(set(word) <= {"0","1"} for word in words),
+            f"nonbinary words in {words!r}; globals={resolver.global_binding_words!r}",
+        )
         first_frame=mod.frame_text7(
             mod.text7_encode("first",self.text7,mod.Tok("ATOM","first",0)),
             mod.Tok("ATOM","first",0),
