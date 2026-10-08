@@ -106,6 +106,7 @@ def load_engine_maps(root: Path):
         root / "crates/sens/src/semantic_registry.rs",
         root / "crates/sens/src/eval/necessary_forms_generated.rs",
         root / "contracts/core1-historical-sid-map.lisp",
+        root / "knowledge/sens8-current-coverage-v1.json",
     )
     text7 = engine.build_text7(
         data, root / "crates/sens/src/text7_projection_generated.rs"
