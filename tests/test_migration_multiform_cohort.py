@@ -71,6 +71,7 @@ class PhysicalMultiformMigration(unittest.TestCase):
                 sys.executable, str(SCRIPT), str(COHORT), "--out", str(target),
                 *[item for key, value in ARGS.items()
                   for item in ("--" + key.replace("_", "-"), str(value))],
+                "--source-era", "legacy",
                 "--report", str(report),
             ]
             first = subprocess.run(command, capture_output=True, text=True)
