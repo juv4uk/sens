@@ -1,0 +1,64 @@
+name: Audit comment-only original Lisp sources
+
+on:
+  pull_request:
+    paths:
+      - "scripts/audit_comment_only_originals.py"
+      - "tests/test_audit_comment_only_originals.py"
+      - "docs/COMMENT-ONLY-LISP-SCOPE.uk.md"
+      - ".github/workflows/audit-comment-only-originals.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  comment-only-original-source-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test conservative Git SHA and no-executable-form audit
+        run: python3 -m unittest discover -s tests -p "test_audit_comment_only_originals.py" -v
+      - name: Probe full original corpus without writing or claiming a program
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_comment_only_originals.py \
+            --repo "$PWD" --out "$RUNNER_TEMP/comment-only-originals.json"
+          python3 - "$RUNNER_TEMP/comment-only-originals.json" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          report=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          s=report["summary"]
+          assert report["schema"]=="sens-original-comment-only-audit/v1"
+          assert report["mode"]=="READ_ONLY_SOURCE_KIND_REVIEW_NOT_MIGRATION"
+          assert s["physical_outputs_created"]==0
+          assert s["executable_semantics_certified"]==0
+          assert s["strict_comment_only_review_candidates"]==len(report["sources"])
+          assert all(x["classification"]=="COMMENT_ONLY_REVIEW_PENDING"
+                     and not x["physical_sens_published"]
+                     and not x["source_is_executable_proven"]
+                     for x in report["sources"])
+          assert any(x["path"]=="lib/core2.lisp" for x in report["sources"])
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a",encoding="utf-8") as out:
+              out.write("## Comment-only original Lisp source research\n\n")
+              out.write(f"- Unpaired originals: **{s['original_unpaired']}**\n")
+              out.write(f"- Active/unknown originals reviewed: **{s['active_or_unclassified_scanned']}**\n")
+              out.write(f"- Strictly comment/blank source files: **{s['strict_comment_only_review_candidates']}**\n")
+              out.write("- Status: REVIEW PENDING — no source-kind admission, no physical .sens, no release credit\n")
+          PY
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            echo "ERROR: auditor modified repository"
+            git status --short
+            exit 1
+          }
+      - name: Save original SHA-pinned comment-only evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-comment-only-scope-no-publish
+          path: ${{ runner.temp }}/comment-only-originals.json
+          if-no-files-found: error
