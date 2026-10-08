@@ -1,0 +1,32 @@
+name: Proven physical T5 migration admission
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/admit-t5-migration.py'
+      - 'tests/test_admit_t5_migration.py'
+      - '.github/workflows/admit-t5-migration.yml'
+      - 'docs/ADMIT-T5-MIGRATION.uk.md'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/admit-t5-migration.py'
+      - 'tests/test_admit_t5_migration.py'
+      - '.github/workflows/admit-t5-migration.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-admission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build actual typed SENS D2 reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Verify original source provenance, real physical T5 and oracle-gated publication
+        run: python3 -m unittest discover -s tests -p 'test_admit_t5_migration.py' -v
