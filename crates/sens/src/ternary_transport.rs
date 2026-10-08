@@ -71,7 +71,7 @@ pub fn encode_ternary_words(
         return Err(TernaryTransportError::TransportTooLarge);
     }
     let mut encoded = Vec::with_capacity(byte_len);
-    for five in trits.chunks_exact(TRITS_PER_BYTE) {
+    for five in trits.as_chunks::<TRITS_PER_BYTE>().0 {
         let value = five.iter().fold(0u16, |n, d| n * 3 + u16::from(*d));
         // Кожна п'ятірка дає рівно діапазон 0..=242.
         encoded.push(value as u8);
