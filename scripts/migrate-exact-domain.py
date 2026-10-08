@@ -30,6 +30,13 @@ from domain_tables import read_domain_table
 DOMAIN_PATHS = [ROOT / "lib" / "domains" / f"d{width}.lisp" for width in range(3, 7)]
 REGISTRY_PATH = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 
+# Contract 11.8 compiler-call admission is a separate law from identity
+# resolution. Never narrow a legacy identity into a non-admitted callable.
+ADMITTED_CALLABLES = {
+    "D3": frozenset({"001", "010", "011", "100", "101", "110", "111"}),
+    "D4": frozenset({"0010", "0011"}),
+}
+
 ROW_RE = re.compile(r'^\s*\(([01]{8})\s+(.*)\)\s*$')
 FIELD_RE = re.compile(
     r'\((en|uk|ukr|sa|sym)\s+("(?:\\\\.|[^"\\\\])*"|\(\)|[^()\s]+)\)'
@@ -234,6 +241,9 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
 
         identity = legacy.get(token) if re.fullmatch(r"[01]{8}", token) else surfaces.get(token)
         if identity is not None:
+            if identity.bits not in ADMITTED_CALLABLES.get(identity.domain, ()):
+                quoted_next = False
+                continue
             edits.append(Edit(start, end, token, identity))
         quoted_next = False
 
