@@ -49,7 +49,7 @@ EXPECTED_COUNTS = {path: spec["candidate_count"] for path, spec in EXPECTED_SOUR
 
 def git_blob_sha(data: bytes) -> str:
     """Compute the canonical Git blob SHA-1 for exact source bytes."""
-    header = f"blob {len(data)}\\0".encode("ascii")
+    header = f"blob {len(data)}\0".encode("ascii")
     return hashlib.sha1(header + data).hexdigest()
 
 
@@ -103,7 +103,7 @@ for row in candidates:
     lines = (ROOT / path).read_text(encoding="utf-8").splitlines()
     assert line_number <= len(lines), f"line outside pinned source: {path}:{line_number}"
     line = lines[line_number - 1]
-    match = re.match(r"^\\s*\\(00001001\\s+([^\\s()]+)", line)
+    match = re.match(r"^\s*\(00001001\s+([^\s()]+)", line)
     assert match and match.group(1) == row["name"], (
         f"stale candidate anchor {path}:{line_number}: expected {row['name']!r}, "
         f"found {line!r}"
