@@ -17,6 +17,9 @@ Eight-bit W8 source is ambiguous between old SID8 and ratified current D8.
 Use --source-era auto (default; BLOCK), or --source-era legacy/current only
 when source provenance proves that era.
 Use --dry-run to classify without writing. The original .lisp never changes.
+Real physical publication REQUIRES --reader /path/to/target/debug/sens-trit
+and a current Rust D2 syntax PASS for every staged program. This does not
+certify semantic-oracle parity. Dry-run needs no Rust reader.
 For protected publication, use an output directory outside the source tree.
 """
 from __future__ import annotations
@@ -130,6 +133,11 @@ def verify_published(report: dict, output: Path, dry_run: bool) -> int:
         raise MigrationBlocked(f"not all requested files admitted: {summary}")
     if published != (0 if dry_run else count):
         raise MigrationBlocked(f"publication count mismatch: {summary}")
+    if not dry_run and any(
+        row.get("d2_syntax") != "PASS" or row.get("semantic_oracle") != "NOT_VERIFIED"
+        for row in rows
+    ):
+        raise MigrationBlocked("publisher did not prove Rust D2 syntax or misreported oracle")
     if dry_run:
         return count
 
@@ -171,11 +179,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, required=True, help="separate artifact staging root")
     ap.add_argument("--report", type=Path, required=True, help="JSON admission/blocker report")
     ap.add_argument("--dry-run", action="store_true", help="admission only, no .sens files")
+    ap.add_argument("--reader", type=Path, help="real Rust sens-trit executable; REQUIRED when writing")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
                     help="auto blocks W8 ambiguity; specify a proven historical/current source era")
     args = ap.parse_args(argv)
 
     try:
+        if not args.dry_run and args.reader is None:
+            raise MigrationBlocked("--reader is mandatory for physical T5 publication")
+        if args.reader is not None and not args.reader.resolve().is_file():
+            raise MigrationBlocked("--reader must be a real Rust sens-trit executable")
         root = args.root.resolve(strict=True)
         output = args.out.resolve()
         report = args.report.resolve()
@@ -198,11 +211,12 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="sens-admission-") as directory:
             manifest = Path(directory) / "pinned.json"
             manifest.write_text(json.dumps(pinned, sort_keys=True) + "\n", encoding="utf-8")
-            invoke(manifest, root, output, report, args.dry_run, args.source_era)
+            invoke(manifest, root, output, report, args.dry_run, args.source_era,
+                   args.reader.resolve() if args.reader else None)
 
         result = json.loads(report.read_text(encoding="utf-8"))
         verified = verify_published(result, output, args.dry_run)
-        print(json.dumps({"status": "DRY_RUN_READY" if args.dry_run else "VERIFIED",
+        print(json.dumps({"status": "DRY_RUN_READY" if args.dry_run else "PHYSICAL_AND_D2_VERIFIED_ORACLE_PENDING",
                           "files": verified, "report": str(report)}, ensure_ascii=False))
         return 0
     except (MigrationBlocked, OSError, ValueError, json.JSONDecodeError) as error:
@@ -211,12 +225,15 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def invoke(manifest: Path, root: Path, output: Path, report: Path,
-           dry_run: bool, source_era: str = "auto") -> None:
+           dry_run: bool, source_era: str = "auto",
+           reader: Path | None = None) -> None:
     command = [sys.executable, str(TRANSACTION), str(root), "--manifest",
                str(manifest), "--out", str(output), "--report", str(report),
                "--source-era", source_era]
     if dry_run:
         command.append("--dry-run")
+    if reader is not None:
+        command.extend(["--reader", str(reader)])
     process = subprocess.run(command, cwd=root, capture_output=True, text=True)
     if process.returncode != 0:
         # Keep the original tool's precise per-file blocker manifest.

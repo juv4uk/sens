@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -14,6 +15,17 @@ ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "scripts/migrate-sens.py"
 FIXTURE = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
 EXPECTED = ROOT / "tests/fixtures/migration-d1-cond-cohort/branch.sens"
+
+
+def actual_reader() -> Path:
+    env = os.environ.get("SENS_TRIT_BIN")
+    binary = Path(env) if env else ROOT / "target/debug/sens-trit"
+    if not binary.is_file():
+        subprocess.run(["cargo", "build", "-q", "-p", "sens-cli", "--bin", "sens-trit"],
+                       cwd=ROOT, check=True, timeout=240)
+    if not binary.is_file():
+        raise RuntimeError("real Rust sens-trit is required for physical publication tests")
+    return binary.resolve()
 
 spec = importlib.util.spec_from_file_location("sens_migration_cli", CLI)
 assert spec and spec.loader
@@ -26,7 +38,7 @@ class OperationalMigrationTests(unittest.TestCase):
     def args(self, out: Path, report: Path, *extras: str) -> list[str]:
         return [sys.executable, str(CLI), "--root", str(ROOT),
                 "--source", FIXTURE, "--out", str(out),
-                "--report", str(report), *extras]
+                "--report", str(report), "--reader", str(actual_reader()), *extras]
 
     def test_pin_manifest_is_real_sha_and_rejects_escape_or_duplicates(self):
         pinned = runner.pin_sources([FIXTURE], ROOT)["files"]
@@ -149,7 +161,8 @@ class OperationalMigrationTests(unittest.TestCase):
             t = Path(tmp)
             out, report = t / "binary", t / "report.json"
             cmd = [sys.executable, str(CLI), "--root", str(ROOT),
-                   "--source", real, "--out", str(out), "--report", str(report)]
+                   "--source", real, "--out", str(out), "--report", str(report),
+                   "--reader", str(actual_reader())]
             blocked = subprocess.run(cmd, cwd=t, capture_output=True, text=True)
             self.assertEqual(blocked.returncode, 2, blocked.stdout + blocked.stderr)
             self.assertFalse((out / real.replace(".lisp", ".sens")).exists())
@@ -160,6 +173,17 @@ class OperationalMigrationTests(unittest.TestCase):
             self.assertEqual((out / real.replace(".lisp", ".sens")).read_bytes(),
                              expected.read_bytes())
             self.assertEqual(json.loads(report.read_text())["source_era"], "legacy")
+
+    def test_real_publication_requires_independent_rust_reader(self):
+        with tempfile.TemporaryDirectory(prefix="sens-require-d2-") as td:
+            temp = Path(td)
+            command = [sys.executable, str(CLI), "--root", str(ROOT),
+                       "--source", FIXTURE, "--out", str(temp / "out"),
+                       "--report", str(temp / "report.json")]
+            proc = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
+            self.assertIn("--reader is mandatory", proc.stderr)
+            self.assertFalse((temp / "out").exists())
 
     def test_outside_root_is_required(self):
         with tempfile.TemporaryDirectory() as tmp:
