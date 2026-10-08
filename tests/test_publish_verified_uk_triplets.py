@@ -120,6 +120,19 @@ class SafeTripletPublisher(unittest.TestCase):
             self.assertEqual(out["summary"]["blocked"], 1)
             self.assertEqual(out["summary"]["triplets_written"], 0)
 
+    def test_symlinked_mirror_parent_cannot_write_into_source_tree(self):
+        # The lexical target is outside ROOT, but its real path points inside
+        # source. No staged .sens/view may be materialized via this alias.
+        with tempfile.TemporaryDirectory() as td:
+            alias = Path(td) / "linked-checkout"
+            alias.symlink_to(ROOT, target_is_directory=True)
+            destination = alias / "blocked-mirror-4756"
+            with self.assertRaisesRegex(ProjectionBlocked, "outside source repository"):
+                export(ROOT, destination, Path(td) / "blocked.json",
+                       [self.REL1], write=True)
+            self.assertFalse((ROOT / "blocked-mirror-4756").exists())
+            self.assertFalse(destination.exists())
+
     def test_no_filename_confusion_or_source_mirror_escape(self):
         with tempfile.TemporaryDirectory() as td:
             for bad in ("/etc/passwd.lisp", "../escape.lisp", "./file.lisp",
