@@ -1297,7 +1297,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses through exact-domain seam");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
