@@ -69,6 +69,16 @@ class UkrainianPackedSourceCodecTests(unittest.TestCase):
         with self.assertRaises(CarrierError):
             decode(bytes(packet))
 
+    def test_unterminated_d2_structure_fails_closed(self):
+        packet = encode([DomainWord(2, "10"), DomainWord(3, "100")])
+        with self.assertRaises(CarrierError):
+            decode_ukrainian(packet)
+
+    def test_unmatched_d2_close_fails_closed(self):
+        packet = encode([DomainWord(2, "01")])
+        with self.assertRaises(CarrierError):
+            decode_ukrainian(packet)
+
 
 if __name__ == "__main__":
     unittest.main()
