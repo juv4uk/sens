@@ -6,8 +6,16 @@ on:
       - "scripts/plan_t5_agent_work.py"
       - "tests/test_plan_t5_agent_work.py"
       - "scripts/report_original_migration_candidates.py"
-      - "knowledge/migration-nonprogram-*manifest-2026-10-08.json"
+      - "knowledge/migration-nonprogram-*.json"
       - "docs/T5-AGENT-SHARDS.uk.md"
+      - ".github/workflows/plan-t5-agent-work.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/plan_t5_agent_work.py"
+      - "tests/test_plan_t5_agent_work.py"
+      - "scripts/report_original_migration_candidates.py"
+      - "knowledge/migration-nonprogram-*.json"
       - ".github/workflows/plan-t5-agent-work.yml"
   workflow_dispatch:
 
