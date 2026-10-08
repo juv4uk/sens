@@ -85,6 +85,24 @@ class MigrateOneToSensTests(unittest.TestCase):
                 "356fc5d19bb93bf3006ded87f435ef5b7ecce3f819ce07ef7e109f2fa29c4b6f",
             )
 
+    def test_peer_identity_acceptance_uses_full_current_surface_set(self):
+        source = ROOT / "lib" / "surface" / "peer-identity-acceptance.lisp"
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), str(source), "--dry-run"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["status"], "would-write")
+        self.assertEqual(
+            report["output"].replace("\\", "/"),
+            "lib/surface/peer-identity-acceptance.sens",
+        )
+        self.assertGreater(report["bytes"], 0)
+        self.assertGreater(len(report["words"]), 0)
+
     def test_source_outside_repo_is_blocked(self):
         with tempfile.TemporaryDirectory() as td:
             source = Path(td) / "outside.lisp"
