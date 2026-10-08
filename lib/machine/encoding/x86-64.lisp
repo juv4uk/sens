@@ -1215,14 +1215,14 @@
 ; These are machine bytes in the exact Number carrier already used by the
 ; x86 encoder, so the instruction-set witness compares identity, not print.
 (00001001 x86-vex3-byte2
-  (00001000 (map r x b)
+  (00001000 (mmmmm r x b)
     (00001100
       (00001110 (00001101 1 r) 128)
       (00001100
         (00001110 (00001101 1 x) 64)
         (00001100
           (00001110 (00001101 1 b) 32)
-          map)))))
+          mmmmm)))))
 
 (00001001 x86-vex3-byte3
   (00001000 (w vvvv l pp)
@@ -1235,7 +1235,7 @@
           pp)))))
 
 (00001001 x86-encode-vex3-xmm-xmm-xmm
-  (00001000 (map w l pp opcode dst src1 src2)
+  (00001000 (mmmmm w l pp opcode dst src1 src2)
     (10011100
       ((dst-code (x86-xmm-reg-code dst))
        (src1-code (x86-xmm-reg-code src1))
@@ -1243,7 +1243,7 @@
       (00100111
         196
         (x86-vex3-byte2
-          map
+          mmmmm
           (x86-high1 dst-code)
           0
           (x86-high1 src2-code))
