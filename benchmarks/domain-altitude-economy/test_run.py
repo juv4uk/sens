@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
@@ -9,6 +10,7 @@ MODULE_PATH = Path(__file__).with_name("run.py")
 SPEC = importlib.util.spec_from_file_location("domain_altitude_economy", MODULE_PATH)
 assert SPEC and SPEC.loader
 dae = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = dae
 SPEC.loader.exec_module(dae)
 
 
