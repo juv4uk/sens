@@ -6,7 +6,7 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    domain_identity_shape_mechanism, eval_parsed_expressions, eval_program, load_core_library,
+    domain_identity_shape_mechanism, eval_parsed_expressions, load_core_library, parse_mixed_exact_domain,
     Bija3, Bit3, Bit4, Bit8, CoreD4, CoreD8, DomainIdentity, ErrorKind, Exactness, Session, Value,
 };
 use std::rc::Rc;
@@ -83,7 +83,8 @@ fn session() -> Session {
     session
         .environment
         .define(MECHANISM_NAME, domain_identity_shape_mechanism());
-    eval_program(NUCLEUS, &mut session).expect("compiler nucleus loads");
+    let expressions = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus parses");
+    eval_parsed_expressions(&expressions, &mut session).expect("compiler nucleus loads");
     session
 }
 
