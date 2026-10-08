@@ -35,6 +35,14 @@ def fixture() -> dict:
             "physical_outputs_created": 0,
             "original_unpaired_executables_migrated_by_this_tool": 0,
         },
+        "blocked_sources": [
+            {"path": row["path"], "source_git_blob_sha": row["source_git_blob_sha"],
+             "reason": row["first_blocker"], "status": "BLOCKED",
+             "same_stem_sens_already_exists": False,
+             "source_is_executable_proven": False,
+             "independent_semantic_oracle_passed": False}
+            for row in blocked
+        ],
         "blocker_cohorts": [{
             "family": "w8-provenance", "status": "BLOCKED_NOT_ORACLE_ADMITTED",
             "count": 3, "next_action": "Pin historic source-era Git witness",
@@ -82,7 +90,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
     def test_no_paired_source_or_duplicate_can_enter_plan(self):
         a = fixture()
         a["blocker_cohorts"][0]["original_sources"][0]["path"] = "test/ready.lisp"
-        with self.assertRaisesRegex(mod.PlanError, "duplicate"):
+        with self.assertRaisesRegex(mod.PlanError, "canonical ledger"):
             mod.build_plan(a, 2)
         a = fixture()
         a["mechanical_candidates"][0]["same_stem_sens_already_exists"] = True
@@ -119,6 +127,33 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         for n in [0, 101]:
             with self.assertRaises(mod.PlanError):
                 mod.build_plan(fixture(), n)
+
+    def test_cohort_shas_and_first_blockers_must_match_original_ledger(self):
+        cases = ("sha-swap", "reason-swap", "extra-cohort", "missing-original",
+                 "duplicate-original", "missing-ledger", "status-forgery",
+                 "wrong-original-sha")
+        for case in cases:
+            state = fixture()
+            cohort_rows = state["blocker_cohorts"][0]["original_sources"]
+            original_rows = state["blocked_sources"]
+            if case == "sha-swap":
+                cohort_rows[0]["source_git_blob_sha"] = "0" * 40
+            elif case == "reason-swap":
+                cohort_rows[0]["first_blocker"] = "unknown PRINT host effect"
+            elif case == "extra-cohort":
+                cohort_rows[0]["path"] = "lib/forged.lisp"
+            elif case == "missing-original":
+                original_rows.pop()
+            elif case == "duplicate-original":
+                original_rows[1] = dict(original_rows[0])
+            elif case == "missing-ledger":
+                del state["blocked_sources"]
+            elif case == "status-forgery":
+                original_rows[0]["status"] = "CANDIDATE_NOT_ADMITTED"
+            elif case == "wrong-original-sha":
+                original_rows[0]["source_git_blob_sha"] = "f" * 40
+            with self.subTest(case=case), self.assertRaises(mod.PlanError):
+                mod.build_plan(state, 2)
 
     def test_cli_write_once_is_read_only_input_and_rejects_overwrite(self):
         with tempfile.TemporaryDirectory() as td:
