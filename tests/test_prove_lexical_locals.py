@@ -59,8 +59,73 @@ class OriginalLocalCoordinates(unittest.TestCase):
         rows = json.dumps(data["definitions"], ensure_ascii=False)
         self.assertIn('"historical_w8": "00100111"', rows)
         self.assertIn('"historical_w8": "00101001"', rows)
-        self.assertIn('"kind": "historical-call-not-current-domain"', rows)
+        self.assertIn('"kind": "historical-call-proven-current-head-not-admitted"', rows)
+        self.assertIn('"current_domain": "D4"', rows)
+        self.assertIn('"current_exact_word": "1110"', rows)
+        self.assertIn('"current_exact_word": "1111"', rows)
         self.assertNotIn('"kind": "DomainIdentity"', rows)
+
+    def test_all_seventeen_real_old_heads_have_only_audited_current_successors(self):
+        _, data = self.original()
+        expected = {
+            "00001001": ("D4", "0011", 6),  # DEFINE
+            "00001000": ("D4", "0010", 6),  # LAMBDA
+            "00000001": ("D3", "001", 1),   # QUOTE
+            "00100111": ("D4", "1110", 2),  # LIST
+            "00101001": ("D4", "1111", 2),  # APPEND
+        }
+        self.assertTrue(data["historical_head_successors_proven"])
+        witness = data["historical_head_successors"]
+        counts = {key: 0 for key in expected}
+
+        def walk(node):
+            if isinstance(node, dict):
+                for key in ("historical_head_successor", "historical_define_successor"):
+                    successor = node.get(key)
+                    if successor is not None:
+                        counts[successor["old_w8"]] += 1
+                        self.assertFalse(successor["current_runtime_admitted_by_this_proof"])
+                for key, value in node.items():
+                    if key not in ("historical_head_successor", "historical_define_successor"):
+                        walk(value)
+            elif isinstance(node, list):
+                for value in node:
+                    walk(value)
+
+        walk(data["definitions"])
+        self.assertEqual(sum(counts.values()), 17)
+        for old_w8, (domain, word, n) in expected.items():
+            self.assertEqual(counts[old_w8], n)
+            self.assertEqual(witness[old_w8]["current_domain"], domain)
+            self.assertEqual(witness[old_w8]["current_exact_word"], word)
+            self.assertEqual(len(word), int(domain[1:]))
+        self.assertFalse(data["current_callable_domain_identity_proven"])
+        self.assertEqual(data["original_executable_migrations_admitted"], 0)
+
+    def test_audited_successor_not_guessed_from_historical_w8_bits(self):
+        self.assertEqual(proof.audited_current_head("00100111")["current_exact_word"], "1110")
+        self.assertEqual(proof.audited_current_head("00101001")["current_exact_word"], "1111")
+        self.assertNotEqual("00100111", "1110")
+        with self.assertRaises(proof.BindingBlocked):
+            proof.audited_current_head("11111111")
+
+    def test_audited_successor_corrupt_registry_blocks(self):
+        from unittest.mock import patch
+        for corrupt in (
+            {"00100111": None},
+            {"00100111": ("111", "D3", "forged")},
+            {"00100111": ("11100000", "D8", "forged")},
+        ):
+            with self.subTest(corrupt=corrupt):
+                with patch.object(proof, "historical_successor_registry", return_value=corrupt):
+                    with self.assertRaises(proof.BindingBlocked):
+                        proof.audited_current_head("00100111")
+
+    def test_historical_w8_cannot_be_interpreted_as_current_d8_in_auto(self):
+        registry = proof.historical_successor_registry()
+        resolver = proof.parser.Resolver(registry, {}, {}, source_era="auto")
+        with self.assertRaisesRegex(proof.parser.MigrationError, "ambiguous W8"):
+            resolver.head(proof.parser.Tok("ATOM", "00100111", 0))
 
     def test_nested_lambda_nonlocal_depth_exact(self):
         form = "(00001001 example (00001000 (x) (00001000 (y) (00100111 x y))))"
@@ -86,7 +151,10 @@ class OriginalLocalCoordinates(unittest.TestCase):
         source = "(00001001 e (00001000 () (00000001 ())))"
         result = proof.lower_definitions(source)
         body = result["definitions"][0]["local_coordinate_body"]["body"]
-        self.assertEqual(body, {"kind": "quote-empty-historical-w8", "datum": "D3:000"})
+        self.assertEqual(body["kind"], "quote-empty-historical-w8")
+        self.assertEqual(body["datum"], "D3:000")
+        self.assertEqual(body["historical_head_successor"]["current_domain"], "D3")
+        self.assertEqual(body["historical_head_successor"]["current_exact_word"], "001")
         self.assertEqual(locals_in(body), [])
 
     def test_duplicate_params_fail_closed(self):
