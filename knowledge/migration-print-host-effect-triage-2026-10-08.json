@@ -1,0 +1,84 @@
+{
+  "schema": "sens-migration-print-host-effect-triage/v1",
+  "authority": "research-only; not domain law or an admitted executable T5 corpus",
+  "as_of": "2026-10-08",
+  "parent_issue": "https://github.com/juv4uk/sens/issues/4458",
+  "coordinated_by": "https://github.com/juv4uk/sens/issues/4449",
+  "source_policy": "keep original .lisp unchanged; no .sens emitted until semantic+I/O witness",
+  "wire_policy": "same-stem .sens must be physical five-trit T5; logical 2 only between exact 0/1 words; EOF from file length; no 22",
+  "status": "BLOCKED_HOST_EFFECT",
+  "files": [
+    {
+      "path": "scripts/build-constitution.lisp",
+      "git_blob_sha": "9d0d8772dff6133292c451f24dd3369d72c099a2",
+      "line_numbers": {
+        "output_call": 62,
+        "host_read": 23,
+        "local_binding": 60,
+        "strings": 25
+      },
+      "observed": [
+        "legacy 01001000 output primitive",
+        "legacy 01001011 file read and 10100110 filename literal",
+        "quoted string payload",
+        "recursive print-fixtures local function"
+      ],
+      "required_evidence": [
+        "ratified exact-width successor proof for each used legacy call",
+        "file-read side-effect host contract",
+        "Text7/string payload layout and output byte/line parity",
+        "post-conversion SENS oracle run and T5 byte exactness"
+      ],
+      "action": "BLOCK: do not output scripts/build-constitution.sens"
+    },
+    {
+      "path": "scripts/symbol-table.lisp",
+      "git_blob_sha": "53c38a2afe829030191ef6dccc8fb15cd6154c88",
+      "line_numbers": {
+        "output_call": 91,
+        "host_read": 94,
+        "local_binding": 85,
+        "source_cli": 29
+      },
+      "observed": [
+        "legacy 01001000 printing `(name . id)`",
+        "legacy 01001011 reading lib/core4.lisp",
+        "local recursive symbol walker and sort",
+        "numeric `id` and increment sequence"
+      ],
+      "required_evidence": [
+        "read-file and print output host semantics",
+        "stable symbol ordering and numeric binding/number payload law",
+        "exact source typed-word successor mapping and oracle parity"
+      ],
+      "action": "BLOCK: do not output scripts/symbol-table.sens"
+    },
+    {
+      "path": "scripts/fixtures-for-tier.lisp",
+      "git_blob_sha": "138c07f5c2f503f55d4d5b3ab885ce248ccaf398",
+      "line_numbers": {
+        "output_call": 49,
+        "host_read": 53,
+        "local_binding": 41,
+        "argument_source": 23
+      },
+      "observed": [
+        "legacy 01001000 output",
+        "legacy 01001011 file read",
+        "dynamic *argv* tier argument and error path",
+        "local print-matching recursive binding"
+      ],
+      "required_evidence": [
+        "CLI argv / error semantics",
+        "host I/O printable fixture parity",
+        "ratified numeric/string/binding laws and typed-word AST witness"
+      ],
+      "action": "BLOCK: do not output scripts/fixtures-for-tier.sens"
+    }
+  ],
+  "next_steps": [
+    "claim separate executable/host-effect split for each script before editing source",
+    "record source-blob changes via test and manually refresh provenance",
+    "only after accepted oracle+I/O evidence allow physical paired .sens and replace BLOCK classification"
+  ]
+}

@@ -1,0 +1,19 @@
+name: migration-print-host-effect-triage
+on:
+  pull_request:
+    paths:
+      - "knowledge/migration-print-host-effect-triage-2026-10-08.json"
+      - "tests/test_migration_print_host_effect_triage.py"
+      - "scripts/migrate-three-pass.py"
+      - ".github/workflows/migration-print-host-effect-triage.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-host-effect-blockers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Assert pinned source provenance and actual three-pass BLOCK
+        run: python3 -m unittest discover -s tests -p 'test_migration_print_host_effect_triage.py' -v
