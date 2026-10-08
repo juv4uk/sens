@@ -26,12 +26,38 @@ cargo build -p sens-cli --bin sens-trit
   "expected_physical_sha256": "<64 hex of independently verified packed T5>",
   "expected_typed_sha256": "<64 hex of independently verified typed D1-D9 words>",
   "oracle_commands": [
-    ["cargo", "test", "-p", "sens", "--test", "specific_original_semantic_witness"]
-  ]
+    ["python3", "tests/test_specific_original_history.py", "-q"],
+    ["cargo", "test", "-p", "sens", "--test", "specific_original_current"]
+  ],
+  "oracle_witnesses": {
+    "historical": {
+      "path": "tests/test_specific_original_history.py",
+      "git_blob_sha1": "<40 hex Git blob SHA1 of reviewed Python witness>"
+    },
+    "current": {
+      "path": "crates/sens/tests/specific_original_current.rs",
+      "git_blob_sha1": "<40 hex Git blob SHA1 of reviewed Rust witness>"
+    }
+  }
 }
 ```
 
 Доказ не можна замінювати на фальшивий `true` чи тест іншої програми.
+Маніфест відтепер вимагає **два незалежні, незмінні тести**:
+Python для історичного джерела та Rust `cargo test -p sens --test ...`
+для поточного SENS. Для обох зазначати власний `git_blob_sha1`, як у
+`knowledge/migration-admissions/two-forms-canary.json`. Команди `echo`,
+`true`, `python -c`, випадкові зовнішні скрипти й один-єдиний оракул
+**блокуються до публікації**. Якщо файл тесту відрізняється від
+зафіксованого Git blob або його змінено під час запуску, допуск зривається.
+
+Ці автоматичні гарантії доводять походження і запуск **названих тестів**,
+але не математичну правильність самих тверджень у тестах. Власник повинен
+окремо перевірити, що Python-свідок порівнює історичне виконання саме
+цього `.lisp`, а Rust-свідок — виконання відповідного фізичного
+`.sens` у поточних D1–D9. Історична архівна програма без цього не
+отримує статус мігрованої, навіть якщо T5 та D2 PASS.
+
 Перевірений тест повинен засвідчувати саме цю програму, її оригінальну
 спостережувану поведінку та правильність поточних D1–D9 доменів. Маніфест
 підлягає рев'ю.
