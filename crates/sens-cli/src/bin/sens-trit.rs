@@ -143,7 +143,11 @@ fn execute() -> Result<(), String> {
             // loads the existing language-owned Core4 module on request.
             // Neither open nor bare eval may silently acquire mechanisms.
             let bytes = read_sens(path)?;
-            let result = eval_t5_bytes_with_core(&bytes, command == "eval-core")?;
+            let result = if command == "eval-core" {
+                eval_t5_bytes_with_core(&bytes, true)?
+            } else {
+                eval_t5_bytes(&bytes)?
+            };
             for output in result.output {
                 println!("{output}");
             }
