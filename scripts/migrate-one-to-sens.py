@@ -28,15 +28,13 @@ import tempfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MIGRATOR = ROOT / "scripts" / "migrate-three-pass.py"
+MIGRATOR = ROOT / "scripts" / "migrate-to-sens-codes.py"
 CODEC = ROOT / "scripts" / "sens_t5_codec.py"
 
 DEFAULT_ARGS = {
     "foundation": ROOT / "knowledge" / "d1-d7-foundation.json",
-    "domain_surfaces": ROOT / "crates" / "sens" / "src" / "domain_surface_registry_generated.rs",
-    "semantic_generated": ROOT / "crates" / "sens" / "src" / "semantic_registry_generated.rs",
-    "semantic_registry": ROOT / "crates" / "sens" / "src" / "semantic_registry.rs",
-    "necessary_forms": ROOT / "crates" / "sens" / "src" / "eval" / "necessary_forms_generated.rs",
+    "domain_surfaces": ROOT / "lib" / "domains" / "d3.lisp",
+    "semantic_registry": ROOT / "lib" / "surface" / "semantic-registry.lisp",
     "historical_map": ROOT / "contracts" / "core1-historical-sid-map.lisp",
     "text7": ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs",
 }
@@ -117,14 +115,12 @@ def main() -> int:
 
         cmd = [
             sys.executable, str(MIGRATOR), str(stage),
-            "--out", str(stage_out),
             "--foundation", str(DEFAULT_ARGS["foundation"]),
-            "--domain-surfaces", str(DEFAULT_ARGS["domain_surfaces"]),
-            "--semantic-generated", str(DEFAULT_ARGS["semantic_generated"]),
-            "--semantic-registry", str(DEFAULT_ARGS["semantic_registry"]),
-            "--necessary-forms", str(DEFAULT_ARGS["necessary_forms"]),
+            "--sens-mirror", str(stage_out),
+            "--text7-projection", str(DEFAULT_ARGS["text7"]),
             "--historical-map", str(DEFAULT_ARGS["historical_map"]),
-            "--text7", str(DEFAULT_ARGS["text7"]),
+            "--semantic-registry", str(DEFAULT_ARGS["semantic_registry"]),
+            "--domain-surfaces", str(DEFAULT_ARGS["domain_surfaces"]),
             "--report", str(report),
         ]
         completed = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
