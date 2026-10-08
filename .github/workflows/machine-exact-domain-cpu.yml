@@ -1,3 +1,4 @@
+# Structural-effect CI retrigger: canonical COND exact-result repair
 name: machine-exact-domain-cpu
 
 concurrency:
