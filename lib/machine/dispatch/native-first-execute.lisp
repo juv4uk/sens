@@ -17,19 +17,19 @@
 
 (00001001 native-first-execution-completed
   (00001000 (route value)
-    (00100111
+    (1110
       (00000001 execution-route)
       route
       (00000001 (status completed))
-      (00100111 (00000001 value) value))))
+      (1110 (00000001 value) value))))
 
 (00001001 native-first-execution-rejected
   (00001000 (route detail)
-    (00100111
+    (1110
       (00000001 execution-route)
       route
       (00000001 (status rejected))
-      (00100111 (00000001 detail) detail))))
+      (1110 (00000001 detail) detail))))
 
 (00001001 native-first-plan-tag-state
   (00001000 (plan tag)
@@ -42,53 +42,85 @@
        native-first-plan-tag-state-fallback
        (00000001 distinct)))))
 
+(00001001 native-first-plan-second
+  (00001000 (plan)
+    (100 (011 plan))))
+
+(00001001 native-first-plan-third
+  (00001000 (plan)
+    (100 (011 (011 plan)))))
+
+(00001001 native-first-plan-length-2?
+  (00001000 (plan)
+    (00000111
+      ((010 plan) (0))
+      ((010 (011 plan)) (0))
+      ((101 (011 (011 plan)) ()) (1))
+      ((native-first-domain-true ()) (0)))))
+
+(00001001 native-first-plan-length-3?
+  (00001000 (plan)
+    (00000111
+      ((010 plan) (0))
+      ((010 (011 plan)) (0))
+      ((010 (011 (011 plan))) (0))
+      ((101 (011 (011 (011 plan))) ()) (1))
+      ((native-first-domain-true ()) (0)))))
+
+(00001001 native-first-execute-native-result
+  (00001000 (result)
+    (1110
+      ((101 (x86-machine-rejected? result) t)
+       (1)
+       (native-first-execution-rejected (00000001 native) result))
+      ((101 (x86-machine-rejected? result) t)
+       (0)
+       (native-first-execution-completed (00000001 native) result)))))
+
 (00001001 native-first-execute-native-plan
   (00001000 (plan)
-    (10011100 ((result
-            (x86-call-admitted-u64
-              (00101111 plan)
-              (00110000 plan))))
-      (00000111
-        ((00100010 (x86-machine-rejected? result) t)
-         (1)
-         (native-first-execution-rejected (00000001 native) result))
-        ((00100010 (x86-machine-rejected? result) t)
-         (0)
-         (native-first-execution-completed (00000001 native) result))))))
-
-(00001001 native-first-execute-plan
+    (native-first-execute-native-result
+      (x86-call-admitted-u64
+        (native-first-plan-second pl(00001001 native-first-execute-plan
   (00001000 (plan)
-    (10011100 ((native-state
-            (native-first-plan-tag-state plan (00000001 native-plan))))
-      (00000111
-        ((00000011 native-state (00000001 same)) (1)
-         (00000111
-           ((00100010 (00101000 plan) 3) (1)
-            (native-first-execute-native-plan plan))
-           ((00100010 (00101000 plan) 3) (0)
-            (native-first-execution-rejected
-              (00000001 native)
-              (00100111 (00000001 malformed-native-plan) plan)))))
-        ((00000011 native-state (00000001 distinct)) (1)
-         (10011100 ((fallback-state
-                 (native-first-plan-tag-state
-                   plan
-                   (00000001 evaluator-fallback))))
-           (00000111
-             ((00000011 fallback-state (00000001 same)) (1)
-              (00000111
-                ((00100010 (00101000 plan) 2) (1)
-                 (native-first-execution-completed
-                   (00000001 evaluator)
-                   (01001101 (00101111 plan))))
-                ((00100010 (00101000 plan) 2) (0)
-                 (native-first-execution-rejected
-                   (00000001 evaluator)
-                   (00100111 (00000001 malformed-evaluator-fallback) plan)))))
-             ((00000011 fallback-state (00000001 distinct)) (1)
-              (native-first-execution-rejected
-                (00000001 invalid-plan)
-                (00100111 (00000001 unknown-native-first-plan) plan))))))))))
+    (00000111
+      ((101
+         (native-first-plan-tag-state plan (00000001 native-plan))
+         (00000001 same))
+       (1)
+       (00000111
+         ((101 (native-first-plan-length-3? plan) 1)
+          (1)
+          (native-first-execute-native-plan plan))
+         ((101 (native-first-plan-length-3? plan) 1)
+          (0)
+          (native-first-execution-rejected
+            (00000001 native)
+            (1110 (00000001 malformed-native-plan) plan)))))
+      ((101
+         (native-first-plan-tag-state plan (00000001 evaluator-fallback))
+         (00000001 same))
+       (1)
+       (00000111
+         ((101 (native-first-plan-length-2? plan) 1)
+          (1)
+          (native-first-execution-completed
+            (00000001 evaluator)
+            (0001 (native-first-plan-second plan))))
+         ((101 (native-first-plan-length-2? plan) 1)
+          (0)
+          (native-first-execution-rejected
+            (00000001 evaluator)
+            (1110 (00000001 malformed-evaluator-fallback) plan)))))
+      ((101
+         (native-first-plan-tag-state plan (00000001 native-first-plan))
+         (00000001 distinct))
+       (1)
+       (native-first-execution-rejected
+         (00000001 invalid-plan)
+         (1110 (00000001 unknown-native-first-plan) plan))))))
+
+0001 unknown-native-first-plan) plan))))))))))
 
 (00001001 native-first-execute-expression
   (00001000 (expression)
@@ -100,10 +132,10 @@
     (00000111
       ((00000010 forms) () (00000001 ()))
       ((00000010 forms) (1)
-       (00100111
+       (1110
          (native-first-execution-rejected
            (00000001 evaluator)
-           (00100111 (00000001 malformed-source-form-tail) forms))))
+           (1110 (00000001 malformed-source-form-tail) forms))))
       ((00000010 forms) (0)
        (00000100
          (native-first-execute-expression (00000101 forms))
@@ -111,7 +143,7 @@
 
 (00001001 native-first-execute-source
   (00001000 (source)
-    (00100111
+    (1110
       (00000001 source-execution)
       (native-first-execute-source-forms
         (01001011 source)))))
