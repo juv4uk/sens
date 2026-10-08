@@ -144,7 +144,7 @@
                 ((x86-projection-rejected? rest-projected)
                  (00000001 x86-projection-rejected))
                 (t
-                 (00101001 projected rest-projected))))))))))))
+                 (00101001 projected rest-projected)))))))))))
 
 (00001001 x86-project-machine-effects-with-layout
   (00001000 (effects field0-offset field1-offset)
@@ -173,7 +173,7 @@
                 ((x86-projection-rejected? rest-projected)
                  (00000001 x86-projection-rejected))
                 (t
-                 (00101001 projected rest-projected))))))))))))
+                 (00101001 projected rest-projected)))))))))))
 
 (00001001 x86-encode-machine-effect
   (00001000 (effect)
