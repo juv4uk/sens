@@ -111,7 +111,7 @@ def build_report() -> dict:
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                     and not written
                 ),
-                "rule": "no unproved ACTIVE/UNCLASSIFIED original is mechanically admitted; archival benchmark candidates are NOT executable migrations; no .sens emitted",
+                "rule": "ACTIVE/UNCLASSIFIED originals are BLOCKED until separate oracle proof; archive-only mechanical candidates are NONPROGRAM, never executable migrations; no .sens emitted",
             },
         }
         return result
