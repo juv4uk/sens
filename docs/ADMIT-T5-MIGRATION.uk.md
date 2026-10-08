@@ -26,8 +26,13 @@ cargo build -p sens-cli --bin sens-trit
   "expected_physical_sha256": "<64 hex of independently verified packed T5>",
   "expected_typed_sha256": "<64 hex of independently verified typed D1-D9 words>",
   "oracle_commands": [
-    ["cargo", "test", "-p", "sens", "--test", "specific_original_semantic_witness"]
+    ["python3", "tests/test_specific_original_history.py", "-q"],
+    ["cargo", "test", "-p", "sens", "--test", "specific_original_current"]
   ],
+  "oracle_witnesses": {
+    "historical": {"path": "tests/test_specific_original_history.py", "git_blob_sha1": "<40hex>"},
+    "current": {"path": "crates/sens/tests/specific_original_current.rs", "git_blob_sha1": "<40hex>"}
+  },
   "historical_observation": {
     "command": ["python3", "tests/oracle_for_this_source.py", "{source}"],
     "stdout_sha256": "<64 hex of EXACT historical observable stdout>"
@@ -135,3 +140,9 @@ GitHub-hosted job компілює справжній Rust `sens-trit`, запу
 автоматичної черги**, уже наявний тестовий приклад; він **не** зменшує число
 оригінальних неперенесених файлів. Маніфести оригінальних програм без
 семантичного доказу не додавати. Не дублювати наявні gate у нових скриптах.
+
+## Перевірюваність коду оракулів
+
+Маніфест вимагає рівно два окремі, простежувані Git blob свідки: Python-тест історичного джерела `tests/test_*.py` і Rust-тест поточного SENS `crates/sens/tests/*.rs`. `oracle_witnesses` зберігає для кожного точні `path` і `git_blob_sha1`, а `oracle_commands` запускає відповідні тести. Допуск відхиляє `echo`, `true`, `python -c`, одну-єдину команду, незв'язаний тест, змінений тест або зміну джерела в процесі перевірки. Файли тестів мають прямо називати відповідні `.lisp` та `.sens`.
+
+Це не автоматична математична сертифікація: окреме рев'ю має підтвердити правильність тверджень у тестах. Для оригінальних виконуваних програм також **залишається обов'язковою** незалежна байтова перевірка `historical_observation` проти реального `sens-trit eval` та збереження `expected_current_eval_stdout` для чинного канонічного прикладу. Новий контракт доповнює ці умови, не замінює їх.

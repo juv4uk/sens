@@ -290,7 +290,7 @@ class OriginalCandidateTests(unittest.TestCase):
         # All 25 ISA + 21 schema + 8 evidence + 13 fixture envelopes
         # were individually reviewed and landed on main; they are data.
         entries = mod.load_nonprogram_classification(ROOT)
-        self.assertEqual(len(entries), 67)
+        self.assertEqual(len(entries), 76)
         self.assertEqual(
             {name: sum(e["cohort"] == name for e in entries.values())
              for name in ("isa", "schema", "evidence", "expr-record")},
@@ -337,6 +337,21 @@ class OriginalCandidateTests(unittest.TestCase):
         }), encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "mis-scoped ISA catalogue"):
             mod.load_nonprogram_classification(self.root)
+
+
+    def test_ratified_domain_tables_are_data_not_executable_migration(self):
+        classified = mod.load_nonprogram_classification(ROOT)
+        rows = [v for v in classified.values() if v["cohort"] == "domain-table"]
+        self.assertEqual(len(rows), 9)
+        self.assertEqual(
+            sorted(r["path"] for r in rows),
+            sorted(f"lib/domains/d{i}.lisp" for i in range(1, 10)),
+        )
+        self.assertTrue(all(r["source_class"] == "NONPROGRAM_DATA_REVIEWED"
+                            and r["semantic_oracle_admitted"] is False
+                            and r["automatic_sens_companion"] is False for r in rows))
+        self.assertNotIn("lib/domains/d10.lisp", classified)
+        self.assertNotIn("lib/core1.lisp", classified)
 
 
 if __name__ == "__main__":

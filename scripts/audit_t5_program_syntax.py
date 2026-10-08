@@ -55,6 +55,20 @@ def audit(root: Path, *, reader: Path,
                 row["syntax_reason"] = "Rust D2 reader rejected stream: " + (
                     result.stderr.strip()[:300] or f"exit={result.returncode}"
                 )
+                # A transport-level InvalidProgramSyntax is unhelpfully vague
+                # for original-source migration. Ask the SAME Rust reader to
+                # explain via its canonical grammar; never infer D2 in Python.
+                # Older readers can lack this opt-in command: keep the original
+                # BLOCK status and syntax reason in that case.
+                explanation = subprocess.run(
+                    [str(reader), "explain", str(path)],
+                    capture_output=True, check=False,
+                    timeout=15, text=True, encoding="utf-8",
+                )
+                detail = explanation.stderr.strip()
+                if explanation.returncode and "D2 grammar rejected" in detail:
+                    row["syntax_reason"] += " | " + detail[:1200]
+                    row["d2_word_coordinate_diagnostic"] = detail[:1200]
                 continue
             expected = " ".join(words) + "\n"
             if result.stdout != expected:

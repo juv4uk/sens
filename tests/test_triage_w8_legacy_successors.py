@@ -125,6 +125,102 @@ class W8SecondBarrierTests(unittest.TestCase):
         ):
             self.assertEqual(triage.next_barrier(value),expected)
 
+
+    def scoped_census(self, kind="UNCLASSIFIED_NEEDS_SOURCE_PROOF"):
+        row = {
+            "path": "old.lisp", "source_git_blob_sha": self.sha,
+            "status": "BLOCKED",
+            "same_stem_sens_already_exists": False,
+            "independent_semantic_oracle_passed": False,
+            "source_is_executable_proven": False,
+            "source_scope": kind, "reason": "ambiguous W8 executable head 00001001",
+        }
+        return {
+            "source_era": "auto",
+            "summary": {
+                "blocked": 1, "physical_outputs_created": 0,
+                "original_unpaired_executables_migrated_by_this_tool": 0,
+                "classified_nonprogram": int(kind == "NONPROGRAM_DATA_REVIEWED"),
+                "archived_benchmark_data_sources": int(kind == "ARCHIVED_BENCHMARK_NONPROGRAM"),
+            },
+            "blocked_sources": [row],
+            "reviewed_nonprogram_sources": (
+                [{
+                    "path": "old.lisp", "source_git_blob_sha": self.sha,
+                    "source_class": "NONPROGRAM_DATA_REVIEWED",
+                    "automatic_sens_companion": False,
+                    "semantic_oracle_admitted": False,
+                }] if kind == "NONPROGRAM_DATA_REVIEWED" else []
+            ),
+        }
+
+    def test_real_candidate_scope_remains_unproved_not_executable(self):
+        result = triage.add_owner_reviewed_source_scope(
+            self.run_join(), self.scoped_census()
+        )
+        self.assertEqual(result["summary"]["chronology_proven_same_blob"], 1)
+        self.assertEqual(result["summary"]["executable_or_unclassified_next_barrier_originals"], 1)
+        self.assertEqual(result["summary"]["data_only_next_barrier_originals"], 0)
+        self.assertEqual(result["sources"][0]["work_lane"],
+                         "EXECUTABLE_OR_UNCLASSIFIED_NEEDS_ORACLE")
+        self.assertFalse(result["sources"][0]["release_admitted"])
+        self.assertEqual(result["summary"]["physical_outputs_created"], 0)
+        self.assertEqual(result["summary"]["current_semantic_admissions"], 0)
+
+    def test_owner_reviewed_data_never_enqueued_for_executable_conversion(self):
+        result = triage.add_owner_reviewed_source_scope(
+            self.run_join(), self.scoped_census("NONPROGRAM_DATA_REVIEWED")
+        )
+        self.assertEqual(result["summary"]["data_only_next_barrier_originals"], 1)
+        self.assertEqual(result["summary"]["executable_or_unclassified_next_barrier_originals"], 0)
+        self.assertEqual(result["sources"][0]["work_lane"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertEqual(result["source_scope_next_barrier_cohorts"][0]["count"], 1)
+        self.assertFalse(result["sources"][0]["current_source_era_permission"])
+
+    def test_archived_benchmark_scope_requires_actual_owner_path_law(self):
+        from migration_source_scope import archived_benchmark_source
+        correct = ("benchmarks/sens-surface/results/"
+                   "20260925-icount-33bfb53a/programs/old.lisp")
+        self.assertTrue(archived_benchmark_source(correct))
+        result = self.run_join()
+        result["sources"][0]["path"] = correct
+        census = self.scoped_census("ARCHIVED_BENCHMARK_NONPROGRAM")
+        census["blocked_sources"][0]["path"] = correct
+        scoped = triage.add_owner_reviewed_source_scope(result, census)
+        self.assertEqual(scoped["summary"]["data_only_next_barrier_originals"], 1)
+        with self.assertRaisesRegex(triage.TriageError, "archive source-scope"):
+            triage.add_owner_reviewed_source_scope(
+                self.run_join(),
+                self.scoped_census("ARCHIVED_BENCHMARK_NONPROGRAM")
+            )
+
+    def test_fake_data_classification_or_stale_source_sha_fails_closed(self):
+        report = self.run_join()
+        forged = self.scoped_census("NONPROGRAM_DATA_REVIEWED")
+        forged["reviewed_nonprogram_sources"] = []
+        with self.assertRaisesRegex(triage.TriageError, "manifest total|owner-reviewed"):
+            triage.add_owner_reviewed_source_scope(report, forged)
+        stale = self.scoped_census()
+        stale["blocked_sources"][0]["source_git_blob_sha"] = "0"*40
+        with self.assertRaisesRegex(triage.TriageError, "Git SHA differs"):
+            triage.add_owner_reviewed_source_scope(report, stale)
+        doubled = self.scoped_census()
+        doubled["blocked_sources"].append(dict(doubled["blocked_sources"][0]))
+        doubled["summary"]["blocked"] = 2
+        with self.assertRaisesRegex(triage.TriageError, "duplicate"):
+            triage.add_owner_reviewed_source_scope(report, doubled)
+
+    def test_source_scope_cannot_override_canonical_auto_or_oracle(self):
+        report = self.run_join()
+        malformed = self.scoped_census()
+        malformed["source_era"] = "legacy"
+        with self.assertRaisesRegex(triage.TriageError, "source-era auto"):
+            triage.add_owner_reviewed_source_scope(report, malformed)
+        malformed = self.scoped_census()
+        malformed["blocked_sources"][0]["source_is_executable_proven"] = True
+        with self.assertRaisesRegex(triage.TriageError, "unapproved original"):
+            triage.add_owner_reviewed_source_scope(report, malformed)
+
     def test_canonical_legacy_replay_cannot_mint_output(self):
         source = (self.root / "scripts")
         source.mkdir()
