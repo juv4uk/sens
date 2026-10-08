@@ -62,7 +62,9 @@ class C1FourthDomainCanary(unittest.TestCase):
 
     def test_actual_three_pass_and_committed_real_t5(self):
         readable = SOURCE.read_text(encoding="utf-8")
-        resolver = migration.Resolver(self.legacy, self.my, self.upper)
+        # lib/core1.lisp pins these exact-8 heads as historical Core1.
+        # Do not change the global AUTO law: unknown W8 remains BLOCKED.
+        resolver = migration.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
         projection = migration.migrate_file(readable, resolver, self.text7)
         self.assertEqual(projection, EXPECTED_WORDS)
         self.assertEqual(resolver.counts["pass1-sens8"], 15)
@@ -72,7 +74,14 @@ class C1FourthDomainCanary(unittest.TestCase):
         self.assertNotEqual(payload, readable.encode("utf-8"))
         self.assertEqual(migration.encode_projection(projection), payload)
         self.assertEqual(migration.decode_bytes(payload), EXPECTED_WORDS.split())
-        self.assertFalse((FIXTURE / "fourth").exists())
+        # A same-stem extensionless file is permitted ONLY as exact ASCII view.
+        # On older main commits the view may be pending; once present it must
+        # reproduce the exact physical words, never masquerade as .sens.
+        view = FIXTURE / "fourth"
+        if view.exists() or view.is_symlink():
+            self.assertTrue(view.is_file() and not view.is_symlink())
+            self.assertEqual(view.read_bytes(), EXPECTED_WORDS.encode("ascii"))
+            self.assertNotEqual(view.read_bytes(), payload)
 
     def test_real_mirror_cli_manifest_and_no_clobber(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -82,7 +91,7 @@ class C1FourthDomainCanary(unittest.TestCase):
                 sys.executable, str(SCRIPT), str(FIXTURE), "--out", str(dest),
                 *[item for key, path in ARGS.items() for item in
                   ("--" + key.replace("_", "-"), str(path))],
-                "--report", str(report)
+                "--report", str(report), "--source-era", "legacy"
             ]
             run = subprocess.run(cmd, text=True, capture_output=True)
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
@@ -96,6 +105,12 @@ class C1FourthDomainCanary(unittest.TestCase):
             self.assertEqual(blocked["summary"]["files_blocked"], 1)
             self.assertEqual((dest / "fourth.sens").read_bytes(), EXPECTED_BYTES)
             self.assertTrue(SOURCE.exists())
+
+    def test_auto_w8_remains_blocked_without_historical_source_era(self):
+        readable = SOURCE.read_text(encoding="utf-8")
+        auto = migration.Resolver(self.legacy, self.my, self.upper, source_era="auto")
+        with self.assertRaisesRegex(migration.MigrationError, "ambiguous W8"):
+            migration.migrate_file(readable, auto, self.text7)
 
     def test_unratified_and_corrupt_transport_stay_blocked(self):
         for invalid in (EXPECTED_BYTES + b"\xf2", bytes([243])):
