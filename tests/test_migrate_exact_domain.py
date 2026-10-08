@@ -25,7 +25,8 @@ class ExactDomainMigrationTests(unittest.TestCase):
         cls.surfaces, cls.legacy = mod.load_authority()
 
     def rewrite(self, source: str) -> str:
-        return mod.apply_edits(source, mod.plan(source, self.surfaces, self.legacy))
+        edits = mod.plan(source, self.surfaces, self.legacy)
+        return mod.apply_edits(source, edits)
 
     def test_current_d3_surfaces_and_legacy_sid_resolve_to_same_successor(self):
         for source in ("(car x)", "(CAR x)", "(перше x)", "(00000101 x)"):
@@ -63,8 +64,6 @@ class ExactDomainMigrationTests(unittest.TestCase):
     def test_legacy_list_successor_is_not_narrowed_into_nonadmitted_d4(self):
         source = "(00100111 evaluator-fallback expression)\n"
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
-
-
 
 
 if __name__ == "__main__":
