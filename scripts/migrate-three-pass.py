@@ -649,7 +649,7 @@ def collect_global_bindings(forms):
         if not isinstance(form,ListNode) or form.tail is not None or len(form.items)<2:
             continue
         head=form.items[0]
-        if not isinstance(head,Atom) or head.tok.text not in {"00001001","0011","define","def"}:
+        if not isinstance(head,Atom) or head.tok.text not in {"00001001","0011","визначити","define","def"}:
             continue
         target=form.items[1]
         if isinstance(target,Atom):
@@ -714,6 +714,43 @@ def encode_atom_data(node: Atom,text7,lexical_env=()):
     return [t]
 
 
+def encode_define_shorthand(node: ListNode,resolver,text7,lexical_env=()):
+    """Normalize legacy (define (f x) body) to contextual DEFINE + LAMBDA."""
+    if node.tail is not None or len(node.items) != 3:
+        return None
+    head, target, body = node.items
+    if not (isinstance(head, Atom) and isinstance(target, ListNode)):
+        return None
+    head_words, _ = resolver.head(head.tok)
+    if not head_words or head_words[0] != "0011":
+        return None
+    if target.tail is not None or not target.items or not isinstance(target.items[0], Atom):
+        raise MigrationError(
+            "DEFINE shorthand requires a proper (name parameters...) signature",
+            target.tok,
+        )
+    name_tok = target.items[0].tok
+    params = ListNode(target.items[1:], None, target.tok)
+    lambda_names = lambda_parameter_names(params)
+    words = [D2_OPEN, "0011", D2_SEP]
+    words.extend(encode_text7_identifier(name_tok.text, text7, name_tok))
+    words.append(D2_SEP)
+    words.extend((D2_OPEN, "0010", D2_SEP))
+    words.extend(encode_lambda_params(params, text7))
+    words.append(D2_SEP)
+    words.extend(
+        encode(
+            body,
+            resolver,
+            text7,
+            quoted=False,
+            lexical_env=tuple(lambda_names) + tuple(lexical_env),
+        )
+    )
+    words.extend((D2_CLOSE, D2_CLOSE))
+    return words
+
+
 def encode_string(node: String,text7):
     return [node.tok.text]
 
@@ -747,6 +784,11 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
     if isinstance(node,ListNode):
         if not node.items and node.tail is None:
             return [D3_EMPTY]
+
+        if not quoted:
+            shorthand = encode_define_shorthand(node,resolver,text7,lexical_env)
+            if shorthand is not None:
+                return shorthand
 
         words=[D2_OPEN]
         head_bits=None
@@ -1049,6 +1091,7 @@ def main():
             "1": "historical 8-bit head -> admitted current successor",
             "2": "my-lisp / current admitted name -> exact current domain",
             "3": "Lisp-I/1.5 head -> proven current D3-D6",
+            "4": "source-proven global/lexical Text7 binding frame",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
         "source_era": args.source_era,
