@@ -35,32 +35,31 @@
         "spec/translit.spec.js@52166a26220cb5fdd63ec834d0693f4ad49181cd"
       ],
       "semantic_name": "CONTEXTUAL-TEXT-REWRITE",
-      "behavior": "Apply a finite rule table whose rewrite for a matched input depends on lexical context classes (word-start, after-consonant, default), with deterministic longest-key matching and preserved case variants.",
+      "behavior": "Apply a finite rewrite table where the result for a matched input depends on lexical context classes such as word-start and after-consonant, with deterministic longest-key matching and case projections.",
       "decision": "HOLD",
       "language_visible": true,
       "mechanism_only": false,
       "duplicate_target": null,
-      "duplicate_audit": "No current D10 semantic-name match found for contextual rewrite; exact D1-D9 behavioral audit still required.",
+      "duplicate_audit": "No current D10 semantic-name match; exact behavioral lower-domain audit still required.",
       "coordinate": null,
-      "provenance_note": "Actual transliteration operation; admission withheld until carrier-independent restatement and lower-domain duplicate audit."
+      "provenance_note": "Actual transliteration operation; not admitted as a slot yet."
     },
     {
       "stable_id": "d10.ling.vidyut.unicode-normalization.v1",
       "repository": "juv4uk/vidyut",
       "source": [
         "vidyut-lipi/src/unicode_norm.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea",
-        "vidyut-lipi/src/transliterate.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea",
         "vidyut-lipi/tests/basic.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea"
       ],
       "semantic_name": "CANONICAL-UNICODE-NORMALIZE",
-      "behavior": "Map Unicode-equivalent representations to a canonical NFC or NFD representation, with equivalent input variants receiving the same transliteration behavior.",
+      "behavior": "Map Unicode-equivalent representations to canonical NFC/NFD forms while preserving semantic equivalence for downstream transliteration.",
       "decision": "HOLD",
       "language_visible": true,
       "mechanism_only": false,
       "duplicate_target": null,
-      "duplicate_audit": "No D10 semantic-name match found for NFC/NFD normalization; exact D1-D9 semantic audit still required.",
+      "duplicate_audit": "No D10 name match; exact D1-D9 behavioral audit remains.",
       "coordinate": null,
-      "provenance_note": "Executable to_nfc/to_nfd semantics with Unicode equivalence tests; retain as portable text-equivalence evidence."
+      "provenance_note": "Executable normalization law with equivalence tests."
     },
     {
       "stable_id": "d10.ling.vidyut.greedy-span-mapping.v1",
@@ -70,46 +69,146 @@
         "vidyut-lipi/src/mapping.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea"
       ],
       "semantic_name": "LONGEST-MATCH-TEXT-MAPPING",
-      "behavior": "At each input position choose the longest defined mapping key beginning at that position; preserve token-kind context where required.",
+      "behavior": "At each input position choose the longest defined mapping key starting there, with token-kind context for marks/consonants.",
       "decision": "HOLD",
       "language_visible": true,
       "mechanism_only": false,
       "duplicate_target": null,
-      "duplicate_audit": "Potentially derivable from generic matching; do not admit without proof that longest-match behavior itself is language-visible rather than an implementation strategy.",
+      "duplicate_audit": "Could be an implementation strategy for generic matching rather than an independent language law.",
       "coordinate": null,
-      "provenance_note": "Evidence only; max-by-key implementation detail is not semantic authority."
+      "provenance_note": "Evidence only."
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.tokenize-sentences.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/TokenizeText.groovy@9ee55703fbdd003ae217d83347db40f520fdb29c"
+      ],
+      "semantic_name": "TOKENIZE-SENTENCES",
+      "behavior": "Transform text into an ordered sequence of sentence units using the Ukrainian sentence-boundary tokenizer, preserving paragraph processing and normalized line separation.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for sentence tokenization; STRING-SPLIT exists but does not encode language-specific sentence boundary behavior.",
+      "coordinate": null,
+      "provenance_note": "Executable Ukrainian-specific sentence segmentation."
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.tokenize-words.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/TokenizeText.groovy@9ee55703fbdd003ae217d83347db40f520fdb29c"
+      ],
+      "semantic_name": "TOKENIZE-WORDS",
+      "behavior": "Transform a sentence into ordered lexical/token units using the Ukrainian word tokenizer, with language-specific token adjustments and optional filtering to lexical words.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match; generic STRING-SPLIT is not equivalent to language-specific token boundary rules.",
+      "coordinate": null,
+      "provenance_note": "Executable Ukrainian-specific word segmentation."
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.lemmatize-text.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/LemmatizeText.groovy@e33b3c5f02ac742ced189db1f9a5a4e01230f5f"
+      ],
+      "semantic_name": "LEMMATIZE-TEXT",
+      "behavior": "Map analyzed token readings to lemma representatives; when multiple lemmas remain, optionally select one by an explicit lemma-frequency policy after tag-based filtering.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for lemmatization; current STRING/MAP/translation validation rows are not the same operation.",
+      "coordinate": null,
+      "provenance_note": "LanguageTool-backed executable lemma mapping with an explicit ambiguity policy."
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.inflect-word.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/Inflect.groovy@a59975b48b1771de90136d512606e831a855ab0a",
+        "juv4uk/dict_uk:data/affix/*.aff"
+      ],
+      "semantic_name": "INFLECT-WORD",
+      "behavior": "Generate all word forms of a lemma satisfying a requested morphological tag or tag regular expression.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for morphological inflection; donor affix rules are supporting evidence, not independent slots.",
+      "coordinate": null,
+      "provenance_note": "Executable synthesizer plus Ukrainian affix-rule evidence."
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.pos-morph-tag.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/TagText.groovy@64da8876e4ca877d3c129bbd5e4d594df4977422"
+      ],
+      "semantic_name": "MORPHO-SYNTACTIC-TAG",
+      "behavior": "For each analyzed token expose lemma and one or more part-of-speech/morphological readings, with explicit handling of punctuation, symbols, unknown and unclassified tokens.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for POS/morphological tagging.",
+      "coordinate": null,
+      "provenance_note": "Executable analysis operation with structured token readings."
+    },
+    {
+      "stable_id": "d10.ling.dict-uk.affix-generation.v1",
+      "repository": "juv4uk/dict_uk",
+      "source": [
+        "README.md@master",
+        "data/affix/a.aff@e6b2fc9c718a4a7576e2bd93cafa3c05cbd91fdb"
+      ],
+      "semantic_name": "AFFIX-RULE-WORDFORM-GENERATION",
+      "behavior": "Generate inflected word forms from lemma-class affix rules, including tag-bearing alternatives and alternation classes.",
+      "decision": "PROJECTION",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": "d10.ling.nlp-uk.inflect-word.v1",
+      "coordinate": null,
+      "provenance_note": "Independent donor corroborates the inflection law; do not mint a second D10 slot."
     }
   ],
   "negative_evidence": [
     {
       "repository": "juv4uk/dict_uk",
       "query_scope": "lookup",
-      "result": "NO_CODE_SEARCH_MATCH",
-      "note": "Search absence is not proof of semantic absence."
+      "result": "NO_INDEXED_CODE_HIT",
+      "note": "Repository is code/data indexed incompletely; direct root/src/data inspection found executable affix-generation evidence."
     },
     {
       "repository": "juv4uk/nlp_uk",
       "query_scope": "token",
-      "result": "NO_CODE_SEARCH_MATCH",
-      "note": "Search absence is not proof of semantic absence."
+      "result": "INITIAL_SEARCH_MISS",
+      "note": "Repository was later inspected directly; executable tokenization, lemmatization, inflection and tagging were found."
     },
     {
       "repository": "juv4uk/russian-lang",
       "query_scope": "grammar",
-      "result": "NO_CODE_SEARCH_MATCH",
-      "note": "Search absence is not proof of semantic absence."
+      "result": "NO_INDEXED_CODE_HIT",
+      "note": "Initial search miss; root/reader inspection showed a small language implementation but no new D10 candidate admitted in this pass."
     },
     {
       "repository": "juv4uk/sanskritworld_texts",
       "query_scope": "normalize",
-      "result": "NO_CODE_SEARCH_MATCH",
-      "note": "Corpus review remains possible; no semantics selected from this negative signal."
+      "result": "NO_INDEXED_CODE_HIT",
+      "note": "Inspection found corpus/task/documentation material; no independent language operation selected in this pass."
     }
   ],
   "acceptance_state": {
     "coordinates_assigned": 0,
     "ratification_effect": "NONE",
     "inventory_mutation": "NONE",
-    "next_gate": "Exact D1-D9 behavioral duplicate audit, then independent-law review before any SELECT admission."
+    "selected_candidates_in_artifact": 4,
+    "projected_candidates_in_artifact": 1,
+    "hold_candidates_in_artifact": 3,
+    "next_gate": "Exact behavioral duplicate proof for the four SELECT rows, then consolidated D10 inventory admission as UNPLACED only."
   }
 }
