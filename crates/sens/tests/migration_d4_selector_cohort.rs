@@ -23,10 +23,10 @@ fn historical_caar_is_a_real_exact_d4_selector_and_returns_nil() {
     assert_eq!(SPACED_VIEW, format!("{VISIBLE}\n"));
     assert!(UKR_SOURCE.starts_with("(п-п (сполучити"));
     assert!(!UKR_SOURCE.contains("CAAR"));
-    assert_eq!(SPACED_VIEW.matches('\\n').count(), 1);
+    assert_eq!(SPACED_VIEW.matches('\n').count(), 1);
     assert!(SPACED_VIEW
         .bytes()
-        .all(|b| matches!(b, b'0' | b'1' | b' ' | b'\\n')));
+        .all(|b| matches!(b, b'0' | b'1' | b' ' | b'\n')));
     assert_eq!(encode_binary_projection_ternary(SPACED_VIEW.trim_end()).unwrap(), T5);
     assert_eq!(
         words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" "),
