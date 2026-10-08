@@ -18,7 +18,12 @@ fn both_migrated_equality_programs_execute_with_exact_yes_bit() {
         let words = decode_ternary_program(physical).expect("physical canonical T5 decode");
         let visible = open_ternary_program(physical).expect("typed word boundaries");
         assert_eq!(visible, VISIBLE);
-        assert_eq!(words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" "), VISIBLE);
+        let words_spaced = words
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(" ");
+        assert_eq!(words_spaced, VISIBLE);
         assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
         let parsed = parse_canonical_binary(&visible).expect("current D2/D3 parse");
         let result = eval_parsed_expressions(&parsed, &mut Session::default())
