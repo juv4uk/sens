@@ -1,0 +1,27 @@
+name: D2 and Text7 role boundary (no unratified W7 retag)
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/tests/d2_text7_frame_role_boundary.rs'
+      - 'crates/sens/src/canonical_reader.rs'
+      - '.github/workflows/d2-text7-role-boundary.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens/tests/d2_text7_frame_role_boundary.rs'
+      - 'crates/sens/src/canonical_reader.rs'
+      - '.github/workflows/d2-text7-role-boundary.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  unambiguous-w7-structural-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: D2 list data remains D7 exact payload and never implicit symbol
+        run: cargo test -p sens --test d2_text7_frame_role_boundary -- --nocapture
