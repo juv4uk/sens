@@ -262,7 +262,7 @@ def decode_words(words: list[DomainWord]) -> str:
                     out.pop()
                 if not out or out[-1] == "(":
                     raise CarrierError("invalid D2 dot placement")
-                out.append(" .")
+                out.append(" . ")
             else:
                 raise CarrierError(f"invalid D2 source word {word.bits}")
             continue
