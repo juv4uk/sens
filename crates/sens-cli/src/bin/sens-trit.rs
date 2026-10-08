@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -49,13 +49,13 @@ fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
 /// are independent gates; success does not prove that an old Lisp source
 /// has the same behavior or that a D24+/host effect is admitted.
 fn eval_t5_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
-    eval_t5_bytes_with_core(bytes, false)
+    eval_t5_bytes_core4(bytes, false)
 }
 
 /// An EXPLICIT opt-in Core4 bootstrap for programs that need language-owned
 /// D4/D5 closures such as LIST/APPEND. Bare eval remains capability-free and
 /// unchanged; loading a library is mechanism availability, NOT a new resident.
-fn eval_t5_bytes_with_core(
+fn eval_t5_bytes_core4(
     bytes: &[u8],
     bootstrap_core: bool,
 ) -> Result<sens::EvalResult, String> {
@@ -143,8 +143,8 @@ fn execute() -> Result<(), String> {
             // loads the existing language-owned Core4 module on request.
             // Neither open nor bare eval may silently acquire mechanisms.
             let bytes = read_sens(path)?;
-            let result = if command == "eval-core" {
-                eval_t5_bytes_with_core(&bytes, true)?
+            let result = if command == "eval-core4" {
+                eval_t5_bytes_core4(&bytes, true)?
             } else {
                 eval_t5_bytes(&bytes)?
             };
@@ -209,7 +209,7 @@ mod eval_tests {
             "unexpected missing-bootstrap error: {unbootstrapped}"
         );
 
-        let core = eval_t5_bytes_with_core(&packed, true)
+        let core = eval_t5_bytes_core4(&packed, true)
             .expect("explicit Core4 must supply language-owned D4 LIST");
         assert_eq!(core.value.to_string(), "(())");
         assert_eq!(sens::open_ternary_program(&packed).unwrap(),
