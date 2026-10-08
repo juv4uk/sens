@@ -1,0 +1,56 @@
+name: SENS exact spaced-view T5 gate
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/sens_spaced_view.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/test_sens_spaced_view.py'
+      - 'tests/fixtures/migration-d1-cond-cohort/**'
+      - '.github/workflows/sens-spaced-view.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sens_spaced_view.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/test_sens_spaced_view.py'
+      - 'tests/fixtures/migration-d1-cond-cohort/**'
+      - '.github/workflows/sens-spaced-view.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-view-conformance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify strict view codec and fail-closed negative cases
+        run: python3 -m unittest discover -s tests -p 'test_sens_spaced_view.py' -v
+      - name: Verify committed fixture is exact T5 view, without release claims
+        run: |
+          python3 scripts/sens_spaced_view.py \
+            --root . \
+            --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --verify > "$RUNNER_TEMP/sens-view-ledger.json"
+          python3 - "$RUNNER_TEMP/sens-view-ledger.json" <<'PY'
+          import json, sys
+          with open(sys.argv[1], encoding="utf-8") as stream:
+              receipt = json.load(stream)
+          assert receipt["status"] == "VERIFY"
+          assert receipt["words"] == 19
+          assert receipt["physical_bytes"] == 12
+          assert receipt["semantic_oracle"] == "NOT_VERIFIED_BY_VIEW_TOOL"
+          assert receipt["release_admitted"] is False
+          assert all(len(receipt[key]) == 64 for key in (
+              "source_sha256", "sens_sha256", "view_sha256", "typed_word_sha256"
+          ))
+          print(json.dumps(receipt, ensure_ascii=False, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sens-spaced-view-ledger
+          path: ${{ runner.temp }}/sens-view-ledger.json
+          retention-days: 14
