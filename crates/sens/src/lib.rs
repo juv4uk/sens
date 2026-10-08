@@ -379,7 +379,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         // or an English name, owns the domain coordinate. Bare sessions stay
         // empty; bootstrap-only slots remain single-assignment.
         if matches!(&value, Value::Closure(_) | Value::Builtin(_)) {
-            for peer in peers {
+            for peer in peers.iter().copied() {
                 if let Some(identity) = semantic_registry::domain_identity_for_surface(peer) {
                     if environment.domain_code_slot(identity).is_none() {
                         environment.bind_domain_code_slot_once(identity, value.clone());
