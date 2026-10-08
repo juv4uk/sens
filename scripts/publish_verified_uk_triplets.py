@@ -76,9 +76,15 @@ def attest_source(source: bytes) -> tuple[list[str], bytes, bytes]:
 
 
 def mirror_safety(root: Path, mirror: Path, report: Path) -> None:
+    # A lexical /tmp/alias/mirror can point back into root when /tmp/alias
+    # is a symlink. Resolve containment and ban every symlinked mirror parent
+    # BEFORE mkdir/staging; checking descendants of mirror alone is unsafe.
+    real_mirror = mirror.resolve(strict=False)
     if (mirror == root or mirror.is_relative_to(root)
+            or real_mirror == root or real_mirror.is_relative_to(root)
+            or any(parent.is_symlink() for parent in (mirror, *mirror.parents))
             or report == root or report.is_relative_to(root)
-            or mirror == report or mirror.is_symlink() or report.is_symlink()):
+            or mirror == report or report.is_symlink()):
         raise ProjectionBlocked("mirror/report must be outside source repository")
     if mirror.exists() and not mirror.is_dir():
         raise ProjectionBlocked("mirror exists and is not a directory")
