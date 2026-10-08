@@ -32,8 +32,7 @@ MIGRATOR = ROOT / "scripts" / "migrate-to-sens-codes.py"
 CODEC = ROOT / "scripts" / "sens_t5_codec.py"
 
 DEFAULT_ARGS = {
-    "foundation": ROOT / "knowledge" / "d1-d7-foundation.json",
-    "domain_surfaces": ROOT / "lib" / "domains" / "d3.lisp",
+    "foundation": ROOT / "knowledge" / "d1-d9-foundation.json",
     "semantic_registry": ROOT / "lib" / "surface" / "semantic-registry.lisp",
     "historical_map": ROOT / "contracts" / "core1-historical-sid-map.lisp",
     "text7": ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs",
@@ -120,7 +119,6 @@ def main() -> int:
             "--text7-projection", str(DEFAULT_ARGS["text7"]),
             "--historical-map", str(DEFAULT_ARGS["historical_map"]),
             "--semantic-registry", str(DEFAULT_ARGS["semantic_registry"]),
-            "--domain-surfaces", str(DEFAULT_ARGS["domain_surfaces"]),
             "--report", str(report),
         ]
         completed = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
