@@ -1,0 +1,47 @@
+name: README current SENS owner and triplet contract
+
+on:
+  pull_request:
+    paths:
+      - README.md
+      - docs/ukrainian-api.md
+      - lib/surface/semantic-registry.lisp
+      - lib/surface/uk-docs.lisp
+      - tests/test_readme_owner_contract.py
+      - .github/workflows/readme-owner-contract.yml
+      - scripts/verify-repo.lisp
+      - lib/domains/d3.lisp
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - docs/ukrainian-api.md
+      - lib/surface/semantic-registry.lisp
+      - lib/surface/uk-docs.lisp
+      - tests/test_readme_owner_contract.py
+      - .github/workflows/readme-owner-contract.yml
+      - scripts/verify-repo.lisp
+      - lib/domains/d3.lisp
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-owner-triplet-and-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check current README agrees with owner contract and D3 table
+        run: python3 -m unittest discover -s tests -p test_readme_owner_contract.py -v
+      - name: Run the actual SENS-hosted repository policy verifier
+        run: cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
+      - name: Prove README policy verifier never rewrote worktree
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
