@@ -26,7 +26,7 @@ class PrintZeroOriginalOracle(unittest.TestCase):
     def test_existing_mylisp_executes_the_original_source(self):
         expected = EXPECTED.read_text(encoding="utf-8").strip()
         result = subprocess.run(
-            ["cargo", "run", "-q", "-p", "my-lisp-cli", "--bin", "my-lisp",
+            ["cargo", "run", "-q", "-p", "sens-cli", "--bin", "sens",
              "--", str(SOURCE.relative_to(ROOT))],
             cwd=ROOT, capture_output=True, text=True, timeout=180, check=False,
         )
