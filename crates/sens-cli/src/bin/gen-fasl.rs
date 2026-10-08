@@ -2,7 +2,7 @@
 //! Usage: gen-fasl <source.wsm> <output.fasl>
 //! The snapshot embeds sha256(source); the loader refuses snapshots whose
 //! embedded hash does not match the compiled-in source bytes.
-use sens::{fasl_encode, parse, sha256_source};
+use sens::{fasl_encode, parse_mixed_exact_domain, sha256_source};
 use std::{fs, process};
 
 fn main() {
@@ -13,7 +13,7 @@ fn main() {
     }
     let source = fs::read(&args[1]).expect("read source");
     let expressions =
-        parse(std::str::from_utf8(&source).expect("utf-8 source")).expect("parse source");
+        parse_mixed_exact_domain(std::str::from_utf8(&source).expect("utf-8 source")).expect("parse source");
     let hash = sha256_source(&source);
     let encoded = fasl_encode(&expressions, &hash);
     fs::write(&args[2], &encoded).expect("write fasl");
