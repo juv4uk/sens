@@ -29,9 +29,10 @@ fn eval_physical(data: &[u8]) -> Value {
 
 #[test]
 fn eq_yes_selects_first_cond_clause_through_exact_d1() {
+    assert!(SELECT_SOURCE.contains("(00000001 1)"));
     assert!(SELECT_SOURCE.contains("00000011"));
     assert!(SELECT_SOURCE.contains("00000111"));
-    assert_eq!(SELECT_T5.len(), 36);
+    assert_eq!(SELECT_T5.len(), 33);
 
     let observed = eval_physical(SELECT_T5);
     match observed {
@@ -45,7 +46,8 @@ fn eq_yes_selects_first_cond_clause_through_exact_d1() {
 
 #[test]
 fn eq_no_skips_first_cond_clause_instead_of_host_truthiness() {
-    assert_eq!(SKIP_T5.len(), 36);
+    assert!(SKIP_SOURCE.contains("(00000001 0)"));
+    assert_eq!(SKIP_T5.len(), 33);
     let observed = eval_physical(SKIP_T5);
     assert!(
         matches!(observed, Value::Nil),
