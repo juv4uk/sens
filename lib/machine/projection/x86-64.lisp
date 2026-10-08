@@ -11,14 +11,14 @@
       ((00100010 (00101000 effect) arity)
        (00000011 (00000101 effect) operation))
       (t (00000001 ())))))
-
+ 
 (00001001 x86-projection-rejected?
   (00001000 (value)
     (00000111
       ((00000010 value)
        (00000011 value (00000001 x86-projection-rejected)))
       (t (00000001 ())))))
-
+ 
 (00001001 x86-structural-machine-effect?
   (00001000 (effect)
     (00000111
@@ -27,7 +27,7 @@
       ((x86-machine-effect-form? effect (00000001 load-u64) 4) t)
       ((x86-machine-effect-form? effect (00000001 return-u64) 2) t)
       (t (00000001 ())))))
-
+ 
 ; Translate abstract representation slots to one target layout.
 (00001001 x86-project-structural-slot-offset
   (00001000 (slot field0-offset field1-offset)
@@ -170,7 +170,7 @@
             (t
               (00000001 x86-projection-rejected)))))
       (t
-        (00000001 x86-projection-rejected)))))
+        (00000001 x86-projection-rejected)))))))
 
 (00001001 x86-project-machine-effect
   (00001000 (effect)
