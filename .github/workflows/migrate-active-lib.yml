@@ -1,0 +1,48 @@
+name: Migrate active lib (exact domain)
+
+# Runs the CANONICAL converter (sens-to-sens) over the active authored lib —
+# the same tool the completion gate uses — and uploads the rewritten files.
+# It does NOT commit; it only produces the migration for review.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/vivaka-hub/4380-migrate-code-subset
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build canonical converter
+        run: cargo build -p sens-cli --bin sens-to-sens
+
+      # Invoke via `bash` so the script does not need the executable bit
+      # (the GitHub contents API commits files as 100644).
+      - name: Gate check (report only)
+        run: bash scripts/migrate-active-lib-exact.sh --check || true
+
+      - name: Apply canonical migration
+        run: bash scripts/migrate-active-lib-exact.sh --apply || true
+
+      - name: Collect changed files
+        run: |
+          git add -A
+          git --no-pager diff --cached --stat
+          git --no-pager diff --cached --name-only > /tmp/changed.txt
+          cat /tmp/changed.txt
+          if [ -s /tmp/changed.txt ]; then
+            tar czf migrated-active-lib.tgz -T /tmp/changed.txt
+          else
+            echo "no changes" > migrated-active-lib.tgz
+          fi
+
+      - name: Upload migration artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: migrated-active-lib
+          path: migrated-active-lib.tgz
+          if-no-files-found: warn
