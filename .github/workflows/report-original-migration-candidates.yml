@@ -46,6 +46,11 @@ jobs:
           assert s['scanned']==s['blocked']+s['mechanical_candidates']
           assert s['scanned']==s['original_unpaired_sources_scanned']
           assert s['already_paired_sources_excluded']==len(r['already_paired_sources_excluded'])
+          assert len(r['blocked_sources'])==s['blocked']
+          assert sum(c['count'] for c in r['blocker_cohorts'])==s['blocked']
+          assert sum(s['blocker_family_counts'].values())==s['blocked']
+          assert len({x['path'] for x in r['blocked_sources']})==s['blocked']
+          assert all(x['source_git_blob_sha'] for x in r['blocked_sources'])
           assert s['physical_outputs_created']==0
           assert r['source_era']=='auto'
           assert 'D1-D9' in r['authority']
@@ -62,11 +67,14 @@ jobs:
               out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
-              out.write('### First blocked originals (exact source paths)\n\n')
+              out.write('### Shared mechanical blockers — reusable owner work\n\n')
+              for cohort in r['blocker_cohorts']:
+                  out.write(f"- **{cohort['family']}**: {cohort['count']} original SHA-pinned sources — {cohort['next_action']}\n")
+              out.write('\n### First blocked originals (exact source paths)\n\n')
               for row in r['unpaired_blocker_sample'][:12]:
                   reason=row.get('reason','unknown').replace('\n',' ')[:200]
                   out.write(f"- `{row['path']}`: {reason}\n")
-              out.write('\nFull SHA-pinned evidence is attached as the JSON artifact.\n')
+              out.write('\nFull SHA-pinned evidence for every original source, not just the first 20, is attached as JSON. Grouping is the FIRST mechanical block and never an executable/semantic admission.\n')
           PY
       - name: Save exact source SHA and admission decision
         uses: actions/upload-artifact@v4
