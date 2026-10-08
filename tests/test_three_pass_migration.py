@@ -95,6 +95,16 @@ class ThreePassMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
             self.migrate("(11111111 x)\n")
 
+    def test_current_main_ukrainian_d1_literals_survive_audited_successor_bridge(self):
+        # Ratified D1 Ukrainian source surfaces are data, not historical W8.
+        # A replay of the successor mapper may not silently drop this main law.
+        self.assertEqual(set(mod.D1_UK_SURFACES.values()), {"0", "1"})
+        self.assertEqual(len(mod.D1_UK_SURFACES), 2)
+        for surface, bits in mod.D1_UK_SURFACES.items():
+            out, resolver = self.migrate(f"(QUOTE {surface})\n")
+            self.assertEqual(out, f"10 001 00 {bits} 01\n")
+            self.assertEqual(resolver.counts["pass3-lisp15"], 1)
+
     def test_audited_print_successor_is_current_d8(self):
         out,resolver=self.migrate("(01001000 x)\n")
         self.assertTrue(out.startswith("10 11011011 00 "))
@@ -279,7 +289,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         authority = mod.load_foundation(ROOT / "knowledge" / "d1-d9-foundation.json")
         d8 = authority["domains"]["D8"]["residents"]
         self.assertIn("00000101", d8)
-        source = "(00000101 ())\\n".replace("\\n", "\n")
+        source = "(00000101 ())\n".replace("\n", "\n")
         with self.assertRaisesRegex(mod.MigrationError, "ambiguous W8 executable"):
             mod.migrate_file(
                 source, mod.Resolver(self.legacy, self.my, self.upper,
@@ -348,8 +358,8 @@ class ThreePassMigrationTests(unittest.TestCase):
             base = Path(td)
             source = base / "src"
             source.mkdir()
-            (source / "old.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
-            (source / "paired.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
+            (source / "old.lisp").write_text("()\n".replace("\n", "\n"), encoding="utf-8")
+            (source / "paired.lisp").write_text("()\n".replace("\n", "\n"), encoding="utf-8")
             already = mod.encode_projection("000")
             (source / "paired.sens").write_bytes(already)
             out = base / "mirror"
