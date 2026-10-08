@@ -18,9 +18,9 @@
   (00001000
     (slot)
     (00000111
-      ((00000011 slot (00000001 field0)) 1 t)
-      ((00000011 slot (00000001 field1)) 1 t)
-      ((00000011 0 0) 1 (00000001 ())))))
+      ((00000011 slot (00000001 field0)) (00000001 (1)) t)
+      ((00000011 slot (00000001 field1)) (00000001 (1)) t)
+      ((00000001 (1)) (00000001 (1)) (00000001 ())))))
 
 (00001001
   machine-effect-bounded-two-field-store-load
@@ -60,8 +60,8 @@
                             (00000001 arena)
                             observed-slot)
                           (00100111 (00000001 return-u64) (00000001 result))))
-                      ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
-                  ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
-              ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
-          ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
-      ((00000011 0 0) 1 (00000001 machine-effect-rejected)))))
+                      ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
+                  ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
+              ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
+          ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected))))
+      ((00000001 (1)) (00000001 (1)) (00000001 machine-effect-rejected)))))
