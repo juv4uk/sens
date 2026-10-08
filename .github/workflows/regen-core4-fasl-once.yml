@@ -1,0 +1,32 @@
+name: regenerate Core4 FASL once
+on:
+  push:
+    branches:
+      - replay/4604-compiler-current-main-1008
+    paths:
+      - "lib/core4.lisp"
+      - ".github/workflows/regen-core4-fasl-once.yml"
+permissions:
+  contents: write
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: replay/4604-compiler-current-main-1008
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Generate current Core4 FASL
+        run: cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Commit snapshot only
+        run: |
+          git diff --check
+          if git diff --quiet -- lib/core4.lisp.fasl; then
+            echo "Core4 FASL already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core4.lisp.fasl
+          git commit -m "chore(4604): regenerate Core4 FASL after exact NULL source cutover"
+          git push origin HEAD:replay/4604-compiler-current-main-1008
