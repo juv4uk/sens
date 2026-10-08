@@ -13,6 +13,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from domain_tables import read_domain_table
+
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "knowledge/d1-d9-foundation.json"
 OUTPUT = ROOT / "knowledge/domain-width-authority.generated.json"
@@ -85,13 +87,58 @@ def load_foundation() -> tuple[dict, bytes]:
     return foundation, payload
 
 
+def load_table_evidence(foundation: dict) -> dict[str, dict]:
+    evidence: dict[str, dict] = {}
+    for domain in foundation["current_domains"]:
+        table_path = ROOT / "lib" / "domains" / f"{domain.lower()}.lisp"
+        if not table_path.is_file():
+            raise SystemExit(f"{domain}: missing canonical SENS domain table {table_path}")
+
+        table_payload = table_path.read_bytes()
+        rows = read_domain_table(table_path)
+        observed_widths = {len(row.bits) for row in rows}
+        if len(observed_widths) != 1:
+            raise SystemExit(
+                f"{domain}: canonical SENS table has multiple key widths "
+                f"{sorted(observed_widths)}"
+            )
+
+        [table_width] = observed_widths
+        declared_width = foundation["domains"][domain]["width"]
+        if table_width != declared_width:
+            raise SystemExit(
+                f"{domain}: SENS table key width {table_width} disagrees with "
+                f"ratified foundation width {declared_width}"
+            )
+
+        table_coordinates = {row.bits for row in rows}
+        ratified_coordinates = set(foundation["domains"][domain]["residents"])
+        if table_coordinates != ratified_coordinates:
+            missing = sorted(ratified_coordinates - table_coordinates)
+            extra = sorted(table_coordinates - ratified_coordinates)
+            raise SystemExit(
+                f"{domain}: SENS table coordinates disagree with ratified residents; "
+                f"missing={missing[:4]} extra={extra[:4]}"
+            )
+
+        evidence[domain] = {
+            "path": str(table_path.relative_to(ROOT)),
+            "key_width": table_width,
+            "rows": len(rows),
+            "git_blob_sha1": git_blob_sha1(table_payload),
+        }
+
+    return evidence
+
+
 def generate() -> str:
     foundation, payload = load_foundation()
     current = foundation["current_domains"]
     domains = foundation["domains"]
+    table_evidence = load_table_evidence(foundation)
 
     certificate = {
-        "schema": "sens-domain-width-certificate/v1",
+        "schema": "sens-domain-width-certificate/v2",
         "status": "generated-projection-non-authoritative",
         "source": {
             "path": "knowledge/d1-d9-foundation.json",
@@ -105,6 +152,7 @@ def generate() -> str:
             domain: {
                 "width": domains[domain]["width"],
                 "authority": domains[domain]["authority"],
+                "canonical_table": table_evidence[domain],
             }
             for domain in current
         },
@@ -112,11 +160,14 @@ def generate() -> str:
             "binary_coordinate_lengths_match_declared_width": True,
             "declared_capacities_match_power_of_two_width": True,
             "declared_occupancies_match_resident_count": True,
+            "canonical_sens_table_key_widths_match_declared_width": True,
+            "canonical_sens_table_coordinates_match_ratified_residents": True,
         },
         "law": (
-            "Widths are copied from current SENS authority. "
-            "This generated projection cannot mint, infer, widen, narrow, "
-            "or otherwise redefine a domain width."
+            "Canonical SENS table coordinate width and the ratified foundation "
+            "must agree exactly. This generated projection only verifies and "
+            "carries that agreement; it cannot mint, infer, widen, narrow, or "
+            "otherwise redefine a domain width."
         ),
     }
     return json.dumps(certificate, indent=2, ensure_ascii=False) + "\n"
