@@ -434,7 +434,7 @@ mod tests {
         assert_eq!(surface_for_domain_identity(yes, "uk"), Some("так"));
         assert_eq!(surface_for_domain_identity(yes, "sa"), Some("ām"));
         assert_eq!(surface_for_domain_identity(open, "uk"), Some("відкрити"));
-        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("śūnya"));
+        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("()"));
         assert_eq!(surface_for_domain_identity(lambda, "uk"), Some("функція"));
         assert_eq!(surface_for_domain_identity(lambda, "sa"), Some("phalana"));
 
