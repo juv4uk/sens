@@ -57,13 +57,12 @@ fn framed_text7_global_definition_resolves_to_existing_closure_binding() {
 }
 
 #[test]
-fn quoted_text7_is_data_not_a_binding_lookup() {
+fn quoted_d2_w7_frame_remains_structural_data_not_a_binding_lookup() {
     let name = t7(&[0x41, 0x42]);
     // (quote <Text7-name>)
     let source = format!("10 001 00 {name} 01");
     let value = eval_canonical(&source);
-    let text = sens::Text7::from_cells(vec![0x41, 0x42]).unwrap();
-    assert_eq!(value, Value::Text7(text));
+    assert!(matches!(value, Value::Pair(_, _)), "quoted D2/W7 frame must remain a structural list: {value:?}");
 }
 
 #[test]
