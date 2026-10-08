@@ -1,0 +1,27 @@
+name: sens-bitcodec-research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research_sens_bitcodec.py"
+      - "tests/test_research_sens_bitcodec.py"
+      - ".github/workflows/sens-bitcodec-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-experimental-word-carriers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Exhaustively test domain word widths, delimiter collisions, and file length
+        run: python3 -m unittest tests/test_research_sens_bitcodec.py -v
+      - name: Compare actual emitted binary file sizes against semantic widths
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/vertical.words"
+          python3 scripts/research_sens_bitcodec.py "$RUNNER_TEMP/vertical.words" --write-prototypes "$RUNNER_TEMP/binary-prototypes"
+          wc -c "$RUNNER_TEMP"/binary-prototypes/*.bin
