@@ -1,0 +1,56 @@
+name: Audit T5 file pairs
+
+on:
+  pull_request:
+    paths:
+      - "**/*.sens"
+      - "**/*.lisp"
+      - "scripts/sens_t5_codec.py"
+      - "scripts/audit_t5_file_pairs.py"
+      - "tests/test_audit_t5_file_pairs.py"
+      - ".github/workflows/audit-t5-file-pairs.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**/*.sens"
+      - "scripts/audit_t5_file_pairs.py"
+      - "tests/test_audit_t5_file_pairs.py"
+      - ".github/workflows/audit-t5-file-pairs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test T5 physical file-pair guard
+        run: python3 -m unittest discover -s tests -p 'test_audit_t5_file_pairs.py' -v
+      - name: Inspect tracked .sens file pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_t5_file_pairs.py . \
+            --output "$RUNNER_TEMP/t5-pairs-report.json"
+          python3 - "$RUNNER_TEMP/t5-pairs-report.json" <<'PY'
+          import json,sys
+          report=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert report["schema"]=="sens-t5-file-pair-audit/v1"
+          assert report["summary"]["physical_blocked"]==0
+          if report["status"]=="NO_FILES":
+              print("NO_SENS_FILES: this is not proof of migration success")
+          if report["summary"]["pending_oracle"]:
+              print("PENDING_ORACLE:",report["summary"]["pending_oracle"],
+                    "physical bytes checked; semantic admission NOT certified")
+          PY
+      - name: Keep audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-t5-file-pairs-report
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/t5-pairs-report.json
+# No source modification, no git push, no automatic semantic admission.
