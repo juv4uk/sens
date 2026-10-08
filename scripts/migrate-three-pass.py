@@ -16,7 +16,7 @@ Hard rules:
 - Unknown D1 words may pass through unchanged as predicate/data evidence, but are never reclassified as D2.
 - Comments disappear before migration.
 - Unrecognized data/numbers/strings PASS THROUGH unchanged instead of being forced into Text7.
-- Output is extensionless; recognized language structure/functions are binary, unresolved source remains visible.
+- Output is a PHYSICAL T5 binary file with the same stem and extension .sens.\n- Unknown/unmapped words FAIL CLOSED: never ship text remnants as .sens.\n- Source .lisp is retained; migration never overwrites an existing .sens.
 """
 from __future__ import annotations
 
@@ -24,9 +24,19 @@ import argparse
 import ast
 from dataclasses import dataclass
 import json
+import hashlib
+import os
 from pathlib import Path
 import re
 import signal
+import tempfile
+import sys
+
+SCRIPTS = str(Path(__file__).resolve().parent)
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
+
+from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
 
 SOURCE_EXTS = {".lisp"}
 SKIP_DIRS = {".git","target","node_modules","vendor","dist","build",".venv","venv","__pycache__"}
@@ -627,37 +637,32 @@ def source_files(root: Path):
         if any(part in SKIP_DIRS for part in p.parts): continue
         if p.suffix.lower() in SOURCE_EXTS: yield p
 
-def extensionless(rel: Path):
-    return rel.with_suffix("")
+def sens_destination(rel: Path) -> Path:
+    """НАЗВА.lisp -> НАЗВА.sens у тому самому відносному каталозі."""
+    if rel.suffix.lower() != ".lisp":
+        raise ValueError("only .lisp sources are eligible")
+    return rel.with_suffix(".sens")
 
-def plan_extensionless_destinations(rels):
-    """Plan extensionless output names without file/directory collisions.
 
-    If foo.lisp coexists with foo/bar.lisp, plain "foo" cannot be both a file
-    and a directory. The file becomes "foo__file" (still extensionless).
-    """
-    rels=list(rels)
-    source_dirs=set()
-    for rel in rels:
-        parent=rel.parent
-        while parent != Path("."):
-            source_dirs.add(parent)
-            parent=parent.parent
+def write_atomic_no_clobber(target: Path, physical_bytes: bytes) -> None:
+    """Опублікувати новий .sens лише якщо не існує; ніяких тихих overwrite."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp_name = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", prefix=".sens-t5-", suffix=".tmp",
+            dir=target.parent, delete=False,
+        ) as staged:
+            tmp_name = Path(staged.name)
+            staged.write(physical_bytes)
+            staged.flush()
+            os.fsync(staged.fileno())
+        # Atomic hard-link with fail-if-exists; no permissions to replace targets.
+        os.link(tmp_name, target)
+    finally:
+        if tmp_name is not None:
+            tmp_name.unlink(missing_ok=True)
 
-    planned={}
-    used={}
-    for rel in sorted(rels,key=lambda p:str(p)):
-        dest=extensionless(rel)
-        if dest in source_dirs or dest in used:
-            base=dest.with_name(dest.name+"__file")
-            dest=base
-            n=2
-            while dest in source_dirs or dest in used:
-                dest=base.with_name(base.name+str(n))
-                n+=1
-        planned[rel]=dest
-        used[dest]=rel
-    return planned
 
 def migrate_file(source: str,resolver,text7):
     stripped=strip_comments(source)
@@ -672,100 +677,128 @@ def migrate_file(source: str,resolver,text7):
     return text
 
 def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument("root",type=Path)
-    ap.add_argument("--out",type=Path,required=True)
-    ap.add_argument("--foundation",type=Path,required=True)
-    ap.add_argument("--domain-surfaces",type=Path,required=True)
-    ap.add_argument("--semantic-generated",type=Path,required=True)
-    ap.add_argument("--semantic-registry",type=Path,required=True)
-    ap.add_argument("--necessary-forms",type=Path,required=True)
-    ap.add_argument("--historical-map",type=Path,required=True)
-    ap.add_argument("--text7",type=Path,required=True)
-    ap.add_argument("--report",type=Path,required=True)
-    args=ap.parse_args()
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("root", type=Path)
+    ap.add_argument("--out", type=Path, required=True,
+                    help="окрема вихідна папка; .lisp НЕ змінюється")
+    ap.add_argument("--foundation", type=Path, required=True)
+    ap.add_argument("--domain-surfaces", type=Path, required=True)
+    ap.add_argument("--semantic-generated", type=Path, required=True)
+    ap.add_argument("--semantic-registry", type=Path, required=True)
+    ap.add_argument("--necessary-forms", type=Path, required=True)
+    ap.add_argument("--historical-map", type=Path, required=True)
+    ap.add_argument("--text7", type=Path, required=True)
+    ap.add_argument("--report", type=Path, required=True)
+    ap.add_argument("--dry-run", action="store_true",
+                    help="переклад/перевірка без запису фізичних файлів")
+    args = ap.parse_args()
 
-    data=load_foundation(args.foundation)
-    legacy,my,upper=build_three_pass_maps(
-        data,args.domain_surfaces,args.semantic_generated,args.semantic_registry,args.necessary_forms,
-        args.historical_map
+    data = load_foundation(args.foundation)
+    legacy, my, upper = build_three_pass_maps(
+        data, args.domain_surfaces, args.semantic_generated,
+        args.semantic_registry, args.necessary_forms, args.historical_map
     )
-    text7=build_text7(data,args.text7)
-    args.out.mkdir(parents=True,exist_ok=True)
+    text7 = build_text7(data, args.text7)
+    rows = []
+    written = 0
+    blocked = 0
+    totals = {"already-exact": 0, "pass1-sens8": 0,
+              "pass2-my-lisp": 0, "pass3-lisp15": 0, "passthrough-head": 0}
 
-    rows=[]
-    written=0
-    blocked=0
-    totals={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
-    destinations={}
-
-    root=args.root.resolve()
-    paths=list(source_files(root))
-    rels=[path.resolve().relative_to(root) for path in paths]
-    destination_plan=plan_extensionless_destinations(rels)
-    for path,rel in zip(paths,rels):
-        dest=destination_plan[rel]
-        if dest in destinations:
-            rows.append({"path":str(rel),"status":"blocked","reason":f"extensionless collision with {destinations[dest]}"})
-            blocked+=1
-            continue
-        resolver=Resolver(legacy,my,upper)
-        source=path.read_text(encoding="utf-8")
+    root = args.root.resolve()
+    # Stable sorted manifest; never traverse generated .sens as Lisp source.
+    paths = sorted(source_files(root))
+    seen_destinations = set()
+    for path in paths:
+        rel = path.resolve().relative_to(root)
+        dest = sens_destination(rel)
+        target = args.out / dest
+        resolver = Resolver(legacy, my, upper)
         try:
+            if dest in seen_destinations:
+                raise SensT5Error(f"duplicate destination {dest}")
+            seen_destinations.add(dest)
+            if target.exists() or target.is_symlink():
+                raise SensT5Error(f"target already exists; not overwriting {dest}")
+            source = path.read_text(encoding="utf-8")
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
-            output=migrate_file(source,resolver,text7)
-            signal.alarm(0)
-            if not output.strip():
-                rows.append({"path":str(rel),"status":"empty","passes":resolver.counts})
-                continue
-            target=args.out/dest
-            target.parent.mkdir(parents=True,exist_ok=True)
-            target.write_text(output,encoding="utf-8")
-            destinations[dest]=str(rel)
-            written+=1
-            for k,v in resolver.counts.items(): totals[k]+=v
-            rows.append({"path":str(rel),"output":str(dest),"status":"written","passes":resolver.counts})
-        except MigrationError as e:
-            signal.alarm(0)
-            blocked+=1
-            row={"path":str(rel),"status":"blocked","reason":e.message,"passes":resolver.counts}
-            if e.tok:
-                line,col=line_col(source,e.tok.offset)
-                row.update({"token":e.tok.text,"line":line,"column":col})
+            try:
+                projection = migrate_file(source, resolver, text7)
+            finally:
+                signal.alarm(0)
+            # Strict physical T5: any historic name, passthrough or unencoded
+            # value still visible is a blocker, never a falsely binary file.
+            words = parse_words(projection)
+            payload = encode_projection(projection)
+            if decode_bytes(payload) != words:
+                raise SensT5Error("byte roundtrip changes source word identities")
+            if not args.dry_run:
+                write_atomic_no_clobber(target, payload)
+            for key, value in resolver.counts.items():
+                totals[key] += value
+            status = "would-write" if args.dry_run else "written"
+            row = {
+                "path": str(rel), "output": str(dest), "status": status,
+                "bytes": len(payload), "semantic_word_count": len(words),
+                "semantic_bits": sum(len(word) for word in words),
+                "transport_trits": sum(len(word) for word in words) + len(words) - 1,
+                "physical_sha256": hashlib.sha256(payload).hexdigest(),
+                "typed_word_sha256": typed_sha256(words),
+                "passes": resolver.counts,
+            }
             rows.append(row)
-
+            written += 1
+        except (MigrationError, SensT5Error, UnicodeError, OSError) as error:
+            blocked += 1
+            row = {
+                "path": str(rel), "output": str(dest),
+                "status": "blocked", "reason": getattr(error, "message", str(error)),
+                "passes": resolver.counts,
+            }
+            token = getattr(error, "tok", None)
+            if token is not None:
+                text = locals().get("source", "")
+                line, column = line_col(text, token.offset)
+                row.update({"token": token.text, "line": line, "column": column})
+            rows.append(row)
         if (written + blocked) % 25 == 0:
-            print(
-                f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
-                flush=True,
-            )
+            print(f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
+                  flush=True)
 
-    report={
-        "schema":"sens-three-pass-migration/v2-fail-soft",
-        "passes":{
-            "1":"legacy Sens8/Sid8 -> proven current exact-domain successor",
-            "2":"my-lisp/current admitted surface -> exact-domain identity",
-            "3":"historical LISP 1-1.5 uppercase resident -> ratified D3-D6 identity",
+    report = {
+        "schema": "sens-three-pass-t5-migration/v3",
+        "naming_law": "SOURCE/name.lisp -> OUT/name.sens; extensionless outputs are forbidden",
+        "file_format": {
+            "suffix": ".sens", "physical": "binary-T5-five-trits-per-byte",
+            "language": "D1..D9 exact-width 0/1 words",
+            "transport_separator": "logical trit 2 strictly between words",
+            "file_eof": "physical byte length; no terminal 22",
+            "padding": "zero through four final trits 2",
+            "ascii_text": False,
         },
-        "structure":{
-            "empty":"000",
-            "control_domain":"D2-only",
-            "open":"10",
-            "separator":"00",
-            "dot":"11",
-            "close":"01",
-            "rule":"every exact-width W2 word in emitted source is grammar control, never data or a callable head",
+        "passes": {
+            "1": "historical 8-bit head -> admitted current successor",
+            "2": "my-lisp / current admitted name -> exact current domain",
+            "3": "Lisp-I/1.5 head -> proven current D3-D6",
         },
-        "output_naming":"source .lisp suffix removed; no new extension; file/directory collisions use __file",
-        "fallback":"unknown dynamic/data spelling may remain visible; any known legacy function without a current D3-D6 successor blocks the file",
-        "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
-        "files":rows,
+        "blocked_policy": "no unresolved textual source can become physical .sens",
+        "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
+        "mode": "dry-run" if args.dry_run else "write-new-only",
+        "summary": {
+            "files_seen": len(paths),
+            "files_written": written if not args.dry_run else 0,
+            "files_would_write": written if args.dry_run else 0,
+            "files_blocked": blocked, "resolved_heads": totals,
+        },
+        "files": rows,
     }
-    args.report.parent.mkdir(parents=True,exist_ok=True)
-    args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    print(json.dumps(report["summary"],ensure_ascii=False))
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+                           encoding="utf-8")
+    print(json.dumps(report["summary"], ensure_ascii=False))
     return 0 if written else 2
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     raise SystemExit(main())

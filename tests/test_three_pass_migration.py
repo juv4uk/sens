@@ -4,6 +4,9 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import sys
+import tempfile
+import subprocess
+import json
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -164,19 +167,93 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertIn("000",words)
         self.assertEqual(out.count("000"),1)
 
-    def test_extensionless_collision_gets_file_suffix_without_extension(self):
-        plan=mod.plan_extensionless_destinations([
-            Path("tasks.lisp"),
-            Path("tasks/pending.lisp"),
-            Path("foo.lisp"),
-        ])
-        self.assertEqual(str(plan[Path("tasks.lisp")]),"tasks__file")
-        self.assertEqual(str(plan[Path("tasks/pending.lisp")]),"tasks/pending")
-        self.assertEqual(str(plan[Path("foo.lisp")]),"foo")
+    def test_same_basename_gets_sens_extension_without_directory_collision(self):
+        self.assertEqual(str(mod.sens_destination(Path("tasks.lisp"))), "tasks.sens")
+        self.assertEqual(str(mod.sens_destination(Path("tasks/pending.lisp"))),
+                         "tasks/pending.sens")
+        self.assertEqual(str(mod.sens_destination(Path("lib/sse4.1.lisp"))),
+                         "lib/sse4.1.sens")
+        self.assertEqual(str(mod.sens_destination(Path("foo.lisp"))), "foo.sens")
 
-    def test_extensionless_output_name(self):
-        self.assertEqual(str(mod.extensionless(Path("lib/foo.lisp"))),"lib/foo")
-        self.assertEqual(str(mod.extensionless(Path("lib/sse4.1.lisp"))),"lib/sse4.1")
+    def test_legacy_unmapped_name_is_not_valid_t5_binary_output(self):
+        projection,_ = self.migrate("(totally-unknown-function x)\n")
+        with self.assertRaises(mod.SensT5Error):
+            mod.encode_projection(projection)
+        self.assertEqual(mod.decode_bytes(mod.encode_projection("000\n")), ["000"])
+
+    def test_main_writes_actual_sens_bytes_and_blocks_leftover_names(self):
+        with tempfile.TemporaryDirectory() as td:
+            temp = Path(td)
+            root = temp / "inputs"
+            root.mkdir()
+            (root / "tasks").mkdir()
+            (root / "good.lisp").write_text("()\n", encoding="utf-8")
+            (root / "tasks.lisp").write_text("()\n", encoding="utf-8")
+            (root / "tasks" / "more.lisp").write_text("()\n", encoding="utf-8")
+            (root / "unresolved.lisp").write_text(
+                "(totally-unknown-function x)\n", encoding="utf-8"
+            )
+            out = temp / "artifacts"
+            report = temp / "report.json"
+            args = [
+                sys.executable, str(SCRIPT), str(root), "--out", str(out),
+                "--foundation", str(FOUNDATION),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--historical-map", str(HISTORICAL),
+                "--text7", str(TEXT7),
+                "--report", str(report),
+            ]
+            subprocess.run(args, check=True, capture_output=True, text=True)
+            self.assertTrue((out / "good.sens").is_file())
+            self.assertTrue((out / "tasks.sens").is_file())
+            self.assertTrue((out / "tasks" / "more.sens").is_file())
+            self.assertFalse((out / "unresolved.sens").exists())
+            self.assertFalse((out / "good").exists())
+            self.assertFalse((out / "good.lisp").exists())
+            self.assertEqual(mod.decode_bytes((out / "good.sens").read_bytes()),
+                             ["000"])
+            self.assertEqual((root / "good.lisp").read_text(), "()\n")
+            result = json.loads(report.read_text())
+            self.assertEqual(result["summary"]["files_written"], 3)
+            self.assertEqual(result["summary"]["files_blocked"], 1)
+            self.assertTrue(result["file_format"]["physical"].startswith("binary"))
+            self.assertEqual(result["naming_law"].split(" -> ")[1].split(";")[0],
+                             "OUT/name.sens")
+            # Never silently overwrite the exact .sens target on rerun.
+            again = subprocess.run(args, capture_output=True, text=True)
+            self.assertEqual(again.returncode, 2)
+            self.assertEqual((out / "good.sens").read_bytes(),
+                             mod.encode_projection("000\n"))
+            # Explicitly return to source/manifest workflow before a rerun.
+            self.assertTrue((root / "tasks.lisp").exists())
+
+    def test_dry_run_produces_report_without_any_binary_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            src = base / "in"
+            src.mkdir()
+            (src / "one.lisp").write_text("()\n", encoding="utf-8")
+            dst = base / "out"
+            report = base / "report.json"
+            process = subprocess.run([
+                sys.executable, str(SCRIPT), str(src),
+                "--out", str(dst), "--foundation", str(FOUNDATION),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--historical-map", str(HISTORICAL),
+                "--text7", str(TEXT7), "--report", str(report), "--dry-run",
+            ], capture_output=True, text=True)
+            self.assertEqual(process.returncode, 0, process.stderr)
+            self.assertFalse(dst.exists())
+            state = json.loads(report.read_text())
+            self.assertEqual(state["summary"]["files_would_write"], 1)
+            self.assertEqual(state["summary"]["files_written"], 0)
+
 
 if __name__=="__main__":
     unittest.main()
