@@ -189,7 +189,10 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
         ]
         for flag, artifact in ARTIFACTS.items():
             command.extend(["--" + flag, str(root / artifact)])
-        command.extend(["--report", str(report)])
+        # The pinned manifest admits ONLY historical-legacy source. Never
+        # inherit a changing three-pass default or silently reinterpret W8
+        # as current D8 once D1-D9 have been ratified.
+        command.extend(["--source-era", "legacy", "--report", str(report)])
         run(command, cwd=root, timeout=120)
         status = json.loads(report.read_text(encoding="utf-8"))
         if (status["summary"]["files_seen"] != 1 or
