@@ -43,7 +43,7 @@ fn d4_append_only_admits_proper_lists_not_predicates_or_improper_pairs() {
 
     // APPEND of an explicit dotted pair is prohibited: no silent tail coercion.
     let dotted =
-        "10 1111 00 10 001 00 10 1 11 0 01 01 01";
+        "10 1111 00 10 001 00 10 1 11 0 01 01";
     let bad_dotted = run(dotted).unwrap_err();
     assert_eq!(bad_dotted.kind, ErrorKind::Type);
     assert!(bad_dotted.message.contains("proper lists"));
@@ -55,6 +55,25 @@ fn only_two_ratified_d4_derived_coordinates_acquire_a_mechanism() {
     let unsupported = run("10 1101 00 000 01").unwrap_err();
     assert_eq!(unsupported.kind, ErrorKind::Type);
     assert!(unsupported.message.contains("no admitted value-call mechanism"));
+}
+
+#[test]
+fn equal_numeric_payloads_in_other_widths_never_borrow_d4_list_meaning() {
+    // D4:1110 LIST is the exact four-bit resident. Same numeric payloads in
+    // other widths are different identities and must not inherit LIST.
+    let d5_same_bits = run("10 01110 01").unwrap_err();
+    assert_ne!(d5_same_bits.message, "");
+    assert!(
+        d5_same_bits.message.contains("no admitted value-call mechanism")
+            || d5_same_bits.kind == ErrorKind::Type
+    );
+
+    let d8_same_bits = run("10 00001110 01").unwrap_err();
+    assert_ne!(d8_same_bits.message, "");
+    assert!(
+        d8_same_bits.message.contains("no admitted value-call mechanism")
+            || d8_same_bits.kind == ErrorKind::Type
+    );
 }
 
 #[test]
