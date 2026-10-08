@@ -79,14 +79,13 @@ class ThreePassMigrationTests(unittest.TestCase):
         frame_text=" ".join(frame)
         self.assertEqual(
             out,
-            f"10 0011 00 {frame_text} 00 000 01\n"
-            f"10 {frame_text} 01\n",
+            f"10 0011 00 {frame_text} 00 000 01 00 10 {frame_text} 01\n",
         )
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
 
     def test_unproven_global_name_stays_fail_closed(self):
         resolver=mod.Resolver(self.legacy,self.my,self.upper,source_era="legacy")
-        out,_=mod.migrate_file("(00001001 foo ())\n(bar)\n",resolver,self.text7)
+        out=mod.migrate_file("(00001001 foo ())\n(bar)\n",resolver,self.text7)
         self.assertIn("bar",out)
         self.assertEqual(resolver.counts["pass4-text7-global"],0)
 
@@ -506,7 +505,12 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,resolver=self.migrate(source)
         words=out.split()
         self.assertTrue(all(set(word) <= {"0","1"} for word in words))
-        self.assertGreaterEqual(resolver.counts["pass4-text7-global"], 2)
+        # Both call heads are LOCALLY bound 'first', so routing through a
+        # same-named global callable would silently change semantics.
+        self.assertEqual(resolver.counts["pass4-text7-global"], 0)
+        frame=" ".join(mod.encode_text7_identifier(
+            "first",self.text7,mod.Tok("atom","first",0)))
+        self.assertGreaterEqual(out.count(frame), 4)
 
 
 if __name__=="__main__":
