@@ -453,5 +453,44 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
 
+    def test_real_machine_block_is_fully_word_closed_after_global_and_local_binding_frames(self):
+        source=(ROOT/"lib"/"machine"/"block.lisp").read_text(encoding="utf-8")
+        projection,resolver=self.migrate(source)
+        words=projection.split()
+        self.assertTrue(words, "machine-block projection must not be empty")
+        self.assertTrue(
+            all(set(word) <= {"0","1"} for word in words),
+            "real machine-block projection must contain no unresolved symbolic atoms",
+        )
+        self.assertEqual(resolver.counts["pass1-sens8"], 17)
+        self.assertEqual(resolver.counts["pass4-text7-global"], 6)
+        self.assertGreater(
+            projection.count("10 " + "00"),
+            0,
+            "binding frames must contribute D2 structure",
+        )
+        payload=mod.encode_projection(projection)
+        self.assertEqual(mod.decode_bytes(payload), words)
+        self.assertEqual(
+            json.loads(json.dumps(words)),
+            mod.decode_bytes(payload),
+            "T5 physical roundtrip must preserve exact typed words",
+        )
+
+
+    def test_local_binding_shadows_global_and_builtin_in_nested_machine_style_source(self):
+        source="""(00001001 first
+  (00001000 (first)
+    (first)))
+(00001001 wrapper
+  (00001000 (first)
+    (00100111 (first))))
+"""
+        out,resolver=self.migrate(source)
+        words=out.split()
+        self.assertTrue(all(set(word) <= {"0","1"} for word in words))
+        self.assertGreaterEqual(resolver.counts["pass4-text7-global"], 2)
+
+
 if __name__=="__main__":
     unittest.main()
