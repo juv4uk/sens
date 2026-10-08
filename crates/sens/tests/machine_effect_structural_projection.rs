@@ -145,6 +145,32 @@ fn structural_effect_is_target_neutral_and_layout_free() {
 }
 
 #[test]
+fn each_structural_effect_form_projects_or_rejects_explicitly() {
+    let mut session = machine_session();
+    for (effect, expected) in [
+        (
+            "(00100111 (00000001 materialize-u64) (00000001 work) 2)",
+            "((mov-r64-imm64 rax 2))",
+        ),
+        (
+            "(00100111 (00000001 store-u64) (00000001 arena) (00000001 field0) (00000001 work))",
+            "((mov-mem-disp8-r64 rdi 0 rax))",
+        ),
+        (
+            "(00100111 (00000001 load-u64) (00000001 result) (00000001 arena) (00000001 field0))",
+            "((mov-r64-mem-disp8 rax rdi 0))",
+        ),
+        (
+            "(00100111 (00000001 return-u64) (00000001 result))",
+            "((ret))",
+        ),
+    ] {
+        let actual = eval_value(&format!("(x86-project-machine-effect {effect})"), &mut session);
+        assert_eq!(actual, expected, "projection witness for {effect}");
+    }
+}
+
+#[test]
 fn x86_projection_consumes_layout_and_preserves_donor_forms_bytes_and_decode() {
     let mut session = machine_session();
     let effects = structural_effects(&mut session);
