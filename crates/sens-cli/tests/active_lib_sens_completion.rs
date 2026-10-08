@@ -65,11 +65,14 @@ fn active_lisp_files() -> Vec<(String, PathBuf)> {
     files
 }
 
-fn run_check(files: &[PathBuf], language: bool) -> Output {
+fn run_check(files: &[PathBuf], language: bool, exact_domain: bool) -> Output {
     let mut command = tool();
     command.current_dir(repo_root()).arg("--check");
     if language {
         command.arg("--language");
+    }
+    if exact_domain {
+        command.arg("--exact-domain");
     }
     for file in files {
         command.arg(file);
@@ -81,7 +84,7 @@ fn assert_clean(label: &str, files: &[(String, PathBuf)], language: bool) {
     assert!(!files.is_empty(), "{label}: no files selected");
 
     let paths: Vec<PathBuf> = files.iter().map(|(_, path)| path.clone()).collect();
-    let output = run_check(&paths, language);
+    // Active authored source is now audited against exact-domain authority.\n    // Legacy human spellings remain candidates; already-exact D3-D9 heads are\n    // not reinterpreted through the historical 8-bit compatibility path.\n    let output = run_check(&paths, language, true);
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
