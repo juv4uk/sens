@@ -8,22 +8,22 @@
 (load "lib/machine/lowering/semantic-x86-64.lisp")
 (load-mixed-exact-domain "lib/machine/dispatch/native-first.lisp")
 
-(00001001 native-first-totality-check
-  (00001000 (expression)
-    (00000111
-      ((00100010
+(0011 native-first-totality-check
+  (0010 (expression)
+    (110
+      ((101
          (native-first-plan expression)
-         (00100111 (00000001 evaluator-fallback) expression))
+         (1110 (001 evaluator-fallback) expression))
        (1)
-       (00000001 pass))
-      ((00100010
+       (001 pass))
+      ((101
          (native-first-plan expression)
-         (00100111 (00000001 evaluator-fallback) expression))
+         (1110 (001 evaluator-fallback) expression))
        (0)
-       (00000001 fail)))))
+       (001 fail)))))
 
-(00100111
+(1110
   (native-first-totality-check
-    (00000001 ((lambda (x) (+ x 1)) 41)))
+    (001 ((lambda (x) (+ x 1)) 41)))
   (native-first-totality-check
-    (00000001 (car ((lambda (x) x) 1)))))
+    (001 (car ((lambda (x) x) 1)))))
