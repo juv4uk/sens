@@ -34,7 +34,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
             self.assertEqual(rewritten, "(100 x)", source)
 
     def test_comments_quotes_strings_and_arguments_are_not_migrated(self):
-        source = '; (car x)\n\'(car x)\n(\"car\" car)\n(car (quote car) x)\n'
+        source = '; (car x)\n\'(car x)\n(\"car\" 100)\n(car (quote car) x)\n'
         expected = '; (car x)\n\'(car x)\n(\"car\" car)\n(100 (001 car) x)\n'
         self.assertEqual(self.rewrite(source), expected)
 
