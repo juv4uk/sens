@@ -145,6 +145,13 @@ fn execute() -> Result<(), String> {
     }
 }
 
+fn main() {
+    if let Err(message) = execute() {
+        eprintln!("sens-trit: {message}");
+        process::exit(1);
+    }
+}
+
 #[cfg(test)]
 mod eval_tests {
     use super::*;
@@ -224,9 +231,3 @@ mod eval_tests {
     }
 }
 
-fn main() {
-    if let Err(message) = execute() {
-        eprintln!("sens-trit: {message}");
-        process::exit(1);
-    }
-}
