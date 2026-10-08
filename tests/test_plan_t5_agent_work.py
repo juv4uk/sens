@@ -92,7 +92,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         src = a["blocked_sources"][0]
         src["source_class"] = "NONPROGRAM_DATA_REVIEWED"
         src["automatic_sens_companion"] = False
-        a["nonprogram_classification"] = [{
+        a["reviewed_nonprogram_sources"] = [{
             "path": src["path"],
             "source_git_blob_sha": src["source_git_blob_sha"],
             "source_class": "NONPROGRAM_DATA_REVIEWED",
@@ -133,14 +133,14 @@ class PlanT5AgentWorkTests(unittest.TestCase):
                 "automatic_sens_companion": False,
                 "semantic_oracle_admitted": False,
             }
-            a["nonprogram_classification"] = [row]
+            a["reviewed_nonprogram_sources"] = [row]
             a["summary"]["classified_nonprogram"] = 1
             if variant == "wrong-pin":
                 row["source_git_blob_sha"] = "f" * 40
             elif variant == "wrong-source":
                 row["path"] = "lib/not-canonical.lisp"
             elif variant == "duplicate":
-                a["nonprogram_classification"].append(dict(row))
+                a["reviewed_nonprogram_sources"].append(dict(row))
                 a["summary"]["classified_nonprogram"] = 2
             elif variant == "unreviewed":
                 row["source_class"] = "EXECUTABLE"
@@ -153,12 +153,31 @@ class PlanT5AgentWorkTests(unittest.TestCase):
             elif variant == "incorrect-count":
                 a["summary"]["classified_nonprogram"] = 2
             elif variant == "missing-records":
-                a.pop("nonprogram_classification")
+                a.pop("reviewed_nonprogram_sources")
             else:
                 row["path"] = "test/ready.lisp"
                 row["source_git_blob_sha"] = "a" * 40
             with self.subTest(variant=variant), self.assertRaises(mod.PlanError):
                 mod.build_plan(a, 2)
+
+    def test_simultaneous_conflicting_old_and_current_classifications_fail_closed(self):
+        a = fixture()
+        src = a["blocked_sources"][0]
+        src["source_class"] = "NONPROGRAM_DATA_REVIEWED"
+        src["automatic_sens_companion"] = False
+        reviewed = [{
+            "path": src["path"],
+            "source_git_blob_sha": src["source_git_blob_sha"],
+            "source_class": "NONPROGRAM_DATA_REVIEWED",
+            "automatic_sens_companion": False,
+            "semantic_oracle_admitted": False,
+        }]
+        a["reviewed_nonprogram_sources"] = reviewed
+        a["nonprogram_classification"] = [dict(reviewed[0],
+                                               source_git_blob_sha="f" * 40)]
+        a["summary"]["classified_nonprogram"] = 1
+        with self.assertRaisesRegex(mod.PlanError, "conflicting"):
+            mod.build_plan(a, 2)
 
     def test_no_paired_source_or_duplicate_can_enter_plan(self):
         a = fixture()
