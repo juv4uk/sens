@@ -68,5 +68,14 @@ class DomainWordCarrierTest(unittest.TestCase):
                 parse_display(token)
 
 
+    def test_real_d3_domain_library(self):
+        import re
+        source = (Path(__file__).resolve().parents[1] / "lib/domains/d3.lisp").read_text(encoding="utf-8")
+        coordinates = re.findall(r"^  \\(([01]{3}) \\(ук ", source, re.MULTILINE)
+        self.assertEqual(coordinates, [format(x, "03b") for x in range(8)])
+        words = [DomainWord(3, bits) for bits in coordinates]
+        self.assertEqual(decode(encode(words)), words)
+        self.assertEqual(len(encode(words)), 14)
+
 if __name__ == "__main__":
     unittest.main()
