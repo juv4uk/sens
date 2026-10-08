@@ -1,0 +1,33 @@
+name: D10 selfhosting and reasoning harvest v1
+
+on:
+  pull_request:
+    paths:
+      - "lib/meta-eval.lisp"
+      - "lib/reason.lisp"
+      - "knowledge/d10-selfhost-reason-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-selfhost-reason-harvest-v1.py"
+      - ".github/workflows/d10-selfhost-reason-harvest-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/meta-eval.lisp"
+      - "lib/reason.lisp"
+      - "knowledge/d10-selfhost-reason-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-selfhost-reason-harvest-v1.py"
+      - ".github/workflows/d10-selfhost-reason-harvest-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  source-identity-and-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d10-selfhost-reason-harvest-v1.py
+      - run: python3 scripts/check-d10-v1-semantic-inventory.py
+      - run: python3 scripts/check-d10-fill-v1-seed.py
