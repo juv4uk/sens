@@ -243,5 +243,15 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), encode_projection('000'))
 
 
+    def test_lambda_parameter_list_is_data_not_executable_head(self):
+        converted, hits, _ = self.binary("(lambda (x) x)\n")
+        self.assertEqual([hit.label for hit in hits], ["LAMBDA"])
+        self.assertRegex(converted, r"^[01\s]+$")
+
+    def test_define_signature_is_data_but_body_remains_code(self):
+        converted, hits, _ = self.binary("(define (f x) (quote x))\n")
+        self.assertEqual([hit.label for hit in hits], ["DEFINE", "QUOTE"])
+        self.assertRegex(converted, r"^[01\s]+$")
+
 if __name__ == "__main__":
     unittest.main()

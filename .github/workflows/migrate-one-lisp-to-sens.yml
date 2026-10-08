@@ -1,0 +1,32 @@
+name: migrate-one-lisp-to-sens
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/migrate-to-sens-codes.py'
+      - 'scripts/migrate-one-lisp-to-sens.py'
+      - 'tests/test_migrate_one_lisp_to_sens.py'
+      - 'lib/machine/block.lisp'
+      - 'lib/machine/block.sens'
+      - 'scripts/sens_t5_codec.py'
+      - 'scripts/sens_source_resolver.py'
+      - 'scripts/domain_tables.py'
+      - 'lib/domains/**'
+      - 'knowledge/d1-d7-foundation.json'
+      - 'lib/surface/semantic-registry.lisp'
+      - 'contracts/core1-historical-sid-map.lisp'
+      - 'crates/sens/src/text7_projection_generated.rs'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-one-file:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify one real source migration
+        run: python3 -m unittest discover -s tests -p 'test_migrate_one_lisp_to_sens.py' -v
+      - name: Verify focused migration regression
+        run: python3 -m unittest discover -s tests -p 'test_sens_code_migration.py' -v
