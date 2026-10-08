@@ -10,6 +10,7 @@ on:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
+      - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
       - "crates/sens/tests/machine_effect_structural_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
       - "crates/sens/tests/machine_semantic_effect_lowering.rs"
@@ -91,6 +92,7 @@ jobs:
         run: |
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
           cargo test -p sens --test machine_effect_add_projection -- --nocapture
+          cargo test -p sens --test machine_effect_d5_arithmetic_projection -- --nocapture
           cargo test -p sens --test machine_effect_explicit_outputs -- --nocapture
           cargo test -p sens --test machine_effect_structural_projection -- --nocapture
           cargo test -p sens --test machine_semantic_effect_lowering -- --nocapture
@@ -125,6 +127,18 @@ jobs:
           cargo test -p sens-host --test machine_effect_structural -- --nocapture
       - name: Compile owner-silicon witness without claiming hosted hardware evidence
         run: cargo test -p sens-host --test real_silicon_sweep --no-run
+
+
+  d5-arithmetic-effects-gpu-witness:
+    name: D5 arithmetic effects GPU-runner witness
+    if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact D5 ADD/SUB/MUL target-neutral effect witness
+        run: cargo test -p sens --test machine_effect_d5_arithmetic_projection -- --nocapture
 
   d6-add1-sub1-gpu-witness:
     name: D6 ADD1/SUB1 GPU-runner witness
