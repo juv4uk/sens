@@ -81,33 +81,38 @@
                 (00000110
                   (00000110
                     (00000110 effect))))))
-          (10011100
-            ((offset
-               (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
-            (00000111
-            ((x86-projection-rejected? offset)
-              (00000001 x86-projection-rejected))
-            ((00000011
-               base
-               (00000001 arena))
-              (00000111
-                ((00000011
-                   value-slot
-                   (00000001 work))
-                  (00000111
-                    ((x86-admission-disp8? offset)
-                      (00100111
-                        (00100111
-                          (00000001 mov-mem-disp8-r64)
-                          (00000001 rdi)
-                          offset
-                          (00000001 rax))))
-                    (t
-                      (00000001 x86-projection-rejected))))
-                (t
-                  (00000001 x86-projection-rejected))))
-            (t
-              (00000001 x86-projection-rejected)))))
+          (00000111
+            ((x86-projection-rejected?
+               (x86-project-structural-slot-offset
+                 field-slot
+                 field0-offset
+                 field1-offset))
+             (1)
+             (00000001 x86-projection-rejected))
+            ((00000011 base (00000001 arena))
+             (1)
+             (00000111
+               ((00000011 value-slot (00000001 work))
+                (1)
+                (00000111
+                  ((x86-admission-disp8?
+                     (x86-project-structural-slot-offset
+                       field-slot
+                       field0-offset
+                       field1-offset))
+                   t
+                   (00100111
+                     (00100111
+                       (00000001 mov-mem-disp8-r64)
+                       (00000001 rdi)
+                       (x86-project-structural-slot-offset
+                         field-slot
+                         field0-offset
+                         field1-offset)
+                       (00000001 rax))))
+                  (t t (00000001 x86-projection-rejected))))
+               (t t (00000001 x86-projection-rejected))))
+            (t t (00000001 x86-projection-rejected))))
       ((x86-machine-effect-form?
          effect
          (00000001 load-u64)
@@ -125,33 +130,38 @@
                 (00000110
                   (00000110
                     (00000110 effect))))))
-          (10011100
-            ((offset
-               (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
-            (00000111
-            ((x86-projection-rejected? offset)
-              (00000001 x86-projection-rejected))
-            ((00000011
-               result-slot
-               (00000001 result))
-              (00000111
-                ((00000011
-                   base
-                   (00000001 arena))
-                  (00000111
-                    ((x86-admission-disp8? offset)
-                      (00100111
-                        (00100111
-                          (00000001 mov-r64-mem-disp8)
-                          (00000001 rax)
-                          (00000001 rdi)
-                          offset)))
-                    (t
-                      (00000001 x86-projection-rejected))))
-                (t
-                  (00000001 x86-projection-rejected))))
-            (t
-              (00000001 x86-projection-rejected)))))
+          (00000111
+            ((x86-projection-rejected?
+               (x86-project-structural-slot-offset
+                 field-slot
+                 field0-offset
+                 field1-offset))
+             (1)
+             (00000001 x86-projection-rejected))
+            ((00000011 result-slot (00000001 result))
+             (1)
+             (00000111
+               ((00000011 base (00000001 arena))
+                (1)
+                (00000111
+                  ((x86-admission-disp8?
+                     (x86-project-structural-slot-offset
+                       field-slot
+                       field0-offset
+                       field1-offset))
+                   t
+                   (00100111
+                     (00100111
+                       (00000001 mov-r64-mem-disp8)
+                       (00000001 rax)
+                       (00000001 rdi)
+                       (x86-project-structural-slot-offset
+                         field-slot
+                         field0-offset
+                         field1-offset))))
+                  (t t (00000001 x86-projection-rejected))))
+               (t t (00000001 x86-projection-rejected))))
+            (t t (00000001 x86-projection-rejected))))
       ((x86-machine-effect-form?
          effect
          (00000001 return-u64)
