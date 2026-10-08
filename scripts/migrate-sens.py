@@ -37,10 +37,53 @@ if str(SCRIPT_DIR) not in sys.path:
 from sens_t5_codec import decode_bytes, encode_words, typed_sha256
 
 TRANSACTION = SCRIPT_DIR / "migrate-approved-t5.py"
+ARCHIVE_POLICY = "migration-benchmark-snapshot-2026-10-08.json"
 
 
 class MigrationBlocked(ValueError):
     pass
+
+
+def archived_program_path(path: PurePosixPath) -> bool:
+    parts = path.parts
+    return (
+        len(parts) == 6
+        and parts[:3] == ("benchmarks", "sens-surface", "results")
+        and re.fullmatch(r"[0-9]{8}-[A-Za-z0-9._-]+", parts[3]) is not None
+        and parts[4] == "programs"
+        and path.suffix == ".lisp"
+    )
+
+
+def _proof_gated_archive_sources(root: Path) -> set[str]:
+    approved: set[str] = set()
+    directory = root / "knowledge" / "migration-admissions"
+    if not directory.is_dir():
+        return approved
+    for manifest in sorted(directory.glob("*.json")):
+        try:
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, ValueError, UnicodeError):
+            continue
+        if document.get("schema") != "sens-t5-proof-admission/v1":
+            continue
+        source = document.get("source")
+        source_sha = document.get("source_sha256")
+        if not isinstance(source, str) or not isinstance(source_sha, str):
+            continue
+        try:
+            rel = PurePosixPath(source)
+            if rel.is_absolute() or "\\" in source or rel.suffix != ".lisp":
+                continue
+            candidate = root.joinpath(*rel.parts)
+            if not archived_program_path(rel) or not candidate.is_file() or candidate.is_symlink():
+                continue
+            if hashlib.sha256(candidate.read_bytes()).hexdigest() != source_sha.lower():
+                continue
+        except (OSError, ValueError):
+            continue
+        approved.add(rel.as_posix())
+    return approved
 
 
 def outside(candidate: Path, root: Path, what: str) -> None:
@@ -73,6 +116,14 @@ def pin_sources(sources: list[str], root: Path) -> dict:
         # verifies this SHA again before publishing. Never silently trust names.
         sha = hashlib.sha256(candidate.read_bytes()).hexdigest()
         entries.append({"path": rel, "sha256": sha})
+    approved_archive = _proof_gated_archive_sources(root)
+    for row in entries:
+        rel = PurePosixPath(row["path"])
+        if archived_program_path(rel) and rel.as_posix() not in approved_archive:
+            raise MigrationBlocked(
+                f"NONPROGRAM archived benchmark measurement; "
+                f"no proof-gated executable .sens: {row['path']}"
+            )
     return {"files": sorted(entries, key=lambda item: item["path"])}
 
 
@@ -173,6 +224,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dry-run", action="store_true", help="admission only, no .sens files")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
                     help="auto blocks W8 ambiguity; specify a proven historical/current source era")
+    ap.add_argument("--reader", type=Path,
+                    default=ROOT / "target" / "debug" / "sens-trit",
+                    help="real Rust sens-trit reader used for physical-T5 publication")
     args = ap.parse_args(argv)
 
     try:
@@ -198,7 +252,7 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="sens-admission-") as directory:
             manifest = Path(directory) / "pinned.json"
             manifest.write_text(json.dumps(pinned, sort_keys=True) + "\n", encoding="utf-8")
-            invoke(manifest, root, output, report, args.dry_run, args.source_era)
+            invoke(manifest, root, output, report, args.dry_run, args.source_era, args.reader)
 
         result = json.loads(report.read_text(encoding="utf-8"))
         verified = verify_published(result, output, args.dry_run)
@@ -211,12 +265,15 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def invoke(manifest: Path, root: Path, output: Path, report: Path,
-           dry_run: bool, source_era: str = "auto") -> None:
+           dry_run: bool, source_era: str = "auto",
+           reader: Path | None = None) -> None:
     command = [sys.executable, str(TRANSACTION), str(root), "--manifest",
                str(manifest), "--out", str(output), "--report", str(report),
                "--source-era", source_era]
     if dry_run:
         command.append("--dry-run")
+    elif reader is not None:
+        command.extend(["--reader", str(reader)])
     process = subprocess.run(command, cwd=root, capture_output=True, text=True)
     if process.returncode != 0:
         # Keep the original tool's precise per-file blocker manifest.
