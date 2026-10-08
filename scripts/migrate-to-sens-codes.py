@@ -26,6 +26,9 @@ import json
 from pathlib import Path
 import re
 import sys
+import os
+import tempfile
+from sens_t5_codec import SensT5Error, encode_projection, decode_bytes, parse_words, typed_sha256
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -883,6 +886,10 @@ def main():
     parser.add_argument("--foundation", type=Path, required=True)
     parser.add_argument("--domains", nargs="+", default=list(CALL_DOMAINS))
     parser.add_argument("--apply", action="store_true", help="rewrite supported source in place")
+    parser.add_argument(
+        "--sens-mirror", type=Path,
+        help="write NEW packed T5 .sens files with same stem as .lisp; no overwrite",
+    )
     parser.add_argument("--mirror", type=Path, help="write conservative migrated mirror")
     parser.add_argument(
         "--binary-mirror",
@@ -917,9 +924,11 @@ def main():
     parser.add_argument("--report", type=Path, default=Path("sens-code-migration-report.json"))
     args = parser.parse_args()
 
-    selected_modes = sum(bool(x) for x in (args.apply, args.mirror, args.binary_mirror))
+    selected_modes = sum(bool(x) for x in (
+        args.apply, args.mirror, args.binary_mirror, args.sens_mirror
+    ))
     if selected_modes > 1:
-        parser.error("--apply, --mirror and --binary-mirror are mutually exclusive")
+        parser.error("--apply, --mirror, --binary-mirror and --sens-mirror are mutually exclusive")
 
     foundation, digest = load_foundation(args.foundation)
     code_map = build_map(foundation, args.domains)
@@ -933,7 +942,7 @@ def main():
     )
     text7_candidates = (
         build_text7_encoder(foundation, args.text7_projection)
-        if args.binary_mirror
+        if (args.binary_mirror or args.sens_mirror)
         else None
     )
     legacy_sid_map = (
@@ -953,11 +962,11 @@ def main():
     blocked_files = 0
     total_hits = 0
 
-    for path in source_files(root, binary_master=bool(args.binary_mirror)):
+    for path in source_files(root, binary_master=bool(args.binary_mirror or args.sens_mirror)):
         text = path.read_text(encoding="utf-8")
         rel = path.relative_to(root)
 
-        if args.binary_mirror:
+        if args.binary_mirror or args.sens_mirror:
             try:
                 converted, hits, shadowed = binary_rewrite(
                     text,
@@ -970,14 +979,45 @@ def main():
                 if not converted.strip():
                     status = "empty"
                 else:
-                    target = args.binary_mirror / rel
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(converted, encoding="ascii")
-                    status = "binary-mirrored"
+                    if args.sens_mirror:
+                        target = args.sens_mirror / rel.with_suffix(".sens")
+                        source_words = parse_words(converted)
+                        physical = encode_projection(converted)
+                        if decode_bytes(physical) != source_words:
+                            raise SensT5Error("physical T5 roundtrip changed exact typed words")
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        # Atomic no-overwrite: stage beside destination, link O_EXCL.
+                        staged_path = None
+                        try:
+                            with tempfile.NamedTemporaryFile(
+                                mode="wb", prefix=".sens-stage-", suffix=".tmp",
+                                dir=target.parent, delete=False,
+                            ) as staged:
+                                staged_path = Path(staged.name)
+                                staged.write(physical)
+                                staged.flush()
+                                os.fsync(staged.fileno())
+                            os.link(staged_path, target)
+                        finally:
+                            if staged_path is not None:
+                                staged_path.unlink(missing_ok=True)
+                        status = "sens-written"
+                        extra = {
+                            "output": str(rel.with_suffix(".sens")),
+                            "physical_bytes": len(physical),
+                            "physical_sha256": sha256(physical).hexdigest(),
+                            "typed_word_sha256": typed_sha256(source_words),
+                        }
+                    else:
+                        target = args.binary_mirror / rel
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_text(converted, encoding="ascii")
+                        status = "binary-mirrored"
+                        extra = {}
                     rewritten_files += 1
                 total_hits += len(hits)
                 blocked = []
-            except BinaryMigrationError as error:
+            except (BinaryMigrationError, SensT5Error, OSError) as error:
                 converted = ""
                 hits = []
                 shadowed = []
@@ -1011,11 +1051,13 @@ def main():
             "hits": [asdict(x) for x in hits],
             "shadowed_labels": shadowed,
             "blockers": blocked,
+            **(extra if (args.binary_mirror or args.sens_mirror) and status == "sens-written" else {}),
         })
 
     mode = (
         "apply" if args.apply
         else "mirror" if args.mirror
+        else "sens-mirror" if args.sens_mirror
         else "binary-mirror" if args.binary_mirror
         else "audit"
     )
@@ -1030,7 +1072,7 @@ def main():
         "mode": mode,
         "binary_source_rule": (
             "D2 structure + exact D3-D6 callable heads + D7/Text7 spelling; comments absent"
-            if args.binary_mirror else None
+            if args.binary_mirror or args.sens_mirror else None
         ),
         "summary": {
             "files_seen": len(rows),
@@ -1047,7 +1089,7 @@ def main():
     )
     print(json.dumps(report["summary"], ensure_ascii=False))
 
-    if args.binary_mirror:
+    if args.binary_mirror or args.sens_mirror:
         return 0 if rewritten_files else 2
     return 2 if blocked_files else (1 if total_hits and not (args.apply or args.mirror) else 0)
 
