@@ -134,6 +134,29 @@ typedef uintptr_t Value;
 
 English auxiliary note: before searching blindly or inventing a workflow, load `lib/guard.lisp` and `knowledge/guard-reference.lisp`. The directory points to authority; it does not replace it.
 
+## Міграція SENS: одна робоча команда, жодного фальшивого PASS
+
+Перед будь-яким PR, який стосується `.lisp → .sens`, користуйся **вже
+злитим** `python3 scripts/migrate.py`; не створюй черговий несумісний
+перекладач. Офіційні підкоманди:
+
+- `candidates --report /tmp/candidates.json`: обов'язковий огляд оригінального непарного корпусу
+- `preview PATH.lisp --mirror /tmp/mirror --report /tmp/preview.json`: реальний three-pass/T5 dry-run, ніколи не пише
+- `admit --manifest /tmp/reviewed.json --reader target/debug/sens-trit --mirror /tmp/mirror --report /tmp/admit.json`: source-pinned Git, реальний D2 рідер та незалежний Rust/historical oracle
+- `admit ... --write`: **тільки** після VERIFIED_NOT_WRITTEN, атомарне створення нового same-stem `.sens` у зовнішньому mirror; PR додає точні фізичні байти після рев'ю
+
+Перш ніж заявляти «1 файл перенесено», покажи **старий** вихідний
+`.lisp` з історичним Git blob, відсутній перед роботою однойменний
+`.sens`, доказ збігу семантики, новий Git binary blob з чинним
+T5 і зелені незалежні тести/CI. Тестова canary-пара не зменшує
+історичну чергу. `BLOCKED`/непідтверджені D1/8-бітний SID8/D8,
+хост-ефекти, зв'язані імена, Text7/числа — не допускати шляхом підміни
+схожих назв.
+
+Документація запуску: [README](README.md), [перевірений маніфест](docs/ADMIT-T5-MIGRATION.uk.md).
+Координація файлів, claims, конкурентних агентів — issue #4449.
+Не змінювати production pins і не зливати червоні релізні гейти під виглядом міграції.
+
 ## Session start — join the swarm
 
 **Current coordination authority:** `swarm-node`, documented by `docs/swarm-mesh-v2.md`.
