@@ -16,10 +16,10 @@
     (00000111
       ((00100010 actual expected)
        (1)
-       (001 pass))
+       'pass)
       ((00100010 actual expected)
        (0)
-       (00100111 (001 fail) actual expected)))))
+       (00100111 'fail actual expected)))))
 
 (00001001 native-first-execution-witness
   (00001000 ()
@@ -27,58 +27,52 @@
       ; Supported bounded structural slice really reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (001 (car (cons 2 3))))
-        (001
-          (execution-route native
+          '(car (cons 2 3)))
+        '(execution-route native
             (status completed)
-            (value 2))))
+            (value 2)))
 
       ; Unsupported ordinary Lisp is not an error: it stays evaluator-owned.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (001 (+ 2 3)))
-        (001
-          (execution-route evaluator
+          '(+ 2 3))
+        '(execution-route evaluator
             (status completed)
-            (value 5))))
+            (value 5)))
 
       ; Source text is parsed, then every top-level form is routed separately.
       (native-first-execution-witness-check
         (native-first-execute-source
           "(+ 1 2)
 (car (cons 7 9))")
-        (001
-          (source-execution
+        '(source-execution
             ((execution-route evaluator
                (status completed)
                (value 3))
              (execution-route native
                (status completed)
-               (value 7))))))
+               (value 7)))))
 
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (001
-            (native-plan
+          '(native-plan
               ((definitely-not-an-admitted-machine-form))
-              0)))
-        (001
-          (execution-route native
+              0))
+        '(execution-route native
             (status rejected)
             (detail
               (rejected
                 unadmitted-machine-form
-                (definitely-not-an-admitted-machine-form))))))
+                (definitely-not-an-admitted-machine-form)))))
 
       ; Malformed native plans also fail closed on the native route.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (001 (native-plan ((ret)))))
-        (001
-          (execution-route native
+          '(native-plan ((ret))))
+        '(execution-route native
             (status rejected)
             (detail
               (malformed-native-plan
-                (native-plan ((ret)))))))))))
+                (native-plan ((ret))))))))))
 
 (native-first-execution-witness)
