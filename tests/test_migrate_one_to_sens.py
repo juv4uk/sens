@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Тести безпечного one-file T5 runner."""
+"""Regression for canonical one-file T5 staging, not semantic admission."""
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -9,93 +10,84 @@ import sys
 import tempfile
 import unittest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "migrate-one-to-sens.py"
+PROVEN = ROOT / "tests" / "fixtures" / "migration-multiform-cohort" / "two-forms.lisp"
+EXISTING = PROVEN.with_suffix(".sens")
 
 
-class MigrateOneToSensTests(unittest.TestCase):
-    def test_dry_run_of_existing_known_fixture_is_side_effect_free(self):
-        source = ROOT / "tests" / "fixtures" / "migration-multiform-cohort" / "two-forms.lisp"
-        before = source.read_bytes()
-        result = subprocess.run(
-            [sys.executable, str(SCRIPT), str(source), "--dry-run"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        report = json.loads(result.stdout)
-        self.assertEqual(report["status"], "would-write")
-        self.assertEqual(report["output"].replace("\\", "/"),
-                         "tests/fixtures/migration-multiform-cohort/two-forms.sens")
-        self.assertEqual(source.read_bytes(), before)
+def invoke(source: Path, *args: str):
+    return subprocess.run(
+        [sys.executable, str(SCRIPT), str(source), *args],
+        cwd=ROOT, capture_output=True, text=True
+    )
+
+
+class CanonicalOneFileMigration(unittest.TestCase):
+    def test_real_proven_canary_dry_run_does_not_write(self):
+        before = PROVEN.read_bytes()
+        result = invoke(PROVEN, "--dry-run", "--source-era", "legacy")
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        state = json.loads(result.stdout)
+        self.assertEqual(state["status"], "would-write")
+        self.assertEqual(state["semantic_parity"], "NOT_VERIFIED")
+        self.assertEqual(state["source_era"], "legacy")
+        self.assertEqual(state["physical_sha256"], hashlib.sha256(EXISTING.read_bytes()).hexdigest())
+        self.assertEqual(PROVEN.read_bytes(), before)
 
     def test_existing_target_is_never_overwritten(self):
-        source = ROOT / "tests" / "fixtures" / "migration-multiform-cohort" / "two-forms.lisp"
-        target = ROOT / "tests" / "fixtures" / "migration-multiform-cohort" / "two-forms.sens"
-        before = target.read_bytes()
-        result = subprocess.run(
-            [sys.executable, str(SCRIPT), str(source)],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-        )
-        self.assertEqual(result.returncode, 1)
+        before = EXISTING.read_bytes()
+        result = invoke(PROVEN, "--source-era", "legacy")
+        self.assertNotEqual(result.returncode, 0)
         self.assertIn("refusing overwrite", result.stderr)
-        self.assertEqual(target.read_bytes(), before)
+        self.assertEqual(EXISTING.read_bytes(), before)
 
-    def test_real_executable_guard_can_be_migrated_to_binary_t5(self):
-        source = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
+    def test_real_binary_staging_agrees_with_current_canonical_three_pass(self):
+        before = PROVEN.read_bytes()
         with tempfile.TemporaryDirectory() as td:
-            target = Path(td) / "machine-authority-guard.sens"
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT), str(source), "--output", str(target)],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-            )
-            self.assertEqual(result.returncode, 0, result.stderr)
+            output = Path(td) / "two-forms.sens"
+            result = invoke(PROVEN, "--output", str(output), "--source-era", "legacy")
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             report = json.loads(result.stdout)
             self.assertEqual(report["status"], "written")
-            self.assertGreater(report["bytes"], 0)
-            self.assertTrue(target.is_file())
-            import hashlib
-            self.assertEqual(report["physical_sha256"], hashlib.sha256(target.read_bytes()).hexdigest())
-            self.assertNotIn(b" ", target.read_bytes())
-            self.assertEqual(source.suffix, ".lisp")
+            self.assertEqual(report["semantic_parity"], "NOT_VERIFIED")
+            self.assertEqual(report["source"], str(PROVEN.relative_to(ROOT)))
+            self.assertEqual(report["bytes"], 14)
+            self.assertEqual(output.read_bytes(), EXISTING.read_bytes())
+            self.assertEqual(report["physical_sha256"], hashlib.sha256(output.read_bytes()).hexdigest())
+            second = invoke(PROVEN, "--output", str(output), "--source-era", "legacy")
+            self.assertNotEqual(second.returncode, 0)
+            self.assertIn("refusing overwrite", second.stderr)
+        self.assertEqual(PROVEN.read_bytes(), before)
 
-    def test_checked_in_t5_matches_official_one_file_runner(self):
+    def test_unknown_ukrainian_identifiers_are_not_encoded_as_fake_calls(self):
         source = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
-        checked = ROOT / "lib" / "surface" / "ukr-acceptance.sens"
+        before = source.read_bytes()
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "ukr-acceptance.sens"
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT), str(source), "--output", str(target)],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-            )
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(target.read_bytes(), checked.read_bytes())
+            result = invoke(source, "--source-era", "legacy", "--output", str(target))
+            self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
             report = json.loads(result.stdout)
-            self.assertEqual(report["bytes"], 72)
-            self.assertEqual(
-                report["physical_sha256"],
-                "356fc5d19bb93bf3006ded87f435ef5b7ecce3f819ce07ef7e109f2fa29c4b6f",
-            )
+            self.assertEqual(report["status"], "blocked")
+            self.assertIn("reason", report)
+            self.assertFalse(target.exists())
+        self.assertEqual(source.read_bytes(), before)
 
-    def test_source_outside_repo_is_blocked(self):
+    def test_repository_publication_requires_separate_oracle_admission(self):
+        source = ROOT / "benchmarks" / "lists.lisp"
+        target = source.with_suffix(".sens")
+        self.assertFalse(target.exists())
+        result = invoke(source, "--source-era", "legacy")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("in-repository publication needs independent", result.stderr)
+        self.assertFalse(target.exists())
+
+    def test_source_outside_repository_is_blocked(self):
         with tempfile.TemporaryDirectory() as td:
             source = Path(td) / "outside.lisp"
             source.write_text("000\n", encoding="utf-8")
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT), str(source), "--dry-run"],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-            )
-        self.assertEqual(result.returncode, 1)
+            result = invoke(source, "--dry-run")
+        self.assertNotEqual(result.returncode, 0)
         self.assertIn("inside the repository", result.stderr)
 
 
