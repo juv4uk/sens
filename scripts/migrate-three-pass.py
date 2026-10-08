@@ -461,10 +461,16 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     return words
 
 class Resolver:
-    def __init__(self,legacy,my,upper):
+    def __init__(self,legacy,my,upper,source_era="legacy",admitted_d8=None):
+        if source_era not in ("legacy","current"):
+            raise ValueError(f"invalid source era {source_era!r}")
+        if source_era=="current" and not admitted_d8:
+            raise MigrationError("current D8 source requires an owner-ratified D8 foundation")
         self.legacy=legacy
         self.my=my
         self.upper=upper
+        self.source_era=source_era
+        self.admitted_d8=set(admitted_d8 or ())
         self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     def head(self,tok: Tok):
         t=tok.text
@@ -479,10 +485,17 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # Pass 1: every exact-eight executable head belongs to the old
-        # SID8/Sens8 generation. It may migrate only through a proven current
-        # successor; old/unassigned bytes never fall through as text.
+        # The same eight visible bits can be historical SID8 or CURRENT D8.
+        # Its source-era provenance must be explicit: never infer meaning from
+        # the bit shape. Current D8 is left exact, not rewritten through SID8.
         if len(t)==8 and set(t)<=set("01"):
+            if self.source_era=="current":
+                if t not in self.admitted_d8:
+                    raise MigrationError(
+                        f"unratified current D8 executable head {t}",tok
+                    )
+                self.counts["already-exact"]+=1
+                return [t],"already-exact"
             if t not in self.legacy:
                 raise MigrationError(
                     f"legacy-unmapped SID8/Sens8 {t}: no historical registry row",
@@ -691,9 +704,14 @@ def main():
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
+    ap.add_argument("--source-era", choices=("legacy","current"), default="legacy",
+                    help="розрізняти SID8 і сучасний D8; legacy є сумісним режимом")
     args = ap.parse_args()
 
     data = load_foundation(args.foundation)
+    if args.source_era=="current" and "D8" not in data.get("current_domains",()):
+        ap.error("--source-era=current requires a foundation ratifying D8")
+    admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
     legacy, my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
         args.semantic_registry, args.necessary_forms, args.historical_map
@@ -706,14 +724,24 @@ def main():
               "pass2-my-lisp": 0, "pass3-lisp15": 0, "passthrough-head": 0}
 
     root = args.root.resolve()
-    # Stable sorted manifest; never traverse generated .sens as Lisp source.
-    paths = sorted(source_files(root))
+    # An explicit .lisp path means ONE input file, not an empty directory scan.
+    # A directory still gives the stable sorted tree inventory.
+    if root.is_file():
+        if root.suffix.lower() not in SOURCE_EXTS:
+            ap.error("a single source must be a .lisp file")
+        base_root = root.parent
+        paths = [root]
+    elif root.is_dir():
+        base_root = root
+        paths = sorted(source_files(root))
+    else:
+        ap.error(f"input path does not exist: {root}")
     seen_destinations = set()
     for path in paths:
-        rel = path.resolve().relative_to(root)
+        rel = path.resolve().relative_to(base_root)
         dest = sens_destination(rel)
         target = args.out / dest
-        resolver = Resolver(legacy, my, upper)
+        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8)
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")
@@ -783,6 +811,8 @@ def main():
             "3": "Lisp-I/1.5 head -> proven current D3-D6",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
+        "source_era": args.source_era,
+        "source_era_law": "W8 head is historical SID8 in legacy mode, ratified D8 in current mode; never guessed",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
