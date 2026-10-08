@@ -206,9 +206,57 @@
     "coordinates_assigned": 0,
     "ratification_effect": "NONE",
     "inventory_mutation": "NONE",
-    "selected_candidates_in_artifact": 4,
+    "selected_candidates_in_artifact": 5,
     "projected_candidates_in_artifact": 1,
     "hold_candidates_in_artifact": 3,
-    "next_gate": "Exact behavioral duplicate proof for the four SELECT rows, then consolidated D10 inventory admission as UNPLACED only."
+    "next_gate": "Lower-domain audit completed for the five SELECT rows; remaining gate is independent-law confirmation and explicit reviewer agreement before consolidated D10 admission as UNPLACED only."
+  },
+  "duplicate_audit": {
+    "lower_domain_sources": [
+      "knowledge/d1-d9-foundation.json",
+      "knowledge/d9-v1-semantic-inventory.json",
+      "knowledge/d8-v2-semantic-inventory.json",
+      "knowledge/d6-v2-complete-semantic-inventory.json",
+      "knowledge/d5-ratified.json"
+    ],
+    "d1_d9_result": {
+      "exact_candidates_found": 0,
+      "note": "No TOKENIZE-SENTENCES, TOKENIZE-WORDS, LEMMATIZE-TEXT, INFLECT-WORD or MORPHO-SYNTACTIC-TAG behavioral twin was found in the inspected lower-domain inventories. D9 does contain query/evidence/provenance operations, but those are not linguistic tokenization or morphology."
+    },
+    "current_d10_near_matches": [
+      {
+        "candidate": "TOKENIZE-SENTENCES",
+        "existing": "STRING-SPLIT",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "separator-based splitting does not encode sentence-boundary language law"
+      },
+      {
+        "candidate": "TOKENIZE-WORDS",
+        "existing": "STRING-SPLIT",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "language-specific lexical boundary and token adjustment differ from generic separator splitting"
+      },
+      {
+        "candidate": "INFLECT-WORD",
+        "existing": "DERIVE-VERB-LAKARA",
+        "verdict": "NOT_EXACT_DUPLICATE",
+        "reason": "existing row is a staged Paninian verb derivation; donor candidate is generic lemma+morphological-tag form generation, so keep separate pending law-level review"
+      },
+      {
+        "candidate": "LEMMATIZE-TEXT",
+        "existing": "UNDERSTAND-QUERY / TRANSLATION-*",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "existing rows operate on controlled knowledge/translation structures, not morphological lemma normalization"
+      },
+      {
+        "candidate": "MORPHO-SYNTACTIC-TAG",
+        "existing": "STRING->SYMBOL / STRING-VECTOR families",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "representation conversion does not expose linguistic POS/morphological readings"
+      }
+    ],
+    "donor_projection": {
+      "AFFIX-RULE-WORDFORM-GENERATION": "INFLECT-WORD"
+    }
   }
 }
