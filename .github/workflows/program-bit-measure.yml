@@ -24,3 +24,17 @@ jobs:
         run: |
           cargo test -p sens source_packing::tests::
           cargo test -p sens paired_sens::tests::
+      - name: Run CLI on a physically saved .sens sibling
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01' > "$RUNNER_TEMP/demo.lisp"
+          cargo run -q -p sens-cli --bin sens-pair -- encode "$RUNNER_TEMP/demo.lisp"
+          cargo run -q -p sens-cli --bin sens-pair -- verify "$RUNNER_TEMP/demo.lisp"
+          test "$(wc -c < "$RUNNER_TEMP/demo.sens")" -eq 2
+          printf '\\000' >> "$RUNNER_TEMP/demo.sens"
+          if cargo run -q -p sens-cli --bin sens-pair -- verify "$RUNNER_TEMP/demo.lisp"; then
+            echo "ERROR: appended bytes were accepted"
+            exit 1
+          fi
+
