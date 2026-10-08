@@ -43,7 +43,7 @@ def changed_paths(root: Path, base: str) -> list[tuple[str, str]]:
         raise ValueError("BASE: immutable 40-digit Git commit SHA required")
     git(root, "rev-parse", "--verify", base + "^{commit}")
     raw = git(root, "diff", "--name-status", "-z", "--no-renames",
-              "--diff-filter=AMDR", base, "HEAD")
+              "--diff-filter=AMDRT", base, "HEAD")
     fields = raw.split(b"\0")
     if fields[-1] != b"":
         raise ValueError("GIT: malformed NUL-delimited status")
@@ -55,7 +55,7 @@ def changed_paths(root: Path, base: str) -> list[tuple[str, str]]:
         status = fields[i].decode("ascii", "strict")
         name = os.fsdecode(fields[i + 1])
         safe_path(name)
-        if status not in ("A", "M", "D"):
+        if status not in ("A", "M", "D", "T"):
             raise ValueError("GIT: unknown change " + status)
         changed.append((status, name))
     return changed
