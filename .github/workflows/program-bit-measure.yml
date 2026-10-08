@@ -5,6 +5,7 @@ on:
     paths:
       - "crates/sens/src/source_packing.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/bracket_eof_t5_experiment.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens/src/binary_delimited_transport.rs"
       - "crates/sens/src/sens_container_experiment.rs"
@@ -17,6 +18,7 @@ on:
     paths:
       - "crates/sens/src/source_packing.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/bracket_eof_t5_experiment.rs"
       - "crates/sens/src/binary_delimited_transport.rs"
       - "crates/sens/src/sens_container_experiment.rs"
       - "crates/sens/src/hdlc_transport_experiment.rs"
@@ -34,6 +36,7 @@ jobs:
         run: |
           cargo test -p sens source_packing::tests::
           cargo test -p sens ternary_transport::tests::
+          cargo test -p sens bracket_eof_t5_experiment::tests::
           cargo test -p sens binary_delimited_transport::tests::
           cargo test -p sens sens_container_experiment::tests::
           cargo test -p sens hdlc_transport_experiment::tests::
