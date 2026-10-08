@@ -114,7 +114,7 @@
       "stable_id": "d10.ling.nlp-uk.lemmatize-text.v1",
       "repository": "juv4uk/nlp_uk",
       "source": [
-        "src/main/groovy/org/nlp_uk/tools/LemmatizeText.groovy@e33b3c5f02ac742ced189db1f9a5a4e01230f5f"
+        "src/main/groovy/org/nlp_uk/tools/LemmatizeText.groovy@e33b3c5f02ac742ced189db1f9a5a4e012230f5f"
       ],
       "semantic_name": "LEMMATIZE-TEXT",
       "behavior": "Map analyzed token readings to lemma representatives; when multiple lemmas remain, optionally select one by an explicit lemma-frequency policy after tag-based filtering.",
