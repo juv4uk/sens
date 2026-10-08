@@ -44,6 +44,49 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
                 ["preview", "benchmarks/lists.lisp", "--mirror", "/tmp/mirror",
                  "--report", "/tmp/preview.json", "--write"])
 
+    def test_view_routes_only_through_the_existing_canonical_t5_view_tool(self):
+        p = migrate.parser()
+        source = "tests/fixtures/migration-d4-selector-cohort/caar.sens"
+        verify = migrate.command(p.parse_args(["view", "--sens", source, "--verify"]))
+        self.assertEqual(Path(verify[1]).name, "sens_spaced_view.py")
+        self.assertEqual(verify[-3:], ["--sens", source, "--verify"])
+        self.assertNotIn("--write", verify)
+        stage = migrate.command(p.parse_args([
+            "view", "--sens", source, "--stage", "/tmp/sens-review-stage"]))
+        self.assertEqual(stage[-2:], ["--stage", "/tmp/sens-review-stage"])
+        self.assertNotIn("--write", stage)
+        with self.assertRaises(SystemExit):
+            p.parse_args(["view", "--sens", source])
+        with self.assertRaises(SystemExit):
+            p.parse_args(["view", "--sens", source, "--verify", "--stage", "/tmp/out"])
+        with self.assertRaises(SystemExit):
+            p.parse_args(["view", "--sens", source, "--verify", "--write"])
+
+    def test_view_verifies_real_d1_and_ukrainian_d4_same_stem_triplets(self):
+        for stem in (
+            "tests/fixtures/migration-d1-cond-cohort/branch",
+            "tests/fixtures/migration-d4-selector-cohort/caar",
+        ):
+            with self.subTest(stem=stem):
+                self.assertEqual(migrate.main(["view", "--sens", stem + ".sens", "--verify"]), 0)
+
+    def test_view_external_staging_is_exact_read_only_and_no_clobber(self):
+        source = "tests/fixtures/migration-d4-selector-cohort/caar.sens"
+        expected = ROOT / "tests/fixtures/migration-d4-selector-cohort/caar"
+        source_binary = ROOT / source
+        original_physical = source_binary.read_bytes()
+        with tempfile.TemporaryDirectory(prefix="sens-migrate-view-") as d:
+            output = Path(d)
+            cmd = ["view", "--sens", source, "--stage", str(output)]
+            self.assertEqual(migrate.main(cmd), 0)
+            generated = output / "tests/fixtures/migration-d4-selector-cohort/caar"
+            self.assertEqual(generated.read_bytes(), expected.read_bytes())
+            self.assertEqual(migrate.main(cmd), 2, "no-clobber must block existing view")
+            self.assertEqual(source_binary.read_bytes(), original_physical)
+        with self.assertRaises(SystemExit):
+            migrate.parser().parse_args(["view", "--sens", source, "--write"])
+        self.assertEqual(migrate.main(["view", "--sens", "../forbidden.sens", "--verify"]), 2)
+
     def test_admit_requires_all_independent_evidence_and_write_is_explicit(self):
         p = migrate.parser()
         with self.assertRaises(SystemExit):
