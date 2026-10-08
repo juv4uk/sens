@@ -24,8 +24,8 @@ fn physical_two_form_source_retains_d2_boundary_and_executes_both() {
     );
     let words = decode_ternary_program(T5).expect("one canonical physical T5");
     assert_eq!(words.len(), 21);
-    assert_eq!(words[5], "00", "D2 structure separates the two forms");
     let visible = open_ternary_program(T5).expect("binary program opens");
+    assert_eq!(visible.split_whitespace().nth(5), Some("00"), "D2 inter-form separator");
     assert_eq!(visible, PROJECTION);
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), T5);
 
