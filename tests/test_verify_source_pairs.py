@@ -71,6 +71,10 @@ class PairCheckTests(unittest.TestCase):
             self.skipTest("symlinks unavailable")
         self.assertIn("must not be symlinks", self.scan()[1][0])
 
+    def test_orphan_binary_fails(self):
+        (self.root / "lib" / "сирота").write_bytes(b"10101")
+        self.assertIn("bit-only binary orphan", self.scan()[1][0])
+
     def test_inventory_is_not_codec_evidence(self):
         n, errors = self.scan(inventory_only=True)
         self.assertEqual((n, errors), (1, []))
