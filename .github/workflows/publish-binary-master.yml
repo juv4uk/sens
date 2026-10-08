@@ -74,6 +74,29 @@ jobs:
               print('WARNING: no admitted .lisp -> .sens files yet; never publish the old master output')
 
           PY
+      - name: Cross-check three-pass T5 bytes with Rust sens-trit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/t5-canary-src" "$RUNNER_TEMP/t5-canary-target" "$RUNNER_TEMP/t5-rust"
+          printf '()\n' > "$RUNNER_TEMP/t5-canary-src/empty.lisp"
+          python3 scripts/migrate-three-pass.py "$RUNNER_TEMP/t5-canary-src" \
+            --out "$RUNNER_TEMP/t5-canary-target" \
+            --foundation knowledge/d1-d7-foundation.json \
+            --domain-surfaces crates/sens/src/domain_surface_registry_generated.rs \
+            --semantic-generated crates/sens/src/semantic_registry_generated.rs \
+            --semantic-registry crates/sens/src/semantic_registry.rs \
+            --necessary-forms crates/sens/src/eval/necessary_forms_generated.rs \
+            --historical-map contracts/core1-historical-sid-map.lisp \
+            --text7 crates/sens/src/text7_projection_generated.rs \
+            --report "$RUNNER_TEMP/t5-canary-report.json"
+          test -f "$RUNNER_TEMP/t5-canary-target/empty.sens"
+          printf '000\n' > "$RUNNER_TEMP/t5-rust/empty.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/t5-rust/empty.lisp"
+          cmp "$RUNNER_TEMP/t5-canary-target/empty.sens" "$RUNNER_TEMP/t5-rust/empty.sens"
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/t5-canary-target/empty.sens" > "$RUNNER_TEMP/t5-canary-open.txt"
+          printf '000\n' > "$RUNNER_TEMP/t5-canary-expected.txt"
+          cmp "$RUNNER_TEMP/t5-canary-open.txt" "$RUNNER_TEMP/t5-canary-expected.txt"
       - name: Upload binary migration preview and blocker report
         if: always()
         uses: actions/upload-artifact@v4
