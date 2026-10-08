@@ -1,8 +1,8 @@
 //! Test-only internal bootstrap decomposition for #3648.
 //!
-//! One ignored dispatch test is reused for every stage. The stage arrives via
-//! SENS_BOOTSTRAP_MEASURE_STAGE, so the Rust test-harness/filter overhead is
-//! identical across Cachegrind runs.
+//! One ignored dispatch test is reused for every stage. A one-byte numeric
+//! SENS_BOOTSTRAP_MEASURE_LEVEL selects the prefix depth, avoiding variable-cost
+//! string dispatch inside the measured Cachegrind path.
 //!
 //! This module deliberately lives behind cfg(test) so private bootstrap
 //! mechanisms stay private.
@@ -46,53 +46,75 @@ fn prepare_through_decode() -> (Session, Vec<Expr>) {
     (session, expressions)
 }
 
+fn measurement_level() -> u8 {
+    let raw = std::env::var("SENS_BOOTSTRAP_MEASURE_LEVEL")
+        .expect("SENS_BOOTSTRAP_MEASURE_LEVEL must select a diagnostic prefix level");
+    let bytes = raw.as_bytes();
+    assert_eq!(
+        bytes.len(),
+        1,
+        "SENS_BOOTSTRAP_MEASURE_LEVEL must be exactly one ASCII digit"
+    );
+    let byte = bytes[0];
+    assert!(
+        (b'0'..=b'6').contains(&byte),
+        "SENS_BOOTSTRAP_MEASURE_LEVEL must be in 0..=6"
+    );
+    byte - b'0'
+}
+
 #[test]
 #[ignore = "diagnostic benchmark for #3648"]
 fn bootstrap_measure_dispatch() {
-    let stage = std::env::var("SENS_BOOTSTRAP_MEASURE_STAGE")
-        .expect("SENS_BOOTSTRAP_MEASURE_STAGE must select a diagnostic stage");
+    let level = measurement_level();
 
-    match stage.as_str() {
-        "root" => {
-            black_box(root_session());
-        }
-        "profile" => {
-            let mut session = root_session();
-            prepare_profile(&mut session);
-            black_box(session);
-        }
-        "macro" => {
-            let mut session = root_session();
-            prepare_profile(&mut session);
-            load_first_macro(&mut session);
-            black_box(session);
-        }
-        "decode" => {
-            let (session, expressions) = prepare_through_decode();
-            black_box(session);
-            black_box(expressions);
-        }
-        "eval-no-peers" => {
-            let (mut session, expressions) = prepare_through_decode();
-            let result = eval_parsed_expressions(&expressions, &mut session)
-                .expect("decoded Core must evaluate");
-            black_box(result);
-            black_box(session);
-        }
-        "eval-with-peers" => {
-            let (mut session, expressions) = prepare_through_decode();
-            let result = eval_parsed_expressions(&expressions, &mut session)
-                .expect("decoded Core must evaluate");
-            bind_missing_stable_surface_peers(&session.environment);
-            black_box(result);
-            black_box(session);
-        }
-        "full-loader" => {
-            let mut session = root_session();
-            let result = load_core_library(&mut session).expect("full Core loader must succeed");
-            black_box(result);
-            black_box(session);
-        }
-        other => panic!("unknown SENS_BOOTSTRAP_MEASURE_STAGE={other}"),
+    // Level 6 is the independent production-loader control. It is compared
+    // with the staged path, but is deliberately not part of its monotonic prefix.
+    if level == 6 {
+        let mut session = root_session();
+        let result = load_core_library(&mut session).expect("full Core loader must succeed");
+        black_box(result);
+        black_box(session);
+        return;
     }
+
+    // Levels 0..5 are intentionally one sequential prefix. Every later level
+    // executes all earlier setup before adding exactly one named stage.
+    let mut session = root_session();
+    if level == 0 {
+        black_box(session);
+        return;
+    }
+
+    prepare_profile(&mut session);
+    if level == 1 {
+        black_box(session);
+        return;
+    }
+
+    load_first_macro(&mut session);
+    if level == 2 {
+        black_box(session);
+        return;
+    }
+
+    let expressions = decode_current_core();
+    if level == 3 {
+        black_box(session);
+        black_box(expressions);
+        return;
+    }
+
+    let result = eval_parsed_expressions(&expressions, &mut session)
+        .expect("decoded Core must evaluate");
+    if level == 4 {
+        black_box(result);
+        black_box(session);
+        return;
+    }
+
+    debug_assert_eq!(level, 5);
+    bind_missing_stable_surface_peers(&session.environment);
+    black_box(result);
+    black_box(session);
 }
