@@ -3,6 +3,7 @@
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
+use crate::canonical_reader::text7_binding_key;
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 use std::{
@@ -34,7 +35,18 @@ fn parse_lambda_list(expr: &Expr) -> LambdaListResult {
 type LambdaList = (Vec<Rc<str>>, Option<Rc<str>>);
 type LambdaListResult = Result<LambdaList, LanguageError>;
 
+fn bindable_parameter_name(expr: &Expr) -> Result<Option<Rc<str>>, LanguageError> {
+    let Some(name) = text7_binding_key(expr) else {
+        return Ok(None);
+    };
+    canon::ensure_bindable(&name, expr.span)?;
+    Ok(Some(name))
+}
+
 fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
+    if let Some(name) = bindable_parameter_name(expr)? {
+        return Ok((Vec::new(), Some(name)));
+    }
     match &expr.kind {
         ExprKind::Symbol(name) => {
             canon::ensure_bindable(name, expr.span)?;
