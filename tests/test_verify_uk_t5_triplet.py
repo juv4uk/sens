@@ -207,6 +207,57 @@ class BoundedUkTripletTests(unittest.TestCase):
                 with self.assertRaises(mod.ProjectionBlocked):
                     mod.canonical_uk_from_words(invalid_words)
 
+    def test_caar_real_uk_source_against_original_unmodified_physical_t5(self):
+        source_dir = ROOT / "tests/fixtures/migration-d4-selector-cohort"
+        self.assertEqual(mod.uk_surface(4)["1000"], "п-п")
+        with tempfile.TemporaryDirectory(prefix="sens-d4-uk-triple-") as td:
+            stage = Path(td)
+            for suffix in (".lisp", ".sens", ""):
+                shutil.copyfile(source_dir / ("caar" + suffix),
+                                stage / ("caar" + suffix))
+            lisp, sens, view = stage / "caar.lisp", stage / "caar.sens", stage / "caar"
+            original = (lisp.read_bytes(), sens.read_bytes(), view.read_bytes())
+            self.assertEqual(lisp.read_text(encoding="utf-8"),
+                "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n")
+            words = mod.decode_bytes(original[1])
+            self.assertEqual(words[0:2], ["10", "1000"])
+            self.assertEqual(mod.canonical_uk_from_words(words), lisp.read_text(encoding="utf-8"))
+            self.assertEqual(mod.project_current_uk(lisp.read_text(encoding="utf-8")), words)
+            receipt = mod.verify(lisp, sens, view)
+            self.assertEqual(receipt["physical_bytes"], 20)
+            self.assertTrue(receipt["canonical_uk_roundtrip"])
+            self.assertTrue(receipt["canonical_view_roundtrip"])
+            self.assertFalse(receipt["runtime_oracle_admitted_by_this_audit"])
+            self.assertEqual(receipt["old_originals_migrated_by_this_audit"], 0)
+            self.assertEqual(original,
+                             (lisp.read_bytes(), sens.read_bytes(), view.read_bytes()))
+            forged = words.copy()
+            forged[1] = "100"  # D3 CAR is NOT D4 CAAR!
+            sens.write_bytes(mod.encode_words(forged))
+            view.write_text(" ".join(forged) + "\n", encoding="ascii")
+            with self.assertRaises(mod.ProjectionBlocked):
+                mod.verify(lisp, sens, view)
+
+    def test_caar_only_accepts_proven_cons_with_nested_cons_car(self):
+        for invalid in (
+            ["10", "1000", "01"],                     # no argument
+            ["10", "1000", "00", "000", "01"],        # empty not a pair
+            ["10", "1000", "00", "10", "001", "00", "000", "01", "01"],  # quoted nil
+            ["10", "1000", "00", "10", "111", "00", "10",
+             "001", "00", "000", "01", "00", "10", "001",
+             "00", "000", "01", "01", "01"],          # CONS but CAR not CONS
+            ["10", "1000", "00", "10", "111", "00", "10",
+             "111", "00", "10", "001", "00", "1", "01",
+             "00", "10", "001", "00", "000", "01", "01",
+             "00", "10", "001", "00", "000", "01", "01",
+             "01"],                                # quoted D1 not nil-pair
+            ["10", "1001", "00", "000", "01"],        # unproved D4 CADR
+            ["10", "0010", "00", "000", "01"],        # D4 binder not callable
+        ):
+            with self.subTest(words=invalid):
+                with self.assertRaises(mod.ProjectionBlocked):
+                    mod.canonical_uk_from_words(invalid)
+
     def test_cli_read_only_current_canary(self):
         cmd = [sys.executable, str(SOURCE), "--lisp", str(self.lisp),
                "--sens", str(self.sens), "--view", str(self.view)]
