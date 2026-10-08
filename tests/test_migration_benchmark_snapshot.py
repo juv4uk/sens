@@ -18,7 +18,7 @@ LEDGER = ROOT / "knowledge/migration-benchmark-snapshot-2026-10-08.json"
 
 
 def git_blob_sha(content: bytes) -> str:
-    header = b"blob " + str(len(content)).encode("ascii") + b"\\0"
+    header = b"blob " + str(len(content)).encode("ascii") + b"\0"
     return hashlib.sha1(header + content).hexdigest()
 
 
