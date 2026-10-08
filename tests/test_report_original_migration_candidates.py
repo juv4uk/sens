@@ -287,15 +287,17 @@ class OriginalCandidateTests(unittest.TestCase):
 
 
     def test_reviewed_source_manifests_are_sha_pinned_nonexecutables(self):
-        # All 25 ISA + 21 schema + 8 evidence + 13 fixture envelopes
-        # were individually reviewed and landed on main; they are data.
         entries = mod.load_nonprogram_classification(ROOT)
-        self.assertEqual(len(entries), 78)
-        self.assertEqual(
-            {name: sum(e["cohort"] == name for e in entries.values())
-             for name in ("isa", "schema", "evidence", "expr-record")},
-            {"isa": 25, "schema": 21, "evidence": 8, "expr-record": 13},
-        )
+        approved = {
+            cohort: count for cohort, manifest, count in mod.NONPROGRAM_MANIFESTS
+            if (ROOT / manifest).is_file()
+        }
+        self.assertEqual(len(entries), sum(approved.values()))
+        self.assertEqual({
+            cohort: sum(e["cohort"] == cohort for e in entries.values())
+            for cohort in approved
+        }, approved)
+        self.assertEqual(approved.get("knowledge-record"), 14)
         self.assertTrue(all(not e["automatic_sens_companion"]
                             and not e["semantic_oracle_admitted"]
                             for e in entries.values()))

@@ -188,6 +188,7 @@ NONPROGRAM_MANIFESTS = (
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
     ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
+    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 14),
 )
 
 
@@ -262,6 +263,8 @@ def load_nonprogram_classification(root: Path) -> dict[str, dict]:
                 raise ValueError(f"mis-scoped evidence data: {path}")
             if cohort == "expr-record" and not path.startswith("tests/fixtures/"):
                 raise ValueError(f"mis-scoped test-record envelope: {path}")
+            if cohort == "knowledge-record" and (not path.startswith("knowledge/") or path.count("/") != 1):
+                raise ValueError(f"mis-scoped knowledge data record: {path}")
             row["cohort"] = cohort
             rows[path] = row
     return rows
