@@ -1,0 +1,843 @@
+{
+ "schema": "d10-library-harvest/v1",
+ "authority": "#4013",
+ "status": "RESEARCH-UNRATIFIED",
+ "law": "source-grounded candidate meanings only; NO D10 positions invented (positions are owner generator authority)",
+ "sources": [
+  {
+   "path": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef"
+  },
+  {
+   "path": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829"
+  },
+  {
+   "path": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f"
+  },
+  {
+   "path": "lib/reason.lisp",
+   "blob_sha": "dadc52a2f40f2f30ad77642898afb81980044c08"
+  }
+ ],
+ "count": 102,
+ "candidates": [
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 18,
+   "name": "*dimension-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 19,
+   "name": "*unit-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 20,
+   "name": "*quantity-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 21,
+   "name": "*science-source-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 22,
+   "name": "*scientific-constant-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 24,
+   "name": "science-proper-list?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 35,
+   "name": "science-sixth",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 39,
+   "name": "science-seventh",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 43,
+   "name": "make-dimension",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 47,
+   "name": "dimension?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 62,
+   "name": "dimension-base",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 65,
+   "name": "dimension-exponent",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 68,
+   "name": "science-dimensions-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 81,
+   "name": "make-unit",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 85,
+   "name": "unit?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 95,
+   "name": "unit-dimensions",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 98,
+   "name": "make-quantity",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 102,
+   "name": "quantity?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 113,
+   "name": "quantity-value",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 116,
+   "name": "quantity-unit",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 122,
+   "name": "science-add-dimension",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 147,
+   "name": "science-merge-dimensions",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 157,
+   "name": "science-negate-dimensions",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 169,
+   "name": "unit-product",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 176,
+   "name": "unit-quotient",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 183,
+   "name": "quantity-product",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 189,
+   "name": "quantity-quotient",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 195,
+   "name": "make-science-source",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 199,
+   "name": "science-source?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 214,
+   "name": "scientific-constant-status-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 222,
+   "name": "scientific-constant-kind-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 231,
+   "name": "make-scientific-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 242,
+   "name": "scientific-constant?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 260,
+   "name": "scientific-constant-name",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 263,
+   "name": "scientific-constant-quantity",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 266,
+   "name": "scientific-constant-value",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 270,
+   "name": "scientific-constant-unit",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 274,
+   "name": "scientific-constant-status",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 277,
+   "name": "scientific-constant-kind",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 280,
+   "name": "scientific-constant-system",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 283,
+   "name": "scientific-constant-source",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 289,
+   "name": "scientific-constant->clauses",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 35,
+   "name": "*translation-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 36,
+   "name": "*translation-review-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 37,
+   "name": "*translation-evidence-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 38,
+   "name": "*translation-evidence*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 40,
+   "name": "translation-status",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 43,
+   "name": "translation-kind",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 46,
+   "name": "translation-source",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 49,
+   "name": "translation-payload",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 52,
+   "name": "translation-status-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 61,
+   "name": "translation-kind-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 74,
+   "name": "translation-envelope-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 94,
+   "name": "translation-batch-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 102,
+   "name": "translation-candidate-payload-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 110,
+   "name": "translation-alternatives-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 124,
+   "name": "translation-ambiguity-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 134,
+   "name": "make-translation-review",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 138,
+   "name": "translation-review-status",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 141,
+   "name": "translation-review-code",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 144,
+   "name": "translation-review-proposal",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 147,
+   "name": "translation-review-detail",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 150,
+   "name": "translation-review-status-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 159,
+   "name": "translation-review-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 176,
+   "name": "translation-review-advice-decision",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 199,
+   "name": "translation-review-candidate",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 223,
+   "name": "translation-review",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 262,
+   "name": "translation-admittable?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 278,
+   "name": "translation-admission-payload",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 288,
+   "name": "translation-evidence-worthy?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 296,
+   "name": "translation-evidence-entry",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 300,
+   "name": "translation-evidence-next",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 307,
+   "name": "translation-review-with-evidence",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 25,
+   "name": "si:defining-cesium-frequency",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 34,
+   "name": "si:defining-speed-of-light",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 44,
+   "name": "si:defining-planck-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 56,
+   "name": "si:defining-elementary-charge",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 67,
+   "name": "si:defining-boltzmann-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 80,
+   "name": "si:defining-avogadro-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 89,
+   "name": "si:defining-luminous-efficacy",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 103,
+   "name": "si:constant-value",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 108,
+   "name": "si:cesium-frequency",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 109,
+   "name": "si:speed-of-light",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 110,
+   "name": "si:planck-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 111,
+   "name": "si:elementary-charge",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 112,
+   "name": "si:boltzmann-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 113,
+   "name": "si:avogadro-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 114,
+   "name": "si:luminous-efficacy",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 118,
+   "name": "delta-nu-cs",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 119,
+   "name": "c",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 120,
+   "name": "h",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 121,
+   "name": "e",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 122,
+   "name": "k",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 123,
+   "name": "n-a",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 124,
+   "name": "k-cd",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 125,
+   "name": "si:delta-nu-cs",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 126,
+   "name": "si:c",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 127,
+   "name": "si:h",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 128,
+   "name": "si:e",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 129,
+   "name": "si:k",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 130,
+   "name": "si:n-a",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 131,
+   "name": "si:k-cd",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  }
+ ]
+}

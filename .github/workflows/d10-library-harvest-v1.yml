@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "knowledge/d10-library-harvest-v1.json"
+      - "knowledge/d10-library-source-symbols-v1.json"
+      - "scripts/check-d10-library-source-symbols-v1.py"
+      - "tests/test_d10_library_source_symbols_v1.py"
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-library-harvest-v1.py"
@@ -15,6 +18,9 @@ on:
     branches: [main]
     paths:
       - "knowledge/d10-library-harvest-v1.json"
+      - "knowledge/d10-library-source-symbols-v1.json"
+      - "scripts/check-d10-library-source-symbols-v1.py"
+      - "tests/test_d10_library_source_symbols_v1.py"
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-library-harvest-v1.py"
@@ -33,5 +39,9 @@ jobs:
         run: python3 scripts/check-d10-recovery-v1.py
       - name: Preserve recovery v2
         run: python3 scripts/check-d10-recovery-v2.py
-      - name: Verify canonical Lisp library harvest
+      - name: Verify canonical 39 selected Lisp semantic candidates
         run: python3 scripts/check-d10-library-harvest-v1.py
+      - name: Verify 102 raw source symbols have NO resident authority
+        run: python3 scripts/check-d10-library-source-symbols-v1.py
+      - name: Test fail-closed raw/selected D10 provenance boundary
+        run: python3 -m unittest discover -s tests -p test_d10_library_source_symbols_v1.py -v
