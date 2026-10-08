@@ -238,6 +238,18 @@ fn active_compiler_and_native_first_are_never_catalogue_data() {
 }
 
 #[test]
+fn actual_active_lib_collection_excludes_only_validated_generated_catalogue() {
+    let selected: Vec<String> = active_lisp_files()
+        .into_iter().map(|(relative, _)| relative).collect();
+    assert!(!selected.contains(
+        &"lib/machine/encoding/admitted-iclass-index.lisp".to_owned()
+    ));
+    assert!(selected.contains(&"lib/compiler-nucleus.lisp".to_owned()));
+    assert!(selected.contains(&"lib/machine/dispatch/native-first.lisp".to_owned()));
+    assert!(selected.contains(&"lib/machine/layout/pair-x86-64.lisp".to_owned()));
+}
+
+#[test]
 fn completion_gate_exclusions_are_narrow_and_explicit() {
     assert!(is_explicit_non_implementation(
         "lib/machine/encoding/coverage.lisp"
