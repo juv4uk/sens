@@ -27,6 +27,12 @@ import json
 from pathlib import Path
 import re
 import signal
+import sys
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+from domain_tables import validate_ratified_ladder
 
 SOURCE_EXTS = {".lisp"}
 SKIP_DIRS = {".git","target","node_modules","vendor","dist","build",".venv","venv","__pycache__"}
@@ -58,7 +64,7 @@ HISTORICAL_ROW_RE = re.compile(
 
 def normalize_role(name: str):
     aliases={
-        "+":"PLUS","-":"DIFFERENCE","*":"TIMES","/":"QUOTIENT",
+        "+":"PLUS","-":"DIFFERENCE","*":"TIMES","/":"DIVIDE",
         "<":"LESSP",">":"GREATERP","NIL":"EMPTY","EMPTY-LIST":"EMPTY",
         "ATOM?":"ATOM","EQ?":"EQ","NULL?":"NULL","NUMBER?":"NUMBERP",
         "INTEGER?":"INTEGERP","RATIONAL?":"RATIONALP","ZERO?":"ZEROP",
@@ -240,8 +246,11 @@ class Parser:
 
 def load_foundation(path: Path):
     data=json.loads(path.read_text(encoding="utf-8"))
-    if data.get("status")!="owner-ratified":
-        raise MigrationError("foundation is not owner-ratified")
+    try:
+        policy=json.loads((SCRIPT_DIR.parent/"knowledge"/"number-width-ratified.json").read_text(encoding="utf-8"))
+        validate_ratified_ladder(data, policy)
+    except (ValueError, KeyError) as exc:
+        raise MigrationError(f"current D1-D9 / Number authority check failed: {exc}") from exc
     return data
 
 def current_residents(data):
@@ -477,6 +486,11 @@ class Resolver:
                 tok,
             )
         # Exact current function words are already migrated.
+        if len(t) in (7, 9) and set(t)<=set("01"):
+            raise MigrationError(
+                f"D{len(t)} resident is ratified but not admitted as a "
+                "three-pass executable head", tok
+            )
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
@@ -539,8 +553,8 @@ def encode_atom_data(node: Atom,text7):
             f"D2 word {t} is structural control only; it cannot be ordinary data",
             node.tok,
         )
-    # Fail-soft migration: other unresolved atoms remain visible until their
-    # own semantic/number/text law is admitted.
+    # Historical compatibility projection only: unknown source atoms remain
+    # visible and MUST NOT be advertised as canonical binary until typed.
     return [t]
 
 def encode_string(node: String,text7):
