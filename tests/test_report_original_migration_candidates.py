@@ -121,6 +121,8 @@ class OriginalCandidateTests(unittest.TestCase):
         self.assertEqual(result["already_paired_sources_excluded"], ["paired.lisp"])
         self.assertEqual(summary["mechanical_candidates"], 0)
         self.assertEqual(result["source_era"], "auto")
+        self.assertEqual(result["first_blocker_partition"]["first_blocked_total"], 1)
+        self.assertEqual(result["first_blocker_partition"]["semantically_admitted_executable_sources"], 0)
         self.assertEqual(summary["original_unpaired_executables_migrated_by_this_tool"], 0)
 
     def test_false_pair_in_unpaired_ledger_fails_closed(self):
@@ -147,6 +149,70 @@ class OriginalCandidateTests(unittest.TestCase):
         with patch.object(mod.subprocess, "run", side_effect=fake_run):
             with self.assertRaisesRegex(RuntimeError, "already paired"):
                 mod.build_report(self.root)
+
+
+
+    def test_partition_every_old_source_once_by_exact_first_blocker(self):
+        source_paths = ["w8a.lisp", "w8b.lisp", "w8c.lisp", "syntax.lisp", "text.lisp"]
+        for name in source_paths:
+            (self.root / name).write_text("(placeholder ())\n", encoding="utf-8")
+        reasons = [
+            "ambiguous W8 executable head 00001001: choose --source-era legacy or current",
+            "ambiguous W8 executable head 00001001: choose --source-era legacy or current",
+            "ambiguous W8 executable head 00001011: choose --source-era legacy or current",
+            "word 2: requires exact D1..D9 0/1 word, got 'symbol'",
+            "Text7 cannot encode something without ratified character identity",
+        ]
+        rows = []
+        for name, reason in zip(source_paths, reasons):
+            row = mod.categorize({"path": name, "status": "blocked",
+                                 "reason": reason, "token": "symbol",
+                                 "line": 2, "column": 3}, self.root)
+            rows.append(row)
+        partition = mod.first_blocker_cohorts(rows)
+        self.assertEqual(partition["status"], "TRIAGE_ONLY_NO_ORACLE")
+        self.assertEqual(partition["first_blocked_total"], 5)
+        self.assertEqual(sum(x["first_blocked_sources"] for x in partition["cohorts"]), 5)
+        self.assertEqual(partition["cohorts"][0]["family"], "W8_ERA_AMBIGUITY")
+        self.assertEqual(partition["cohorts"][0]["coordinate"], "00001001")
+        self.assertEqual(partition["cohorts"][0]["first_blocked_sources"], 2)
+        self.assertEqual(partition["source_counts_by_family"]["W8_ERA_AMBIGUITY"], 3)
+        self.assertEqual(partition["source_counts_by_family"]["NON_BINARY_WORD"], 1)
+        self.assertEqual(partition["semantically_admitted_executable_sources"], 0)
+        members = [m for group in partition["cohorts"] for m in group["original_sources"]]
+        self.assertEqual({m["path"] for m in members}, set(source_paths))
+        self.assertTrue(all(len(m["source_git_blob_sha"]) == 40 for m in members))
+        self.assertEqual({m["line"] for m in members}, {2})
+        self.assertTrue(all(g["not_executable_or_semantic_admission"] for g in partition["cohorts"]))
+
+    def test_cohort_rejects_fake_sha_duplicate_and_paired_input(self):
+        (self.root / "old.lisp").write_text("(unknown ())\n")
+        base = mod.categorize({
+            "path": "old.lisp", "status": "blocked", "reason": "ambiguous W8 executable head 00001001",
+        }, self.root)
+        with self.assertRaisesRegex(ValueError, "non-disjoint"):
+            mod.first_blocker_cohorts([base, base])
+        corrupt = dict(base, source_git_blob_sha="0" * 39)
+        with self.assertRaisesRegex(ValueError, "Git blob"):
+            mod.first_blocker_cohorts([corrupt])
+        paired = dict(base, same_stem_sens_already_exists=True)
+        with self.assertRaisesRegex(ValueError, "paired file"):
+            mod.first_blocker_cohorts([paired])
+
+    def test_explicit_first_blocker_not_a_claim_of_executable_classification(self):
+        self.assertEqual(mod.first_blocker_identity({
+            "reason": "legacy-unmapped SID8/Sens8 00100010: no current resident",
+        }), ("LEGACY_SUCCESSOR", "00100010"))
+        self.assertEqual(mod.first_blocker_identity({
+            "reason": "D2 word 10 is structural control only",
+        }), ("D2_STRUCTURE_AS_DATA", "D2"))
+        self.assertEqual(mod.first_blocker_identity({
+            "reason": "word 3: requires exact D1-D9 binary word",
+        }), ("NON_BINARY_WORD", "word3"))
+        self.assertEqual(mod.first_blocker_identity({
+            "reason": "unrecognized dynamic function head",
+        }), ("OTHER_UNPROVEN", "other"))
+        self.assertEqual(mod.first_blocker_cohorts([])["cohorts"], [])
 
 
 if __name__ == "__main__":
