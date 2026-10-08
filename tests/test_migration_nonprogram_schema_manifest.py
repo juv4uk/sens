@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import hashlib
 import json
 import pathlib
 import subprocess
@@ -7,17 +6,6 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
-
-def git_blob_sha1(data: bytes) -> str:
-    header = f"blob {len(data)}".encode() + b"\\0"
-    return hashlib.sha1(header + data).hexdigest()
-
-def first_code_line(text: str) -> str:
-    for raw in text.splitlines():
-        line = raw.strip()
-        if line and not line.startswith(";"):
-            return line
-    return ""
 
 class MigrationNonProgramSchemaManifest(unittest.TestCase):
     def test_manifest_is_bounded_and_sources_stay_declarative(self):
@@ -44,7 +32,7 @@ class MigrationNonProgramSchemaManifest(unittest.TestCase):
             source_text = payload.decode("utf-8")
             self.assertRegex(
                 source_text,
-                r"(?ms)^\\(\\s*\\n?\\s*\\(schema\\b",
+                r"(?ms)^\(\s*\n?\s*\(schema\b",
                 rel.as_posix(),
             )
             self.assertFalse(
