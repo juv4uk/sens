@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Єдина точка входу для перевіреної міграції SENS .lisp → фізичний .sens.
+"""Єдина точка входу: міграція SENS .lisp → .sens та перевірений людський view.
 
 Не реалізує нового парсера, кодера чи семантики. Викликає вже наявні
-контрактні інструменти. Жоден режим, крім admit --write, не публікує байти.
+контрактні інструменти. Жоден режим, крім admit --write, не публікує фізичний .sens.
+view --stage пише ТІЛЬКИ людинозрозумілий view у зовнішній каталог.
 """
 from __future__ import annotations
 
@@ -25,6 +26,16 @@ def command(args: argparse.Namespace) -> list[str]:
         return [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
                 *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
                 "--report", str(args.report), "--source-era", args.source_era]
+    if args.action == "view":
+        # Delegate only to the merged canonical physical T5 ASCII adapter.
+        # --stage writes outside the source repository, never a machine .sens.
+        cmd = [sys.executable, str(SCRIPTS / "sens_spaced_view.py"),
+               "--root", str(ROOT), "--sens", args.sens]
+        if args.verify:
+            cmd.append("--verify")
+        else:
+            cmd.extend(("--stage", str(args.stage)))
+        return cmd
     if args.action == "admit":
         cmd = [sys.executable, str(SCRIPTS / "admit-t5-migration.py"),
                "--root", str(ROOT), "--manifest", str(args.manifest),
@@ -50,6 +61,13 @@ def parser() -> argparse.ArgumentParser:
     preview.add_argument("--source-era", choices=("auto", "legacy", "current"),
                          default="auto", help="auto блокує невідоме W8; явно legacy/current лише з provenance")
 
+    view = sub.add_parser("view", help="вірний ASCII-перегляд уже перевіреного .sens; не машина")
+    view.add_argument("--sens", required=True, help="один відносний шлях name.sens")
+    view_mode = view.add_mutually_exclusive_group(required=True)
+    view_mode.add_argument("--verify", action="store_true",
+                           help="прочитати чинну трійку same-stem без запису")
+    view_mode.add_argument("--stage", type=Path,
+                           help="створити НОВИЙ перегляд у зовнішньому staging; no-clobber")
     admit = sub.add_parser("admit", help="опублікувати .sens тільки з перевіреним маніфестом/оракулом")
     admit.add_argument("--manifest", type=Path, required=True)
     admit.add_argument("--mirror", type=Path, required=True)
