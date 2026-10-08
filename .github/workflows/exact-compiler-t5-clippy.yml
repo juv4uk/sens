@@ -6,6 +6,9 @@ on:
       - "crates/sens/src/compilation_artifact_producer.rs"
       - "crates/sens/src/program_compiler.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/compiler_language.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   push:
     branches: [main]
@@ -13,6 +16,9 @@ on:
       - "crates/sens/src/compilation_artifact_producer.rs"
       - "crates/sens/src/program_compiler.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/compiler_language.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   workflow_dispatch:
 
