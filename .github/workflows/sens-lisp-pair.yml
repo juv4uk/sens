@@ -1,0 +1,36 @@
+name: sens-lisp-pair
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/paired_sens.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-pair.rs"
+      - "crates/sens-cli/Cargo.toml"
+      - ".github/workflows/sens-lisp-pair.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-companion-reader:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test binary .sens verified by exact-width .lisp sidecar
+        run: cargo test -p sens paired_sens::tests:: -- --nocapture
+      - name: Write and verify a real sibling .sens file without formatting bits
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/paired.lisp"
+          cargo run -q -p sens-cli --bin sens-pair -- encode "$RUNNER_TEMP/paired.lisp"
+          cargo run -q -p sens-cli --bin sens-pair -- verify "$RUNNER_TEMP/paired.lisp"
+          test "$(wc -c < "$RUNNER_TEMP/paired.sens")" -eq 2
+          printf '\377' >> "$RUNNER_TEMP/paired.sens"
+          if cargo run -q -p sens-cli --bin sens-pair -- verify "$RUNNER_TEMP/paired.lisp"; then
+            echo "ERROR: appended byte accepted"
+            exit 1
+          fi
