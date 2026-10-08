@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 589,
-    "remaining_semantic_candidates": 435,
+    "selected_semantic_candidates": 602,
+    "remaining_semantic_candidates": 422,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 333,
+    "unplaced_selected_candidates": 346,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -302,6 +302,13 @@
       "lib/persistent-map.lisp"
     ],
     "selected": 31,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "interlisp_psl_history_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+    "selected": 13,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
   }
