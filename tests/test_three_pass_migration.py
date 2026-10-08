@@ -14,7 +14,7 @@ mod=importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name]=mod
 SPEC.loader.exec_module(mod)
 
-FOUNDATION=ROOT/"knowledge"/"d1-d7-foundation.json"
+FOUNDATION=ROOT/"knowledge"/"d1-d9-foundation.json"
 DOMAIN_SURFACES=ROOT/"crates"/"sens"/"src"/"domain_surface_registry_generated.rs"
 SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
@@ -83,6 +83,13 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,resolver=self.migrate("(totally-unknown-function x)\n")
         self.assertEqual(out,"10 totally-unknown-function 00 x 01\n")
         self.assertEqual(resolver.counts["passthrough-head"],1)
+
+    def test_d7_d9_residents_are_not_callable_in_three_pass(self):
+        for bits in ("1000000", "111111111"):
+            with self.subTest(bits=bits):
+                with self.assertRaisesRegex(mod.MigrationError,
+                                            "resident is ratified but not admitted"):
+                    self.migrate(f"({bits} x)\n")
 
     def test_unresolved_sid8_blocks_instead_of_becoming_text(self):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
