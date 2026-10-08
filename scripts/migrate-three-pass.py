@@ -255,6 +255,20 @@ def load_foundation(path: Path):
         raise MigrationError("foundation is not owner-ratified")
     return data
 
+def load_d1_uk_surfaces(path: Path = REPO_ROOT / "lib/domains/d1.lisp") -> dict[str, str]:
+    """Project ratified D1's Ukrainian literals; do not invent host truthiness."""
+    source = path.read_text(encoding="utf-8")
+    rows = re.findall(r"(?m)^\\s*\\(([01])\\s+\\(ук\\s+([^\\s()]+)\\)", source)
+    if len(rows) != 2 or {bits for bits, _ in rows} != {"0", "1"}:
+        raise MigrationError("D1 Ukrainian surface table lacks exactly two canonical values")
+    if len({name for _, name in rows}) != 2:
+        raise MigrationError("D1 Ukrainian surface names must be unique")
+    return {name: bits for bits, name in rows}
+
+
+D1_UK_SURFACES = load_d1_uk_surfaces()
+
+
 def current_residents(data):
     labels={}
     for domain in ("D3","D4","D5","D6"):
@@ -556,6 +570,11 @@ def encode_atom_data(node: Atom,text7):
             f"D2 word {t} is structural control only; it cannot be ordinary data",
             node.tok,
         )
+    # Canonical .lisp human source is Ukrainian, while physical .sens keeps
+    # exact D1 bits. Resolve only explicitly ratified D1 literals; never use
+    # Lisp/NIL, host truthiness or an inferred width.
+    if t in D1_UK_SURFACES:
+        return [D1_UK_SURFACES[t]]
     # Fail-soft migration: other unresolved atoms remain visible until their
     # own semantic/number/text law is admitted.
     return [t]
