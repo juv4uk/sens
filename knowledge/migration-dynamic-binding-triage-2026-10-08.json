@@ -1,0 +1,97 @@
+{
+  "schema": "sens-migration-dynamic-binding-triage/v1",
+  "date": "2026-10-08",
+  "issue": "https://github.com/juv4uk/sens/issues/4461",
+  "coordination": "https://github.com/juv4uk/sens/issues/4449",
+  "authority": "read-only research classification; NOT ratified successor mapping or admitted .sens",
+  "policy": "Preserve every source .lisp; no same-stem physical T5 .sens until full exact-domain/binding oracle parity; never infer identity from historical 8-bit heads, text, or numeric value",
+  "status": "BLOCKED_UNPROVEN_BINDING",
+  "files": [
+    {
+      "path": "benchmarks/arithmetic.lisp",
+      "git_blob_sha": "1f5ad581fbe4f890e1ded187db2cff5e2bbee176",
+      "kind": "dynamic local callable and numeric benchmark",
+      "proof_lines": {
+        "local_definition": 2,
+        "bound_parameter": 3,
+        "numeric_expression": 4,
+        "call": 5
+      },
+      "exact_fragments": [
+        "polynomial",
+        "(00001000 (x)",
+        "(00001100 (00001110 x x)",
+        "(polynomial 123)"
+      ],
+      "blocks": [
+        "local callable polynomial has no demonstrated exact-domain binder/call path",
+        "numeric literals 3,7,123 and arithmetic need independent exact typed-number law",
+        "legacy 00001001/00001000/00001100/00001110 are historical syntax, not modern ratified function IDs"
+      ],
+      "required_evidence": [
+        "typed D5/D6 local binder and scope witness",
+        "exact numeric payload law and arithmetic oracle parity",
+        "source-to-T5 physical bytes with stable provenance"
+      ]
+    },
+    {
+      "path": "benchmarks/closures.lisp",
+      "git_blob_sha": "a28c9490f893434ab9b456938259339764356ee5",
+      "kind": "curried closure capturing bound left",
+      "proof_lines": {
+        "local_definition": 2,
+        "outer_lambda": 3,
+        "inner_lambda": 4,
+        "captured_pair": 5,
+        "application": 6
+      },
+      "exact_fragments": [
+        "make-pair",
+        "(00001000 (left)",
+        "(00001000 (right)",
+        "(00000100 left",
+        "((make-pair"
+      ],
+      "blocks": [
+        "closure captures outer left while applying inner right; no verified D6 closure environment parity",
+        "radio/antenna symbols require typed text/symbol projection, not auto-spelling conversion",
+        "historical CONS/QUOTE words must not be mistaken for current exact D3 codes"
+      ],
+      "required_evidence": [
+        "closure capture, binder/lookup and arity parity against current SENS oracle",
+        "typed symbol/text carrier provenance",
+        "exact D2/D3 and T5 roundtrip with immutable source"
+      ]
+    },
+    {
+      "path": "benchmarks/recursion.lisp",
+      "git_blob_sha": "20474bf7829ab5dd8df4f4a56d4cf6a1ecb7adc1",
+      "kind": "recursive local callable with historical conditional and list numerals",
+      "proof_lines": {
+        "local_definition": 2,
+        "binder": 3,
+        "conditional": 4,
+        "recursive_call": 7,
+        "entry": 8
+      },
+      "exact_fragments": [
+        "walk",
+        "(00001000 (values)",
+        "(00000111",
+        "(t (walk",
+        "(walk (00000001"
+      ],
+      "blocks": [
+        "recursive binding walk and lexical value scope lack admitted exact-domain proof",
+        "historical truth t and 00000111 conditional must be reconciled with current D1 yes/no, EMPTY and D2-only structure",
+        "the numeric-list payload 1..20 is not automatically a ratified D1–D9 numeric/symbol sequence"
+      ],
+      "required_evidence": [
+        "bounded recursion/current D1 conditional oracle counterexamples and positives",
+        "typed list/numeric law with exact D2 structural separation",
+        "fixed-point/environment binding and source-to-T5 observable parity"
+      ]
+    }
+  ],
+  "next_step": "For each source, prove binder, numeric, symbol and current-D1 semantics independently before a new PR authorizes an executable same-stem packed .sens; otherwise keep BLOCK. This ledger does not change the earlier 491/0 denominator."
+}
