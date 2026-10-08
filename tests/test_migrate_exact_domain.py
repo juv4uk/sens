@@ -60,6 +60,10 @@ class ExactDomainMigrationTests(unittest.TestCase):
 """
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
 
+    def test_legacy_list_successor_is_not_narrowed_into_nonadmitted_d4(self):
+        source = "(00100111 evaluator-fallback expression)\n"
+        self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
+
 
 
 if __name__ == "__main__":
