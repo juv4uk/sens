@@ -91,12 +91,12 @@ fn structural_u64_carrier_helpers_accept_the_bounded_vertical_day_values() {
             "(machine-effect-within-inclusive-integer-range? 2 0 18446744073709551615)",
             &mut session,
         ),
-        "t",
+        "1",
         "u64 inclusive range witness must accept the bounded value 2"
     );
     assert_eq!(
         eval_value("(machine-effect-u64-carrier? 2)", &mut session),
-        "t",
+        "1",
         "shared u64 carrier must accept the bounded value 2"
     );
     assert_eq!(
