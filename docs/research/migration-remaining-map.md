@@ -35,3 +35,14 @@
 - Усі числа — з **одного прогону** канонічного мігратора, повторюваного.
 - Класи **перекриваються** (файл може мати кілька блокерів) — після кожного кроку потрібен перепрогін.
 - Жодних координат не вигадано: де потрібна ратифікація — так і написано.
+
+## Окремий CI gate: source rewrite debt ≠ migration admission
+
+У поточному main sens-to-sens --check має ще один вимір: у lib/compiler-nucleus.lisp зафіксовано **311 parser-convertible heads** (311 named calls, 0 blocked-host). Це **не** ті самі 67 файлів Text7/Local cohort з таблиці вище: інструменти перевіряють різні межі й не можна складати/ототожнювати їхні лічильники.
+
+Canonical Ukrainian .lisp — читабельне джерело; sens-to-sens --check міряє можливість механічної заміни поверхонь у джерелі, а не доводить, що оригінальна програма повністю перейшла у фізичний T5. Тому CI мусить:
+1. зберігати строгий нульовий gate для вже закритих language-definition файлів;
+2. для звичайних active-lib файлів тримати source-blob-pinned baseline відомого rewrite debt і падати на будь-якому новому/збільшеному blocker;
+3. окремо лишити physical admission fail-closed: канонічний .lisp + фізичний .sens + generated view + digests + незалежний OLD/CURRENT execution oracle.
+
+Baseline artifact: knowledge/active-authored-lib-conversion-baseline-v1.json. Поточний відомий debt — тільки lib/compiler-nucleus.lisp@c81ff7341a3a18c7cb6ff8e77038318bb935b232 = 311/311/0. Source SHA змінився або число зменшилось — теж вимагає явного рев'ю/оновлення manifest, щоб прогрес був видимим. Це не дозвіл ігнорувати 311, не класифікація цього файла як DATA і не migration credit: migration_credit=0, physical_admission_effect=NONE.
