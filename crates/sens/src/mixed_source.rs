@@ -40,6 +40,19 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
             let mut lifted = items.to_vec();
             lifted[0] = lift_head(source, lifted[0].clone())?;
 
+            // Legacy exact-eight heads belong to the ordinary compatibility
+            // parser. They are OPAQUE while their historical source-era and
+            // owner-ratified current successor remain unproved. In particular
+            // old W8 QUOTE must never convert a quoted (100 ...) data list
+            // into a current D3 CAR call merely because that nested head is
+            // three bits wide. Do not infer current D8 from spelling.
+            if is_opaque_legacy_w8_head(source, &lifted[0]) {
+                return Ok(Expr {
+                    kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+                    span,
+                });
+            }
+
             // Exact D3 QUOTE keeps its argument as reader data. Apostrophe
             // sugar also stays data-owned without naming legacy byte identity.
             let quote_data =
@@ -51,7 +64,15 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
                         *clause = lift_cond_clause(source, clause.clone(), depth + 1)?;
                     }
                 } else {
-                    for item in lifted.iter_mut().skip(1) {
+                    // D4 LAMBDA parameter declarations and D4 DEFINE binding
+                    // targets are DATA, never callable expression positions.
+                    // Preserve their exact parsed structure; only bodies and
+                    // value expressions may lift executable domain heads.
+                    let binding_head = is_exact_d4_binding_head(&lifted[0]);
+                    for (index, item) in lifted.iter_mut().enumerate().skip(1) {
+                        if binding_head && index == 1 {
+                            continue;
+                        }
                         *item = lift_expression(source, item.clone(), depth + 1)?;
                     }
                 }
@@ -123,6 +144,22 @@ fn lift_cond_clause(
 
 fn source_spelling<'a>(source: &'a str, expression: &Expr) -> Option<&'a str> {
     source.get(expression.span.start..expression.span.end)
+}
+
+/// Opaque W8 compatibility syntax is not an admission of current D8.
+fn is_opaque_legacy_w8_head(source: &str, head: &Expr) -> bool {
+    source_spelling(source, head).is_some_and(|spelling| {
+        spelling.len() == 8 && spelling.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+    })
+}
+
+fn is_exact_d4_binding_head(expression: &Expr) -> bool {
+    matches!(
+        &expression.kind,
+        ExprKind::DomainIdentity(identity)
+            if identity.width() == 4
+                && matches!(identity.packed_bits(), 0b0010 | 0b0011)
+    )
 }
 
 fn is_exact_quote(expression: &Expr) -> bool {
@@ -309,6 +346,95 @@ mod tests {
         let error = parse_mixed_exact_domain("(0000001 x)").expect_err("D7 must reject");
         assert_eq!(error.kind, ErrorKind::Parse);
         assert!(error.message.contains("non-callable"));
+    }
+
+    #[test]
+    fn opaque_historical_w8_quote_never_changes_nested_binary_data() {
+        // This outer W8 head is parser-owned historical compatibility, not
+        // a proven current-D8 call; its inner three-bit data must stay data.
+        let parsed = parse_mixed_exact_domain("(00000001 (100 x))").unwrap();
+        let ExprKind::List(outer) = &parsed[0].kind else {
+            panic!("expected outer legacy list");
+        };
+        assert!(matches!(&outer[0].kind, ExprKind::Sid(_)));
+        let ExprKind::List(quoted) = &outer[1].kind else {
+            panic!("expected quoted list data");
+        };
+        assert!(matches!(
+            &quoted[0].kind,
+            ExprKind::Number(value, _) if *value == 100.0
+        ), "quoted source must not become a D3 executable identity");
+
+        // Non-QUOTE W8 is also opaque: its owner/era is not yet proven.
+        let unknown = parse_mixed_exact_domain("(11111111 (011 x))").unwrap();
+        let ExprKind::List(form) = &unknown[0].kind else {
+            panic!("legacy form");
+        };
+        let ExprKind::List(inner) = &form[1].kind else {
+            panic!("legacy operand data");
+        };
+        assert!(!matches!(&inner[0].kind, ExprKind::DomainIdentity(_)));
+    }
+
+    #[test]
+    fn exact_d4_lambda_and_define_binding_slots_are_source_data() {
+        // Binder declarations may be structural lists whose first atom
+        // looks like a D3 word; it is not an executable CAR/COND call.
+        let expression = only(
+            parse_mixed_exact_domain("(0010 ((100 x)) (011 x))")
+                .expect("exact D4 lambda parse"),
+        );
+        let ExprKind::List(lambda) = &expression.kind else {
+            panic!("lambda list");
+        };
+        let ExprKind::List(params) = &lambda[1].kind else {
+            panic!("lambda binders");
+        };
+        let ExprKind::List(declaration) = &params[0].kind else {
+            panic!("nested binder metadata");
+        };
+        assert!(!matches!(&declaration[0].kind, ExprKind::DomainIdentity(_)));
+        let ExprKind::List(body) = &lambda[2].kind else {
+            panic!("executable body");
+        };
+        assert!(matches!(
+            &body[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b011
+        ));
+
+        let defined = only(
+            parse_mixed_exact_domain("(0011 (100 x) (011 x))")
+                .expect("D4 define parse"),
+        );
+        let ExprKind::List(items) = &defined.kind else {
+            panic!("define list");
+        };
+        let ExprKind::List(name_record) = &items[1].kind else {
+            panic!("define name data");
+        };
+        assert!(!matches!(&name_record[0].kind, ExprKind::DomainIdentity(_)));
+        let ExprKind::List(value) = &items[2].kind else {
+            panic!("define value expression");
+        };
+        assert!(matches!(&value[0].kind, ExprKind::DomainIdentity(_)));
+    }
+
+    #[test]
+    fn ordinary_symbol_call_still_lifts_proven_nested_current_heads() {
+        let parsed = parse_mixed_exact_domain("(local-f (100 x))")
+            .expect("mixed ordinary call");
+        let ExprKind::List(outer) = &parsed[0].kind else {
+            panic!("outer call");
+        };
+        let ExprKind::List(inner) = &outer[1].kind else {
+            panic!("inner current call");
+        };
+        assert!(matches!(
+            &inner[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b100
+        ));
     }
 
     #[test]
