@@ -27,13 +27,10 @@ jobs:
             --historical-map contracts/core1-historical-sid-map.lisp \
             --text7 crates/sens/src/text7_projection_generated.rs \
             --report /tmp/migration.json
-          test -f /tmp/sens-mirror/lib/compiler-nucleus.sens
-          test -f /tmp/sens-mirror/lib/machine/dispatch/native-first.sens
-          test -f /tmp/sens-mirror/lib/machine/dispatch/native-first-execute.sens
-          mkdir -p /tmp/candidates/lib/machine/dispatch
-          cp /tmp/sens-mirror/lib/compiler-nucleus.sens /tmp/candidates/lib/compiler-nucleus.sens
-          cp /tmp/sens-mirror/lib/machine/dispatch/native-first.sens /tmp/candidates/lib/machine/dispatch/native-first.sens
-          cp /tmp/sens-mirror/lib/machine/dispatch/native-first-execute.sens /tmp/candidates/lib/machine/dispatch/native-first-execute.sens
+          echo "Produced physical T5 files:"
+          find /tmp/sens-mirror -type f -name '*.sens' -print
+          mkdir -p /tmp/candidates
+          find /tmp/sens-mirror -type f -name '*.sens' -exec cp --parents '{}' /tmp/candidates/ ;
           python3 - <<'PY'
           import hashlib, json, pathlib
           root=pathlib.Path('/tmp/candidates')
