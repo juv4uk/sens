@@ -101,26 +101,26 @@ jobs:
           with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a',encoding='utf-8') as out:
               out.write('## Original Lisp → physical SENS — current ratified D1–D9\n\n')
               out.write(f"- Historical unpaired originals scanned: **{s['scanned']}**\n")
-              out.write(f"- Reviewed nonprogram DATA: **{s['classified_nonprogram']}**\\n")
-              out.write(f"- Archived benchmark evidence: **{s['archived_benchmark_data_sources']}**\\n")
-              out.write(f"- Executable or not yet classified: **{s['executable_or_unclassified_unpaired']}**\\n")
-              out.write(f"- Actionable FIRST blockers (still unproved): **{s['actionable_blocked_sources']}**\\n")
+              out.write(f"- Reviewed nonprogram DATA: **{s['classified_nonprogram']}**\n")
+              out.write(f"- Archived benchmark evidence: **{s['archived_benchmark_data_sources']}**\n")
+              out.write(f"- Executable or not yet classified: **{s['executable_or_unclassified_unpaired']}**\n")
+              out.write(f"- Actionable FIRST blockers (still unproved): **{s['actionable_blocked_sources']}**\n")
 
               out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
               out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
-              out.write('### Work queue: real executable/unknown sources ONLY\\n\\n')
-              out.write('These are still BLOCKED and need source-era, owner-law and independent oracle proof.\\n\\n')
+              out.write('### Work queue: real executable/unknown sources ONLY\n\n')
+              out.write('These are still BLOCKED and need source-era, owner-law and independent oracle proof.\n\n')
               for n, group, sources in actionable_exact[:15]:
                   examples = ', '.join(f"`{row['path']}`" for row in sources[:2])
                   out.write(
                       f"- **{n} source(s)** — {group['family']} "
                       f"`{group['coordinate']}` → {group['owner_issue']}: "
-                      f"{examples}\\n"
+                      f"{examples}\n"
                   )
-              out.write('\\nEvery item is SHA-checked against the unmodified canonical report. No automatic .sens emission.\\n\\n')
-              out.write('### Raw FIRST blockers (includes DATA and archives; diagnostic only)\\n\\n')
+              out.write('\nEvery item is SHA-checked against the unmodified canonical report. No automatic .sens emission.\n\n')
+              out.write('### Raw FIRST blockers (includes DATA and archives; diagnostic only)\n\n')
               for cohort in r['blocker_cohorts']:
                   out.write(f"- **{cohort['family']}**: {cohort['count']} original SHA-pinned sources — {cohort['next_action']}\n")
               out.write('\n### Top exact FIRST-BLOCKER coordinates (single-law agent work)\n\n')
