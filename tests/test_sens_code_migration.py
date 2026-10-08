@@ -117,7 +117,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.assertTrue(hits, surface)
 
     def test_unframed_lexical_binder_blocks_old_false_binary_success(self):
-        source = "(00001001 machine-block (00001000 (forms) forms))\\n"
+        source = "(00001001 machine-block (00001000 (forms) forms))\n"
         with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
             self.binary(source)
         # A true original lib source, not a synthetic canary, must not be
@@ -222,9 +222,9 @@ class SensCodeMigrationTests(unittest.TestCase):
 
     def test_multi_cell_ukrainian_and_english_strings_require_ratified_term(self):
         for source in (
-            '(CONS "привіт" x)\\n',
-            '(CONS test-name x)\\n',
-            '(CONS ім’я x)\\n',
+            '(CONS "привіт" x)\n',
+            '(CONS test-name x)\n',
+            '(CONS ім’я x)\n',
         ):
             with self.subTest(source=source):
                 with self.assertRaisesRegex(
