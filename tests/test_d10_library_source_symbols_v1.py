@@ -31,6 +31,61 @@ class D10RawNotResidents(unittest.TestCase):
         self.assertEqual(result["exact_name_duplicates_with_selected"], 15)
         self.assertEqual(result["source_counts"]["lib/reason.lisp"], 0)
 
+    def test_37_historical_reason_binders_are_visible_but_not_new_residents(self):
+        result = mod.validate(*evidence())
+        donor = result["historical_alternate_head_donor"]
+        self.assertEqual(donor["path"], "lib/reason.lisp")
+        self.assertEqual(donor["blob_sha"], "dadc52a2f40f2f30ad77642898afb81980044c08")
+        self.assertEqual(donor["source_head"], "00001011")
+        self.assertEqual(donor["top_level_definitions_observed"], 37)
+        self.assertEqual(donor["semantic_meanings_selected_from_history"], 0)
+        self.assertEqual(donor["new_D10_coordinates"], 0)
+        self.assertEqual(len(donor["selected_exact_name_duplicates"]), 6)
+        names = {d["name"] for d in donor["definitions"]}
+        self.assertIn("reason-index-build-scan", names)
+        self.assertIn("prove-goal-state", names)
+        self.assertIn("prove-rule", donor["selected_exact_name_duplicates"])
+        self.assertIn("map-goal-results", donor["selected_exact_name_duplicates"])
+        self.assertEqual(result["source_counts"]["lib/reason.lisp"], 0)
+        self.assertTrue(all(d["semantic_admission"] is False for d in donor["definitions"]))
+        self.assertTrue(all(d["classification"] == "HISTORICAL_TOP_LEVEL_BINDER_SHAPE_ONLY"
+                            for d in donor["definitions"]))
+
+    def test_alternate_head_scanner_excludes_comments_strings_quotes_and_nested_data(self):
+        forms = [
+            "; (00001011 comment spoof)",
+            "'(00001011 quoted-spoof (00000001 ()))",
+            '(00000001 "(00001011 quoted-data)")',
+            "(00001011 real-meaning (00001000 (x) x))",
+            "(00001000 (x)",
+            "(00001011 inner-shape (00000001 ()))",
+            ")",
+            '"(00001011 string-spoof)"',
+            "(00001011 last-one (00000001 ())) ; (00001011 fake-comment)",
+        ]
+        observed = mod.historical_top_level_define_rows(forms)
+        self.assertEqual([x["name"] for x in observed],
+                         ["real-meaning", "last-one"])
+        self.assertEqual([x["line"] for x in observed], [4, 9])
+
+    def test_multiline_historical_binder_name_is_a_complete_top_level_definition(self):
+        source = [
+            "(00001011 newline-terminated",
+            "  (00001000 (x) (00000001 ())))",
+        ]
+        found = mod.historical_top_level_define_rows(source)
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0]["line"], 1)
+        self.assertEqual(found[0]["name"], "newline-terminated")
+
+    def test_historical_donor_parser_rejects_unbalanced_and_string_damage(self):
+        with self.assertRaisesRegex(ValueError, "unbalanced"):
+            mod.historical_top_level_define_rows(["(00001011 first ())", ")"])
+        with self.assertRaisesRegex(ValueError, "unclosed"):
+            mod.historical_top_level_define_rows(["(00001011 first (00001000 (x) x)"])
+        with self.assertRaisesRegex(ValueError, "unclosed"):
+            mod.historical_top_level_define_rows(['(00001011 first "not closed)'])
+
     def test_restored_39_selected_are_distinct_from_102_symbols(self):
         raw, lib, inv, state = evidence()
         self.assertEqual(lib["accounting"]["selected_d10_candidates"], 39)
