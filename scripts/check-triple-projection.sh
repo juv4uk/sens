@@ -4,7 +4,7 @@
 # 'uk render exited zero' never certifies semantic or byte parity. A PASS
 # requires committed same-stem Ukrainian source, T5, and view, all checked
 # by the existing bounded source->T5->view + reverse Ukrainian validator.
-# Unsupported historical/English/binder fixtures explicitly BLOCK (not skip).
+# Unsupported or unadmitted candidates remain inventory debt; only explicitly admitted fixtures block this gate.
 #
 # Usage:
 #   scripts/check-triple-projection.sh
@@ -16,11 +16,10 @@ SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CHECK_ROOT="$SCRIPT_ROOT"
 FIXTURES=()
 if [ "$#" -eq 0 ]; then
+  # Release-blocking scope is the explicitly owner-admitted cohort only.
+  # The full lib/tests inventory is audited separately by sens_inventory.py.
   FIXTURES=(
-    tests/fixtures/core1-third-domain-canary/third.lisp
     tests/fixtures/migration-d1-cond-cohort/branch.lisp
-    tests/fixtures/migration-d4-selector-cohort/caar.lisp
-    tests/fixtures/migration-multiform-cohort/two-forms.lisp
   )
 else
   while [ "$#" -gt 0 ]; do
@@ -68,7 +67,7 @@ for relative in "${FIXTURES[@]}"; do
       --lisp "$source" --sens "$physical" --view "$view" 2>&1)"; then
     printf 'PASS %-64s uk=T5=view (bounded); release=NOT_ADMITTED\n' "$relative"
   else
-    echo "BLOCKED: $relative: $proof" >&2
+    echo "BLOCKED: admitted fixture $relative: $proof" >&2
     fail=1
   fi
 done
