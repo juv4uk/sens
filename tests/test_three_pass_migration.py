@@ -71,6 +71,19 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 0011 00 "))
         self.assertGreaterEqual(resolver.counts["pass2-my-lisp"],2)
 
+    def test_owner_uk_define_and_lambda_have_same_candidate_wire_as_exact_heads(self):
+        ukrainian="(визначити foo (функція (x) x))\n(foo так)\n"
+        exact="(0011 foo (0010 (x) x))\n(foo 1)\n"
+        uk_words,uk_resolver=self.migrate(ukrainian,source_era="auto")
+        exact_words,_=self.migrate(exact,source_era="auto")
+        self.assertEqual(uk_words,exact_words)
+        self.assertEqual(uk_resolver.counts["pass4-text7-global"],1)
+        self.assertTrue(all(1 <= len(w) <= 9 and set(w) <= {"0","1"}
+                            for w in uk_words.split()))
+        self.assertNotIn("foo",uk_words)
+        self.assertNotIn("x",uk_words)
+
+
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
         self.assertTrue(out.startswith("10 100 00 "))
@@ -449,9 +462,9 @@ class ThreePassMigrationTests(unittest.TestCase):
         frame_text=" ".join(frame)
         self.assertGreaterEqual(projection.count(frame_text),2)
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
-        self.assertIn(frame_text, projection)
-        self.assertIn("tak", projection)
-        self.assertNotIn("foo", projection)
+        self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()))
+        payload=mod.encode_projection(projection)
+        self.assertEqual(mod.decode_bytes(payload),projection.split())
 
 
     def test_real_machine_block_closes_all_global_and_local_symbolic_words(self):
@@ -459,11 +472,11 @@ class ThreePassMigrationTests(unittest.TestCase):
         projection,resolver=self.migrate(source)
         words=projection.split()
         self.assertTrue(words)
-        self.assertGreaterEqual(
-            resolver.counts["pass1-sens8"],
-            17,
-            "all 17 historical callable heads must be recognized even when additional exact W8 evidence is present",
+        self.assertTrue(
+            all(set(word) <= {"0","1"} for word in words),
+            "the real machine-block source must reach an all-binary candidate",
         )
+        self.assertEqual(resolver.counts["pass1-sens8"],17)
 
         for name in (
             "machine-block",
@@ -524,11 +537,13 @@ class ThreePassMigrationTests(unittest.TestCase):
 """
         projection,resolver=self.migrate(source)
         words=projection.split()
+        self.assertTrue(all(set(word) <= {"0","1"} for word in words))
         first_frame=mod.frame_text7(
             mod.text7_encode("first",self.text7,mod.Tok("ATOM","first",0)),
             mod.Tok("ATOM","first",0),
         )
         self.assertGreaterEqual(projection.count(" ".join(first_frame)),2)
+
 
 if __name__=="__main__":
     unittest.main()
