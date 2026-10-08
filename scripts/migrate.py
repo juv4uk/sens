@@ -24,7 +24,7 @@ def command(args: argparse.Namespace) -> list[str]:
     if args.action == "preview":
         return [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
                 *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
-                "--report", str(args.report)]
+                "--report", str(args.report), "--source-era", args.source_era]
     if args.action == "admit":
         cmd = [sys.executable, str(SCRIPTS / "admit-t5-migration.py"),
                "--root", str(ROOT), "--manifest", str(args.manifest),
@@ -47,6 +47,8 @@ def parser() -> argparse.ArgumentParser:
     preview.add_argument("paths", nargs="+", help="явні відносні шляхи до .lisp чи каталогів")
     preview.add_argument("--mirror", type=Path, required=True)
     preview.add_argument("--report", type=Path, required=True)
+    preview.add_argument("--source-era", choices=("auto", "legacy", "current"),
+                         default="auto", help="auto блокує невідоме W8; явно legacy/current лише з provenance")
 
     admit = sub.add_parser("admit", help="опублікувати .sens тільки з перевіреним маніфестом/оракулом")
     admit.add_argument("--manifest", type=Path, required=True)
