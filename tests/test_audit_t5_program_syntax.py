@@ -80,6 +80,10 @@ class AuditT5D2SyntaxTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertEqual(report["summary"]["d2_syntax_blocked"], 1)
         self.assertIn("Rust D2 reader rejected", report["files"][0]["syntax_reason"])
+        self.assertIn("D2 grammar rejected", report["files"][0]["syntax_reason"])
+        self.assertIn("one exact typed word per line",
+                      report["files"][0]["d2_word_coordinate_diagnostic"])
+        self.assertEqual(report["files"][0]["oracle_status"], "NOT_VERIFIED")
 
     def test_missing_close_is_not_made_complete_by_byte_eof(self):
         self.pair("truncated-form", "10 001\n", ["10", "001"])
