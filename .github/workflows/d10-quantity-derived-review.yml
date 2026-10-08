@@ -10,7 +10,6 @@ on:
       - 'lib/translation.lisp'
       - 'knowledge/d10-v1-semantic-inventory.json'
   push:
-    branches: [main]
     paths:
       - 'knowledge/d10-quantity-derived-review-v1.json'
       - 'tests/test_d10_quantity_derived_review.py'
