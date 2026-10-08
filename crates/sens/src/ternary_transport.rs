@@ -159,6 +159,22 @@ pub fn render_ternary_words_vertical(words: &[BinarySourceWord]) -> String {
     words.iter().map(|word| format!("{word}\n")).collect()
 }
 
+/// Звичайне людське представлення фізичного .sens: транспортний трит 2
+/// перетворюється тільки на пробіл МІЖ словами. Кінцевий 22 і
+/// padding ніколи не потрапляють у відкритий для людини текст.
+/// Це НЕ фізичний вміст файла: не записувати цей рядок у .sens.
+pub fn render_ternary_words_spaced(words: &[BinarySourceWord]) -> String {
+    words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")
+}
+
+/// Відкрити .sens у вигляді вихідних двійкових слів, розділених
+/// одним ASCII пробілом. Декодер спершу перевіряє канонічний T5
+/// та синтаксичні закони D2. Не відображати жодної транспортної '2'.
+pub fn open_ternary_program(data: &[u8]) -> Result<String, TernaryTransportError> {
+    let words = decode_ternary_program(data)?;
+    Ok(render_ternary_words_spaced(&words))
+}
+
 /// Поки що адаптер приймає видиму точну двійкову проєкцію D1..D9,
 /// а не довільні історичні чи українські Lisp-імена.
 pub fn encode_binary_projection_ternary(
@@ -234,6 +250,34 @@ mod tests {
         assert_eq!(measure.encoded_trits, 18);
         assert_eq!(measure.tail_trits, 2);
         assert_eq!(measure.physical_bits, 32);
+    }
+
+    #[test]
+    fn opening_binary_sens_shows_only_spaces_not_transport_twos() {
+        let original = "10 001 00 000 01";
+        let binary = encode_binary_projection_ternary(original).unwrap();
+        assert_eq!(binary, [0x63, 0x89, 0x06, 0xa1]);
+        let visible = open_ternary_program(&binary).unwrap();
+        assert_eq!(visible, original);
+        assert_eq!(visible.bytes().filter(|c| *c == b' ').count(), 4);
+        assert!(!visible.contains('2'));
+        assert!(!visible.contains('\n'));
+        // View is a projection, physical SENS remains nontext packed bytes.
+        assert_ne!(visible.as_bytes(), binary);
+        assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), binary);
+    }
+
+    #[test]
+    fn opening_never_renders_eos_padding_or_d7_space_as_a_separator_token() {
+        let source = "10 001 00 1100000 01";
+        let encoded = encode_binary_projection_ternary(source).unwrap();
+        assert_eq!(open_ternary_program(&encoded).unwrap(), source);
+        assert_eq!(render_ternary_words_spaced(&[]), "");
+        let changed = [243u8]; // impossible packed 5-trit value
+        assert_eq!(
+            open_ternary_program(&changed),
+            Err(TernaryTransportError::InvalidPhysicalByte)
+        );
     }
 
     #[test]
