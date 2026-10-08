@@ -147,21 +147,28 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
             self.assertEqual(state["summary"]["files_written"], 0)
             self.assertEqual(state["summary"]["files_blocked"], 4)
 
-            expected_symbols = {row["symbol"] for row in self.dynamic}
-            observed_reasons = []
+            # The source SHA and its dynamic DEFINE/references are pinned in
+            # test_four_dynamic_sources_are_real_sha_pinned_executable_bindings.
+            # When a predecessor (for example a legacy SID8 successor) becomes
+            # lawfully resolved, the *first* reported blocker can change. Never
+            # confuse that change with approved lexical/dynamic semantics.
+            expected_paths = {Path(row["path"]).name for row in self.dynamic}
+            self.assertEqual(len(expected_paths), 4)
+            self.assertEqual(len(state["files"]), len(expected_paths))
+            observed = {}
             for row in state["files"]:
+                input_name = Path(row["path"]).name
+                self.assertNotIn(input_name, observed, "each original must appear exactly once")
+                observed[input_name] = row
                 self.assertEqual(row["status"], "blocked", row)
-                self.assertTrue(row.get("reason"), row)
-                observed_reasons.append(row["reason"])
-                self.assertEqual(Path(row["output"]).suffix, ".sens")
-                self.assertFalse((outgoing / row["output"]).exists())
+                self.assertIsInstance(row.get("reason"), str, row)
+                self.assertTrue(row["reason"].strip(), row)
+                self.assertEqual(Path(row["output"]).name, Path(input_name).with_suffix(".sens").name)
+                self.assertFalse((outgoing / row["output"]).exists(), row)
 
-            for symbol in expected_symbols:
-                self.assertTrue(
-                    any(symbol in reason for reason in observed_reasons),
-                    f"real migrator report must still expose blocker symbol {symbol!r}",
-                )
-            self.assertFalse(list(folder.rglob("*.sens")))
+            self.assertEqual(set(observed), expected_paths)
+            self.assertFalse(list(folder.rglob("*.sens")),
+                             "a first-blocker change MUST NEVER publish unproved .sens")
 
 
 if __name__ == "__main__":
