@@ -25,4 +25,4 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run benchmark unit tests
-        run: python3 -m unittest benchmarks/domain-altitude-economy/test_run.py
+        run: python3 -m unittest discover -s benchmarks/domain-altitude-economy -p 'test_*.py'
