@@ -1,0 +1,40 @@
+name: Report original T5 migration candidates
+on:
+  pull_request:
+    paths:
+      - 'scripts/report_original_migration_candidates.py'
+      - 'tests/test_report_original_migration_candidates.py'
+      - '.github/workflows/report-original-migration-candidates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-eligibility-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: No-write classification + SHA tests
+        run: python3 -m unittest discover -s tests -p 'test_report_original_migration_candidates.py' -v
+      - name: Run ACTUAL canonical three-pass converter in dry-run, expose exact paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/report_original_migration_candidates.py --out "$RUNNER_TEMP/original-eligibility.json"
+          python3 - "$RUNNER_TEMP/original-eligibility.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          s=r['summary']
+          assert r['schema']=='sens-original-three-pass-eligibility/v1'
+          assert s['scanned']==s['blocked']+s['mechanical_candidates']
+          assert s['physical_outputs_created']==0
+          assert s['original_unpaired_executables_migrated_by_this_tool']==0
+          assert all(not x['independent_semantic_oracle_passed'] for x in r['mechanical_candidates'])
+          print('ORIGINAL_LISP_CANDIDATES',r['mechanical_candidates'])
+          PY
+      - name: Save exact source SHA and admission decision
+        uses: actions/upload-artifact@v4
+        with:
+          name: t5-original-candidate-report
+          path: ${{ runner.temp }}/original-eligibility.json
+          if-no-files-found: error
