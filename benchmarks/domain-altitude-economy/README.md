@@ -93,3 +93,26 @@ python3 -m unittest benchmarks/domain-altitude-economy/test_run.py
 
 Phase 1 uses `max domain width` as altitude. Derivation depth may become a
 separate future axis only after an admitted derivation graph exists.
+
+
+## D8 strict inventory
+
+Before constructing any resident/expanded benchmark pair, run:
+
+```sh
+python3 benchmarks/domain-altitude-economy/inventory.py \
+  --out /tmp/d8-altitude-inventory.json
+```
+
+The current authority intersection intentionally distinguishes:
+
+- **derivability candidate** — ratified D8 resident with explicit
+  `DERIVED-NO-SLOT`, `GENERATED/STRUCTURAL`, or concrete lower-domain
+  derivation metadata;
+- **dividend-ready pair** — additionally has an executable exact-binary
+  lower-domain expansion, resident/expansion digest parity, and exact bit
+  accounting for both forms.
+
+On the current authority snapshot the strict inventory yields **22 candidates**
+and **0 dividend-ready pairs**. That is a valid research result: derivability
+metadata alone is not enough to claim a measurable residency dividend.
