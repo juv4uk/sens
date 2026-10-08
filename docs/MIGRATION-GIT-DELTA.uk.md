@@ -31,3 +31,5 @@ python3 -m unittest discover -s tests -p test_report_migration_git_delta.py -v
 Причина малого числа: поточний аудит #4449 розділяє 211 історичних `.lisp` як data/archive і 279 як active/UNKNOWN, де W8-source provenance, Text7 binder/role, D2 structural authority, Number/D24+ або відсутність незалежного оракула залишаються реальними бар'єрами. Жоден скрипт не повинен вигадувати їхні значення.
 
 Суміжні інструменти: `scripts/migrate.py`, `scripts/migrate-t5-batch.py`, `scripts/report_original_migration_candidates.py`, `scripts/publish_verified_uk_triplets.py`. Цей Git-delta скрипт **доповнює**, а не замінює їх.
+
+Пара без правильного текстового view не вважається новою перевіреною трійкою. Звіт окремо рахує нові фізичні пари, готові механічні трійки і ремонт неповних старих пар; semantic oracle proof залишається окремим.
