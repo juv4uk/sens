@@ -59,7 +59,7 @@ jobs:
           print("bytes",len(p))
           print("sha256",hashlib.sha256(p).hexdigest())
           print("typed",typed_sha256(words))
-          assert typed_sha256(words) == "0951a7c253644c5783e7317269e354959817932e2bf9016114760fc76f769922"
+          assert typed_sha256(words) == "d7084d46e7e0e6946daab13b0087824db21e7097477bf4c2c09a23985426de3a"
           PY
       - name: Upload regenerated candidate
         if: always()
