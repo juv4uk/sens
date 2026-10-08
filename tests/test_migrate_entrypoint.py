@@ -36,7 +36,9 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
         self.assertEqual(Path(cmd[1]).name, "migrate-t5-batch.py")
         self.assertIn("benchmarks/lists.lisp", cmd)
         self.assertNotIn("--write", cmd)
-        self.assertEqual(cmd[-2:], ["--report", "/tmp/preview.json"])
+        self.assertEqual(cmd[-4:], ["--report", "/tmp/preview.json", "--source-era", "auto"])
+        historical = migrate.parser().parse_args(["preview", "tests/fixtures/migration-multiform-cohort/two-forms.lisp", "--mirror", "/tmp/m", "--report", "/tmp/r.json", "--source-era", "legacy"])
+        self.assertEqual(migrate.command(historical)[-2:], ["--source-era", "legacy"])
         with self.assertRaises(SystemExit):
             migrate.parser().parse_args(
                 ["preview", "benchmarks/lists.lisp", "--mirror", "/tmp/mirror",
