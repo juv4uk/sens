@@ -458,6 +458,17 @@ class Resolver:
         self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     def head(self,tok: Tok):
         t=tok.text
+        # Historical DIVIDE denotes division, while current D5 QUOTIENT is
+        # a different ratified operation. The D3-D6-only registry resolver
+        # must never silently route it into QUOTIENT. D8 DIVIDE exists,
+        # but executable admission of this legacy transition needs a separate
+        # proven migration law, not a surface-name coincidence.
+        if t in ("00001111", "divide", "DIVIDE", "/", "поділити"):
+            raise MigrationError(
+                "unsafe DIVIDE -> D5 QUOTIENT migration: "
+                "D8 DIVIDE requires an explicitly proven successor",
+                tok,
+            )
         # D2 is structural control only. A two-bit word in executable-head
         # position is ambiguous/corrupt source, never a callable identity.
         if len(t)==2 and set(t)<=set("01"):
