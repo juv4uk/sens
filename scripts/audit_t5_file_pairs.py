@@ -43,6 +43,38 @@ def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def require_changed_views(report: dict, changed_sens: list[str]) -> None:
+    """PR/push gate: no NEW/MODIFIED physical .sens without a verified view.
+
+    This does NOT pretend legacy existing files are admitted. Source-to-current
+    semantic equivalence needs independent Ukrainian oracle and original SHA.
+    """
+    if report.get("schema") != SCHEMA:
+        raise ValueError("unknown T5 report schema")
+    records = {row["sens"]: row for row in report.get("files", ())}
+    if len(records) != len(report.get("files", ())):
+        raise ValueError("duplicate T5 source pair report rows")
+    seen: set[str] = set()
+    for path in changed_sens:
+        if not isinstance(path, str) or not path.endswith(".sens") or path.startswith("/"):
+            raise ValueError(f"invalid changed T5 path: {path!r}")
+        posix = Path(path)
+        if (posix.as_posix() != path or
+                any(part in ("", ".", "..") for part in path.split("/"))):
+            raise ValueError(f"unsafe changed T5 path: {path!r}")
+        if path in seen:
+            raise ValueError(f"duplicate changed T5 path: {path}")
+        seen.add(path)
+        row = records.get(path)
+        if row is None:
+            raise ValueError(f"new/modified T5 not included in physical audit: {path}")
+        if row.get("physical_status") != "PASS" or row.get("view_status") != "PASS":
+            raise ValueError(
+                f"new/modified T5 must have same-stem canonical spaced-bit view: {path}; "
+                f"physical={row.get('physical_status')} view={row.get('view_status')}"
+            )
+
+
 def inspect(root: Path, *, strict_semantic: bool = False,
             include_untracked: bool = False,
             require_spaced_view: bool = False) -> dict:

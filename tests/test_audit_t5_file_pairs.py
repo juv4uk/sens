@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from audit_t5_file_pairs import inspect, main
+from audit_t5_file_pairs import inspect, main, require_changed_views
 from sens_t5_codec import encode_words
 
 
@@ -178,6 +178,34 @@ class AuditT5PairsTests(unittest.TestCase):
             "(за-умовою (ні (перше ())) (так так))\n",
         )
         self.assertTrue((cohort / "branch").read_bytes().endswith(b"\n"))
+
+    def test_changed_new_physical_requires_proven_extensionless_view(self):
+        self.pair("src/first", "10 01\n", ["10", "01"])
+        self.pair("src/second", "10 01\n", ["10", "01"])
+        src = "src/first.sens"
+        report = self.audit()
+        with self.assertRaisesRegex(ValueError, "same-stem canonical"):
+            require_changed_views(report, [src])
+        (self.root / "src/first").write_bytes(b"10 01\n")
+        report = self.audit()
+        require_changed_views(report, [src])  # original second pair is grandfathered
+        with self.assertRaisesRegex(ValueError, "same-stem canonical"):
+            require_changed_views(report, ["src/second.sens"])
+        with self.assertRaisesRegex(ValueError, "not included"):
+            require_changed_views(report, ["src/missing.sens"])
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            require_changed_views(report, [src, src])
+        with self.assertRaisesRegex(ValueError, "unsafe changed"):
+            require_changed_views(report, ["../src/first.sens"])
+        with self.assertRaisesRegex(ValueError, "invalid changed"):
+            require_changed_views(report, ["/src/first.sens"])
+        with self.assertRaisesRegex(ValueError, "invalid changed"):
+            require_changed_views(report, ["src/first.lisp"])
+        report["files"][0]["physical_status"] = "BLOCKED"
+        with self.assertRaisesRegex(ValueError, "same-stem canonical"):
+            require_changed_views(report, [src])
+        with self.assertRaisesRegex(ValueError, "unknown T5 report"):
+            require_changed_views({"schema": "unsupported"}, [src])
 
     def test_cli_generates_read_only_report_without_overwrite(self):
         self.pair("p", "10 01\n", ["10", "01"])
