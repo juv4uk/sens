@@ -10,6 +10,7 @@
 pub(crate) use special_forms::digest::sha256 as digest_sha256;
 
 mod arithmetic;
+mod d4_sequence;
 mod d5_arithmetic;
 mod d5_predicates;
 mod d6_arithmetic;
