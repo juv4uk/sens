@@ -1,127 +1,126 @@
-# Compact languages: a study — and where SENS sits
+# Компактні мови: дослідження — і де стоїть SENS
 
-Scope: a survey of languages/encodings that minimise *program size in bits*, and an
-honest placement of SENS against them. Written to be verifiable, not promotional:
-every claim about SENS below was measured against the repository's own tooling
+Обсяг: огляд мов/кодувань, що мінімізують *розмір програми в бітах*, і чесне
+місце SENS серед них. Написано так, щоб було перевірно, а не рекламно: кожне
+твердження про SENS нижче **заміряне** тулзом самого репозиторію
 (`migrate-three-pass.py`, `migrate-t5-batch.py`, `sens_t5_codec.py`, `lib/domains/*`).
 
-## 1. The ladder of compactness
+## 1. Драбина компактності
 
-"Compactness" is not one axis. Three distinct things are routinely conflated:
+«Компактність» — не одна вісь. Зазвичай змішують три різні речі:
 
-| layer | what it is | examples |
+| шар | що це | приклади |
 |---|---|---|
-| **meaning** | the exact identity of operations/computations | SENS exact-domain words |
-| **recording of meaning** | a serialisation of that meaning | T5 `.sens`, BLC bitstream |
-| **machine encoding** | a form for one physical machine | bytecode (WASM/JVM/CPython), native ISA |
+| **зміст** | точна ідентичність операцій/обчислень | exact-domain слова SENS |
+| **запис змісту** | серіалізація цього змісту | T5 `.sens`, бітстрім BLC |
+| **машинне кодування** | форма під конкретну машину | bytecode (WASM/JVM/CPython), нативна ISA |
 
-Comparisons are only meaningful *within* a layer. A binary encoding will always beat
-a text encoding; that says nothing about the languages.
+Порівнювати має сенс **у межах шару**. Бінарний запис завжди коротший за текстовий —
+і це нічого не каже про мови.
 
-## 2. Binary Lambda Calculus (BLC)
+## 2. Двійкове лямбда-числення (BLC)
 
-The reference point for minimal program size.
+Еталон мінімального розміру програми.
 
-- Invented by **John Tromp (2004)**; a binary encoding of the untyped lambda calculus
-  in **De Bruijn index** notation.
-- Encoding: lambda = `00`, application = `01`, variable `n` = `1ⁿ0`.
-- The shortest closed term is the identity, `blc(λ1) = 0010` — **4 bits**.
-- Its purpose is theory, not production: a concrete basis for **Kolmogorov /
-  descriptional complexity** ("a very simple and elegant concrete definition of
-  descriptional complexity").
-- Practical variant **BLC8**: byte-oriented I/O ("bit streams fare poorly in
-  interfacing with the real world"); universal machine U8 = 355 bits as BLC (45 bytes
-  in BLC8).
-- Where it is actually used: research, toolkits (e.g. `cl-blc` — a library/CLI to
-  read/eval/compile BLC), and competition/obfuscation (IOCCC 2012 winner implements
-  the BLC universal machine in under 6K). **Not** an industrial language.
+- Автор — **Джон Тромп (2004)**; двійкове кодування нетипізованого лямбда-числення
+  в нотації **de Bruijn**.
+- Кодування: лямбда = `00`, аплікація = `01`, змінна `n` = `1ⁿ0`.
+- Найкоротший замкнений терм — тотожність, `blc(λ1) = 0010` — **4 біти**.
+- Призначення — теорія, не продакшн: конкретна основа для **складності за
+  Колмогоровим** («просте й елегантне означення descriptional complexity»).
+- Практичний варіант **BLC8**: байт-орієнтований I/O («бітстріми погано стикуються
+  з реальним світом»); універсальна машина U8 = 355 біт як BLC (45 байт у BLC8).
+- Де справді вживається: дослідження, тулкіти (`cl-blc` — бібліотека/CLI для
+  read/eval/compile BLC), змагання/обфускація (переможець IOCCC 2012 реалізує
+  універсальну машину BLC у <6K). **Не** індустріальна мова.
 
-Primary source: John Tromp, *Binary Lambda Calculus* (tromp.github.io/cl/Binary_lambda_calculus.html).
+Першоджерело: John Tromp, *Binary Lambda Calculus* (tromp.github.io/cl/Binary_lambda_calculus.html).
 
-## 3. Combinator bases (SK, Iota, Jot)
+## 3. Комбінаторні базиси (SK, Iota, Jot)
 
-An alternative minimal basis: express computation with a handful of combinators and no
-variables at all.
+Альтернативний мінімальний базис: виразити обчислення кількома комбінаторами без
+змінних узагалі.
 
-- **SK calculus**: S and K suffice for all computable functions; a program is a tree of
-  S/K applications. Often *fewer bits* than lambda for the same term, because there is
-  no binder structure.
-- **Iota / Jot** (Barker): single-combinator / binary encodings that are, in places,
-  even smaller than BLC.
-- Same caveat as BLC: minimal, opaque, unverifiable by inspection.
+- **SK-числення**: S і K достатні для всіх обчислюваних функцій; програма — дерево
+  аплікацій S/K. Часто **менше біт**, ніж лямбда для того ж терма, бо немає структури
+  зв'язувань.
+- **Iota / Jot** (Barker): одно-комбінаторні / двійкові кодування, подекуди ще менші
+  за BLC.
+- Той самий застережний знак, що й у BLC: мінімально, непрозоро, неперевірно на око.
 
-## 4. What is actually used
+## 4. Що насправді вживане
 
-The minimal-basis languages (BLC, SK, Iota, Jot) are **not** used in industry. What is
-used for compact program representation is:
+Мінімальні базиси (BLC, SK, Iota, Jot) в індустрії **не вживаються**. Для компактного
+представлення програм вживають:
 
-- **Bytecode VMs** — WebAssembly, JVM, CPython: each operation is typically ~1 byte
-  (opcode), with *implicit* structure (no explicit delimiters).
-- **Binary serialisation** — MessagePack, CBOR, Protobuf: compact *data*, not programs.
-- **Forth** — dictionary of 1-byte words; embedded niche.
+- **bytecode-VM** — WebAssembly, JVM, CPython: операція зазвичай ~1 байт (опкод), зі
+  **неявною** структурою (без явних розділювачів).
+- **бінарна серіалізація** — MessagePack, CBOR, Protobuf: компактні *дані*, не програми.
+- **Forth** — словник 1-байтових слів; вбудована ніша.
 
-So: the languages that beat everyone on bits are the ones nobody runs; the ones people
-run are compact on a *different* axis (machine encoding), not on the meaning axis.
+Отже: мови, що перемагають усіх за бітами, ніхто не запускає; а ті, що запускають,
+компактні на **іншій** осі (машинне кодування), не на осі змісту.
 
-## 5. Where SENS sits
+## 5. Де стоїть SENS
 
-SENS does **not** translate meaning: an operation's identity *is* its code. With the
-domain ladder D1–D9 (D10 upcoming), any operation is **≤10 bits**, regardless of how
-long its human name would be. That removes the name/syntax/opcode tax entirely.
+SENS **не перекладає** зміст: ідентичність операції *і є* її код. З драбиною
+D1–D9 (далі D10) будь-яка операція — **≤10 біт**, хоч би як довго звалося її людське
+ім'я. Це прибирає податок на імена/синтаксис/опкоди цілком.
 
-Measured on the repository's own T5 pipeline (the four admitted fixtures):
+Заміряно на власному T5-пайплайні репозиторію (чотири допущені фікстури):
 
-- T5 round-trip (`decode_bytes → encode_words`) is **bitwise identical** on every file.
-- Codes are the **ratified** ones (e.g. D3 `100` = CAR, confirmed by
+- T5 round-trip (`decode_bytes → encode_words`) **бітово ідентичний** на кожному файлі.
+- Коди — **ратифіковані** (напр. D3 `100` = CAR, підтверджено
   `knowledge/d1-d5-foundation.json`, `semantic_registry.rs`, `gpu_oracle_conformance.rs`).
-- The stream spans the ladder: D1 (`0/1`), D3 (CAR/CDR/CONS/QUOTE/NIL/COND), D4 (`1000` = CAAR).
+- Потік охоплює драбину: D1 (`0/1`), D3 (CAR/CDR/CONS/QUOTE/NIL/COND), D4 (`1000` = CAAR).
 
-Cost: the codec writes `trits = "2".join(words)`, i.e. **one separator trit per word**,
-then packs 5 trits/byte. That separator, not the trit packing, is the overhead:
+Ціна: кодек пише `trits = "2".join(words)`, тобто **один тріт-розділювач на слово**,
+далі пакує 5 трітів/байт. Надлишок дає саме розділювач, а не тріт-пакування:
 
-| program | logical bits | T5 bytes | T5 bits | overhead |
+| програма | логічних біт | T5 байт | T5 біт | надлишок |
 |---|---|---|---|---|
 | third | 131 | 38 | 304 | 2.32× |
 | branch | 38 | 12 | 96 | 2.53× |
 | caar | 68 | 20 | 160 | 2.35× |
 | two-forms | 49 | 14 | 112 | 2.29× |
 
-Overhead ≈ `1.6·(w+1)/w` for word width `w`: ≈2.1× at D3, ≈1.9× at D5, ≈1.8× at D9.
-Small programs with many short words sit at the **worst** end; longer words amortise the
-separator.
+Надлишок ≈ `1.6·(w+1)/w` для ширини слова `w`: ≈2.1× на D3, ≈1.9× на D5, ≈1.8× на D9.
+Дрібні програми з багатьма короткими словами — на **гіршому** краю; довші слова
+розчиняють розділювач.
 
-## 6. Honest comparison
+## 6. Чесне порівняння
 
-- **Pure bit-golf**: BLC / SK / Iota win. SENS pays ~2× for explicit (D2) structure.
-- **Verifiable recording**: SENS is alone. BLC is minimal but opaque; nothing proves a
-  4-bit term does what it claims. SENS carries exact identities + a bitwise round-trip
-  + authority-sourced codes.
-- **Readable surface**: SENS can render the same meaning as human text; BLC cannot.
+- **Чистий bit-golf**: перемагають BLC / SK / Iota. SENS платить ~2× за явну
+  (D2) структуру.
+- **Перевірний запис**: SENS — сам. BLC мінімальний, але непрозорий; ніщо не доводить,
+  4-бітний терм робить саме те, що заявлено. SENS несе точні ідентичності + бітовий
+  round-trip + коди з авторитета.
+- **Читабельна поверхня**: SENS може подати той самий зміст як людський текст; BLC — ні.
 
-The defensible claim is therefore **"compactness with proven identity"**, not "smallest
-program". The unique property is *combination*: minimum-ish size **and** exact meaning
-**and** readable surface — no other compact language offers all three.
+Тож захищене твердження — **«компактність із доведеною тотожністю»**, а не «найменша
+програма». Унікальна властивість — *поєднання*: майже мінімум **і** точний зміст
+**і** читабельна поверхня; жодна інша компактна мова не дає всіх трьох.
 
-## 7. Open questions / boundaries
+## 7. Відкриті питання / межі
 
-1. The canonical migrator currently admits only tiny fixtures; **all of `lib/` is
-   blocked fail-closed** (e.g. `compiler-nucleus.lisp`: "word 4: requires exact D1..D9
-   0/1 word, got 'compiler-authority-find'"). Compactness claims beyond the fixtures are
-   therefore **derived, not yet measured** on large programs.
-2. The D2 separator is the main handicap against BLC. Reducing it (implicit/self-delimiting
-   structure, run-encoded domain tags) is the obvious lever — at the cost of some transparency.
-3. Octet/`F==S` rules (non-octet programs are blocked as `.sens`) must be explicit criteria,
-   not surprises, in any future benchmark or competition.
-4. A competition format that SENS could own: *shortest exact-domain recording that provably
-   round-trips and passes an independent oracle* — a game BLC cannot win, because BLC carries
-   no verification.
+1. Канонічний мігратор допускає лише крихітні фікстури; **увесь `lib/` блоковано**
+   fail-closed (напр. `compiler-nucleus.lisp`: «word 4: requires exact D1..D9 0/1 word,
+   got 'compiler-authority-find'»). Тому твердження про компактність поза фікстурами —
+   **виведені, а не заміряні** на великих програмах.
+2. D2-розділювач — головний гандикап проти BLC. Зменшити його (неявна/самороздільна
+   структура, run-кодування тегів домену) — очевидний важіль, але ціною частини прозорості.
+3. Правила октетності / `F==S` (неоктетні програми блокуються як `.sens`) мають бути
+   **явними критеріями**, а не сюрпризами, у будь-якому майбутньому бенчмарку чи змаганні.
+4. Формат змагання, який SENS міг би зайняти: *найкоротший exact-domain запис, що
+   доведено проходить round-trip і незалежний оракул* — гра, яку BLC виграти не може,
+   бо BLC не несе верифікації.
 
-## References
+## Референси
 
 - John Tromp, *Binary Lambda Calculus* — https://tromp.github.io/cl/Binary_lambda_calculus.html
-- IOCCC 2012 (tromp): BLC universal machine — https://github.com/ioccc-src/winner/blob/master/2012/tromp/README.md
-- `cl-blc`: toolkit for BLC — https://codeberg.org/aartaka/cl-blc
-- Repository authority for codes: `lib/domains/d1..d9.lisp`, `knowledge/d1-d9-foundation.json`,
+- IOCCC 2012 (tromp): універсальна машина BLC — https://github.com/ioccc-src/winner/blob/master/2012/tromp/README.md
+- `cl-blc`: тулкіт для BLC — https://codeberg.org/aartaka/cl-blc
+- Авторитет кодів у репо: `lib/domains/d1..d9.lisp`, `knowledge/d1-d9-foundation.json`,
   `crates/sens/src/semantic_registry.rs`, `crates/sens/src/domain_surface_registry_generated.rs`
-- Repository T5 pipeline: `scripts/migrate-three-pass.py`, `scripts/migrate-t5-batch.py`,
+- T5-пайплайн репо: `scripts/migrate-three-pass.py`, `scripts/migrate-t5-batch.py`,
   `scripts/sens_t5_codec.py`
