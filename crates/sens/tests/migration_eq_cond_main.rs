@@ -27,7 +27,8 @@ fn eq_yes_selects_first_cond_clause() {
     assert!(SELECT_SOURCE.contains("00000011"));
     assert!(SELECT_SOURCE.contains("00000111"));
     assert_eq!(SELECT_T5.len(), 33);
-    match eval_physical(SELECT_T5) {
+    let value = eval_physical(SELECT_T5);
+    match &value {
         Value::Pair(head, tail) => {
             assert!(matches!(head.as_ref(), Value::Nil));
             assert!(matches!(tail.as_ref(), Value::Nil));
