@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import json
 from pathlib import Path
 import re
 
@@ -81,23 +82,23 @@ def inventory_projection_errors(inventory: dict, document: str) -> list[str]:
 
     expected = {
         "D10 selected": (
-            re.compile(r"(?m)^D10 selected\\s+(\\d+)/(\\d+)\\s*$"),
+            re.compile(r"(?m)^D10 selected\s+(\d+)/(\d+)\s*$"),
             (accounting.get("selected_semantic_candidates"), capacity),
         ),
         "law-forced": (
-            re.compile(r"(?m)^law-forced\\s+(\\d+)\\s*$"),
+            re.compile(r"(?m)^law-forced\s+(\d+)\s*$"),
             (accounting.get("law_forced_coordinates"),),
         ),
         "unplaced": (
-            re.compile(r"(?m)^unplaced\\s+(\\d+)\\s*$"),
+            re.compile(r"(?m)^unplaced\s+(\d+)\s*$"),
             (accounting.get("unplaced_selected_candidates"),),
         ),
         "remaining": (
-            re.compile(r"(?m)^remaining\\s+(\\d+)\\s*$"),
+            re.compile(r"(?m)^remaining\s+(\d+)\s*$"),
             (accounting.get("remaining_semantic_inventory"),),
         ),
         "ratified": (
-            re.compile(r"(?m)^ratified\\s+(\\d+)\\s*$"),
+            re.compile(r"(?m)^ratified\s+(\d+)\s*$"),
             (accounting.get("ratified_d10_residents"),),
         ),
     }
@@ -186,7 +187,7 @@ def main() -> int:
     inventory_path = ROOT / "knowledge" / "d10-v1-semantic-inventory.json"
     architecture_path = ROOT / "docs" / "architecture" / "ARCHIPELAGO-V1.uk.md"
     try:
-        inventory = __import__("json").loads(inventory_path.read_text(encoding="utf-8"))
+        inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
         projection = architecture_path.read_text(encoding="utf-8")
     except (OSError, ValueError) as exc:
         print(f"D10-PROPOSAL-LEDGER: BLOCK cannot read D10 machine inventory/projection: {exc}")
