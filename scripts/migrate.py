@@ -21,9 +21,11 @@ def command(args: argparse.Namespace) -> list[str]:
         return [sys.executable, str(SCRIPTS / "report_original_migration_candidates.py"),
                 "--out", str(args.report)]
     if args.action == "preview":
+        # Explicit era is evidence about the source's provenance, not a
+        # semantic permit. Default auto MUST block ambiguous W8/D8.
         return [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
                 *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
-                "--report", str(args.report)]
+                "--source-era", str(args.source_era), "--report", str(args.report)]
     if args.action == "admit":
         cmd = [sys.executable, str(SCRIPTS / "admit-t5-migration.py"),
                "--root", str(ROOT), "--manifest", str(args.manifest),
@@ -46,6 +48,9 @@ def parser() -> argparse.ArgumentParser:
     preview.add_argument("paths", nargs="+", help="явні відносні шляхи до .lisp чи каталогів")
     preview.add_argument("--mirror", type=Path, required=True)
     preview.add_argument("--report", type=Path, required=True)
+    preview.add_argument("--source-era", choices=("auto", "legacy", "current"),
+                         default="auto",
+                         help="auto BLOCKS ambiguous W8; legacy/current require independently proven source provenance")
 
     admit = sub.add_parser("admit", help="опублікувати .sens тільки з перевіреним маніфестом/оракулом")
     admit.add_argument("--manifest", type=Path, required=True)
