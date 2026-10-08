@@ -1,0 +1,31 @@
+name: Migration physical two-form T5 cohort
+
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/migration-multiform-cohort/**'
+      - 'tests/test_migration_multiform_cohort.py'
+      - 'crates/sens/tests/migration_multiform_cohort.rs'
+      - '.github/workflows/migration-multiform-cohort.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/fixtures/migration-multiform-cohort/**'
+      - 'tests/test_migration_multiform_cohort.py'
+      - 'crates/sens/tests/migration_multiform_cohort.rs'
+      - '.github/workflows/migration-multiform-cohort.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  physical-two-form-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Actual three-pass Lisp to same-stem physical T5
+        run: python3 tests/test_migration_multiform_cohort.py -v
+      - name: Actual Rust exact D2/D3 oracle evaluates two top-level forms
+        run: cargo test -p sens --test migration_multiform_cohort
