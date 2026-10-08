@@ -1,0 +1,21 @@
+{
+  "schema": "sens-migration-nonprogram-manifest/1",
+  "generated_from_main": "89a2dbd9e91a6faf1ae4aa60ca3304dffebce73d",
+  "issue": 4460,
+  "classification": "lisp-data-nonprogram",
+  "cohort": "comment-only compatibility/profile loader markers",
+  "reason": "Both exact historical .lisp Git blobs contain only semicolon comments and blank lines; no executable Lisp forms. They remain source/profile metadata and must never be counted as executable migrations.",
+  "automatic_sens_companion": false,
+  "not_executable_programs": true,
+  "not_physical_migration_credit": true,
+  "entries": [
+    {
+      "path": "lib/core2.lisp",
+      "git_blob_sha1": "9a39a1d341dde7faf3a1899b52f78a7b1e931783"
+    },
+    {
+      "path": "lib/surface/ukr.lisp",
+      "git_blob_sha1": "f5577917e72f2661cb64b277afc85122276d13c7"
+    }
+  ]
+}
