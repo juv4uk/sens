@@ -1,0 +1,72 @@
+name: report-t5-migration-progress
+
+on:
+  pull_request:
+    paths:
+      - "scripts/report_t5_migration_progress.py"
+      - "tests/test_report_t5_migration_progress.py"
+      - ".github/workflows/report-t5-migration-progress.yml"
+      - "scripts/audit_t5_file_pairs.py"
+      - "scripts/migration-readiness-census.py"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/report_t5_migration_progress.py"
+      - "tests/test_report_t5_migration_progress.py"
+      - ".github/workflows/report-t5-migration-progress.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-coverage-mechanical-not-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reject source omissions, duplicate physical names and fake oracle credit
+        run: python3 -m unittest discover -s tests -p "test_report_t5_migration_progress.py" -v
+      - name: Existing physical T5 same-stem pair audit
+        run: python3 scripts/audit_t5_file_pairs.py . --output "$RUNNER_TEMP/t5-pairs.json"
+      - name: Existing source-era migration readiness census (no output files)
+        run: python3 scripts/migration-readiness-census.py --out "$RUNNER_TEMP/t5-readiness.json"
+      - name: Combine audited physical pairs and blocked original sources
+        run: |
+          set -euo pipefail
+          python3 scripts/report_t5_migration_progress.py \
+            --root . \
+            --pairs "$RUNNER_TEMP/t5-pairs.json" \
+            --readiness "$RUNNER_TEMP/t5-readiness.json" \
+            --out "$RUNNER_TEMP/t5-progress.json"
+      - name: Report real source coverage without claiming semantic completion
+        run: |
+          python3 - "$RUNNER_TEMP/t5-progress.json" <<'PY'
+          import json, os, sys
+          r=json.load(open(sys.argv[1], encoding="utf-8"))
+          s=r["summary"]
+          assert r["status"] == "COMPLETE_MECHANICAL_INVENTORY_ONLY"
+          assert s["tracked_lisp_sources"] == s["tracked_physical_sens_pairs"] + s["unpaired_source_rows"]
+          assert s["independently_oracle_certified_from_these_inputs"] == 0
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as out:
+              out.write("## T5 migration progress (mechanical evidence only)\n\n")
+              out.write(f"- Original tracked Lisp files: **{s['tracked_lisp_sources']}**\n")
+              out.write(f"- Physical T5 pairs: **{s['tracked_physical_sens_pairs']}**\n")
+              out.write(f"- Unpaired originals: **{s['unpaired_source_rows']}**\n")
+              out.write(f"- Physically canonical T5: **{s['mechanically_canonical_physical_pairs']}**\n")
+              out.write("- Semantic/executable admission: **NOT measured by this audit**; require independent D2/oracle evidence\n")
+              out.write("- Non-program data are not executable backlog\n")
+          print("MECHANICAL_COVERAGE",s)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t5-migration-progress-ledger
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/t5-pairs.json
+            ${{ runner.temp }}/t5-readiness.json
+            ${{ runner.temp }}/t5-progress.json

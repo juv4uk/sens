@@ -92,6 +92,41 @@ class AuditT5D2SyntaxTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertEqual(report["summary"]["d2_syntax_pass"], 0)
 
+    def test_nested_truncated_d2_identifies_unclosed_exact_word_coordinates(self):
+        # The 2-bit words form an unclosed outer list despite physical
+        # T5 roundtrip. One-based indices and original widths are preserved.
+        self.pair("nested-unclosed", "10 001 00 10 000 01\\n",
+                  ["10", "001", "00", "10", "000", "01"])
+        row = self.examine()["files"][0]
+        self.assertEqual(row["syntax_status"], "BLOCKED")
+        hint = row["d2_structure_balance_hint"]
+        self.assertEqual(hint["typed_word_count"], 6)
+        self.assertEqual(hint["d2_opens"], 2)
+        self.assertEqual(hint["d2_closes"], 1)
+        self.assertEqual(hint["unclosed_open_count"], 1)
+        self.assertEqual(hint["first_unclosed_open_word"], 1)
+        self.assertEqual(hint["last_unclosed_open_word"], 1)
+        self.assertEqual(hint["unclosed_open_contexts"][0]["typed_words"],
+                         ["10", "001", "00", "10"])
+        self.assertIn("D2 grammar rejected", row["syntax_reason"])
+        self.assertEqual(row["oracle_status"], "NOT_VERIFIED")
+
+    def test_d2_unexpected_close_hint_does_not_grant_syntax_or_semantics(self):
+        self.pair("underflow", "01 10 01\\n", ["01", "10", "01"])
+        row = self.examine()["files"][0]
+        self.assertEqual(row["syntax_status"], "BLOCKED")
+        hint = row["d2_structure_balance_hint"]
+        self.assertEqual(hint["first_unmatched_close_word"], 1)
+        self.assertEqual(hint["unclosed_open_count"], 0)
+        self.assertEqual(row["oracle_status"], "NOT_VERIFIED")
+
+    def test_d2_nested_valid_pair_gets_no_failure_hint(self):
+        self.pair("nested-ok", "10 10 000 01 01\\n",
+                  ["10", "10", "000", "01", "01"])
+        row = self.examine()["files"][0]
+        self.assertEqual(row["syntax_status"], "PASS_D2_SYNTAX")
+        self.assertNotIn("d2_structure_balance_hint", row)
+
     def test_malformed_byte_rejected_before_rust_grammar(self):
         path = self.pair("corrupt", "10 01\n", ["10", "01"])
         path.write_bytes(b"\xf3")  # not valid T5 five-trit byte
