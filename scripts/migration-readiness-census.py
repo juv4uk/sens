@@ -15,9 +15,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-from migration_source_scope import source_scope, blocker_cohort
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = str(ROOT / "scripts")
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
+from migration_source_scope import source_scope, blocker_cohort
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 ARTIFACT_ARGS = [
     "--foundation", "knowledge/d1-d9-foundation.json",
