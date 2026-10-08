@@ -111,7 +111,7 @@ def validate(raw: dict, library: dict, inventory: dict, state: dict,
             raise ValueError(f"raw source identity, line or SHA mismatch: {path}:{line}")
         # A textual symbol definition is evidence, not a callable meaning.
         observed = file_lines[path][line - 1]
-        if not re.match(r"^\s*\(00001001\s+" + re.escape(name) + r"(?=\s|\))", observed):
+        if not re.match(r"^\s*\(00001001\s+" + re.escape(name) + r"(?=\s|\)|$)", observed):
             raise ValueError(f"no pinned Lisp source definition at {path}:{line} for {name}")
         counts[path] += 1
         coordinates.add((path, line))
