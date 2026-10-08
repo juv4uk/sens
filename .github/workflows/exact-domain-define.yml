@@ -1,0 +1,27 @@
+name: exact-domain-define
+
+on:
+  pull_request:
+    paths:
+      - crates/sens/src/eval/special_forms/core.rs
+      - crates/sens/tests/exact_domain_define_current_main.rs
+      - .github/workflows/exact-domain-define.yml
+  push:
+    branches: [main]
+    paths:
+      - crates/sens/src/eval/special_forms/core.rs
+      - crates/sens/tests/exact_domain_define_current_main.rs
+      - .github/workflows/exact-domain-define.yml
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact-domain DEFINE acceptance
+        run: cargo test -p sens --test exact_domain_define_current_main -- --nocapture
