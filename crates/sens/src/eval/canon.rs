@@ -462,14 +462,19 @@ fn d4_append_proper_lists(
             span,
         ));
     }
-    let mut values = Vec::new();
+    // Validate both arguments before producing a result. Copy only the left
+    // proper-list spine; the right proper list remains the shared suffix,
+    // matching classic APPEND identity behavior and avoiding needless copies.
+    let mut left_values = Vec::new();
     for (index, list) in args.iter().enumerate() {
         let mut cursor = list;
         loop {
             match cursor {
                 Value::Nil => break,
                 Value::Pair(head, tail) => {
-                    values.push(head.as_ref().clone());
+                    if index == 0 {
+                        left_values.push(head.as_ref().clone());
+                    }
                     cursor = tail.as_ref();
                 }
                 _ => return Err(LanguageError::new(
@@ -480,7 +485,11 @@ fn d4_append_proper_lists(
             }
         }
     }
-    Ok(Value::list(values))
+    let mut suffix = args[1].clone();
+    for head in left_values.into_iter().rev() {
+        suffix = Value::Pair(std::rc::Rc::new(head), std::rc::Rc::new(suffix));
+    }
+    Ok(suffix)
 }
 
 pub(crate) fn invoke_domain_identity(
