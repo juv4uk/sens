@@ -114,6 +114,22 @@ class SpacedViewTests(unittest.TestCase):
                             (WORDS + "\n").encode("ascii"))
         self.assertFalse((ROOT / "should-not-exist").exists())
 
+    def test_report_output_is_external_write_once_not_original(self):
+        _, rendered = view.inspect(ROOT, SENS)
+        with tempfile.TemporaryDirectory(prefix="sens-view-report-test-") as td:
+            dst = Path(td) / "evidence.json"
+            view.write_report_outside_repo(ROOT, dst, {"view_sha256": view.sha256(rendered)})
+            self.assertTrue(dst.is_file())
+            before = dst.read_bytes()
+            with self.assertRaisesRegex(view.ViewBlocked, "NO_CLOBBER"):
+                view.write_report_outside_repo(ROOT, dst, {"view_sha256": "forged"})
+            self.assertEqual(dst.read_bytes(), before)
+        with self.assertRaisesRegex(view.ViewBlocked, "outside"):
+            view.write_report_outside_repo(
+                ROOT, ROOT / "tests/fixtures/migration-d1-cond-cohort/branch.lisp",
+                {"forged": True}
+            )
+
     def test_external_staging_write_once_and_source_untouched(self):
         before_lisp = (ROOT / (str(COHORT) + ".lisp")).read_bytes()
         before_sens = (ROOT / SENS).read_bytes()
