@@ -21,6 +21,7 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
+from domain_tables import read_domain_table
 from sens_t5_codec import SensT5Error, decode_bytes, encode_words, typed_sha256
 
 CONVERTER = SCRIPTS / "migrate-three-pass.py"
@@ -41,12 +42,13 @@ def uk_surface(width: int) -> dict[str, str]:
     """Read exact 'ук' cells from owner's domain table, never English aliases."""
     if width not in (1, 3):
         raise ProjectionBlocked("no ratified Ukrainian renderer for this width")
-    text = (ROOT / f"lib/domains/d{width}.lisp").read_text(encoding="utf-8")
-    rows = re.findall(
-        rf"(?m)^\s*\(([01]{{{width}}})\s+\(ук\s+([^\s()]+)\)",
-        text,
-    )
+    # Parse structural () through the canonical table reader. Regex token
+    # matching excluded D3:000 and wrongly blocked the whole D3 authority.
+    rows = [(row.bits, row.uk) for row in read_domain_table(
+        ROOT / f"lib/domains/d{width}.lisp"
+    )]
     if (len(rows) != 2 ** width or
+            any(name is None for _, name in rows) or
             len({bits for bits, _ in rows}) != len(rows) or
             len({name for _, name in rows}) != len(rows)):
         raise ProjectionBlocked(f"D{width}: nonunique or incomplete ук authority")
