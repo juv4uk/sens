@@ -121,6 +121,32 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertTrue(out.startswith(f"10 {bits} "),source)
             self.assertEqual(resolver.counts["pass1-sens8"],1,source)
 
+    def test_locally_defined_walk_cannot_be_published_as_global_d9(self):
+        # The old source may define a LOCAL recursive 'walk', while the
+        # audited coverage ledger also knows a DIFFERENT global D9 WALK.
+        # Until lexical/binder data has an independently proven physical
+        # carrier, a shared spelling must never mint an executable .sens.
+        source = "(0011 walk (0010 (x) (walk x)))\n"
+        with tempfile.TemporaryDirectory(prefix="sens-local-walk-") as td:
+            root = Path(td)
+            original = root / "local-walk.lisp"
+            original.write_text(source, encoding="utf-8")
+            mirror = root / "out"
+            report = root / "report.json"
+            run = subprocess.run([
+                sys.executable, str(SCRIPT), str(original),
+                "--source-era", "legacy", "--out", str(mirror),
+                "--report", str(report),
+            ], cwd=ROOT, capture_output=True, text=True, timeout=120)
+            self.assertEqual(run.returncode, 2, run.stdout + run.stderr)
+            state = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(state["summary"]["files_seen"], 1)
+            self.assertEqual(state["summary"]["files_blocked"], 1)
+            self.assertEqual(state["summary"]["files_written"], 0)
+            self.assertFalse((mirror / "local-walk.sens").exists())
+            self.assertEqual(original.read_text(encoding="utf-8"), source)
+            self.assertTrue(state["files"][0]["reason"])
+
     def test_old_functions_with_current_successors_move_by_semantic_role(self):
         cases=[
             ("(00100001 x)\n","0100","pass1-sens8"),   # NOT
