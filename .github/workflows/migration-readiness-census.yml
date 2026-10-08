@@ -1,0 +1,54 @@
+name: T5 migration readiness census
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+      - "scripts/migration-readiness-census.py"
+      - "knowledge/d1-d7-foundation.json"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/semantic_registry_generated.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/necessary_forms_generated.rs"
+      - "crates/sens/src/text7_projection_generated.rs"
+      - "contracts/core1-historical-sid-map.lisp"
+      - ".github/workflows/migration-readiness-census.yml"
+  pull_request:
+    paths:
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+      - "scripts/migration-readiness-census.py"
+      - "knowledge/d1-d7-foundation.json"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "crates/sens/src/semantic_registry_generated.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/necessary_forms_generated.rs"
+      - "crates/sens/src/text7_projection_generated.rs"
+      - "contracts/core1-historical-sid-map.lisp"
+      - ".github/workflows/migration-readiness-census.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census:
+    name: fail-closed full corpus census
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run migration readiness census
+        run: |
+          python3 scripts/migration-readiness-census.py \
+            --out /tmp/sens-t5-migration-readiness.json
+      - name: Publish census artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-t5-migration-readiness-${{ github.sha }}
+          path: /tmp/sens-t5-migration-readiness.json
+          if-no-files-found: error
+          retention-days: 14
