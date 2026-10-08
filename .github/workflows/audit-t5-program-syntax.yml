@@ -78,9 +78,10 @@ jobs:
           set -euo pipefail
           # Isolated cloned history: original .lisp predates .sens; never touch checkout.
           work="$RUNNER_TEMP/original-proof-e2e"
-          git clone -q --no-hardlinks "$GITHUB_WORKSPACE" "$work"
+          # PR synthetic merge commits can be unreferenced by a fresh clone.
+          # Worktree shares the exact checked-out Git objects, not build artifacts.
+          git -C "$GITHUB_WORKSPACE" worktree add --detach "$work" "$GITHUB_SHA" >/dev/null
           cd "$work"
-          git checkout -q "$GITHUB_SHA"
           git config user.name 'SENS CI Proof'
           git config user.email 'ci@proof.invalid'
           paired='tests/fixtures/migration-multiform-cohort/two-forms.sens'
