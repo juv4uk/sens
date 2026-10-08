@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -93,6 +94,20 @@ class SafeTripletPublisher(unittest.TestCase):
             self.assertEqual(res["summary"]["blocked"], 1)
             self.assertEqual(view.read_text(encoding="utf-8"), "tampered \u2603\n")
             self.assertFalse(view.with_suffix(".sens").exists())
+
+    def test_report_write_failure_rolls_back_all_new_triplets(self):
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "mirror"
+            report = Path(td) / "report.json"
+            with mock.patch("publish_verified_uk_triplets.json.dump",
+                            side_effect=OSError("simulated report write failure")):
+                with self.assertRaisesRegex(OSError, "report write failure"):
+                    export(ROOT, target, report, [self.REL1], write=True)
+            lisp = target / self.REL1
+            self.assertFalse(lisp.exists())
+            self.assertFalse(lisp.with_suffix(".sens").exists())
+            self.assertFalse(lisp.with_suffix("").exists())
+            self.assertFalse(report.exists())
 
     def test_reject_symlink_source_and_output_parent(self):
         with tempfile.TemporaryDirectory() as td:
