@@ -94,6 +94,7 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
         0b1010_1011 => Some(d4(0b0101)), // NULL
+        0b0010_0111 => Some(d4(0b1110)), // LIST: ratified D4, Lisp-owned closure
         0b0010_1001 => Some(d4(0b1111)), // APPEND
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
@@ -337,6 +338,35 @@ mod tests {
             session.environment.domain_code_slot(identity).is_some(),
             "Core bootstrap must bind the language-owned closure into its exact D4 slot"
         );
+    }
+
+    #[test]
+    fn explicit_core4_bootstrap_binds_ratified_d4_list_as_language_owned_closure() {
+        // Historical registry 00100111 and CURRENT D4:1110 are linked only
+        // by this audited successor; the numeric width remains domain-qualified.
+        let exact = legacy_domain_identity_from_registry_byte(0b0010_0111)
+            .expect("historical registry successor must exist");
+        assert_eq!((exact.width(), exact.packed_bits()), (4, 0b1110));
+        assert_eq!(domain_identity_for_surface("список"), Some(exact));
+
+        let mut session = crate::Session::default();
+        assert!(session.environment.domain_code_slot(exact).is_none());
+        crate::load_core_library(&mut session)
+            .expect("existing language-owned Core4 bootstrap");
+        assert!(
+            matches!(
+                session.environment.domain_code_slot(exact),
+                Some(crate::Value::Closure(_))
+            ),
+            "D4:1110 requires the existing Lisp-owned closure, not a Rust primitive"
+        );
+
+        let source = "10 1110 00 10 001 00 000 01 01";
+        let forms = crate::parse_canonical_binary(source)
+            .expect("canonical exact D2/D3/D4 expression");
+        let observed = crate::eval_parsed_expressions(&forms, &mut session)
+            .expect("current exact D4 callable after explicit Core4 bootstrap");
+        assert_eq!(observed.value.to_string(), "(())");
     }
 
     #[test]
