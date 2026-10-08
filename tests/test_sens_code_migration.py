@@ -121,7 +121,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         converted, hits, shadowed = self.binary(source)
         self.assertEqual([hit.label for hit in hits], ["DEFINE", "LAMBDA"])
         self.assertFalse(shadowed)
-        self.assertRegex(converted, r"^[01\\s]+$")
+        self.assertRegex(converted, r"^[01\s]+$")
         # The lambda parameter list is data; the following bound variable
         # forms must not be reinterpreted as an executable function head.
         self.assertNotEqual(converted, "")
