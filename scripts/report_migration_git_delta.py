@@ -91,14 +91,23 @@ def difference(root: Path, base: str, head: str) -> dict:
     lost = sorted(set(previous)-set(current))
     # Existing test fixtures are not fresh historical executable migration.
     new_rows = [current[x] for x in fresh]
+    # Pair != triple: a missing/wrong view is NOT a completed migration.
+    verified_new = [x for x in new_rows if x["status"]=="MECHANICAL_TRIPLE_VERIFIED"]
+    repaired = sorted(
+        key for key in set(current)&set(previous)
+        if previous[key]["status"] != "MECHANICAL_TRIPLE_VERIFIED"
+        and current[key]["status"] == "MECHANICAL_TRIPLE_VERIFIED"
+    )
     return {"schema":"sens-git-physical-triple-delta/v1", "base":b["commit"],
             "head":h["commit"],
             "base_census":{k:v for k,v in b.items() if k not in ("rows","commit")},
             "head_census":{k:v for k,v in h.items() if k not in ("rows","commit")},
-            "new_triples":len(fresh),
-            "new_non_fixture_triples":sum(x["scope"]=="non_fixture" for x in new_rows),
-            "new_fixture_triples":sum(x["scope"]=="fixture" for x in new_rows),
-            "new_mechanically_verified":sum(x["status"]=="MECHANICAL_TRIPLE_VERIFIED" for x in new_rows),
+            "new_pairs":len(fresh),
+            "new_triples":len(verified_new),
+            "new_non_fixture_triples":sum(x["scope"]=="non_fixture" for x in verified_new),
+            "new_fixture_triples":sum(x["scope"]=="fixture" for x in verified_new),
+            "new_mechanically_verified":len(verified_new),
+            "repaired_existing_triples":repaired,
             "new_invalid_or_incomplete":sum(x["status"]!="MECHANICAL_TRIPLE_VERIFIED" for x in new_rows),
             "removed_pairs":lost,
             "new_files":new_rows,

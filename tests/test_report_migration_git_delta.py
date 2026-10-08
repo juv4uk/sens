@@ -67,6 +67,8 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
         self.commit("missing canonical view")
         out=difference(self.repo,self.base,self.head())
         self.assertEqual(out["new_invalid_or_incomplete"],1)
+        self.assertEqual(out["new_pairs"],1)
+        self.assertEqual(out["new_triples"],0)
         self.assertEqual(out["head_census"]["paired_count"],1)
         self.assertEqual(out["head_census"]["triple_count"],0)
         self.assertEqual(main(["--root",str(self.repo),"--base",self.base,
@@ -83,6 +85,18 @@ class TrackedMigrationDeltaTest(unittest.TestCase):
         self.commit("out of range packed byte")
         out=difference(self.repo,self.base,self.head())
         self.assertEqual(out["head_census"]["invalid_triples"],1)
+
+    def test_existing_incomplete_pair_repaired_is_not_new_pair(self):
+        (self.repo/"lib/first.sens").write_bytes(encode_words(["10","01"]))
+        self.commit("existing physical pair but no view")
+        before=self.head()
+        (self.repo/"lib/first").write_bytes(b"10 01\n")
+        self.commit("repair existing incomplete triple")
+        out=difference(self.repo,before,self.head())
+        self.assertEqual(out["new_pairs"],0)
+        self.assertEqual(out["new_triples"],0)
+        self.assertEqual(out["repaired_existing_triples"],["lib/first.lisp"])
+        self.assertEqual(out["head_census"]["valid_triples"],1)
 
     def test_existing_pair_not_counted_twice_after_other_changes(self):
         self.add_triple("lib/first")
