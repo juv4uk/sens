@@ -59,6 +59,26 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
             .flatten()
     })
 }
+ 
+/// Canonical Ukrainian *source-head* projection, before evaluation.
+///
+/// Only owner-ratified source-routable uk rows are eligible. This is NOT the
+/// legacy SID compatibility index: no en alias, old W8, D2 structure, or
+/// unratified D7 binder can become a callable head via this API.
+/// The mixed reader applies it only to executable HEAD positions.
+pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::DomainIdentity> {
+    DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
+        if !row.source_routable
+            || !row.surfaces.iter().any(|surface|
+                surface.namespace == "uk" && surface.name == name)
+        {
+            return None;
+        }
+        exact_domain_identity_from_projection(row.width, row.bits)
+            .map(crate::DomainIdentity::from)
+    })
+}
+
 
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
