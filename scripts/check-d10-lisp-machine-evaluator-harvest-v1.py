@@ -44,7 +44,7 @@ donors = {d["path"]: d["source_sha"] for d in ledger["donors"]}
 source_lines = {}
 for file, expected_sha in donors.items():
     raw = (root / file).read_bytes()
-    blob = b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw
+    blob = b"blob " + str(len(raw)).encode("ascii") + bytes([0]) + raw
     assert hashlib.sha1(blob).hexdigest() == expected_sha
     source_lines[file] = raw.decode("utf-8").splitlines()
 
@@ -60,7 +60,7 @@ for row in rows:
     assert row["coordinate"] is None and row["coordinate_basis"] == "UNPLACED"
     line = source_lines[row["source_file"]][row["source_line"] - 1]
     assert line.startswith("(00001001 " + row["source_name"])
-    assert line[len("(00001001 " + row["source_name"]):][:1] in ("", " ", "\\t", ")")
+    assert line[len("(00001001 " + row["source_name"]):][:1] in ("", " ", chr(9), ")")
 
 selected = state["target"]["selected_semantic_candidates"]
 assert selected >= ledger["accounting"]["after"]  # historical minimum, not a ceiling
