@@ -67,6 +67,6 @@ jobs:
         with:
           name: real-block-physical-candidate
           path: |
-            \${{ runner.temp }}/block-mirror/lib/machine/block.sens
-            \${{ runner.temp }}/block-report.json
+            ${{ runner.temp }}/block-mirror/lib/machine/block.sens
+            ${{ runner.temp }}/block-report.json
           if-no-files-found: warn
