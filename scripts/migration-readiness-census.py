@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 ARTIFACT_ARGS = [
-    "--foundation", "knowledge/d1-d7-foundation.json",
+    "--foundation", "knowledge/d1-d9-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
     "--semantic-generated", "crates/sens/src/semantic_registry_generated.rs",
     "--semantic-registry", "crates/sens/src/semantic_registry.rs",
@@ -43,6 +43,7 @@ def build_report() -> dict:
             sys.executable, str(MIGRATOR), str(ROOT),
             "--out", str(output), *ARTIFACT_ARGS,
             "--report", str(report), "--dry-run", "--unpaired-only",
+            "--source-era", "auto",
         ]
         completed = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=180)
         if not report.is_file():
@@ -53,7 +54,10 @@ def build_report() -> dict:
         written = list(output.rglob("*.sens")) if output.exists() else []
         result = {
             "schema": "sens-t5-migration-readiness/v1",
-            "authority": "research-only; no source or .sens artifact is written",
+            "authority": "research-only; ratified D1-D9, W8 auto fail-closed; no .sens written",
+            "foundation_path": "knowledge/d1-d9-foundation.json",
+            "source_era": "auto",
+            "ratified_foundation_sha256": state.get("authority", {}).get("foundation_sha256"),
             "mode": "original unpaired .lisp only; full-repository dry-run",
             "skipped_existing_sens_pairs": state.get("skipped_paired_paths", []),
             "migrator_exit_code": completed.returncode,
