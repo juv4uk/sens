@@ -1209,3 +1209,72 @@
         (00101001
           (00000101 instructions)
           (x86-encode-program (00000110 instructions)))))))
+
+; #2372 reusable VEX3 XMM register law.
+; byte1 = C4; byte2 = ~R ~X ~B m-mmmm; byte3 = W ~vvvv L pp.
+; These are machine bytes in the same exact Number carrier as the existing
+; x86 encoder, so the instruction-set witness can compare identity, not print.
+(00001001 x86-vex3-byte2
+  (00001000 (map r x b)
+    (00001100
+      (00001110 (00001101 1 r) 128)
+      (00001100
+        (00001110 (00001101 1 x) 64)
+        (00001100
+          (00001110 (00001101 1 b) 32)
+          map)))))
+
+(00001001 x86-vex3-byte3
+  (00001000 (w vvvv l pp)
+    (00001100
+      (00001110 w 128)
+      (00001100
+        (00001110 (00001101 15 vvvv) 8)
+        (00001100
+          (00001110 l 4)
+          pp)))))
+
+(00001001 x86-encode-vex3-xmm-xmm-xmm
+  (00001000 (map w l pp opcode dst src1 src2)
+    (10011100
+      ((dst-code (x86-xmm-reg-code dst))
+       (src1-code (x86-xmm-reg-code src1))
+       (src2-code (x86-xmm-reg-code src2)))
+      (00100111
+        196
+        (x86-vex3-byte2
+          map
+          (x86-high1 dst-code)
+          0
+          (x86-high1 src2-code))
+        (x86-vex3-byte3 w src1-code l pp)
+        opcode
+        (x86-encode-modrm
+          3
+          (x86-low3 dst-code)
+          (x86-low3 src2-code))))))
+
+; VANDNPS xmm,xmm,xmm: VEX.128.0F.WIG 55 /r.
+(00001001 x86-encode-vandnps-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 0 85 dst src1 src2)))
+
+; VANDNPD xmm,xmm,xmm: VEX.128.66.0F.WIG 55 /r.
+(00001001 x86-encode-vandnpd-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 1 85 dst src1 src2)))
+
+; VADDPD xmm,xmm,xmm: VEX.128.66.0F.WIG 58 /r.
+(00001001 x86-encode-vaddpd-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 1 88 dst src1 src2)))
+
+; VADDPS xmm,xmm,xmm: VEX.128.0F.WIG 58 /r.
+(00001001 x86-encode-vaddps-xmm-xmm-xmm
+  (00001000 (dst src1 src2)
+    (x86-encode-vex3-xmm-xmm-xmm
+      1 0 0 0 88 dst src1 src2)))
+
