@@ -1,0 +1,31 @@
+name: D10 quantity derived-vs-resident research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-quantity-derived-review-v1.json'
+      - 'tests/test_d10_quantity_derived_review.py'
+      - '.github/workflows/d10-quantity-derived-review.yml'
+      - 'lib/quantity.lisp'
+      - 'lib/si.lisp'
+      - 'lib/translation.lisp'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-quantity-derived-review-v1.json'
+      - 'tests/test_d10_quantity_derived_review.py'
+      - '.github/workflows/d10-quantity-derived-review.yml'
+      - 'lib/quantity.lisp'
+      - 'lib/si.lisp'
+      - 'lib/translation.lisp'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+permissions:
+  contents: read
+jobs:
+  proposal-dedup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert pinned donors, D10 duplicate guard and no unauthorized coordinates
+        run: python3 -m unittest discover -s tests -p 'test_d10_quantity_derived_review.py' -v
