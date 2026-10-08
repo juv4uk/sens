@@ -5,10 +5,7 @@ Two outputs are deliberately different:
 
 1. --mirror
    Conservative source migration: rewrite only admitted executable call heads.
-2. --sens-mirror (NEW canonical migration destination)
-   Preserve the input name, replacing .lisp with .sens, and write real
-   physically packed T5 bytes; block non-binary leftovers; no overwrite.
-3. --binary-mirror (legacy staging ONLY, NEVER a .sens deliverable)
+2. --binary-mirror
    Produce visible-binary SENS source:
    - D2 owns list structure: 10=open, 01=close, 11=dot, 00=separator;
    - executable admitted heads use their exact D3-D6 words;
@@ -29,9 +26,6 @@ import json
 from pathlib import Path
 import re
 import sys
-import os
-import tempfile
-from sens_t5_codec import SensT5Error, encode_projection, decode_bytes, parse_words, typed_sha256
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -41,7 +35,10 @@ from domain_tables import read_domain_table
 from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
-LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt"}  # .sens is packed BYTES, NEVER text
+CONTRACT_CALL_DOMAINS = CALL_DOMAINS
+CONTRACT_SURFACE_DOMAINS = ("D3", "D4", "D5", "D6", "D8", "D9")
+CONTRACT_DOMAINS = ("D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9")
+LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
 BINARY_MASTER_EXTS = {".lisp"}
 SKIP_DIRS = {
     ".git", ".hg", ".svn", "target", "node_modules", ".venv", "venv",
@@ -98,6 +95,76 @@ def build_map(data, domains):
                 raise SystemExit(f"duplicate label across selected domains: {key}")
             out[key] = Entry(domain, width, bits, str(label), authority)
     return out
+
+
+def build_binary_authority(data, domains=CONTRACT_DOMAINS):
+    """Index every ratified exact-domain coordinate without human-name authority."""
+    out = {}
+    for domain in domains:
+        desc = data["domains"].get(domain)
+        if desc is None:
+            continue
+        width = int(desc["width"])
+        authority = str(desc.get("authority", data.get("authority", "unknown")))
+        for bits, label in desc["residents"].items():
+            if len(bits) != width or set(bits) - {"0", "1"}:
+                raise BinaryMigrationError(
+                    f"{domain}: invalid exact-width word {bits}"
+                )
+            key = (width, bits)
+            if key in out:
+                raise BinaryMigrationError(
+                    f"duplicate exact binary coordinate: {domain}:{bits}"
+                )
+            out[key] = Entry(
+                domain=domain,
+                width=width,
+                bits=bits,
+                label=str(label),
+                authority=authority,
+            )
+    return out
+
+
+def validate_contract_binary_output(
+    rendered: str,
+    authority: dict[tuple[int, str], Entry],
+    *,
+    d1_enabled: bool,
+    d9_enabled: bool,
+) -> None:
+    """Fail closed unless every emitted word is an admitted exact coordinate."""
+    for word in rendered.split():
+        if not re.fullmatch(r"[01]+", word):
+            raise BinaryMigrationError(
+                f"contract-authority output contains non-binary token {word!r}"
+            )
+        width = len(word)
+        if width == 1:
+            if not d1_enabled:
+                raise BinaryMigrationError(
+                    f"D1 word {word!r} requires GREEN exact-W1 reader support"
+                )
+            if (width, word) not in authority:
+                raise BinaryMigrationError(
+                    f"unadmitted D1 exact binary word {word!r}"
+                )
+            continue
+        if width == 2:
+            # D2 is the only structural exception to ordinary semantic residents.
+            if (width, word) not in authority:
+                raise BinaryMigrationError(
+                    f"D2 structural word {word!r} is outside current authority"
+                )
+            continue
+        if width == 9 and not d9_enabled:
+            raise BinaryMigrationError(
+                f"W9 word {word!r} requires GREEN exact-W9 reader/carrier support"
+            )
+        if (width, word) not in authority:
+            raise BinaryMigrationError(
+                f"unadmitted exact binary word {word!r} (width={width})"
+            )
 
 
 def _entry_index(code_map):
@@ -628,6 +695,83 @@ def _emit_item(out, words, need_separator):
     out.extend(words)
 
 
+def resolve_contract_binary_token(
+    token: str,
+    *,
+    binary_authority: dict[tuple[int, str], Entry],
+    d1_enabled: bool,
+    d9_enabled: bool,
+) -> str:
+    """Resolve one already-binary data token under Contract 11.8 authority."""
+    width = len(token)
+    if width == 1:
+        if not d1_enabled:
+            raise BinaryMigrationError(
+                f"D1 word {token!r} requires GREEN exact-W1 reader support"
+            )
+        if (width, token) not in binary_authority:
+            raise BinaryMigrationError(
+                f"unadmitted D1 exact binary word {token!r}"
+            )
+    if width == 9 and not d9_enabled:
+        raise BinaryMigrationError(
+            f"W9 word {token!r} requires GREEN exact-W9 reader/carrier support"
+        )
+
+    exact = binary_authority.get((width, token))
+    if exact is not None:
+        if width == 2:
+            raise BinaryMigrationError(
+                f"D2 word {token!r} is structural control only"
+            )
+
+        # In Contract-authority mode a bare exact binary word is already canonical.
+        # Historical SID8 evidence is never allowed to reinterpret it here.
+        return token
+
+    raise BinaryMigrationError(
+        f"unadmitted exact binary word {token!r}"
+    )
+
+
+def resolve_binary_executable_head(
+    token: str,
+    *,
+    contract_authority: bool,
+    resolver: SourceResolver | None,
+    binary_authority: dict[tuple[int, str], Entry],
+) -> Entry:
+    """Resolve a callable head without allowing width to mint callability."""
+    if contract_authority and re.fullmatch(r"[01]+", token):
+        identity = binary_authority.get((len(token), token))
+        if identity is None:
+            raise BinaryMigrationError(
+                f"unadmitted exact binary executable head {token!r}"
+            )
+        return identity
+
+    if resolver is None:
+        raise BinaryMigrationError(
+            "history-aware SourceResolver is required for binary migration"
+        )
+
+    resolution = resolver.resolve_head(token)
+    if not resolution.resolved:
+        detail = (
+            ", ".join(resolution.ambiguous)
+            if resolution.ambiguous
+            else "no proven current exact-domain identity"
+        )
+        raise BinaryMigrationError(
+            f"unresolved executable head {token!r}: "
+            f"{resolution.kind}; {detail}"
+        )
+
+    identity = resolution.current
+    assert identity is not None
+    return identity
+
+
 def binary_rewrite(
     text,
     code_map,
@@ -635,6 +779,11 @@ def binary_rewrite(
     legacy_sid_map=None,
     registry_surface_sid_map=None,
     resolver: SourceResolver | None = None,
+    *,
+    contract_authority: bool = False,
+    binary_authority: dict[tuple[int, str], Entry] | None = None,
+    d1_enabled: bool = False,
+    d9_enabled: bool = False,
 ):
     """Encode one source file as exact-width visible binary SENS words."""
     source = strip_comments(text)
@@ -645,6 +794,7 @@ def binary_rewrite(
         (entry.width, entry.bits): entry
         for entry in code_map.values()
     }
+    binary_authority = binary_authority or {}
 
     out = []
     hits = []
@@ -727,6 +877,8 @@ def binary_rewrite(
             else:
                 raise BinaryMigrationError("unterminated string")
             token = source[start:i]
+            # Quoted digits are ordinary Text7 string data.  Only an unquoted
+            # binary source word may carry exact domain identity.
             out.extend(encode_text7_spelling(token, text7_candidates))
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
@@ -776,6 +928,11 @@ def binary_rewrite(
         if not token:
             raise BinaryMigrationError(f"cannot tokenize character {source[i]!r} at offset {i}")
 
+        if contract_authority and re.fullmatch(r"(?i)#b[01]+", token):
+            raise BinaryMigrationError(
+                f"legacy #b binary wrapper {token!r} is not canonical source"
+            )
+
         begin_item()
         frame = frames[-1] if frames else None
         is_head = bool(frame and frame["head"])
@@ -783,27 +940,22 @@ def binary_rewrite(
         resolved_label = None
 
         if is_head and not quoted:
-            if resolver is None:
+            identity = resolve_binary_executable_head(
+                token,
+                contract_authority=contract_authority,
+                resolver=resolver,
+                binary_authority=binary_authority,
+            )
+            if contract_authority and identity.domain not in CONTRACT_CALL_DOMAINS:
                 raise BinaryMigrationError(
-                    "history-aware SourceResolver is required for binary migration"
+                    f"non-callable authority resident used as executable head: "
+                    f"{identity.domain}:{identity.bits}"
                 )
-            resolution = resolver.resolve_head(token)
-            if not resolution.resolved:
-                detail = (
-                    ", ".join(resolution.ambiguous)
-                    if resolution.ambiguous
-                    else "no proven current exact-domain identity"
-                )
-                raise BinaryMigrationError(
-                    f"unresolved executable head {token!r}: "
-                    f"{resolution.kind}; {detail}"
-                )
-            identity = resolution.current
-            assert identity is not None
             if identity.label == "EMPTY":
                 raise BinaryMigrationError(
                     "structural EMPTY/000 cannot be used as a callable head"
                 )
+
             out.append(identity.bits)
             resolved_label = identity.label
             line, col = line_col(source, start)
@@ -815,10 +967,21 @@ def binary_rewrite(
                 identity.domain,
             ))
         else:
+            # In contract-authority mode, a bare binary word is already canonical
+            # source.  Keep its exact width instead of spelling its digits as D7.
+            if contract_authority and re.fullmatch(r"[01]+", token):
+                out.append(
+                    resolve_contract_binary_token(
+                        token,
+                        binary_authority=binary_authority,
+                        d1_enabled=d1_enabled,
+                        d9_enabled=d9_enabled,
+                    )
+                )
             # Explicit legacy SID values are semantic identities even outside a
             # call head; migrate them by named historical evidence rather than
             # spelling their eight digits as Text7.
-            if re.fullmatch(r"[01]{8}", token):
+            elif re.fullmatch(r"[01]{8}", token):
                 if resolver is None:
                     raise BinaryMigrationError(
                         "history-aware SourceResolver is required for SID data migration"
@@ -869,6 +1032,13 @@ def binary_rewrite(
         rendered += "\n"
     if rendered and (set(rendered) - {"0", "1", " ", "\n", "\t", "\r"}):
         raise AssertionError("binary migration emitted a non-binary source character")
+    if contract_authority:
+        validate_contract_binary_output(
+            rendered,
+            binary_authority,
+            d1_enabled=d1_enabled,
+            d9_enabled=d9_enabled,
+        )
     return rendered, hits, sorted(shadowed)
 
 
@@ -888,11 +1058,12 @@ def main():
     parser.add_argument("root", type=Path, help="repository or source tree")
     parser.add_argument("--foundation", type=Path, required=True)
     parser.add_argument("--domains", nargs="+", default=list(CALL_DOMAINS))
-    parser.add_argument("--apply", action="store_true", help="rewrite supported source in place")
     parser.add_argument(
-        "--sens-mirror", type=Path,
-        help="write NEW packed T5 .sens files with same stem as .lisp; no overwrite",
+        "--contract-authority",
+        action="store_true",
+        help="strict current Contract 11.8 binary-source authority mode",
     )
+    parser.add_argument("--apply", action="store_true", help="rewrite supported source in place")
     parser.add_argument("--mirror", type=Path, help="write conservative migrated mirror")
     parser.add_argument(
         "--binary-mirror",
@@ -927,25 +1098,65 @@ def main():
     parser.add_argument("--report", type=Path, default=Path("sens-code-migration-report.json"))
     args = parser.parse_args()
 
-    selected_modes = sum(bool(x) for x in (
-        args.apply, args.mirror, args.binary_mirror, args.sens_mirror
-    ))
+    selected_modes = sum(bool(x) for x in (args.apply, args.mirror, args.binary_mirror))
     if selected_modes > 1:
-        parser.error("--apply, --mirror, --binary-mirror and --sens-mirror are mutually exclusive")
+        parser.error("--apply, --mirror and --binary-mirror are mutually exclusive")
+    if args.contract_authority and (args.apply or args.mirror):
+        parser.error("--contract-authority is only valid with --binary-mirror")
+    if args.contract_authority and not args.binary_mirror:
+        parser.error("--contract-authority requires --binary-mirror")
 
     foundation, digest = load_foundation(args.foundation)
-    code_map = build_map(foundation, args.domains)
-    code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
-    code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
+    # Contract-authority mode is intentionally stacked on tested W1/W9 reader
+    # ancestry (#4292 on the merged #4258 W9 main cut).  Capability is a release
+    # prerequisite, never inferred from grep-able implementation text.
+    d1_enabled = bool(args.contract_authority)
+    d9_enabled = bool(args.contract_authority)
+    selected_domains = list(args.domains)
+    selected_surfaces = list(args.domain_surfaces)
+    current_resolver_domains = tuple(dict.fromkeys(selected_domains))
+    if args.contract_authority:
+        # Only already-callable domains may enter the human/source-head map.
+        # D8/D9 remain resolver evidence so attempted executable use can fail
+        # named/non-callable, while semantic membership itself is owned by the
+        # exact (width,bits) binary_authority below.
+        selected_domains = list(CONTRACT_CALL_DOMAINS)
+        selected_surfaces.extend(
+            path
+            for path in (
+                Path("lib/domains/d8.lisp"),
+                Path("lib/domains/d9.lisp"),
+            )
+            if path not in selected_surfaces and path.exists()
+        )
+        current_resolver_domains = tuple(CONTRACT_SURFACE_DOMAINS)
+    code_map = build_map(foundation, selected_domains)
+    code_map = augment_code_map_with_domain_surfaces(code_map, selected_surfaces)
+    if not args.contract_authority:
+        code_map = augment_code_map_with_registry_aliases(
+            code_map,
+            args.semantic_registry,
+        )
     resolver = build_resolver(
         historical_map=args.historical_map,
         foundation=args.foundation,
         registry=args.semantic_registry,
-        domain_surfaces=args.domain_surfaces,
+        domain_surfaces=selected_surfaces,
+        current_domains=current_resolver_domains,
+    )
+    binary_authority = (
+        build_binary_authority(
+            foundation,
+            CONTRACT_DOMAINS if d9_enabled else tuple(
+                domain for domain in CONTRACT_DOMAINS if domain != "D9"
+            ),
+        )
+        if args.contract_authority
+        else {}
     )
     text7_candidates = (
         build_text7_encoder(foundation, args.text7_projection)
-        if (args.binary_mirror or args.sens_mirror)
+        if args.binary_mirror
         else None
     )
     legacy_sid_map = (
@@ -965,11 +1176,11 @@ def main():
     blocked_files = 0
     total_hits = 0
 
-    for path in source_files(root, binary_master=bool(args.binary_mirror or args.sens_mirror)):
+    for path in source_files(root, binary_master=bool(args.binary_mirror)):
         text = path.read_text(encoding="utf-8")
         rel = path.relative_to(root)
 
-        if args.binary_mirror or args.sens_mirror:
+        if args.binary_mirror:
             try:
                 converted, hits, shadowed = binary_rewrite(
                     text,
@@ -978,49 +1189,22 @@ def main():
                     legacy_sid_map,
                     registry_surface_sid_map,
                     resolver,
+                    contract_authority=args.contract_authority,
+                    binary_authority=binary_authority,
+                    d1_enabled=d1_enabled,
+                    d9_enabled=d9_enabled,
                 )
                 if not converted.strip():
                     status = "empty"
                 else:
-                    if args.sens_mirror:
-                        target = args.sens_mirror / rel.with_suffix(".sens")
-                        source_words = parse_words(converted)
-                        physical = encode_projection(converted)
-                        if decode_bytes(physical) != source_words:
-                            raise SensT5Error("physical T5 roundtrip changed exact typed words")
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        # Atomic no-overwrite: stage beside destination, link O_EXCL.
-                        staged_path = None
-                        try:
-                            with tempfile.NamedTemporaryFile(
-                                mode="wb", prefix=".sens-stage-", suffix=".tmp",
-                                dir=target.parent, delete=False,
-                            ) as staged:
-                                staged_path = Path(staged.name)
-                                staged.write(physical)
-                                staged.flush()
-                                os.fsync(staged.fileno())
-                            os.link(staged_path, target)
-                        finally:
-                            if staged_path is not None:
-                                staged_path.unlink(missing_ok=True)
-                        status = "sens-written"
-                        extra = {
-                            "output": str(rel.with_suffix(".sens")),
-                            "physical_bytes": len(physical),
-                            "physical_sha256": sha256(physical).hexdigest(),
-                            "typed_word_sha256": typed_sha256(source_words),
-                        }
-                    else:
-                        target = args.binary_mirror / rel
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        target.write_text(converted, encoding="ascii")
-                        status = "binary-mirrored"
-                        extra = {}
+                    target = args.binary_mirror / rel
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text(converted, encoding="ascii")
+                    status = "binary-mirrored"
                     rewritten_files += 1
                 total_hits += len(hits)
                 blocked = []
-            except (BinaryMigrationError, SensT5Error, OSError) as error:
+            except BinaryMigrationError as error:
                 converted = ""
                 hits = []
                 shadowed = []
@@ -1054,13 +1238,11 @@ def main():
             "hits": [asdict(x) for x in hits],
             "shadowed_labels": shadowed,
             "blockers": blocked,
-            **(extra if (args.binary_mirror or args.sens_mirror) and status == "sens-written" else {}),
         })
 
     mode = (
         "apply" if args.apply
         else "mirror" if args.mirror
-        else "sens-mirror" if args.sens_mirror
         else "binary-mirror" if args.binary_mirror
         else "audit"
     )
@@ -1074,9 +1256,17 @@ def main():
         "root": str(root),
         "mode": mode,
         "binary_source_rule": (
-            "D2 structure + exact D3-D6 callable heads + D7/Text7 spelling; comments absent"
-            if args.binary_mirror or args.sens_mirror else None
+            "D2 + exact current-domain words + D7/Text7; "
+            "D1 waits for W1 reader support; comments absent"
+            if args.binary_mirror and args.contract_authority
+            else (
+                "D2 structure + exact D3-D6 callable heads + D7/Text7 spelling; "
+                "comments absent"
+            )
+            if args.binary_mirror else None
         ),
+        "contract_authority": args.contract_authority,
+        "w9_enabled": d9_enabled,
         "summary": {
             "files_seen": len(rows),
             "files_written": rewritten_files,
@@ -1092,7 +1282,7 @@ def main():
     )
     print(json.dumps(report["summary"], ensure_ascii=False))
 
-    if args.binary_mirror or args.sens_mirror:
+    if args.binary_mirror:
         return 0 if rewritten_files else 2
     return 2 if blocked_files else (1 if total_hits and not (args.apply or args.mirror) else 0)
 
