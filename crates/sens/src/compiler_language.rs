@@ -1363,7 +1363,7 @@ mod tests {
         assert!(!requests.is_empty(), "whole artifact must carry SENS-produced requests");
         let expected_request_digest = match crate::eval::invoke_value(
             &canonical_value_sha256_mechanism(),
-            &[request_value.clone()],
+            std::slice::from_ref(request_value),
             &crate::Environment::root(),
             Span::default(),
         )
