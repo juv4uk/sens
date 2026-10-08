@@ -115,12 +115,12 @@ class T5ProofPublisherTests(unittest.TestCase):
     def test_real_current_sens_eval_and_historical_observables_match_bytes(self):
         self.assertTrue(READER.is_file(), "build real sens-trit first")
         path = ROOT / "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
-        historical = [sys.executable, "-c", "print('NIL')", "{source}"]
+        historical = [sys.executable, "-c", "print('()')", "{source}"]
         proof = {
             "source": "lib/machine/block.lisp",
             "historical_observation": {
                 "command": historical,
-                "stdout_sha256": hashlib.sha256(b"NIL\n").hexdigest(),
+                "stdout_sha256": hashlib.sha256(b"()\n").hexdigest(),
             },
         }
         # Synthetic historical oracle tests the COMPARE mechanism only. It is
