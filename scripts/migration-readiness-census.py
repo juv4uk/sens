@@ -159,15 +159,19 @@ def build_report() -> dict:
             for era in ("auto", "legacy", "current")
         }
         transitions: collections.Counter[tuple[str, str, str]] = collections.Counter()
+        transition_paths: dict[tuple[str, str, str], list[str]] = collections.defaultdict(list)
         for row in queue_rows:
             reasons = row["blocker_by_era"]
-            transitions[tuple(
+            transition = tuple(
                 classify(reasons.get(era) or "mechanical-candidate")
                 for era in ("auto", "legacy", "current")
-            )] += 1
+            )
+            transitions[transition] += 1
+            if len(transition_paths[transition]) < 5:
+                transition_paths[transition].append(row["path"])
         top_transitions = [
             {"auto": reasons[0], "legacy": reasons[1], "current": reasons[2],
-             "files": count}
+             "files": count, "example_original_paths": transition_paths[reasons]}
             for reasons, count in transitions.most_common(40)
         ]
 
