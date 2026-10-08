@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only audit of physically packed T5 .sens + same-stem .lisp pairs.
+"""Read-only audit of physical T5 + Ukrainian .lisp + optional spaced-bit view.
 
 Scope: physical file identity and source provenance, NOT oracle certification.
 Never creates, deletes, fixes or converts any source or target.
@@ -44,7 +44,8 @@ def _sha(data: bytes) -> str:
 
 
 def inspect(root: Path, *, strict_semantic: bool = False,
-            include_untracked: bool = False) -> dict:
+            include_untracked: bool = False,
+            require_spaced_view: bool = False) -> dict:
     root = root.resolve(strict=True)
     if not root.is_dir():
         raise ValueError("root must be directory")
@@ -57,6 +58,8 @@ def inspect(root: Path, *, strict_semantic: bool = False,
         row = {
             "sens": rel.as_posix(),
             "source": rel.with_suffix(".lisp").as_posix(),
+            "view": rel.with_suffix("").as_posix(),
+            "view_status": "NOT_CHECKED",
             "physical_status": "BLOCKED",
             "source_status": "NOT_CHECKED",
         }
@@ -102,6 +105,38 @@ def inspect(root: Path, *, strict_semantic: bool = False,
                     if source_words != words:
                         raise ValueError("binary source word identities differ from .sens")
                     row["source_status"] = "EXACT_BINARY_SOURCE"
+
+            # The extensionless third projection is a GENERATED read-only view.
+            # Verify exact canonical ASCII bytes from the PHYSICAL .sens, not
+            # from a potentially untrusted source or a whitespace-tolerant split().
+            # Source→current-SENS semantic parity remains a SEPARATE oracle.
+            view = root / rel.with_suffix("")
+            if view.is_symlink():
+                row["view_status"] = "BLOCKED"
+                row["view_reason"] = "symlink extensionless view forbidden"
+            elif view.exists():
+                if not view.is_file():
+                    row["view_status"] = "BLOCKED"
+                    row["view_reason"] = "extensionless view must be a regular file"
+                else:
+                    try:
+                        actual_view = view.read_bytes()
+                    except OSError as exc:
+                        row["view_status"] = "BLOCKED"
+                        row["view_reason"] = str(exc)
+                    else:
+                        canonical_view = (" ".join(words) + "\n").encode("ascii")
+                        if actual_view != canonical_view:
+                            row["view_status"] = "BLOCKED"
+                            row["view_reason"] = (
+                                "extensionless spaced-bit view differs from "
+                                "canonical T5 typed words or ASCII/LF layout"
+                            )
+                        else:
+                            row["view_status"] = "PASS"
+                            row["view_sha256"] = _sha(actual_view)
+            else:
+                row["view_status"] = "MISSING_NOT_CERTIFIED"
         except (OSError, SensT5Error, ValueError) as exc:
             row["error"] = str(exc)
             row["physical_status"] = "BLOCKED"
@@ -110,10 +145,14 @@ def inspect(root: Path, *, strict_semantic: bool = False,
     physical_blockers = sum(row["physical_status"] == "BLOCKED" for row in entries)
     pending_oracle = sum(row["source_status"] == "PENDING_ORACLE" for row in entries)
     exact_binary = sum(row["source_status"] == "EXACT_BINARY_SOURCE" for row in entries)
+    view_pass = sum(row["view_status"] == "PASS" for row in entries)
+    view_missing = sum(row["view_status"] == "MISSING_NOT_CERTIFIED" for row in entries)
+    view_blocked = sum(row["view_status"] == "BLOCKED" for row in entries)
     return {
         "schema": SCHEMA,
         "mode": "tracked-only" if not include_untracked else "all-files",
         "strict_semantic": strict_semantic,
+        "require_spaced_view": require_spaced_view,
         "empty_is_not_certification": len(entries) == 0,
         "summary": {
             "sens_files": len(entries),
@@ -121,17 +160,24 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             "physical_blocked": physical_blockers,
             "exact_binary_source_pairs": exact_binary,
             "pending_oracle": pending_oracle,
+            "spaced_view_pass": view_pass,
+            "spaced_view_missing": view_missing,
+            "spaced_view_blocked": view_blocked,
             "admitted_executable_semantics": None,
         },
         "status": (
-            "BLOCKED" if physical_blockers or (strict_semantic and pending_oracle)
+            "BLOCKED" if (physical_blockers or view_blocked
+                          or (require_spaced_view and view_missing)
+                          or (strict_semantic and pending_oracle))
             else "NO_FILES" if not entries else
             "MECHANICAL_ONLY" if pending_oracle else "EXACT_BINARY_PAIRS"
         ),
         "files": entries,
         "warning": (
             "Physical T5 and a source pair do not prove parser/oracle semantics. "
-            "Symbolic Lisp remains PENDING_ORACLE; no automatic execution."
+            "Missing extensionless views are NOT certified unless explicitly "
+            "required for a scoped admitted cohort. Symbolic Lisp remains "
+            "PENDING_ORACLE; no automatic execution."
         ),
     }
 
@@ -144,10 +190,13 @@ def main(argv: list[str] | None = None) -> int:
                         help="require exact 0/1 source identity; block symbolic .lisp")
     parser.add_argument("--include-untracked", action="store_true",
                         help="scan all .sens files; default scans only git-tracked files")
+    parser.add_argument("--require-spaced-view", action="store_true",
+                        help="fail if any checked .sens has no canonical same-stem ASCII view; scope to an admitted cohort")
     args = parser.parse_args(argv)
     try:
         report = inspect(args.root, strict_semantic=args.strict_semantic,
-                         include_untracked=args.include_untracked)
+                         include_untracked=args.include_untracked,
+                         require_spaced_view=args.require_spaced_view)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(
