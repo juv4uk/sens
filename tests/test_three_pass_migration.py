@@ -434,6 +434,26 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
 
+    def test_global_text7_call_head_uses_same_frame_as_define_target(self):
+        source="""\\
+(00001001 foo
+  (00001000 ()
+    1))
+(foo)
+"""
+        projection,resolver=self.migrate(source)
+        frame=mod.frame_text7(
+            mod.text7_encode("foo",self.text7,mod.Tok("ATOM","foo",0)),
+            mod.Tok("ATOM","foo",0),
+        )
+        frame_text=" ".join(frame)
+        self.assertGreaterEqual(projection.count(frame_text),2)
+        self.assertEqual(resolver.counts["pass4-text7-global"],1)
+        self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()))
+        payload=mod.encode_projection(projection)
+        self.assertEqual(mod.decode_bytes(payload),projection.split())
+
+
     def test_real_machine_block_closes_all_global_and_local_symbolic_words(self):
         source=(ROOT/"lib"/"machine"/"block.lisp").read_text(encoding="utf-8")
         projection,resolver=self.migrate(source)
