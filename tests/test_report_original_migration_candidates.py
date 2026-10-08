@@ -290,7 +290,7 @@ class OriginalCandidateTests(unittest.TestCase):
         # All 25 ISA + 21 schema + 8 evidence + 13 fixture envelopes
         # were individually reviewed and landed on main; they are data.
         entries = mod.load_nonprogram_classification(ROOT)
-        self.assertEqual(len(entries), 67)
+        self.assertEqual(len(entries), 76)
         self.assertEqual(
             {name: sum(e["cohort"] == name for e in entries.values())
              for name in ("isa", "schema", "evidence", "expr-record")},
