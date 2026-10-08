@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """End-to-end safe batch regression using existing REAL Core1 executable .lisp."""
+import argparse
+import importlib.util
 import json
 from pathlib import Path
 import shutil
@@ -7,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 REPO = Path(__file__).resolve().parents[1]
 DRIVER = REPO / "scripts/migrate-t5-batch.py"
@@ -93,10 +96,81 @@ class RealBatchTest(unittest.TestCase):
         self.assertEqual(p.returncode, 2, p.stderr + p.stdout)
         doc = json.loads(self.report.read_text())
         self.assertEqual(doc["summary"]["files_seen"], 2)
-        self.assertEqual(doc["summary"]["files_written"], 1)
+        self.assertEqual(doc["summary"]["files_written"], 0)
+        self.assertEqual(doc["summary"]["files_would_write"], 1)
         self.assertEqual(doc["summary"]["files_blocked"], 1)
+        self.assertEqual(doc["files"][0]["status"], "would-write")
         self.assertEqual(doc["files"][1]["status"], "blocked")
+        self.assertFalse((self.out / "lib/third.sens").exists())
         self.assertFalse((self.out / "lib/unknown.sens").exists())
+
+    def test_two_proven_sources_publish_as_one_transaction(self):
+        branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
+        shutil.copy2(branch, self.root / "lib/branch.lisp")
+        p = self.call("lib/third.lisp", "lib/branch.lisp", write=True)
+        self.assertEqual(p.returncode, 0, p.stderr + p.stdout)
+        doc = json.loads(self.report.read_text())
+        self.assertEqual(doc["summary"]["files_written"], 2)
+        self.assertEqual(doc["summary"]["files_blocked"], 0)
+        self.assertEqual(
+            (self.out / "lib/third.sens").read_bytes(),
+            PROVEN.with_suffix(".sens").read_bytes()
+        )
+        self.assertEqual(
+            (self.out / "lib/branch.sens").read_bytes(),
+            branch.with_suffix(".sens").read_bytes()
+        )
+
+    def test_existing_target_in_group_blocks_every_other_write(self):
+        # A pre-existing destination is never overwritten, AND no other
+        # candidate in the cohort may be published if this one BLOCKS.
+        branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
+        shutil.copy2(branch, self.root / "lib/branch.lisp")
+        (self.out / "lib").mkdir(parents=True)
+        (self.out / "lib/branch.sens").write_bytes(b"sentinel")
+        p = self.call("lib/third.lisp", "lib/branch.lisp", write=True)
+        self.assertEqual(p.returncode, 2, p.stderr + p.stdout)
+        d = json.loads(self.report.read_text())
+        self.assertEqual(d["summary"]["files_written"], 0)
+        self.assertEqual(d["summary"]["files_would_write"], 1)
+        self.assertEqual(d["summary"]["files_blocked"], 1)
+        self.assertEqual((self.out / "lib/branch.sens").read_bytes(), b"sentinel")
+        self.assertFalse((self.out / "lib/third.sens").exists())
+
+    def test_mid_transaction_writer_failure_rolls_back_created_binary(self):
+        branch = REPO / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
+        shutil.copy2(branch, self.root / "lib/branch.lisp")
+        spec = importlib.util.spec_from_file_location(
+            "sens_atomic_batch_test_impl", DRIVER)
+        assert spec is not None and spec.loader is not None
+        batch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(batch)
+        original_writer = batch.mig.write_atomic_no_clobber
+        calls = []
+
+        def intermittent_writer(target, payload):
+            calls.append(target)
+            if len(calls) == 2:
+                raise OSError("test injected second-write failure")
+            original_writer(target, payload)
+
+        args = argparse.Namespace(
+            paths=["lib/branch.lisp", "lib/third.lisp"], root=self.root,
+            out=self.out, report=self.report, source_era="legacy", write=True,
+        )
+        with patch.object(batch.mig, "write_atomic_no_clobber",
+                          side_effect=intermittent_writer):
+            outcome = batch.run(args)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(outcome["summary"]["files_written"], 0)
+        self.assertEqual(outcome["summary"]["files_blocked"], 1)
+        self.assertEqual(outcome["summary"]["files_would_write"], 1)
+        self.assertIn("atomic batch aborted",
+                      str([e.get("reason", "") for e in outcome["files"]]))
+        self.assertFalse((self.out / "lib/branch.sens").exists())
+        self.assertFalse((self.out / "lib/third.sens").exists())
+        self.assertEqual((self.root / "lib/branch.lisp").read_bytes(),
+                         branch.read_bytes())
 
     def test_symlinks_traversal_bad_suffix_and_absent_sources_are_rejected(self):
         (self.root / "lib/link.lisp").symlink_to(self.root / "lib/third.lisp")
