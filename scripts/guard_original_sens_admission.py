@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import re
@@ -92,6 +93,27 @@ def source_and_binary(root: Path, path: Path) -> tuple[Path, Path]:
     return root / source, root / path
 
 
+def reviewed_source_kind_guard(root: Path, source: Path) -> None:
+    """Use SAME immutable nonprogram/archival policy as the production operator.
+
+    This is not semantic admission: outside the reviewed exclusions, program
+    classification and original-current oracle still require independent proof.
+    """
+    path = root / "scripts/migrate-sens.py"
+    if not path.is_file() or path.is_symlink():
+        raise Blocked("SOURCE_KIND: canonical nonprogram authority unavailable")
+    spec = importlib.util.spec_from_file_location("sens_original_kind_operator", path)
+    if spec is None or spec.loader is None:
+        raise Blocked("SOURCE_KIND: cannot load canonical operator")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+        module.reject_classified_nonprogram([source.as_posix()], root)
+    except (OSError, ValueError, ImportError) as exc:
+        raise Blocked("SOURCE_KIND: " + str(exc)) from exc
+
+
 def manifests_for(root: Path, source: Path) -> list[tuple[Path, dict]]:
     manifests = []
     for file in sorted((root / MANIFEST_DIR).glob("*.json")):
@@ -139,7 +161,7 @@ def attest(root: Path, reader: Path, file: Path, manifest: Path,
 
 
 def inspect(root: Path, base: str, reader: Path,
-            attestor=attest) -> dict:
+            attestor=attest, kind_guard=reviewed_source_kind_guard) -> dict:
     root = root.resolve(strict=True)
     reader = reader.resolve(strict=True)
     if not reader.is_file() or reader.is_symlink():
@@ -153,6 +175,11 @@ def inspect(root: Path, base: str, reader: Path,
         rows.append(row)
         # All candidate Git outputs must be regular source/target pairs.
         source_file, binary_file = source_and_binary(root, binary)
+        try:
+            kind_guard(root, source)
+        except Blocked as exc:
+            row["reason"] = str(exc)
+            continue
         prior = old_source_blob(root, base, source)
         if prior is None:
             row["status"] = "NEW_COHORT_NOT_ORIGINAL"
