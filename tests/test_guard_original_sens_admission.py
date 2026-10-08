@@ -103,6 +103,20 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         self.assertEqual(state["status"], "BLOCKED")
         self.assertIn("SOURCE_CHANGED", state["files"][0]["reason"])
 
+    def test_committed_source_change_cannot_be_hidden_by_dirty_worktree(self):
+        (self.root / self.src).write_bytes(b"(00000100 ())\\n")
+        self.add_original_binary()
+        # Restore worktree only. The PR HEAD would still ship modified source!
+        original = subprocess.run(
+            ["git", "show", f"{self.base}:{self.src.as_posix()}"],
+            cwd=self.root, capture_output=True, check=True,
+        ).stdout
+        (self.root / self.src).write_bytes(original)
+        self.proof()
+        state = gate.inspect(self.root, self.base, self.reader, self.approved)
+        self.assertEqual(state["status"], "BLOCKED")
+        self.assertIn("SOURCE_CHANGED", state["files"][0]["reason"])
+
     def test_tampered_physical_digest_blocks_before_oracle(self):
         self.add_original_binary()
         manifest = self.proof()
