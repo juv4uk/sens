@@ -1,0 +1,20 @@
+{
+  "schema": "active-authored-lib-conversion-baseline/v1",
+  "status": "PARTIAL-BLOCKED-NOT-ADMISSION",
+  "authority": "#4449",
+  "source_snapshot_commit": "1d70dd7a0e760efe12078f1e44cb559af60d3db0",
+  "method": "sens-to-sens --check over active authored canonical Ukrainian .lisp source; counts measure mechanical source rewrite candidates only",
+  "known_blockers": [
+    {
+      "path": "lib/compiler-nucleus.lisp",
+      "git_blob_sha": "c81ff7341a3a18c7cb6ff8e77038318bb935b232",
+      "convertible": 311,
+      "named_calls": 311,
+      "blocked_host": 0,
+      "reason": "Known parser-convertible heads in canonical Ukrainian compiler source. Keep human-readable source intact; generated physical T5 and independent semantic oracle are separate proof obligations."
+    }
+  ],
+  "migration_credit": 0,
+  "physical_admission_effect": "NONE",
+  "update_rule": "Any change to a pinned source blob or measured count requires an explicit reviewed update to this manifest; any additional path/count fails the ratchet."
+}
