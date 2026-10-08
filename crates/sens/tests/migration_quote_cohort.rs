@@ -9,6 +9,14 @@ const SOURCE: &str =
     include_str!("../../../tests/fixtures/migration-quote-cohort/quote-legacy.lisp");
 const T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort/quote-legacy.sens");
+const MYLISP_SOURCE: &str =
+    include_str!("../../../tests/fixtures/migration-quote-cohort/quote-mylisp.lisp");
+const MYLISP_T5: &[u8] =
+    include_bytes!("../../../tests/fixtures/migration-quote-cohort/quote-mylisp.sens");
+const LISP15_SOURCE: &str =
+    include_str!("../../../tests/fixtures/migration-quote-cohort/quote-lisp15.lisp");
+const LISP15_T5: &[u8] =
+    include_bytes!("../../../tests/fixtures/migration-quote-cohort/quote-lisp15.sens");
 
 #[test]
 fn physical_quote_legacy_migration_runs_in_current_exact_domain_oracle() {
@@ -23,6 +31,23 @@ fn physical_quote_legacy_migration_runs_in_current_exact_domain_oracle() {
     let result = eval_parsed_expressions(&expressions, &mut Session::default())
         .expect("current evaluator executes D3 QUOTE of D3 EMPTY");
     assert!(matches!(result.value, Value::Nil));
+}
+
+#[test]
+fn three_physical_quote_sources_share_exact_current_identity() {
+    for (source, payload, expected_source) in [
+        (MYLISP_SOURCE, MYLISP_T5, "(quote ())"),
+        (LISP15_SOURCE, LISP15_T5, "(QUOTE ())"),
+    ] {
+        assert_eq!(source.trim_end(), expected_source);
+        assert_eq!(payload, T5);
+        let visible = open_ternary_program(payload).expect("physical T5 opens");
+        assert_eq!(visible, "10 001 00 000 01");
+        let expressions = parse_canonical_binary(&visible).expect("current exact source parses");
+        let result = eval_parsed_expressions(&expressions, &mut Session::default())
+            .expect("current evaluator executes migrated quote canary");
+        assert!(matches!(result.value, Value::Nil));
+    }
 }
 
 #[test]

@@ -17,6 +17,11 @@ FIXTURES = ROOT / "tests" / "fixtures" / "migration-quote-cohort"
 LEGACY_SOURCE = FIXTURES / "quote-legacy.lisp"
 PHYSICAL = FIXTURES / "quote-legacy.sens"
 EXPECTED = "10 001 00 000 01\n"
+COHORT = (
+    ("quote-legacy.lisp", "quote-legacy.sens", "(00000001 ())\n", "pass1-sens8"),
+    ("quote-mylisp.lisp", "quote-mylisp.sens", "(quote ())\n", "pass2-my-lisp"),
+    ("quote-lisp15.lisp", "quote-lisp15.sens", "(QUOTE ())\n", "pass3-lisp15"),
+)
 
 spec = importlib.util.spec_from_file_location("migration_quote_three_pass", SCRIPT)
 assert spec and spec.loader
@@ -70,17 +75,25 @@ class QuoteCohort(unittest.TestCase):
                          module.typed_sha256(EXPECTED.split()))
 
     def test_three_historical_source_spellings_project_identically(self):
-        # Дві перевірки мапінгу не розмножують нові .lisp-файли з англійськими головами.
-        for source, phase in (
-            ("(00000001 ())\n", "pass1-sens8"),
-            ("(quote ())\n", "pass2-my-lisp"),
-            ("(QUOTE ())\n", "pass3-lisp15"),
-        ):
+        for _, _, source, phase in COHORT:
             with self.subTest(source=source):
                 projection, counts = self.project(source)
                 self.assertEqual(projection, EXPECTED)
                 self.assertEqual(counts[phase], 1)
                 self.assertEqual(module.encode_projection(projection), PHYSICAL.read_bytes())
+
+    def test_three_real_sources_have_physical_same_stem_companions(self):
+        for source_name, binary_name, source_text, phase in COHORT:
+            with self.subTest(source_name=source_name):
+                source = FIXTURES / source_name
+                physical = FIXTURES / binary_name
+                self.assertEqual(source.read_text(encoding="utf-8"), source_text)
+                projection, counts = self.project(source_text)
+                self.assertEqual(projection, EXPECTED)
+                self.assertEqual(counts[phase], 1)
+                self.assertEqual(physical.read_bytes(), b"\\x63\\x89\\x06\\xa1")
+                self.assertEqual(module.encode_projection(projection), physical.read_bytes())
+                self.assertEqual(module.decode_bytes(physical.read_bytes()), EXPECTED.split())
 
     def test_actual_migrator_creates_physical_artifact_and_manifest(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -99,12 +112,12 @@ class QuoteCohort(unittest.TestCase):
             self.assertFalse((out / "quote-legacy").exists())
             self.assertFalse((out / "quote-legacy.lisp").exists())
             rows = json.loads(report.read_text(encoding="utf-8"))
-            self.assertEqual(rows["summary"]["files_seen"], 1)
-            self.assertEqual(rows["summary"]["files_written"], 1)
+            self.assertEqual(rows["summary"]["files_seen"], 3)
+            self.assertEqual(rows["summary"]["files_written"], 3)
             self.assertEqual(rows["summary"]["files_blocked"], 0)
-            self.assertEqual(rows["files"][0]["passes"]["pass1-sens8"], 1)
-            self.assertEqual(rows["files"][0]["semantic_word_count"], 5)
-            self.assertEqual(rows["files"][0]["bytes"], 4)
+            self.assertEqual({row["path"] for row in rows["files"]}, {name for name, _, _, _ in COHORT})
+            self.assertTrue(all(row["semantic_word_count"] == 5 for row in rows["files"]))
+            self.assertTrue(all(row["bytes"] == 4 for row in rows["files"]))
             self.assertTrue(LEGACY_SOURCE.is_file(), "historical source preserved")
             # На повторному запуску не можна перезаписати готовий файл.
             again = subprocess.run(command, capture_output=True, text=True)
