@@ -85,7 +85,9 @@
   (0010 (plan)
     ((0010 (result)
        (110
-         ((101 (x86-machine-rejected? result) t)
+         ((010 result)
+          (native-first-execution-completed (001 native) result))
+         ((101 (100 result) (001 rejected))
           (native-first-execution-rejected (001 native) result))
          ((native-first-domain-true ())
           (native-first-execution-completed (001 native) result))))
