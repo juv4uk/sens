@@ -117,6 +117,10 @@ class ReadinessContractTests(unittest.TestCase):
                             not row["physical_published"]
                             for row in report["candidate_rows"]))
         self.assertEqual(report["per_era_summary"]["legacy"]["files_would_write"], 1)
+        self.assertEqual(report["blocker_by_era_reason_counts"]["legacy"].get(
+            "ambiguous W8 executable head 00001001"), 1)
+        self.assertTrue(report["top_blocker_transitions"])
+        self.assertEqual(sum(x["files"] for x in report["top_blocker_transitions"]), 2)
         self.assertEqual(report["per_era_summary"]["auto"]["files_would_write"], 0)
         self.assertTrue(report["gate"]["pass"])
 
