@@ -46,7 +46,8 @@ jobs:
           set -euo pipefail
           python3 scripts/migrate.py preview \
             tests/fixtures/migration-multiform-cohort/two-forms.lisp \
-            --mirror "$RUNNER_TEMP/preview" --report "$RUNNER_TEMP/preview.json"
+            --mirror "$RUNNER_TEMP/preview" --report "$RUNNER_TEMP/preview.json" \
+            --source-era legacy
           python3 - "$RUNNER_TEMP/preview.json" <<'PY'
           import json,sys
           result=json.load(open(sys.argv[1],encoding='utf-8'))
