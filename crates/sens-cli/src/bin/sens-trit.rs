@@ -53,7 +53,10 @@ fn eval_t5_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
         .map_err(|e| format!("physical T5/D2 decode rejected: {e:?}"))?;
     let forms = sens::parse_canonical_binary(&visible)
         .map_err(|e| format!("canonical SENS parser rejected: {}", e.render(&visible)))?;
-    sens::eval_parsed_expressions(&forms, &mut sens::Session::default())
+    let mut session = sens::Session::default();
+    sens::load_core_library(&mut session)
+        .map_err(|e| format!("current Core4 bootstrap rejected: {}", e.render(sens::CORE_LIBRARY_SOURCE)))?;
+    sens::eval_parsed_expressions(&forms, &mut session)
         .map_err(|e| format!("current SENS oracle rejected: {}", e.render(&visible)))
 }
 
@@ -213,6 +216,18 @@ mod eval_tests {
                 .into_iter().map(|word| word.word).collect::<Vec<_>>()
         ).unwrap();
         assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
+    }
+
+    #[test]
+    fn exact_d4_list_has_lisp_owned_value_call_mechanism() {
+        let source = "10 1110 00 1 00 2 00 3 01";
+        let words = source
+            .split_whitespace()
+            .map(|word| word.to_string())
+            .collect::<Vec<_>>();
+        let trits = sens::encode_ternary_words(&words).expect("D2 source encodes");
+        let evaluated = eval_t5_bytes(&trits).expect("Core4 LIST must be available to physical eval");
+        assert_eq!(evaluated.value.to_string(), "(1 2 3)");
     }
 
     #[test]
