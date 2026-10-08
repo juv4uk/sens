@@ -31,9 +31,12 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from domain_tables import read_domain_table
+from domain_tables import read_domain_table, validate_ratified_ladder
 from sens_source_resolver import SourceResolver, build_resolver
 
+# Independently admitted executable heads (not the full ratified inventory).
+# D1-D9 is validated in full; D7 text and D8/D9 resident presence DO NOT
+# imply executable call admission.
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
 LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
 BINARY_MASTER_EXTS = {".lisp"}
@@ -881,6 +884,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path, help="repository or source tree")
     parser.add_argument("--foundation", type=Path, required=True)
+    parser.add_argument("--number-widths", type=Path,
+                        default=Path("knowledge/number-width-ratified.json"),
+                        help="ratified D24/D48/D96 Number widths; not a numeric value codec")
     parser.add_argument("--domains", nargs="+", default=list(CALL_DOMAINS))
     parser.add_argument("--apply", action="store_true", help="rewrite supported source in place")
     parser.add_argument("--mirror", type=Path, help="write conservative migrated mirror")
@@ -911,7 +917,7 @@ def main():
         "--domain-surfaces",
         type=Path,
         nargs="*",
-        default=[Path(f"lib/domains/d{width}.lisp") for width in range(1, 7)],
+        default=[Path(f"lib/domains/d{width}.lisp") for width in range(1, 10)],
         help="exact-domain surface projection files used to recognize function spellings",
     )
     parser.add_argument("--report", type=Path, default=Path("sens-code-migration-report.json"))
@@ -922,6 +928,10 @@ def main():
         parser.error("--apply, --mirror and --binary-mirror are mutually exclusive")
 
     foundation, digest = load_foundation(args.foundation)
+    number_policy = json.loads(args.number_widths.read_text(encoding="utf-8"))
+    ladder_counts = validate_ratified_ladder(foundation, number_policy)
+    if set(args.domains) - set(CALL_DOMAINS):
+        parser.error("D7 text / D8-D9 residents are not admitted as generic callable heads")
     code_map = build_map(foundation, args.domains)
     code_map = augment_code_map_with_domain_surfaces(code_map, args.domain_surfaces)
     code_map = augment_code_map_with_registry_aliases(code_map, args.semantic_registry)
@@ -1026,6 +1036,9 @@ def main():
         "foundation_sha256": digest,
         "identity_rule": foundation.get("identity_rule"),
         "domains": args.domains,
+        "ratified_domain_ladder": ladder_counts,
+        "number_widths": number_policy["ratified_prefix_bits"],
+        "executable_head_domains": list(CALL_DOMAINS),
         "root": str(root),
         "mode": mode,
         "binary_source_rule": (
