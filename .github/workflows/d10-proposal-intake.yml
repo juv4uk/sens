@@ -7,6 +7,7 @@ on:
       - docs/architecture/ARCHIPELAGO-V1.uk.md
       - docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md
       - knowledge/d10-proposal-ledger.tsv
+      - knowledge/d10-v1-semantic-inventory.json
       - scripts/check-d10-proposal-ledger.py
       - .github/workflows/d10-proposal-intake.yml
   push:
@@ -14,6 +15,8 @@ on:
       - main
     paths:
       - knowledge/d10-proposal-ledger.tsv
+      - knowledge/d10-v1-semantic-inventory.json
+      - docs/architecture/ARCHIPELAGO-V1.uk.md
       - scripts/check-d10-proposal-ledger.py
       - .github/workflows/d10-proposal-intake.yml
 
