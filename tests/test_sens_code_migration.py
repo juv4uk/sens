@@ -21,6 +21,7 @@ SPEC.loader.exec_module(mod)
 from sens_source_resolver import build_resolver
 
 FOUNDATION = ROOT / "knowledge" / "d1-d7-foundation.json"
+CONTRACT_FOUNDATION = ROOT / "knowledge" / "d1-d9-foundation.json"
 NUMBER_WIDTHS = ROOT / "knowledge" / "number-width-ratified.json"
 TEXT7 = ROOT / "crates" / "sens" / "src" / "text7_projection_generated.rs"
 REGISTRY = ROOT / "lib" / "surface" / "semantic-registry.lisp"
@@ -28,6 +29,10 @@ HISTORICAL = ROOT / "contracts" / "core1-historical-sid-map.lisp"
 DOMAIN_SURFACES = [
     ROOT / "lib" / "domains" / f"d{width}.lisp"
     for width in range(1, 7)
+]
+CONTRACT_DOMAIN_SURFACES = [
+    ROOT / "lib" / "domains" / f"d{width}.lisp"
+    for width in (*range(1, 7), 8, 9)
 ]
 
 
@@ -62,6 +67,147 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.registry_surfaces,
             self.resolver,
         )
+
+    @classmethod
+    def contract_setup(cls):
+        data, _ = mod.load_foundation(CONTRACT_FOUNDATION)
+        callable_domains = list(mod.CONTRACT_CALL_DOMAINS)
+        current_domains = list(mod.CONTRACT_SURFACE_DOMAINS)
+        # The executable migration map is deliberately only D3-D6.
+        # D8/D9 residents participate through exact-domain authority and
+        # resolver evidence, never by a global human-label identity map.
+        code_map = mod.build_map(data, callable_domains)
+        code_map = mod.augment_code_map_with_domain_surfaces(
+            code_map,
+            CONTRACT_DOMAIN_SURFACES,
+        )
+        resolver = build_resolver(
+            historical_map=HISTORICAL,
+            foundation=CONTRACT_FOUNDATION,
+            registry=REGISTRY,
+            domain_surfaces=CONTRACT_DOMAIN_SURFACES,
+            current_domains=current_domains,
+        )
+        authority = mod.build_binary_authority(data, mod.CONTRACT_DOMAINS)
+        return (
+            data,
+            code_map,
+            mod.build_text7_encoder(data, TEXT7),
+            resolver,
+            authority,
+        )
+
+    def contract_binary(self, source: str):
+        _, code_map, text7, resolver, authority = self.contract_setup()
+        return mod.binary_rewrite(
+            source,
+            code_map,
+            text7,
+            resolver=resolver,
+            contract_authority=True,
+            binary_authority=authority,
+            d1_enabled=True,
+            d9_enabled=True,
+        )
+
+    def test_contract_authority_preserves_exact_d8_word_as_data(self):
+        converted, _, _ = self.contract_binary("(LIST 11111111)\n")
+        self.assertTrue(converted.startswith("10 1110 00 11111111 01\n"), converted)
+        self.assertNotIn("1100001 1100001 1100001", converted)
+
+    def test_contract_authority_rejects_d8_head_as_non_callable(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "non-callable authority resident used as executable head",
+        ):
+            self.contract_binary("(ROUND x)\n")
+
+    def test_contract_authority_rejects_human_alist_head_instead_of_serializing_prose_authority(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "dynamic-symbol-head",
+        ):
+            self.contract_binary("((major . contract-version))\n")
+
+    def test_contract_authority_call_map_excludes_d8_d9_but_resolver_keeps_evidence(self):
+        _, code_map, _, resolver, authority = self.contract_setup()
+        self.assertTrue(
+            all(entry.domain in mod.CONTRACT_CALL_DOMAINS for entry in code_map.values())
+        )
+        self.assertEqual(mod.CONTRACT_CALL_DOMAINS, ("D3", "D4", "D5", "D6"))
+        self.assertIn((8, "00000101"), authority)
+        self.assertIn((9, "100000001"), authority)
+        self.assertNotIn("ROUND", code_map)
+
+        resolution = resolver.resolve_head("ROUND")
+        self.assertTrue(resolution.resolved)
+        self.assertEqual(resolution.current.domain, "D8")
+
+        # A reused human label cannot select one domain globally.
+        self.assertNotIn("MAP", resolver.current_by_label)
+
+
+    def test_contract_authority_preserves_bare_d7_word_instead_of_spelling_digits(self):
+        converted, _, _ = self.contract_binary("(LIST 0011001)\n")
+        self.assertIn("0011001", converted)
+        self.assertNotIn("1100001 1100001 1100001", converted)
+
+    def test_contract_authority_preserves_exact_d1_source_cell(self):
+        converted, _, _ = self.contract_binary("(LIST 1)\n")
+        self.assertTrue(converted.startswith("10 1110 00 1 01\n"), converted)
+        self.assertIn("1", converted.split())
+
+    def test_contract_authority_rejects_hash_b_wrapper(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "legacy #b binary wrapper",
+        ):
+            self.contract_binary("(LIST #b101)\n")
+
+    def test_contract_authority_digit_only_string_is_text7_data(self):
+        converted, hits, _ = self.contract_binary('(LIST "101")\n')
+        self.assertTrue(converted.startswith("10 1110 00 "), converted)
+        self.assertNotIn("101", converted.split())
+        self.assertRegex(converted, r"^[01\s]+$")
+        self.assertEqual([hit.label for hit in hits], ["LIST"])
+
+    def test_contract_authority_rejects_noncanonical_d2_data_word(self):
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "D2 word '10' is structural control only",
+        ):
+            self.contract_binary("(LIST 10)\n")
+
+    def test_contract_authority_preserves_exact_w9_source_cell(self):
+        converted, _, _ = self.contract_binary("(LIST 100000001)\n")
+        self.assertIn("100000001", converted.split())
+
+    def test_contract_authority_keeps_w8_even_when_legacy_sid8_evidence_exists(self):
+        converted, _, _ = self.contract_binary("(LIST 00000101)\n")
+        self.assertIn("00000101", converted.split())
+        self.assertNotIn("100", converted.split())
+
+    def test_contract_authority_validator_accepts_exact_d8_value(self):
+        _, _, _, _, authority = self.contract_setup()
+        mod.validate_contract_binary_output(
+            "10 1110 00 00000101 01\n",
+            authority,
+            d1_enabled=False,
+            d9_enabled=False,
+        )
+
+    def test_contract_authority_validator_rejects_unadmitted_binary_word(self):
+        _, _, _, _, authority = self.contract_setup()
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            "unadmitted exact binary word",
+        ):
+            mod.validate_contract_binary_output(
+                "10 111 00 0100001 01\n",
+                authority,
+                d1_enabled=True,
+                d9_enabled=True,
+            )
 
     def test_current_d3_authority_is_used(self):
         self.assertEqual(self.code_map["CAR"].bits, "100")
