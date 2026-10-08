@@ -63,6 +63,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.legacy,
             self.registry_surfaces,
             self.resolver,
+            d2_structure=self.d2_structure,
         )
 
     def test_d2_structure_is_loaded_from_canonical_domain_table(self):
