@@ -1,0 +1,44 @@
+name: migrate compiler nucleus to canonical binary mirror once
+on:
+  push:
+    branches:
+      - replay/compiler-t5-canonical-current-main-1008
+    paths:
+      - "lib/compiler-nucleus.lisp"
+      - ".github/workflows/migrate-compiler-nucleus-once.yml"
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: replay/compiler-t5-canonical-current-main-1008
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      - name: Migrate only compiler nucleus through canonical binary mirror
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/sens-stage /tmp/sens-mirror
+          mkdir -p /tmp/sens-stage/lib
+          cp lib/compiler-nucleus.lisp /tmp/sens-stage/lib/compiler-nucleus.lisp
+          python3 scripts/migrate-to-sens-codes.py /tmp/sens-stage             --foundation "$GITHUB_WORKSPACE/knowledge/d1-d7-foundation.json"             --domains D3 D4 D5 D6             --binary-mirror /tmp/sens-mirror             --text7-projection "$GITHUB_WORKSPACE/crates/sens/src/text7_projection_generated.rs"             --historical-map "$GITHUB_WORKSPACE/contracts/core1-historical-sid-map.lisp"             --semantic-registry "$GITHUB_WORKSPACE/lib/surface/semantic-registry.lisp"             --domain-surfaces "$GITHUB_WORKSPACE/lib/domains/d1.lisp" "$GITHUB_WORKSPACE/lib/domains/d2.lisp" "$GITHUB_WORKSPACE/lib/domains/d3.lisp" "$GITHUB_WORKSPACE/lib/domains/d4.lisp" "$GITHUB_WORKSPACE/lib/domains/d5.lisp" "$GITHUB_WORKSPACE/lib/domains/d6.lisp"             --report /tmp/sens-migration-report.json
+          cp /tmp/sens-mirror/lib/compiler-nucleus.lisp lib/compiler-nucleus.lisp
+          python3 scripts/check-binary-domain-format.py
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("lib/compiler-nucleus.lisp").read_text(encoding="utf-8")
+          assert s.strip(), "empty migrated nucleus"
+          assert set(s) <= set("01 \t\r\n"), "migrated nucleus is not canonical visible binary"
+          print("compiler nucleus binary source:", len(s), "bytes")
+          PY
+      - name: Commit migrated compiler nucleus only
+        run: |
+          set -euo pipefail
+          git diff --check
+          git add lib/compiler-nucleus.lisp
+          git diff --cached --stat
+          git commit -m "migrate(4449): convert compiler nucleus to canonical binary source"
+          git push origin HEAD:replay/compiler-t5-canonical-current-main-1008
