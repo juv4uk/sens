@@ -77,6 +77,12 @@ def run(argv: list[str], *, cwd: Path, timeout: int = 90) -> subprocess.Complete
     return result
 
 
+def is_fixture_canary(source: str) -> bool:
+    # Fixture demonstrations are never ORIGINAL executable migration credit.
+    # Original active sources elsewhere must prove real historical/current output.
+    return source.startswith("tests/fixtures/") and source.endswith(".lisp")
+
+
 def checked_manifest(path: Path) -> dict:
     try:
         obj = json.loads(path.read_text(encoding="utf-8"))
@@ -104,7 +110,61 @@ def checked_manifest(path: Path) -> dict:
             not isinstance(x, str) or not x for x in argv
         ):
             raise Blocked("ORACLE: argv must be a list of nonempty strings")
+    if not is_fixture_canary(obj["source"]):
+        proof = obj.get("historical_observation")
+        if not isinstance(proof, dict):
+            raise Blocked("OBSERVABLE_PARITY: original executable needs historical observation")
+        command = proof.get("command")
+        expected = proof.get("stdout_sha256")
+        if (not isinstance(command, list) or not command
+                or any(not isinstance(item, str) or not item for item in command)
+                or command.count("{source}") != 1):
+            raise Blocked("OBSERVABLE_PARITY: old oracle command must name exactly one {source}")
+        if (not isinstance(expected, str) or len(expected) != 64 or
+                any(c not in "0123456789abcdef" for c in expected)):
+            raise Blocked("OBSERVABLE_PARITY: pin historical observation stdout SHA256")
+    elif obj.get("historical_observation") is not None:
+        raise Blocked("OBSERVABLE_PARITY: fixture cannot impersonate original admission")
     return obj
+
+
+def verify_observable_parity(reader: Path, candidate: Path, root: Path,
+                             manifest: dict) -> str:
+    """Compare RAW stdout bytes from independent old CLI and real current SENS.
+
+    Caller has already verified exact source Git blob, T5 bytes and Rust D2.
+    This test does not pretend generic EVAL/host support or full program proof.
+    """
+    if is_fixture_canary(manifest["source"]):
+        return "NOT_VERIFIED_FIXTURE_CANARY"
+    proof = manifest.get("historical_observation")
+    if not isinstance(proof, dict):
+        raise Blocked("OBSERVABLE_PARITY: missing source-specific historical oracle")
+    old_argv = [manifest["source"] if item == "{source}" else item
+                for item in proof["command"]]
+    for label, argv in (
+        ("HISTORICAL", old_argv),
+        ("CURRENT", [str(reader), "eval", str(candidate)]),
+    ):
+        try:
+            proc = subprocess.run(argv, cwd=root, capture_output=True,
+                                  check=False, timeout=240)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise Blocked(f"OBSERVABLE_PARITY_{label}: {exc}") from exc
+        if proc.returncode or proc.stderr:
+            raise Blocked(
+                f"OBSERVABLE_PARITY_{label}: process failed or wrote stderr"
+                f" (exit={proc.returncode})"
+            )
+        if not proc.stdout:
+            raise Blocked(f"OBSERVABLE_PARITY_{label}: empty observation cannot prove output")
+        if label == "HISTORICAL":
+            old_stdout = proc.stdout
+            if digest(old_stdout) != proof["stdout_sha256"]:
+                raise Blocked("OBSERVABLE_PARITY_HISTORICAL: pinned source observation drift")
+        elif proc.stdout != old_stdout:
+            raise Blocked("OBSERVABLE_PARITY_MISMATCH: historical and current stdout differ")
+    return "BYTE_EXACT_HISTORICAL_VS_CURRENT_OUTPUT_REVIEW_REQUIRED"
 
 
 def ensure_tracked(root: Path, source: Path, blob_sha: str) -> None:
@@ -217,6 +277,13 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
         for oracle in manifest["oracle_commands"]:
             run(oracle, cwd=root, timeout=240)
 
+        # REAL previously existing active sources are never admitted merely
+        # by a passing unrelated test + D2. Execute the freshly generated
+        # physical .sens and compare *raw observable output bytes* with an
+        # independently source-pinned old-world oracle, before ANY write.
+        observable = verify_observable_parity(
+            reader, output / source.with_suffix(".sens"), root, manifest
+        )
         if write:
             publish(target, payload, mirror)
         return {
@@ -231,7 +298,10 @@ def admit(root: Path, mirror: Path, manifest: dict, reader: Path, write: bool) -
             "typed_sha256": typed_sha256(words),
             "d2_reader": "PASS",
             "oracle_commands_passed": len(manifest["oracle_commands"]),
-            "warning": "Proof is bounded to named tests; not a general 491-file or release claim.",
+            "observable_parity": observable,
+            "original_executable_parity": not is_fixture_canary(manifest["source"]),
+            "release_admitted": False,
+            "warning": "Source-specific bounded proof only; human review and release gates remain independent.",
         }
 
 
