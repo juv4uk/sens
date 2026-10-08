@@ -1,0 +1,22 @@
+name: migration-dynamic-binding-census
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/migration-dynamic-binding-census-2026-10-08.json"
+      - "tests/test_migration_dynamic_binding_census.py"
+      - "scripts/migrate-three-pass.py"
+      - ".github/workflows/migration-dynamic-binding-census.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-dynamic-binding-blockers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify strict-artifact split and real migrator fail-closed
+        run: python3 -m unittest discover -s tests -p 'test_migration_dynamic_binding_census.py' -v

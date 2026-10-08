@@ -1,0 +1,278 @@
+{
+  "schema": "sens-migration-dynamic-binding-census/v1",
+  "authority": "research/classification evidence only; not semantic or migration authority",
+  "as_of": "2026-10-08",
+  "parent_issue": "https://github.com/juv4uk/sens/issues/4461",
+  "coordinator": "https://github.com/juv4uk/sens/issues/4449",
+  "strict_artifact": {
+    "workflow_run": 37810152645,
+    "artifact_id": 11564951770,
+    "artifact_name": "sens-t5-migration-preview",
+    "artifact_digest": "sha256:7c972193ced938394456b901c175cd47a02348d3c21da686be9fd6537915cb5f",
+    "report_schema": "sens-three-pass-t5-migration/v3",
+    "files_seen": 491,
+    "files_written": 0,
+    "files_blocked": 491
+  },
+  "source_policy": "read-only source census; no .lisp edit and no .sens emission until exact binding/scope or nonprogram classification is proved",
+  "executable_dynamic": [
+    {
+      "path": "benchmarks/arithmetic.lisp",
+      "git_blob_sha": "1f5ad581fbe4f890e1ded187db2cff5e2bbee176",
+      "symbol": "polynomial",
+      "artifact_reason": "word 4: requires exact D1..D9 0/1 word, got 'polynomial'",
+      "observed": [
+        "user-defined function via DEFINE",
+        "function is called later in the same executable benchmark",
+        "arguments/results include numeric payload"
+      ],
+      "required_evidence": [
+        "typed binding/scope law for user-defined function symbols",
+        "numeric payload law for benchmark data",
+        "current oracle parity before/after conversion",
+        "physical T5 roundtrip"
+      ],
+      "action": "BLOCK_DYNAMIC_BINDING: do not emit benchmarks/arithmetic.sens"
+    },
+    {
+      "path": "benchmarks/closures.lisp",
+      "git_blob_sha": "a28c9490f893434ab9b456938259339764356ee5",
+      "symbol": "make-pair",
+      "artifact_reason": "word 4: requires exact D1..D9 0/1 word, got 'make-pair'",
+      "observed": [
+        "user-defined function via DEFINE",
+        "returns a closure over left",
+        "returned closure is immediately called with right"
+      ],
+      "required_evidence": [
+        "typed binding/scope law for local closure-producing names",
+        "closure/environment representation parity",
+        "current oracle parity before/after conversion",
+        "physical T5 roundtrip"
+      ],
+      "action": "BLOCK_DYNAMIC_BINDING: do not emit benchmarks/closures.sens"
+    },
+    {
+      "path": "benchmarks/recursion.lisp",
+      "git_blob_sha": "20474bf7829ab5dd8df4f4a56d4cf6a1ecb7adc1",
+      "symbol": "walk",
+      "artifact_reason": "legacy-unmapped my-lisp function 'walk': no current D3-D6 resident",
+      "artifact_line": 5,
+      "artifact_column": 37,
+      "observed": [
+        "user-defined recursive function via DEFINE",
+        "recursive call to walk inside COND",
+        "list payload includes numeric data"
+      ],
+      "required_evidence": [
+        "typed self-binding/recursive scope law",
+        "exact D1/COND and list-state parity",
+        "numeric payload law",
+        "current oracle parity and physical T5 roundtrip"
+      ],
+      "action": "BLOCK_DYNAMIC_BINDING: do not emit benchmarks/recursion.sens"
+    },
+    {
+      "path": "benchmarks/parser.lisp",
+      "git_blob_sha": "a9d92e86b5f6064354e2d334532690daecdf1d64",
+      "symbol": "identity",
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "artifact_line": 1,
+      "artifact_column": 48,
+      "observed": [
+        "user-defined identity function via DEFINE",
+        "multiple direct calls",
+        "quoted lists, string and rational payloads are data"
+      ],
+      "required_evidence": [
+        "typed binding/scope law for user-defined names",
+        "Text7/string and exact-rational payload laws",
+        "quoted-data preservation",
+        "current oracle parity and physical T5 roundtrip"
+      ],
+      "action": "BLOCK_DYNAMIC_BINDING: do not emit benchmarks/parser.sens"
+    }
+  ],
+  "redirected_nonprogram_identity": [
+    {
+      "path": "contracts/answer-contract.lisp",
+      "git_blob_sha": "f04dbe50b229fd710c99d2db14e28f78f6c4a5a1",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 49,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/answer-contract.sens"
+    },
+    {
+      "path": "contracts/control-dispatch-contract.lisp",
+      "git_blob_sha": "d3f0554ea7ae0af961c0c3f0ab91a991c166bc57",
+      "token": "identity",
+      "artifact_line": 3,
+      "artifact_column": 2,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/control-dispatch-contract.sens"
+    },
+    {
+      "path": "contracts/core-profile-contract.lisp",
+      "git_blob_sha": "21f717dc7bdb15b0e0c63bcf36b2154933f827ff",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 39,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/core-profile-contract.sens"
+    },
+    {
+      "path": "contracts/core1-bootstrap-contract.lisp",
+      "git_blob_sha": "8d2da148cda5cf9b14ee20097e817d0d098027fe",
+      "token": "identity",
+      "artifact_line": 3,
+      "artifact_column": 7,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/core1-bootstrap-contract.sens"
+    },
+    {
+      "path": "contracts/core1-generation-manifest.lisp",
+      "git_blob_sha": "3d9e4e821f2f904a232b3b6d4437e38c618ed98b",
+      "token": "identity",
+      "artifact_line": 48,
+      "artifact_column": 5,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/core1-generation-manifest.sens"
+    },
+    {
+      "path": "contracts/core3-profile-contract.lisp",
+      "git_blob_sha": "56ad2439f15a74d8d3fc3f97a358fe6497e38164",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 48,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/core3-profile-contract.sens"
+    },
+    {
+      "path": "contracts/core4-predicate-answer-scale.lisp",
+      "git_blob_sha": "9b0547a2a5f8b3fa8a38c68d33aa8e27d7bff730",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 57,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/core4-predicate-answer-scale.sens"
+    },
+    {
+      "path": "contracts/datalog-math-capability-1001.lisp",
+      "git_blob_sha": "3463c4bae75b0d21047a72379e104541b39b18f9",
+      "token": "identity",
+      "artifact_line": 24,
+      "artifact_column": 3,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/datalog-math-capability-1001.sens"
+    },
+    {
+      "path": "contracts/exact-q-binary-contract.lisp",
+      "git_blob_sha": "8adcc286807286afaee57e5875677a23bf2b75ac",
+      "token": "identity",
+      "artifact_line": 13,
+      "artifact_column": 2,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/exact-q-binary-contract.sens"
+    },
+    {
+      "path": "contracts/island-compat-contract.lisp",
+      "git_blob_sha": "13654e2b99ee80d6c1216f3945f05b9d2fbecc31",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 48,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/island-compat-contract.sens"
+    },
+    {
+      "path": "contracts/life-1-contract.lisp",
+      "git_blob_sha": "bdc54aa4f371465b8086b02d39e2b284b189d38c",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 35,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/life-1-contract.sens"
+    },
+    {
+      "path": "contracts/mathematical-result-taxonomy.lisp",
+      "git_blob_sha": "a1baa1447037e1771a015f319e4254a7cfbcaa9f",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 58,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/mathematical-result-taxonomy.sens"
+    },
+    {
+      "path": "contracts/structural-observation-contract.lisp",
+      "git_blob_sha": "0ca25226cf963ad375159ed880d48c16f60f04a0",
+      "token": "identity",
+      "artifact_line": 1,
+      "artifact_column": 46,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit contracts/structural-observation-contract.sens"
+    },
+    {
+      "path": "knowledge/semantic-lineage-core-v1.lisp",
+      "git_blob_sha": "0e27d9c03d858481fa4a319b06816a3e528513e6",
+      "token": "identity",
+      "artifact_line": 3,
+      "artifact_column": 75,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit knowledge/semantic-lineage-core-v1.sens"
+    },
+    {
+      "path": "knowledge/sens-primary.lisp",
+      "git_blob_sha": "bce4aee8c3863bac23010a131c7acc4f163c34f9",
+      "token": "identity",
+      "artifact_line": 3,
+      "artifact_column": 30,
+      "artifact_reason": "legacy-unmapped my-lisp function 'identity': no current D3-D6 resident",
+      "classification": "REDIRECT_NONPROGRAM_IDENTITY_FIELD",
+      "handoff_issue": "https://github.com/juv4uk/sens/issues/4460",
+      "observed": "identity is a declarative record/field label, not a user-defined executable function call",
+      "action": "REDIRECT_NONPROGRAM: do not mint IDENTITY resident and do not auto-emit knowledge/sens-primary.sens"
+    }
+  ]
+}
