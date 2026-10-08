@@ -111,55 +111,87 @@ def load_authority() -> tuple[dict[str, Identity], dict[str, Identity]]:
 
     return surfaces, legacy
 
+def _consume_line_comment(text: str, start: int, size: int) -> tuple[int, str]:
+    end = text.find("\n", start)
+    if end < 0:
+        end = size
+    return end, text[start:end]
+
+
+def _consume_block_comment(text: str, start: int, size: int) -> tuple[int, str]:
+    end = start + 2
+    depth = 1
+    while end < size and depth:
+        if text.startswith("#|", end):
+            depth += 1
+            end += 2
+        elif text.startswith("|#", end):
+            depth -= 1
+            end += 2
+        else:
+            end += 1
+    if depth:
+        raise ValueError("unterminated #| ... |# comment")
+    return end, text[start:end]
+
+
+def _consume_string(text: str, start: int, size: int) -> tuple[int, str]:
+    end = start + 1
+    while end < size:
+        if text[end] == "\\" and end + 1 < size:
+            end += 2
+        elif text[end] == '"':
+            end += 1
+            return end, text[start:end]
+        else:
+            end += 1
+    raise ValueError("unterminated string")
+
+
+def _consume_quote(text: str, start: int, size: int) -> tuple[int, str]:
+    end = start + 2 if start + 1 < size and text[start:start + 2] == ",@" else start + 1
+    return end, text[start:end]
+
+
+def _consume_atom(text: str, start: int, size: int) -> tuple[int, str]:
+    delimiters = set("();\"",)
+    end = start
+    while end < size:
+        current = text[end]
+        if current.isspace() or current in delimiters or current == chr(96):
+            break
+        if text.startswith("#|", end):
+            break
+        end += 1
+    if end == start:
+        raise ValueError(f"cannot tokenize {text[start]!r} at offset {start}")
+    return end, text[start:end]
+
+
 def tokens(text: str):
     i = 0
-    n = len(text)
+    size = len(text)
     backquote = chr(96)
-    delimiters = set("();\"',")
 
-    while i < n:
+    while i < size:
         ch = text[i]
         if ch.isspace():
             i += 1
             continue
         if ch == ";":
-            end = text.find("\n", i)
-            if end < 0:
-                end = n
-            yield ("comment", i, end, text[i:end])
+            end, value = _consume_line_comment(text, i, size)
+            yield ("comment", i, end, value)
             i = end
             continue
         if text.startswith("#|", i):
-            start = i
-            depth = 1
-            i += 2
-            while i < n and depth:
-                if text.startswith("#|", i):
-                    depth += 1
-                    i += 2
-                elif text.startswith("|#", i):
-                    depth -= 1
-                    i += 2
-                else:
-                    i += 1
-            if depth:
-                raise ValueError("unterminated #| ... |# comment")
-            yield ("comment", start, i, text[start:i])
+            end, value = _consume_block_comment(text, i, size)
+            yield ("comment", i, end, value)
+            i = end
             continue
         if ch == '"':
-            start = i
-            i += 1
-            while i < n:
-                if text[i] == "\\" and i + 1 < n:
-                    i += 2
-                elif text[i] == '"':
-                    i += 1
-                    break
-                else:
-                    i += 1
-            else:
-                raise ValueError("unterminated string")
-            yield ("string", start, i, text[start:i])
+            end, value = _consume_string(text, i, size)
+            yield ("string", i, end, value)
+            i = end
             continue
         if ch == "(":
             yield ("open", i, i + 1, ch)
@@ -174,24 +206,78 @@ def tokens(text: str):
             i += 1
             continue
         if ch == ",":
-            end = i + 2 if i + 1 < n and text[i + 1] == "@" else i + 1
-            yield ("quote", i, end, text[i:end])
+            end, value = _consume_quote(text, i, size)
+            yield ("quote", i, end, value)
             i = end
             continue
 
-        start = i
-        while i < n:
-            current = text[i]
-            if current.isspace() or current in delimiters or current == backquote:
-                break
-            if text.startswith("#|", i):
-                break
-            i += 1
-        if i == start:
-            raise ValueError(f"cannot tokenize {text[i]!r} at offset {i}")
-        yield ("atom", start, i, text[start:i])
+        end, value = _consume_atom(text, i, size)
+        yield ("atom", i, end, value)
+        i = end
 
-def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) -> list[Edit]:
+
+def _push_atom_edit(
+    edits: list[Edit],
+    start: int,
+    end: int,
+    value: str,
+    surfaces: dict[str, Identity],
+    legacy: dict[str, Identity],
+) -> None:
+    if re.fullmatch(r"[01]{3,6}", value):
+        return
+
+    identity = (
+        legacy.get(value) if re.fullmatch(r"[01]{8}", value) else surfaces.get(value)
+    )
+    if identity is None:
+        return
+    if identity.bits not in ADMITTED_CALLABLES.get(identity.domain, ()):
+        return
+    edits.append(Edit(start, end, value, identity))
+
+
+def _walk_plan_token(
+    kind: str,
+    start: int,
+    end: int,
+    value: str,
+    stack: list[dict[str, bool]],
+    quoted_next: bool,
+    edits: list[Edit],
+    surfaces: dict[str, Identity],
+    legacy: dict[str, Identity],
+) -> bool:
+    if kind == "quote":
+        return True
+    if kind in {"string", "comment", "close"}:
+        if kind == "string" and stack:
+            stack[-1]["head"] = False
+        if kind == "close":
+            if not stack:
+                raise ValueError(f"unexpected ')' at offset {start}")
+            stack.pop()
+        return False
+    if kind == "open":
+        parent_quoted = bool(stack and stack[-1]["quoted"])
+        stack.append({"quoted": parent_quoted or quoted_next, "head": True})
+        return False
+    if kind != "atom" or not stack:
+        return False
+
+    frame = stack[-1]
+    is_head = frame["head"]
+    quoted = frame["quoted"]
+    frame["head"] = False
+    if not is_head or quoted:
+        return False
+    _push_atom_edit(edits, start, end, str(value), surfaces, legacy)
+    return False
+
+
+def plan(
+    text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]
+) -> list[Edit]:
     stack: list[dict[str, bool]] = []
     quoted_next = False
     edits: list[Edit] = []
@@ -200,52 +286,20 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
         if kind == "quote":
             quoted_next = True
             continue
-        if kind == "string":
-            if stack:
-                stack[-1]["head"] = False
+        if _walk_plan_token(
+            kind,
+            start,
+            end,
+            value,
+            stack,
+            quoted_next,
+            edits,
+            surfaces,
+            legacy,
+        ):
+            quoted_next = True
+        else:
             quoted_next = False
-            continue
-        if kind == "comment":
-            quoted_next = False
-            continue
-        if kind == "open":
-            parent_quoted = bool(stack and stack[-1]["quoted"])
-            stack.append({"quoted": parent_quoted or quoted_next, "head": True})
-            quoted_next = False
-            continue
-        if kind == "close":
-            if not stack:
-                raise ValueError(f"unexpected ')' at offset {start}")
-            stack.pop()
-            quoted_next = False
-            continue
-        if kind != "atom":
-            continue
-
-        if not stack:
-            quoted_next = False
-            continue
-
-        frame = stack[-1]
-        is_head = frame["head"]
-        quoted = frame["quoted"]
-        frame["head"] = False
-        if not is_head or quoted:
-            quoted_next = False
-            continue
-
-        token = str(value)
-        if re.fullmatch(r"[01]{3,6}", token):
-            quoted_next = False
-            continue
-
-        identity = legacy.get(token) if re.fullmatch(r"[01]{8}", token) else surfaces.get(token)
-        if identity is not None:
-            if identity.bits not in ADMITTED_CALLABLES.get(identity.domain, ()):
-                quoted_next = False
-                continue
-            edits.append(Edit(start, end, token, identity))
-        quoted_next = False
 
     if stack:
         raise ValueError("unterminated list")
