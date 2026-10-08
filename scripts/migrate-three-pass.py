@@ -258,7 +258,7 @@ def load_foundation(path: Path):
 def load_d1_uk_surfaces(path: Path = REPO_ROOT / "lib/domains/d1.lisp") -> dict[str, str]:
     """Project ratified D1's Ukrainian literals; do not invent host truthiness."""
     source = path.read_text(encoding="utf-8")
-    rows = re.findall(r"(?m)^\\s*\\(([01])\\s+\\(ук\\s+([^\\s()]+)\\)", source)
+    rows = re.findall(r"(?m)^\s*\(([01])\s+\(ук\s+([^\s()]+)\)", source)
     if len(rows) != 2 or {bits for bits, _ in rows} != {"0", "1"}:
         raise MigrationError("D1 Ukrainian surface table lacks exactly two canonical values")
     if len({name for _, name in rows}) != 2:
