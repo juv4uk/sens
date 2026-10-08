@@ -105,9 +105,9 @@ def verified_witness_spec(manifest: dict) -> list[tuple[str, Path, str]]:
         result.append((role, path, sha))
     historical, current = result
     hpath, cpath = historical[1].as_posix(), current[1].as_posix()
-    if not re.fullmatch(r"tests/test_[a-zA-Z0-9_]+\\.py", hpath):
+    if not re.fullmatch(r"tests/test_[a-zA-Z0-9_]+[.]py", hpath):
         raise Blocked("ORACLE: historical witness must be a reviewed Python test file")
-    if not re.fullmatch(r"crates/sens/tests/[a-zA-Z0-9_]+\\.rs", cpath):
+    if not re.fullmatch(r"crates/sens/tests/[a-zA-Z0-9_]+[.]rs", cpath):
         raise Blocked("ORACLE: current witness must be a reviewed Rust integration test")
     hcmd, ccmd = commands
     if (not isinstance(hcmd, list) or len(hcmd) not in (2, 3)
