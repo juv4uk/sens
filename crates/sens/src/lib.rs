@@ -43,6 +43,8 @@ mod source_packing;
 mod ternary_transport;
 mod binary_delimited_transport;
 #[cfg(test)]
+mod hdlc_transport_experiment;
+#[cfg(test)]
 mod sens_container_experiment;
 #[cfg(test)]
 mod bootstrap_measurement;
