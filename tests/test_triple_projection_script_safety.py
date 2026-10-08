@@ -102,18 +102,23 @@ class SafeTripleScriptTests(unittest.TestCase):
         self.assertEqual(no_fixture.returncode, 2)
         self.assertIn("BLOCKED", no_fixture.stderr)
 
-    def test_default_full_corpus_fails_closed_on_legacy_non_uk_triples(self):
-        # The other 3 fixtures are currently legacy/English with no views,
-        # not admitted canonical Ukrainian triples; they must not SKIP/PASS.
+    def test_default_corpus_proves_caar_but_still_blocks_unadmitted_legacy(self):
+        # Ratified D4 CAAR + D3 QUOTE/CONS now have a bounded Ukrainian proof
+        # and current independent Rust semantic witness. Do not misreport
+        # their actual committed source/T5/view triplet as still blocked.
+        # The two other legacy sources without canonical views must remain
+        # BLOCKED until each receives its own source-era and oracle proof.
         result = subprocess.run(
             ["bash", str(SHELL)], cwd=ROOT,
             capture_output=True, text=True, timeout=120,
         )
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertIn("result=BLOCKED", result.stdout)
+        self.assertIn("PASS tests/fixtures/migration-d1-cond-cohort/branch.lisp", result.stdout)
+        self.assertIn("PASS tests/fixtures/migration-d4-selector-cohort/caar.lisp", result.stdout)
         self.assertIn("third.lisp", result.stderr)
-        self.assertIn("caar.lisp", result.stderr)
         self.assertIn("two-forms.lisp", result.stderr)
+        self.assertNotIn("caar.lisp", result.stderr)
 
     def test_renderer_default_never_rewrites_original_lisp(self):
         origin = (F / "branch.lisp").read_bytes()
