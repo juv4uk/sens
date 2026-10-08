@@ -50,7 +50,7 @@ def next_barrier(reason: str) -> tuple[str, str]:
     # D2 control words cannot be indexed lexical data words.
     if re.search(r"D2 word|structural control", reason):
         return "D2_STRUCTURE_UNPROVED", "D2"
-    m = re.search(r"\\bword\\s+(\\d+)\\b", reason, re.I)
+    m = re.search(r"\bword\s+(\d+)\b", reason, re.I)
     if m:
         return "NON_BINARY_OR_UNTYPED", "word" + m.group(1)
     if re.search(r"print|host|I/O|read-all", reason, re.I):
