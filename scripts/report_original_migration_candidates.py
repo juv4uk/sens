@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -96,6 +97,78 @@ def blocker_cohorts(blocked_sources: list[dict]) -> list[dict]:
     ]
 
 
+
+# Coordinate-specific first-blocker queues refine the existing broad family
+# census. They preserve the family contract and never infer program meaning.
+COORDINATE_OWNER = {
+    "w8-provenance": "#4459",
+    "unmapped-function": "#4577",
+    "d2-or-domain-data": "#4460",
+    "host-effect": "#4449",
+    "lexical-binding": "#4449",
+    "numeric-law": "#4449",
+    "text-or-quote": "#4449",
+    "other-unproved": "#4449",
+}
+
+
+def first_blocker_coordinate(reason: str, family: str) -> str:
+    """Split major shared laws by EXACT historical word, not guessed semantics."""
+    if family == "w8-provenance":
+        match = re.search(r"\b([01]{8})\b", reason)
+        return match.group(1) if match else "unknown-w8"
+    if family == "d2-or-domain-data":
+        match = re.search(r"\bword\s+(\d+)\b", reason, re.I)
+        if match:
+            return "word" + match.group(1)
+        if "d2" in reason.casefold():
+            return "D2"
+    if family == "unmapped-function":
+        match = re.search(r"\b([01]{8})\b", reason)
+        if match:
+            return match.group(1)
+    return "other"
+
+
+def blocker_coordinate_cohorts(blocked_sources: list[dict]) -> list[dict]:
+    """Full SHA-pinned first-error partition, exact W8 and word-position slices.
+
+    A source in this partition may have MANY later blockers. This is NOT
+    an executable-program classification or independent oracle certification.
+    """
+    grouped: dict[tuple[str, str], list[dict]] = {}
+    seen = set()
+    for row in blocked_sources:
+        path, sha = row["path"], row.get("source_git_blob_sha")
+        if path in seen:
+            raise ValueError("duplicate exact-coordinate original path")
+        seen.add(path)
+        if (row["status"] != "BLOCKED" or row["same_stem_sens_already_exists"]
+                or not isinstance(sha, str)
+                or not re.fullmatch(r"[0-9a-f]{40}", sha)):
+            raise ValueError("coordinate cohort needs unpaired BLOCK and exact Git blob")
+        family = blocker_family(row["reason"])
+        coordinate = first_blocker_coordinate(row["reason"], family)
+        grouped.setdefault((family, coordinate), []).append({
+            "path": path,
+            "source_git_blob_sha": sha,
+            "first_blocker": row["reason"],
+        })
+    return [
+        {
+            "family": family, "coordinate": coordinate,
+            "count": len(members), "owner_issue": COORDINATE_OWNER[family],
+            "next_action": BLOCKER_ACTIONS[family],
+            "status": "FIRST_BLOCK_ONLY_NOT_SEMANTICALLY_ADMITTED",
+            "example_paths": sorted(m["path"] for m in members)[:5],
+            "original_sources": sorted(members, key=lambda m: m["path"]),
+        }
+        for (family, coordinate), members in sorted(
+            grouped.items(), key=lambda x: (-len(x[1]), x[0][0], x[0][1])
+        )
+    ]
+
+
 def git_blob_sha(path: Path) -> str:
     data = path.read_bytes()
     return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
@@ -180,6 +253,9 @@ def build_report(root: Path = ROOT) -> dict:
             key=lambda row: row["path"],
         )
         cohorts = blocker_cohorts(blocked_sources)
+        exact_cohorts = blocker_coordinate_cohorts(blocked_sources)
+        if sum(x["count"] for x in exact_cohorts) != blocked:
+            raise RuntimeError("exact coordinate cohort total differs from blocked corpus")
         if sum(cohort["count"] for cohort in cohorts) != blocked:
             raise RuntimeError("source blocker cohort totals inconsistent")
         if len({row["path"] for row in rows}) != len(rows):
@@ -194,6 +270,7 @@ def build_report(root: Path = ROOT) -> dict:
                 "already_paired_sources_excluded": len(excluded),
                 "blocked": blocked,
                 "blocker_family_counts": {cohort["family"]: cohort["count"] for cohort in cohorts},
+                "exact_blocker_coordinates": len(exact_cohorts),
                 "mechanical_candidates": len(candidates),
                 "already_paired_candidates": len(candidates)-len(unpaired),
                 "unpaired_candidates_needing_original_oracle": len(unpaired),
@@ -206,6 +283,7 @@ def build_report(root: Path = ROOT) -> dict:
             "mechanical_candidates": candidates,
             "blocked_sources": blocked_sources,
             "blocker_cohorts": cohorts,
+            "exact_blocker_cohorts": exact_cohorts,
             "unpaired_blocker_sample": blocked_sources[:20],
             "required_evidence": [
                 "prove original file is an executable SENS program, not an archive/catalogue",

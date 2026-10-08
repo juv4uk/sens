@@ -229,5 +229,46 @@ class OriginalCandidateTests(unittest.TestCase):
                             for x in result["blocked_sources"]))
 
 
+
+    def test_exact_w8_and_nonbit_word_cohorts_keep_every_source_sha(self):
+        sources = []
+        cases = [
+            ("a.lisp", "ambiguous W8 executable head 00001001: choose source era", "w8-provenance", "00001001"),
+            ("b.lisp", "ambiguous W8 executable head 00001001: choose source era", "w8-provenance", "00001001"),
+            ("c.lisp", "ambiguous W8 executable head 00001011: choose source era", "w8-provenance", "00001011"),
+            ("d.lisp", "word 2: requires exact D1-D9 binary word", "d2-or-domain-data", "word2"),
+            ("e.lisp", "word 3: requires exact D1-D9 binary word", "d2-or-domain-data", "word3"),
+        ]
+        for path, reason, _, _ in cases:
+            sources.append({
+                "path": path, "source_git_blob_sha": "a"*40,
+                "same_stem_sens_already_exists": False,
+                "status": "BLOCKED", "reason": reason,
+            })
+        out = mod.blocker_coordinate_cohorts(sources)
+        self.assertEqual(sum(x["count"] for x in out), len(sources))
+        self.assertEqual(out[0]["family"], "w8-provenance")
+        self.assertEqual(out[0]["coordinate"], "00001001")
+        self.assertEqual(out[0]["count"], 2)
+        self.assertEqual(out[0]["owner_issue"], "#4459")
+        self.assertEqual(len({x["path"] for g in out for x in g["original_sources"]}), 5)
+        self.assertEqual({g["coordinate"] for g in out if g["family"]=="w8-provenance"},
+                         {"00001001", "00001011"})
+        self.assertTrue(all(g["status"]=="FIRST_BLOCK_ONLY_NOT_SEMANTICALLY_ADMITTED" for g in out))
+
+    def test_exact_coordinate_split_never_relabels_originals_as_certified(self):
+        a = {"path":"old.lisp","source_git_blob_sha":"f"*40,
+             "same_stem_sens_already_exists":False,"status":"BLOCKED",
+             "reason":"legacy-unmapped SID8/Sens8 00100010 no resident"}
+        self.assertEqual(mod.blocker_coordinate_cohorts([a])[0]["coordinate"],"00100010")
+        with self.assertRaisesRegex(ValueError,"duplicate"):
+            mod.blocker_coordinate_cohorts([a,a])
+        with self.assertRaisesRegex(ValueError,"exact Git blob"):
+            mod.blocker_coordinate_cohorts([{**a,"source_git_blob_sha":"0"*39}])
+        with self.assertRaisesRegex(ValueError,"unpaired BLOCK"):
+            mod.blocker_coordinate_cohorts([{**a,"status":"CANDIDATE_NOT_ADMITTED"}])
+        self.assertEqual(mod.blocker_coordinate_cohorts([]), [])
+
+
 if __name__ == "__main__":
     unittest.main()
