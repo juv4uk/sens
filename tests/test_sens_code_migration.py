@@ -93,12 +93,12 @@ class SensCodeMigrationTests(unittest.TestCase):
 
     def test_all_three_historical_function_notations_resolve_before_text7(self):
         cases = {
-            "(00000101 x)\n": ("100", "CAR"),
-            "(car x)\n": ("100", "CAR"),
-            "(CAR x)\n": ("100", "CAR"),
-            "(00001100 a b)\n": ("01010", "PLUS"),
-            "(+ a b)\n": ("01010", "PLUS"),
-            "(PLUS a b)\n": ("01010", "PLUS"),
+            "(00000101 ())\n": ("100", "CAR"),
+            "(car ())\n": ("100", "CAR"),
+            "(CAR ())\n": ("100", "CAR"),
+            "(00001100 () ())\n": ("01010", "PLUS"),
+            "(+ () ())\n": ("01010", "PLUS"),
+            "(PLUS () ())\n": ("01010", "PLUS"),
         }
         for source, (bits, label) in cases.items():
             converted, hits, _ = self.binary(source)
@@ -112,7 +112,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             ("aṇu", "010"),
             ("додати", "01010"),
         ]:
-            converted, hits, _ = self.binary(f"({surface} x)\n")
+            converted, hits, _ = self.binary(f"({surface} ())\n")
             self.assertTrue(converted.startswith(f"10 {bits} 00 "), (surface, converted))
             self.assertTrue(hits, surface)
 
@@ -132,21 +132,21 @@ class SensCodeMigrationTests(unittest.TestCase):
         # A bare one-cell W7 value is D7 data, not a Lisp identifier.
         # No D2 Text7 atom/binder framing law has been ratified yet.
         with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
-            self.binary("(a)\\n")
+            self.binary("(CONS a ())\n")
 
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
-        converted, hits, shadowed = self.binary("(CONS (CAR x) (CDR y))\n")
-        # x = SLP1 0x50, y = SLP1 0x26.
+        converted, hits, shadowed = self.binary("(CONS (CAR ()) (CDR ()))\n")
+        # Only D3 EMPTY is admitted as an operand here.
         self.assertEqual(
             converted,
-            "10 111 00 10 100 00 1010000 01 00 "
-            "10 011 00 0100110 01 01\n",
+            "10 111 00 10 100 00 000 01 00 "
+            "10 011 00 000 01 01\n",
         )
         self.assertEqual([hit.label for hit in hits], ["CONS", "CAR", "CDR"])
         self.assertFalse(shadowed)
 
     def test_registry_only_old_sid_map_reaches_current_d6_map(self):
-        converted, hits, _ = self.binary("(00110111 f x)\n")
+        converted, hits, _ = self.binary("(00110111 () ())\n")
         self.assertTrue(converted.startswith("10 101000 00 "), converted)
         self.assertEqual((hits[0].label, hits[0].domain), ("MAP", "D6"))
 
@@ -161,7 +161,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.binary("(print x)\n")
 
     def test_current_exact_width_head_is_preserved(self):
-        converted, hits, _ = self.binary("(100 x)\n")
+        converted, hits, _ = self.binary("(100 ())\n")
         self.assertTrue(converted.startswith("10 100 00 "))
         self.assertEqual(hits[0].label, "CAR")
 
@@ -188,9 +188,9 @@ class SensCodeMigrationTests(unittest.TestCase):
         commented = """; outside
 (CAR ; inline
   #| outer #| nested |# block |#
-  x)
+  ())
 """
-        plain = "(CAR x)\n"
+        plain = "(CAR ())\n"
         a, _, _ = self.binary(commented)
         b, _, _ = self.binary(plain)
         self.assertEqual(a, b)
@@ -212,7 +212,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.binary("'(CAR x)\n")
 
     def test_dot_is_d2_only_when_standalone_multi_cell_symbol_blocks(self):
-        dotted, _, _ = self.binary("(LIST a . b)\n")
+        dotted, _, _ = self.binary("(LIST () . ())\n")
         self.assertIn(" 11 ", dotted)
         with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
             self.binary("(LIST a.b)\n")
@@ -222,7 +222,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.binary("(LIST 🙂)\n")
 
     def test_binary_output_is_ascii_bits_only(self):
-        converted, _, _ = self.binary("(CONS (CAR x) (CDR y))\n")
+        converted, _, _ = self.binary("(CONS (CAR ()) (CDR ()))\n")
         self.assertRegex(converted, r"^[01\s]+$")
         converted.encode("ascii")
 
