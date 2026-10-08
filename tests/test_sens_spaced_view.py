@@ -173,6 +173,14 @@ class SpacedViewTests(unittest.TestCase):
         self.assertEqual(code, 2, r)
         self.assertIn("unsafe", r["reason"])
 
+    def test_symlinked_external_stage_root_cannot_bypass_path_guard(self):
+        linked = self.working / "symlinked-stage"
+        linked.symlink_to(self.stage, target_is_directory=True)
+        code, result = self.invoke("--stage", "--out-root", str(linked))
+        self.assertEqual(code, 2, result)
+        self.assertIn("staging root symlink", result["reason"])
+        self.assertFalse(self.stage.exists())
+
     def test_stage_without_actual_rust_reader_fails_closed(self):
         code, obj = self.invoke("--stage", "--out-root", str(self.stage), reader=False)
         self.assertEqual(code, 2, obj)
