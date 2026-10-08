@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -60,7 +61,102 @@ def categorize(row: dict, root: Path) -> dict:
         result.update(status="BLOCKED", reason=row.get("reason", "unknown"))
     else:
         raise ValueError(f"unexpected dry-run status {row['status']!r}")
+    # Preserve the exact FIRST failing token/coordinate. This is lexical
+    # evidence for assigning work, never a proposed semantic translation.
+    if row["status"] == "blocked":
+        for field in ("token", "line", "column"):
+            if field in row:
+                result[field] = row[field]
     return result
+
+
+# A blocker cohort is a FIRST-ERROR partition, not the set of all blockers
+# in a program. One source may need several distinct ratified laws after the
+# first blocker is resolved. In particular: do NOT call it "executable".
+BLOCKER_LANES = {
+    "W8_ERA_AMBIGUITY": ("#4459", "Prove original Git SHA / source era before choosing legacy or current D8"),
+    "LEGACY_SUCCESSOR": ("#4577", "Prove exact owner-audited historical successor and current domain"),
+    "D2_STRUCTURE_AS_DATA": ("#4462", "Prove whether structural D2 is misplaced data, not executable"),
+    "NON_BINARY_WORD": ("#4460", "Separate source program from catalogue/schema/archive and admit literal law"),
+    "HOST_EFFECT": ("#4449", "Prove host/IO effects and observable parity or retain BLOCK"),
+    "TEXT7_OR_NUMERIC_LAW": ("#4449", "Prove exact typed text/number semantic law, not phoneme bytes as functions"),
+    "OTHER_UNPROVEN": ("#4449", "Investigate exact source and independently verify its semantic role"),
+}
+
+
+def first_blocker_identity(row: dict) -> tuple[str, str]:
+    """Conservative signature of the first BLOCK, never an admission."""
+    reason = str(row.get("reason", ""))
+    token = str(row.get("token", ""))
+    match = re.search(r"ambiguous W8 executable head ([01]{8})", reason)
+    if match:
+        return "W8_ERA_AMBIGUITY", match.group(1)
+    match = re.search(r"legacy-unmapped SID8/Sens8 ([01]{8})", reason)
+    if match:
+        return "LEGACY_SUCCESSOR", match.group(1)
+    if re.search(r"D2 word [01]{2}|structural control only", reason):
+        return "D2_STRUCTURE_AS_DATA", "D2"
+    match = re.search(r"\bword (\d+):.*(?:exact|binary|0/1|0/1 word)", reason, re.I)
+    if match:
+        return "NON_BINARY_WORD", "word" + match.group(1)
+    if re.search(r"\b(?:print|display|read-file|host|I/O|IO effect)\b", reason + " " + token, re.I):
+        return "HOST_EFFECT", "side-effect"
+    if re.search(r"Text7|D24|numeric|digit|number|character|string", reason, re.I):
+        return "TEXT7_OR_NUMERIC_LAW", "typed-data"
+    if re.search(r"legacy-unmapped|unratified|no current .*resident", reason, re.I):
+        return "LEGACY_SUCCESSOR", "unmapped-surface"
+    return "OTHER_UNPROVEN", "other"
+
+
+def first_blocker_cohorts(rows: list[dict]) -> dict:
+    """Cover every original blocked path exactly once with a SHA-pinned cohort.
+
+    Cohort counts prioritize shared laws but do not mean any file is a
+    convertible executable. No original is modified by this function.
+    """
+    blocked = [r for r in rows if r["status"] == "BLOCKED"]
+    cohorts: dict[tuple[str, str], list[dict]] = {}
+    for row in blocked:
+        path = row["path"]
+        sha = row.get("source_git_blob_sha")
+        if not isinstance(path, str) or not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}", sha):
+            raise ValueError("first blocker requires exact original file and Git blob SHA")
+        if row.get("same_stem_sens_already_exists"):
+            raise ValueError("paired file cannot enter an original blocker cohort")
+        family, coordinate = first_blocker_identity(row)
+        member = {"path": path, "source_git_blob_sha": sha, "reason": str(row.get("reason", "unknown"))}
+        for field in ("token", "line", "column"):
+            if field in row:
+                member[field] = row[field]
+        cohorts.setdefault((family, coordinate), []).append(member)
+    all_paths = [member["path"] for members in cohorts.values() for member in members]
+    if len(all_paths) != len(set(all_paths)) or len(all_paths) != len(blocked):
+        raise ValueError("non-disjoint or incomplete original blocker partition")
+    groups = []
+    for (family, coordinate), members in sorted(
+        cohorts.items(), key=lambda item: (-len(item[1]), item[0][0], item[0][1])
+    ):
+        ordered = sorted(members, key=lambda x: x["path"])
+        issue, proof = BLOCKER_LANES[family]
+        groups.append({
+            "family": family, "coordinate": coordinate,
+            "first_blocked_sources": len(ordered),
+            "owner_issue": issue, "required_proof": proof,
+            "example_paths": [x["path"] for x in ordered[:5]],
+            "original_sources": ordered,
+            "not_executable_or_semantic_admission": True,
+        })
+    families = {}
+    for group in groups:
+        families[group["family"]] = families.get(group["family"], 0) + group["first_blocked_sources"]
+    return {
+        "method": "FIRST failing lexical/domain constraint per exact original SHA; other later blockers not tested",
+        "status": "TRIAGE_ONLY_NO_ORACLE",
+        "first_blocked_total": len(blocked),
+        "cohorts": groups,
+        "source_counts_by_family": dict(sorted(families.items(), key=lambda x: (-x[1], x[0]))),
+        "semantically_admitted_executable_sources": 0,
+    }
 
 
 def build_report(root: Path = ROOT) -> dict:
@@ -105,6 +201,9 @@ def build_report(root: Path = ROOT) -> dict:
         blocked = len(rows) - len(candidates)
         if len(rows) != report["summary"]["files_seen"] or blocked != report["summary"]["files_blocked"]:
             raise RuntimeError("migrator report totals inconsistent")
+        blocker_partition = first_blocker_cohorts(rows)
+        if blocker_partition["first_blocked_total"] != blocked:
+            raise RuntimeError("first blocker partition count mismatch")
         return {
             "schema": "sens-original-three-pass-eligibility/v1",
             "authority": "candidate discovery only; parser/codec parity is NOT oracle parity",
@@ -119,10 +218,12 @@ def build_report(root: Path = ROOT) -> dict:
                 "unpaired_candidates_needing_original_oracle": len(unpaired),
                 "original_unpaired_executables_migrated_by_this_tool": 0,
                 "physical_outputs_created": 0,
+                "blocker_cohorts": len(blocker_partition["cohorts"]),
             },
             "source_era": "auto",
             "authority": "original unpaired current D1-D9 source; candidate only; no oracle admission",
             "already_paired_sources_excluded": excluded,
+            "first_blocker_partition": blocker_partition,
             "mechanical_candidates": candidates,
             "unpaired_blocker_sample": [r for r in rows if r["status"] == "BLOCKED" and not r["same_stem_sens_already_exists"]][:20],
             "required_evidence": [
