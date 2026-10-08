@@ -93,9 +93,9 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertEqual(json.loads(output.getvalue())["status"], payload["status"])
         return code, payload
 
-    def test_pinned_original_not_fake_new_file(self):
-        self.assertEqual(source_blob(SOURCE), "0aa0b793f16688ff7d1032df7bd169f27afcd4be")
-        self.assertEqual(self.orig.decode(), "(CAAR (CONS (CONS (QUOTE ()) (QUOTE ())) (QUOTE ())))\n")
+    def test_pinned_ratified_ukrainian_fixture_not_fake_new_file(self):
+        # #4430/#4455 intentionally ratified this fixture as Ukrainian `ук`;\n        # it is a semantic/physical canary, NOT a new original migration credit.\n        self.assertEqual(source_blob(SOURCE), "407685130e53a0129b8d1b86e8e20b36270965ba")
+        self.assertEqual(self.orig.decode(), "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n")
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
 
     def test_bad_blob_blocks_even_before_conversion(self):
