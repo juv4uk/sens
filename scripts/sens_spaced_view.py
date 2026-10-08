@@ -178,6 +178,35 @@ def safe_stage(root: Path, mirror: Path, rel: Path, view: bytes) -> Path:
     return dest
 
 
+def write_report_outside_repo(root: Path, report: Path, state: dict) -> None:
+    """Evidence is also write-once and cannot overwrite source or .sens."""
+    root = root.resolve(strict=True)
+    destination = report.resolve(strict=False)
+    if destination == root or root in destination.parents:
+        raise ViewBlocked("REPORT: evidence output must be outside source repo")
+    if destination.exists() or destination.is_symlink():
+        raise ViewBlocked("NO_CLOBBER: evidence report already exists")
+    parent = destination.parent
+    if parent.is_symlink():
+        raise ViewBlocked("REPORT: symlink report parent")
+    parent.mkdir(parents=True, exist_ok=True)
+    data = (json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    tmp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="wb", prefix=".sens-view-report-",
+                                          dir=parent, delete=False) as tmp:
+            tmp_path = Path(tmp.name)
+            tmp.write(data)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        os.link(tmp_path, destination)
+    except FileExistsError as exc:
+        raise ViewBlocked("NO_CLOBBER: evidence report already exists") from exc
+    finally:
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("preview", "verify", "stage"))
@@ -218,10 +247,7 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 state["stage_written"] = False
         if args.report:
-            args.report.parent.mkdir(parents=True, exist_ok=True)
-            args.report.write_text(json.dumps(state, ensure_ascii=False,
-                                               indent=2, sort_keys=True) + "\n",
-                                   encoding="utf-8")
+            write_report_outside_repo(args.root, args.report, state)
         print(json.dumps(state, ensure_ascii=False, sort_keys=True))
         return 0
     except (ViewBlocked, SensT5Error, OSError, ValueError) as exc:
