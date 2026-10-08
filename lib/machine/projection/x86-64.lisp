@@ -80,10 +80,11 @@
               (00000101
                 (00000110
                   (00000110
-                    (00000110 effect)))))
-            (offset
-              (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
-          (00000111
+                    (00000110 effect))))))
+          (10011100
+            ((offset
+               (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
+            (00000111
             ((x86-projection-rejected? offset)
               (00000001 x86-projection-rejected))
             ((00000011
@@ -123,10 +124,11 @@
               (00000101
                 (00000110
                   (00000110
-                    (00000110 effect)))))
-            (offset
-              (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
-          (00000111
+                    (00000110 effect))))))
+          (10011100
+            ((offset
+               (x86-project-structural-slot-offset field-slot field0-offset field1-offset)))
+            (00000111
             ((x86-projection-rejected? offset)
               (00000001 x86-projection-rejected))
             ((00000011
