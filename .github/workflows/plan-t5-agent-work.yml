@@ -55,24 +55,31 @@ jobs:
                                      "UNCLAIMED__NONPROGRAM_DATA_ONLY")
                      for s in plan["shards"])
           reviewed = [s for s in plan["shards"] if s["family"] == "reviewed-nonprogram-data"]
+          archived = [s for s in plan["shards"] if s["family"] == "archived-benchmark-data"]
+          data_shards = reviewed + archived
           assert all(s["status"] == "UNCLAIMED__NONPROGRAM_DATA_ONLY"
                      and s["release_gate"] == "DATA_CONTRACT_NO_EXECUTABLE_T5"
-                     for s in reviewed)
+                     for s in data_shards)
           assert all(s["release_gate"] == "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"
-                     for s in plan["shards"] if s["family"] != "reviewed-nonprogram-data")
-          count=sum(s["source_count"] for s in reviewed)
-          assert count == plan["summary"]["reviewed_nonprogram_originals"]
-          assert count == summary.get("classified_nonprogram", 0)
+                     for s in plan["shards"] if s not in data_shards)
+          reviewed_count=sum(s["source_count"] for s in reviewed)
+          archived_count=sum(s["source_count"] for s in archived)
+          assert reviewed_count == plan["summary"]["reviewed_nonprogram_originals"]
+          assert reviewed_count == summary.get("classified_nonprogram", 0)
+          assert archived_count == plan["summary"]["archived_benchmark_nonprogram_originals"]
+          assert archived_count == summary.get("archived_benchmark_data_sources", 0)
+          count=reviewed_count+archived_count
           assert plan["summary"]["executable_or_unclassified_originals"] + count == len(paths)
           assert plan["summary"]["claimed"]==0 and plan["summary"]["admitted"]==0
           assert len(paths)==plan["summary"]["blocked"]+plan["summary"]["mechanical_pending_oracle"]
           print("DISJOINT_T5_AGENT_SHARDS_CONFIRMED",len(paths),"sources",len(plan["shards"]),
-                "shards",count,"reviewed nonprogram sources routed to DATA ONLY")
+                "shards",reviewed_count,"reviewed data plus",archived_count,"archived data-only")
           import os
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summaryfile:
               summaryfile.write("## Original Lisp agent work allocation\\n\\n")
               summaryfile.write(f"- Unpaired originals: **{len(paths)}**\\n")
-              summaryfile.write(f"- Reviewed data-only originals: **{count}** (no executable .sens)\\n")
+              summaryfile.write(f"- Reviewed DATA original sources: **{reviewed_count}** (no executable .sens)\\n")
+              summaryfile.write(f"- Archived benchmark sources: **{archived_count}** (nonprogram)\\n")
               summaryfile.write(f"- Executable/unclassified originals: **{len(paths)-count}** (oracle required)\\n")
               summaryfile.write(f"- Distinct claimable shards: **{len(plan['shards'])}**\\n")
           PY
