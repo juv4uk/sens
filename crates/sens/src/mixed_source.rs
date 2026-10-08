@@ -36,7 +36,7 @@ pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError
         .collect()
 }
 
-fn binding_form(source: &str, head: &Expr) -> Option<u8> {
+fn binding_form(source: &str, head: &Expr) -> Option<u16> {
     let spelling = source_spelling(source, head)?;
     match spelling {
         "0010" => return Some(2),
@@ -84,6 +84,12 @@ fn collect_source_bindings(source: &str, expression: &Expr, names: &mut HashSet<
                 }
             }
         }
+    }
+    // Some D2/COND clauses have a LIST as their first element, not an
+    // executable callable head. Its test expression may itself introduce
+    // a nested binder; do not lose it merely because the parent is a list.
+    if matches!(&head.kind, ExprKind::List(_)) {
+        collect_source_bindings(source, head, names);
     }
     for (index, child) in items.iter().enumerate().skip(1) {
         if binding.is_some() && index == 1 {
