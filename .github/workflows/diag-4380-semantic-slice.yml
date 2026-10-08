@@ -1,0 +1,24 @@
+name: diag-4380-semantic-slice
+
+on:
+  push:
+    branches:
+      - diag/4380-semantic-slice-1008
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run semantic slice with bounded trace
+        shell: bash
+        run: |
+          set +e
+          bash -x scripts/test-current-semantic-slice.sh > /tmp/semantic-slice.log 2>&1
+          rc=$?
+          echo "semantic-slice-exit=$rc"
+          echo "----- bounded tail -----"
+          tail -n 240 /tmp/semantic-slice.log
+          exit "$rc"
