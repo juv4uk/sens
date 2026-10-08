@@ -101,6 +101,15 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
+    /// Owner-ratified Ukrainian CALL-head mapping to exact-width domain
+    /// identity. Source/UI .lisp must stay Ukrainian; it must not be reverted
+    /// to historical eight-bit function names by the legacy migration auditor.
+    /// Contextual head routing itself remains in parse_mixed_exact_domain.
+    pub fn exact_uk_callable_for_source_head(name: &str) -> Option<super::DomainIdentity> {
+        super::semantic_registry::exact_uk_callable_for_source_head(name)
+    }
+
+
     /// Legacy packed-byte export for external projection consumers.
     ///
     /// Runtime/source semantics use opaque `Sens8`; this function deliberately
