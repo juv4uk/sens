@@ -7,7 +7,7 @@
 
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
-    Span,
+    Span, Text7,
 };
 use crate::syntax::ExprKind;
 use std::rc::Rc;
@@ -26,6 +26,54 @@ const D2_DOT: u8 = 0b11;
 pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> {
     let tokens = parse_binary_source_words(source)?;
     CanonicalReader::new(&tokens, source.len()).parse_program()
+}
+
+/// Recognize the current candidate Text7 identifier atom framing.
+///
+/// This is intentionally a reader/mechanism helper, not a new semantic AST
+/// variant or a semantic resident. A non-empty D2 list whose every leaf is an
+/// exact D7 identity is the candidate Text7 atom; width and domain remain on
+/// each leaf, while the resulting Text7 value supplies one stable binding key.
+pub(crate) fn text7_atom(expression: &Expr) -> Option<Text7> {
+    let ExprKind::List(items) = &expression.kind else {
+        return None;
+    };
+    if items.is_empty() {
+        return None;
+    }
+
+    let cells = items
+        .iter()
+        .map(|item| match item.kind {
+            ExprKind::DomainIdentity(crate::DomainIdentity::D7(word)) => {
+                Some(word.word().packed_bits())
+            }
+            _ => None,
+        })
+        .collect::<Option<Vec<u8>>>()?;
+
+    Text7::from_cells(cells).ok()
+}
+
+/// Canonical internal binding key for a framed Text7 identifier.
+pub(crate) fn text7_binding_key(expression: &Expr) -> Option<Rc<str>> {
+    text7_atom(expression).map(|text| Rc::from(text.to_canonical_wire_token()))
+}
+
+/// Re-materialize a Text7 atom as the canonical D2/W7 AST shape.
+pub(crate) fn text7_to_expr(text: &Text7, span: Span) -> Expr {
+    let items = text
+        .to_source_words()
+        .into_iter()
+        .map(|word| Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
+            span,
+        })
+        .collect::<Vec<_>>();
+    Expr {
+        kind: ExprKind::List(Rc::from(items.into_boxed_slice())),
+        span,
+    }
 }
 
 struct CanonicalReader<'a> {
