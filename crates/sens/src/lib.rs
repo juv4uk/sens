@@ -47,6 +47,8 @@ mod hdlc_transport_experiment;
 #[cfg(test)]
 mod word_tag_transport_experiment;
 #[cfg(test)]
+mod bracket_eof_t5_experiment;
+#[cfg(test)]
 mod sens_container_experiment;
 #[cfg(test)]
 mod bootstrap_measurement;
