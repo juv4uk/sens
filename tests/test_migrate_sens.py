@@ -79,7 +79,7 @@ class OperationalMigrationTests(unittest.TestCase):
                                  cwd=ROOT, capture_output=True, text=True)
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
             target = out / "tests/fixtures/migration-d1-cond-cohort/branch.sens"
-            target.write_bytes(target.read_bytes() + b"\\xf3")
+            target.write_bytes(target.read_bytes() + bytes([243]))
             with self.assertRaises((runner.MigrationBlocked, ValueError)):
                 runner.verify_published(json.loads(report.read_text()), out, False)
 
