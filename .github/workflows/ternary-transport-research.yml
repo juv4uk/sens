@@ -1,0 +1,39 @@
+name: ternary-transport-research
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/Cargo.toml"
+      - ".github/workflows/ternary-transport-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-trit-transport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run exhaustive mechanical trit codec regressions
+        run: cargo test -p sens ternary_transport::tests:: -- --nocapture
+      - name: Prove physical .sens file and exact binary word recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- verify "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/decoded.words"
+          printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/expected.words"
+          cmp "$RUNNER_TEMP/expected.words" "$RUNNER_TEMP/decoded.words"
+          test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          printf '\000' >> "$RUNNER_TEMP/sample.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens"; then
+            echo "ERROR: extra physical byte accepted after canonical EOS"
+            exit 1
+          fi

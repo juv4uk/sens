@@ -4,12 +4,25 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/bracket_eof_t5_experiment.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/src/binary_delimited_transport.rs"
+      - "crates/sens/src/sens_container_experiment.rs"
+      - "crates/sens/src/hdlc_transport_experiment.rs"
+      - "crates/sens/src/word_tag_transport_experiment.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
   push:
     branches: [main]
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/bracket_eof_t5_experiment.rs"
+      - "crates/sens/src/binary_delimited_transport.rs"
+      - "crates/sens/src/sens_container_experiment.rs"
+      - "crates/sens/src/hdlc_transport_experiment.rs"
+      - "crates/sens/src/word_tag_transport_experiment.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
 
@@ -22,3 +35,39 @@ jobs:
       - name: Prove canonical source bit measure and dense packing parity
         run: |
           cargo test -p sens source_packing::tests::
+          cargo test -p sens ternary_transport::tests::
+          cargo test -p sens bracket_eof_t5_experiment::tests::
+          cargo test -p sens binary_delimited_transport::tests::
+          cargo test -p sens sens_container_experiment::tests::
+          cargo test -p sens hdlc_transport_experiment::tests::
+          cargo test -p sens word_tag_transport_experiment::tests::
+      - name: Verify actual nontext .sens ternary-byte encoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- verify "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/decoded.words"
+          printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/expected.words"
+          cmp "$RUNNER_TEMP/decoded.words" "$RUNNER_TEMP/expected.words"
+          # Human opening: hidden transport digit 2 becomes ONE space.
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/opened.txt"
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/spaced.txt"
+          cmp "$RUNNER_TEMP/opened.txt" "$RUNNER_TEMP/spaced.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- view "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/viewed.txt"
+          cmp "$RUNNER_TEMP/viewed.txt" "$RUNNER_TEMP/spaced.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/implicit-opened.txt"
+          cmp "$RUNNER_TEMP/implicit-opened.txt" "$RUNNER_TEMP/spaced.txt"
+          # No UI separators are persisted as spaces in the physical file.
+          test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          if cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.lisp"; then
+            echo "ERROR: opened non-SENS source as packed .sens"
+            exit 1
+          fi
+          test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          printf '\000' >> "$RUNNER_TEMP/sample.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens"; then
+            echo "ERROR: extra bytes after end of ternary program accepted"
+            exit 1
+          fi

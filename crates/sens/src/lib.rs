@@ -40,6 +40,16 @@ mod presentation;
 mod semantic_registry;
 mod source_words;
 mod source_packing;
+mod ternary_transport;
+mod binary_delimited_transport;
+#[cfg(test)]
+mod hdlc_transport_experiment;
+#[cfg(test)]
+mod word_tag_transport_experiment;
+#[cfg(test)]
+mod bracket_eof_t5_experiment;
+#[cfg(test)]
+mod sens_container_experiment;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -174,6 +184,17 @@ pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
 pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
+};
+pub use binary_delimited_transport::{
+    binary_delimited_accounting, decode_binary_delimited_program,
+    decode_binary_delimited_words, encode_binary_delimited_projection,
+    encode_binary_delimited_words, BinaryDelimitedAccounting, BinaryDelimitedError,
+};
+pub use ternary_transport::{
+    decode_ternary_program, decode_ternary_words, encode_binary_projection_ternary,
+    encode_ternary_words, open_ternary_program, render_ternary_words_spaced,
+    render_ternary_words_vertical, ternary_transport_accounting,
+    TernaryTransportAccounting, TernaryTransportError,
 };
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, packed_transport_accounting,
