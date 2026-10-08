@@ -5,6 +5,7 @@ on:
       - '**/*.lisp'
       - '**/*.sens'
       - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migration_source_scope.py'
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'tests/test_report_original_migration_candidates.py'
@@ -17,6 +18,7 @@ on:
       - '**/*.lisp'
       - '**/*.sens'
       - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migration_source_scope.py'
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'knowledge/d1-d9-foundation.json'
@@ -56,6 +58,10 @@ jobs:
           assert 'D1-D9' in r['authority']
           assert all(not x['same_stem_sens_already_exists'] for x in r['mechanical_candidates'])
           assert s['original_unpaired_executables_migrated_by_this_tool']==0
+          assert s['mechanical_candidates']==s['archived_nonprogram_mechanical_candidates']+s['active_or_unclassified_mechanical_candidates']
+          assert s['unpaired_candidates_needing_original_oracle']==s['active_or_unclassified_mechanical_candidates']
+          assert all(row['source_scope']=='ARCHIVED_BENCHMARK_NONPROGRAM' for row in r['archived_nonprogram_candidates'])
+          assert all(row['source_scope']!='ARCHIVED_BENCHMARK_NONPROGRAM' for row in r['actionable_not_yet_oracle_proven_candidates'])
           assert all(not x['independent_semantic_oracle_passed'] for x in r['mechanical_candidates'])
           print('ORIGINAL_LISP_CANDIDATES',r['mechanical_candidates'])
           from pathlib import Path
@@ -65,6 +71,7 @@ jobs:
               out.write(f"- Historical unpaired originals scanned: **{s['scanned']}**\n")
               out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
               out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
+              out.write(f"- Archived nonprogram mechanical candidates: **{s['archived_nonprogram_mechanical_candidates']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
               out.write('### Shared mechanical blockers — reusable owner work\n\n')
