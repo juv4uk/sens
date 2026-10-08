@@ -1,0 +1,26 @@
+name: Physical T5 explicit Core4 oracle
+on:
+  pull_request:
+    paths:
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/lib.rs"
+      - ".github/workflows/physical-t5-explicit-core4.yml"
+  workflow_dispatch:
+
+jobs:
+  explicit-core4-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Physical T5 bare-vs-explicit Core4 oracle and existing T5 safety
+        run: cargo test -p sens-cli --bin sens-trit -- --nocapture
+      - name: Immutable source and physical T5 artifacts
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
