@@ -179,6 +179,50 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.PlanError, "conflicting"):
             mod.build_plan(a, 2)
 
+    def test_sha_pinned_archived_benchmark_gets_data_only_shard(self):
+        a = fixture()
+        archived = ("benchmarks/sens-surface/results/"
+                    "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        a["blocked_sources"][0]["path"] = archived
+        a["blocked_sources"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+        a["blocked_sources"][0]["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
+        a["blocker_cohorts"][0]["original_sources"][0]["path"] = archived
+        a["blocker_cohorts"][0]["original_sources"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+        a["summary"]["archived_benchmark_data_sources"] = 1
+        result = mod.build_plan(a, 2)
+        archive = [shard for shard in result["shards"]
+                   if shard["family"] == "archived-benchmark-data"]
+        self.assertEqual(len(archive), 1)
+        self.assertEqual(archive[0]["status"], "UNCLAIMED__NONPROGRAM_DATA_ONLY")
+        self.assertEqual(archive[0]["release_gate"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertEqual(archive[0]["sources"][0]["path"], archived)
+        self.assertEqual(result["summary"]["archived_benchmark_nonprogram_originals"], 1)
+        self.assertEqual(result["summary"]["executable_or_unclassified_originals"], 3)
+        self.assertEqual(result["summary"]["original_unpaired"], 4)
+
+    def test_mechanically_convertible_archive_does_not_enter_oracle_worker(self):
+        a = fixture()
+        archived = ("benchmarks/sens-surface/results/"
+                    "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        a["mechanical_candidates"][0]["path"] = archived
+        a["mechanical_candidates"][0]["source_git_blob_sha"] = "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+        a["mechanical_candidates"][0]["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
+        a["summary"]["archived_benchmark_data_sources"] = 1
+        a["summary"]["unpaired_candidates_needing_original_oracle"] = 0
+        result = mod.build_plan(a, 2)
+        self.assertEqual(result["summary"]["mechanical_pending_oracle"], 0)
+        self.assertFalse(any(x["family"] == "oracle-pending" for x in result["shards"]))
+        self.assertEqual(result["summary"]["archived_benchmark_nonprogram_originals"], 1)
+        self.assertTrue(any(shard["family"] == "archived-benchmark-data"
+                            and shard["sources"][0]["path"] == archived
+                            for shard in result["shards"]))
+
+    def test_archived_scope_cannot_be_forged_from_active_source(self):
+        a = fixture()
+        a["blocked_sources"][0]["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
+        with self.assertRaisesRegex(mod.PlanError, "forged archive"):
+            mod.build_plan(a, 2)
+
     def test_no_paired_source_or_duplicate_can_enter_plan(self):
         a = fixture()
         a["blocker_cohorts"][0]["original_sources"][0]["path"] = "test/ready.lisp"
