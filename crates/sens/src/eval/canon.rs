@@ -458,6 +458,20 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
+    // Owner-ratified D4:1110 LIST is an eager value-call.  The current
+    // historical machine-block calls this exact identity; its transport and
+    // D2 reader already pass, but a missing *mechanism* previously made the
+    // current physical evaluator reject the original program.
+    //
+    // Do not project a numerical 1110 from other widths or accept arbitrary
+    // Text7 spellings as a callable name. LIST makes a proper list out of
+    // already-evaluated argument VALUES, preserving NIL as an element.
+    if let CoreDomainIdentity::D4(word) = identity {
+        if word.word().packed_bits() == 0b1110 {
+            return Ok(Value::list(args.iter().cloned()));
+        }
+    }
+
     if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
         let value = result?;
         return canonicalize_domain_result(identity, value, span);
@@ -824,6 +838,48 @@ mod tests {
         let error = canonicalize_domain_result(d3(0b101), number, span)
             .expect_err("bare Number 1 must not collapse into D1");
         assert_eq!(error.kind, ErrorKind::Type);
+    }
+
+    #[test]
+    fn exact_d4_list_constructs_proper_values_without_cross_width_fallback() {
+        let span = Span { start: 0, end: 0 };
+        let env = Environment::root();
+        let d4 = |bits| {
+            CoreDomainIdentity::D4(crate::CoreD4::from_word(
+                crate::Bit4::new(bits).unwrap(),
+            ))
+        };
+        let list = d4(0b1110); // Owner-ratified D4:1110; not an English alias.
+        let nil = invoke_domain_identity(list, &[], &env, span)
+            .expect("zero-argument LIST is the empty list");
+        assert_eq!(nil, Value::Nil);
+
+        let nested_nil = invoke_domain_identity(list, &[Value::Nil], &env, span)
+            .expect("one NIL argument must remain an element, not disappear");
+        assert_eq!(nested_nil, Value::list([Value::Nil]));
+        assert_ne!(nested_nil, Value::Nil);
+
+        let payload = Value::list([Value::Nil]);
+        let first = Value::Symbol(std::rc::Rc::from("left"));
+        let values = [first.clone(), payload.clone(), Value::Nil];
+        let constructed = invoke_domain_identity(list, &values, &env, span)
+            .expect("D4 LIST must preserve order and nested structure");
+        assert_eq!(constructed, Value::list(values.iter().cloned()));
+        assert_eq!(values[1], payload, "constructing LIST must not mutate arguments");
+
+        let d5_same_bits = CoreDomainIdentity::D5(crate::CoreD5::from_word(
+            crate::Bit5::new(0b01110).unwrap(),
+        ));
+        let err = invoke_domain_identity(d5_same_bits, &[], &env, span)
+            .expect_err("D5 equal numeric payload must not borrow D4 LIST meaning");
+        assert_eq!(err.kind, ErrorKind::Type);
+
+        let d8_same_bits = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b00001110).unwrap(),
+        ));
+        let err = invoke_domain_identity(d8_same_bits, &[], &env, span)
+            .expect_err("D8 equal numeric payload must not borrow D4 LIST meaning");
+        assert_eq!(err.kind, ErrorKind::Type);
     }
 
     #[test]
