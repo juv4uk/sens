@@ -448,12 +448,12 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
-        source = (
-            "(00001001 foo\n"
-            "  (00001000 ()\n"
-            "    1))\n"
-            "(foo)\n"
-        )
+        source="""\\
+(00001001 foo
+  (00001000 ()
+    1))
+(foo)
+"""
         projection,resolver=self.migrate(source)
         frame=mod.frame_text7(
             mod.text7_encode("foo",self.text7,mod.Tok("ATOM","foo",0)),
@@ -462,7 +462,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         frame_text=" ".join(frame)
         self.assertGreaterEqual(projection.count(frame_text),2)
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
-        self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()), repr(projection))
+        self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()))
         payload=mod.encode_projection(projection)
         self.assertEqual(mod.decode_bytes(payload),projection.split())
 
@@ -474,7 +474,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(words)
         self.assertTrue(
             all(set(word) <= {"0","1"} for word in words),
-            repr(projection),
+            "the real machine-block source must reach an all-binary candidate",
         )
         self.assertEqual(resolver.counts["pass1-sens8"],17)
 
@@ -511,10 +511,11 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(payload, "physical T5 candidate must contain bytes")
 
 
+
     def test_let_and_let_star_bindings_use_contextual_text7_without_treating_binding_lists_as_calls(self):
         for source, head, expected_env in (
-            ("(let ((x 1)) x)\n", "001000", 1),
-            ("(let* ((x 1) (y x)) y)\n", "001001", 1),
+            ("(let ((x 1)) x)\\n", "001000", 1),
+            ("(let* ((x 1) (y x)) y)\\n", "001001", 1),
         ):
             projection, resolver = self.migrate(source)
             words = projection.split()
@@ -530,11 +531,11 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertNotIn(" x ", " " + projection + " ")
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
-        source = (
-            "(00001001 first\n"
-            "  (00001000 (first)\n"
-            "    (first)))\n"
-        )
+        source="""\\
+(00001001 first
+  (00001000 (first)
+    (first)))
+"""
         projection,resolver=self.migrate(source)
         words=projection.split()
         self.assertTrue(all(set(word) <= {"0","1"} for word in words))
