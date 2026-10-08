@@ -3,6 +3,7 @@
 //! Bau von `lambda` und Anwendung von Closures/Makros auf Argumente.
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
+use crate::canonical_reader::text7_binding_key;
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 use std::{
@@ -34,7 +35,18 @@ fn parse_lambda_list(expr: &Expr) -> LambdaListResult {
 type LambdaList = (Vec<Rc<str>>, Option<Rc<str>>);
 type LambdaListResult = Result<LambdaList, LanguageError>;
 
+fn bindable_parameter_name(expr: &Expr) -> Result<Option<Rc<str>>, LanguageError> {
+    let Some(name) = text7_binding_key(expr) else {
+        return Ok(None);
+    };
+    canon::ensure_bindable(&name, expr.span)?;
+    Ok(Some(name))
+}
+
 fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
+    if let Some(name) = bindable_parameter_name(expr)? {
+        return Ok((Vec::new(), Some(name)));
+    }
     match &expr.kind {
         ExprKind::Symbol(name) => {
             canon::ensure_bindable(name, expr.span)?;
@@ -51,27 +63,30 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             let mut parameters = Vec::with_capacity(parameter_forms.len());
             let mut unique = HashSet::new();
             for parameter in parameter_forms.iter() {
-                let name = match &parameter.kind {
-                    ExprKind::Symbol(name) => {
-                        canon::ensure_bindable(name, parameter.span)?;
-                        name.clone()
-                    }
-                    ExprKind::Sid(sid) => {
-                        canon::ensure_bindable_sid(*sid, parameter.span)?;
-                        sid.to_string().into()
-                    }
-                    ExprKind::DomainIdentity(identity) => {
-                        return Err(canon::immutable_domain_binding_error(
-                            *identity,
-                            parameter.span,
-                        ));
-                    }
-                    _ => {
-                        return Err(LanguageError::new(
-                            ErrorKind::InvalidForm,
-                            "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
-                            parameter.span,
-                        ));
+                let name = match bindable_parameter_name(parameter)? {
+                    Some(name) => name,
+                    None => match &parameter.kind {
+                        ExprKind::Symbol(name) => {
+                            canon::ensure_bindable(name, parameter.span)?;
+                            name.clone()
+                        }
+                        ExprKind::Sid(sid) => {
+                            canon::ensure_bindable_sid(*sid, parameter.span)?;
+                            sid.to_string().into()
+                        }
+                        ExprKind::DomainIdentity(identity) => {
+                            return Err(canon::immutable_domain_binding_error(
+                                *identity,
+                                parameter.span,
+                            ));
+                        }
+                        _ => {
+                            return Err(LanguageError::new(
+                                ErrorKind::InvalidForm,
+                                "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
+                                parameter.span,
+                            ));
+                        }
                     }
                 };
                 if !unique.insert(name.clone()) {
@@ -90,29 +105,43 @@ fn parse_lambda_list_inner(expr: &Expr) -> LambdaListResult {
             let mut unique = HashSet::new();
             let mut current: &Expr = expr;
             let rest = loop {
+                if let Some(name) = bindable_parameter_name(current)? {
+                    if !unique.insert(name.clone()) {
+                        return Err(LanguageError::new(
+                            ErrorKind::InvalidForm,
+                            format!("duplicate lambda parameter · povtornyi parametr lambda · doppelter lambda-Parameter: {name}"),
+                            current.span,
+                        ));
+                    }
+                    break name;
+                }
+
                 match &current.kind {
                     ExprKind::Pair(head, tail) => {
-                        let name = match &head.kind {
-                            ExprKind::Symbol(name) => {
-                                canon::ensure_bindable(name, head.span)?;
-                                name.clone()
-                            }
-                            ExprKind::Sid(sid) => {
-                                canon::ensure_bindable_sid(*sid, head.span)?;
-                                sid.to_string().into()
-                            }
-                            ExprKind::DomainIdentity(identity) => {
-                                return Err(canon::immutable_domain_binding_error(
-                                    *identity,
-                                    head.span,
-                                ));
-                            }
-                            _ => {
-                                return Err(LanguageError::new(
-                                    ErrorKind::InvalidForm,
-                                    "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
-                                    head.span,
-                                ));
+                        let name = match bindable_parameter_name(head)? {
+                            Some(name) => name,
+                            None => match &head.kind {
+                                ExprKind::Symbol(name) => {
+                                    canon::ensure_bindable(name, head.span)?;
+                                    name.clone()
+                                }
+                                ExprKind::Sid(sid) => {
+                                    canon::ensure_bindable_sid(*sid, head.span)?;
+                                    sid.to_string().into()
+                                }
+                                ExprKind::DomainIdentity(identity) => {
+                                    return Err(canon::immutable_domain_binding_error(
+                                        *identity,
+                                        head.span,
+                                    ));
+                                }
+                                _ => {
+                                    return Err(LanguageError::new(
+                                        ErrorKind::InvalidForm,
+                                        "lambda parameter must be a symbol · parametr lambda maie buty symvolom · lambda-Parameter muss ein Symbol sein",
+                                        head.span,
+                                    ));
+                                }
                             }
                         };
                         if !unique.insert(name.clone()) {
@@ -398,6 +427,17 @@ fn resolve(
     environment: &Environment,
     changed: &mut bool,
 ) -> Expr {
+    if let Some(name) = text7_binding_key(expression) {
+        if let Some(local) = local_for(&name, scopes) {
+            *changed = true;
+            return Expr {
+                kind: local,
+                span: expression.span,
+            };
+        }
+        return expression.clone();
+    }
+
     let resolve_all = |items: &[Expr], changed: &mut bool| -> Rc<[Expr]> {
         items.iter().map(|item| resolve(item, scopes, environment, changed)).collect()
     };
