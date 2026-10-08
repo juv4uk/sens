@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/paired_sens.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
 
@@ -32,7 +33,7 @@ jobs:
           cargo run -q -p sens-cli --bin sens-pair -- encode "$RUNNER_TEMP/demo.lisp"
           cargo run -q -p sens-cli --bin sens-pair -- verify "$RUNNER_TEMP/demo.lisp"
           test "$(wc -c < "$RUNNER_TEMP/demo.sens")" -eq 2
-          printf '\\000' >> "$RUNNER_TEMP/demo.sens"
+          printf '\000' >> "$RUNNER_TEMP/demo.sens"
           if cargo run -q -p sens-cli --bin sens-pair -- verify "$RUNNER_TEMP/demo.lisp"; then
             echo "ERROR: appended bytes were accepted"
             exit 1
