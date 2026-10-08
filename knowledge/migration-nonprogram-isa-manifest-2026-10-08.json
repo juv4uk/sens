@@ -1,6 +1,6 @@
 {
   "schema": "sens-migration-nonprogram-manifest/1",
-  "generated_from_main": "a4e5032466f1e4e31042639559592aeb2d296ced",
+  "generated_from_main": "cd6ad0099f7bedca47a9be38bec86c6bfce9cca8",
   "issue": 4460,
   "classification": "lisp-data-nonprogram",
   "reason": "top-level isa-catalogue/1 declarative machine evidence, not executable SENS program",
