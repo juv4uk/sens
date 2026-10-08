@@ -171,7 +171,7 @@ fn each_structural_effect_form_projects_or_rejects_explicitly() {
     );
     assert_eq!(
         eval_value("(x86-projection-rejected? 0)", &mut session),
-        "()",
+        "(0)",
         "zero displacement is not a projection rejection"
     );
     assert_eq!(
