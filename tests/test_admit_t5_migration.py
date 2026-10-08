@@ -86,6 +86,98 @@ class T5ProofPublisherTests(unittest.TestCase):
             with self.assertRaisesRegex(gate.Blocked, "SOURCE_ERA"):
                 gate.checked_manifest(path)
 
+    def test_real_original_manifest_cannot_omit_historical_observable(self):
+        proof = fixture_manifest()
+        proof["source"] = "lib/machine/block.lisp"
+        with tempfile.TemporaryDirectory() as directory:
+            location = Path(directory) / "source.json"
+            location.write_text(json.dumps(proof))
+            with self.assertRaisesRegex(gate.Blocked, "OBSERVABLE_PARITY"):
+                gate.checked_manifest(location)
+            proof["historical_observation"] = {
+                "command": [sys.executable, "-c", "print('NIL')"],
+                "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+            }
+            location.write_text(json.dumps(proof))
+            with self.assertRaisesRegex(gate.Blocked, r"\\{source\\}"):
+                gate.checked_manifest(location)
+            proof["historical_observation"]["command"].append("{source}")
+            location.write_text(json.dumps(proof))
+            self.assertEqual(gate.checked_manifest(location)["source"],
+                             "lib/machine/block.lisp")
+            proof["historical_observation"]["stdout_sha256"] = "f" * 64
+            location.write_text(json.dumps(proof))
+            # Hash shape alone is not evidence; actual historical output has
+            # to be independently executed and matched before publication.
+            self.assertEqual(gate.checked_manifest(location)["source"],
+                             "lib/machine/block.lisp")
+
+    def test_real_current_sens_eval_and_historical_observables_match_bytes(self):
+        self.assertTrue(READER.is_file(), "build real sens-trit first")
+        path = ROOT / "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        historical = [sys.executable, "-c", "print('NIL')", "{source}"]
+        proof = {
+            "source": "lib/machine/block.lisp",
+            "historical_observation": {
+                "command": historical,
+                "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+            },
+        }
+        # Synthetic historical oracle tests the COMPARE mechanism only. It is
+        # not an approved source-specific oracle or an original migration.
+        result = gate.verify_observable_parity(READER, path, ROOT, proof)
+        self.assertEqual(result,
+                         "BYTE_EXACT_HISTORICAL_VS_CURRENT_OUTPUT_REVIEW_REQUIRED")
+
+    def test_false_old_current_parity_never_succeeds(self):
+        self.assertTrue(READER.is_file(), "build real sens-trit first")
+        path = ROOT / "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        p = {
+            "source": "lib/machine/block.lisp",
+            "historical_observation": {
+                "command": [sys.executable, "-c", "print('different')", "{source}"],
+                "stdout_sha256": hashlib.sha256(b"different\\n").hexdigest(),
+            },
+        }
+        with self.assertRaisesRegex(gate.Blocked, "OBSERVABLE_PARITY_MISMATCH"):
+            gate.verify_observable_parity(READER, path, ROOT, p)
+        p["historical_observation"]["stdout_sha256"] = "0" * 64
+        with self.assertRaisesRegex(gate.Blocked, "pinned source observation drift"):
+            gate.verify_observable_parity(READER, path, ROOT, p)
+
+    def test_old_oracle_failure_or_stderr_blocks_even_if_current_executes(self):
+        self.assertTrue(READER.is_file(), "build real sens-trit first")
+        path = ROOT / "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        for script in ("import sys;sys.exit(4)",
+                       "import sys;sys.stderr.write('not proven\\\\n');print('NIL')"):
+            proof = {
+                "source": "lib/machine/block.lisp",
+                "historical_observation": {
+                    "command": [sys.executable, "-c", script, "{source}"],
+                    "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+                },
+            }
+            with self.subTest(script=script), self.assertRaisesRegex(
+                    gate.Blocked, "OBSERVABLE_PARITY_HISTORICAL"):
+                gate.verify_observable_parity(READER, path, ROOT, proof)
+
+    def test_canary_not_misreported_as_original_source_semantic_parity(self):
+        fixture = fixture_manifest()
+        self.assertTrue(gate.is_fixture_canary(fixture["source"]))
+        self.assertEqual(
+            gate.verify_observable_parity(READER, ROOT / PHYSICAL, ROOT, fixture),
+            "NOT_VERIFIED_FIXTURE_CANARY",
+        )
+        fixture["historical_observation"] = {
+            "command": [sys.executable, "-c", "print('NIL')", "{source}"],
+            "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            location = Path(directory) / "canary.json"
+            location.write_text(json.dumps(fixture))
+            with self.assertRaisesRegex(gate.Blocked, "impersonate"):
+                gate.checked_manifest(location)
+
     def test_symlink_traversal_and_non_lisp_source_block(self):
         for source in ("../escape.lisp", "/tmp/escape.lisp", "tests/test.py"):
             with self.assertRaises(gate.Blocked, msg=source):
@@ -127,6 +219,9 @@ class T5ProofPublisherTests(unittest.TestCase):
             preview = gate.admit(ROOT, mirror, proof, READER, write=False)
             self.assertEqual(preview["status"], "VERIFIED_NOT_WRITTEN")
             self.assertEqual(preview["physical_bytes"], len(expected))
+            self.assertEqual(preview["observable_parity"], "NOT_VERIFIED_FIXTURE_CANARY")
+            self.assertFalse(preview["original_executable_parity"])
+            self.assertFalse(preview["release_admitted"])
             self.assertFalse((mirror / Path(PHYSICAL)).exists())
             actual = gate.admit(ROOT, mirror, proof, READER, write=True)
             self.assertEqual(actual["status"], "WRITTEN")
