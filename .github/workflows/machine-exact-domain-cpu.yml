@@ -188,3 +188,5 @@ jobs:
 # 4349 structural-family helper witness contract
 
 # 4349 rejection predicate witness normalized
+
+# 4349 isolate nested store guard witness
