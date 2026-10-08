@@ -372,6 +372,22 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
             continue;
         };
 
+        // One semantic registry row may be defined in the historical Lisp
+        // library while its modern exact-width spelling is D4/D5. Publish the
+        // very SAME Lisp-owned callable under that ratified DomainIdentity.
+        // This is only a mechanism bridge: the registry, not the legacy byte
+        // or an English name, owns the domain coordinate. Bare sessions stay
+        // empty; bootstrap-only slots remain single-assignment.
+        if matches!(&value, Value::Closure(_) | Value::Builtin(_)) {
+            for peer in peers {
+                if let Some(identity) = semantic_registry::domain_identity_for_surface(peer) {
+                    if environment.domain_code_slot(identity).is_none() {
+                        environment.bind_domain_code_slot_once(identity, value.clone());
+                    }
+                }
+            }
+        }
+
         for peer in peers {
             if environment.get(peer).is_none() {
                 environment.define(peer, value.clone());
