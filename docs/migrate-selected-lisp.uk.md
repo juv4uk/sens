@@ -37,3 +37,19 @@
 ## Реальний прогрес
 
 Файл можна рахувати за оригінальний перенесений лише після того, як існуючий до міграції executable .lisp із когорти 491 отримав same-stem фізичний .sens, незалежний історичний/current oracle пройшов, і PR злитий у main. Аудитуйте Git-дерево головної гілки, а не кількість dry-run кандидатів.
+
+## Інспекція справжнього старого файла без семантичного оракула
+
+Для діагностики старого Lisp можна запустити тільки перевірки фізичного T5 та D2:
+
+    cargo build -p sens-cli --bin sens-trit
+    python3 scripts/migrate-selected-lisp.py \
+      --source benchmarks/closures.lisp \
+      --source-blob HEAD --source-era legacy \
+      --inspect --out-root /tmp/sens-audit-no-write \
+      --reader target/debug/sens-trit \
+      --report /tmp/sens-audit.json
+
+Параметр --source-blob HEAD прив'язує вхід до ТОЧНОГО Git blob перевіреного коміту; незакомічена зміна блокується. Також можна передати 40-символьний blob SHA явно. Інспекція повертає BLOCKED (код 2 і точна причина) або SYNTAX_ONLY_UNVERIFIED (код 0). ОБИДВА стани означають нуль нових .sens і не є доказом збереження семантики.
+
+Режим --inspect взаємовиключний із --dry-run. Для фактичного запису обов'язковий незалежний історичний/current verifier. GitHub workflow інспектує три РЕАЛЬНІ вихідні файли benchmarks/closures.lisp, benchmarks/parser.lisp, lib/machine/block.lisp і публікує артефакт sens-original-lisp-triage, не створюючи фізичного файла. Це дослідження заблокованих джерел, а не успішна міграція.

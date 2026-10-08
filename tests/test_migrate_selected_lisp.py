@@ -70,7 +70,7 @@ class SelectedOriginalT5(unittest.TestCase):
         self.orig = (ROOT / SOURCE).read_bytes()
 
     def call(self, source=SOURCE, *, blob=None, era="auto", oracle=True,
-             reader=True, dry=False, out=None):
+             reader=True, dry=False, inspect=False, out=None):
         args = [
             "--source", source,
             "--source-blob", source_blob(source) if blob is None else blob,
@@ -84,6 +84,8 @@ class SelectedOriginalT5(unittest.TestCase):
             args.extend(["--reader", str(self.reader)])
         if dry:
             args.append("--dry-run")
+        if inspect:
+            args.append("--inspect")
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             code = app.main(args)
@@ -122,6 +124,42 @@ class SelectedOriginalT5(unittest.TestCase):
         code, state = self.call(source="../outside.lisp", blob="0" * 40)
         self.assertEqual((code, state["status"]), (2, "BLOCKED"))
         self.assertIn("relative", state["reason"])
+
+    def test_inspect_requires_no_oracle_and_never_writes(self):
+        if not self.reader.is_file():
+            self.fail("build real Rust sens-trit opener before inspection")
+        # HEAD is pinned to a committed Git blob, never a mutable workspace
+        # shortcut. This route MUST NOT fake a semantic PASS.
+        code, state = self.call(blob="HEAD", inspect=True, oracle=False)
+        self.assertEqual(code, 0, state)
+        self.assertEqual(state["status"], "SYNTAX_ONLY_UNVERIFIED")
+        self.assertEqual(state["syntax"], "PASS_D2_SYNTAX_ONLY")
+        self.assertEqual(state["oracle"], "NOT_VERIFIED")
+        self.assertEqual(state["files_written"], 0)
+        self.assertEqual(state["source_blob_sha"], source_blob(SOURCE))
+        self.assertEqual(len(state["source_commit"]), 40)
+        self.assertFalse(list(self.output.rglob("*.sens")))
+        self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
+
+    def test_real_unpaired_original_files_are_audited_not_converted(self):
+        # These are tracked old files, not fabricated canaries or newly authored
+        # snapshots. They include local binding, Text7 and machine-data issues.
+        for old in ("benchmarks/closures.lisp", "benchmarks/parser.lisp",
+                    "lib/machine/block.lisp"):
+            with self.subTest(source=old):
+                original = (ROOT / old).read_bytes()
+                code, state = self.call(old, blob="HEAD", era="legacy",
+                                        inspect=True, oracle=False)
+                self.assertIn(state["status"], {"BLOCKED", "SYNTAX_ONLY_UNVERIFIED"})
+                self.assertIn(code, (0, 2))
+                self.assertFalse(list(self.output.rglob("*.sens")))
+                self.assertEqual(original, (ROOT / old).read_bytes())
+                self.assertFalse(state["original_491_reduced"])
+                if state["status"] == "BLOCKED":
+                    self.assertTrue(state["reason"])
+                else:
+                    self.assertEqual(state["oracle"], "NOT_VERIFIED")
+                    self.assertEqual(state["files_written"], 0)
 
     def test_corrupt_oracle_claim_is_rejected(self):
         if not self.reader.is_file():
