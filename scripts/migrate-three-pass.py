@@ -462,7 +462,7 @@ def text7_encode(spelling: str,candidates,tok: Tok):
 
 class Resolver:
     def __init__(self,legacy,my,upper,source_era="legacy",admitted_d8=None):
-        if source_era not in ("legacy","current"):
+        if source_era not in ("auto","legacy","current"):
             raise ValueError(f"invalid source era {source_era!r}")
         if source_era=="current" and not admitted_d8:
             raise MigrationError("current D8 source requires an owner-ratified D8 foundation")
@@ -486,9 +486,13 @@ class Resolver:
             self.counts["already-exact"]+=1
             return [t],"already-exact"
         # The same eight visible bits can be historical SID8 or CURRENT D8.
-        # Its source-era provenance must be explicit: never infer meaning from
-        # the bit shape. Current D8 is left exact, not rewritten through SID8.
+        # Auto must BLOCK: without source-era provenance these are ambiguous.
+        # Current D8 is left exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
+            if self.source_era=="auto":
+                raise MigrationError(
+                    f"ambiguous W8 executable head {t}: choose --source-era legacy or current",tok
+                )
             if self.source_era=="current":
                 if t not in self.admitted_d8:
                     raise MigrationError(
@@ -704,8 +708,8 @@ def main():
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
-    ap.add_argument("--source-era", choices=("legacy","current"), default="legacy",
-                    help="розрізняти SID8 і сучасний D8; legacy є сумісним режимом")
+    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
+                    help="auto блокує двозначні W8; legacy = SID8, current = ратифікований D8")
     args = ap.parse_args()
 
     data = load_foundation(args.foundation)
@@ -812,7 +816,7 @@ def main():
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
         "source_era": args.source_era,
-        "source_era_law": "W8 head is historical SID8 in legacy mode, ratified D8 in current mode; never guessed",
+        "source_era_law": "auto blocks ambiguous W8 heads; legacy maps SID8; current preserves ratified D8",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
