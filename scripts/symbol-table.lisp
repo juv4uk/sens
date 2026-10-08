@@ -61,10 +61,10 @@
 (00001001 insert-sorted-onto
   (00001000 (sym before after)
     (00000111
-      ((00000010 after) () (10101 before (00100111 sym)))
-      ((00000010 after) (1) (10101 before (00100111 sym)))
+      ((00000010 after) () (reverse-onto before (00100111 sym)))
+      ((00000010 after) (1) (reverse-onto before (00100111 sym)))
       ((00100101 (01000010 sym) (01000010 (00000101 after)))
-       (10101 before (00000100 sym after)))
+       (reverse-onto before (00000100 sym after)))
       (t (insert-sorted-onto sym (00000100 (00000101 after) before) (00000110 after))))))
 
 (00001001 insert-sorted
