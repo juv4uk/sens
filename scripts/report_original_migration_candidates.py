@@ -14,6 +14,8 @@ import subprocess
 import sys
 import tempfile
 
+from migration_source_scope import source_scope, blocker_cohort
+
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 ARGS = [
@@ -45,6 +47,7 @@ def categorize(row: dict, root: Path) -> dict:
         "same_stem_sens_already_exists": pair.exists() or pair.is_symlink(),
         "source_is_executable_proven": False,
         "independent_semantic_oracle_passed": False,
+        "source_scope": source_scope(rel.as_posix()),
     }
     if row["status"] == "would-write":
         result.update(
@@ -57,7 +60,11 @@ def categorize(row: dict, root: Path) -> dict:
             passes=row["passes"],
         )
     elif row["status"] == "blocked":
-        result.update(status="BLOCKED", reason=row.get("reason", "unknown"))
+        result.update(
+            status="BLOCKED",
+            reason=row.get("reason", "unknown"),
+            work_cohort=blocker_cohort(row.get("reason", "")),
+        )
     else:
         raise ValueError(f"unexpected dry-run status {row['status']!r}")
     return result
@@ -102,7 +109,22 @@ def build_report(root: Path = ROOT) -> dict:
                 raise RuntimeError("excluded pair is missing")
         candidates = [r for r in rows if r["status"] == "CANDIDATE_NOT_ADMITTED"]
         unpaired = [r for r in candidates if not r["same_stem_sens_already_exists"]]
+        archived = [r for r in unpaired if r["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"]
+        actionable = [r for r in unpaired if r["source_scope"] != "ARCHIVED_BENCHMARK_NONPROGRAM"]
         blocked = len(rows) - len(candidates)
+        active_blocked = [
+            r for r in rows if r["status"] == "BLOCKED"
+            and r["source_scope"] != "ARCHIVED_BENCHMARK_NONPROGRAM"
+        ]
+        work_counts = {}
+        for row in active_blocked:
+            work_counts.setdefault(row["work_cohort"], []).append(row)
+        work_queues = [
+            {"cohort": cohort, "blocked_count": len(items),
+             "source_examples": items[:10]}
+            for cohort, items in sorted(work_counts.items(),
+                                        key=lambda item: (-len(item[1]), item[0]))
+        ]
         if len(rows) != report["summary"]["files_seen"] or blocked != report["summary"]["files_blocked"]:
             raise RuntimeError("migrator report totals inconsistent")
         return {
@@ -116,7 +138,10 @@ def build_report(root: Path = ROOT) -> dict:
                 "blocked": blocked,
                 "mechanical_candidates": len(candidates),
                 "already_paired_candidates": len(candidates)-len(unpaired),
-                "unpaired_candidates_needing_original_oracle": len(unpaired),
+                "unpaired_candidates_needing_original_oracle": len(actionable),
+                "archived_nonprogram_mechanical_candidates": len(archived),
+                "active_or_unclassified_mechanical_candidates": len(actionable),
+                "active_or_unclassified_blocked": len(active_blocked),
                 "original_unpaired_executables_migrated_by_this_tool": 0,
                 "physical_outputs_created": 0,
             },
@@ -124,6 +149,9 @@ def build_report(root: Path = ROOT) -> dict:
             "authority": "original unpaired current D1-D9 source; candidate only; no oracle admission",
             "already_paired_sources_excluded": excluded,
             "mechanical_candidates": candidates,
+            "actionable_candidates_not_oracle_admitted": actionable,
+            "archived_benchmark_nonprogram_candidates": archived,
+            "agent_work_queues": work_queues,
             "unpaired_blocker_sample": [r for r in rows if r["status"] == "BLOCKED" and not r["same_stem_sens_already_exists"]][:20],
             "required_evidence": [
                 "prove original file is an executable SENS program, not an archive/catalogue",
@@ -142,7 +170,13 @@ def main() -> int:
     result = build_report()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"summary":result["summary"],"candidates":result["mechanical_candidates"]},ensure_ascii=False))
+    print(json.dumps({
+        "summary": result["summary"],
+        "actionable_candidates": result["actionable_candidates_not_oracle_admitted"],
+        "archived_candidates": result["archived_benchmark_nonprogram_candidates"],
+        "agent_cohorts": [{"cohort": x["cohort"], "blocked_count": x["blocked_count"]}
+                          for x in result["agent_work_queues"]],
+    }, ensure_ascii=False))
     return 0
 
 
