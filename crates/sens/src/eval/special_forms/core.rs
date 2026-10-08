@@ -3,6 +3,7 @@
 //! is bootstrapped from `lib/macro.lisp`; the Rust kernel no longer implements it.
 
 use crate::eval::canon;
+use crate::canonical_reader::text7_binding_key;
 use crate::eval::{evaluate, evaluate_step, EvalStep};
 use crate::environment::{CondClauseMode, CoreProfile};
 use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
@@ -132,6 +133,14 @@ pub(crate) fn evaluate_definition(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
+
+    if let Some(name) = text7_binding_key(&arguments[0]) {
+        canon::ensure_bindable(&name, arguments[0].span)?;
+        let value = evaluate(&arguments[1], environment)?;
+        canon::bind_language_definition(&name, &value, environment);
+        environment.define(name, value.clone());
+        return Ok(value);
+    }
 
     match &arguments[0].kind {
         ExprKind::Symbol(name) => {
