@@ -15,6 +15,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from migration_source_scope import source_scope, blocker_cohort
+
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 ARTIFACT_ARGS = [
@@ -52,6 +54,31 @@ def build_report() -> dict:
         summary = state["summary"]
         reasons = collections.Counter(classify(row.get("reason", "")) for row in state["files"])
         written = list(output.rglob("*.sens")) if output.exists() else []
+        rows = state["files"]
+        if len(rows) != summary["files_seen"]:
+            raise RuntimeError("full-source census row count differs from summary")
+        if summary["files_written"] or any(row["status"] not in ("blocked", "would-write") for row in rows):
+            raise RuntimeError("unexpected write-capable or unknown source status")
+        mechanical = [row for row in rows if row["status"] == "would-write"]
+        if len(mechanical) != summary["files_would_write"]:
+            raise RuntimeError("mechanical candidate count differs from summary")
+        archived_candidates = [row for row in mechanical
+                               if source_scope(row["path"]) == "ARCHIVED_BENCHMARK_NONPROGRAM"]
+        nonarchive_candidates = [row for row in mechanical
+                                 if source_scope(row["path"]) != "ARCHIVED_BENCHMARK_NONPROGRAM"]
+        nonarchive_blockers = [row for row in rows if row["status"] == "blocked"
+                               and source_scope(row["path"]) != "ARCHIVED_BENCHMARK_NONPROGRAM"]
+        work_counts = collections.Counter(blocker_cohort(row.get("reason", ""))
+                                          for row in nonarchive_blockers)
+        work_queue = [
+            {"cohort": cohort, "blocked_count": count,
+             "examples": [
+                 {"path": row["path"], "reason": row.get("reason", "")}
+                 for row in nonarchive_blockers
+                 if blocker_cohort(row.get("reason", "")) == cohort
+             ][:10]}
+            for cohort, count in sorted(work_counts.items(), key=lambda item: (-item[1], item[0]))
+        ]
         result = {
             "schema": "sens-t5-migration-readiness/v1",
             "authority": "research-only; ratified D1-D9, W8 auto fail-closed; no .sens written",
@@ -63,16 +90,25 @@ def build_report() -> dict:
             "migrator_exit_code": completed.returncode,
             "migrator_summary": summary,
             "reason_counts": dict(reasons.most_common()),
+            "source_scope": {
+                "archived_benchmark_mechanically_eligible": len(archived_candidates),
+                "active_or_unclassified_mechanically_eligible": len(nonarchive_candidates),
+                "active_or_unclassified_blocked": len(nonarchive_blockers),
+                "archived_candidate_paths": [r["path"] for r in archived_candidates],
+                "active_or_unclassified_candidate_paths": [r["path"] for r in nonarchive_candidates],
+                "executable_originals_semantically_certified": 0,
+            },
+            "agent_work_queue": work_queue,
             "physical_outputs_created": [str(path.relative_to(output)) for path in written],
             "gate": {
                 "pass": (
-                    completed.returncode == 2
+                    completed.returncode in (0, 2)
                     and summary["files_written"] == 0
-                    and summary["files_would_write"] == 0
-                    and summary["files_blocked"] == summary["files_seen"]
+                    and len(nonarchive_candidates) == 0
+                    and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                     and not written
                 ),
-                "rule": "every ORIGINAL UNPAIRED .lisp remains BLOCKED until separate oracle proof; no .sens emitted",
+                "rule": "no unproved ACTIVE/UNCLASSIFIED original is mechanically admitted; archival benchmark candidates are NOT executable migrations; no .sens emitted",
             },
         }
         return result
@@ -85,7 +121,12 @@ def main() -> int:
     result = build_report()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"summary": result["migrator_summary"], "reason_counts": result["reason_counts"], "gate": result["gate"]}, ensure_ascii=False))
+    print(json.dumps({
+        "summary": result["migrator_summary"],
+        "source_scope": result["source_scope"],
+        "agent_work_queue": result["agent_work_queue"],
+        "gate": result["gate"],
+    }, ensure_ascii=False))
     if not result["gate"]["pass"]:
         return 1
     return 0
