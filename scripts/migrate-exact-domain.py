@@ -30,13 +30,6 @@ from domain_tables import read_domain_table
 DOMAIN_PATHS = [ROOT / "lib" / "domains" / f"d{width}.lisp" for width in range(3, 7)]
 REGISTRY_PATH = ROOT / "lib" / "surface" / "semantic-registry.lisp"
 
-# Contract 11.8 compiler-call admission is a separate law from identity
-# resolution. Never narrow a legacy identity into a non-admitted callable.
-ADMITTED_CALLABLES = {
-    "D3": frozenset({"001", "010", "011", "100", "101", "110", "111"}),
-    "D4": frozenset({"0010", "0011"}),
-}
-
 ROW_RE = re.compile(r'^\s*\(([01]{8})\s+(.*)\)\s*$')
 FIELD_RE = re.compile(
     r'\((en|uk|ukr|sa|sym)\s+("(?:\\\\.|[^"\\\\])*"|\(\)|[^()\s]+)\)'
@@ -55,6 +48,7 @@ class Edit:
     end: int
     source: str
     identity: Identity
+    replacement: str
 
 def decode_registry_value(raw: str) -> str | None:
     if raw == "()":
@@ -241,13 +235,11 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
             quoted_next = False
             continue
 
-        identity = legacy.get(token) if re.fullmatch(r"[01]{8}", token) else surfaces.get(token)
+        legacy_sid = re.fullmatch(r"[01]{8}", token)
+        identity = legacy.get(token) if legacy_sid else surfaces.get(token)
         if identity is not None:
-            if identity.bits not in ADMITTED_CALLABLES.get(identity.domain, ()):
-                quoted_next = False
-                continue
-            replacement = token if not re.fullmatch(r"[01]{8}", token) else identity.en
-            edits.append(Edit(start, end, token, Identity(identity.domain, identity.bits, identity.label, replacement)))
+            replacement = identity.en if legacy_sid else token
+            edits.append(Edit(start, end, token, identity, replacement))
         quoted_next = False
 
     if stack:
@@ -256,7 +248,7 @@ def plan(text: str, surfaces: dict[str, Identity], legacy: dict[str, Identity]) 
 
 def apply_edits(text: str, edits: list[Edit]) -> str:
     for edit in reversed(edits):
-        text = text[:edit.start] + edit.identity.en + text[edit.end:]
+        text = text[:edit.start] + edit.replacement + text[edit.end:]
     return text
 
 def main() -> int:
