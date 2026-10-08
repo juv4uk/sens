@@ -233,9 +233,16 @@ mod tests {
     }
 
     #[test]
-    fn zeros_dominant_compares_favorably_against_five_trits_per_byte() {
-        let ws = words(&"000000000".repeat(8).split_whitespace().collect::<Vec<_>>().join(" "));
-        // Concat creates a width-72 word, which is NOT D9. Use eight D9 words instead.
-        assert!(ws.is_empty()); // intentionally replaced below in follow-up test
+    fn data_distribution_changes_best_transport_choice() {
+        let zeros = words(&vec!["000000000"; 8].join(" "));
+        let ones = words(&vec!["111111111"; 8].join(" "));
+        let compact_zeros = encode_binary_delimited_words(&zeros).unwrap();
+        let base3_zeros = crate::encode_ternary_words(&zeros).unwrap();
+        assert!(compact_zeros.len() < base3_zeros.len());
+        let compact_ones = encode_binary_delimited_words(&ones).unwrap();
+        let base3_ones = crate::encode_ternary_words(&ones).unwrap();
+        assert!(compact_ones.len() > base3_ones.len());
+        assert_eq!(decode_binary_delimited_words(&compact_zeros).unwrap(), zeros);
+        assert_eq!(decode_binary_delimited_words(&compact_ones).unwrap(), ones);
     }
 }
