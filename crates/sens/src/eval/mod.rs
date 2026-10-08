@@ -33,6 +33,7 @@ pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::canonical_reader::text7_binding_key;
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -189,9 +190,22 @@ pub(crate) fn evaluate_step(
                 expression.span,
             ))
         }
+        // A candidate canonical Text7 atom is an interned binding key.
+        // Its source/debug spelling is not a semantic function identity.
+        ExprKind::List(items) if !items.is_empty() => {
+            if let Some(key) = text7_binding_key(expression) {
+                return environment.get(&key).map(EvalStep::Value).ok_or_else(|| {
+                    LanguageError::new(
+                        ErrorKind::UnknownSymbol,
+                        format!("unknown Text7 binding: {key}"),
+                        expression.span,
+                    )
+                });
+            }
+            evaluate_list(items, environment, expression.span)
+        }
         // Empty structure is a structural value, not any function SID.
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
-        ExprKind::List(items) => evaluate_list(items, environment, expression.span),
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
