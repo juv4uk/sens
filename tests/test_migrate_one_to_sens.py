@@ -65,6 +65,26 @@ class MigrateOneToSensTests(unittest.TestCase):
             self.assertNotIn(b" ", target.read_bytes())
             self.assertEqual(source.suffix, ".lisp")
 
+    def test_checked_in_t5_matches_official_one_file_runner(self):
+        source = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
+        checked = ROOT / "lib" / "surface" / "ukr-acceptance.sens"
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "ukr-acceptance.sens"
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), str(source), "--output", str(target)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(target.read_bytes(), checked.read_bytes())
+            report = json.loads(result.stdout)
+            self.assertEqual(report["bytes"], 72)
+            self.assertEqual(
+                report["physical_sha256"],
+                "356fc5d19bb93bf3006ded87f435ef5b7ecce3f819ce07ef7e109f2fa29c4b6f",
+            )
+
     def test_source_outside_repo_is_blocked(self):
         with tempfile.TemporaryDirectory() as td:
             source = Path(td) / "outside.lisp"
