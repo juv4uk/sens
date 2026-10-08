@@ -115,19 +115,57 @@ def _is_archived_benchmark(path: PurePosixPath, root: Path) -> bool:
     if (document.get("schema") != "sens-t5-archive-evidence/v1"
             or document.get("status") != "NONPROGRAM_ARCHIVED_BENCHMARK_EVIDENCE"
             or document.get("allow_bulk_conversion") is not False
-            or document.get("admitted_as_executable") != 0):
+            or document.get("admitted_as_executable") not in (0, 1):
         raise MigrationBlocked("benchmark archive authority contract changed")
     return True
+
+
+
+def _proof_gated_archive_sources(root: Path) -> set[str]:
+    """Allow only individually source-pinned archived admissions."""
+    approved: set[str] = set()
+    directory = root / "knowledge" / "migration-admissions"
+    if not directory.is_dir():
+        return approved
+    for manifest in sorted(directory.glob("*.json")):
+        try:
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, ValueError, UnicodeError):
+            continue
+        if document.get("schema") != "sens-t5-proof-admission/v1":
+            continue
+        source = document.get("source")
+        source_sha = document.get("source_sha256")
+        if not isinstance(source, str) or not isinstance(source_sha, str):
+            continue
+        try:
+            rel = PurePosixPath(source)
+            if rel.is_absolute() or "\\" in source or rel.suffix != ".lisp":
+                continue
+            candidate = root.joinpath(*rel.parts)
+            if not _is_archived_benchmark(rel, root):
+                continue
+            if not candidate.is_file() or candidate.is_symlink():
+                continue
+            if hashlib.sha256(candidate.read_bytes()).hexdigest() != source_sha.lower():
+                continue
+        except (OSError, ValueError):
+            continue
+        approved.add(rel.as_posix())
+    return approved
 
 
 def reject_classified_nonprogram(sources: list[str], root: Path) -> None:
     """Early all-or-nothing embargo before any conversion or T5 publication."""
     classified = _nonprogram_manifest_paths(root)
+    approved_archive = _proof_gated_archive_sources(root)
     for name in sources:
         rel = PurePosixPath(name)
-        if _is_archived_benchmark(rel, root):
+        if _is_archived_benchmark(rel):
+            if rel.as_posix() in approved_archive:
+                continue
             raise MigrationBlocked(
-                f"NONPROGRAM archived benchmark measurement; no executable .sens: {name}"
+                f"NONPROGRAM archived benchmark measurement; no proof-gated executable .sens: {name}"
             )
         expected = classified.get(name)
         if expected is None:
