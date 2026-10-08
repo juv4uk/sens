@@ -12,7 +12,7 @@ Example:
     --source tests/fixtures/migration-d1-cond-cohort/branch.lisp \
     --out /tmp/sens-stage --report /tmp/sens-migration.json
 
-Repeat --source for an atomic batch, or pass --manifest approved.json.
+Repeat --source for an atomic batch, or pass --manifest approved.json.\nEvery manifest entry is independently SHA-pinned before execution; supplied\nSHA256 values must match actual source bytes or the whole run is BLOCKED.
 Use --dry-run to classify without writing. The original .lisp never changes.
 For protected publication, use an output directory outside the source tree.
 """
@@ -71,6 +71,48 @@ def pin_sources(sources: list[str], root: Path) -> dict:
         sha = hashlib.sha256(candidate.read_bytes()).hexdigest()
         entries.append({"path": rel, "sha256": sha})
     return {"files": sorted(entries, key=lambda item: item["path"])}
+
+
+def pin_manifest(path: Path, root: Path) -> dict:
+    """Validate an approved manifest and SHA-pin EVERY source before execution.
+
+    Both supported manifest shapes are accepted, but the forwarded temporary
+    manifest always carries a verified content SHA for every entry. Explicit
+    caller SHAs are treated as immutable preconditions, never overwritten.
+    """
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    rows = raw.get("files") if isinstance(raw, dict) else raw
+    if not isinstance(rows, list) or not rows:
+        raise MigrationBlocked("manifest requires a non-empty files list")
+    names: list[str] = []
+    expected: dict[str, str] = {}
+    for row in rows:
+        if isinstance(row, str):
+            name = row
+        elif isinstance(row, dict):
+            if set(row) - {"path", "sha256"}:
+                raise MigrationBlocked("manifest contains unsupported fields")
+            name = row.get("path")
+            digest = row.get("sha256")
+            if digest is not None:
+                if not isinstance(digest, str) or len(digest) != 64 or any(
+                    char not in "0123456789abcdefABCDEF" for char in digest
+                ):
+                    raise MigrationBlocked(f"invalid source SHA256 for {name!r}")
+                if not isinstance(name, str):
+                    raise MigrationBlocked("manifest path must be a string")
+                expected[name] = digest.lower()
+        else:
+            raise MigrationBlocked("manifest row must be a path or path/SHA object")
+        if not isinstance(name, str):
+            raise MigrationBlocked("manifest path must be a string")
+        names.append(name)
+    pinned = pin_sources(names, root)
+    for row in pinned["files"]:
+        wanted = expected.get(row["path"])
+        if wanted is not None and wanted != row["sha256"]:
+            raise MigrationBlocked(f"source changed from approved SHA256: {row['path']}")
+    return pinned
 
 
 def verify_published(report: dict, output: Path, dry_run: bool) -> int:
@@ -139,19 +181,19 @@ def main(argv: list[str] | None = None) -> int:
         if output == report or output in report.parents:
             raise MigrationBlocked("--report must not be inside --out")
         if args.manifest:
-            manifest = args.manifest.resolve(strict=True)
-            outside(manifest, output, "--manifest")
-            if not manifest.is_file():
+            approved = args.manifest.resolve(strict=True)
+            outside(approved, output, "--manifest")
+            if not approved.is_file():
                 raise MigrationBlocked("manifest must be an existing regular file")
-            # Do not reinterpret the manifest: original canonical transaction
-            # owns its validation, source SHA checks and atomic no-clobber.
-            invoke(manifest, root, output, report, args.dry_run)
+            pinned = pin_manifest(approved, root)
         else:
             pinned = pin_sources(args.source, root)
-            with tempfile.TemporaryDirectory(prefix="sens-admission-") as directory:
-                manifest = Path(directory) / "pinned.json"
-                manifest.write_text(json.dumps(pinned, sort_keys=True) + "\n", encoding="utf-8")
-                invoke(manifest, root, output, report, args.dry_run)
+        # One SHA-locked transaction path for BOTH entry modes. Never pass a
+        # raw, unpinned approved manifest directly into the publisher.
+        with tempfile.TemporaryDirectory(prefix="sens-admission-") as directory:
+            manifest = Path(directory) / "pinned.json"
+            manifest.write_text(json.dumps(pinned, sort_keys=True) + "\n", encoding="utf-8")
+            invoke(manifest, root, output, report, args.dry_run)
 
         result = json.loads(report.read_text(encoding="utf-8"))
         verified = verify_published(result, output, args.dry_run)
