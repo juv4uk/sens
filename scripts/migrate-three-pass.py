@@ -655,50 +655,57 @@ def collect_global_bindings(forms):
                 bindings.append((name,target.items[0].tok))
     return bindings
 
-def encode_lambda_params(node: ListNode,text7):
+def lambda_parameter_names(node: ListNode) -> tuple[str, ...]:
     if node.tail is not None:
         raise MigrationError("dotted lambda parameter list has no candidate Text7 binding law",node.tok)
-    words=[D2_OPEN]
-    for index,param in enumerate(node.items):
+    names=[]
+    for param in node.items:
         if not isinstance(param,Atom):
             raise MigrationError("lambda parameter must be a human identifier atom",node.tok)
+        names.append(param.tok.text)
+    return tuple(names)
+
+
+def encode_lambda_params(node: ListNode,text7):
+    names=lambda_parameter_names(node)
+    words=[D2_OPEN]
+    for index,name in enumerate(names):
         if index:
             words.append(D2_SEP)
-        words.extend(encode_text7_identifier(param.tok.text,text7,param.tok))
+        words.extend(encode_text7_identifier(name,text7,Tok("ATOM",name,node.tok.offset)))
     words.append(D2_CLOSE)
     return words
 
-def encode_atom_data(node: Atom,text7):
+
+def encode_atom_data(node: Atom,text7,lexical_env=()):
+    # Bound source identifiers are represented by the existing contextual
+    # Text7 binding frame. Quote paths never reach this branch with a live
+    # lexical environment, so quoted names remain literal data.
+    t=node.tok.text
+    if t in lexical_env:
+        return encode_text7_identifier(t,text7,node.tok)
+
     # W2 is reserved by the grammar. It can only be emitted by the structural
     # encoder as OPEN/CLOSE/SEPARATOR/DOT; treating the same width as ordinary
     # data would make the exact-width stream ambiguous.
-    t=node.tok.text
     if len(t)==2 and set(t)<=set("01"):
         raise MigrationError(
             f"D2 word {t} is structural control only; it cannot be ordinary data",
             node.tok,
         )
-    # Canonical .lisp human source is Ukrainian, while physical .sens keeps
-    # exact D1 bits. Resolve only explicitly ratified D1 literals; never use
-    # Lisp/NIL, host truthiness or an inferred width.
     if t in D1_UK_SURFACES:
         return [D1_UK_SURFACES[t]]
-    # Fail-soft migration: other unresolved atoms remain visible until their
-    # own semantic/number/text law is admitted.
     return [t]
 
+
 def encode_string(node: String,text7):
-    # Strings are data, not function identities. Preserve them verbatim.
     return [node.tok.text]
 
-def encode_clause(node,resolver,text7):
-    """COND clause is structural: the clause itself is not a function call.
 
-    Nested list expressions inside it remain executable. Bare atoms at clause
-    level (e.g. t) are data/control values, never function heads.
-    """
+def encode_clause(node,resolver,text7,lexical_env=()):
+    """COND clause is structural; nested executable expressions keep scope."""
     if not isinstance(node,ListNode):
-        return encode(node,resolver,text7,quoted=False)
+        return encode(node,resolver,text7,quoted=False,lexical_env=lexical_env)
     if not node.items and node.tail is None:
         return [D3_EMPTY]
     words=[D2_OPEN]
@@ -706,75 +713,85 @@ def encode_clause(node,resolver,text7):
         if idx:
             words.append(D2_SEP)
         if isinstance(item,ListNode):
-            words.extend(encode(item,resolver,text7,quoted=False))
+            words.extend(encode(item,resolver,text7,quoted=False,lexical_env=lexical_env))
         else:
-            words.extend(encode(item,resolver,text7,quoted=True))
+            words.extend(encode(item,resolver,text7,quoted=True,lexical_env=lexical_env))
     if node.tail is not None:
         words.append(D2_DOT)
-        words.extend(encode(node.tail,resolver,text7,quoted=True))
+        words.extend(encode(node.tail,resolver,text7,quoted=True,lexical_env=lexical_env))
     words.append(D2_CLOSE)
     return words
 
-def encode(node,resolver,text7,quoted=False):
+
+def encode(node,resolver,text7,quoted=False,lexical_env=()):
     if isinstance(node,ListNode):
         if not node.items and node.tail is None:
             return [D3_EMPTY]
 
         words=[D2_OPEN]
         head_bits=None
+        lambda_names=()
+        lambda_binding_head=False
 
         for idx,item in enumerate(node.items):
             if idx:
                 words.append(D2_SEP)
 
             if idx==0 and not quoted and isinstance(item,Atom):
+                # Lexical binding wins over global surface/function identity.
+                # A local function-valued parameter is a Text7 binding frame,
+                # never the builtin whose spelling it happens to reuse.
+                if item.tok.text in lexical_env:
+                    words.extend(encode_text7_identifier(item.tok.text,text7,item.tok))
+                    continue
                 head,_=resolver.head(item.tok)
                 head_bits=head[0]
                 words.extend(head)
+                lambda_binding_head=(head_bits=="0010")
                 continue
 
-            # Explicit QUOTE: every datum is data, never an executable head.
             if not quoted and head_bits=="001":
-                words.extend(encode(item,resolver,text7,quoted=True))
+                words.extend(encode(item,resolver,text7,quoted=True,lexical_env=()))
                 continue
 
-            # LAMBDA: first argument is the parameter-list grammar.
             if not quoted and head_bits=="0010" and idx==1:
                 if not isinstance(item,ListNode):
-                    raise MigrationError("lambda parameters must be a proper list", item.tok if isinstance(item,Atom) else None)
+                    raise MigrationError("lambda parameters must be a proper list",item.tok if isinstance(item,Atom) else None)
+                lambda_names=lambda_parameter_names(item)
                 words.extend(encode_lambda_params(item,text7))
                 continue
 
-            # DEFINE: the target identifier is a proven global binding site.
-            # A shorthand signature remains data-shaped; only its first name
-            # is currently upgraded to the same Text7 identity.
+            if not quoted and head_bits=="0010" and idx>=2:
+                body_env=tuple(lambda_names)+tuple(lexical_env)
+                words.extend(encode(item,resolver,text7,quoted=False,lexical_env=body_env))
+                continue
+
             if not quoted and head_bits=="0011" and idx==1:
                 if isinstance(item,Atom):
                     words.extend(encode_text7_identifier(item.tok.text,text7,item.tok))
                     continue
                 if isinstance(item,ListNode):
-                    words.extend(encode(item,resolver,text7,quoted=True))
+                    words.extend(encode(item,resolver,text7,quoted=True,lexical_env=()))
                     continue
 
-            # COND: each clause is a grammar container, not a call itself.
             if not quoted and head_bits=="110":
-                words.extend(encode_clause(item,resolver,text7))
+                words.extend(encode_clause(item,resolver,text7,lexical_env=lexical_env))
                 continue
 
-            words.extend(encode(item,resolver,text7,quoted=quoted))
+            words.extend(encode(item,resolver,text7,quoted=quoted,lexical_env=lexical_env))
 
         if node.tail is not None:
             words.append(D2_DOT)
-            words.extend(encode(node.tail,resolver,text7,quoted=True))
+            words.extend(encode(node.tail,resolver,text7,quoted=True,lexical_env=lexical_env))
         words.append(D2_CLOSE)
         return words
 
     if isinstance(node,Quote):
-        return [D2_OPEN,"001",D2_SEP,*encode(node.value,resolver,text7,quoted=True),D2_CLOSE]
+        return [D2_OPEN,"001",D2_SEP,*encode(node.value,resolver,text7,quoted=True,lexical_env=()),D2_CLOSE]
     if isinstance(node,String):
         return encode_string(node,text7)
     if isinstance(node,Atom):
-        return encode_atom_data(node,text7)
+        return encode_atom_data(node,text7,lexical_env=lexical_env)
     raise TypeError(node)
 
 def line_col(source: str,offset: int):
