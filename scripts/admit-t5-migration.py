@@ -23,7 +23,7 @@ from sens_t5_codec import decode_bytes, encode_projection, typed_sha256  # noqa:
 
 SCHEMA = "sens-t5-proof-admission/v1"
 ARTIFACTS = {
-    "foundation": "knowledge/d1-d7-foundation.json",
+    "foundation": "knowledge/d1-d9-foundation.json",
     "domain-surfaces": "crates/sens/src/domain_surface_registry_generated.rs",
     "semantic-generated": "crates/sens/src/semantic_registry_generated.rs",
     "semantic-registry": "crates/sens/src/semantic_registry.rs",
