@@ -7,6 +7,7 @@ on:
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/binary_delimited_transport.rs"
       - "crates/sens/src/sens_container_experiment.rs"
+      - "crates/sens/src/hdlc_transport_experiment.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
   push:
@@ -16,6 +17,7 @@ on:
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/binary_delimited_transport.rs"
       - "crates/sens/src/sens_container_experiment.rs"
+      - "crates/sens/src/hdlc_transport_experiment.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
 
@@ -31,6 +33,7 @@ jobs:
           cargo test -p sens ternary_transport::tests::
           cargo test -p sens binary_delimited_transport::tests::
           cargo test -p sens sens_container_experiment::tests::
+          cargo test -p sens hdlc_transport_experiment::tests::
       - name: Verify actual nontext .sens ternary-byte encoding
         shell: bash
         run: |
