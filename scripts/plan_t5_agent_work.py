@@ -179,7 +179,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--max-files", type=int, default=25)
     args = ap.parse_args(argv)
     if args.candidates.resolve() == args.out.resolve():
-        ap.error("never overwrite original candidate report")
+        print("BLOCKED: never overwrite original candidate report", file=sys.stderr)
+        return 2
     try:
         plan = build_plan(json.loads(args.candidates.read_text(encoding="utf-8")),
                           args.max_files)
