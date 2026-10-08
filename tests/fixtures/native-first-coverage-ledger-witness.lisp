@@ -22,83 +22,83 @@
 (00001001 native-first-coverage-check
   (00001000 (left right)
     (00000111
-      ((00100010 left right) (1) (quote pass))
-      ((00100010 left right) (0) (quote fail)))))
+      ((00100010 left right) (1) (00000001 pass))
+      ((00100010 left right) (0) (00000001 fail)))))
 
 (00001001 native-first-coverage-all-pass-state
   (00001000 (states)
     (00000111
-      ((00000010 states) () (quote pass))
-      ((00000010 states) (1) (quote fail))
+      ((00000010 states) () (00000001 pass))
+      ((00000010 states) (1) (00000001 fail))
       ((00000010 states) (0)
        (00000111
-         ((00000011 (00000101 states) (quote pass)) (1)
+         ((00000011 (00000101 states) (00000001 pass)) (1)
           (native-first-coverage-all-pass-state (00000110 states)))
-         ((00000011 (00000101 states) (quote pass)) (0)
-          (quote fail)))))))
+         ((00000011 (00000101 states) (00000001 pass)) (0)
+          (00000001 fail)))))))
 
 (00001001 native-first-coverage-field
   (00001000 (name row)
     (10011100 ((found (00101101 name (00000110 row))))
       (00000111
-        ((00000010 found) () (quote ()))
-        ((00000010 found) (1) (quote ()))
+        ((00000010 found) () (00000001 ()))
+        ((00000010 found) (1) (00000001 ()))
         ((00000010 found) (0) (00101111 found))))))
 
 (00001001 native-first-coverage-present-state
   (00001000 (value)
     (00000111
-      ((00100010 value (quote ())) (1) (quote fail))
-      ((00100010 value (quote ())) (0) (quote pass)))))
+      ((00100010 value (00000001 ())) (1) (00000001 fail))
+      ((00100010 value (00000001 ())) (0) (00000001 pass)))))
 
 (00001001 native-first-coverage-fallback-plan-state
   (00001000 (expression)
     (native-first-coverage-check
       (native-first-plan expression)
-      (00100111 (quote evaluator-fallback) expression))))
+      (00100111 (00000001 evaluator-fallback) expression))))
 
 (00001001 native-first-coverage-native-plan-state
   (00001000 (plan)
     (00000111
-      ((00000010 plan) () (quote fail))
-      ((00000010 plan) (1) (quote fail))
+      ((00000010 plan) () (00000001 fail))
+      ((00000010 plan) (1) (00000001 fail))
       ((00000010 plan) (0)
        (native-first-coverage-check
          (00000101 plan)
-         (quote native-plan))))))
+         (00000001 native-plan))))))
 
 (00001001 native-first-coverage-parity-state
   (00001000 (parity)
     (00000111
-      ((00000010 parity) () (quote fail))
-      ((00000010 parity) (1) (quote fail))
+      ((00000010 parity) () (00000001 fail))
+      ((00000010 parity) (1) (00000001 fail))
       ((00000010 parity) (0)
        (native-first-coverage-check
          (00110000 parity)
-         (quote pass))))))
+         (00000001 pass))))))
 
 (00001001 native-first-coverage-native-row-state
   (00001000 (row)
-    (10011101 ((class (native-first-coverage-field (quote class) row))
+    (10011101 ((class (native-first-coverage-field (00000001 class) row))
            (expression
              (native-first-coverage-field
-               (quote representative)
+               (00000001 representative)
                row))
            (expected
              (native-first-coverage-field
-               (quote expected)
+               (00000001 expected)
                row))
            (effect
              (native-first-coverage-field
-               (quote effect)
+               (00000001 effect)
                row))
            (error-class
              (native-first-coverage-field
-               (quote error)
+               (00000001 error)
                row))
            (evidence
              (native-first-coverage-field
-               (quote evidence)
+               (00000001 evidence)
                row))
            (plan (native-first-plan expression))
            (outcome
@@ -117,37 +117,37 @@
           (native-first-coverage-present-state expected)
           (native-first-coverage-check
             evidence
-            (quote native-first-parity-witness))
+            (00000001 native-first-parity-witness))
           (native-first-coverage-native-plan-state plan)
           (native-first-coverage-check
             outcome
             (00100111
-              (quote execution-route)
-              (quote native)
-              (quote (status completed))
-              (00100111 (quote value) expected)))
+              (00000001 execution-route)
+              (00000001 native)
+              (00000001 (status completed))
+              (00100111 (00000001 value) expected)))
           (native-first-coverage-parity-state parity))))))
 
 (00001001 native-first-coverage-fallback-row-state
   (00001000 (row)
     (10011100 ((expression
             (native-first-coverage-field
-              (quote representative)
+              (00000001 representative)
               row))
           (reason-ref
             (native-first-coverage-field
-              (quote reason)
+              (00000001 reason)
               row))
           (evidence
             (native-first-coverage-field
-              (quote evidence)
+              (00000001 evidence)
               row)))
       (native-first-coverage-all-pass-state
         (00100111
           (native-first-coverage-present-state reason-ref)
           (native-first-coverage-check
             evidence
-            (quote native-first-dispatch-witness))
+            (00000001 native-first-dispatch-witness))
           (native-first-coverage-fallback-plan-state expression))))))
 
 (00001001 native-first-coverage-blocked-row-state
@@ -157,83 +157,83 @@
         (native-first-coverage-fallback-row-state row)
         (native-first-coverage-present-state
           (native-first-coverage-field
-            (quote prerequisite)
+            (00000001 prerequisite)
             row))))))
 
 (00001001 native-first-coverage-row-state
   (00001000 (row)
     (00000111
-      ((00000010 row) () (quote fail))
-      ((00000010 row) (1) (quote fail))
+      ((00000010 row) () (00000001 fail))
+      ((00000010 row) (1) (00000001 fail))
       ((00000010 row) (0)
        (00000111
-         ((00100010 (00000101 row) (quote native-coverage))
+         ((00100010 (00000101 row) (00000001 native-coverage))
           (1)
           (10011100 ((status
                   (native-first-coverage-field
-                    (quote status)
+                    (00000001 status)
                     row)))
             (00000111
-              ((00100010 status (quote native-supported))
+              ((00100010 status (00000001 native-supported))
                (1)
                (native-first-coverage-native-row-state row))
-              ((00100010 status (quote fallback-required))
+              ((00100010 status (00000001 fallback-required))
                (1)
                (native-first-coverage-fallback-row-state row))
-              ((00100010 status (quote blocked-runtime-prerequisite))
+              ((00100010 status (00000001 blocked-runtime-prerequisite))
                (1)
                (native-first-coverage-blocked-row-state row))
-              (t (quote fail)))))
-         ((00100010 (00000101 row) (quote native-coverage))
+              (t (00000001 fail)))))
+         ((00100010 (00000101 row) (00000001 native-coverage))
           (0)
-          (quote fail)))))))
+          (00000001 fail)))))))
 
 (00001001 native-first-coverage-all-valid-state
   (00001000 (rows)
     (00000111
-      ((00000010 rows) () (quote pass))
-      ((00000010 rows) (1) (quote fail))
+      ((00000010 rows) () (00000001 pass))
+      ((00000010 rows) (1) (00000001 fail))
       ((00000010 rows) (0)
        (10011100 ((row-state
                (native-first-coverage-row-state (00000101 rows))))
          (00000111
-           ((00000011 row-state (quote pass)) (1)
+           ((00000011 row-state (00000001 pass)) (1)
             (native-first-coverage-all-valid-state (00000110 rows)))
-           ((00000011 row-state (quote pass)) (0)
-            (quote fail))))))))
+           ((00000011 row-state (00000001 pass)) (0)
+            (00000001 fail))))))))
 
 (00001001 native-first-coverage-expected-authority-row-state
   (00001000 (row)
     (10011100 ((status
-            (native-first-coverage-field (quote status) row))
+            (native-first-coverage-field (00000001 status) row))
           (expected
-            (native-first-coverage-field (quote expected) row)))
+            (native-first-coverage-field (00000001 expected) row)))
       (00000111
-        ((00100010 status (quote native-supported))
+        ((00100010 status (00000001 native-supported))
          (1)
          (native-first-coverage-present-state expected))
-        ((00100010 status (quote fallback-required))
+        ((00100010 status (00000001 fallback-required))
          (1)
-         (native-first-coverage-check expected (quote ())))
-        ((00100010 status (quote blocked-runtime-prerequisite))
+         (native-first-coverage-check expected (00000001 ())))
+        ((00100010 status (00000001 blocked-runtime-prerequisite))
          (1)
-         (native-first-coverage-check expected (quote ())))
-        (t (quote fail))))))
+         (native-first-coverage-check expected (00000001 ())))
+        (t (00000001 fail))))))
 
 (00001001 native-first-coverage-expected-authority-state
   (00001000 (rows)
     (00000111
-      ((00000010 rows) () (quote pass))
-      ((00000010 rows) (1) (quote fail))
+      ((00000010 rows) () (00000001 pass))
+      ((00000010 rows) (1) (00000001 fail))
       ((00000010 rows) (0)
        (10011100 ((row-state
                (native-first-coverage-expected-authority-row-state
                  (00000101 rows))))
          (00000111
-           ((00000011 row-state (quote pass)) (1)
+           ((00000011 row-state (00000001 pass)) (1)
             (native-first-coverage-expected-authority-state (00000110 rows)))
-           ((00000011 row-state (quote pass)) (0)
-            (quote fail))))))))
+           ((00000011 row-state (00000001 pass)) (0)
+            (00000001 fail))))))))
 
 (00001001 native-first-coverage-count-status-onto
   (00001000 (rows status count)
@@ -244,7 +244,7 @@
        (00000111
          ((00100010
             (native-first-coverage-field
-              (quote status)
+              (00000001 status)
               (00000101 rows))
             status)
           (1)
@@ -254,7 +254,7 @@
             (00001100 count 1)))
          ((00100010
             (native-first-coverage-field
-              (quote status)
+              (00000001 status)
               (00000101 rows))
             status)
           (0)
@@ -277,29 +277,29 @@
         (00111110
           "native-first-coverage"
           (10100110 "lib/machine/dispatch/native-first.lisp"))
-        (quote ()))
+        (00000001 ()))
       (native-first-coverage-check
         (00111110
           "native-first-coverage"
           (10100110 "lib/machine/dispatch/native-first-execute.lisp"))
-        (quote ()))
+        (00000001 ()))
       (native-first-coverage-check
         (00111110
           "native-first-coverage"
           (10100110 "lib/machine/dispatch/native-first-parity.lisp"))
-        (quote ())))))
+        (00000001 ())))))
 
 (00001001 native-first-coverage-ledger-witness
   (00001000 ()
     (10011100 ((native-count
             (native-first-coverage-count-status
-              (quote native-supported)))
+              (00000001 native-supported)))
           (fallback-count
             (native-first-coverage-count-status
-              (quote fallback-required)))
+              (00000001 fallback-required)))
           (blocked-count
             (native-first-coverage-count-status
-              (quote blocked-runtime-prerequisite))))
+              (00000001 blocked-runtime-prerequisite))))
       (10011100 ((verdict
               (native-first-coverage-all-pass-state
                 (00100111
@@ -315,22 +315,22 @@
                   (native-first-coverage-check fallback-count 2)
                   (native-first-coverage-check blocked-count 3)))))
         (00000111
-          ((00000011 verdict (quote pass)) (1)
+          ((00000011 verdict (00000001 pass)) (1)
            (00100111
-             (quote native-first-coverage-ledger-witness)
-             (quote (status pass))
-             (00100111 (quote rows) 6)
-             (00100111 (quote native) native-count)
-             (00100111 (quote fallback) fallback-count)
-             (00100111 (quote blocked) blocked-count)))
-          ((00000011 verdict (quote pass)) (0)
+             (00000001 native-first-coverage-ledger-witness)
+             (00000001 (status pass))
+             (00100111 (00000001 rows) 6)
+             (00100111 (00000001 native) native-count)
+             (00100111 (00000001 fallback) fallback-count)
+             (00100111 (00000001 blocked) blocked-count)))
+          ((00000011 verdict (00000001 pass)) (0)
            (00100111
-             (quote native-first-coverage-ledger-witness)
-             (quote (status fail))
-             (00100111 (quote rows)
+             (00000001 native-first-coverage-ledger-witness)
+             (00000001 (status fail))
+             (00100111 (00000001 rows)
                    (00101000 native-first-coverage-ledger))
-             (00100111 (quote native) native-count)
-             (00100111 (quote fallback) fallback-count)
-             (00100111 (quote blocked) blocked-count))))))))
+             (00100111 (00000001 native) native-count)
+             (00100111 (00000001 fallback) fallback-count)
+             (00100111 (00000001 blocked) blocked-count))))))))
 
 (native-first-coverage-ledger-witness)
