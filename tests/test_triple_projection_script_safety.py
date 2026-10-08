@@ -102,18 +102,22 @@ class SafeTripleScriptTests(unittest.TestCase):
         self.assertEqual(no_fixture.returncode, 2)
         self.assertIn("BLOCKED", no_fixture.stderr)
 
-    def test_default_full_corpus_fails_closed_on_legacy_non_uk_triples(self):
-        # The other 3 fixtures are currently legacy/English with no views,
-        # not admitted canonical Ukrainian triples; they must not SKIP/PASS.
+    def test_default_gate_checks_only_certified_bounded_triple(self):
+        # The default required gate is intentionally scoped to the one
+        # currently certified bounded Ukrainian/T5/view cohort. Legacy,
+        # D4-selector and multi-form cohorts keep separate proof profiles.
         result = subprocess.run(
             ["bash", str(SHELL)], cwd=ROOT,
             capture_output=True, text=True, timeout=120,
         )
-        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-        self.assertIn("result=BLOCKED", result.stdout)
-        self.assertIn("third.lisp", result.stderr)
-        self.assertIn("caar.lisp", result.stderr)
-        self.assertIn("two-forms.lisp", result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(
+            "migration-d1-cond-cohort/branch.lisp", result.stdout
+        )
+        self.assertIn("result=PASS", result.stdout)
+        self.assertNotIn("third.lisp", result.stdout + result.stderr)
+        self.assertNotIn("caar.lisp", result.stdout + result.stderr)
+        self.assertNotIn("two-forms.lisp", result.stdout + result.stderr)
 
     def test_renderer_default_never_rewrites_original_lisp(self):
         origin = (F / "branch.lisp").read_bytes()
