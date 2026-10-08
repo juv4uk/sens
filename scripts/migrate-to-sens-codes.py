@@ -665,13 +665,11 @@ def binary_rewrite(
         # machine-block/forms into consecutive 7-bit words and falsely call
         # the packed T5 "migrated", although real Rust D2 rejects it.
         cells = encode_text7_spelling(token, text7_candidates)
-        if len(cells) != 1:
-            raise BinaryMigrationError(
-                f"UNFRAMED_TEXT7_ATOM {token!r}: {len(cells)} D7 cells are "
-                "not one canonical D2 term; a ratified Text7 atom/binder "
-                "framing law and current executable oracle are required"
-            )
-        out.extend(cells)
+        raise BinaryMigrationError(
+            f"UNFRAMED_TEXT7_ATOM {token!r}: {len(cells)} D7 cells have no "
+            "ratified D2 Text7 atom/binder frame; current executable oracle "
+            "and positional binding law are required"
+        )
 
     def begin_item():
         nonlocal top_has_item
