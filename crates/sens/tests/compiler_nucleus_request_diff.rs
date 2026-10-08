@@ -8,8 +8,8 @@
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
     compiler_execution_role, domain_identity_shape_mechanism, eval_parsed_expressions,
-    eval_program, load_core_library, sha256_source, Bija3, Bit3, Bit4, Bit8,
-    CompilerExecutionRole, CoreD4, CoreD8, CoreDomainIdentity, DomainIdentity, Exactness,
+    load_core_library, parse_mixed_exact_domain, sha256_source, Bija3, Bit3, Bit4, Bit8,
+    CompilerExecutionRole, CoreD4, CoreD8, DomainIdentity, Exactness,
     Session, Value,
 };
 use std::rc::Rc;
