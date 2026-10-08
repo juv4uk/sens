@@ -44,15 +44,14 @@ class MigrationBlocked(ValueError):
     pass
 
 
-# Source classification is NOT inferred from whether three-pass can emit
-# physical bytes. These previously reviewed manifests pin non-program records
-# to their exact immutable Git object, not merely to a filename glob.
-NONPROGRAM_MANIFESTS = (
-    "migration-nonprogram-isa-manifest-2026-10-08.json",
-    "migration-nonprogram-schema-manifest-2026-10-08.json",
-    "migration-nonprogram-evidence-manifest-2026-10-08.json",
-    "migration-nonprogram-expr-records-2026-10-08.json",
+# Non-executable source identity belongs to ONE existing reviewed source-kind
+# authority. Do not copy a stale subset of owner-approved manifests into this
+# publisher: its source classifier and our publication guard must agree.
+from report_original_migration_candidates import (  # noqa: E402
+    NONPROGRAM_MANIFESTS as REVIEWED_NONPROGRAM_MANIFESTS,
+    load_nonprogram_classification,
 )
+
 ARCHIVE_POLICY = "migration-benchmark-snapshot-2026-10-08.json"
 
 
@@ -63,39 +62,28 @@ def _git_blob_sha(content: bytes) -> str:
 
 
 def _nonprogram_manifest_paths(root: Path) -> dict[str, str]:
-    """Load reviewed path/blob records; fail closed if the contract drifts."""
-    indexed: dict[str, str] = {}
-    for filename in NONPROGRAM_MANIFESTS:
-        manifest = root / "knowledge" / filename
+    """Require every reviewed cohort, then reuse the SHA-pinned owner classifier.
+
+    Missing/corrupt authority is BLOCK, not silent promotion into executable
+    code. Reviewed records are verified against real on-disk Git blob bytes,
+    expected cohort sizes and allowable cohort path scopes by the classifier.
+    """
+    for cohort, relative, _count in REVIEWED_NONPROGRAM_MANIFESTS:
+        manifest = root / relative
         if manifest.is_symlink() or not manifest.is_file():
-            raise MigrationBlocked(f"missing/unsafe nonprogram authority: {filename}")
-        try:
-            document = json.loads(manifest.read_text(encoding="utf-8"))
-        except (ValueError, UnicodeError) as exc:
-            raise MigrationBlocked(f"invalid nonprogram authority: {filename}") from exc
-        if (not isinstance(document, dict)
-                or document.get("schema") != "sens-migration-nonprogram-manifest/1"
-                or document.get("automatic_sens_companion") is not False
-                or not isinstance(document.get("entries"), list)
-                or not document["entries"]):
-            raise MigrationBlocked(f"invalid nonprogram authority contract: {filename}")
-        for row in document["entries"]:
-            if not isinstance(row, dict) or set(row) != {"path", "git_blob_sha1"}:
-                raise MigrationBlocked(f"invalid SHA-locked nonprogram row: {filename}")
-            name, blob = row["path"], row["git_blob_sha1"]
-            if not isinstance(name, str) or chr(92) in name:
-                raise MigrationBlocked("nonprogram source path must be relative POSIX")
-            posix = PurePosixPath(name)
-            if (posix.is_absolute() or ".." in posix.parts or posix.suffix != ".lisp"
-                    or posix.as_posix() != name):
-                raise MigrationBlocked(f"unsafe nonprogram path: {name}")
-            if (not isinstance(blob, str) or len(blob) != 40
-                    or any(c not in "0123456789abcdef" for c in blob)):
-                raise MigrationBlocked(f"invalid Git source blob pin for {name}")
-            if name in indexed:
-                raise MigrationBlocked(f"duplicate nonprogram authority path: {name}")
-            indexed[name] = blob
-    return indexed
+            raise MigrationBlocked(
+                f"missing/unsafe NONPROGRAM authority for {cohort}: {relative}"
+            )
+    try:
+        reviewed = load_nonprogram_classification(root)
+    except (OSError, ValueError, UnicodeError, KeyError, TypeError) as exc:
+        raise MigrationBlocked(f"invalid/drifted NONPROGRAM authority: {exc}") from exc
+    total = sum(count for _cohort, _relative, count in REVIEWED_NONPROGRAM_MANIFESTS)
+    if len(reviewed) != total:
+        raise MigrationBlocked(
+            f"NONPROGRAM authority incomplete: {len(reviewed)}/{total} reviewed originals"
+        )
+    return {path: row["source_git_blob_sha"] for path, row in reviewed.items()}
 
 
 def _is_archived_benchmark(path: PurePosixPath, root: Path) -> bool:

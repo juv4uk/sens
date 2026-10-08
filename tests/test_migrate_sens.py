@@ -215,6 +215,73 @@ class OperationalMigrationTests(unittest.TestCase):
             "ce013625030ba8dba906f756967f9e9ca394464a"
         )
 
+    def test_publisher_tracks_all_seven_reviewed_data_manifest_cohorts(self):
+        # The source-scope reporter is the existing owner of these seven
+        # immutable classifications. Publication must never lag its inventory.
+        expected = {
+            "domain-table": "lib/domains/d1.lisp",
+            "comment-only-loader": "lib/core2.lisp",
+            "isa": "lib/machine/isa/adx.lisp",
+            "schema": "contracts/bija3-l1-l5-ratification.lisp",
+            "evidence": "evidence/G5/my-lisp/196d7f2.lisp",
+            "expr-record": "tests/fixtures/canon-laws-v2-witness.lisp",
+            "knowledge-record": "knowledge/agent-discoveries.lisp",
+        }
+        records = runner._nonprogram_manifest_paths(ROOT)
+        self.assertEqual(len(runner.REVIEWED_NONPROGRAM_MANIFESTS), 7)
+        self.assertEqual(
+            len(records),
+            sum(count for _, _, count in runner.REVIEWED_NONPROGRAM_MANIFESTS),
+        )
+        self.assertEqual(len(records), 92)
+        for cohort, path in expected.items():
+            with self.subTest(cohort=cohort):
+                source = ROOT / path
+                self.assertEqual(
+                    runner._git_blob_sha(source.read_bytes()), records[path]
+                )
+                with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
+                    runner.pin_sources([path], ROOT)
+
+    def test_recent_data_cohort_in_mixed_manifest_aborts_before_any_t5_write(self):
+        # The old publisher protected 67 records, leaving these 25 reviewed
+        # originals unprotected. The 3 new cohorts must be vetoed atomically.
+        sources = [
+            "lib/domains/d2.lisp", "lib/surface/ukr.lisp",
+            "knowledge/agent-discoveries.lisp",
+        ]
+        for forbidden in sources:
+            with self.subTest(source=forbidden):
+                with tempfile.TemporaryDirectory(prefix="sens-92-veto-") as td:
+                    temp = Path(td)
+                    requested = temp / "selected.json"
+                    requested.write_text(json.dumps({"files": [FIXTURE, forbidden]}))
+                    out, report = temp / "out", temp / "receipt.json"
+                    process = subprocess.run([
+                        sys.executable, str(CLI), "--root", str(ROOT),
+                        "--manifest", str(requested), "--out", str(out),
+                        "--report", str(report), "--source-era", "legacy",
+                    ], capture_output=True, text=True, cwd=temp)
+                    self.assertEqual(process.returncode, 2,
+                                     process.stdout + process.stderr)
+                    self.assertIn("NONPROGRAM", process.stderr)
+                    self.assertFalse(out.exists())
+                    self.assertFalse(report.exists())
+
+    def test_nonprogram_authority_loss_or_incomplete_ledger_fails_closed(self):
+        with unittest.mock.patch.object(
+            runner, "REVIEWED_NONPROGRAM_MANIFESTS",
+            runner.REVIEWED_NONPROGRAM_MANIFESTS +
+            (("missing-cohort", "knowledge/missing-owner-authority.json", 1),)
+        ):
+            with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
+                runner.pin_sources([FIXTURE], ROOT)
+        with unittest.mock.patch.object(
+            runner, "load_nonprogram_classification", return_value={}
+        ):
+            with self.assertRaisesRegex(runner.MigrationBlocked, "incomplete"):
+                runner.pin_sources([FIXTURE], ROOT)
+
     def test_archived_print_snapshot_not_executable_even_if_mechanically_convertible(self):
         historical = ("benchmarks/sens-surface/results/"
                       "20260925-icount-33bfb53a/programs/empty-en.lisp")
