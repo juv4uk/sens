@@ -12,6 +12,8 @@ on:
       - "tests/test_actual_si_derived_library_migration.py"
       - "scripts/migrate-three-pass.py"
       - "tests/test_three_pass_migration.py"
+      - "tests/test_migrator_ladder_authority.py"
+      - "scripts/domain_tables.py"
   workflow_dispatch:
 
 permissions:
@@ -22,8 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run three-pass regression tests
-        run: python3 -m unittest tests/test_three_pass_migration.py -v
+      - name: Run ladder + existing migration regression tests
+        run: python3 -m unittest tests/test_migrator_ladder_authority.py tests/test_three_pass_migration.py tests/test_sens_code_migration.py -v
       - name: Run ACTUAL existing migration scripts against real lib/si-derived.lisp
         shell: bash
         run: |
