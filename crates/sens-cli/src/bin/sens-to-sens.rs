@@ -547,8 +547,7 @@ mod tests {
     fn ratified_uk_source_heads_remain_primary_not_old_eight_bit_tokens() {
         // Source/UI .lisp must stay Ukrainian, while its executable heads
         // lower to exact D3/D4 identities. Do not regress them into SID8.
-        let source = "(визначити звязок (функція (x) (сполучити (перше x) (решта x))))\\n";
-        let source = source.replace("\\n", "\n");
+        let source = "(визначити звязок (функція (x) (сполучити (перше x) (решта x))))\n";
         let host = no_host();
         let inspected = analyze(&source, &host).expect("canonical Ukrainian source");
         assert!(inspected.named_calls >= 5, "the legacy auditor still sees the calls");
