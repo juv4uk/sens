@@ -16,11 +16,15 @@ SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CHECK_ROOT="$SCRIPT_ROOT"
 FIXTURES=()
 if [ "$#" -eq 0 ]; then
+  # Required release gate covers only the currently certified bounded
+  # Ukrainian/T5/view proof. Other cohorts have their own proof profiles:
+  # - D4 selector: migration_d4_selector_cohort
+  # - historical Core1 third: physical T5 / source-era canary
+  # - multi-form cohort: dedicated T5/oracle lane
+  # They must be supplied explicitly with --fixture by their own workflows;
+  # never widen this bounded gate just because a file exists.
   FIXTURES=(
-    tests/fixtures/core1-third-domain-canary/third.lisp
     tests/fixtures/migration-d1-cond-cohort/branch.lisp
-    tests/fixtures/migration-d4-selector-cohort/caar.lisp
-    tests/fixtures/migration-multiform-cohort/two-forms.lisp
   )
 else
   while [ "$#" -gt 0 ]; do
