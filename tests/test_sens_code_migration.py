@@ -72,7 +72,6 @@ class SensCodeMigrationTests(unittest.TestCase):
     def contract_setup(cls):
         data, _ = mod.load_foundation(CONTRACT_FOUNDATION)
         callable_domains = list(mod.CONTRACT_CALL_DOMAINS)
-        current_domains = list(mod.CONTRACT_SURFACE_DOMAINS)
         # The executable migration map is deliberately only D3-D6.
         # D8/D9 residents participate through exact-domain authority and
         # resolver evidence, never by a global human-label identity map.
@@ -86,7 +85,6 @@ class SensCodeMigrationTests(unittest.TestCase):
             foundation=CONTRACT_FOUNDATION,
             registry=REGISTRY,
             domain_surfaces=CONTRACT_DOMAIN_SURFACES,
-            current_domains=current_domains,
         )
         authority = mod.build_binary_authority(data, mod.CONTRACT_DOMAINS)
         return (
