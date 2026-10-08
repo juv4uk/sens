@@ -46,7 +46,7 @@ class MigrateOneToSensTests(unittest.TestCase):
         self.assertEqual(target.read_bytes(), before)
 
     def test_real_executable_guard_can_be_migrated_to_binary_t5(self):
-        source = ROOT / "scripts" / "machine-authority-guard.lisp"
+        source = ROOT / "lib" / "surface" / "ukr-acceptance.lisp"
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "machine-authority-guard.sens"
             result = subprocess.run(
