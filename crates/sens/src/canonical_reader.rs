@@ -28,6 +28,34 @@ pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> 
     CanonicalReader::new(&tokens, source.len()).parse_program()
 }
 
+/// Recognize a D2-framed Text7 identifier without changing the canonical D2 AST.
+///
+/// This helper is consumed only by contextual binding/call-head code. Ordinary
+/// D2/W7 lists remain structural lists in the canonical reader itself.
+pub(crate) fn text7_atom(expression: &Expr) -> Option<crate::Text7> {
+    let ExprKind::List(items) = &expression.kind else {
+        return None;
+    };
+    if items.is_empty() {
+        return None;
+    }
+    let cells = items
+        .iter()
+        .map(|item| match &item.kind {
+            ExprKind::DomainIdentity(crate::DomainIdentity::D7(word)) => {
+                Some(word.word().packed_bits())
+            }
+            _ => None,
+        })
+        .collect::<Option<Vec<u8>>>()?;
+    crate::Text7::from_cells(cells).ok()
+}
+
+/// Canonical internal binding key for a contextual Text7 identifier.
+pub(crate) fn text7_binding_key(expression: &Expr) -> Option<Rc<str>> {
+    text7_atom(expression).map(|text| Rc::from(text.to_canonical_wire_token()))
+}
+
 struct CanonicalReader<'a> {
     tokens: &'a [BinarySourceToken],
     cursor: usize,
