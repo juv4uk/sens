@@ -153,12 +153,12 @@ fn each_structural_effect_form_projects_or_rejects_explicitly() {
             &format!("(x86-machine-effect-form? {store} (00000001 store-u64) 4)"),
             &mut session,
         ),
-        "t",
+        "(1)",
         "store effect form must satisfy the machine-effect form contract"
     );
     assert_eq!(
         eval_value(&format!("(x86-structural-machine-effect? {store})"), &mut session),
-        "t",
+        "(1)",
         "store effect must be admitted to the structural machine-effect family"
     );
     assert_eq!(
