@@ -252,6 +252,8 @@ class W8SecondBarrierTests(unittest.TestCase):
         doubled = self.scoped_census()
         doubled["blocked_sources"].append(dict(doubled["blocked_sources"][0]))
         doubled["summary"]["blocked"] = 2
+        doubled["summary"]["scanned"] = 2
+        doubled["summary"]["original_unpaired_sources_scanned"] = 2
         with self.assertRaisesRegex(triage.TriageError, "duplicate"):
             triage.add_owner_reviewed_source_scope(report, doubled)
 
