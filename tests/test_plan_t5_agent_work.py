@@ -87,6 +87,79 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         b["blocker_cohorts"][0]["original_sources"].reverse()
         self.assertEqual(mod.build_plan(a, 2), mod.build_plan(b, 2))
 
+    def test_reviewed_nonprogram_original_gets_separate_no_t5_data_shard(self):
+        a = fixture()
+        src = a["blocked_sources"][0]
+        src["source_class"] = "NONPROGRAM_DATA_REVIEWED"
+        src["automatic_sens_companion"] = False
+        a["nonprogram_classification"] = [{
+            "path": src["path"],
+            "source_git_blob_sha": src["source_git_blob_sha"],
+            "source_class": "NONPROGRAM_DATA_REVIEWED",
+            "automatic_sens_companion": False,
+            "semantic_oracle_admitted": False,
+        }]
+        a["summary"]["classified_nonprogram"] = 1
+        plan = mod.build_plan(a, 2)
+        self.assertEqual(plan["summary"]["original_unpaired"], 4)
+        self.assertEqual(plan["summary"]["reviewed_nonprogram_originals"], 1)
+        self.assertEqual(plan["summary"]["executable_or_unclassified_originals"], 3)
+        data = [x for x in plan["shards"] if x["family"] == "reviewed-nonprogram-data"]
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["source_count"], 1)
+        self.assertEqual(data[0]["sources"][0]["path"], src["path"])
+        self.assertEqual(data[0]["release_gate"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertEqual(data[0]["status"], "UNCLAIMED__NONPROGRAM_DATA_ONLY")
+        other = [x for x in plan["shards"] if x["family"] != "reviewed-nonprogram-data"]
+        self.assertTrue(all(x["release_gate"] == "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"
+                            for x in other))
+        seen = [x["path"] for shard in plan["shards"] for x in shard["sources"]]
+        self.assertEqual(len(seen), 4)
+        self.assertEqual(len(set(seen)), 4)
+
+    def test_nonprogram_classification_must_equal_canonical_sha_and_policy(self):
+        variants = ("wrong-pin", "wrong-source", "duplicate", "unreviewed",
+                    "automatic-publish", "oracle-claim", "missing-canonical-label",
+                    "incorrect-count", "missing-records", "candidate-reclassified")
+        for variant in variants:
+            a = fixture()
+            src = a["blocked_sources"][0]
+            src["source_class"] = "NONPROGRAM_DATA_REVIEWED"
+            src["automatic_sens_companion"] = False
+            row = {
+                "path": src["path"],
+                "source_git_blob_sha": src["source_git_blob_sha"],
+                "source_class": "NONPROGRAM_DATA_REVIEWED",
+                "automatic_sens_companion": False,
+                "semantic_oracle_admitted": False,
+            }
+            a["nonprogram_classification"] = [row]
+            a["summary"]["classified_nonprogram"] = 1
+            if variant == "wrong-pin":
+                row["source_git_blob_sha"] = "f" * 40
+            elif variant == "wrong-source":
+                row["path"] = "lib/not-canonical.lisp"
+            elif variant == "duplicate":
+                a["nonprogram_classification"].append(dict(row))
+                a["summary"]["classified_nonprogram"] = 2
+            elif variant == "unreviewed":
+                row["source_class"] = "EXECUTABLE"
+            elif variant == "automatic-publish":
+                row["automatic_sens_companion"] = True
+            elif variant == "oracle-claim":
+                row["semantic_oracle_admitted"] = True
+            elif variant == "missing-canonical-label":
+                src.pop("source_class")
+            elif variant == "incorrect-count":
+                a["summary"]["classified_nonprogram"] = 2
+            elif variant == "missing-records":
+                a.pop("nonprogram_classification")
+            else:
+                row["path"] = "test/ready.lisp"
+                row["source_git_blob_sha"] = "a" * 40
+            with self.subTest(variant=variant), self.assertRaises(mod.PlanError):
+                mod.build_plan(a, 2)
+
     def test_no_paired_source_or_duplicate_can_enter_plan(self):
         a = fixture()
         a["blocker_cohorts"][0]["original_sources"][0]["path"] = "test/ready.lisp"
