@@ -144,6 +144,26 @@ fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
     }
 }
 
+
+#[test]
+fn nucleus_top_level_form_failure_is_localized() {
+    let expressions =
+        parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("active core loads");
+
+    for (index, expression) in expressions.iter().enumerate() {
+        if let Err(error) =
+            eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+        {
+            panic!(
+                "compiler nucleus top-level form {index} failed: {error:?}; expression={expression:?}"
+            );
+        }
+    }
+}
+
+
 #[test]
 fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
     let mut session = Session::default();
