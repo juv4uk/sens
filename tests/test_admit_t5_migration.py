@@ -96,10 +96,10 @@ class T5ProofPublisherTests(unittest.TestCase):
                 gate.checked_manifest(location)
             proof["historical_observation"] = {
                 "command": [sys.executable, "-c", "print('NIL')"],
-                "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+                "stdout_sha256": hashlib.sha256(b"NIL\n").hexdigest(),
             }
             location.write_text(json.dumps(proof))
-            with self.assertRaisesRegex(gate.Blocked, r"\\{source\\}"):
+            with self.assertRaisesRegex(gate.Blocked, r"\{source\}"):
                 gate.checked_manifest(location)
             proof["historical_observation"]["command"].append("{source}")
             location.write_text(json.dumps(proof))
@@ -120,7 +120,7 @@ class T5ProofPublisherTests(unittest.TestCase):
             "source": "lib/machine/block.lisp",
             "historical_observation": {
                 "command": historical,
-                "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+                "stdout_sha256": hashlib.sha256(b"NIL\n").hexdigest(),
             },
         }
         # Synthetic historical oracle tests the COMPARE mechanism only. It is
@@ -136,7 +136,7 @@ class T5ProofPublisherTests(unittest.TestCase):
             "source": "lib/machine/block.lisp",
             "historical_observation": {
                 "command": [sys.executable, "-c", "print('different')", "{source}"],
-                "stdout_sha256": hashlib.sha256(b"different\\n").hexdigest(),
+                "stdout_sha256": hashlib.sha256(b"different\n").hexdigest(),
             },
         }
         with self.assertRaisesRegex(gate.Blocked, "OBSERVABLE_PARITY_MISMATCH"):
@@ -149,12 +149,12 @@ class T5ProofPublisherTests(unittest.TestCase):
         self.assertTrue(READER.is_file(), "build real sens-trit first")
         path = ROOT / "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
         for script in ("import sys;sys.exit(4)",
-                       "import sys;sys.stderr.write('not proven\\\\n');print('NIL')"):
+                       "import sys;sys.stderr.write('not proven');print('NIL')"):
             proof = {
                 "source": "lib/machine/block.lisp",
                 "historical_observation": {
                     "command": [sys.executable, "-c", script, "{source}"],
-                    "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+                    "stdout_sha256": hashlib.sha256(b"NIL\n").hexdigest(),
                 },
             }
             with self.subTest(script=script), self.assertRaisesRegex(
@@ -170,7 +170,7 @@ class T5ProofPublisherTests(unittest.TestCase):
         )
         fixture["historical_observation"] = {
             "command": [sys.executable, "-c", "print('NIL')", "{source}"],
-            "stdout_sha256": hashlib.sha256(b"NIL\\n").hexdigest(),
+            "stdout_sha256": hashlib.sha256(b"NIL\n").hexdigest(),
         }
         with tempfile.TemporaryDirectory() as directory:
             location = Path(directory) / "canary.json"
