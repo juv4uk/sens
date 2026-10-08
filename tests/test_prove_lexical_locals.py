@@ -54,6 +54,100 @@ class OriginalLocalCoordinates(unittest.TestCase):
         self.assertFalse(data["d2_or_d7_framing_defined"])
         self.assertEqual(ORIGINAL.read_bytes(), raw)
 
+    def test_real_six_exported_names_have_source_only_slots_zero_to_five(self):
+        raw, data = self.original()
+        self.assertEqual(proof.git_blob(raw), proof.HISTORICAL_MACHINE_BLOB)
+        self.assertTrue(data["global_declaration_order_source_only_proven"])
+        self.assertEqual(data["global_declaration_count"], 6)
+        self.assertEqual(
+            [d["global_declaration_ordinal_source_only"]
+             for d in data["definitions"]], list(range(6))
+        )
+        self.assertEqual(
+            [d["source_global_name_provenance_only"]
+             for d in data["definitions"]], list(NAMES)
+        )
+        self.assertEqual(data["source_global_export_manifest"], [
+            {"ordinal_source_only": i,
+             "source_name_provenance_only": name,
+             "runtime_binding_admitted": False}
+            for i, name in enumerate(NAMES)
+        ])
+        for declaration in data["definitions"]:
+            self.assertFalse(declaration["global_binding_runtime_admitted"])
+        self.assertFalse(data["global_binding_runtime_admitted"])
+        self.assertFalse(data["global_names_encoded"])
+        self.assertFalse(data["d2_or_d7_framing_defined"])
+        self.assertEqual(data["original_executable_migrations_admitted"], 0)
+
+    def test_global_call_uses_declaration_order_without_invented_d7_id(self):
+        # Forward global reference must resolve source-order manifest,
+        # not legacy W8 or current D8 callable resident.
+        text = (
+            "(00001001 alpha (00001000 (x) (beta x)))\n"
+            "(00001001 beta (00001000 (y) y))\n"
+        )
+        rows = proof.lower_definitions(text)
+        call = rows["definitions"][0]["local_coordinate_body"]["body"]
+        self.assertEqual(call["kind"], "GlobalCallCandidate")
+        self.assertEqual(call["declaration_ordinal_source_only"], 1)
+        self.assertEqual(call["source_name_provenance_only"], "beta")
+        self.assertEqual(call["arguments"], [{"kind": "Local", "depth": 0, "index": 0}])
+        self.assertFalse(call["runtime_binding_admitted"])
+        self.assertEqual(rows["original_executable_migrations_admitted"], 0)
+
+    def test_global_value_reference_remains_source_only_candidate(self):
+        text = (
+            "(00001001 alpha (00001000 (x) beta))\n"
+            "(00001001 beta (00001000 (y) y))\n"
+        )
+        rows = proof.lower_definitions(text)
+        value = rows["definitions"][0]["local_coordinate_body"]["body"]
+        self.assertEqual(value["kind"], "GlobalReferenceCandidate")
+        self.assertEqual(value["declaration_ordinal_source_only"], 1)
+        self.assertFalse(value["runtime_binding_admitted"])
+
+    def test_lexical_shadow_of_global_callable_blocks_not_dispatches(self):
+        text = (
+            "(00001001 alpha (00001000 (beta) (beta beta)))\n"
+            "(00001001 beta (00001000 (y) y))\n"
+        )
+        with self.assertRaisesRegex(proof.BindingBlocked, "shadowed global callable"):
+            proof.lower_definitions(text)
+
+    def test_shadowed_global_value_resolves_local_first(self):
+        text = (
+            "(00001001 alpha (00001000 (beta) beta))\n"
+            "(00001001 beta (00001000 (y) y))\n"
+        )
+        rows = proof.lower_definitions(text)
+        local = rows["definitions"][0]["local_coordinate_body"]["body"]
+        self.assertEqual(local, {"kind": "Local", "depth": 0, "index": 0})
+
+    def test_ordinal_changes_under_definition_reordering_not_semantic_law(self):
+        source = (
+            "(00001001 alpha (00001000 (x) (beta x)))\n"
+            "(00001001 beta (00001000 (y) y))\n"
+        )
+        permuted = (
+            "(00001001 beta (00001000 (y) y))\n"
+            "(00001001 alpha (00001000 (x) (beta x)))\n"
+        )
+        a, b = proof.lower_definitions(source), proof.lower_definitions(permuted)
+        self.assertEqual(
+            a["definitions"][0]["local_coordinate_body"]["body"][
+                "declaration_ordinal_source_only"], 1
+        )
+        self.assertEqual(
+            b["definitions"][1]["local_coordinate_body"]["body"][
+                "declaration_ordinal_source_only"], 0
+        )
+        self.assertNotEqual(a["source_global_export_manifest"],
+                            b["source_global_export_manifest"])
+        for data in (a, b):
+            self.assertFalse(data["global_binding_runtime_admitted"])
+            self.assertEqual(data["original_executable_migrations_admitted"], 0)
+
     def test_historical_w8_function_identity_not_promoted_to_current_d8(self):
         _, data = self.original()
         rows = json.dumps(data["definitions"], ensure_ascii=False)
