@@ -710,6 +710,8 @@ def main():
                     help="переклад/перевірка без запису фізичних файлів")
     ap.add_argument("--source-era", choices=("auto","legacy","current"), default="legacy",
                     help="legacy = сумісний старий SID8; auto блокує W8; current = ратифікований D8")
+    ap.add_argument("--unpaired-only", action="store_true",
+                    help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
 
     data = load_foundation(args.foundation)
@@ -740,6 +742,16 @@ def main():
         paths = sorted(source_files(root))
     else:
         ap.error(f"input path does not exist: {root}")
+    skipped_paired = []
+    if args.unpaired_only:
+        candidates = []
+        for path in paths:
+            partner = path.with_suffix(".sens")
+            if partner.exists() or partner.is_symlink():
+                skipped_paired.append(str(path.relative_to(base_root)))
+            else:
+                candidates.append(path)
+        paths = candidates
     seen_destinations = set()
     for path in paths:
         rel = path.resolve().relative_to(base_root)
@@ -816,11 +828,14 @@ def main():
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
         "source_era": args.source_era,
+        "only_unpaired": args.unpaired_only,
+        "skipped_paired_paths": skipped_paired,
         "source_era_law": "auto blocks ambiguous W8 heads; legacy maps SID8; current preserves ratified D8",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
             "files_seen": len(paths),
+            "files_skipped_paired": len(skipped_paired),
             "files_written": written if not args.dry_run else 0,
             "files_would_write": written if args.dry_run else 0,
             "files_blocked": blocked, "resolved_heads": totals,
