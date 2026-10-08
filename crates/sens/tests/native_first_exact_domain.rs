@@ -1,7 +1,7 @@
 use sens::{
-    domain_identity_shape_or_empty_mechanism, eval_program, expr_to_exact_program_data,
-    load_core_library, lower_program, parse, Bit4, CoreD4, DomainIdentity, ExprKind, Session,
-    Value,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
+    expr_to_exact_program_data, load_core_library, lower_program, parse, parse_mixed_exact_domain,
+    Bit4, CoreD4, DomainIdentity, ExprKind, Session, Value,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -15,8 +15,10 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let path = repo_root().join(path);
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load: {error}", path.display()));
+    let expressions = parse_mixed_exact_domain(&source)
+        .unwrap_or_else(|error| panic!("{} must parse under mixed exact-domain reader: {error}", path.display()));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{} must load under mixed exact-domain reader: {error}", path.display()));
 }
 
 fn native_session() -> Session {
