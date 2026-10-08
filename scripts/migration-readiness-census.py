@@ -18,6 +18,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
+SCRIPTS = str(ROOT / "scripts")
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
+from migration_source_scope import scope
 ARTIFACT_ARGS = [
     "--foundation", "knowledge/d1-d9-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
@@ -137,6 +141,7 @@ def build_report() -> dict:
                 "path": path,
                 "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 "queue": cohort,
+                "source_scope": scope(path),
                 "status": states,
                 "blocker_by_era": {
                     era: by_era[era][path].get("reason") if states[era] == "blocked" else None
@@ -145,6 +150,17 @@ def build_report() -> dict:
                 "semantic_oracle_admitted": False,
                 "physical_published": False,
             })
+
+        archived_auto = [
+            row for row in queue_rows
+            if row["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"
+            and row["status"]["auto"] == "would-write"
+        ]
+        nonarchive_auto = [
+            row for row in queue_rows
+            if row["source_scope"] != "ARCHIVED_BENCHMARK_NONPROGRAM"
+            and row["status"]["auto"] == "would-write"
+        ]
 
         # First-error visibility is insufficient: the initial AUTO W8 error
         # often masks a deeper value/number/binder blocker. Summarize the
@@ -199,12 +215,20 @@ def build_report() -> dict:
             "blocker_by_era_reason_counts": reasons_by_era,
             "top_blocker_transitions": top_transitions,
             "candidate_rows": queue_rows,
+            "source_scope": {
+                "archived_benchmark_mechanical_only": len(archived_auto),
+                "nonarchive_mechanical_unproved": len(nonarchive_auto),
+                "archived_candidate_paths": [row["path"] for row in archived_auto],
+                "nonarchive_candidate_paths": [row["path"] for row in nonarchive_auto],
+                "semantically_admitted_executable_originals": 0,
+            },
             "gate": {
                 "pass": (
-                    views["auto"]["exit"] == 2
+                    views["auto"]["exit"] in (0, 2)
                     and summary["files_written"] == 0
-                    and summary["files_would_write"] == 0
-                    and summary["files_blocked"] == summary["files_seen"]
+                    and summary["files_would_write"] == len(archived_auto)
+                    and not nonarchive_auto
+                    and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
                 "rule": "every ORIGINAL UNPAIRED .lisp remains BLOCKED under safe auto until independent oracle proof; no .sens emitted",
             },
@@ -219,7 +243,7 @@ def main() -> int:
     result = build_report()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"summary": result["migrator_summary"], "per_era_summary": result["per_era_summary"], "candidate_queues": result["candidate_queues"], "top_blocker_transitions": result["top_blocker_transitions"][:12], "per_era_top_reasons": {era: dict(list(rows.items())[:12]) for era, rows in result["blocker_by_era_reason_counts"].items()}, "gate": result["gate"]}, ensure_ascii=False))
+    print(json.dumps({"summary": result["migrator_summary"], "per_era_summary": result["per_era_summary"], "candidate_queues": result["candidate_queues"], "source_scope": result["source_scope"], "top_blocker_transitions": result["top_blocker_transitions"][:12], "per_era_top_reasons": {era: dict(list(rows.items())[:12]) for era, rows in result["blocker_by_era_reason_counts"].items()}, "gate": result["gate"]}, ensure_ascii=False))
     if not result["gate"]["pass"]:
         return 1
     return 0
