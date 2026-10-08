@@ -1,3 +1,22 @@
+; #506 — native-first execution bridge witness.
+; This fixture proves route choice, CPU execution, ordinary evaluator fallback,
+; source parsing, and the non-masking rule after a native plan has been chosen.
+
+(load "lib/core.lisp")
+(load "lib/machine/encoding/x86-64.lisp")
+(load "lib/machine/layout/pair-x86-64.lisp")
+(load "lib/machine/operands/x86-64.lisp")
+(load "lib/machine/admission/x86-64.lisp")
+(load "lib/machine/lowering/semantic-x86-64.lisp")
+(load-mixed-exact-domain "lib/machine/dispatch/native-first.lisp")
+(load "lib/machine/dispatch/native-first-execute.lisp")
+
+(00001001 native-first-execution-witness-check
+  (00001000 (actual expected)
+    (00000111
+      ((00100010 actual expected)
+       (1)
+       (00000001 pass))
       ((00100010 actual expected)
        (0)
        (00100111 (00000001 fail) actual expected)))))
@@ -34,3 +53,34 @@
                (status completed)
                (value 3))
              (execution-route native
+               (status completed)
+               (value 7))))))
+
+      ; Once a native plan exists, admission rejection stays visibly native.
+      ; The bridge must NOT hide this bug by evaluating (+ 40 2) instead.
+      (native-first-execution-witness-check
+        (native-first-execute-plan
+          (00000001
+            (native-plan
+              ((definitely-not-an-admitted-machine-form))
+              0)))
+        (00000001
+          (execution-route native
+            (status rejected)
+            (detail
+              (rejected
+                unadmitted-machine-form
+                (definitely-not-an-admitted-machine-form))))))
+
+      ; Malformed native plans also fail closed on the native route.
+      (native-first-execution-witness-check
+        (native-first-execute-plan
+          (00000001 (native-plan ((ret)))))
+        (00000001
+          (execution-route native
+            (status rejected)
+            (detail
+              (malformed-native-plan
+                (native-plan ((ret)))))))))))
+
+(native-first-execution-witness)
