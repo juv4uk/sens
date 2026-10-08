@@ -1,0 +1,30 @@
+name: bīja3 pure cube
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/bija3-pure-cube/**"
+      - ".github/workflows/bija3-pure-cube.yml"
+  workflow_dispatch:
+
+jobs:
+  exhaustive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Exhaustive 7! cube search
+        run: |
+          python3 benchmarks/bija3-pure-cube/run.py --json-out /tmp/bija3-pure-cube.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/bija3-pure-cube.json'))
+          assert d['counts'] == {
+              'all_family_edges': 48,
+              'single_axis': 144,
+              'total': 5040,
+              'uniform_xor': 336,
+          }
+          assert d['user_antipodal_candidate']['evaluation']['pair_xor_mask'] == '111'
+          assert d['factorized_equivalence_class']['member_law'] == 'sibling = code XOR 001'
+          print('bīja3 pure cube CI: PASS')
+          PY
