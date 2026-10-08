@@ -458,6 +458,17 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
+    // Ratified D4:1110 LIST (Contract 11.8): collect *already evaluated*
+    // argument values in order into a proper list.  D4 is an exact-width
+    // identity; never fall back to a historical SID8 byte or numeric coercion.
+    // LIST is a CONS-derived mechanism, not a second list-framing authority:
+    // D2 alone still parses the call and D3 CONS owns the pair value.
+    if let CoreDomainIdentity::D4(word) = identity {
+        if word.word().packed_bits() == 0b1110 {
+            return Ok(Value::list(args.iter().cloned()));
+        }
+    }
+
     if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
         let value = result?;
         return canonicalize_domain_result(identity, value, span);
