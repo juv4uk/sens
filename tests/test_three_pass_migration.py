@@ -450,10 +450,10 @@ class ThreePassMigrationTests(unittest.TestCase):
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
         # Use ratified D4 identities; W8 provenance is tested independently.
         source = (
-            "(0011 foo\\n"
-            "  (0010 ()\\n"
-            "    1))\\n"
-            "(foo)\\n"
+            "(0011 foo\n"
+            "  (0010 ()\n"
+            "    1))\n"
+            "(foo)\n"
         )
         projection,resolver=self.migrate(source)
         frame=mod.frame_text7(
@@ -519,8 +519,8 @@ class ThreePassMigrationTests(unittest.TestCase):
 
     def test_let_and_let_star_bindings_use_contextual_text7_without_treating_binding_lists_as_calls(self):
         for source, head, expected_env in (
-            ("(let ((x 1)) x)\\n", "001000", 1),
-            ("(let* ((x 1) (y x)) y)\\n", "001001", 1),
+            ("(let ((x 1)) x)\n", "001000", 1),
+            ("(let* ((x 1) (y x)) y)\n", "001001", 1),
         ):
             projection, resolver = self.migrate(source)
             words = projection.split()
@@ -538,9 +538,9 @@ class ThreePassMigrationTests(unittest.TestCase):
     def test_machine_block_local_callable_shadows_builtin_surface(self):
         # Exercise lexical shadowing, not historical W8 lookup.
         source = (
-            "(0011 first\\n"
-            "  (0010 (first)\\n"
-            "    (first)))\\n"
+            "(0011 first\n"
+            "  (0010 (first)\n"
+            "    (first)))\n"
         )
         projection,resolver=self.migrate(source)
         words=projection.split()
