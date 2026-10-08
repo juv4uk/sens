@@ -10,6 +10,8 @@ on:
       - "scripts/sens_t5_codec.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
+      - "scripts/migrate-exact-domain.py"
+      - "tests/test_migrate_exact_domain.py"
       - "tests/test_sens_code_migration.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
@@ -28,6 +30,9 @@ on:
       - "scripts/sens_t5_codec.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
+      - "scripts/migrate-exact-domain.py"
+      - "tests/test_migrate_exact_domain.py"
+      - "lib/machine/dispatch/native-first.lisp"
       - "tests/test_sens_code_migration.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
@@ -50,6 +55,7 @@ jobs:
         run: |
           set +e
           python3 -m unittest \
+            tests/test_migrate_exact_domain.py \
             tests/test_sens_code_migration.py \
             tests/test_classify_lisp_source_forms.py \
             tests/test_three_pass_migration.py \
@@ -66,6 +72,10 @@ jobs:
           path: |
             migration-test.log
             migration-test.status
+      - name: Verify native-first exact-domain migration is clean
+        run: |
+          python3 scripts/migrate-exact-domain.py --check lib/machine/dispatch/native-first.lisp
+
       - name: Build three-pass source inventory
         run: |
           python3 scripts/classify-lisp-source-forms.py . \
