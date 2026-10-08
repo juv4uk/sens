@@ -156,14 +156,25 @@ fn rust_nonsemantic_data_kind(
         return Some("rust-evidence-data");
     }
 
-    // The command line dispatch of sens-trit is a human-facing surface, not
-    // an English-named SENS semantic primitive. Exempt EXACTLY this single
-    // match arm; an ordinary Rust `"eval"` elsewhere remains ratchet debt.
+    // The two-token command arm is a human-facing CLI protocol, not a
+    // language primitive. Exempt only this exact reviewed arm; any other
+    // executable `"eval"` literal remains ratchet debt.
     if rel == "crates/sens-cli/src/bin/sens-trit.rs"
         && literal == "eval"
-        && line_text.trim() == "\"eval\" => {"
+        && line_text.trim() == "\"eval\" | \"eval-core4\" => {"
     {
         return Some("rust-cli-surface");
+    }
+
+    // One exact source string is a negative unit-test vector proving that an
+    // English legacy head is NOT granted current identity. Keep the exception
+    // tied to this test-data line; production Rust-Lisp strings still count.
+    if rel == "crates/sens/src/mixed_source.rs"
+        && literal == "(car x)"
+        && line_text.trim()
+            == "for source in [\"(car x)\", \"(CONS x y)\", \"(00000101 x)\", \"(невідоме x)\"] {"
+    {
+        return Some("rust-test-instrument");
     }
 
     None
@@ -562,13 +573,39 @@ fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
     let source = fs::read_to_string(repo_root().join(relative))
         .expect("read exact real CLI");
     let arms: Vec<_> = source.lines()
-        .filter(|line| line.trim() == "\"eval\" => {")
+        .filter(|line| line.trim() == "\"eval\" | \"eval-core4\" => {")
         .collect();
-    assert_eq!(arms.len(), 1, "the reviewed CLI dispatch shape must not drift");
+    assert_eq!(arms.len(), 1, "the reviewed CLI command arm must not drift");
     assert!(english_names().contains("eval"), "keep the real semantic name scanned");
     assert_eq!(
         rust_nonsemantic_data_kind(relative, arms[0], "eval"),
         Some("rust-cli-surface"),
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(relative, "\"eval\" => {", "eval"),
+        None,
+        "a plain or moved eval literal outside the exact combined CLI arm is still debt",
+    );
+
+    let mixed_source_test_line =
+        "for source in [\"(car x)\", \"(CONS x y)\", \"(00000101 x)\", \"(невідоме x)\"] {";
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/mixed_source.rs",
+            mixed_source_test_line,
+            "(car x)",
+        ),
+        Some("rust-test-instrument"),
+        "only the exact negative test vector is evidence, not production Lisp execution",
+    );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/mixed_source.rs",
+            "let program = \"(car x)\";",
+            "(car x)",
+        ),
+        None,
+        "equivalent production Rust-Lisp input remains ratchet debt",
     );
     assert!(!ratchet_enforced_kind("rust-cli-surface"));
     for (path, line) in [
