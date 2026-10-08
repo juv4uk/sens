@@ -13,7 +13,7 @@
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
 (00001001 native-first-parity-corpus
-  (00000001
+  '
     ((car-cons-u64-zero
        (100 (111 0 1))
        0
