@@ -116,6 +116,15 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.assertTrue(converted.startswith(f"10 {bits} 00 "), (surface, converted))
             self.assertTrue(hits, surface)
 
+    def test_nested_list_first_argument_keeps_following_atom_as_data(self):
+        source = "(00001001 machine-block (00001000 (forms) forms))\n"
+        converted, hits, shadowed = self.binary(source)
+        self.assertEqual([hit.label for hit in hits], ["DEFINE", "LAMBDA"])
+        self.assertFalse(shadowed)
+        self.assertRegex(converted, r"^[01\s]+$")
+        self.assertNotIn("machine-block", converted)
+        self.assertNotIn("forms", converted)
+
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
         converted, hits, shadowed = self.binary("(CONS (CAR x) (CDR y))\n")
         # x = SLP1 0x50, y = SLP1 0x26.
