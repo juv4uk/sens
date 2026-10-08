@@ -127,6 +127,10 @@ class DynamicBindingMigrationCensus(unittest.TestCase):
                 str(ROOT / "crates/sens/src/text7_projection_generated.rs"),
                 "--report",
                 str(report),
+                # This ledger is explicitly historical; do not inherit the
+                # migrator's safe auto default for its pinned legacy cohort.
+                "--source-era",
+                "legacy",
             ]
             run = subprocess.run(
                 arguments,
