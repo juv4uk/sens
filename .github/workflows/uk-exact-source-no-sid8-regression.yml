@@ -1,0 +1,28 @@
+name: Current Ukrainian exact heads do not regress to historical eight-bit
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-to-sens.rs"
+      - "crates/sens-cli/tests/active_lib_sens_completion.rs"
+      - "lib/compiler-nucleus.lisp"
+      - ".github/workflows/uk-exact-source-no-sid8-regression.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+jobs:
+  prove-uk-is-not-legacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact current Ukrainian domain projection, never legacy source replacement
+        run: cargo test -p sens-cli --bin sens-to-sens ratified_uk_source_heads_remain_primary_not_old_eight_bit_tokens -- --nocapture
+      - name: Active executable lib completion (same real canonical auditor, no exclusions)
+        run: cargo test -p sens-cli --test cli active_lib_sens_completion::active_authored_lib_has_no_parser_convertible_surface_heads -- --nocapture
+      - name: Strict D3-D4 Ukrainian source semantically retains current exact heads
+        run: cargo test -p sens --lib mixed_source -- --nocapture
+      - name: Preserve checkout
+        run: git diff --exit-code
