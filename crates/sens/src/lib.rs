@@ -45,6 +45,8 @@ mod binary_delimited_transport;
 #[cfg(test)]
 mod hdlc_transport_experiment;
 #[cfg(test)]
+mod word_tag_transport_experiment;
+#[cfg(test)]
 mod sens_container_experiment;
 #[cfg(test)]
 mod bootstrap_measurement;
