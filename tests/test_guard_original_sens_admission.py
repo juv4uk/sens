@@ -70,13 +70,16 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         path.write_text(json.dumps(obj), encoding="utf-8")
         return path
 
+    def safe_kind(self, _root, _source):
+        return None
+
     def approved(self, _root, _reader, _file, _manifest, _mirror):
         return {"d2_reader": "PASS", "oracle_commands_passed": 1,
                 "physical_sha256": hashlib.sha256((self.root / self.dst).read_bytes()).hexdigest()}
 
     def test_missing_reviewed_proof_is_block_not_physical_success(self):
         self.add_original_binary()
-        state = gate.inspect(self.root, self.base, self.reader, self.approved)
+        state = gate.inspect(self.root, self.base, self.reader, self.approved, self.safe_kind)
         self.assertEqual(state["summary"]["blocked"], 1)
         self.assertEqual(state["files"][0]["status"], "BLOCKED")
         self.assertIn("MANIFEST", state["files"][0]["reason"])
@@ -88,7 +91,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         def witness(root, reader, file, manifest, mirror):
             invoked.append((file, manifest))
             return self.approved(root, reader, file, manifest, mirror)
-        state = gate.inspect(self.root, self.base, self.reader, witness)
+        state = gate.inspect(self.root, self.base, self.reader, witness, self.safe_kind)
         self.assertEqual(state["summary"]["original_files_proof_checked"], 1)
         self.assertEqual(state["summary"]["automatic_semantic_certification"], 0)
         self.assertEqual(state["files"][0]["semantic_oracle"],
@@ -99,7 +102,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         (self.root / self.src).write_bytes(b"(00000100 ())\n")
         self.add_original_binary()
         self.proof()
-        state = gate.inspect(self.root, self.base, self.reader, self.approved)
+        state = gate.inspect(self.root, self.base, self.reader, self.approved, self.safe_kind)
         self.assertEqual(state["status"], "BLOCKED")
         self.assertIn("SOURCE_CHANGED", state["files"][0]["reason"])
 
@@ -113,7 +116,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         ).stdout
         (self.root / self.src).write_bytes(original)
         self.proof()
-        state = gate.inspect(self.root, self.base, self.reader, self.approved)
+        state = gate.inspect(self.root, self.base, self.reader, self.approved, self.safe_kind)
         self.assertEqual(state["status"], "BLOCKED")
         self.assertIn("SOURCE_CHANGED", state["files"][0]["reason"])
 
@@ -125,7 +128,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         manifest.write_text(json.dumps(data))
         def should_not_run(*args):
             self.fail("must not run publisher after physical SHA drift")
-        state = gate.inspect(self.root, self.base, self.reader, should_not_run)
+        state = gate.inspect(self.root, self.base, self.reader, should_not_run, self.safe_kind)
         self.assertIn("PHYSICAL", state["files"][0]["reason"])
 
     def test_claim_of_oracle_pass_with_no_named_tests_blocks(self):
@@ -133,7 +136,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         self.proof()
         def no_oracle(*args):
             return {"d2_reader": "PASS", "oracle_commands_passed": 0}
-        state = gate.inspect(self.root, self.base, self.reader, no_oracle)
+        state = gate.inspect(self.root, self.base, self.reader, no_oracle, self.safe_kind)
         self.assertEqual(state["status"], "BLOCKED")
         self.assertIn("ORACLE", state["files"][0]["reason"])
 
@@ -143,7 +146,7 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         (self.root / new).write_bytes(b"(001 ())\n")
         (self.root / new.with_suffix(".sens")).write_bytes(b"\x23")
         self.commit()
-        state = gate.inspect(self.root, self.base, self.reader, self.approved)
+        state = gate.inspect(self.root, self.base, self.reader, self.approved, self.safe_kind)
         self.assertEqual(state["summary"]["new_cohorts_not_original_credit"], 1)
         self.assertEqual(state["summary"]["original_files_proof_checked"], 0)
 
@@ -152,19 +155,37 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         path.symlink_to(self.src.name)
         self.commit()
         with self.assertRaisesRegex(gate.Blocked, "symlink"):
-            gate.inspect(self.root, self.base, self.reader, self.approved)
+            gate.inspect(self.root, self.base, self.reader, self.approved, self.safe_kind)
+
+    def test_reviewed_archival_original_is_rejected_by_current_operator_kind(self):
+        archive = Path("benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/empty-en.lisp")
+        # Real installed policy, not an ad-hoc second archive list.
+        with self.assertRaisesRegex(gate.Blocked, "NONPROGRAM"):
+            gate.reviewed_source_kind_guard(ROOT, archive)
+
+    def test_nonprogram_kind_blocks_even_with_oracle_claim_and_valid_digest(self):
+        self.add_original_binary()
+        self.proof()
+        def forbidden(_root, _source):
+            raise gate.Blocked("SOURCE_KIND: reviewed NONPROGRAM, not an executable")
+        def should_not_run(*args):
+            self.fail("kind embargo must stop publishing, even with reviewed manifest")
+        state = gate.inspect(self.root, self.base, self.reader, should_not_run, forbidden)
+        self.assertEqual(state["status"], "BLOCKED")
+        self.assertEqual(state["summary"]["original_files_proof_checked"], 0)
+        self.assertIn("NONPROGRAM", state["files"][0]["reason"])
 
     def test_untrusted_base_sha_blocks(self):
         self.add_original_binary()
         with self.assertRaisesRegex(gate.Blocked, "BASE"):
-            gate.inspect(self.root, "HEAD;rm -rf", self.reader, self.approved)
+            gate.inspect(self.root, "HEAD;rm -rf", self.reader, self.approved, self.safe_kind)
 
     def test_only_unchanged_source_still_requires_one_unique_reviewed_manifest(self):
         self.add_original_binary()
         original = self.proof()
         duplicate = original.with_name("duplicate.json")
         duplicate.write_bytes(original.read_bytes())
-        state = gate.inspect(self.root, self.base, self.reader, self.approved)
+        state = gate.inspect(self.root, self.base, self.reader, self.approved, self.safe_kind)
         self.assertEqual(state["status"], "BLOCKED")
         self.assertIn("found 2", state["files"][0]["reason"])
 
