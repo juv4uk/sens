@@ -26,7 +26,7 @@
     },
     {
       "path": "lib/domains/d3.lisp",
-      "git_blob_sha1": "610bf7df6e4101e12ab8add52496717a2f715e6f",
+      "git_blob_sha1": "55b837d05a5772a65c89c6c0d5a8305d2db34256",
       "domain": "D3",
       "bit_width": 3,
       "expected_rows": 8
