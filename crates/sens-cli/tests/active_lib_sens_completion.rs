@@ -6,6 +6,7 @@
 //! quote/data/shadowing positions.  Migration completion must not be faked by
 //! rewriting those positions.
 
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -177,20 +178,180 @@ fn assert_clean(label: &str, files: &[(String, PathBuf)], language: bool) {
     }
 }
 
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+struct ConversionCounts {
+    convertible: usize,
+    named_calls: usize,
+    blocked_host: usize,
+}
+
+fn parse_conversion_rows(stdout: &str, root: &Path) -> BTreeMap<String, ConversionCounts> {
+    let mut rows = BTreeMap::new();
+    for line in stdout.lines().filter(|line| !line.trim().is_empty()) {
+        let (filename, metrics) = line
+            .rsplit_once(": convertible=")
+            .unwrap_or_else(|| panic!("malformed sens-to-sens --check row: {line}"));
+        let relative = Path::new(filename)
+            .strip_prefix(root)
+            .unwrap_or_else(|_| panic!("check returned a path outside repository: {filename}"))
+            .to_string_lossy()
+            .replace('\\', "/");
+        let mut fields = metrics.split_whitespace();
+        let convertible = fields.next()
+            .unwrap_or_else(|| panic!("missing convertible count: {line}"))
+            .parse::<usize>()
+            .unwrap_or_else(|_| panic!("invalid convertible count: {line}"));
+        let named_calls = fields.next()
+            .and_then(|value| value.strip_prefix("named-calls="))
+            .unwrap_or_else(|| panic!("missing named-calls count: {line}"))
+            .parse::<usize>()
+            .unwrap_or_else(|_| panic!("invalid named-calls count: {line}"));
+        let blocked_host = fields.next()
+            .and_then(|value| value.strip_prefix("blocked-host="))
+            .unwrap_or_else(|| panic!("missing blocked-host count: {line}"))
+            .parse::<usize>()
+            .unwrap_or_else(|_| panic!("invalid blocked-host count: {line}"));
+        assert!(fields.next().is_none(), "unexpected check fields: {line}");
+        let previous = rows.insert(relative.clone(), ConversionCounts {
+            convertible,
+            named_calls,
+            blocked_host,
+        });
+        assert!(previous.is_none(), "duplicate sens-to-sens row for {relative}");
+    }
+    rows
+}
+
+fn committed_blob_sha(root: &Path, relative: &str) -> String {
+    let spec = format!("HEAD:{relative}");
+    let output = Command::new("git")
+        .current_dir(root)
+        .args(["rev-parse", "--verify", &spec])
+        .output()
+        .expect("read committed source blob SHA");
+    assert!(
+        output.status.success(),
+        "baseline path must be a tracked file at HEAD: {relative}; stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    String::from_utf8(output.stdout)
+        .expect("git SHA is UTF-8")
+        .trim()
+        .to_owned()
+}
+
+/// Ratchet only the known parser-rewrite debt in canonical Ukrainian source.
+/// This is deliberately NOT a migration-completion test: physical T5, view,
+/// digests and independent semantic oracle admission remain separate gates.
+fn assert_matches_pinned_conversion_baseline(files: &[(String, PathBuf)]) {
+    assert!(!files.is_empty(), "ordinary active lib: no files selected");
+    let root = repo_root();
+    let paths: Vec<PathBuf> = files.iter().map(|(_, path)| path.clone()).collect();
+    let output = run_check(&paths, false);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.is_empty(),
+        "sens-to-sens --check emitted diagnostics; do not absorb analysis errors into the baseline:\nstderr={stderr}\nstdout={stdout}"
+    );
+
+    let actual = parse_conversion_rows(&stdout, &root);
+    assert_eq!(
+        actual.len(),
+        files.len(),
+        "every selected active source must have exactly one check row; stdout={stdout}"
+    );
+    for (relative, _) in files {
+        assert!(
+            actual.contains_key(relative),
+            "missing conversion report for {relative}; stdout={stdout}"
+        );
+    }
+
+    let baseline_path = root.join("knowledge/active-authored-lib-conversion-baseline-v1.json");
+    let raw = fs::read_to_string(&baseline_path)
+        .unwrap_or_else(|error| panic!("read {}: {error}", baseline_path.display()));
+    let manifest: serde_json::Value =
+        serde_json::from_str(&raw).expect("valid conversion-baseline JSON");
+    assert_eq!(manifest["schema"], "active-authored-lib-conversion-baseline/v1");
+    assert_eq!(manifest["status"], "PARTIAL-BLOCKED-NOT-ADMISSION");
+    assert_eq!(manifest["migration_credit"], 0);
+    assert_eq!(manifest["physical_admission_effect"], "NONE");
+
+    let known = manifest["known_blockers"]
+        .as_array()
+        .expect("known_blockers is an array");
+    let mut baseline = BTreeMap::<String, ConversionCounts>::new();
+    for row in known {
+        let relative = row["path"].as_str().expect("blocker path is a string");
+        let expected_blob = row["git_blob_sha"]
+            .as_str()
+            .expect("blocker Git blob SHA is pinned");
+        assert!(
+            files.iter().any(|(path, _)| path == relative),
+            "baseline path is not in the active ordinary lib set: {relative}"
+        );
+        assert_eq!(
+            committed_blob_sha(&root, relative),
+            expected_blob,
+            "source changed at {relative}; update its blocker baseline in a reviewed change"
+        );
+        let expected = ConversionCounts {
+            convertible: row["convertible"].as_u64().expect("convertible count") as usize,
+            named_calls: row["named_calls"].as_u64().expect("named_calls count") as usize,
+            blocked_host: row["blocked_host"].as_u64().expect("blocked_host count") as usize,
+        };
+        assert!(
+            baseline.insert(relative.to_owned(), expected).is_none(),
+            "duplicate blocker path in pinned baseline: {relative}"
+        );
+    }
+
+    let zero = ConversionCounts::default();
+    for (relative, observed) in &actual {
+        match baseline.get(relative) {
+            Some(expected) => assert_eq!(
+                observed, expected,
+                "known blocker changed at {relative}; revise the source-pinned baseline explicitly"
+            ),
+            None => assert_eq!(
+                observed, &zero,
+                "NEW parser-convertible active source: {relative}; do not widen the baseline without source/semantic review"
+            ),
+        }
+    }
+    for relative in baseline.keys() {
+        assert!(
+            actual.contains_key(relative),
+            "pinned blocker disappeared from active census without a baseline update: {relative}"
+        );
+    }
+
+    // The tool exits 1 when it found rewrite candidates, 0 when it found none;
+    // exit 2 or any other result indicates an analysis/tool failure.
+    let has_candidates = actual.values().any(|row| row.convertible > 0);
+    let expected_exit = if has_candidates { 1 } else { 0 };
+    assert_eq!(
+        output.status.code(),
+        Some(expected_exit),
+        "unexpected sens-to-sens --check status; stdout={stdout}\nstderr={stderr}"
+    );
+}
+
 #[test]
-fn active_authored_lib_has_no_parser_convertible_surface_heads() {
+fn active_authored_lib_conversion_candidates_match_pinned_baseline() {
     let files = active_lisp_files();
     let (language, ordinary): (Vec<_>, Vec<_>) = files
         .into_iter()
         .partition(|(rel, _)| is_language_definition_file(rel));
 
-    // Core family files define table-owned language functions.  The canonical
-    // migration tool must inspect them in --language mode so recursive calls
-    // through those first definitions are not hidden as ordinary shadowing.
+    // Table-owned core functions retain the strict zero-conversion check.
+    // This lane is for ordinary library source only.
     assert_clean("language-definition lib", &language, true);
 
-    // Every other active authored library file uses ordinary lexical rules.
-    assert_clean("ordinary active lib", &ordinary, false);
+    // Canonical Ukrainian source may have known mechanical rewrite candidates.
+    // Pin those blockers; reject every new path/count until explicitly reviewed.
+    assert_matches_pinned_conversion_baseline(&ordinary);
 }
 
 #[test]
