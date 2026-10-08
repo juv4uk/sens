@@ -33,7 +33,6 @@ pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
-use crate::canonical_reader::text7_binding_key;
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -191,21 +190,13 @@ pub(crate) fn evaluate_step(
             ))
         }
         ExprKind::List(items) => {
+            // Empty structure is a structural value, not any function SID.
             if items.is_empty() {
-                // Empty structure is a structural value, not any function SID.
                 return Ok(EvalStep::Value(Value::Nil));
             }
-            // A candidate canonical Text7 atom is an interned binding key.
-            // Its source/debug spelling is not a semantic function identity.
-            if let Some(key) = text7_binding_key(expression) {
-                return environment.get(&key).map(EvalStep::Value).ok_or_else(|| {
-                    LanguageError::new(
-                        ErrorKind::UnknownSymbol,
-                        format!("unknown Text7 binding: {key}"),
-                        expression.span,
-                    )
-                });
-            }
+            // D2/W7 lists remain ordinary structure in value/data positions.
+            // Text7 identifier interpretation is position-aware and therefore
+            // handled only when such a list occupies a call-head slot.
             evaluate_list(items, environment, expression.span)
         },
         ExprKind::Call(sid, arguments) => {
@@ -243,6 +234,18 @@ fn evaluate_list(
 ) -> Result<EvalStep, LanguageError> {
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
+    }
+    // A D2/W7 frame is a Text7 identifier only in the syntactic role of a
+    // call head. Ordinary D2/W7 lists elsewhere retain their structural law.
+    if let Some(key) = crate::canonical_reader::text7_binding_key(&items[0]) {
+        let function = environment.get(&key).ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::UnknownSymbol,
+                format!("unknown Text7 binding: {key}"),
+                items[0].span,
+            )
+        })?;
+        return closures::apply(function, &items[1..], environment, span);
     }
     dispatch_call(
         items[0].kind.as_symbol(),
