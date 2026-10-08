@@ -41,6 +41,7 @@ mod semantic_registry;
 mod source_words;
 mod source_packing;
 mod ternary_transport;
+mod binary_delimited_transport;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -175,6 +176,11 @@ pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
 pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
+};
+pub use binary_delimited_transport::{
+    binary_delimited_accounting, decode_binary_delimited_program,
+    decode_binary_delimited_words, encode_binary_delimited_projection,
+    encode_binary_delimited_words, BinaryDelimitedAccounting, BinaryDelimitedError,
 };
 pub use ternary_transport::{
     decode_ternary_program, decode_ternary_words, encode_binary_projection_ternary,
