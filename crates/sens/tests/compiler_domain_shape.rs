@@ -88,6 +88,15 @@ fn session() -> Session {
 }
 
 #[test]
+fn current_d4_null_is_materialized_from_canonical_surface() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("active core loads");
+    let result = eval_program("(0101 (quote ()))", &mut session)
+        .expect("canonical D4 NULL must have an exact callable mechanism");
+    assert_eq!(result.value.as_predicate_bit(), Some(true));
+}
+
+#[test]
 fn same_packed_payload_in_different_domains_keeps_exact_width() {
     let mut session = session();
 
