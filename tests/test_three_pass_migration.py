@@ -30,7 +30,8 @@ class ThreePassMigrationTests(unittest.TestCase):
     def setUpClass(cls):
         data=mod.load_foundation(FOUNDATION)
         cls.legacy,cls.my,cls.upper=mod.build_three_pass_maps(
-            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY,HISTORICAL
+            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY,HISTORICAL,
+            COVERAGE
         )
         cls.text7=mod.build_text7(data,TEXT7)
 
@@ -93,17 +94,31 @@ class ThreePassMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
             self.migrate("(11111111 x)\n")
 
-    def test_old_print_sid8_without_current_resident_blocks(self):
-        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
-            self.migrate("(01001000 x)\n")
+    def test_audited_print_successor_is_current_d8(self):
+        out,resolver=self.migrate("(01001000 x)\n")
+        self.assertTrue(out.startswith("10 11011011 00 "))
+        self.assertEqual(resolver.counts["pass1-sens8"],1)
 
-    def test_old_my_lisp_print_without_current_resident_blocks(self):
-        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped my-lisp function"):
-            self.migrate("(print x)\n")
+        out2,resolver2=self.migrate("(print x)\n")
+        self.assertTrue(out2.startswith("10 11011011 00 "))
+        self.assertEqual(resolver2.counts["pass2-my-lisp"],1)
 
-    def test_old_lisp15_equal_without_current_resident_blocks(self):
-        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped Lisp 1-1.5 function"):
-            self.migrate("(EQUAL a b)\n")
+    def test_audited_equal_successor_is_current_d8(self):
+        out,resolver=self.migrate("(EQUAL a b)\n")
+        self.assertTrue(out.startswith("10 11110111 00 "))
+        self.assertEqual(resolver.counts["pass3-lisp15"],1)
+
+    def test_audited_successor_rows_cover_d4_d8_d9(self):
+        cases=[
+            ("(00100010 a b)\n","11110111"),
+            ("(00101111 xs)\n","1001"),
+            ("(00111010 a b)\n","110011110"),
+            ("(01001011 x)\n","110101001"),
+        ]
+        for source,bits in cases:
+            out,resolver=self.migrate(source)
+            self.assertTrue(out.startswith(f"10 {bits} "),source)
+            self.assertEqual(resolver.counts["pass1-sens8"],1,source)
 
     def test_old_functions_with_current_successors_move_by_semantic_role(self):
         cases=[
