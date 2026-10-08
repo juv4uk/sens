@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ladder_reader.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
   push:
@@ -22,3 +23,4 @@ jobs:
       - name: Prove canonical source bit measure and dense packing parity
         run: |
           cargo test -p sens source_packing::tests::
+          cargo test -p sens ladder_reader::tests::

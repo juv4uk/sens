@@ -40,6 +40,7 @@ mod presentation;
 mod semantic_registry;
 mod source_words;
 mod source_packing;
+mod ladder_reader;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -175,6 +176,7 @@ pub use sens::{Sens, Sens8};
 pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
 };
+pub use ladder_reader::{probe_binary_ladder, probe_binary_ladder_with_context, LadderReaderProbe};
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, packed_transport_accounting,
     semantic_source_bits, unpack_binary_source_words, PackedTransportAccounting,
