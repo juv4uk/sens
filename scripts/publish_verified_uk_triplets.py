@@ -179,6 +179,7 @@ def export(root: Path, mirror: Path, report: Path,
             row.update(status="blocked", reason=str(exc))
         rows.append(row)
 
+    created: list[Path] = []
     if write and all(row["status"] != "blocked" for row in rows):
         paths_data: list[tuple[Path, bytes]] = []
         for rel, source, original, words, physical, view in candidates:
@@ -186,7 +187,6 @@ def export(root: Path, mirror: Path, report: Path,
                 raise ProjectionBlocked(f"source modified during transaction: {rel}")
             paths_data.extend(zip(destination_paths(mirror, rel),
                                   (original, physical, view)))
-        created: list[Path] = []
         try:
             created = publish_no_clobber(paths_data, mirror)
             for rel, source, original, words, physical, view in candidates:
@@ -217,14 +217,20 @@ def export(root: Path, mirror: Path, report: Path,
         },
         "files": rows,
     }
-    report.parent.mkdir(parents=True, exist_ok=True)
-    if report.is_symlink():
-        raise ProjectionBlocked("symlink report forbidden")
-    if report.exists():
-        raise ProjectionBlocked("existing report forbidden")
-    with report.open("x", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
-        f.write("\n")
+    # The report belongs to the SAME transaction: if it cannot be written,
+    # roll back new triplets rather than leave unaccounted orphan .sens files.
+    try:
+        report.parent.mkdir(parents=True, exist_ok=True)
+        if report.is_symlink() or report.exists():
+            raise ProjectionBlocked("existing or symlink report forbidden")
+        with report.open("x", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+    except (OSError, ValueError, ProjectionBlocked):
+        for target in reversed(created):
+            target.unlink(missing_ok=True)
+        report.unlink(missing_ok=True) if report.exists() and not report.is_symlink() else None
+        raise
     return payload
 
 
