@@ -698,3 +698,29 @@ fn scanners_find_names_in_lisp_and_rust() {
         None,
         "the same surface outside the named negative-control field remains enforced"
     );
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/other.rs",
+            gpu_evidence,
+            "numeric-buffer-map",
+        ),
+        None,
+        "the negative-control exemption is path-specific"
+    );
+
+    let rust = rust_strings("let a = \"car\"; // \"cdr\"\nlet c = '\"'; let s = r#\"(cons 1 ())\"#;");
+    let literals: Vec<&str> = rust.iter().map(|(_, s)| s.as_str()).collect();
+    assert_eq!(literals, ["car", "(cons 1 ())"]);
+    assert_eq!(rust[1].0, 2);
+
+    let metric_fixture = vec![
+        ("rust", "lib/a.rs".to_owned(), 1, "car".to_owned()),
+        ("rust-test-instrument", "crates/sens/tests/a.rs".to_owned(), 1, "car".to_owned()),
+        ("lisp", "lib/b.lisp".to_owned(), 1, "cdr".to_owned()),
+    ];
+    assert_eq!(
+        debt_metrics(&metric_fixture),
+        DebtMetrics { sites: 2, files: 2 },
+        "migration debt counts only classifier-enforced production sites"
+    );
+}
