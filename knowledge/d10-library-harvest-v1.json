@@ -1,572 +1,843 @@
 {
-  "schema": "d10-library-harvest-v1/v1",
-  "status": "RESEARCH-UNRATIFIED",
-  "authority": "#4026",
-  "date": "2026-10-07",
-  "current_foundation": "#4008 / Contract 11.8 / D1-D9",
-  "selection_rule": "Select only canonical Lisp definitions with an independent language-visible input/output, protocol-validation, immutable-state, encoding, recovery, dimension, projection, or narration law. Constants, accumulator helpers, compatibility wrappers and host mechanisms are excluded.",
-  "accounting": {
-    "selected_d10_candidates": 39,
-    "translation_protocol": 11,
-    "world_ancestry": 6,
-    "utf8_validation": 7,
-    "lisp_fs_recovery": 7,
-    "dimension_algebra": 4,
-    "prolog_datalog_projection": 2,
-    "structured_narration": 2,
-    "d10_selected_before_harvest": 265,
-    "d10_selected_after_harvest": 304,
-    "d10_remaining_after_harvest": 720,
-    "law_forced_coordinates": 256,
-    "unplaced_selected_after_harvest": 48,
-    "ratified_d10_residents": 0
+ "schema": "d10-library-harvest/v1",
+ "authority": "#4013",
+ "status": "RESEARCH-UNRATIFIED",
+ "law": "source-grounded candidate meanings only; NO D10 positions invented (positions are owner generator authority)",
+ "sources": [
+  {
+   "path": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef"
   },
-  "rows": [
-    {
-      "stable_id": "d10.lib.854c309cc6dfdfb2",
-      "semantic_name": "TRANSLATION-STATUS-VALID?",
-      "source_name": "translation-status-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate the finite translation status vocabulary",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.a96361be62d0eed2",
-      "semantic_name": "TRANSLATION-KIND-VALID?",
-      "source_name": "translation-kind-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate the finite translation kind vocabulary",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.0969e96ea4d2d020",
-      "semantic_name": "TRANSLATION-ENVELOPE-VALID?",
-      "source_name": "translation-envelope-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate the versioned translation protocol envelope independently of payload semantics",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.44d144a2c4f2a62c",
-      "semantic_name": "TRANSLATION-BATCH-VALID?",
-      "source_name": "translation-batch-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate that a translation batch payload is a proper list of valid knowledge clauses",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.39412302796bd17e",
-      "semantic_name": "TRANSLATION-CANDIDATE-PAYLOAD-VALID?",
-      "source_name": "translation-candidate-payload-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate candidate payload according to translation kind",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.61043fc937c01d44",
-      "semantic_name": "TRANSLATION-ALTERNATIVES-VALID?",
-      "source_name": "translation-alternatives-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate every alternative candidate payload in an ambiguity set",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.0e1c082d11d49537",
-      "semantic_name": "TRANSLATION-AMBIGUITY-VALID?",
-      "source_name": "translation-ambiguity-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate that ambiguity contains at least two valid alternatives",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.d85004e5cb653807",
-      "semantic_name": "TRANSLATION-REVIEW-STATUS-VALID?",
-      "source_name": "translation-review-status-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate the finite translation-review status vocabulary",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.30a26951923db088",
-      "semantic_name": "TRANSLATION-REVIEW-VALID?",
-      "source_name": "translation-review-valid?",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "validate the versioned translation-review envelope",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.56310cf7d7b503ec",
-      "semantic_name": "TRANSLATION-REVIEW-ADVICE-DECISION",
-      "source_name": "translation-review-advice-decision",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "map an Advice Taker admission decision to a structured translation review",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.c4701dc7ce95ae8c",
-      "semantic_name": "TRANSLATION-REVIEW-CANDIDATE",
-      "source_name": "translation-review-candidate",
-      "source_file": "lib/translation.lisp",
-      "relation_class": "TRANSLATION-PROTOCOL-LAW",
-      "behavior": "review one candidate translation against kind-specific payload and knowledge-admission laws",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.d2f580d906911b06",
-      "semantic_name": "WORLD-AT-DEPTH-FROM",
-      "source_name": "world-at-depth-from",
-      "source_file": "lib/world.lisp",
-      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
-      "behavior": "walk from an immutable world toward its parent until a requested ancestry depth is reached",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.317eeffc73342b18",
-      "semantic_name": "WORLD-JOURNAL-PREFIX",
-      "source_name": "world-journal-prefix",
-      "source_file": "lib/world.lisp",
-      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
-      "behavior": "compute the journal prefix between a descendant world and an ancestor journal tail",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.8b93a8112ea17a80",
-      "semantic_name": "WORLD-NOT-ANCESTOR?",
-      "source_name": "world-not-ancestor?",
-      "source_file": "lib/world.lisp",
-      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
-      "behavior": "test that one immutable world is not an ancestor of another",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.29770976affe40e3",
-      "semantic_name": "WORLD-CLIMB-TO-DEPTH",
-      "source_name": "world-climb-to-depth",
-      "source_file": "lib/world.lisp",
-      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
-      "behavior": "climb an immutable world ancestry chain to a requested depth",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.8f52d5785c044a9a",
-      "semantic_name": "WORLD-COMMON-ANCESTOR-ALIGNED",
-      "source_name": "world-common-ancestor-aligned",
-      "source_file": "lib/world.lisp",
-      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
-      "behavior": "find the common ancestor of two depth-aligned immutable worlds",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.55de5f0b3896dc6e",
-      "semantic_name": "WORLD-NO-COMMON-ANCESTOR?",
-      "source_name": "world-no-common-ancestor?",
-      "source_file": "lib/world.lisp",
-      "relation_class": "IMMUTABLE-WORLD-ANCESTRY",
-      "behavior": "test whether two immutable worlds have no common ancestor",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.c7c05ac69ef88d8a",
-      "semantic_name": "UTF8-IN-RANGE?",
-      "source_name": "utf8-in-range?",
-      "source_file": "lib/utf8.lisp",
-      "relation_class": "UTF8-VALIDATION-LAW",
-      "behavior": "test whether an integer byte value lies in an inclusive range",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.2b1c04d8da36d19f",
-      "semantic_name": "UTF8-CONTINUATION-BYTE?",
-      "source_name": "utf8-continuation-byte?",
-      "source_file": "lib/utf8.lisp",
-      "relation_class": "UTF8-VALIDATION-LAW",
-      "behavior": "test whether a byte is a UTF-8 continuation byte",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.2ab545f220ead889",
-      "semantic_name": "UTF8-BYTE?",
-      "source_name": "utf8-byte?",
-      "source_file": "lib/utf8.lisp",
-      "relation_class": "UTF8-VALIDATION-LAW",
-      "behavior": "test whether a value is a valid octet for UTF-8 processing",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.775227ddda9615b4",
-      "semantic_name": "UTF8-ALL-BYTES?",
-      "source_name": "utf8-all-bytes?",
-      "source_file": "lib/utf8.lisp",
-      "relation_class": "UTF8-VALIDATION-LAW",
-      "behavior": "test whether every element of a sequence is a valid octet",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.8963984a1d55b0cc",
-      "semantic_name": "UTF8-THREE-BYTE-SECOND-OK?",
-      "source_name": "utf8-three-byte-second-ok?",
-      "source_file": "lib/utf8.lisp",
-      "relation_class": "UTF8-VALIDATION-LAW",
-      "behavior": "validate the second-byte boundary rule for a three-byte UTF-8 sequence",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.d5eb0d93145b8c94",
-      "semantic_name": "UTF8-FOUR-BYTE-SECOND-OK?",
-      "source_name": "utf8-four-byte-second-ok?",
-      "source_file": "lib/utf8.lisp",
-      "relation_class": "UTF8-VALIDATION-LAW",
-      "behavior": "validate the second-byte boundary rule for a four-byte UTF-8 sequence",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.60968cf61f024f2a",
-      "semantic_name": "UTF8-TWO-CONTINUATIONS?",
-      "source_name": "utf8-two-continuations?",
-      "source_file": "lib/utf8.lisp",
-      "relation_class": "UTF8-VALIDATION-LAW",
-      "behavior": "validate that the next two bytes are UTF-8 continuation bytes",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.9e650eca21552008",
-      "semantic_name": "FS-OBJECT-PACKAGE-DECISION",
-      "source_name": "fs-object-package-decision",
-      "source_file": "lib/lisp-fs.lisp",
-      "relation_class": "LISP-FS-RECOVERY-LAW",
-      "behavior": "classify whether a serialized object package is structurally admissible",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.95b47c5fcd18b4d5",
-      "semantic_name": "FS-ROOT-PACKAGE-DECISION",
-      "source_name": "fs-root-package-decision",
-      "source_file": "lib/lisp-fs.lisp",
-      "relation_class": "LISP-FS-RECOVERY-LAW",
-      "behavior": "classify whether a serialized filesystem root package is structurally admissible",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.3b1f6370d84807b4",
-      "semantic_name": "FS-ALL-ADDRESSES-PRESENT?",
-      "source_name": "fs-all-addresses-present?",
-      "source_file": "lib/lisp-fs.lisp",
-      "relation_class": "LISP-FS-RECOVERY-LAW",
-      "behavior": "test that all referenced content addresses exist in a Lisp filesystem store",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.21599c341e38ba46",
-      "semantic_name": "FS-BINDING-ADDRESSES-PRESENT?",
-      "source_name": "fs-binding-addresses-present?",
-      "source_file": "lib/lisp-fs.lisp",
-      "relation_class": "LISP-FS-RECOVERY-LAW",
-      "behavior": "test that every filesystem binding refers to an available content address",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.d94cde8011a2ea26",
-      "semantic_name": "FS-JOURNAL-EVENT-DECISION",
-      "source_name": "fs-journal-event-decision",
-      "source_file": "lib/lisp-fs.lisp",
-      "relation_class": "LISP-FS-RECOVERY-LAW",
-      "behavior": "classify a filesystem journal event before replay",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.86bfeec8824ea88f",
-      "semantic_name": "FS-RECOVER-COMMIT",
-      "source_name": "fs-recover-commit",
-      "source_file": "lib/lisp-fs.lisp",
-      "relation_class": "LISP-FS-RECOVERY-LAW",
-      "behavior": "recover the accepted filesystem commit state from staged commit data",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.e5ca8e1a8334618f",
-      "semantic_name": "FS-RECOVER-ROOT-PACKAGE",
-      "source_name": "fs-recover-root-package",
-      "source_file": "lib/lisp-fs.lisp",
-      "relation_class": "LISP-FS-RECOVERY-LAW",
-      "behavior": "recover a filesystem root package through the explicit package validation/recovery law",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.5879b7448425418a",
-      "semantic_name": "SCIENCE-DIMENSIONS-VALID?",
-      "source_name": "science-dimensions-valid?",
-      "source_file": "lib/quantity.lisp",
-      "relation_class": "DIMENSION-ALGEBRA",
-      "behavior": "validate a dimension-exponent collection against the language dimension schema",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.e25eaf825aab56af",
-      "semantic_name": "SCIENCE-ADD-DIMENSION",
-      "source_name": "science-add-dimension",
-      "source_file": "lib/quantity.lisp",
-      "relation_class": "DIMENSION-ALGEBRA",
-      "behavior": "add one base-dimension exponent into a normalized dimension collection",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.04a9548ac98a58f9",
-      "semantic_name": "SCIENCE-MERGE-DIMENSIONS",
-      "source_name": "science-merge-dimensions",
-      "source_file": "lib/quantity.lisp",
-      "relation_class": "DIMENSION-ALGEBRA",
-      "behavior": "merge two dimension collections by exponent addition",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.8aaee4b441b0c401",
-      "semantic_name": "SCIENCE-NEGATE-DIMENSIONS",
-      "source_name": "science-negate-dimensions",
-      "source_file": "lib/quantity.lisp",
-      "relation_class": "DIMENSION-ALGEBRA",
-      "behavior": "negate every exponent in a dimension collection",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.04b1b297b8cfc5fe",
-      "semantic_name": "PROLOG-VALUES-TO-DATALOG-FACTS",
-      "source_name": "prolog-values-to-datalog-facts",
-      "source_file": "lib/bridge/prolog-to-datalog.lisp",
-      "relation_class": "PROLOG-DATALOG-PROJECTION",
-      "behavior": "project a sequence of observed Prolog values into Datalog fact tuples for a role",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.afb9c92fa0108898",
-      "semantic_name": "PROLOG-SUBSTITUTIONS-TO-DATALOG-FACTS",
-      "source_name": "prolog-substitutions-to-datalog-facts",
-      "source_file": "lib/bridge/prolog-to-datalog.lisp",
-      "relation_class": "PROLOG-DATALOG-PROJECTION",
-      "behavior": "project a structured Prolog substitution observation into an explicit Datalog projection result or named failure",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.6a6ff0bdd334f067",
-      "semantic_name": "NARRATE-PROVED-OUTCOME",
-      "source_name": "narrate-proved-outcome",
-      "source_file": "lib/narrate.lisp",
-      "relation_class": "STRUCTURED-NARRATION",
-      "behavior": "render a canonical proved reasoning outcome into controlled text-shaped language data while retaining proof explanation",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    },
-    {
-      "stable_id": "d10.lib.725057d3abd5ae52",
-      "semantic_name": "NARRATE-INVALID-OUTCOME-SHAPE",
-      "source_name": "narrate-invalid-outcome-shape",
-      "source_file": "lib/narrate.lisp",
-      "relation_class": "STRUCTURED-NARRATION",
-      "behavior": "render a malformed reasoning outcome as explicit invalid/outcome-shape data",
-      "decision": "SELECT-D10-CANDIDATE",
-      "selected_d10_candidate": true,
-      "coordinate": null,
-      "coordinate_basis": "UNPLACED",
-      "legacy_coordinate_authority": "NONE",
-      "ratified_resident": false
-    }
-  ]
+  {
+   "path": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829"
+  },
+  {
+   "path": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f"
+  },
+  {
+   "path": "lib/reason.lisp",
+   "blob_sha": "dadc52a2f40f2f30ad77642898afb81980044c08"
+  }
+ ],
+ "count": 102,
+ "candidates": [
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 18,
+   "name": "*dimension-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 19,
+   "name": "*unit-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 20,
+   "name": "*quantity-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 21,
+   "name": "*science-source-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 22,
+   "name": "*scientific-constant-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 24,
+   "name": "science-proper-list?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 35,
+   "name": "science-sixth",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 39,
+   "name": "science-seventh",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 43,
+   "name": "make-dimension",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 47,
+   "name": "dimension?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 62,
+   "name": "dimension-base",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 65,
+   "name": "dimension-exponent",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 68,
+   "name": "science-dimensions-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 81,
+   "name": "make-unit",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 85,
+   "name": "unit?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 95,
+   "name": "unit-dimensions",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 98,
+   "name": "make-quantity",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 102,
+   "name": "quantity?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 113,
+   "name": "quantity-value",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 116,
+   "name": "quantity-unit",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 122,
+   "name": "science-add-dimension",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 147,
+   "name": "science-merge-dimensions",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 157,
+   "name": "science-negate-dimensions",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 169,
+   "name": "unit-product",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 176,
+   "name": "unit-quotient",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 183,
+   "name": "quantity-product",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 189,
+   "name": "quantity-quotient",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 195,
+   "name": "make-science-source",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 199,
+   "name": "science-source?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 214,
+   "name": "scientific-constant-status-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 222,
+   "name": "scientific-constant-kind-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 231,
+   "name": "make-scientific-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 242,
+   "name": "scientific-constant?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 260,
+   "name": "scientific-constant-name",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 263,
+   "name": "scientific-constant-quantity",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 266,
+   "name": "scientific-constant-value",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 270,
+   "name": "scientific-constant-unit",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 274,
+   "name": "scientific-constant-status",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 277,
+   "name": "scientific-constant-kind",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 280,
+   "name": "scientific-constant-system",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 283,
+   "name": "scientific-constant-source",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/quantity.lisp",
+   "blob_sha": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+   "line": 289,
+   "name": "scientific-constant->clauses",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 35,
+   "name": "*translation-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 36,
+   "name": "*translation-review-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 37,
+   "name": "*translation-evidence-schema*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 38,
+   "name": "*translation-evidence*",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 40,
+   "name": "translation-status",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 43,
+   "name": "translation-kind",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 46,
+   "name": "translation-source",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 49,
+   "name": "translation-payload",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 52,
+   "name": "translation-status-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 61,
+   "name": "translation-kind-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 74,
+   "name": "translation-envelope-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 94,
+   "name": "translation-batch-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 102,
+   "name": "translation-candidate-payload-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 110,
+   "name": "translation-alternatives-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 124,
+   "name": "translation-ambiguity-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 134,
+   "name": "make-translation-review",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 138,
+   "name": "translation-review-status",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 141,
+   "name": "translation-review-code",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 144,
+   "name": "translation-review-proposal",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 147,
+   "name": "translation-review-detail",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 150,
+   "name": "translation-review-status-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 159,
+   "name": "translation-review-valid?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 176,
+   "name": "translation-review-advice-decision",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 199,
+   "name": "translation-review-candidate",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 223,
+   "name": "translation-review",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 262,
+   "name": "translation-admittable?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 278,
+   "name": "translation-admission-payload",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 288,
+   "name": "translation-evidence-worthy?",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 296,
+   "name": "translation-evidence-entry",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 300,
+   "name": "translation-evidence-next",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/translation.lisp",
+   "blob_sha": "6c3118daba896c64255efbb93c926a58d2f19829",
+   "line": 307,
+   "name": "translation-review-with-evidence",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 25,
+   "name": "si:defining-cesium-frequency",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 34,
+   "name": "si:defining-speed-of-light",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 44,
+   "name": "si:defining-planck-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 56,
+   "name": "si:defining-elementary-charge",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 67,
+   "name": "si:defining-boltzmann-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 80,
+   "name": "si:defining-avogadro-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 89,
+   "name": "si:defining-luminous-efficacy",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 103,
+   "name": "si:constant-value",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 108,
+   "name": "si:cesium-frequency",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 109,
+   "name": "si:speed-of-light",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 110,
+   "name": "si:planck-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 111,
+   "name": "si:elementary-charge",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 112,
+   "name": "si:boltzmann-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 113,
+   "name": "si:avogadro-constant",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 114,
+   "name": "si:luminous-efficacy",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 118,
+   "name": "delta-nu-cs",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 119,
+   "name": "c",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 120,
+   "name": "h",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 121,
+   "name": "e",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 122,
+   "name": "k",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 123,
+   "name": "n-a",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 124,
+   "name": "k-cd",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 125,
+   "name": "si:delta-nu-cs",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 126,
+   "name": "si:c",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 127,
+   "name": "si:h",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 128,
+   "name": "si:e",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 129,
+   "name": "si:k",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 130,
+   "name": "si:n-a",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  },
+  {
+   "source": "lib/si.lisp",
+   "blob_sha": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+   "line": 131,
+   "name": "si:k-cd",
+   "kind": "library-defined",
+   "status": "research-unratified"
+  }
+ ]
 }
