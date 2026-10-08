@@ -30,5 +30,6 @@
       "path": "crates/sens/tests/migration_multiform_cohort.rs",
       "git_blob_sha1": "62966dc8ee589891460dd37bc10c01c4d64b7906"
     }
-  }
+  },
+  "expected_current_eval_stdout": "(())\n"
 }
