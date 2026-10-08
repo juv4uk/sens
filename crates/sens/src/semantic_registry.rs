@@ -59,6 +59,26 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
             .flatten()
     })
 }
+ 
+/// Canonical Ukrainian *source-head* projection, before evaluation.
+///
+/// Only owner-ratified source-routable uk rows are eligible. This is NOT the
+/// legacy SID compatibility index: no en alias, old W8, D2 structure, or
+/// unratified D7 binder can become a callable head via this API.
+/// The mixed reader applies it only to executable HEAD positions.
+pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::DomainIdentity> {
+    DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
+        if !row.source_routable
+            || !row.surfaces.iter().any(|surface|
+                surface.namespace == "uk" && surface.name == name)
+        {
+            return None;
+        }
+        exact_domain_identity_from_projection(row.width, row.bits)
+            .map(crate::DomainIdentity::from)
+    })
+}
+
 
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
@@ -414,13 +434,14 @@ mod tests {
         assert_eq!(surface_for_domain_identity(yes, "uk"), Some("так"));
         assert_eq!(surface_for_domain_identity(yes, "sa"), Some("ām"));
         assert_eq!(surface_for_domain_identity(open, "uk"), Some("відкрити"));
-        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("śūnya"));
+        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("()"));
         assert_eq!(surface_for_domain_identity(lambda, "uk"), Some("функція"));
         assert_eq!(surface_for_domain_identity(lambda, "sa"), Some("phalana"));
 
         assert_eq!(direct_domain_identity_for_surface("так"), None);
         assert_eq!(direct_domain_identity_for_surface("відкрити"), None);
         assert_eq!(direct_domain_identity_for_surface("порожнє"), None);
+        assert_eq!(exact_uk_callable_for_source_head("()"), None);
     }
 
     #[test]
