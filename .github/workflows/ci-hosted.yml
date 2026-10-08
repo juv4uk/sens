@@ -29,6 +29,24 @@ jobs:
           python3 scripts/public_api_inventory.py --check
           python3 scripts/sens8-semantic-ratchet.py --self-test
           python3 scripts/sens8-semantic-ratchet.py --summary
+      - name: One-file physical T5 migration canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/migration-one"
+          python3 scripts/migrate-one-to-sens.py \
+            scripts/machine-authority-guard.lisp \
+            --output "$RUNNER_TEMP/migration-one/machine-authority-guard.sens" \
+            > "$RUNNER_TEMP/migration-one/report.json"
+          cat "$RUNNER_TEMP/migration-one/report.json"
+          test -s "$RUNNER_TEMP/migration-one/machine-authority-guard.sens"
+          ! grep -a -q '[^\x00-\xFF]' "$RUNNER_TEMP/migration-one/machine-authority-guard.sens" || true
+      - name: Publish one-file migration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-one-machine-authority-guard
+          path: "$RUNNER_TEMP/migration-one/"
+          if-no-files-found: error
       - name: Build SENS CLI
         run: cargo build -p sens-cli --bin sens
       - name: D7 domain table is canonical-parser re-readable
