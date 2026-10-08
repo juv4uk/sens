@@ -233,6 +233,31 @@ mod tests {
     }
 
     #[test]
+    fn same_physical_8f_can_mean_different_words_in_two_valid_codecs() {
+        // An actual physical collision, not just a naked-payload ambiguity:
+        // base3 byte 0x8f => trits 12022 => words [D1(1), D1(0)].
+        // prefix byte 0x8f => bits 10001111 => word [D3(100)] + EOS.
+        let physical = [0x8fu8];
+        let base3_words = crate::decode_ternary_words(&physical).unwrap();
+        let prefix_words = decode_binary_delimited_words(&physical).unwrap();
+        assert_eq!(base3_words, words("1 0"));
+        assert_eq!(prefix_words, words("100"));
+        assert_ne!(base3_words, prefix_words);
+        assert_eq!(crate::encode_ternary_words(&base3_words).unwrap(), physical);
+        assert_eq!(encode_binary_delimited_words(&prefix_words).unwrap(), physical);
+        // Therefore never autodetect a canonical .sens codec by trial parsing.
+    }
+
+    #[test]
+    fn pinned_golden_hex_for_two_word_framing_strategies() {
+        let payload = words("10 001 00 000 01");
+        assert_eq!(crate::encode_ternary_words(&payload).unwrap(),
+                   [0x63, 0x89, 0x06, 0xa1]);
+        assert_eq!(encode_binary_delimited_words(&payload).unwrap(),
+                   [0x99, 0x66, 0x35, 0xe0]);
+    }
+
+    #[test]
     fn data_distribution_changes_best_transport_choice() {
         let zeros = words(&vec!["000000000"; 8].join(" "));
         let ones = words(&vec!["111111111"; 8].join(" "));
