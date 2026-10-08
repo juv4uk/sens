@@ -37,9 +37,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p 'test_verify_source_pairs.py' -v
           python3 scripts/verify-source-pairs.py --root . \
-            --include 'lib/**/*.lisp' \
-            --include 'contracts/**/*.lisp' \
-            --include 'knowledge/**/*.lisp' \
+            --include '**/*.lisp' \
             --encoder scripts/sens-uk-encode.py \
             --decoder scripts/sens-uk-decode.py
 
