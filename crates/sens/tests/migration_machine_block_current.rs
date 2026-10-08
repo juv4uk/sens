@@ -6,8 +6,7 @@
 
 use sens::{decode_ternary_program, eval_parsed_expressions, eval_program, open_ternary_program, parse_canonical_binary, Session, Value};
 use serde_json::{json, Value as JsonValue};
-use sha2::{Digest, Sha256};
-use std::{env, fs, process::Command, rc::Rc};
+use std::{env, fs, process::Command};
 
 const SOURCE: &str = include_str!("../../../lib/machine/block.lisp");
 const T5: &[u8] = include_bytes!("../../../lib/machine/block.sens");
@@ -61,8 +60,6 @@ fn json_value(value: &Value) -> JsonValue {
 fn load_block() -> Session {
     let visible = open_ternary_program(T5).expect("physical T5 must pass current D2 reader");
     let forms = parse_canonical_binary(&visible).expect("physical T5 must parse as current SENS");
-    eval_parsed_expressions(&forms, &mut Session::default())
-        .expect("physical block definitions must execute on current SENS");
     let mut session = Session::default();
     eval_parsed_expressions(&forms, &mut session)
         .expect("physical block definitions must load into observer session");
@@ -96,7 +93,7 @@ fn historical_oracle_report() -> serde_json::Value {
 
 #[test]
 fn current_machine_block_matches_historical_oracle() {
-    assert_eq!(git_blob_sha1(SOURCE.as_bytes()), SOURCE_GIT_BLOB);
+    assert_eq!(sens::sha256_source(SOURCE.as_bytes()), "84e1a10f5ed21eaec1c9704e88cbf7ebd49db3b3edf5041c913fa020fe7631de");
     let words = decode_ternary_program(T5).expect("canonical physical T5");
     assert_eq!(words.len(), 273);
     assert_eq!(open_ternary_program(T5).expect("T5 opens"),
@@ -129,8 +126,8 @@ fn current_machine_block_matches_historical_oracle() {
 
 #[test]
 fn block_physical_transport_has_stable_proof_digests() {
-    let physical = Sha256::digest(T5);
-    assert_eq!(format!("{:x}", physical), "1540c7e9a69c7dcb953713469a2c6ac803ae5aebfc40e2cd1ab529e66f0271");
+    let physical = sens::sha256_source(T5);
+    assert_eq!(physical, "1540c7e9a69c7dcb953713469a2c6ac803ae5aebfc40e2cd1ab529e66f0271");
     let words = decode_ternary_program(T5).expect("canonical physical T5");
     assert_eq!(typed_sha256(&words), "0951a7c253644c5783e7317269e354959817932e2bf9016114760fc76f769922");
 }
