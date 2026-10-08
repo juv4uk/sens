@@ -613,7 +613,7 @@ fn evaluate_load(
             span,
         )
     })?;
-    let expressions = sens::parse(&source).map_err(|mut error| {
+    let expressions = sens::parse_mixed_exact_domain(&source).map_err(|mut error| {
         error.span = span;
         error
     })?;
