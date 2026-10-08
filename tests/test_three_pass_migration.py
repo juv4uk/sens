@@ -325,5 +325,40 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(again.returncode, 2)  # write-new-only never clobbers
 
 
+    def test_unpaired_only_ignores_preexisting_sens_pairs(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "src"
+            source.mkdir()
+            (source / "old.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
+            (source / "paired.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
+            already = mod.encode_projection("000")
+            (source / "paired.sens").write_bytes(already)
+            out = base / "mirror"
+            report = base / "report.json"
+            result = subprocess.run([
+                sys.executable, str(SCRIPT), str(source),
+                "--out", str(out), "--foundation", str(FOUNDATION),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--historical-map", str(HISTORICAL),
+                "--text7", str(TEXT7), "--report", str(report),
+                "--source-era", "legacy", "--unpaired-only",
+            ], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual((out / "old.sens").read_bytes(), already)
+            self.assertFalse((out / "paired.sens").exists())
+            self.assertEqual((source / "paired.sens").read_bytes(), already)
+            self.assertEqual((source / "old.lisp").read_text(), "()\n")
+            summary = json.loads(report.read_text())
+            self.assertTrue(summary["only_unpaired"])
+            self.assertEqual(summary["skipped_paired_paths"], ["paired.lisp"])
+            self.assertEqual(summary["summary"]["files_seen"], 1)
+            self.assertEqual(summary["summary"]["files_skipped_paired"], 1)
+            self.assertEqual(summary["summary"]["files_written"], 1)
+
+
 if __name__=="__main__":
     unittest.main()
