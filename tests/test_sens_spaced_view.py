@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -58,6 +60,69 @@ class PhysicalSpacedViewTests(unittest.TestCase):
         self.assertEqual(self.plain.read_bytes(), EXPECTED.encode("ascii"))
         with self.assertRaises(view.ViewError):
             view.check_or_stage(self.root, "fixtures/branch.sens", stage=output)
+
+    def test_preview_stage_never_writes_and_rejects_existing_target(self):
+        output = self.work / "preview-stage"
+        output.mkdir()
+        source_before = self.source.read_bytes()
+        sens_before = self.sens.read_bytes()
+        receipt = view.check_or_stage(
+            self.root, "fixtures/branch.sens", stage=output, preview=True
+        )
+        self.assertEqual(receipt["status"], "PREVIEW_NO_WRITE")
+        self.assertFalse((output / "fixtures").exists())
+        self.assertEqual(receipt["d2_reader"], "NOT_CHECKED")
+        self.assertFalse(receipt["release_admitted"])
+        self.assertEqual(self.source.read_bytes(), source_before)
+        self.assertEqual(self.sens.read_bytes(), sens_before)
+        dest = output / "fixtures/branch"
+        dest.parent.mkdir()
+        dest.write_bytes(b"stale")
+        with self.assertRaisesRegex(view.ViewError, "overwrite"):
+            view.check_or_stage(self.root, "fixtures/branch.sens",
+                                stage=output, preview=True)
+        self.assertEqual(dest.read_bytes(), b"stale")
+
+    def test_optional_rust_reader_still_blocks_false_D2_program(self):
+        dummy = self.work / "sens-trit"
+        dummy.write_bytes(b"fake binary")
+        with patch.object(view.subprocess, "run", return_value=subprocess.CompletedProcess(
+                ["sens-trit", "open"], 2, b"", b"InvalidProgramSyntax")):
+            with self.assertRaisesRegex(view.ViewError, "Rust D2"):
+                view.check_or_stage(self.root, "fixtures/branch.sens", reader=dummy)
+        expected = EXPECTED.encode("ascii")
+        with patch.object(view.subprocess, "run", return_value=subprocess.CompletedProcess(
+                ["sens-trit", "open"], 0, expected, b"")):
+            receipt = view.check_or_stage(self.root, "fixtures/branch.sens", reader=dummy)
+            self.assertEqual(receipt["d2_reader"], "PASS")
+        with patch.object(view.subprocess, "run", return_value=subprocess.CompletedProcess(
+                ["sens-trit", "open"], 0, b"0 00\n", b"")):
+            with self.assertRaisesRegex(view.ViewError, "Rust D2"):
+                view.check_or_stage(self.root, "fixtures/branch.sens", reader=dummy)
+
+    @unittest.skipUnless(os.environ.get("SENS_VIEW_READER"), "actual Rust reader provided in focused CI")
+    def test_real_rust_reader_preview_and_verify_cli(self):
+        reader = os.environ["SENS_VIEW_READER"]
+        staging = self.work / "actual-preview"
+        staging.mkdir()
+        script = ROOT / "scripts/sens_spaced_view.py"
+        cmd = [sys.executable, str(script), "--root", str(self.root),
+               "--sens", "fixtures/branch.sens", "--reader", reader,
+               "--preview-stage", str(staging)]
+        process = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertFalse((staging / "fixtures").exists())
+        receipt = json.loads(process.stdout)
+        self.assertEqual(receipt["status"], "PREVIEW_NO_WRITE")
+        self.assertEqual(receipt["d2_reader"], "PASS")
+        self.assertFalse(receipt["release_admitted"])
+        verified = view.check_or_stage(self.root, "fixtures/branch.sens",
+                                       reader=Path(reader))
+        self.assertEqual(verified["d2_reader"], "PASS")
+        # Tamper with physically canonical bytes so D2 cannot parse a program.
+        self.sens.write_bytes(encode_words(["1"]))
+        with self.assertRaisesRegex(view.ViewError, "Rust D2"):
+            view.check_or_stage(self.root, "fixtures/branch.sens", reader=Path(reader))
 
     def test_distinct_domain_widths_survive_cycle(self):
         sequence = ["0", "00", "000", "1", "10", "101010101"]
