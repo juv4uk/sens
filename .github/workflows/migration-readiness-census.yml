@@ -7,7 +7,10 @@ on:
       - "scripts/migrate-three-pass.py"
       - "scripts/sens_t5_codec.py"
       - "scripts/migration-readiness-census.py"
-      - "knowledge/d1-d7-foundation.json"
+      - "tests/test_migration_readiness_contract.py"
+      - "scripts/migrate-t5-batch.py"
+      - "lib/**/*.lisp"
+      - "knowledge/d1-d9-foundation.json"
       - "crates/sens/src/domain_surface_registry_generated.rs"
       - "crates/sens/src/semantic_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
@@ -20,7 +23,10 @@ on:
       - "scripts/migrate-three-pass.py"
       - "scripts/sens_t5_codec.py"
       - "scripts/migration-readiness-census.py"
-      - "knowledge/d1-d7-foundation.json"
+      - "tests/test_migration_readiness_contract.py"
+      - "scripts/migrate-t5-batch.py"
+      - "lib/**/*.lisp"
+      - "knowledge/d1-d9-foundation.json"
       - "crates/sens/src/domain_surface_registry_generated.rs"
       - "crates/sens/src/semantic_registry_generated.rs"
       - "crates/sens/src/semantic_registry.rs"
@@ -40,6 +46,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
+      - name: Verify ratified D1–D9, W8 fail-closed and unpaired-only contract
+        run: python3 -m unittest discover -s tests -p test_migration_readiness_contract.py -v
       - name: Run migration readiness census
         run: |
           python3 scripts/migration-readiness-census.py \
