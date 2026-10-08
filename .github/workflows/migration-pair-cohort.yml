@@ -1,0 +1,27 @@
+name: migration-pair-cohort
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/migration-pair-cohort/**'
+      - 'tests/test_migration_pair_cohort.py'
+      - 'crates/sens/tests/migration_pair_cohort.rs'
+      - '.github/workflows/migration-pair-cohort.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/fixtures/migration-pair-cohort/**'
+      - 'tests/test_migration_pair_cohort.py'
+      - 'crates/sens/tests/migration_pair_cohort.rs'
+      - '.github/workflows/migration-pair-cohort.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source migration, same-stem T5 bytes, strict blockers
+        run: python3 -m unittest discover -s tests -p 'test_migration_pair_cohort.py' -v
+      - name: Current SENS D3 pair selectors on physical T5 bytes
+        run: cargo test -p sens --test migration_pair_cohort
