@@ -15,6 +15,7 @@ SCRIPT = ROOT / "scripts/migrate-three-pass.py"
 FIXTURES = ROOT / "tests/fixtures/migration-d1-cond-cohort"
 READABLE = FIXTURES / "branch.lisp"
 BINARY = FIXTURES / "branch.sens"
+VIEW = FIXTURES / "branch"
 SOURCE = "(за-умовою (ні (перше ())) (так так))\n"
 WORDS = "10 110 00 10 0 00 10 100 00 000 01 01 00 10 1 00 1 01 01"
 BYTES = bytes.fromhex("67386515bf123b2dc4a9b1a1")
@@ -66,7 +67,9 @@ class D1CondPhysicalCohort(unittest.TestCase):
         self.assertEqual(module.typed_sha256(WORDS.split()),
                          module.typed_sha256(module.decode_bytes(BYTES)))
         self.assertEqual(len(BYTES), 12)
-        self.assertFalse((FIXTURES / "branch").exists())
+        self.assertEqual(VIEW.read_bytes(), (WORDS + "\n").encode("ascii"))
+        self.assertEqual(module.decode_bytes(BINARY.read_bytes()), VIEW.read_text(encoding="ascii").split())
+        self.assertEqual(module.encode_projection(VIEW.read_text(encoding="ascii")), BINARY.read_bytes())
 
     def test_existing_three_pass_cli_proves_safe_physical_output(self):
         with tempfile.TemporaryDirectory(prefix="sens-d1-cond-") as directory:
