@@ -104,9 +104,8 @@ class C1ThirdDomainCanary(unittest.TestCase):
         with self.assertRaises(migration.SensT5Error):
             migration.encode_projection("10 100 00 C1-THIRD 01")
         resolver = migration.Resolver(self.legacy, self.my, self.upper)
-        unresolved = migration.migrate_file("(00000101 (11110000 ()))", resolver, self.text7)
-        with self.assertRaises(migration.SensT5Error):
-            migration.encode_projection(unresolved)
+        with self.assertRaises(migration.MigrationError):
+            migration.migrate_file("(00000101 (11110000 ()))", resolver, self.text7)
 
 if __name__ == "__main__":
     unittest.main()
