@@ -381,6 +381,38 @@ mod tests {
     }
 
     #[test]
+    fn every_possible_terminal_padding_length_is_canonical() {
+        let mut seen = [false; 5];
+        // A single exact-width word of each length 1..9 exercises all
+        // possible byte remainders. No D2 CLOSE and no EOS are needed.
+        for width in 1usize..=9 {
+            let source = "1".repeat(width);
+            let original = words(&source);
+            let physical = encode_ternary_words(&original).unwrap();
+            let account = ternary_transport_accounting(&original).unwrap();
+            assert_eq!(account.encoded_trits, width);
+            assert!(account.tail_trits < 5);
+            seen[account.tail_trits] = true;
+            assert_eq!(decode_ternary_words(&physical).unwrap(), original);
+        }
+        assert!(seen.iter().all(|value| *value));
+    }
+
+    #[test]
+    fn explicit_double_separator_is_not_an_eof_marker() {
+        let original = words("10 01");
+        let canonical = encode_ternary_words(&original).unwrap();
+        assert_eq!(canonical, [0x64]); // 10201, exactly 5 trits.
+        // A second block of pure padding cannot be mistaken for EOF.
+        assert_eq!(decode_ternary_words(&[0x64, 0xf2]),
+                   Err(TernaryTransportError::InvalidTail));
+        // T5 separator between two words continues to preserve exact widths.
+        let a = words("0 00");
+        let b = words("000");
+        assert_ne!(encode_ternary_words(&a).unwrap(), encode_ternary_words(&b).unwrap());
+    }
+
+    #[test]
     fn trailing_padding_must_not_become_a_program_word() {
         let original = words("10 001 00 000 01");
         let binary = encode_ternary_words(&original).unwrap();
