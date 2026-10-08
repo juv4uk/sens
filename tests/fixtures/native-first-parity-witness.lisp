@@ -15,22 +15,22 @@
 (00001001 native-first-parity-corpus
   (00000001
     ((car-cons-u64-zero
-       (car (cons 0 1))
+       (100 (111 0 1))
        0
        pure
        not-applicable)
      (car-cons-u64-small
-       (car (cons 2 3))
+       (100 (111 2 3))
        2
        pure
        not-applicable)
      (car-cons-u64-independent-fields
-       (car (cons 42 99))
+       (100 (111 42 99))
        42
        pure
        not-applicable)
      (car-cons-u64-max-exact-result
-       (car (cons 9007199254740991 7))
+       (100 (111 9007199254740991 7))
        9007199254740991
        pure
        not-applicable))))
