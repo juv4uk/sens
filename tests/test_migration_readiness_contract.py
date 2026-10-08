@@ -22,12 +22,13 @@ sys.modules[spec.name] = census
 spec.loader.exec_module(census)
 
 
-def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None):
+def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_auto=False):
     """Mock the canonical 3 source-era scans using REAL present source names."""
     observed = []
     calls = []
     first = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
     second = "tests/fixtures/core1-third-domain-canary/third.lisp"
+    archive = "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/empty-en.lisp"
     possible = per_era_candidates or {}
 
     def run(argv, **kwargs):
@@ -40,11 +41,13 @@ def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None):
         selected = possible.get(era, [])
         if newly_eligible and era == "auto":
             selected = [second]
+        if archived_auto and era == "auto":
+            selected = [archive]
         rows = [
             {"path": path, "status": "would-write" if path in selected else "blocked",
              "reason": None if path in selected else
                 f"ambiguous W8 executable head 00001001: {era}"}
-            for path in (first, second)
+            for path in ((first, second, archive) if archived_auto else (first, second))
         ]
         blocked = sum(row["status"] == "blocked" for row in rows)
         ready = len(rows) - blocked
@@ -53,7 +56,7 @@ def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None):
             "authority": {"foundation_sha256": "mock-ratified-sha256"},
             "source_era": era,
             "summary": {
-                "files_seen": 2,
+                "files_seen": len(rows),
                 "files_written": 0,
                 "files_would_write": ready,
                 "files_blocked": blocked,
@@ -135,6 +138,22 @@ class ReadinessContractTests(unittest.TestCase):
             "both-eras-mechanical-needs-provenance-and-oracle"), 1)
         self.assertTrue(report["gate"]["pass"])
         self.assertEqual(report["physical_outputs_created"], [])
+
+    def test_historical_archive_candidate_is_not_active_application(self):
+        _, fn = fake_migrator_call(archived_auto=True)
+        with patch.object(census.subprocess, "run", side_effect=fn):
+            report = census.build_report()
+        self.assertTrue(report["gate"]["pass"])
+        sc = report["source_scope"]
+        self.assertEqual(sc["archived_benchmark_mechanical_only"], 1)
+        self.assertEqual(sc["nonarchive_mechanical_unproved"], 0)
+        self.assertEqual(sc["semantically_admitted_executable_originals"], 0)
+        self.assertEqual(report["migrator_summary"]["files_would_write"], 1)
+        self.assertFalse(report["physical_outputs_created"])
+        archived = [row for row in report["candidate_rows"]
+                    if row["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"]
+        self.assertEqual(len(archived), 1)
+        self.assertFalse(archived[0]["semantic_oracle_admitted"])
 
     def test_missing_oracle_evidence_is_not_marked_as_executable(self):
         _, fn = fake_migrator_call()

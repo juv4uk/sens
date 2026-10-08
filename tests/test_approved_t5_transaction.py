@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -17,6 +18,17 @@ SOURCE = ROOT / "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
 BINARY = SOURCE.with_suffix(".sens")
 REL = SOURCE.relative_to(ROOT).as_posix()
 
+
+def actual_d2_reader() -> Path:
+    advertised = os.environ.get("SENS_TRIT_BIN")
+    binary = Path(advertised) if advertised else ROOT / "target/debug/sens-trit"
+    if not binary.is_file():
+        subprocess.run(["cargo", "build", "-q", "-p", "sens-cli", "--bin", "sens-trit"],
+                       cwd=ROOT, check=True, timeout=240)
+    if not binary.is_file():
+        raise RuntimeError("real Rust sens-trit reader is required for publication tests")
+    return binary.resolve()
+
 spec = importlib.util.spec_from_file_location("approved_t5_transaction", SCRIPT)
 assert spec is not None and spec.loader is not None
 mod = importlib.util.module_from_spec(spec)
@@ -25,6 +37,27 @@ spec.loader.exec_module(mod)
 
 
 class ApprovedT5TransactionTests(unittest.TestCase):
+    def test_true_rust_d2_rejects_t5_transport_valid_invalid_program(self):
+        words = ["01"]  # D2 CLOSE alone is transport-valid, grammar-invalid.
+        physical = mod.engine.encode_projection("01\n")
+        self.assertEqual(mod.engine.decode_bytes(physical), words)
+        with self.assertRaisesRegex(mod.engine.SensT5Error, "Rust D2 reader rejected"):
+            mod.verify_rust_d2(physical, words, actual_d2_reader())
+
+    def test_missing_reader_blocks_before_publication(self):
+        with tempfile.TemporaryDirectory(prefix="approved-t5-no-rust-") as td:
+            temp = Path(td)
+            manifest = temp / "manifest.json"
+            manifest.write_text(json.dumps({"files": [REL]}), encoding="utf-8")
+            output = temp / "out"
+            result = subprocess.run([
+                sys.executable, str(SCRIPT), str(ROOT), "--manifest", str(manifest),
+                "--out", str(output), "--report", str(temp / "report.json"),
+            ], cwd=ROOT, text=True, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("requires --reader", result.stderr)
+            self.assertFalse(output.exists())
+
     def run_cli(self, temp: Path, entries: list[dict | str], *,
                 out: Path | None = None, report: Path | None = None,
                 source_era: str | None = None):
@@ -33,7 +66,8 @@ class ApprovedT5TransactionTests(unittest.TestCase):
         out = out or temp / "output"
         report = report or temp / "report.json"
         command = [sys.executable, str(SCRIPT), str(ROOT), "--manifest", str(manifest),
-                   "--out", str(out), "--report", str(report)]
+                   "--out", str(out), "--report", str(report),
+                   "--reader", str(actual_d2_reader())]
         if source_era is not None:
             command.extend(["--source-era", source_era])
         proc = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=120)
@@ -59,6 +93,8 @@ class ApprovedT5TransactionTests(unittest.TestCase):
             self.assertFalse((output / SOURCE.relative_to(ROOT)).exists())
             record = json.loads(report.read_text(encoding="utf-8"))
             self.assertEqual(record["summary"]["published"], 1)
+            self.assertEqual(record["files"][0]["d2_syntax"], "PASS")
+            self.assertEqual(record["files"][0]["semantic_oracle"], "NOT_VERIFIED")
             row = record["files"][0]
             self.assertEqual(row["source_sha256"], pin)
             self.assertEqual(row["typed_word_sha256"], mod.engine.typed_sha256(

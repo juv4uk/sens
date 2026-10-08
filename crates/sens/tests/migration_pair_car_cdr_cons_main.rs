@@ -29,7 +29,7 @@ fn cons_executes_and_roundtrips_exact_t5() {
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), CONS_T5);
     let expressions = parse_canonical_binary(&visible).expect("current exact source parses");
     let result = eval_parsed_expressions(&expressions, &mut Session::default()).expect("CONS executes");
-    match result.value {
+    match &result.value {
         Value::Pair(head, tail) => {
             assert!(matches!(head.as_ref(), Value::Nil));
             assert!(matches!(tail.as_ref(), Value::Nil));
