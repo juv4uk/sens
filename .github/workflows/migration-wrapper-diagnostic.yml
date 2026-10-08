@@ -1,0 +1,26 @@
+name: migration-wrapper-diagnostic
+
+on:
+  push:
+    branches:
+      - fix-one-file-current-domain-surfaces
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Diagnose one-file wrapper
+        shell: bash
+        run: |
+          set +e
+          echo "=== ukr acceptance ==="
+          python3 scripts/migrate-one-to-sens.py lib/surface/ukr-acceptance.lisp --dry-run
+          echo "status=$?"
+          echo "=== peer identity ==="
+          python3 scripts/migrate-one-to-sens.py lib/surface/peer-identity-acceptance.lisp --dry-run
+          echo "status=$?"
+          exit 0
