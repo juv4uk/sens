@@ -25,9 +25,10 @@
 (0011 compiler-authority-find
   (0010 (ідентичність rows)
     (110
-      ((010 rows) ())
+      ((0101 rows) ())
       ((101 ідентичність (100 (100 rows))) (100 rows))
-      ((010 ()) (compiler-authority-find ідентичність (011 rows))))))
+      ((compiler-true ідентичність)
+       (compiler-authority-find ідентичність (011 rows))))))
 
 (0011 compiler-nucleus
   (0010 (ідентичність authority)
