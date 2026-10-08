@@ -174,17 +174,22 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertNotIn("oracle_passed", report)
 
 
-    def test_real_pinned_data_registry_has_all_67_unaltered_records(self):
+    def test_real_pinned_data_registry_has_all_78_unaltered_records(self):
         rows = REAL_REVIEWED_LOADER(ROOT)
-        self.assertEqual(len(rows), 76)
+        self.assertEqual(len(rows), 78)
         cohort_counts = {
             group: sum(item["cohort"] == group for item in rows.values())
-            for group in ("domain-table", "isa", "schema", "evidence", "expr-record")
+            for group in ("domain-table", "comment-only-loader", "isa", "schema", "evidence", "expr-record")
         }
         self.assertEqual(cohort_counts, {
-            "domain-table": 9, "isa": 25, "schema": 21, "evidence": 8, "expr-record": 13,
+            "domain-table": 9, "comment-only-loader": 2, "isa": 25, "schema": 21, "evidence": 8, "expr-record": 13,
         })
         self.assertNotIn("lib/machine/block.lisp", rows)
+        self.assertEqual({p for p, item in rows.items() if item["cohort"] == "comment-only-loader"},
+                         {"lib/core2.lisp", "lib/surface/ukr.lisp"})
+        for path in ("lib/core2.lisp", "lib/surface/ukr.lisp"):
+            self.assertFalse((ROOT / path).with_suffix(".sens").exists(),
+                             "comment-only profile marker must not receive executable .sens")
         self.assertTrue(all(
             item["source_class"] == "NONPROGRAM_DATA_REVIEWED"
             and not item["semantic_oracle_admitted"]
