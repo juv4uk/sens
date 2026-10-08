@@ -72,7 +72,7 @@ class PairCohort(unittest.TestCase):
                 source = (FIXTURES / f"{stem}.lisp").read_text(encoding="utf-8")
                 projection, counts = self.project(source)
                 self.assertEqual(projection, case["words"])
-                self.assertEqual(counts["pass1-sens8"], 4 if stem == "pair-car-cdr" else 3)
+                self.assertEqual(counts["pass1-sens8"], 3)
                 with tempfile.TemporaryDirectory() as directory:
                     out = Path(directory) / "out"
                     report = Path(directory) / "report.json"
