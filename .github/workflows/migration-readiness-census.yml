@@ -7,6 +7,9 @@ on:
       - "scripts/migrate-three-pass.py"
       - "scripts/sens_t5_codec.py"
       - "scripts/migration-readiness-census.py"
+      - "scripts/migration_source_scope.py"
+      - "tests/test_report_original_migration_candidates.py"
+      - "benchmarks/sens-surface/results/**/*.lisp"
       - "tests/test_migration_readiness_contract.py"
       - "scripts/migrate-t5-batch.py"
       - "lib/**/*.lisp"
@@ -23,6 +26,9 @@ on:
       - "scripts/migrate-three-pass.py"
       - "scripts/sens_t5_codec.py"
       - "scripts/migration-readiness-census.py"
+      - "scripts/migration_source_scope.py"
+      - "tests/test_report_original_migration_candidates.py"
+      - "benchmarks/sens-surface/results/**/*.lisp"
       - "tests/test_migration_readiness_contract.py"
       - "scripts/migrate-t5-batch.py"
       - "lib/**/*.lisp"
@@ -52,6 +58,37 @@ jobs:
         run: |
           python3 scripts/migration-readiness-census.py \
             --out /tmp/sens-t5-migration-readiness.json
+      - name: Publish actionable original-source cohorts separately from archive
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          r = json.loads(Path("/tmp/sens-t5-migration-readiness.json").read_text(encoding="utf-8"))
+          s = r["source_scope"]
+          lines = [
+              "## Original .lisp migration — source scope, not fake completion",
+              "",
+              f"- Original unpaired scanned: **{r['migrator_summary']['files_seen']}**",
+              f"- Archived benchmarks mechanically convertible: **{s['archived_benchmark_mechanically_eligible']}** (nonprogram evidence)",
+              f"- Active/unknown sources mechanically convertible: **{s['active_or_unclassified_mechanically_eligible']}** (NOT oracle-admitted)",
+              f"- Actual .sens written: **{r['migrator_summary']['files_written']}**",
+              f"- Semantic original executable certifications from census: **{s['executable_originals_semantically_certified']}**",
+              "",
+              "### Work for agents (first blocker by actual source)",
+              "| Workstream | Blocked sources | Example original |",
+              "| --- | ---: | --- |",
+          ]
+          for q in r["agent_work_queue"]:
+              example = q["examples"][0]["path"].replace("|", "/") if q["examples"] else "none"
+              lines.append(f"| {q['cohort']} | {q['blocked_count']} | `{example}` |")
+          if s["archived_candidate_paths"]:
+              lines += ["", "### Do NOT count archive as program migration"]
+              for name in s["archived_candidate_paths"][:10]:
+                  lines.append(f"- `{name}`")
+          Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8").write("\n".join(lines)+"\n")
+          PY
       - name: Publish census artifact
         if: always()
         uses: actions/upload-artifact@v4
