@@ -462,7 +462,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         frame_text=" ".join(frame)
         self.assertGreaterEqual(projection.count(frame_text),2)
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
-        self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()))
+        self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()), repr(projection))
         payload=mod.encode_projection(projection)
         self.assertEqual(mod.decode_bytes(payload),projection.split())
 
@@ -474,7 +474,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(words)
         self.assertTrue(
             all(set(word) <= {"0","1"} for word in words),
-            "the real machine-block source must reach an all-binary candidate",
+            repr(projection),
         )
         self.assertEqual(resolver.counts["pass1-sens8"],17)
 
