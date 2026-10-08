@@ -32,14 +32,14 @@ FLAGS = {
 
 ROWS = {
     "eq-cond-select": {
-        "source": "(00000111\n  ((00000011 (00000001 ()) (00000001 ()))\n   (00000001 (())))\n  ((00000011 (00000001 ()) (00000001 (())))\n   (00000001 ())))\n",
-        "projection": "10 110 00 10 10 101 00 10 001 00 000 01 00 10 001 00 000 01 01 00 10 001 00 10 000 01 01 01 00 10 10 101 00 10 001 00 000 01 00 10 001 00 10 000 01 01 01 00 10 001 00 000 01 01 01",
-        "hex": "673866c215a7123b15a7123b2dc32dc313b18966c215a7123b15a715a42eb1410f36b18c",
+        "source": "(00000111\n  ((00000011 (00000001 1) (00000001 1))\n   (00000001 (())))\n  ((00000011 (00000001 0) (00000001 1))\n   (00000001 ())))\n",
+        "projection": "10 110 00 10 10 101 00 10 001 00 1 01 00 10 001 00 1 01 01 00 10 001 00 10 000 01 01 01 00 10 10 101 00 10 001 00 0 01 00 10 001 00 1 01 01 00 10 001 00 000 01 01 01",
+        "hex": "673866c215a7172dc32dd0b1410f41068c2dc440a937a8b1410f458c15a7123b2e",
     },
     "eq-cond-skip": {
-        "source": "(00000111\n  ((00000011 (00000001 ()) (00000001 (())))\n   (00000001 (())))\n  ((00000011 (00000001 ()) (00000001 ()))\n   (00000001 ())))\n",
-        "projection": "10 110 00 10 10 101 00 10 001 00 000 01 00 10 001 00 10 000 01 01 01 00 10 001 00 10 000 01 01 01 00 10 10 101 00 10 001 00 000 01 00 10 001 00 000 01 01 00 10 001 00 000 01 01 01",
-        "hex": "673866c215a7123b15a715a42eb1410f41068c2dc440a937a813a937a813b1410f36b18c",
+        "source": "(00000111\n  ((00000011 (00000001 0) (00000001 1))\n   (00000001 (())))\n  ((00000011 (00000001 1) (00000001 1))\n   (00000001 ())))\n",
+        "projection": "10 110 00 10 10 101 00 10 001 00 0 01 00 10 001 00 1 01 01 00 10 001 00 10 000 01 01 01 00 10 10 101 00 10 001 00 1 01 00 10 001 00 1 01 01 00 10 001 00 000 01 01 01",
+        "hex": "673866c215a7142dc32dd0b1410f41068c2dc440a937a9b1410f458c15a7123b2e",
     },
 }
 
@@ -66,6 +66,12 @@ class EqCondCohort(unittest.TestCase):
         }.items():
             with self.subTest(old=old):
                 self.assertEqual(self.legacy[old][:2], (current, "D3"))
+
+    def test_d1_atoms_are_data_not_numbers_or_d2(self):
+        # Under QUOTE, exact one-bit 0/1 stay D1 atoms. This cohort deliberately
+        # avoids Number/D24+ and Text7 migration questions.
+        for atom in ("0", "1"):
+            self.assertEqual(M.encode_atom_data(M.Atom(M.Tok("ATOM", atom, 0)), self.text7), [atom])
 
     def test_sources_project_to_exact_words_and_physical_t5(self):
         for stem, row in ROWS.items():
@@ -114,8 +120,8 @@ class EqCondCohort(unittest.TestCase):
             self.assertEqual(data["summary"]["files_seen"], 2)
             self.assertEqual(data["summary"]["files_written"], 2)
             self.assertEqual(data["summary"]["files_blocked"], 0)
-            self.assertEqual({row["semantic_word_count"] for row in data["files"]}, {55})
-            self.assertEqual({row["bytes"] for row in data["files"]}, {36})
+            self.assertEqual({row["semantic_word_count"] for row in data["files"]}, {53})
+            self.assertEqual({row["bytes"] for row in data["files"]}, {33})
 
             for stem, row in ROWS.items():
                 self.assertEqual(
