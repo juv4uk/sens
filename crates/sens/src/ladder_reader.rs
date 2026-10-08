@@ -14,13 +14,14 @@ pub enum LadderReaderProbe {
 const MAX_PROBE_BITS: usize = 128;
 const MAX_SEARCH_NODES: usize = 50_000;
 
-struct ProbeState {
+struct ProbeState<'f, F: FnMut(&[crate::Expr]) -> bool> {
     visited: usize,
     exceeded: bool,
     solutions: Vec<Vec<BinarySourceWord>>,
+    admits: &'f mut F,
 }
 
-impl ProbeState {
+impl<F: FnMut(&[crate::Expr]) -> bool> ProbeState<'_, F> {
     fn walk<'a>(&mut self, raw: &'a str, offset: usize, depth: usize, words: &mut Vec<&'a str>) {
         if self.exceeded || self.solutions.len() >= 2 { return; }
         self.visited += 1;
@@ -32,9 +33,13 @@ impl ProbeState {
             // Справжній SENS reader перевіряє синтаксис, НЕ виконання.
             if depth != 0 { return; }
             let projection = words.join(" ");
-            if parse_canonical_binary(&projection).is_ok() {
-                if let Ok(tokens) = parse_binary_source_words(&projection) {
-                    self.solutions.push(tokens.into_iter().map(|t| t.word).collect());
+            if let Ok(ast) = parse_canonical_binary(&projection) {
+                // Очікувана семантична роль приходить ЗОВНІ,
+                // від мови/оракула; Rust не визначає її самовільно.
+                if (self.admits)(&ast) {
+                    if let Ok(tokens) = parse_binary_source_words(&projection) {
+                        self.solutions.push(tokens.into_iter().map(|t| t.word).collect());
+                    }
                 }
             }
             return;
@@ -64,6 +69,16 @@ impl ProbeState {
 /// PackedBitstream зберігає довжину payload в пам'яті, не EOS файла.
 /// Number D24+ та runtime-арність тут поки не включені.
 pub fn probe_binary_ladder(packed: &PackedBitstream) -> LadderReaderProbe {
+    probe_binary_ladder_with_context(packed, |_| true)
+}
+
+/// Додаткове правило допустимості надає власний SENS-контекст.
+/// Наприклад, очікування порожнього списку усуває D1/D2-суперечність
+/// для 000. Відхилені варіанти не перетворюються в нові ідентичності.
+pub fn probe_binary_ladder_with_context(
+    packed: &PackedBitstream,
+    mut admits: impl FnMut(&[crate::Expr]) -> bool,
+) -> LadderReaderProbe {
     let count = packed.bit_len();
     if count == 0 { return LadderReaderProbe::NoParse; }
     if count > MAX_PROBE_BITS { return LadderReaderProbe::SearchLimit; }
@@ -71,7 +86,9 @@ pub fn probe_binary_ladder(packed: &PackedBitstream) -> LadderReaderProbe {
         let byte = packed.bytes()[pos / 8];
         if byte & (1 << (7 - pos % 8)) == 0 { '0' } else { '1' }
     }).collect();
-    let mut state = ProbeState { visited: 0, exceeded: false, solutions: Vec::new() };
+    let mut state = ProbeState {
+        visited: 0, exceeded: false, solutions: Vec::new(), admits: &mut admits,
+    };
     state.walk(&bits, 0, 0, &mut Vec::new());
     if state.exceeded { return LadderReaderProbe::SearchLimit; }
     match state.solutions.len() {
@@ -118,6 +135,27 @@ mod tests {
             probe("10 001 00 000 01"),
             LadderReaderProbe::Ambiguous { .. }
         ));
+    }
+
+    #[test]
+    fn language_context_can_disambiguate_d3_empty_without_any_extra_bits() {
+        let words = parse_binary_source_words("000").unwrap();
+        let payload = pack_binary_source_tokens(&words);
+        assert!(matches!(probe_binary_ladder(&payload), LadderReaderProbe::Ambiguous { .. }));
+        let resolved = probe_binary_ladder_with_context(&payload, |expressions| {
+            expressions.len() == 1
+                && matches!(
+                    expressions[0].kind,
+                    crate::ExprKind::List(ref items) if items.is_empty()
+                )
+        });
+        match resolved {
+            LadderReaderProbe::Unique(words) => {
+                assert_eq!(words.len(), 1);
+                assert_eq!((words[0].width(), words[0].packed_bits()), (3, 0));
+            }
+            other => panic!("D3 empty expected by language context, got {other:?}"),
+        }
     }
 
     #[test]
