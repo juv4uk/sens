@@ -71,6 +71,24 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 0011 00 "))
         self.assertGreaterEqual(resolver.counts["pass2-my-lisp"],2)
 
+    def test_proven_global_binding_frames_define_and_call_as_same_text7_term(self):
+        source="(00001001 foo ())\\n(foo)\\n"
+        out,resolver=self.migrate(source)
+        cells=mod.text7_encode("foo",self.text7,mod.Tok("atom","foo",0))
+        frame=mod.frame_text7(cells,mod.Tok("atom","foo",0))
+        frame_text=" ".join(frame)
+        self.assertEqual(
+            out,
+            f"10 0011 00 {frame_text} 00 000 01\\n"
+            f"10 {frame_text} 01\\n",
+        )
+        self.assertEqual(resolver.counts["pass4-text7-global"],1)
+
+    def test_unproven_global_name_remains_unframed_and_blocks_strict_output_later(self):
+        resolver=mod.Resolver(self.legacy,self.my,self.upper,source_era="legacy")
+        out,_=mod.migrate_file("(00001001 foo ())\\n(bar)\\n",resolver,self.text7)
+        self.assertIn("bar",out)
+
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
         self.assertTrue(out.startswith("10 100 00 "))
