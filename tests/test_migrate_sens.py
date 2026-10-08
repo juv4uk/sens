@@ -83,6 +83,65 @@ class OperationalMigrationTests(unittest.TestCase):
             with self.assertRaises((runner.MigrationBlocked, ValueError)):
                 runner.verify_published(json.loads(report.read_text()), out, False)
 
+    def test_manifest_paths_always_receive_content_sha(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "approved.json"
+            manifest.write_text(json.dumps({"files": [FIXTURE]}), encoding="utf-8")
+            pinned = runner.pin_manifest(manifest, ROOT)
+            self.assertEqual(pinned, runner.pin_sources([FIXTURE], ROOT))
+            manifest.write_text(json.dumps(pinned), encoding="utf-8")
+            self.assertEqual(runner.pin_manifest(manifest, ROOT), pinned)
+
+    def test_manifest_rejects_stale_sha_and_untrusted_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "approved.json"
+            cases = [
+                {"files": [{"path": FIXTURE, "sha256": "0" * 64}]},
+                {"files": [{"path": FIXTURE, "sha256": "not-a-hash"}]},
+                {"files": [FIXTURE, FIXTURE]},
+                {"files": ["../escape.lisp"]},
+                {"files": ["/tmp/escape.lisp"]},
+                {"files": [FIXTURE.replace(".lisp", ".sens")]},
+                {"files": [{"path": FIXTURE, "unsafe": True}]},
+                {"files": []},
+                {"files": {"path": FIXTURE}},
+            ]
+            for value in cases:
+                with self.subTest(value=value):
+                    manifest.write_text(json.dumps(value), encoding="utf-8")
+                    with self.assertRaises(runner.MigrationBlocked):
+                        runner.pin_manifest(manifest, ROOT)
+
+    def test_actual_manifest_cli_and_two_source_atomic_dry_run(self):
+        other = "tests/fixtures/core1-third-domain-canary/third.lisp"
+        with tempfile.TemporaryDirectory(prefix="sens-manifest-") as tmp:
+            t = Path(tmp)
+            approved = t / "approved.json"
+            out, report = t / "out", t / "report.json"
+            approved.write_text(json.dumps({"files": [FIXTURE, other]}), encoding="utf-8")
+            command = [
+                sys.executable, str(CLI), "--root", str(ROOT),
+                "--manifest", str(approved), "--out", str(out),
+                "--report", str(report), "--dry-run",
+            ]
+            result = subprocess.run(command, cwd=t, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            evidence = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(evidence["summary"]["files_requested"], 2)
+            self.assertEqual(evidence["summary"]["files_ready"], 2)
+            self.assertEqual(evidence["summary"]["published"], 0)
+            self.assertEqual(len(list(out.rglob("*.sens"))) if out.exists() else 0, 0)
+            # Change the expected source digest: no transaction is attempted,
+            # and no target can be silently created.
+            approved.write_text(json.dumps({"files": [
+                {"path": FIXTURE, "sha256": "0" * 64}, other
+            ]}), encoding="utf-8")
+            report.unlink()
+            blocked = subprocess.run(command, cwd=t, capture_output=True, text=True)
+            self.assertEqual(blocked.returncode, 2, blocked.stdout + blocked.stderr)
+            self.assertIn("BLOCKED", blocked.stderr)
+            self.assertFalse(report.exists())
+
     def test_outside_root_is_required(self):
         with tempfile.TemporaryDirectory() as tmp:
             report = Path(tmp) / "report.json"
