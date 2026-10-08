@@ -107,26 +107,30 @@ def inspect(root: Path, *, strict_semantic: bool = False,
             source_bytes = source.read_bytes()
             row["source_sha256"] = _sha(source_bytes)
             if rel.as_posix() in required:
-                # Treat the third file as a READ-ONLY ASCII projection of
-                # decoded, exact-width T5 words, never as source authority.
-                view = root / rel.with_suffix("")
-                if view.is_symlink() or not view.is_file():
-                    raise ValueError("missing/symlink same-stem spaced-bit view")
-                displayed = view.read_bytes()
-                expected = (" ".join(words) + "\n").encode("ascii")
-                if displayed != expected:
-                    raise ValueError(
-                        "noncanonical/mismatched spaced-bit view: "
-                        "requires exactly one ASCII space, LF and exact word widths"
-                    )
-                parsed = parse_words(displayed.decode("ascii"))
-                if parsed != words or encode_words(parsed) != data:
-                    raise ValueError("reverse view-to-physical T5 identity mismatch")
-                if typed_sha256(parsed) != typed_sha256(words):
-                    raise ValueError("spaced view changed exact typed-word identity")
-                row["view_status"] = "PASS"
-                row["view_sha256"] = _sha(displayed)
-                row["view_typed_word_sha256"] = typed_sha256(parsed)
+                # One bad display file must BLOCK the selected triple, but
+                # cannot retroactively turn valid packed T5 into a bad codec.
+                try:
+                    view = root / rel.with_suffix("")
+                    if view.is_symlink() or not view.is_file():
+                        raise ValueError("missing/symlink same-stem spaced-bit view")
+                    displayed = view.read_bytes()
+                    expected = (" ".join(words) + "\n").encode("ascii")
+                    if displayed != expected:
+                        raise ValueError(
+                            "noncanonical/mismatched spaced-bit view: "
+                            "requires one ASCII space, one LF and exact word widths"
+                        )
+                    parsed = parse_words(displayed.decode("ascii"))
+                    if parsed != words or encode_words(parsed) != data:
+                        raise ValueError("reverse view-to-physical T5 identity mismatch")
+                    if typed_sha256(parsed) != typed_sha256(words):
+                        raise ValueError("view changed exact typed-word identity")
+                except (OSError, SensT5Error, UnicodeError, ValueError) as error:
+                    row["view_error"] = str(error)
+                else:
+                    row["view_status"] = "PASS"
+                    row["view_sha256"] = _sha(displayed)
+                    row["view_typed_word_sha256"] = typed_sha256(parsed)
             try:
                 source_text = source_bytes.decode("utf-8")
             except UnicodeError:
