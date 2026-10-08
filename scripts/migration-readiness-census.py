@@ -42,7 +42,7 @@ def build_report() -> dict:
         command = [
             sys.executable, str(MIGRATOR), str(ROOT),
             "--out", str(output), *ARTIFACT_ARGS,
-            "--report", str(report), "--dry-run",
+            "--report", str(report), "--dry-run", "--unpaired-only",
         ]
         completed = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=180)
         if not report.is_file():
@@ -54,7 +54,8 @@ def build_report() -> dict:
         result = {
             "schema": "sens-t5-migration-readiness/v1",
             "authority": "research-only; no source or .sens artifact is written",
-            "mode": "full-repository dry-run",
+            "mode": "original unpaired .lisp only; full-repository dry-run",
+            "skipped_existing_sens_pairs": state.get("skipped_paired_paths", []),
             "migrator_exit_code": completed.returncode,
             "migrator_summary": summary,
             "reason_counts": dict(reasons.most_common()),
@@ -67,7 +68,7 @@ def build_report() -> dict:
                     and summary["files_blocked"] == summary["files_seen"]
                     and not written
                 ),
-                "rule": "unknown or unproven source must remain BLOCKED; no .sens is emitted",
+                "rule": "every ORIGINAL UNPAIRED .lisp remains BLOCKED until separate oracle proof; no .sens emitted",
             },
         }
         return result
