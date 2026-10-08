@@ -11,7 +11,7 @@ fn real_compiler_preserves_uk_source_and_lowers_all_definitions_to_exact_heads()
     // a line-start-only counter would silently ignore valid D4 DEFINE forms.
     let source_definitions = UK_SOURCE.matches("(визначити").count();
     assert_eq!(source_definitions, 51, "compiler has 51 original callable definitions");
-    assert_eq!(UK_SOURCE.matches("(функція ").count(), 51);
+    assert_eq!(UK_SOURCE.matches("(функція").count(), 51);
     assert!(!UK_SOURCE.contains("(0011 "), "the .lisp human projection must not become raw D4");
     assert!(!UK_SOURCE.contains("(0010 "), "the .lisp human projection must not become raw D4");
 
