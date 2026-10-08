@@ -20,11 +20,13 @@ jobs:
       - name: Build canonical converter
         run: cargo build -p sens-cli --bin sens-to-sens
 
+      # Invoke via `bash` so the script does not need the executable bit
+      # (the GitHub contents API commits files as 100644).
       - name: Gate check (report only)
-        run: scripts/migrate-active-lib-exact.sh --check || true
+        run: bash scripts/migrate-active-lib-exact.sh --check || true
 
       - name: Apply canonical migration
-        run: scripts/migrate-active-lib-exact.sh --apply || true
+        run: bash scripts/migrate-active-lib-exact.sh --apply || true
 
       - name: Collect changed files
         run: |
