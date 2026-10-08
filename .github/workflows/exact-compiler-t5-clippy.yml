@@ -1,0 +1,41 @@
+name: SENS exact compiler and T5 strict Clippy
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/compilation_artifact_producer.rs"
+      - "crates/sens/src/program_compiler.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - ".github/workflows/exact-compiler-t5-clippy.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/compilation_artifact_producer.rs"
+      - "crates/sens/src/program_compiler.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - ".github/workflows/exact-compiler-t5-clippy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-compiler-and-t5-lints:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Same strict compiler + T5 lint contract as Hosted CI
+        run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
+      - name: Compiler and T5 source-contract unit tests
+        run: cargo test -q -p sens --lib
+      - name: Prove no repository content was rewritten
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
