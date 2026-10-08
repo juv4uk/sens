@@ -116,6 +116,9 @@ def run(args: argparse.Namespace) -> dict:
     )
     text7 = mig.build_text7(data, INPUTS["text7"])
     ledger = sorted(failures, key=lambda e: e["path"])
+    # A cohort is all-or-none: retain physical candidates in memory until
+    # every requested original has passed conversion and final source checks.
+    staged: list[tuple[Path, Path, bytes, bytes, dict]] = []
     for rel in paths:
         source = repo / rel
         destination = mig.sens_destination(rel)
@@ -141,7 +144,7 @@ def run(args: argparse.Namespace) -> dict:
             if packed == projection.encode("ascii"):
                 raise ValueError("invalid text disguised as physical .sens")
             row.update({
-                "status": "written" if args.write else "would-write",
+                "status": "would-write",
                 "physical_bytes": len(packed),
                 "source_words": len(words),
                 "physical_sha256": digest(packed),
@@ -150,11 +153,7 @@ def run(args: argparse.Namespace) -> dict:
                 "source_era": source_era,
             })
             if args.write:
-                assert_no_links(repo, rel)
-                assert_no_links(out, destination)
-                if source.read_bytes() != original:
-                    raise ValueError("source changed during migration")
-                mig.write_atomic_no_clobber(target, packed)
+                staged.append((rel, destination, original, packed, row))
         except (mig.MigrationError, mig.SensT5Error, UnicodeError,
                 ValueError, OSError) as exc:
             row.update({"status": "blocked", "reason": str(exc),
@@ -165,8 +164,47 @@ def run(args: argparse.Namespace) -> dict:
                 row["line"], row["column"] = mig.line_col(readable, tok.offset)
         ledger.append(row)
     ledger.sort(key=lambda e: e["path"])
+
+    # A single BLOCK (including discovery failures) forbids *all* writes.
+    # A review may still inspect each mechanically feasible would-write row.
+    if args.write and not any(row["status"] == "blocked" for row in ledger):
+        for rel, destination, original, packed, row in staged:
+            try:
+                assert_no_links(repo, rel)
+                assert_no_links(out, destination)
+                if (out / destination).exists() or (out / destination).is_symlink():
+                    raise ValueError("existing .sens output: overwrite forbidden")
+                if (repo / rel).read_bytes() != original:
+                    raise ValueError("source changed during migration")
+            except (ValueError, OSError) as exc:
+                row.update(status="blocked", reason=str(exc))
+        if not any(row["status"] == "blocked" for row in ledger):
+            created: list[Path] = []
+            active: dict | None = None
+            try:
+                for rel, destination, original, packed, row in staged:
+                    active = row
+                    assert_no_links(repo, rel)
+                    assert_no_links(out, destination)
+                    if (repo / rel).read_bytes() != original:
+                        raise ValueError("source changed during batch publication")
+                    target = out / destination
+                    mig.write_atomic_no_clobber(target, packed)
+                    created.append(target)
+            except (ValueError, OSError, mig.SensT5Error) as exc:
+                # Only unlink OUR newly created targets, not existing targets.
+                for target in reversed(created):
+                    target.unlink(missing_ok=True)
+                if active is not None:
+                    active.update(status="blocked", reason="atomic batch aborted: " + str(exc))
+            else:
+                for _, _, _, _, row in staged:
+                    row["status"] = "written"
+
     admitted = sum(e["status"] in ("would-write", "written") for e in ledger)
     blocked = sum(e["status"] == "blocked" for e in ledger)
+    written = sum(e["status"] == "written" for e in ledger)
+    candidates = sum(e["status"] == "would-write" for e in ledger)
     result = {
         "schema": SCHEMA, "mode": "write-new-only" if args.write else "dry-run",
         "root": str(repo), "output_mirror": str(out),
@@ -175,8 +213,8 @@ def run(args: argparse.Namespace) -> dict:
                       "source_era": source_era,
                       "w8_policy": "auto blocks ambiguity; legacy and current require explicit choice"},
         "summary": {"files_seen": len(ledger), "files_admitted": admitted,
-                    "files_written": admitted if args.write else 0,
-                    "files_would_write": admitted if not args.write else 0,
+                    "files_written": written,
+                    "files_would_write": candidates,
                     "files_blocked": blocked},
         "files": ledger,
     }

@@ -37,5 +37,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
       - name: One source, SHA-pinned transaction, binary parity, dry-run and no-clobber
         run: python3 -m unittest discover -s tests -p 'test_migrate_sens.py' -v
