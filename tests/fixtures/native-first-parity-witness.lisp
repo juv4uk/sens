@@ -13,24 +13,24 @@
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
 (00001001 native-first-parity-corpus
-  (quote
+  '
     ((car-cons-u64-zero
-       (car (cons 0 1))
+       (100 (111 0 1))
        0
        pure
        not-applicable)
      (car-cons-u64-small
-       (car (cons 2 3))
+       (100 (111 2 3))
        2
        pure
        not-applicable)
      (car-cons-u64-independent-fields
-       (car (cons 42 99))
+       (100 (111 42 99))
        42
        pure
        not-applicable)
      (car-cons-u64-max-exact-result
-       (car (cons 9007199254740991 7))
+       (100 (111 9007199254740991 7))
        9007199254740991
        pure
        not-applicable))))
@@ -44,14 +44,14 @@
       ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
        (1)
        (00100111
-         (quote native-first-parity-witness)
-         (quote (status pass))
-         (00100111 (quote cases) (00101000 native-first-parity-corpus))))
+         ' native-first-parity-witness)
+         ' (status pass))
+         (00100111 ' cases) (00101000 native-first-parity-corpus))))
       ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
        (0)
        (00100111
-         (quote native-first-parity-witness)
-         (quote (status fail))
-         (00100111 (quote verdicts) native-first-parity-verdicts))))))
+         ' native-first-parity-witness)
+         ' (status fail))
+         (00100111 ' verdicts) native-first-parity-verdicts))))))
 
 (native-first-parity-witness)
