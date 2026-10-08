@@ -616,6 +616,12 @@ class Resolver:
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
+        # A source-proven global DEFINE target is a contextual Text7 binding,
+        # not a semantic function identity. Its call head uses the exact same
+        # D2/W7 frame as the DEFINE target.
+        if t in self.global_binding_words:
+            self.counts["pass4-text7-global"]+=1
+            return self.global_binding_words[t],"pass4-text7-global"
         # D1/D2 or any unresolved dynamic/user function stays exactly as written.
         self.counts["passthrough-head"]+=1
         return [t],"passthrough-head"
