@@ -164,7 +164,7 @@
                          field1-offset))))
                   (t t (00000001 x86-projection-rejected))))
                (t t (00000001 x86-projection-rejected))))
-            (t t (00000001 x86-projection-rejected))))
+            (t t (00000001 x86-projection-rejected)))))
       ((x86-machine-effect-form?
          effect
          (00000001 return-u64)
