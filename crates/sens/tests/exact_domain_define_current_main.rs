@@ -39,37 +39,37 @@ fn exact_call(target: DomainIdentity, arguments_source: &str) -> Expr {
 }
 
 #[test]
-fn exact_d6_define_binds_and_invokes_language_owned_closure() {
-    let flip = d6(0b101101);
+fn exact_d6_add1_define_binds_and_invokes_language_owned_closure() {
+    let add1 = d6(0b001110);
     let mut session = Session::default();
-    eval_parsed_expressions(&[exact_define(flip, "(lambda (f a b) (f b a))")], &mut session)
-        .expect("exact D6 DEFINE must bind a language-owned closure");
+    eval_parsed_expressions(&[exact_define(add1, "(lambda (x) (+ x 1))")], &mut session)
+        .expect("exact D6 ADD1 must bind a language-owned closure");
     let result = eval_parsed_expressions(
-        &[exact_call(flip, "(lambda (x y) (cons x (cons y (quote ()))) ) 7 2")],
+        &[exact_call(add1, "7")],
         &mut session,
-    ).expect("exact D6 invocation");
-    assert_eq!(result.value.to_string(), "(2 7)");
+    ).expect("exact D6 ADD1 invocation");
+    assert_eq!(result.value.to_string(), "8");
 }
 
 #[test]
 fn exact_define_is_single_assignment() {
-    let flip = d6(0b101101);
+    let add1 = d6(0b001110);
     let mut session = Session::default();
-    eval_parsed_expressions(&[exact_define(flip, "(lambda (f a b) (f b a))")], &mut session).unwrap();
+    eval_parsed_expressions(&[exact_define(add1, "(lambda (x) (+ x 1))")], &mut session).unwrap();
     let error = eval_parsed_expressions(
-        &[exact_define(flip, "this-symbol-must-not-be-evaluated")], &mut session,
+        &[exact_define(add1, "this-symbol-must-not-be-evaluated")], &mut session,
     ).expect_err("duplicate exact definition must fail before replacement evaluation");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
     assert!(error.message.contains("already has a language-owned binding"));
     assert_eq!(
-        eval_parsed_expressions(&[exact_call(flip, "(lambda (x y) (cons x (cons y (quote ())))) 7 2")], &mut session).unwrap().value.to_string(),
-        "(2 7)"
+        eval_parsed_expressions(&[exact_call(add1, "7")], &mut session).unwrap().value.to_string(),
+        "8"
     );
 }
 
 #[test]
-fn noncallable_domains_fail_closed() {
-    for target in [d1(1), d2(1), d7(0b0101101), d8(0b00101101)] {
+fn noncallable_domains_and_unadmitted_d6_flip_fail_closed() {
+    for target in [d1(1), d2(1), d6(0b101101), d7(0b0101101), d8(0b00101101)] {
         let error = eval_parsed_expressions(
             &[exact_define(target, "this-symbol-must-not-be-evaluated")],
             &mut Session::default(),
@@ -82,7 +82,7 @@ fn noncallable_domains_fail_closed() {
 #[test]
 fn exact_define_rejects_plain_data_and_symbol_define_stays_compatible() {
     let error = eval_parsed_expressions(
-        &[exact_define(d6(0b101101), "42")], &mut Session::default(),
+        &[exact_define(d6(0b001110), "42")], &mut Session::default(),
     ).expect_err("exact callable identity must not accept plain data");
     assert_eq!(error.kind, ErrorKind::Type);
     assert!(error.message.contains("callable closure or builtin"));
