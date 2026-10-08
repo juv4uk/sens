@@ -50,9 +50,17 @@ fn d4_list_keeps_argument_order_and_d1_bit_identity() {
 
 #[test]
 fn d4_list_never_auto_admits_other_unimplemented_d4_value_mechanisms() {
-    let error = run_physical("10 1111 00 10 001 00 000 01 01")
-        .expect_err("D4 APPEND is a different ratified law; LIST cannot admit it");
-    assert_eq!(error.kind, ErrorKind::Type);
+    // D4 APPEND is a DIFFERENT owner-ratified resident, and its own
+    // mechanism may land independently.  Never demand that a distinct
+    // lawful primitive stay unimplemented merely to keep this test green.
+    match run_physical("10 1111 00 10 001 00 000 01 01") {
+        Ok(actual) => assert_ne!(
+            actual,
+            Value::list([Value::Nil]),
+            "D4 APPEND must not silently share D4 LIST value-call semantics"
+        ),
+        Err(error) => assert_eq!(error.kind, ErrorKind::Type),
+    }
 }
 
 #[test]
