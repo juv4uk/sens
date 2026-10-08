@@ -8,7 +8,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
 
 def git_blob_sha1(data: bytes) -> str:
-    header = f"blob {len(data)}\\0".encode()
+    header = f"blob {len(data)}".encode() + b"\\0"
     return hashlib.sha1(header + data).hexdigest()
 
 def first_code_line(text: str) -> str:
@@ -29,7 +29,7 @@ class MigrationNonProgramSchemaManifest(unittest.TestCase):
 
         for entry in entries:
             rel = pathlib.PurePosixPath(entry["path"])
-            self.assertEqual(rel.parts[0], "contracts" if rel.parts[0] == "contracts" else rel.parts[0])
+            self.assertIn(rel.parts[0], ("contracts", "lib", "tests"))
             self.assertEqual(rel.suffix, ".lisp")
             source = ROOT / rel
             payload = source.read_bytes()
