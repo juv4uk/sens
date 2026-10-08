@@ -82,6 +82,24 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertIn("in-repository publication needs independent", result.stderr)
         self.assertFalse(target.exists())
 
+    def test_peer_identity_acceptance_uses_full_current_surface_set(self):
+        source = ROOT / "lib" / "surface" / "peer-identity-acceptance.lisp"
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), str(source), "--dry-run"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["status"], "would-write")
+        self.assertEqual(
+            report["output"].replace("\\", "/"),
+            "lib/surface/peer-identity-acceptance.sens",
+        )
+        self.assertGreater(report["bytes"], 0)
+        self.assertGreater(len(report["words"]), 0)
+
     def test_source_outside_repository_is_blocked(self):
         with tempfile.TemporaryDirectory() as td:
             source = Path(td) / "outside.lisp"
