@@ -18,8 +18,8 @@
       (word-bits 64)
       (cell-bytes 16)
       (fields
-        ((100 (offset-bytes 0) (width-bits 64))
-         (011 (offset-bytes 8) (width-bits 64))))
+        ((car (offset-bytes 0) (width-bits 64))
+         (cdr (offset-bytes 8) (width-bits 64))))
       (arena-argument-register rdi)
       (allocation raw-host-arena)
       (lifetime native-call)
