@@ -448,6 +448,41 @@ fn canonicalize_domain_result(
     }
 }
 
+/// D4:1111 APPEND uses the already-ratified D3 CONS and structural
+/// empty. Historical machine-block requires exactly two PROPER lists:
+/// a non-list tail or wrong arity must BLOCK, never silently coerce.
+fn d4_append_proper_lists(
+    args: &[Value],
+    span: Span,
+) -> Result<Value, LanguageError> {
+    if args.len() != 2 {
+        return Err(LanguageError::new(
+            ErrorKind::Arity,
+            format!("D4 APPEND requires exactly two proper lists, got {}", args.len()),
+            span,
+        ));
+    }
+    let mut values = Vec::new();
+    for (index, list) in args.iter().enumerate() {
+        let mut cursor = list;
+        loop {
+            match cursor {
+                Value::Nil => break,
+                Value::Pair(head, tail) => {
+                    values.push(head.as_ref().clone());
+                    cursor = tail.as_ref();
+                }
+                _ => return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!("D4 APPEND argument {} must be a proper list", index + 1),
+                    span,
+                )),
+            }
+        }
+    }
+    Ok(Value::list(values))
+}
+
 pub(crate) fn invoke_domain_identity(
     identity: CoreDomainIdentity,
     args: &[Value],
@@ -458,16 +493,14 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
-    // The ratified D4:1110 LIST derives from repeated D3 CONS over the
-    // ALREADY EVALUATED argument values. This is a value-call mechanism for
-    // ONE existing exact-domain identity, not a new opcode or a W8 alias.
-    // It restores the current runtime route required by the original
-    // machine-block LIST heads audited in #4761 and surfaced by #4774.
-    // Do not fall through to a generic D4 handler: APPEND 1111 and all other
-    // D4 residents retain their own independently admitted mechanisms/gates.
+    // Ratified D4:1110 LIST and D4:1111 APPEND are existing derived
+    // proper-list mechanisms, never SID aliases or new semantic residents.
+    // Arguments are already evaluated by the canonical caller.
     if let CoreDomainIdentity::D4(word) = identity {
-        if word.word().packed_bits() == 0b1110 {
-            return Ok(Value::list(args.iter().cloned()));
+        match word.word().packed_bits() {
+            0b1110 => return Ok(Value::list(args.iter().cloned())),
+            0b1111 => return d4_append_proper_lists(args, span),
+            _ => {} // All other D4 residents keep their separate gates.
         }
     }
 
