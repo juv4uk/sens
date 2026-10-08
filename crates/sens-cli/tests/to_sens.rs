@@ -209,3 +209,51 @@ fn top_level_surface_redefinition_has_identical_result_after_migration() {
         .to_string();
     assert_eq!(actual, expected);
 }
+#[test]
+fn exact_domain_mode_rewrites_current_d3_d4_heads_at_real_width() {
+    let source = "(функція (x) (перше (сполучити x ())))\n";
+    let path = temp_file("exact-domain", source);
+
+    let check = tool()
+        .args(["--check", "--exact-domain", path.to_str().expect("utf8 path")])
+        .output()
+        .expect("run exact-domain check");
+    assert_eq!(check.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&check.stdout).contains("convertible=3"));
+
+    let apply = tool()
+        .args(["--exact-domain", path.to_str().expect("utf8 path")])
+        .output()
+        .expect("run exact-domain apply");
+    assert!(
+        apply.status.success(),
+        "{}",
+        String::from_utf8_lossy(&apply.stderr)
+    );
+
+    let rewritten = std::fs::read_to_string(&path).expect("read rewritten exact source");
+    let _ = std::fs::remove_file(&path);
+    assert_eq!(rewritten, "(0010 (x) (101 (111 x ())))\n");
+
+    let clean = tool()
+        .args(["--check", "--exact-domain", "/dev/null"])
+        .output()
+        .expect("run clean exact-domain check");
+    assert_ne!(clean.status.code(), Some(0));
+}
+
+#[test]
+fn exact_domain_mode_fails_closed_for_unresolved_surface() {
+    let source = "(+ 1 2)\n";
+    let path = temp_file("exact-domain-blocked", source);
+
+    let check = tool()
+        .args(["--check", "--exact-domain", path.to_str().expect("utf8 path")])
+        .output()
+        .expect("run exact-domain blocked check");
+    let _ = std::fs::remove_file(&path);
+
+    assert_eq!(check.status.code(), Some(1));
+    let stdout = String::from_utf8_lossy(&check.stdout);
+    assert!(stdout.contains("convertible=0"), "{stdout}");
+}
