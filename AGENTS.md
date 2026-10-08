@@ -269,3 +269,14 @@ Guard decision semantics are Lisp-owned. The Rust boundary validates the exact `
 For NLP tasks on the documented WSL setup, the historical prepared environment is `/home/agents/GitHub/FlagEmbedding/.venv/bin/python`; prepared indexes/config live under `/home/agents/GitHub/vault-semantic-mcp/`. Treat these absolute paths as environment-specific operational notes, not semantic authority; verify they still exist before depending on them.
 
 Semantic classification / embeddings are hypothesis generators, not authority. Candidate clauses still pass through validation/advice/reasoning rather than being written directly into knowledge state.
+
+
+## Облік потрібних функцій під час міграції: D10 (2026-10-08)
+
+Кожен агент, що запускає мігратор на **справжній прикладній бібліотеці**, має залишати у задачах [#4013](https://github.com/juv4uk/sens/issues/4013) та відповідній донорській D10-задачі (для науки — [#4301](https://github.com/juv4uk/sens/issues/4301)) конкретні результати, **коли виявив нову функцію**.
+
+Для кожної потреби запиши: шлях бібліотеки, історичний запис, очікуваний зміст та арність, кількість входжень, уже наявні коди/значення D1–D9, перевірку дублювання або похідності, посилання на тест/CI, рішення `EXISTING`/`SELECT-CANDIDATE`/`HOLD`/`MECHANISM-ONLY`. Новим кандидатам D10 ставити `coordinate=null`; D10 лишається дослідницьким, нерaтифікованим.
+
+**Не робити смітника D10:** D4 DEFINE, D5 TIMES, D8 DIVIDE, D9 функції одиниць вимірювання/наукових констант та окремі D24/D48/D96 числа не стають D10 лише тому, що старий мігратор їх не розпізнає. Проблема кодування, поверхні, транспорту, ранера чи відсутній виконавчий механізм — задача мігратора/компілятора, а не автоматично новий семантичний резидент.
+
+Не змінювати ратифіковані доменні таблиці задля успішного тесту. Якщо доказу еквівалентності немає — блокувати небезпечне переписування й прикладати контрприклад до задачі.
