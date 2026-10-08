@@ -13,6 +13,9 @@ Example:
     --out /tmp/sens-stage --report /tmp/sens-migration.json
 
 Repeat --source for an atomic batch, or pass --manifest approved.json.\nEvery manifest entry is independently SHA-pinned before execution; supplied\nSHA256 values must match actual source bytes or the whole run is BLOCKED.
+Eight-bit W8 source is ambiguous between old SID8 and ratified current D8.
+Use --source-era auto (default; BLOCK), or --source-era legacy/current only
+when source provenance proves that era.
 Use --dry-run to classify without writing. The original .lisp never changes.
 For protected publication, use an output directory outside the source tree.
 """
@@ -168,6 +171,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, required=True, help="separate artifact staging root")
     ap.add_argument("--report", type=Path, required=True, help="JSON admission/blocker report")
     ap.add_argument("--dry-run", action="store_true", help="admission only, no .sens files")
+    ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
+                    help="auto blocks W8 ambiguity; specify a proven historical/current source era")
     args = ap.parse_args(argv)
 
     try:
@@ -193,7 +198,7 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="sens-admission-") as directory:
             manifest = Path(directory) / "pinned.json"
             manifest.write_text(json.dumps(pinned, sort_keys=True) + "\n", encoding="utf-8")
-            invoke(manifest, root, output, report, args.dry_run)
+            invoke(manifest, root, output, report, args.dry_run, args.source_era)
 
         result = json.loads(report.read_text(encoding="utf-8"))
         verified = verify_published(result, output, args.dry_run)
@@ -205,9 +210,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
 
-def invoke(manifest: Path, root: Path, output: Path, report: Path, dry_run: bool) -> None:
+def invoke(manifest: Path, root: Path, output: Path, report: Path,
+           dry_run: bool, source_era: str = "auto") -> None:
     command = [sys.executable, str(TRANSACTION), str(root), "--manifest",
-               str(manifest), "--out", str(output), "--report", str(report)]
+               str(manifest), "--out", str(output), "--report", str(report),
+               "--source-era", source_era]
     if dry_run:
         command.append("--dry-run")
     process = subprocess.run(command, cwd=root, capture_output=True, text=True)

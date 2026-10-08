@@ -112,10 +112,15 @@ def load_engine_maps(root: Path):
     return legacy, my, upper, text7
 
 
-def migrate_one(source: Path, root: Path, maps, original: bytes | None = None):
+def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *, source_era: str = "auto"):
     """Migrate ONE immutable source snapshot; never hash/re-read another version."""
     legacy, my, upper, text7 = maps
-    resolver = engine.Resolver(legacy, my, upper)
+    # The owner-ratified D8 shares 8 visible bits with historical SID8.
+    # Never silently treat current D8 as old SID8. Only explicit legacy
+    # provenance may activate the historical successor mapping.
+    foundation = engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
+    admitted_d8 = foundation["domains"].get("D8", {}).get("residents", {})
+    resolver = engine.Resolver(legacy, my, upper, source_era, admitted_d8)
     if original is None:
         original = source.read_bytes()
     source_text = original.decode("utf-8")
@@ -138,6 +143,7 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None):
         "path": rel.as_posix(),
         "output": dest.as_posix(),
         "source_sha256": hashlib.sha256(original).hexdigest(),
+        "source_era": source_era,
         "typed_word_sha256": engine.typed_sha256(words),
         "physical_sha256": hashlib.sha256(payload).hexdigest(),
         "bytes": len(payload),
@@ -184,6 +190,8 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
+                    help="auto blocks ambiguous W8; legacy requires proven historical source; current preserves ratified D8")
     args = ap.parse_args()
 
     root = args.root.resolve()
@@ -233,7 +241,8 @@ def main() -> int:
                     raise engine.SensT5Error(
                         f"source sha256 mismatch: expected {expected_sha}, got {actual_sha}"
                     )
-                dest_path, payload, row = migrate_one(source, root, maps, original)
+                dest_path, payload, row = migrate_one(source, root, maps, original,
+                                                      source_era=args.source_era)
                 source_snapshots[rel] = original
                 if expected_sha is not None:
                     row["manifest_sha256"] = expected_sha
@@ -274,6 +283,7 @@ def main() -> int:
     report = {
         "schema": "sens-approved-t5-migration/v2",
         "mode": "dry-run" if args.dry_run else "write-transaction",
+        "source_era": args.source_era,
         "manifest": str(manifest),
         "root": str(root),
         "out": str(output),

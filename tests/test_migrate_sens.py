@@ -122,7 +122,7 @@ class OperationalMigrationTests(unittest.TestCase):
             command = [
                 sys.executable, str(CLI), "--root", str(ROOT),
                 "--manifest", str(approved), "--out", str(out),
-                "--report", str(report), "--dry-run",
+                "--report", str(report), "--dry-run", "--source-era", "legacy",
             ]
             result = subprocess.run(command, cwd=t, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -141,6 +141,25 @@ class OperationalMigrationTests(unittest.TestCase):
             self.assertEqual(blocked.returncode, 2, blocked.stdout + blocked.stderr)
             self.assertIn("BLOCKED", blocked.stderr)
             self.assertFalse(report.exists())
+
+    def test_real_w8_auto_blocks_but_explicit_legacy_is_exact_physical_t5(self):
+        real = "tests/fixtures/core1-third-domain-canary/third.lisp"
+        expected = ROOT / real.replace(".lisp", ".sens")
+        with tempfile.TemporaryDirectory(prefix="sens-w8-era-") as tmp:
+            t = Path(tmp)
+            out, report = t / "binary", t / "report.json"
+            cmd = [sys.executable, str(CLI), "--root", str(ROOT),
+                   "--source", real, "--out", str(out), "--report", str(report)]
+            blocked = subprocess.run(cmd, cwd=t, capture_output=True, text=True)
+            self.assertEqual(blocked.returncode, 2, blocked.stdout + blocked.stderr)
+            self.assertFalse((out / real.replace(".lisp", ".sens")).exists())
+            self.assertEqual(json.loads(report.read_text())["source_era"], "auto")
+            accepted = subprocess.run(cmd + ["--source-era", "legacy"],
+                                      cwd=t, capture_output=True, text=True)
+            self.assertEqual(accepted.returncode, 0, accepted.stdout + accepted.stderr)
+            self.assertEqual((out / real.replace(".lisp", ".sens")).read_bytes(),
+                             expected.read_bytes())
+            self.assertEqual(json.loads(report.read_text())["source_era"], "legacy")
 
     def test_outside_root_is_required(self):
         with tempfile.TemporaryDirectory() as tmp:
