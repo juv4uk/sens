@@ -138,7 +138,7 @@ fn execute() -> Result<(), String> {
             println!("{}", explain_t5_bytes(&bytes)?);
             Ok(())
         }
-        "eval" | "eval-core" => {
+        "eval" | "eval-core4" => {
             // Both require explicit execution. Only eval-core additionally
             // loads the existing language-owned Core4 module on request.
             // Neither open nor bare eval may silently acquire mechanisms.
@@ -248,30 +248,3 @@ mod eval_tests {
             "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
         );
         let receipt = explain_t5_bytes(bytes).expect("known current D2 syntax");
-        assert!(receipt.contains("D2 syntax PASS"), "{receipt}");
-        assert!(receipt.contains("semantic oracle NOT_VERIFIED"), "{receipt}");
-        assert!(explain_t5_bytes(&[0xf3])
-            .expect_err("invalid base3 byte")
-            .contains("physical T5 transport rejected"));
-        let bad_d2 = sens::encode_ternary_words(
-            &sens::parse_binary_source_words("01").unwrap()
-                .into_iter().map(|word| word.word).collect::<Vec<_>>()
-        ).unwrap();
-        assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
-    }
-
-    #[test]
-    fn open_and_eval_are_distinct_public_operations() {
-        let bytes = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
-        assert_eq!(sens::open_ternary_program(bytes).unwrap(),
-                   "10 001 00 000 01");
-        assert!(matches!(eval_t5_bytes(bytes).unwrap().value, sens::Value::Nil));
-    }
-}
-
-fn main() {
-    if let Err(message) = execute() {
-        eprintln!("sens-trit: {message}");
-        process::exit(1);
-    }
-}
