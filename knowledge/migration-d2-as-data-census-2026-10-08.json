@@ -1,0 +1,77 @@
+{
+  "schema": "sens-d2-as-data-census/1",
+  "issue": 4462,
+  "source_scan": {
+    "workflow_run": 37810152645,
+    "scan_sha": "f1fcfca81b2c4c7d76c6e53c17cdac6e1d3d9220",
+    "artifact": "sens-t5-migration-preview",
+    "artifact_sha256": "7c972193ced938394456b901c175cd47a02348d3c21da686be9fd6537915cb5f"
+  },
+  "checked_against_main": "a4e5032466f1e4e31042639559592aeb2d296ced",
+  "law": "D2 words 00/01/10/11 are structural control only; they are never ordinary semantic payload by convenience",
+  "entries": [
+    {
+      "path": "demo-tasks.lisp",
+      "git_blob_sha1": "826265ea821068ab6e868586e44fec220c9b768b",
+      "reason": "D2 word 10 is structural control only; it cannot be ordinary data",
+      "route": "semantic-source-review",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "lib/domains/d2.lisp",
+      "git_blob_sha1": "484451cf3c73047158a7886e0874335a9bf8d7f9",
+      "reason": "D2 word 00 is structural control only; it cannot be an executable head",
+      "route": "d2-authority-table-nonprogram",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "lib/machine/capability-axis.lisp",
+      "git_blob_sha1": "9007318a6b3167109ac85f5ed5d117f97c6a4135",
+      "reason": "D2 word 10 is structural control only; it cannot be ordinary data",
+      "route": "machine-evidence-review",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "lib/machine/isa/sse.lisp",
+      "git_blob_sha1": "1d656ae7df051bee2b7f95f1458879f99f43e6d1",
+      "reason": "D2 word 10 is structural control only; it cannot be ordinary data",
+      "route": "nonprogram-isa-catalogue",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "lib/machine/isa/sse2.lisp",
+      "git_blob_sha1": "6b96ee4aecbff026c2bbbc65fe0b4d4e620abb85",
+      "reason": "D2 word 10 is structural control only; it cannot be ordinary data",
+      "route": "nonprogram-isa-catalogue",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "lib/machine/isa/ssse3.lisp",
+      "git_blob_sha1": "e40e72fcf54724e5f4783b88512aff30c57fb08a",
+      "reason": "D2 word 00 is structural control only; it cannot be ordinary data",
+      "route": "nonprogram-isa-catalogue",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "lib/machine/isa/x86-base.lisp",
+      "git_blob_sha1": "4b753fa1ffdd2ca936a262abb691c74ad222711f",
+      "reason": "D2 word 01 is structural control only; it cannot be ordinary data",
+      "route": "nonprogram-isa-catalogue",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "lib/machine/profile/current-domain-x86-64.lisp",
+      "git_blob_sha1": "1b1d25feae7f9e7df43851563266008e108400ee",
+      "reason": "D2 word 10 is structural control only; it cannot be ordinary data",
+      "route": "machine-profile-data-review",
+      "status": "BLOCKED"
+    },
+    {
+      "path": "tests/fixtures/x86-64-instruction-set-witness.lisp",
+      "git_blob_sha1": "a5551fc94d9e1d68900009d424c37e911d8504a2",
+      "reason": "D2 word 10 is structural control only; it cannot be ordinary data",
+      "route": "executable-fixture-review",
+      "status": "BLOCKED"
+    }
+  ]
+}
