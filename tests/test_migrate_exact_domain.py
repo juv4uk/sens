@@ -26,7 +26,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
 
     def rewrite(self, source: str) -> str:
         edits = mod.plan(source, self.surfaces, self.legacy)
-        return mod.apply(source, edits)
+        return mod.apply_edits(source, edits)
 
     def test_current_d3_surfaces_and_legacy_sid_resolve_to_same_successor(self):
         for source in ("(car x)", "(CAR x)", "(перше x)", "(00000101 x)"):
