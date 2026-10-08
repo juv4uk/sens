@@ -13,7 +13,7 @@
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
 (00001001 native-first-parity-corpus
-  (quote
+  (00000001
     ((car-cons-u64-zero
        (car (cons 0 1))
        0
@@ -44,14 +44,14 @@
       ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
        (1)
        (00100111
-         (quote native-first-parity-witness)
-         (quote (status pass))
-         (00100111 (quote cases) (00101000 native-first-parity-corpus))))
+         (00000001 native-first-parity-witness)
+         (00000001 (status pass))
+         (00100111 (00000001 cases) (00101000 native-first-parity-corpus))))
       ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
        (0)
        (00100111
-         (quote native-first-parity-witness)
-         (quote (status fail))
-         (00100111 (quote verdicts) native-first-parity-verdicts))))))
+         (00000001 native-first-parity-witness)
+         (00000001 (status fail))
+         (00100111 (00000001 verdicts) native-first-parity-verdicts))))))
 
 (native-first-parity-witness)
