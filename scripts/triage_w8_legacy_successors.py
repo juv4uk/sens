@@ -192,25 +192,31 @@ def add_owner_reviewed_source_scope(next_report: dict, census: dict) -> dict:
     """
     summary = census.get("summary")
     blocked = census.get("blocked_sources")
-    if not isinstance(summary, dict) or not isinstance(blocked, list):
+    candidates = census.get("mechanical_candidates")
+    if not isinstance(summary, dict) or not isinstance(blocked, list) or not isinstance(candidates, list):
         raise TriageError("canonical source-scope original ledger unavailable")
     if len(blocked) != summary.get("blocked"):
         raise TriageError("canonical source-scope blocked count disagreement")
+    if len(candidates) != summary.get("mechanical_candidates"):
+        raise TriageError("canonical source-scope candidate count disagreement")
+    if len(blocked) + len(candidates) != summary.get("scanned"):
+        raise TriageError("canonical source-scope scanned accounting disagreement")
     if census.get("source_era") != "auto" or (
         summary.get("physical_outputs_created") != 0
         or summary.get("original_unpaired_executables_migrated_by_this_tool") != 0
     ):
         raise TriageError("source-kind authority must be no-write source-era auto")
     by_path: dict[str, dict] = {}
-    for row in blocked:
+    for row in [*blocked, *candidates]:
         if not isinstance(row, dict):
             raise TriageError("canonical source row is malformed")
         path = row.get("path")
         sha = row.get("source_git_blob_sha")
         scope = row.get("source_scope")
+        status = row.get("status")
         if not isinstance(path, str) or path in by_path:
             raise TriageError("duplicate/malformed canonical source scope")
-        if (row.get("status") != "BLOCKED"
+        if (status not in {"BLOCKED", "CANDIDATE_NOT_ADMITTED"}
                 or row.get("same_stem_sens_already_exists") is not False
                 or row.get("independent_semantic_oracle_passed") is not False
                 or row.get("source_is_executable_proven") is not False
