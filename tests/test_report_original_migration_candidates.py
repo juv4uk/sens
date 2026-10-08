@@ -286,5 +286,58 @@ class OriginalCandidateTests(unittest.TestCase):
         self.assertEqual(mod.blocker_coordinate_cohorts([]), [])
 
 
+    def test_reviewed_source_manifests_are_sha_pinned_nonexecutables(self):
+        # All 25 ISA + 21 schema + 8 evidence + 13 fixture envelopes
+        # were individually reviewed and landed on main; they are data.
+        entries = mod.load_nonprogram_classification(ROOT)
+        self.assertEqual(len(entries), 67)
+        self.assertEqual(
+            {name: sum(e["cohort"] == name for e in entries.values())
+             for name in ("isa", "schema", "evidence", "expr-record")},
+            {"isa": 25, "schema": 21, "evidence": 8, "expr-record": 13},
+        )
+        self.assertTrue(all(not e["automatic_sens_companion"]
+                            and not e["semantic_oracle_admitted"]
+                            for e in entries.values()))
+        for path in ("lib/core1.lisp", "lib/machine/block.lisp",
+                     "benchmarks/arithmetic.lisp"):
+            self.assertNotIn(path, entries)
+
+    def test_data_manifest_rejects_source_drift_and_existing_physical_sens(self):
+        p = self.root / "lib/machine/isa/sample.lisp"
+        p.parent.mkdir(parents=True)
+        p.write_text("(isa-catalogue/1)\n", encoding="utf-8")
+        hash1 = mod.git_blob_sha(p)
+        entry = mod._checked_nonprogram_entry(
+            self.root, "lib/machine/isa/sample.lisp", hash1)
+        self.assertEqual(entry["source_git_blob_sha"], hash1)
+        self.assertEqual(entry["source_class"], "NONPROGRAM_DATA_REVIEWED")
+        with self.assertRaisesRegex(ValueError, "drift"):
+            mod._checked_nonprogram_entry(
+                self.root, "lib/machine/isa/sample.lisp", "a" * 40)
+        p.with_suffix(".sens").write_bytes(b"forbidden")
+        with self.assertRaisesRegex(ValueError, "unproven physical pair"):
+            mod._checked_nonprogram_entry(
+                self.root, "lib/machine/isa/sample.lisp", hash1)
+
+    def test_forged_executable_cannot_enter_data_isa_cohort(self):
+        p = self.root / "lib/core1.lisp"
+        p.parent.mkdir(parents=True)
+        p.write_text("(DEFINE x (QUOTE ()))\n", encoding="utf-8")
+        f = self.root / "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
+        f.parent.mkdir(parents=True)
+        f.write_text(json.dumps({
+            "schema": "sens-migration-nonprogram-manifest/1",
+            "issue": 4460,
+            "automatic_sens_companion": False,
+            "entries": [{
+                "path": "lib/core1.lisp",
+                "git_blob_sha1": mod.git_blob_sha(p)
+            }] * 25,
+        }), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "mis-scoped ISA catalogue"):
+            mod.load_nonprogram_classification(self.root)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -50,6 +50,10 @@ class OperationalMigrationTests(unittest.TestCase):
             dry = subprocess.run(self.args(out, report, "--dry-run"),
                                  cwd=temp, capture_output=True, text=True)
             self.assertEqual(dry.returncode, 0, dry.stdout + dry.stderr)
+            dry_receipt = json.loads(dry.stdout)
+            self.assertEqual(dry_receipt["status"], "DRY_RUN_READY")
+            self.assertEqual(dry_receipt["semantic_oracle"], "NOT_VERIFIED")
+            self.assertFalse(dry_receipt["release_admitted"])
             self.assertFalse((out / "tests/fixtures/migration-d1-cond-cohort/branch.sens").exists())
             dry_report = json.loads(report.read_text(encoding="utf-8"))
             self.assertEqual(dry_report["summary"]["files_ready"], 1)
@@ -58,6 +62,10 @@ class OperationalMigrationTests(unittest.TestCase):
             run = subprocess.run(self.args(out, report),
                                  cwd=temp, capture_output=True, text=True)
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            physical_receipt = json.loads(run.stdout)
+            self.assertEqual(physical_receipt["status"], "PHYSICAL_AND_D2_VERIFIED_ORACLE_PENDING")
+            self.assertEqual(physical_receipt["semantic_oracle"], "NOT_VERIFIED")
+            self.assertFalse(physical_receipt["release_admitted"])
             target = out / "tests/fixtures/migration-d1-cond-cohort/branch.sens"
             self.assertTrue(target.is_file())
             self.assertEqual(target.read_bytes(), EXPECTED.read_bytes())
@@ -65,7 +73,22 @@ class OperationalMigrationTests(unittest.TestCase):
             record = json.loads(report.read_text(encoding="utf-8"))
             self.assertEqual(record["summary"]["published"], 1)
             self.assertEqual(runner.verify_published(record, out, False), 1)
+            self.assertEqual(record["files"][0]["d2_syntax"], "PASS")
+            self.assertEqual(record["files"][0]["semantic_oracle"], "NOT_VERIFIED")
             self.assertTrue((ROOT / FIXTURE).is_file())
+
+            # A stale or forged lower-level receipt cannot claim successful
+            # admission, even when bytes and the source SHA still match.
+            missing_reader = {**record, "d2_reader": "/nonexistent/sens-trit"}
+            with self.assertRaises(runner.MigrationBlocked):
+                runner.verify_published(missing_reader, out, False)
+            for property_name, forged in (
+                ("d2_syntax", "NOT_VERIFIED"),
+                ("semantic_oracle", "PASS"),
+            ):
+                altered = {**record, "files": [{**record["files"][0], property_name: forged}]}
+                with self.subTest(field=property_name), self.assertRaises(runner.MigrationBlocked):
+                    runner.verify_published(altered, out, False)
 
             second = subprocess.run(self.args(out, report),
                                     cwd=temp, capture_output=True, text=True)

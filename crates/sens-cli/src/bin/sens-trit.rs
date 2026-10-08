@@ -3,12 +3,16 @@
 //!
 //! `sens-trit open file.sens` або `sens-trit file.sens` показує лише
 //! точні binary words з ОДНИМ пробілом між ними. Фізично `.sens`
-//! залишається packed byte file. Дослідне EOS=22 не ратифіковане.
+//! залишається packed byte file. EOF задає довжина файла, без EOS=22.
+//!
+//! Explicit `eval file.sens` invokes the *current pure SENS oracle*. This is
+//! NOT an implicit action on opening a file, not historical Lisp equivalence,
+//! and not a grant to host I/O/GPU/external processes.
 
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | verify path.lisp)\n       sens-trit path.sens  # open as spaced binary words";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | eval path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -38,6 +42,19 @@ fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
              info.word_count, info.semantic_bits, info.encoded_trits,
              info.physical_bytes, info.tail_trits);
     Ok(())
+}
+
+/// Run the explicitly requested SENS program on the current capability-free
+/// evaluator. Transport identity, D2 structural parsing, then semantic eval
+/// are independent gates; success does not prove that an old Lisp source
+/// has the same behavior or that a D24+/host effect is admitted.
+fn eval_t5_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    let visible = sens::open_ternary_program(bytes)
+        .map_err(|e| format!("physical T5/D2 decode rejected: {e:?}"))?;
+    let forms = sens::parse_canonical_binary(&visible)
+        .map_err(|e| format!("canonical SENS parser rejected: {}", e.render(&visible)))?;
+    sens::eval_parsed_expressions(&forms, &mut sens::Session::default())
+        .map_err(|e| format!("current SENS oracle rejected: {}", e.render(&visible)))
 }
 
 fn execute() -> Result<(), String> {
@@ -79,6 +96,18 @@ fn execute() -> Result<(), String> {
             print!("{}", sens::render_ternary_words_vertical(&words));
             Ok(())
         }
+        "eval" => {
+            // Explicit opt-in. Merely opening, viewing or decoding a .sens
+            // NEVER invokes the evaluator, and Session::default provides
+            // no host capabilities or permission to execute OS commands.
+            let bytes = read_sens(path)?;
+            let result = eval_t5_bytes(&bytes)?;
+            for output in result.output {
+                println!("{output}");
+            }
+            println!("{}", result.value);
+            Ok(())
+        }
         "verify" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
@@ -86,6 +115,52 @@ fn execute() -> Result<(), String> {
             verify_companion(&projection, &bytes)
         }
         _ => Err(USAGE.into()),
+    }
+}
+
+#[cfg(test)]
+mod eval_tests {
+    use super::*;
+
+    #[test]
+    fn canonical_quote_legacy_fixture_runs_on_current_pure_oracle() {
+        // Existing SHA-independent regression fixture: migrated D3 QUOTE of
+        // D3 EMPTY. The exact result is Value::Nil, not just a successful
+        // decode of the transport bytes.
+        let bytes = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
+        let evaluated = eval_t5_bytes(bytes).expect("current canonical T5 oracle");
+        assert!(matches!(evaluated.value, sens::Value::Nil));
+    }
+
+    #[test]
+    fn two_top_level_forms_share_one_file_without_special_eos() {
+        let bytes = include_bytes!("../../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
+        let evaluated = eval_t5_bytes(bytes).expect("sequential canonical execution");
+        assert!(matches!(
+            evaluated.value,
+            sens::Value::Pair(ref head, ref tail)
+                if matches!(head.as_ref(), sens::Value::Nil)
+                && matches!(tail.as_ref(), sens::Value::Nil)
+        ));
+    }
+
+    #[test]
+    fn physical_or_structural_corruption_can_never_be_executed() {
+        assert!(eval_t5_bytes(&[0xf3]).is_err()); // base-3 out of range
+        assert!(eval_t5_bytes(&[0xf2]).is_err()); // five excess pad trits
+        let unbalanced_close = sens::encode_ternary_words(
+            &sens::parse_binary_source_words("01").unwrap()
+                .into_iter().map(|token| token.word).collect::<Vec<_>>()
+        ).unwrap();
+        assert!(eval_t5_bytes(&unbalanced_close).is_err()); // D2 CLOSE alone
+    }
+
+    #[test]
+    fn open_and_eval_are_distinct_public_operations() {
+        let bytes = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
+        assert_eq!(sens::open_ternary_program(bytes).unwrap(),
+                   "10 001 00 000 01");
+        assert!(matches!(eval_t5_bytes(bytes).unwrap().value, sens::Value::Nil));
     }
 }
 
