@@ -1,0 +1,25 @@
+name: safe-batch-t5-migration
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/migrate-t5-batch.py'
+      - 'tests/test_migrate_t5_batch.py'
+      - '.github/workflows/migrate-t5-batch.yml'
+      - 'docs/MIGRATE-T5-BATCH.uk.md'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/migrate-t5-batch.py'
+      - 'tests/test_migrate_t5_batch.py'
+      - '.github/workflows/migrate-t5-batch.yml'
+permissions:
+  contents: read
+jobs:
+  real-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test real Core1 physical T5 conversion and fail-closed batch
+        run: python3 -m unittest discover -s tests -p test_migrate_t5_batch.py -v
