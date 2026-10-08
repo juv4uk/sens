@@ -11,8 +11,10 @@ on:
       - "docs/uk-t5-triplet-bounded.uk.md"
       - "tests/fixtures/migration-d1-cond-cohort/**"
       - "tests/fixtures/migration-pair-cohort-main/**"
+      - "tests/fixtures/migration-d4-selector-cohort/**"
       - "lib/domains/d1.lisp"
       - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
       - "scripts/migrate-three-pass.py"
       - "scripts/sens_t5_codec.py"
   push:
@@ -26,8 +28,10 @@ on:
       - "docs/uk-t5-triplet-bounded.uk.md"
       - "tests/fixtures/migration-d1-cond-cohort/**"
       - "tests/fixtures/migration-pair-cohort-main/**"
+      - "tests/fixtures/migration-d4-selector-cohort/**"
       - "lib/domains/d1.lisp"
       - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
       - "scripts/migrate-three-pass.py"
       - "scripts/sens_t5_codec.py"
   workflow_dispatch:
@@ -94,6 +98,29 @@ jobs:
         run: cargo test -q -p sens --test migration_d1_cond_cohort -- --nocapture
       - name: Independently run current Rust D3 CAR CDR CONS oracle
         run: cargo test -q -p sens --test migration_pair_car_cdr_cons_main -- --nocapture
+      - name: Read-only verified Ukrainian D4 CAAR source / T5 / ASCII view
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-d4-selector-cohort/caar.lisp \
+            --sens tests/fixtures/migration-d4-selector-cohort/caar.sens \
+            --view tests/fixtures/migration-d4-selector-cohort/caar \
+            > "$RUNNER_TEMP/d4-caar-uk-proof.json"
+          python3 - "$RUNNER_TEMP/d4-caar-uk-proof.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          rec=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert rec["physical_bytes"] == 20
+          assert rec["canonical_uk_roundtrip"] and rec["canonical_view_roundtrip"]
+          assert rec["physical_T5_roundtrip"] is True
+          assert rec["runtime_oracle_admitted_by_this_audit"] is False
+          assert rec["old_originals_migrated_by_this_audit"] == 0
+          print("Proven source/T5/view; independent D4 evaluator is next step")
+          PY
+      - name: Independently execute current Rust D4 CAAR T5
+        run: cargo test -q -p sens --test migration_d4_selector_cohort -- --nocapture
+
       - name: Prove verification produced no writes
         shell: bash
         run: |
