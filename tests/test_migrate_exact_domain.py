@@ -35,7 +35,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
 
     def test_comments_quotes_strings_and_arguments_are_not_migrated(self):
         source = '; (car x)\n\'(car x)\n(\"car\" car)\n(car (quote car) x)\n'
-        expected = '; (car x)\n\'(car x)\n(\"car\" 100)\n(100 (quote car) x)\n'
+        expected = '; (car x)\n\'(car x)\n(\"car\" car)\n(100 (001 car) x)\n'
         self.assertEqual(self.rewrite(source), expected)
 
     def test_already_exact_heads_are_idempotent(self):
