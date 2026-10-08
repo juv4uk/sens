@@ -53,5 +53,5 @@ jobs:
         with:
           name: real-original-block-proof
           path: |
-            \${{ runner.temp }}/block-report.json
+            ${{ runner.temp }}/block-report.json
           if-no-files-found: error
