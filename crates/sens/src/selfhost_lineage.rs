@@ -287,7 +287,7 @@ mod tests {
         };
 
         assert_eq!(lineage.version, (LINEAGE_VERSION_MAJOR, LINEAGE_VERSION_MINOR));
-        assert_eq!(lineage.authority_bundle.contract_version, "11.6");
+        assert_eq!(lineage.authority_bundle.contract_version, "11.8");
         assert_eq!(lineage.generation_c1.produced_by, "C0");
         assert_eq!(lineage.generation_c2.produced_by, "C1");
         assert!(lineage.fresh_bootstrap_proof.no_c1_reuse);
