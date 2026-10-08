@@ -1,0 +1,37 @@
+name: Selected original Lisp to verified physical T5
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate-selected-lisp.py"
+      - "tests/test_migrate_selected_lisp.py"
+      - "docs/migrate-selected-lisp.uk.md"
+      - ".github/workflows/migrate-selected-lisp.yml"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-selected-lisp.py"
+      - "tests/test_migrate_selected_lisp.py"
+      - ".github/workflows/migrate-selected-lisp.yml"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  selected-original-t5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build actual SENS T5 opener / D2 grammar gate
+        run: cargo build -p sens-cli --bin sens-trit
+      - name: SHA-pinned single-file physical T5 CLI, negative controls, no-clobber
+        run: python3 -m unittest discover -s tests -p 'test_migrate_selected_lisp.py' -v
+      - name: Independently execute current admitted D4 CAAR oracle
+        run: cargo test -p sens --test migration_d4_selector_cohort -- --nocapture
