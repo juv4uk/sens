@@ -25,6 +25,13 @@ fn is_explicit_non_implementation(rel: &str) -> bool {
     rel.starts_with("lib/generated/")
         || rel.starts_with("lib/surface/")
         || rel == "lib/machine/encoding/coverage.lisp"
+        // #4242/A3: generated pinned #175 evidence inventory.  Every one of its
+        // 1176 convertible heads sits in a `(pair ...)` data row, exactly the
+        // "data position" this gate's contract says must neither be counted
+        // nor rewritten.  Same category, same 1176 rows, same generator output
+        // family as the `coverage.lisp` exclusion above; the inventory stays
+        // under `scripts/silicon-census.py`.
+        || rel == "lib/machine/encoding/admitted-iclass-index.lisp"
 }
 
 fn is_language_definition_file(rel: &str) -> bool {
@@ -129,10 +136,18 @@ fn completion_gate_exclusions_are_narrow_and_explicit() {
     assert!(is_explicit_non_implementation(
         "lib/generated/function-table.lisp"
     ));
+    assert!(is_explicit_non_implementation(
+        "lib/machine/encoding/admitted-iclass-index.lisp"
+    ));
 
     assert!(!is_explicit_non_implementation("lib/meta-eval.lisp"));
     assert!(!is_explicit_non_implementation(
         "lib/machine/dispatch/native-first-coverage.lisp"
     ));
     assert!(!is_explicit_non_implementation("lib/core4.lisp"));
+    // The exclusion is one file, not the generator's whole output family:
+    // the sibling projection produced by the same script keeps the gate.
+    assert!(!is_explicit_non_implementation(
+        "lib/machine/encoding/admission-iclass-projection.lisp"
+    ));
 }
