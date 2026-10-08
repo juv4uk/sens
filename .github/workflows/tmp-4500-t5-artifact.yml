@@ -16,7 +16,9 @@ jobs:
       - name: Build exact physical T5 candidates
         run: |
           set -euo pipefail
+          rm -rf /tmp/sens-mirror
           mkdir -p /tmp/sens-mirror
+          set +e
           python3 scripts/migrate-three-pass.py . \
             --out /tmp/sens-mirror \
             --foundation knowledge/d1-d7-foundation.json \
@@ -43,7 +45,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: t5-candidates-4500
-          path: /tmp/candidates/
+          path: /tmp/sens-mirror/
           if-no-files-found: error
           retention-days: 1
           overwrite: true
