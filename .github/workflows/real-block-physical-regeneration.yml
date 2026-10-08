@@ -1,0 +1,72 @@
+name: real block physical regeneration
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block.lisp"
+      - "lib/machine/block.sens"
+      - "scripts/migrate-to-sens-codes.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/test_sens_code_migration.py"
+      - ".github/workflows/real-block-physical-regeneration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build current Rust T5/D2 reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Regenerate block with fixed canonical source migrator
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate-to-sens-codes.py . \
+            --foundation knowledge/d1-d7-foundation.json \
+            --sens-mirror "$RUNNER_TEMP/block-mirror" \
+            --report "$RUNNER_TEMP/block-report.json"
+          python3 - "$RUNNER_TEMP/block-report.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding="utf-8"))
+          rows=[x for x in r["files"] if x["path"]=="lib/machine/block.lisp"]
+          print(json.dumps(rows,ensure_ascii=False,indent=2))
+          assert len(rows)==1 and rows[0]["status"]=="sens-written"
+          PY
+          target="$RUNNER_TEMP/block-mirror/lib/machine/block.sens"
+          test -f "$target"
+          target/debug/sens-trit open "$target"
+      - name: Verify source unchanged and candidate differs from stale bytes
+        run: |
+          set -euo pipefail
+          test "$(git hash-object -- lib/machine/block.lisp)" = "200201b741787c4e144ad4194848acf51d7b439e"
+          cmp -s "$RUNNER_TEMP/block-mirror/lib/machine/block.sens" lib/machine/block.sens && {
+            echo "candidate still equals stale artifact"
+            exit 1
+          } || true
+          python3 - "$RUNNER_TEMP/block-mirror/lib/machine/block.sens" <<'PY'
+          import hashlib,sys
+          from pathlib import Path
+          import sys as _sys
+          _sys.path.insert(0,"scripts")
+          from sens_t5_codec import decode_bytes,typed_sha256
+          p=Path(sys.argv[1]).read_bytes()
+          words=decode_bytes(p)
+          print("bytes",len(p))
+          print("sha256",hashlib.sha256(p).hexdigest())
+          print("typed",typed_sha256(words))
+          assert typed_sha256(words) == "0951a7c253644c5783e7317269e354959817932e2bf9016114760fc76f769922"
+          PY
+      - name: Upload regenerated candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-block-physical-candidate
+          path: |
+            \${{ runner.temp }}/block-mirror/lib/machine/block.sens
+            \${{ runner.temp }}/block-report.json
+          if-no-files-found: warn
