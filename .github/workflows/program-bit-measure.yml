@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
   push:
     branches: [main]
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
 
@@ -22,3 +24,20 @@ jobs:
       - name: Prove canonical source bit measure and dense packing parity
         run: |
           cargo test -p sens source_packing::tests::
+          cargo test -p sens ternary_transport::tests::
+      - name: Verify actual nontext .sens ternary-byte encoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- verify "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/decoded.words"
+          printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/expected.words"
+          cmp "$RUNNER_TEMP/decoded.words" "$RUNNER_TEMP/expected.words"
+          test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          printf '\000' >> "$RUNNER_TEMP/sample.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens"; then
+            echo "ERROR: extra bytes after end of ternary program accepted"
+            exit 1
+          fi
