@@ -81,7 +81,10 @@
   (00001000 (plan)
     (native-first-execute-native-result
       (x86-call-admitted-u64
-        (native-first-plan-second pl(00001001 native-first-execute-plan
+        (native-first-plan-second plan)
+        (native-first-plan-third plan)))))
+
+(00001001 native-first-execute-plan
   (00001000 (plan)
     (00000111
       ((101
@@ -119,8 +122,6 @@
        (native-first-execution-rejected
          (00000001 invalid-plan)
          (1110 (00000001 unknown-native-first-plan) plan))))))
-
-0001 unknown-native-first-plan) plan))))))))))
 
 (00001001 native-first-execute-expression
   (00001000 (expression)
