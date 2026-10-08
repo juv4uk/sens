@@ -467,14 +467,11 @@ mod tests {
     #[test]
     fn exact_domain_named_definition_supports_recursive_symbol_calls() {
         let source = "\
-(0011 compiler-true
-  (0010 (seed)
-    (010 seed)))
 (0011 walk
   (0010 (xs)
     (110
-      ((010 xs) (001 done))
-      ((compiler-true xs) (walk (011 xs))))))
+      ((010 xs) (1) (001 done))
+      ((101 (001 left) (001 left)) (1) (walk (011 xs))))))
 (walk (001 (a b)))
 ";
         let parsed = parse_mixed_exact_domain(source).expect("recursive exact-domain source parses");
