@@ -16,12 +16,12 @@ on:
 
 jobs:
   structural-economy:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: Runner identity
-        run: nvidia-smi || true
+      - name: Python identity
+        run: python3 --version
       - name: Replay Pareto and dividend controls
         run: python3 scripts/check-domain-altitude-economy.py
       - name: Emit synthetic report
