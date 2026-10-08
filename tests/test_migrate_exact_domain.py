@@ -19,6 +19,7 @@ sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 
 
+
 class ExactDomainMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -63,6 +64,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
     def test_legacy_list_successor_is_not_narrowed_into_nonadmitted_d4(self):
         source = "(00100111 evaluator-fallback expression)\n"
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
+
 
 
 
