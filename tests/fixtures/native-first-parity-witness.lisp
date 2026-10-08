@@ -33,7 +33,7 @@
        (перше (сполучити 9007199254740991 7))
        9007199254740991
        pure
-       not-applicable))
+       not-applicable)))
 
 (00001001 native-first-parity-verdicts
   (native-first-parity-run native-first-parity-corpus))
