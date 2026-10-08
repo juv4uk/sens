@@ -176,13 +176,13 @@ class ReadinessContractTests(unittest.TestCase):
 
     def test_real_pinned_data_registry_has_all_67_unaltered_records(self):
         rows = REAL_REVIEWED_LOADER(ROOT)
-        self.assertEqual(len(rows), 67)
+        self.assertEqual(len(rows), 76)
         cohort_counts = {
             group: sum(item["cohort"] == group for item in rows.values())
-            for group in ("isa", "schema", "evidence", "expr-record")
+            for group in ("domain-table", "isa", "schema", "evidence", "expr-record")
         }
         self.assertEqual(cohort_counts, {
-            "isa": 25, "schema": 21, "evidence": 8, "expr-record": 13,
+            "domain-table": 9, "isa": 25, "schema": 21, "evidence": 8, "expr-record": 13,
         })
         self.assertNotIn("lib/machine/block.lisp", rows)
         self.assertTrue(all(
@@ -215,7 +215,8 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertEqual(report["source_scope"]["active_or_unknown_originals"], 1)
         self.assertEqual(sum(report["actionable_executable_unknown_queues"].values()), 1)
         self.assertEqual(report["physical_outputs_created"], [])
-        self.assertEqual(report["candidate_rows"][0]["source_scope"],
+        self.assertEqual(next(r for r in report["candidate_rows"]
+                              if r["path"] == path)["source_scope"],
                          "NONPROGRAM_DATA_REVIEWED")
         self.assertFalse(report["candidate_rows"][0]["semantic_oracle_admitted"])
 
