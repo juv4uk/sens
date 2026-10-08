@@ -126,17 +126,19 @@ jobs:
           assert summary['reps'] == 3
           assert summary['api_boundary'] == 'test-only private access; no public semantic API added'
           deltas = summary['stage_deltas']
-          assert isinstance(deltas['profile_setup_i_refs'], int)
+          # Matched-prefix stage deltas are signed evidence. A negative
+          # value is a real improvement (or measurement noise) and must not
+          # fail the structural evidence gate.
           for field in (
+              'profile_setup_i_refs',
               'first_macro_i_refs',
               'fasl_decode_freshness_i_refs',
               'decoded_core_eval_i_refs',
               'stable_peer_projection_i_refs',
+              'production_loader_gap_i_refs',
               'full_loader_delta_i_refs',
           ):
               assert isinstance(deltas[field], int)
-              assert deltas[field] >= 0
-          assert isinstance(deltas['production_loader_gap_i_refs'], int)
           PY
 
       - uses: actions/upload-artifact@v4
