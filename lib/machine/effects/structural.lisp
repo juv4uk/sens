@@ -16,9 +16,9 @@
 (00001001 machine-effect-structural-slot?
   (00001000 (slot)
     (00000111
-      ((00000011 slot (00000001 field0)) t t)
-      ((00000011 slot (00000001 field1)) t t)
-      ((00000011 0 0) t (00000001 ())))))
+      ((00000011 slot (00000001 field0)) 1 t)
+      ((00000011 slot (00000001 field1)) 1 t)
+      ((00000011 0 0) 1 (00000001 ())))))
 
 (00001001 machine-effect-bounded-two-field-store-load
   (00001000 (first-value second-value first-slot second-slot observed-slot)
