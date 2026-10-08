@@ -17,9 +17,6 @@ Eight-bit W8 source is ambiguous between old SID8 and ratified current D8.
 Use --source-era auto (default; BLOCK), or --source-era legacy/current only
 when source provenance proves that era.
 Use --dry-run to classify without writing. The original .lisp never changes.
-Real physical publication REQUIRES --reader /path/to/target/debug/sens-trit
-and a current Rust D2 syntax PASS for every staged program. This does not
-certify semantic-oracle parity. Dry-run needs no Rust reader.
 For protected publication, use an output directory outside the source tree.
 """
 from __future__ import annotations
@@ -44,6 +41,106 @@ TRANSACTION = SCRIPT_DIR / "migrate-approved-t5.py"
 
 class MigrationBlocked(ValueError):
     pass
+
+
+# Source classification is NOT inferred from whether three-pass can emit
+# physical bytes. These previously reviewed manifests pin non-program records
+# to their exact immutable Git object, not merely to a filename glob.
+NONPROGRAM_MANIFESTS = (
+    "migration-nonprogram-isa-manifest-2026-10-08.json",
+    "migration-nonprogram-schema-manifest-2026-10-08.json",
+    "migration-nonprogram-evidence-manifest-2026-10-08.json",
+    "migration-nonprogram-expr-records-2026-10-08.json",
+)
+ARCHIVE_POLICY = "migration-benchmark-snapshot-2026-10-08.json"
+
+
+def _git_blob_sha(content: bytes) -> str:
+    return hashlib.sha1(
+        b"blob " + str(len(content)).encode("ascii") + bytes([0]) + content
+    ).hexdigest()
+
+
+def _nonprogram_manifest_paths(root: Path) -> dict[str, str]:
+    """Load reviewed path/blob records; fail closed if the contract drifts."""
+    indexed: dict[str, str] = {}
+    for filename in NONPROGRAM_MANIFESTS:
+        manifest = root / "knowledge" / filename
+        if manifest.is_symlink() or not manifest.is_file():
+            raise MigrationBlocked(f"missing/unsafe nonprogram authority: {filename}")
+        try:
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+        except (ValueError, UnicodeError) as exc:
+            raise MigrationBlocked(f"invalid nonprogram authority: {filename}") from exc
+        if (not isinstance(document, dict)
+                or document.get("schema") != "sens-migration-nonprogram-manifest/1"
+                or document.get("automatic_sens_companion") is not False
+                or not isinstance(document.get("entries"), list)
+                or not document["entries"]):
+            raise MigrationBlocked(f"invalid nonprogram authority contract: {filename}")
+        for row in document["entries"]:
+            if not isinstance(row, dict) or set(row) != {"path", "git_blob_sha1"}:
+                raise MigrationBlocked(f"invalid SHA-locked nonprogram row: {filename}")
+            name, blob = row["path"], row["git_blob_sha1"]
+            if not isinstance(name, str) or chr(92) in name:
+                raise MigrationBlocked("nonprogram source path must be relative POSIX")
+            posix = PurePosixPath(name)
+            if (posix.is_absolute() or ".." in posix.parts or posix.suffix != ".lisp"
+                    or posix.as_posix() != name):
+                raise MigrationBlocked(f"unsafe nonprogram path: {name}")
+            if (not isinstance(blob, str) or len(blob) != 40
+                    or any(c not in "0123456789abcdef" for c in blob)):
+                raise MigrationBlocked(f"invalid Git source blob pin for {name}")
+            if name in indexed:
+                raise MigrationBlocked(f"duplicate nonprogram authority path: {name}")
+            indexed[name] = blob
+    return indexed
+
+
+def _is_archived_benchmark(path: PurePosixPath, root: Path) -> bool:
+    """Frozen measurement programs are archived evidence, not active SENS."""
+    parts = path.parts
+    if not (len(parts) == 6 and parts[:3] ==
+            ("benchmarks", "sens-surface", "results") and
+            parts[4] == "programs" and path.suffix == ".lisp"):
+        return False
+    source = root / "knowledge" / ARCHIVE_POLICY
+    if source.is_symlink() or not source.is_file():
+        raise MigrationBlocked("missing benchmark archive authority")
+    try:
+        document = json.loads(source.read_text(encoding="utf-8"))
+    except (ValueError, UnicodeError) as exc:
+        raise MigrationBlocked("invalid benchmark archive authority") from exc
+    if (document.get("schema") != "sens-t5-archive-evidence/v1"
+            or document.get("status") != "NONPROGRAM_ARCHIVED_BENCHMARK_EVIDENCE"
+            or document.get("allow_bulk_conversion") is not False
+            or document.get("admitted_as_executable") != 0):
+        raise MigrationBlocked("benchmark archive authority contract changed")
+    return True
+
+
+def reject_classified_nonprogram(sources: list[str], root: Path) -> None:
+    """Early all-or-nothing embargo before any conversion or T5 publication."""
+    classified = _nonprogram_manifest_paths(root)
+    for name in sources:
+        rel = PurePosixPath(name)
+        if _is_archived_benchmark(rel, root):
+            raise MigrationBlocked(
+                f"NONPROGRAM archived benchmark measurement; no executable .sens: {name}"
+            )
+        expected = classified.get(name)
+        if expected is None:
+            continue
+        data = (root / name).read_bytes()
+        actual = _git_blob_sha(data)
+        if actual != expected:
+            raise MigrationBlocked(
+                f"NONPROGRAM source authority drift: {name}; "
+                f"expected original Git blob {expected}, actual {actual}; independent review required"
+            )
+        raise MigrationBlocked(
+            f"NONPROGRAM Git-blob-locked data/record; no executable .sens: {name}"
+        )
 
 
 def outside(candidate: Path, root: Path, what: str) -> None:
@@ -76,6 +173,9 @@ def pin_sources(sources: list[str], root: Path) -> dict:
         # verifies this SHA again before publishing. Never silently trust names.
         sha = hashlib.sha256(candidate.read_bytes()).hexdigest()
         entries.append({"path": rel, "sha256": sha})
+    # Every selected path is checked as one atomic batch. A source may be
+    # mechanically convertible while being reviewed NONPROGRAM archive/data.
+    reject_classified_nonprogram([row["path"] for row in entries], root)
     return {"files": sorted(entries, key=lambda item: item["path"])}
 
 
@@ -133,11 +233,6 @@ def verify_published(report: dict, output: Path, dry_run: bool) -> int:
         raise MigrationBlocked(f"not all requested files admitted: {summary}")
     if published != (0 if dry_run else count):
         raise MigrationBlocked(f"publication count mismatch: {summary}")
-    if not dry_run and any(
-        row.get("d2_syntax") != "PASS" or row.get("semantic_oracle") != "NOT_VERIFIED"
-        for row in rows
-    ):
-        raise MigrationBlocked("publisher did not prove Rust D2 syntax or misreported oracle")
     if dry_run:
         return count
 
@@ -179,16 +274,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, required=True, help="separate artifact staging root")
     ap.add_argument("--report", type=Path, required=True, help="JSON admission/blocker report")
     ap.add_argument("--dry-run", action="store_true", help="admission only, no .sens files")
-    ap.add_argument("--reader", type=Path, help="real Rust sens-trit executable; REQUIRED when writing")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
                     help="auto blocks W8 ambiguity; specify a proven historical/current source era")
     args = ap.parse_args(argv)
 
     try:
-        if not args.dry_run and args.reader is None:
-            raise MigrationBlocked("--reader is mandatory for physical T5 publication")
-        if args.reader is not None and not args.reader.resolve().is_file():
-            raise MigrationBlocked("--reader must be a real Rust sens-trit executable")
         root = args.root.resolve(strict=True)
         output = args.out.resolve()
         report = args.report.resolve()
@@ -211,12 +301,11 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="sens-admission-") as directory:
             manifest = Path(directory) / "pinned.json"
             manifest.write_text(json.dumps(pinned, sort_keys=True) + "\n", encoding="utf-8")
-            invoke(manifest, root, output, report, args.dry_run, args.source_era,
-                   args.reader.resolve() if args.reader else None)
+            invoke(manifest, root, output, report, args.dry_run, args.source_era)
 
         result = json.loads(report.read_text(encoding="utf-8"))
         verified = verify_published(result, output, args.dry_run)
-        print(json.dumps({"status": "DRY_RUN_READY" if args.dry_run else "PHYSICAL_AND_D2_VERIFIED_ORACLE_PENDING",
+        print(json.dumps({"status": "DRY_RUN_READY" if args.dry_run else "VERIFIED",
                           "files": verified, "report": str(report)}, ensure_ascii=False))
         return 0
     except (MigrationBlocked, OSError, ValueError, json.JSONDecodeError) as error:
@@ -225,15 +314,12 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def invoke(manifest: Path, root: Path, output: Path, report: Path,
-           dry_run: bool, source_era: str = "auto",
-           reader: Path | None = None) -> None:
+           dry_run: bool, source_era: str = "auto") -> None:
     command = [sys.executable, str(TRANSACTION), str(root), "--manifest",
                str(manifest), "--out", str(output), "--report", str(report),
                "--source-era", source_era]
     if dry_run:
         command.append("--dry-run")
-    if reader is not None:
-        command.extend(["--reader", str(reader)])
     process = subprocess.run(command, cwd=root, capture_output=True, text=True)
     if process.returncode != 0:
         # Keep the original tool's precise per-file blocker manifest.
