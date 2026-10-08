@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/publish_verified_uk_triplets.py"
+      - "tests/test_publish_verified_uk_triplets.py"
       - "tests/test_verify_uk_t5_triplet.py"
       - ".github/workflows/verify-uk-t5-triplet.yml"
       - ".github/workflows/release-preflight.yml"
@@ -21,6 +23,8 @@ on:
     branches: [main]
     paths:
       - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/publish_verified_uk_triplets.py"
+      - "tests/test_publish_verified_uk_triplets.py"
       - "tests/test_verify_uk_t5_triplet.py"
       - ".github/workflows/verify-uk-t5-triplet.yml"
       - ".github/workflows/release-preflight.yml"
@@ -46,6 +50,22 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: No-clobber atomic exporter of verified Ukrainian T5 triplets
+        run: python3 -m unittest discover -s tests -p 'test_publish_verified_uk_triplets.py' -v
+      - name: Reproduce two known canonical uk → T5 → spaced-view canaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/uk-triplet-export"
+          python3 scripts/publish_verified_uk_triplets.py \
+            tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            tests/fixtures/migration-d4-selector-cohort/caar.lisp \
+            --mirror "$RUNNER_TEMP/uk-triplet-export" \
+            --report "$RUNNER_TEMP/uk-triplet-export-report.json" --write
+          cmp tests/fixtures/migration-d1-cond-cohort/branch.sens "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d1-cond-cohort/branch.sens"
+          cmp tests/fixtures/migration-d1-cond-cohort/branch "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d1-cond-cohort/branch"
+          cmp tests/fixtures/migration-d4-selector-cohort/caar.sens "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d4-selector-cohort/caar.sens"
+          cmp tests/fixtures/migration-d4-selector-cohort/caar "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d4-selector-cohort/caar"
       - name: Current Ukrainian canonical-source and malicious triple negatives
         run: python3 -m unittest discover -s tests -p 'test_verify_uk_t5_triplet.py' -v
       - name: Read-only exact real existing triple, emit source/physical/view SHA
