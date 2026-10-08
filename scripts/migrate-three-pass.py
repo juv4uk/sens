@@ -38,6 +38,7 @@ if SCRIPTS not in sys.path:
 
 from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXTS = {".lisp"}
 SKIP_DIRS = {".git","target","node_modules","vendor","dist","build",".venv","venv","__pycache__"}
 
@@ -461,10 +462,16 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     return words
 
 class Resolver:
-    def __init__(self,legacy,my,upper):
+    def __init__(self,legacy,my,upper,source_era="legacy",admitted_d8=None):
+        if source_era not in ("auto","legacy","current"):
+            raise ValueError(f"invalid source era {source_era!r}")
+        if source_era=="current" and not admitted_d8:
+            raise MigrationError("current D8 source requires an owner-ratified D8 foundation")
         self.legacy=legacy
         self.my=my
         self.upper=upper
+        self.source_era=source_era
+        self.admitted_d8=set(admitted_d8 or ())
         self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     def head(self,tok: Tok):
         t=tok.text
@@ -479,10 +486,21 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # Pass 1: every exact-eight executable head belongs to the old
-        # SID8/Sens8 generation. It may migrate only through a proven current
-        # successor; old/unassigned bytes never fall through as text.
+        # The same eight visible bits can be historical SID8 or CURRENT D8.
+        # Auto must BLOCK: without source-era provenance these are ambiguous.
+        # Current D8 is left exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
+            if self.source_era=="auto":
+                raise MigrationError(
+                    f"ambiguous W8 executable head {t}: choose --source-era legacy or current",tok
+                )
+            if self.source_era=="current":
+                if t not in self.admitted_d8:
+                    raise MigrationError(
+                        f"unratified current D8 executable head {t}",tok
+                    )
+                self.counts["already-exact"]+=1
+                return [t],"already-exact"
             if t not in self.legacy:
                 raise MigrationError(
                     f"legacy-unmapped SID8/Sens8 {t}: no historical registry row",
@@ -681,19 +699,28 @@ def main():
     ap.add_argument("root", type=Path)
     ap.add_argument("--out", type=Path, required=True,
                     help="окрема вихідна папка; .lisp НЕ змінюється")
-    ap.add_argument("--foundation", type=Path, required=True)
-    ap.add_argument("--domain-surfaces", type=Path, required=True)
-    ap.add_argument("--semantic-generated", type=Path, required=True)
-    ap.add_argument("--semantic-registry", type=Path, required=True)
-    ap.add_argument("--necessary-forms", type=Path, required=True)
-    ap.add_argument("--historical-map", type=Path, required=True)
-    ap.add_argument("--text7", type=Path, required=True)
-    ap.add_argument("--report", type=Path, required=True)
+    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d9-foundation.json")
+    ap.add_argument("--domain-surfaces", type=Path, default=REPO_ROOT / "crates/sens/src/domain_surface_registry_generated.rs")
+    ap.add_argument("--semantic-generated", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry_generated.rs")
+    ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
+    ap.add_argument("--necessary-forms", type=Path, default=REPO_ROOT / "crates/sens/src/eval/necessary_forms_generated.rs")
+    ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
+    ap.add_argument("--text7", type=Path, default=REPO_ROOT / "crates/sens/src/text7_projection_generated.rs")
+    ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
+    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="legacy",
+                    help="legacy = сумісний старий SID8; auto блокує W8; current = ратифікований D8")
+    ap.add_argument("--unpaired-only", action="store_true",
+                    help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
+    if args.report is None:
+        args.report = args.out.with_name(args.out.name + ".report.json")
 
     data = load_foundation(args.foundation)
+    if args.source_era=="current" and "D8" not in data.get("current_domains",()):
+        ap.error("--source-era=current requires a foundation ratifying D8")
+    admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
     legacy, my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
         args.semantic_registry, args.necessary_forms, args.historical_map
@@ -706,14 +733,34 @@ def main():
               "pass2-my-lisp": 0, "pass3-lisp15": 0, "passthrough-head": 0}
 
     root = args.root.resolve()
-    # Stable sorted manifest; never traverse generated .sens as Lisp source.
-    paths = sorted(source_files(root))
+    # An explicit .lisp path means ONE input file, not an empty directory scan.
+    # A directory still gives the stable sorted tree inventory.
+    if root.is_file():
+        if root.suffix.lower() not in SOURCE_EXTS:
+            ap.error("a single source must be a .lisp file")
+        base_root = root.parent
+        paths = [root]
+    elif root.is_dir():
+        base_root = root
+        paths = sorted(source_files(root))
+    else:
+        ap.error(f"input path does not exist: {root}")
+    skipped_paired = []
+    if args.unpaired_only:
+        candidates = []
+        for path in paths:
+            partner = path.with_suffix(".sens")
+            if partner.exists() or partner.is_symlink():
+                skipped_paired.append(str(path.relative_to(base_root)))
+            else:
+                candidates.append(path)
+        paths = candidates
     seen_destinations = set()
     for path in paths:
-        rel = path.resolve().relative_to(root)
+        rel = path.resolve().relative_to(base_root)
         dest = sens_destination(rel)
         target = args.out / dest
-        resolver = Resolver(legacy, my, upper)
+        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8)
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")
@@ -783,10 +830,15 @@ def main():
             "3": "Lisp-I/1.5 head -> proven current D3-D6",
         },
         "blocked_policy": "no unresolved textual source can become physical .sens",
+        "source_era": args.source_era,
+        "only_unpaired": args.unpaired_only,
+        "skipped_paired_paths": skipped_paired,
+        "source_era_law": "auto blocks ambiguous W8 heads; legacy maps SID8; current preserves ratified D8",
         "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
         "mode": "dry-run" if args.dry_run else "write-new-only",
         "summary": {
             "files_seen": len(paths),
+            "files_skipped_paired": len(skipped_paired),
             "files_written": written if not args.dry_run else 0,
             "files_would_write": written if args.dry_run else 0,
             "files_blocked": blocked, "resolved_heads": totals,

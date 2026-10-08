@@ -255,5 +255,131 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(state["summary"]["files_written"], 0)
 
 
+    def test_w8_source_era_is_explicit_and_never_guessed(self):
+        # Same W8 word is historical CAR in SID8 but a distinct ratified D8
+        # resident today; the CLI must never silently choose one.
+        authority = mod.load_foundation(ROOT / "knowledge" / "d1-d9-foundation.json")
+        d8 = authority["domains"]["D8"]["residents"]
+        self.assertIn("00000101", d8)
+        source = "(00000101 ())\\n".replace("\\n", "\n")
+        with self.assertRaisesRegex(mod.MigrationError, "ambiguous W8 executable"):
+            mod.migrate_file(
+                source, mod.Resolver(self.legacy, self.my, self.upper,
+                                     source_era="auto", admitted_d8=d8),
+                self.text7,
+            )
+        legacy = mod.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
+        self.assertEqual(mod.migrate_file(source, legacy, self.text7),
+                         "10 100 00 000 01\n")
+        current = mod.Resolver(self.legacy, self.my, self.upper,
+                               source_era="current", admitted_d8=d8)
+        self.assertEqual(mod.migrate_file(source, current, self.text7),
+                         "10 00000101 00 000 01\n")
+        self.assertEqual(current.counts["already-exact"], 1)
+        with self.assertRaisesRegex(mod.MigrationError, "owner-ratified D8"):
+            mod.Resolver(self.legacy, self.my, self.upper, source_era="current")
+
+    def test_single_lisp_file_cli_and_w8_current_authority(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "one.lisp"
+            original = "(00000101 ())\n"
+            source.write_text(original, encoding="utf-8")
+            def run(era, foundation):
+                dst = base / ("out-" + era)
+                report = base / (era + ".json")
+                command = [
+                    sys.executable, str(SCRIPT), str(source),
+                    "--out", str(dst), "--foundation", str(foundation),
+                    "--domain-surfaces", str(DOMAIN_SURFACES),
+                    "--semantic-generated", str(SEMANTIC_GENERATED),
+                    "--semantic-registry", str(SEMANTIC_REGISTRY),
+                    "--necessary-forms", str(NECESSARY),
+                    "--historical-map", str(HISTORICAL),
+                    "--text7", str(TEXT7),
+                    "--report", str(report), "--source-era", era,
+                ]
+                process = subprocess.run(command, capture_output=True, text=True)
+                return process, dst, json.loads(report.read_text(encoding="utf-8"))
+            current_foundation = ROOT / "knowledge" / "d1-d9-foundation.json"
+            blocked, blocked_out, blocked_report = run("auto", current_foundation)
+            self.assertEqual(blocked.returncode, 2, blocked.stderr)
+            self.assertEqual(blocked_report["summary"]["files_seen"], 1)
+            self.assertEqual(blocked_report["summary"]["files_blocked"], 1)
+            self.assertIn("ambiguous W8", blocked_report["files"][0]["reason"])
+            self.assertFalse((blocked_out / "one.sens").exists())
+            legacy, legacy_out, legacy_report = run("legacy", FOUNDATION)
+            self.assertEqual(legacy.returncode, 0, legacy.stderr)
+            self.assertEqual(mod.decode_bytes((legacy_out / "one.sens").read_bytes()),
+                             ["10", "100", "00", "000", "01"])
+            current, current_out, current_report = run("current", current_foundation)
+            self.assertEqual(current.returncode, 0, current.stderr)
+            binary = current_out / "one.sens"
+            self.assertEqual(mod.decode_bytes(binary.read_bytes()),
+                             ["10", "00000101", "00", "000", "01"])
+            self.assertEqual(current_report["summary"]["files_seen"], 1)
+            self.assertEqual(current_report["summary"]["files_written"], 1)
+            self.assertEqual(current_report["source_era"], "current")
+            self.assertEqual(source.read_text(encoding="utf-8"), original)
+            again, _, _ = run("current", current_foundation)
+            self.assertEqual(again.returncode, 2)  # write-new-only never clobbers
+
+
+    def test_unpaired_only_ignores_preexisting_sens_pairs(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "src"
+            source.mkdir()
+            (source / "old.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
+            (source / "paired.lisp").write_text("()\\n".replace("\\n", "\n"), encoding="utf-8")
+            already = mod.encode_projection("000")
+            (source / "paired.sens").write_bytes(already)
+            out = base / "mirror"
+            report = base / "report.json"
+            result = subprocess.run([
+                sys.executable, str(SCRIPT), str(source),
+                "--out", str(out), "--foundation", str(FOUNDATION),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--historical-map", str(HISTORICAL),
+                "--text7", str(TEXT7), "--report", str(report),
+                "--source-era", "legacy", "--unpaired-only",
+            ], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual((out / "old.sens").read_bytes(), already)
+            self.assertFalse((out / "paired.sens").exists())
+            self.assertEqual((source / "paired.sens").read_bytes(), already)
+            self.assertEqual((source / "old.lisp").read_text(), "()\n")
+            summary = json.loads(report.read_text())
+            self.assertTrue(summary["only_unpaired"])
+            self.assertEqual(summary["skipped_paired_paths"], ["paired.lisp"])
+            self.assertEqual(summary["summary"]["files_seen"], 1)
+            self.assertEqual(summary["summary"]["files_skipped_paired"], 1)
+            self.assertEqual(summary["summary"]["files_written"], 1)
+
+
+    def test_minimal_cli_defaults_to_current_ratified_foundation(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "old.lisp"
+            source.write_text("()\n", encoding="utf-8")
+            out = base / "mirror"
+            done = subprocess.run(
+                [sys.executable, str(SCRIPT), str(source), "--out", str(out)],
+                cwd=base, text=True, capture_output=True,
+            )
+            self.assertEqual(done.returncode, 0, done.stderr)
+            self.assertEqual((out / "old.sens").read_bytes(),
+                             mod.encode_projection("000"))
+            report = base / "mirror.report.json"
+            self.assertTrue(report.is_file())
+            state = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(state["summary"]["files_written"], 1)
+            self.assertEqual(state["summary"]["files_seen"], 1)
+            self.assertEqual(source.read_text(), "()\n")
+
+
 if __name__=="__main__":
     unittest.main()
