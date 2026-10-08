@@ -4,8 +4,8 @@
 ; it does NOT claim every XED operand/addressing form is implemented.
 
 (x86-admission-iclass-projection/1
-  (admission-head-count #b10111010)
-  (partial-pair-count #b1111010)
+  (admission-head-count #b10111110)
+  (partial-pair-count #b1111110)
   (orphan-count #b0)
   (partial X86-BASE "ADD" (heads add-r64-r64 add-r64-imm32))
   (partial SSE2 "ADDSD" (heads addsd-xmm-xmm))
@@ -126,6 +126,10 @@
   (partial X86-BASE "TEST" (heads test-r64-r64 test-r64-imm32))
   (partial BMI1 "TZCNT" (heads tzcnt-r64-r64))
   (partial SSE2 "UCOMISD" (heads ucomisd-xmm-xmm))
+  (partial AVX "VADDPD" (heads vaddpd-xmm-xmm-xmm))
+  (partial AVX "VADDPS" (heads vaddps-xmm-xmm-xmm))
+  (partial AVX "VANDNPD" (heads vandnpd-xmm-xmm-xmm))
+  (partial AVX "VANDNPS" (heads vandnps-xmm-xmm-xmm))
   (partial X86-BASE "XCHG" (heads xchg-r64-r64))
   (partial X86-BASE "XOR" (heads xor-r64-r64 xor-r64-imm32))
   (partial SSE2 "XORPD" (heads xorpd-xmm-xmm))
