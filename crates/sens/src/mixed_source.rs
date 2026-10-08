@@ -12,6 +12,7 @@
 
 use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
 use crate::{parse_binary_source_words, DomainIdentity, ErrorKind, LanguageError};
+use std::collections::HashSet;
 use std::rc::Rc;
 
 /// Parse ordinary mixed Lisp source, then lift only exact-width callable heads
@@ -19,13 +20,91 @@ use std::rc::Rc;
 ///
 /// This is a migration bridge, not a new canonical wire syntax.
 pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError> {
-    crate::parser::parse(source)?
+    let expressions = crate::parser::parse(source)?;
+    // Call-head source spellings are NOT authoritative domain identities
+    // when this very source declares the spelling as a DEFINE or LAMBDA
+    // binding. Protect all such names across this source until the owner
+    // lexical-slot resolver can prove their exact scopes. Conservatively
+    // declining a projection is safer than silently calling a builtin.
+    let mut bound_names = HashSet::new();
+    for expression in &expressions {
+        collect_source_bindings(source, expression, &mut bound_names);
+    }
+    expressions
         .into_iter()
-        .map(|expression| lift_expression(source, expression, 0))
+        .map(|expression| lift_expression(source, expression, 0, &bound_names))
         .collect()
 }
 
-fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+fn binding_form(source: &str, head: &Expr) -> Option<u16> {
+    let spelling = source_spelling(source, head)?;
+    match spelling {
+        "0010" => return Some(2),
+        "0011" => return Some(3),
+        _ => {}
+    }
+    let identity = crate::semantic_registry::exact_uk_callable_for_source_head(spelling)?;
+    (identity.width() == 4).then_some(identity.packed_bits())
+        .filter(|bits| matches!(bits, 2 | 3))
+}
+
+fn is_source_quote(source: &str, head: &Expr) -> bool {
+    if source_spelling(source, head) == Some("001") {
+        return true;
+    }
+    source_spelling(source, head)
+        .and_then(crate::semantic_registry::exact_uk_callable_for_source_head)
+        .is_some_and(|id| id.width() == 3 && id.packed_bits() == 1)
+}
+
+/// Source-language binder inventory, not an inference of runtime identity.
+/// Ignore quoted records and ambiguous old exact-eight forms entirely.
+fn collect_source_bindings(source: &str, expression: &Expr, names: &mut HashSet<String>) {
+    let ExprKind::List(items) = &expression.kind else { return };
+    let Some(head) = items.first() else { return };
+    if is_source_quote(source, head) || is_opaque_legacy_w8_head(source, head) {
+        return;
+    }
+    let binding = binding_form(source, head);
+    if let Some(kind) = binding {
+        if let Some(target) = items.get(1) {
+            if kind == 3 {
+                if let ExprKind::Symbol(_) = &target.kind {
+                    if let Some(name) = source_spelling(source, target) {
+                        names.insert(name.to_owned());
+                    }
+                }
+            } else if let ExprKind::List(parameters) = &target.kind {
+                for parameter in parameters.iter() {
+                    if let ExprKind::Symbol(_) = &parameter.kind {
+                        if let Some(name) = source_spelling(source, parameter) {
+                            names.insert(name.to_owned());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // Some D2/COND clauses have a LIST as their first element, not an
+    // executable callable head. Its test expression may itself introduce
+    // a nested binder; do not lose it merely because the parent is a list.
+    if matches!(&head.kind, ExprKind::List(_)) {
+        collect_source_bindings(source, head, names);
+    }
+    for (index, child) in items.iter().enumerate().skip(1) {
+        if binding.is_some() && index == 1 {
+            continue;
+        }
+        collect_source_bindings(source, child, names);
+    }
+}
+
+fn lift_expression(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+    bound_names: &HashSet<String>,
+) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
@@ -38,7 +117,7 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
     match kind {
         ExprKind::List(items) if !items.is_empty() => {
             let mut lifted = items.to_vec();
-            lifted[0] = lift_head(source, lifted[0].clone())?;
+            lifted[0] = lift_head(source, lifted[0].clone(), bound_names)?;
 
             // Legacy exact-eight heads belong to the ordinary compatibility
             // parser. They are OPAQUE while their historical source-era and
@@ -61,7 +140,7 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
             if !quote_data {
                 if is_exact_cond(&lifted[0]) {
                     for clause in lifted.iter_mut().skip(1) {
-                        *clause = lift_cond_clause(source, clause.clone(), depth + 1)?;
+                        *clause = lift_cond_clause(source, clause.clone(), depth + 1, bound_names)?;
                     }
                 } else {
                     // D4 LAMBDA parameter declarations and D4 DEFINE binding
@@ -73,7 +152,7 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
                         if binding_head && index == 1 {
                             continue;
                         }
-                        *item = lift_expression(source, item.clone(), depth + 1)?;
+                        *item = lift_expression(source, item.clone(), depth + 1, bound_names)?;
                     }
                 }
             }
@@ -87,12 +166,18 @@ fn lift_expression(source: &str, expression: Expr, depth: u32) -> Result<Expr, L
     }
 }
 
-fn lift_head(source: &str, head: Expr) -> Result<Expr, LanguageError> {
+fn lift_head(source: &str, head: Expr, bound_names: &HashSet<String>) -> Result<Expr, LanguageError> {
     let Some(spelling) = source_spelling(source, &head) else {
         return Ok(head);
     };
 
     if !spelling.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+        if bound_names.contains(spelling) {
+            // Locals and user-defined callables take precedence over the
+            // surface registry. A future lexical resolver can refine this
+            // conservative whole-source refusal into precise scopes.
+            return Ok(head);
+        }
         // Human-facing .lisp stays Ukrainian. Lift ONLY a ratified callable
         // list HEAD into the same exact DomainIdentity as its binary spelling.
         // This is reader-time projection, not runtime dispatch by names.
@@ -138,13 +223,14 @@ fn lift_cond_clause(
     source: &str,
     clause: Expr,
     depth: u32,
+    bound_names: &HashSet<String>,
 ) -> Result<Expr, LanguageError> {
     let Expr { kind, span } = clause;
     match kind {
         ExprKind::List(items) => {
             let mut lifted = items.to_vec();
             for item in &mut lifted {
-                *item = lift_expression(source, item.clone(), depth + 1)?;
+                *item = lift_expression(source, item.clone(), depth + 1, bound_names)?;
             }
             Ok(Expr {
                 kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -259,6 +345,55 @@ mod tests {
             assert!(!matches!(&items[0].kind, ExprKind::DomainIdentity(_)),
                 "{source} must not become a ratified current domain from spelling");
         }
+    }
+
+    #[test]
+    fn local_callable_shadows_ratified_uk_surface_in_lambda_body() {
+        let forms = parse_mixed_exact_domain("(функція (перше) (перше x))")
+            .expect("local shadowing remains valid source");
+        let ExprKind::List(lambda) = &forms[0].kind else { panic!("lambda"); };
+        assert!(matches!(&lambda[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 4 && id.packed_bits() == 0b0010));
+        let ExprKind::List(body) = &lambda[2].kind else { panic!("body"); };
+        assert!(matches!(&body[0].kind, ExprKind::Symbol(name)
+            if &**name == "перше"), "shadowed head must NOT become D3 CAR");
+    }
+
+    #[test]
+    fn globally_defined_callable_shadows_builtin_even_before_its_definition() {
+        let forms = parse_mixed_exact_domain(
+            "(перше x) (визначити перше (функція (x) x)) (перше y)"
+        ).expect("whole source binding inventory");
+        assert_eq!(forms.len(), 3);
+        for index in [0, 2] {
+            let ExprKind::List(call) = &forms[index].kind else { panic!("call"); };
+            assert!(matches!(&call[0].kind, ExprKind::Symbol(name)
+                if &**name == "перше"), "user callable wins over ratified built-in");
+        }
+    }
+
+    #[test]
+    fn quoted_definition_is_data_and_does_not_shadow_builtin() {
+        let forms = parse_mixed_exact_domain(
+            "(як-є (визначити перше (функція (x) x))) (перше x)"
+        ).expect("quote remains data");
+        let ExprKind::List(call) = &forms[1].kind else { panic!("call"); };
+        assert!(matches!(&call[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b100),
+            "quoted pseudo-definition must not bind source");
+    }
+
+    #[test]
+    fn nested_local_shadowed_callable_is_not_promoted_inside_cond_clause() {
+        let parsed = parse_mixed_exact_domain(
+            "(функція (перше) (за-умовою ((атом? x) (перше x))))"
+        ).expect("nested clause");
+        let ExprKind::List(lambda) = &parsed[0].kind else { panic!("lambda"); };
+        let ExprKind::List(cond) = &lambda[2].kind else { panic!("cond"); };
+        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(body) = &clause[1].kind else { panic!("branch"); };
+        assert!(matches!(&body[0].kind, ExprKind::Symbol(name)
+            if &**name == "перше"), "local binding is not D3 CAR even in COND");
     }
 
     #[test]
