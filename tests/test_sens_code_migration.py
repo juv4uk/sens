@@ -128,6 +128,12 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.binary(original)
 
+    def test_single_cell_text7_atom_is_not_a_bare_d7_codepoint(self):
+        # A bare one-cell W7 value is D7 data, not a Lisp identifier.
+        # No D2 Text7 atom/binder framing law has been ratified yet.
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+            self.binary("(a)\\n")
+
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
         converted, hits, shadowed = self.binary("(CONS (CAR x) (CDR y))\n")
         # x = SLP1 0x50, y = SLP1 0x26.
