@@ -7,6 +7,9 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import json
+import subprocess
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/report_original_migration_candidates.py"
@@ -78,6 +81,72 @@ class OriginalCandidateTests(unittest.TestCase):
         link.symlink_to(self.root / "missing.lisp")
         with self.assertRaises(ValueError):
             mod.categorize({"path":"link.lisp","status":"blocked"},self.root)
+
+
+    def test_current_d1_d9_unpaired_source_era_is_default(self):
+        self.assertIn("knowledge/d1-d9-foundation.json", mod.ARGS)
+        self.assertNotIn("knowledge/d1-d7-foundation.json", mod.ARGS)
+
+    def test_real_original_report_excludes_paired_before_counting(self):
+        (self.root / "new-old.lisp").write_text("(unknown ())\\n", encoding="utf-8")
+        (self.root / "paired.lisp").write_text("()\\n", encoding="utf-8")
+        (self.root / "paired.sens").write_bytes(b"\\x00")
+        report = {
+            "mode": "dry-run",
+            "summary": {
+                "files_seen": 1,
+                "files_written": 0,
+                "files_would_write": 0,
+                "files_blocked": 1,
+                "files_skipped_paired": 1,
+            },
+            "skipped_paired_paths": ["paired.lisp"],
+            "files": [{
+                "path": "new-old.lisp", "status": "blocked",
+                "reason": "unratified historical unknown",
+            }],
+        }
+        def fake_run(command, **kwargs):
+            self.assertIn("--unpaired-only", command)
+            self.assertEqual(command[command.index("--source-era")+1], "auto")
+            self.assertIn("knowledge/d1-d9-foundation.json", command)
+            Path(command[command.index("--report")+1]).write_text(json.dumps(report))
+            return subprocess.CompletedProcess(command, 2, "", "")
+        with patch.object(mod.subprocess, "run", side_effect=fake_run):
+            result = mod.build_report(self.root)
+        summary = result["summary"]
+        self.assertEqual(summary["scanned"], 1)
+        self.assertEqual(summary["blocked"], 1)
+        self.assertEqual(summary["already_paired_sources_excluded"], 1)
+        self.assertEqual(result["already_paired_sources_excluded"], ["paired.lisp"])
+        self.assertEqual(summary["mechanical_candidates"], 0)
+        self.assertEqual(result["source_era"], "auto")
+        self.assertEqual(summary["original_unpaired_executables_migrated_by_this_tool"], 0)
+
+    def test_false_pair_in_unpaired_ledger_fails_closed(self):
+        (self.root / "paired.lisp").write_text("()\\n")
+        (self.root / "paired.sens").write_bytes(b"\\x01")
+        report = {
+            "mode": "dry-run",
+            "summary": {
+                "files_seen": 1, "files_written": 0,
+                "files_would_write": 1, "files_blocked": 0,
+                "files_skipped_paired": 0,
+            },
+            "skipped_paired_paths": [],
+            "files": [{
+                "path": "paired.lisp", "status": "would-write",
+                "bytes": 1, "physical_sha256": "a"*64,
+                "typed_word_sha256": "b"*64, "semantic_word_count": 1,
+                "passes": {},
+            }],
+        }
+        def fake_run(command, **kwargs):
+            Path(command[command.index("--report")+1]).write_text(json.dumps(report))
+            return subprocess.CompletedProcess(command, 0, "", "")
+        with patch.object(mod.subprocess, "run", side_effect=fake_run):
+            with self.assertRaisesRegex(RuntimeError, "already paired"):
+                mod.build_report(self.root)
 
 
 if __name__ == "__main__":
