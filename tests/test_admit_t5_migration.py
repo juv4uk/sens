@@ -44,6 +44,26 @@ def fixture_manifest() -> dict:
 
 
 class T5ProofPublisherTests(unittest.TestCase):
+    def test_uses_current_ratified_d1_d9_authority_like_batch(self):
+        foundation_path = gate.ARTIFACTS["foundation"]
+        self.assertEqual(foundation_path, "knowledge/d1-d9-foundation.json")
+        authority = json.loads((ROOT / foundation_path).read_text(encoding="utf-8"))
+        self.assertEqual(authority["status"], "owner-ratified")
+        self.assertEqual(authority["current_domains"],
+                         [f"D{i}" for i in range(1, 10)])
+        self.assertEqual(authority["schema"],
+                         "d1-d9-foundation-ratification/v1")
+        # The public preview and proof-gated publisher must not silently
+        # choose different ratified semantic registries for the same file.
+        batch_source = (ROOT / "scripts/migrate-t5-batch.py").read_text(encoding="utf-8")
+        self.assertIn('"foundation": ROOT / "knowledge/d1-d9-foundation.json"',
+                      batch_source)
+        # This proof publisher takes only historical-legacy manifests;
+        # the W8 era is explicit, never inherited from the migrator default.
+        publisher_source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('command.extend(["--source-era", "legacy"',
+                      publisher_source)
+
     def test_git_source_blob_is_real_git_identity(self):
         source = (ROOT / SOURCE).read_bytes()
         actual = subprocess.run(
