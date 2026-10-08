@@ -81,9 +81,9 @@ class BoundedUkTripletTests(unittest.TestCase):
         view = PAIR / "pair-cons"
         original = (lisp.read_bytes(), sens.read_bytes(), view.read_bytes())
         self.assertEqual(lisp.read_text(encoding="utf-8"),
-                         "(сполучити (як-є ()) (як-є ()))\\n")
+                         "(сполучити (як-є ()) (як-є ()))\n")
         expected = "10 111 00 10 001 00 000 01 00 10 001 00 000 01 01"
-        self.assertEqual(view.read_text(encoding="ascii"), expected + "\\n")
+        self.assertEqual(view.read_text(encoding="ascii"), expected + "\n")
         report = mod.verify(lisp, sens, view)
         self.assertEqual(report["physical_bytes"], 10)
         self.assertEqual(report["typed_word_count"], len(expected.split()))
@@ -98,14 +98,14 @@ class BoundedUkTripletTests(unittest.TestCase):
         # D3 callable spellings are always owner uk surfaces; 000 is literal
         # (), not NIL, a missing alias or a D2 empty-list special case.
         rows = [
-            ("10 001 00 000 01", "(як-є ())\\n"),
-            ("10 010 00 000 01", "(атом? ())\\n"),
-            ("10 011 00 000 01", "(решта ())\\n"),
-            ("10 100 00 000 01", "(перше ())\\n"),
+            ("10 001 00 000 01", "(як-є ())\n"),
+            ("10 010 00 000 01", "(атом? ())\n"),
+            ("10 011 00 000 01", "(решта ())\n"),
+            ("10 100 00 000 01", "(перше ())\n"),
             ("10 101 00 10 001 00 1 01 00 10 001 00 1 01 01",
-             "(тотожне? (як-є так) (як-є так))\\n"),
+             "(тотожне? (як-є так) (як-є так))\n"),
             ("10 111 00 10 001 00 000 01 00 10 001 00 000 01 01",
-             "(сполучити (як-є ()) (як-є ()))\\n"),
+             "(сполучити (як-є ()) (як-є ()))\n"),
         ]
         for visible, uk in rows:
             words = visible.split()
