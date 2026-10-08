@@ -119,8 +119,10 @@ class PhysicalSpacedViewTests(unittest.TestCase):
         verified = view.check_or_stage(self.root, "fixtures/branch.sens",
                                        reader=Path(reader))
         self.assertEqual(verified["d2_reader"], "PASS")
-        # Tamper with physically canonical bytes so D2 cannot parse a program.
-        self.sens.write_bytes(encode_words(["1"]))
+        # An unclosed D2 OPEN is physically canonical T5 but not a program.
+        # A single atom "1" is potentially syntactically legal: do not misuse
+        # it to claim Rust rejected actual D2 syntax.
+        self.sens.write_bytes(encode_words(["10"]))
         with self.assertRaisesRegex(view.ViewError, "Rust D2"):
             view.check_or_stage(self.root, "fixtures/branch.sens", reader=Path(reader))
 
