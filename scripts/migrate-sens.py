@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path, PurePosixPath
 import subprocess
 import sys
@@ -141,6 +142,23 @@ def reject_classified_nonprogram(sources: list[str], root: Path) -> None:
         raise MigrationBlocked(
             f"NONPROGRAM Git-blob-locked data/record; no executable .sens: {name}"
         )
+
+
+def actual_reader(root: Path, configured: Path | None = None) -> Path:
+    """Return a real Rust sens-trit reader for physical publication."""
+    env = os.environ.get("SENS_TRIT_BIN")
+    reader = (Path(env) if env else configured if configured else root / "target" / "debug" / "sens-trit").resolve()
+    if not reader.is_file():
+        process = subprocess.run(
+            ["cargo", "build", "-q", "-p", "sens-cli", "--bin", "sens-trit"],
+            cwd=root, capture_output=True, text=True, timeout=240,
+        )
+        if process.returncode != 0:
+            reason = process.stderr.strip() or process.stdout.strip()
+            raise MigrationBlocked(f"unable to build real Rust sens-trit reader: {reason[:1000]}")
+    if not reader.is_file():
+        raise MigrationBlocked(f"real Rust sens-trit reader not found: {reader}")
+    return reader
 
 
 def outside(candidate: Path, root: Path, what: str) -> None:
@@ -274,6 +292,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, required=True, help="separate artifact staging root")
     ap.add_argument("--report", type=Path, required=True, help="JSON admission/blocker report")
     ap.add_argument("--dry-run", action="store_true", help="admission only, no .sens files")
+    ap.add_argument("--reader", type=Path, help="real built Rust sens-trit; auto-built for physical publication")
     ap.add_argument("--source-era", choices=("auto", "legacy", "current"), default="auto",
                     help="auto blocks W8 ambiguity; specify a proven historical/current source era")
     args = ap.parse_args(argv)
@@ -298,10 +317,11 @@ def main(argv: list[str] | None = None) -> int:
             pinned = pin_sources(args.source, root)
         # One SHA-locked transaction path for BOTH entry modes. Never pass a
         # raw, unpinned approved manifest directly into the publisher.
+        reader = None if args.dry_run else actual_reader(root, args.reader)
         with tempfile.TemporaryDirectory(prefix="sens-admission-") as directory:
             manifest = Path(directory) / "pinned.json"
             manifest.write_text(json.dumps(pinned, sort_keys=True) + "\n", encoding="utf-8")
-            invoke(manifest, root, output, report, args.dry_run, args.source_era)
+            invoke(manifest, root, output, report, args.dry_run, args.source_era, reader)
 
         result = json.loads(report.read_text(encoding="utf-8"))
         verified = verify_published(result, output, args.dry_run)
@@ -314,12 +334,14 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def invoke(manifest: Path, root: Path, output: Path, report: Path,
-           dry_run: bool, source_era: str = "auto") -> None:
+           dry_run: bool, source_era: str = "auto", reader: Path | None = None) -> None:
     command = [sys.executable, str(TRANSACTION), str(root), "--manifest",
                str(manifest), "--out", str(output), "--report", str(report),
                "--source-era", source_era]
     if dry_run:
         command.append("--dry-run")
+    elif reader is not None:
+        command.extend(["--reader", str(reader)])
     process = subprocess.run(command, cwd=root, capture_output=True, text=True)
     if process.returncode != 0:
         # Keep the original tool's precise per-file blocker manifest.
