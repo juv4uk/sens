@@ -7,7 +7,28 @@
   "expected_physical_sha256": "fafd77ff776795c95bb678c42f90c875b65f22bb98cf73a74daf2047b17e38df",
   "expected_typed_sha256": "bbdb4b0a4fc4b3cc84d6748239ee87fdbfdb7ea00dfa719d799f8b6819451d43",
   "oracle_commands": [
-    ["python3", "tests/test_migration_multiform_cohort.py", "-q"],
-    ["cargo", "test", "-p", "sens", "--test", "migration_multiform_cohort"]
-  ]
+    [
+      "python3",
+      "tests/test_migration_multiform_cohort.py",
+      "-q"
+    ],
+    [
+      "cargo",
+      "test",
+      "-p",
+      "sens",
+      "--test",
+      "migration_multiform_cohort"
+    ]
+  ],
+  "oracle_witnesses": {
+    "historical": {
+      "path": "tests/test_migration_multiform_cohort.py",
+      "git_blob_sha1": "3de90fb9176a421450ebf5d705ac110a2fe6274b"
+    },
+    "current": {
+      "path": "crates/sens/tests/migration_multiform_cohort.rs",
+      "git_blob_sha1": "62966dc8ee589891460dd37bc10c01c4d64b7906"
+    }
+  }
 }
