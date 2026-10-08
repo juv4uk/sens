@@ -1,0 +1,52 @@
+name: temporary 4500 T5 artifact producer
+
+on:
+  push:
+    branches:
+      - "tmp/4500-t5-artifact-20261008"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build exact physical T5 candidates
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sens-mirror
+          python3 scripts/migrate-three-pass.py . \
+            --out /tmp/sens-mirror \
+            --foundation knowledge/d1-d7-foundation.json \
+            --domain-surfaces crates/sens/src/domain_surface_registry_generated.rs \
+            --semantic-generated crates/sens/src/semantic_registry_generated.rs \
+            --semantic-registry crates/sens/src/semantic_registry.rs \
+            --necessary-forms crates/sens/src/eval/necessary_forms_generated.rs \
+            --historical-map contracts/core1-historical-sid-map.lisp \
+            --text7 crates/sens/src/text7_projection_generated.rs \
+            --report /tmp/migration.json
+          test -f /tmp/sens-mirror/lib/compiler-nucleus.sens
+          test -f /tmp/sens-mirror/lib/machine/dispatch/native-first.sens
+          test -f /tmp/sens-mirror/lib/machine/dispatch/native-first-execute.sens
+          mkdir -p /tmp/candidates/lib/machine/dispatch
+          cp /tmp/sens-mirror/lib/compiler-nucleus.sens /tmp/candidates/lib/compiler-nucleus.sens
+          cp /tmp/sens-mirror/lib/machine/dispatch/native-first.sens /tmp/candidates/lib/machine/dispatch/native-first.sens
+          cp /tmp/sens-mirror/lib/machine/dispatch/native-first-execute.sens /tmp/candidates/lib/machine/dispatch/native-first-execute.sens
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          root=pathlib.Path('/tmp/candidates')
+          rows=[]
+          for p in sorted(root.rglob('*.sens')):
+              b=p.read_bytes()
+              rows.append({'path':str(p.relative_to(root)),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+          print(json.dumps(rows,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t5-candidates-4500
+          path: /tmp/candidates/
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true
