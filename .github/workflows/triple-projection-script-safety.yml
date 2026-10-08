@@ -1,0 +1,60 @@
+name: Triple-projection read-only safety gate
+
+on:
+  pull_request:
+    paths:
+      - "scripts/check-triple-projection.sh"
+      - "scripts/sens_uk.py"
+      - "tests/test_triple_projection_script_safety.py"
+      - ".github/workflows/triple-projection-script-safety.yml"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/check-triple-projection.sh"
+      - "scripts/sens_uk.py"
+      - "tests/test_triple_projection_script_safety.py"
+      - ".github/workflows/triple-projection-script-safety.yml"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-uk-triplet-no-clobber:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prove real committed parity and negative clobber protections
+        run: python3 -m unittest discover -s tests -p 'test_triple_projection_script_safety.py' -v
+      - name: Positive bounded canonical Ukrainian triplet MUST pass
+        run: |
+          bash scripts/check-triple-projection.sh \
+            --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
+      - name: The OLD legacy/incomplete corpus MUST NOT be reported green
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          bash scripts/check-triple-projection.sh > "$RUNNER_TEMP/full-triple.log" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/full-triple.log"
+          test "$status" -eq 2
+          grep -q "result=BLOCKED" "$RUNNER_TEMP/full-triple.log"
+          printf '%s\n' 'Scope: bounded canonical D1/D3 proof only; 3 legacy/incomplete fixtures BLOCK.' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' 'No physical/uk release admission or historical executable conversion from this check.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Prove no source or output was rewritten
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }

@@ -136,15 +136,71 @@ class TripletInventoryTests(unittest.TestCase):
 
     def test_cli_receipt_is_read_only_and_not_an_extensionless_program(self):
         self.view.write_bytes(self.expected)
-        receipt = self.root / "receipt.json"
-        rc = main([str(self.root), "--include-untracked", "--require-view",
-                   "case.sens", "--report", str(receipt)])
-        self.assertEqual(rc, 0)
-        self.assertTrue(receipt.is_file())
-        data = json.loads(receipt.read_text(encoding="utf-8"))
-        self.assertEqual(data["summary"]["view_present_valid"], 1)
-        self.assertEqual(data["files"][0]["uk_oracle"], "NOT_VERIFIED")
-        self.assertEqual(self.view.read_bytes(), self.expected)
+        original=(self.source.read_bytes(),self.sens.read_bytes(),self.view.read_bytes())
+        with tempfile.TemporaryDirectory(prefix="sens-report-outside-") as target:
+            receipt=Path(target)/"receipt.json"
+            rc=main([str(self.root),"--include-untracked","--require-view",
+                     "case.sens","--report",str(receipt)])
+            self.assertEqual(rc,0)
+            self.assertTrue(receipt.is_file())
+            data=json.loads(receipt.read_text(encoding="utf-8"))
+            self.assertEqual(data["summary"]["view_present_valid"],1)
+            self.assertEqual(data["files"][0]["uk_oracle"],"NOT_VERIFIED")
+            prior=receipt.read_bytes()
+            # Second attempt must not replace a prior proof receipt.
+            self.assertEqual(main([str(self.root),"--include-untracked",
+                                   "--report",str(receipt)]),2)
+            self.assertEqual(receipt.read_bytes(),prior)
+        self.assertEqual(original,(
+            self.source.read_bytes(),self.sens.read_bytes(),self.view.read_bytes(),
+        ))
+
+    def test_receipt_target_cannot_clobber_any_of_three_program_files(self):
+        self.view.write_bytes(self.expected)
+        for path in (self.source,self.sens,self.view):
+            original=path.read_bytes()
+            with self.subTest(path=path.name):
+                code=main([str(self.root),"--include-untracked",
+                           "--report",str(path)])
+                self.assertEqual(code,2)
+                self.assertEqual(path.read_bytes(),original)
+        # Even a NEW receipt path inside the corpus is forbidden.
+        forbidden=self.root/"new-receipt.json"
+        self.assertEqual(main([str(self.root),"--include-untracked",
+                               "--report",str(forbidden)]),2)
+        self.assertFalse(forbidden.exists())
+
+    def test_external_receipt_symlink_and_existing_file_fail_closed(self):
+        self.view.write_bytes(self.expected)
+        with tempfile.TemporaryDirectory(prefix="sens-report-outside-") as target:
+            other=Path(target)
+            receipt=other/"existing.json"
+            receipt.write_bytes(b"sentinel-json")
+            self.assertEqual(main([str(self.root),"--include-untracked",
+                                   "--report",str(receipt)]),2)
+            self.assertEqual(receipt.read_bytes(),b"sentinel-json")
+            link=other/"redirect.json"
+            link.symlink_to(self.view)
+            self.assertEqual(main([str(self.root),"--include-untracked",
+                                   "--report",str(link)]),2)
+            self.assertEqual(self.view.read_bytes(),self.expected)
+            bad_dir=other/"linked-parent"
+            bad_dir.symlink_to(self.root,target_is_directory=True)
+            self.assertEqual(main([str(self.root),"--include-untracked",
+                                   "--report",str(bad_dir/"report.json")]),2)
+            self.assertFalse((self.root/"report.json").exists())
+
+    def test_receipt_atomic_create_once_under_new_external_directory(self):
+        self.view.write_bytes(self.expected)
+        with tempfile.TemporaryDirectory(prefix="sens-report-outside-") as target:
+            output=Path(target)/"nested"/"cohort"/"proof.json"
+            rc=main([str(self.root),"--include-untracked",
+                     "--report",str(output)])
+            self.assertEqual(rc,0)
+            evidence=json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(evidence["summary"]["view_present_valid"],1)
+            self.assertEqual(evidence["summary"]["release_admitted"],0)
+            self.assertFalse(list(output.parent.glob(".sens-triplet-receipt-*")))
 
     def test_real_checked_in_ukrainian_branch_triplet_is_not_original_credit(self):
         sens = ROOT / GOLDEN
