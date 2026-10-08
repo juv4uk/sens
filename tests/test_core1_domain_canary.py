@@ -44,9 +44,14 @@ class ExistingCore1DomainCanaryTests(unittest.TestCase):
         self.assertEqual(mod.verify_checked_in(), (len(physical), expected_digest))
 
     def test_no_guessed_symbols_or_historical_sid_as_modern_code(self):
-        for bad in ("LABEL", "C1-SECOND", "10101010 10", "10 111 00 X 01"):
+        for bad in ("LABEL", "C1-SECOND", "10 111 00 X 01"):
             with self.subTest(bad=bad), self.assertRaises(SensT5Error):
                 encode_projection(bad)
+        # T5 is TRANSPORT, not semantic admission. An old 8-bit word is
+        # physically valid but must NEVER be assigned modern D8 meaning.
+        raw = ["10101010", "10"]
+        self.assertEqual(decode_bytes(encode_words(raw)), raw)
+        self.assertNotIn("10101010", mod.words_from_existing_core1())
 
     def test_corruption_fails_closed(self):
         physical = mod.PHYSICAL.read_bytes()
