@@ -57,7 +57,7 @@
                (value 7))))))
 
       ; Once a native plan exists, admission rejection stays visibly native.
-      ; The bridge must NOT hide this bug by evaluating (+ 40 2) instead.
+      ; The bridge must NOT hide this native rejection by silently retrying through the evaluator.
       (native-first-execution-witness-check
         (native-first-execute-plan
           (00000001
