@@ -3,8 +3,9 @@
 //! Це не трійкова семантика: D1..D9 залишаються двійковими.
 //! Транспортні цифри 0/1 відтворюють біт, 2 відділяє слова.
 //! Упаковано п'ять тритів в один фізичний байт (3^5=243).
-//! Подвійна 2 наприкінці є експериментальним EOS; хвіст
-//! добивається лише транспортними 2 та перевіряється канонічно.
+//! Фізичний EOF дає сам файл: окремий 22 не потрібний.
+//! Завершальна неповна п'ятірка доповнюється лише тритами 2,
+//! яких має бути 0..4; довший хвіст відхиляється.
 //! Жодного D7-пробілу чи нового D10-резидента тут немає.
 //! Number D24+ ще не допускається до цього механічного носія.
 
@@ -16,7 +17,6 @@ pub enum TernaryTransportError {
     InvalidBinaryProjection,
     InvalidProgramSyntax,
     InvalidPhysicalByte,
-    MissingEnd,
     EmptyDomainWord,
     UnsupportedDomainWidth,
     InvalidTail,
@@ -29,7 +29,6 @@ pub struct TernaryTransportAccounting {
     pub word_count: usize,
     pub semantic_bits: usize,
     pub separating_trits: usize,
-    pub eos_trits: usize,
     pub encoded_trits: usize,
     pub tail_trits: usize,
     pub physical_bytes: usize,
@@ -61,9 +60,9 @@ pub fn encode_ternary_words(
             trits.push(((value >> shift) & 1) as u8);
         }
     }
-    // EOS — дві послідовні транспортні 2; звичайний
-    // роздільник завжди одиночний і стоїть МІЖ двійковими словами.
-    trits.extend_from_slice(&[2, 2]);
+    // У файлі EOF вже відомий з його фізичної довжини.
+    // Роздільник 2 пишеться ВИКЛЮЧНО між двома словами.
+    // Трити 2 в кінці — тільки байтовий padding (0..4 шт.).
     while trits.len() % TRITS_PER_BYTE != 0 {
         trits.push(2);
     }
@@ -105,52 +104,51 @@ pub fn decode_ternary_words(
         }
         trits.extend_from_slice(&digits);
     }
+    // Не слід шукати EOS=22: межу файла вже дає кількість байтів.
+    // Після останнього слова може бути тільки 0..4 trit-2 як padding.
+    // У самих словах допустимі лише 0 та 1, тому фізичний хвіст
+    // однозначно відділяється від останнього слова.
+    let tail = trits.iter().rev().take_while(|digit| **digit == 2).count();
+    if tail >= TRITS_PER_BYTE {
+        return Err(TernaryTransportError::InvalidTail);
+    }
+    trits.truncate(trits.len() - tail);
+    if trits.is_empty() {
+        return Err(TernaryTransportError::EmptyDomainWord);
+    }
+
     let mut parts = Vec::<String>::new();
     let mut current = String::new();
-    let mut offset = 0;
-    while offset < trits.len() {
-        let digit = trits[offset];
+    for digit in trits {
         match digit {
             0 | 1 => {
                 current.push(char::from(b'0' + digit));
                 if current.len() > 9 {
                     return Err(TernaryTransportError::UnsupportedDomainWidth);
                 }
-                offset += 1;
             }
             2 => {
                 if current.is_empty() {
                     return Err(TernaryTransportError::EmptyDomainWord);
                 }
-                if offset + 1 >= trits.len() {
-                    return Err(TernaryTransportError::MissingEnd);
-                }
                 parts.push(std::mem::take(&mut current));
-                if trits[offset + 1] == 2 {
-                    offset += 2;
-                    // Не дозволяти додатковий байт після EOS:
-                    // лише <5 тритів 2 як останній фізичний хвіст.
-                    if trits.len() - offset >= TRITS_PER_BYTE
-                        || trits[offset..].iter().any(|d| *d != 2)
-                    {
-                        return Err(TernaryTransportError::InvalidTail);
-                    }
-                    let visible = parts.join(" ");
-                    let tokens = parse_binary_source_words(&visible)
-                        .map_err(|_| TernaryTransportError::UnsupportedDomainWidth)?;
-                    let words: Vec<_> = tokens.into_iter().map(|token| token.word).collect();
-                    let reconstructed = encode_ternary_words(&words)?;
-                    if reconstructed != data {
-                        return Err(TernaryTransportError::NoncanonicalEncoding);
-                    }
-                    return Ok(words);
-                }
-                offset += 1;
             }
             _ => unreachable!(),
         }
     }
-    Err(TernaryTransportError::MissingEnd)
+    if current.is_empty() {
+        return Err(TernaryTransportError::EmptyDomainWord);
+    }
+    parts.push(current);
+    let visible = parts.join(" ");
+    let tokens = parse_binary_source_words(&visible)
+        .map_err(|_| TernaryTransportError::UnsupportedDomainWidth)?;
+    let words: Vec<_> = tokens.into_iter().map(|token| token.word).collect();
+    // Зайвий байт, неоднозначний або неканонічний хвіст — відмова.
+    if encode_ternary_words(&words)? != data {
+        return Err(TernaryTransportError::NoncanonicalEncoding);
+    }
+    Ok(words)
 }
 
 /// Вертикальний вигляд — тільки для людини, newline не є
@@ -160,8 +158,8 @@ pub fn render_ternary_words_vertical(words: &[BinarySourceWord]) -> String {
 }
 
 /// Звичайне людське представлення фізичного .sens: транспортний трит 2
-/// перетворюється тільки на пробіл МІЖ словами. Кінцевий 22 і
-/// padding ніколи не потрапляють у відкритий для людини текст.
+/// перетворюється тільки на пробіл МІЖ словами. Кінцевий
+/// padding ніколи не потрапляє у відкритий для людини текст.
 /// Це НЕ фізичний вміст файла: не записувати цей рядок у .sens.
 pub fn render_ternary_words_spaced(words: &[BinarySourceWord]) -> String {
     words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")
@@ -202,7 +200,7 @@ pub fn decode_ternary_program(
     Ok(words)
 }
 
-/// Вартість носія, включно з EOS і фінальним заповненням.
+/// Вартість носія, включно з фізичним заповненням, але БЕЗ EOS.
 /// Трити і біти — різні одиниці; физичні байти враховано окремо.
 pub fn ternary_transport_accounting(
     words: &[BinarySourceWord],
@@ -210,14 +208,12 @@ pub fn ternary_transport_accounting(
     let data = encode_ternary_words(words)?;
     let semantic_bits = words.iter().map(|word| word.width()).sum::<usize>();
     let separating_trits = words.len() - 1;
-    let eos_trits = 2;
-    let encoded_trits = semantic_bits + separating_trits + eos_trits;
+    let encoded_trits = semantic_bits + separating_trits;
     let tail_trits = data.len() * TRITS_PER_BYTE - encoded_trits;
     Ok(TernaryTransportAccounting {
         word_count: words.len(),
         semantic_bits,
         separating_trits,
-        eos_trits,
         encoded_trits,
         tail_trits,
         physical_bytes: data.len(),
@@ -246,9 +242,8 @@ mod tests {
         let measure = ternary_transport_accounting(&original).unwrap();
         assert_eq!(measure.semantic_bits, 12);
         assert_eq!(measure.separating_trits, 4);
-        assert_eq!(measure.eos_trits, 2);
-        assert_eq!(measure.encoded_trits, 18);
-        assert_eq!(measure.tail_trits, 2);
+        assert_eq!(measure.encoded_trits, 16);
+        assert_eq!(measure.tail_trits, 4);
         assert_eq!(measure.physical_bits, 32);
     }
 
@@ -268,7 +263,7 @@ mod tests {
     }
 
     #[test]
-    fn opening_never_renders_eos_padding_or_d7_space_as_a_separator_token() {
+    fn opening_never_renders_padding_or_d7_space_as_a_separator_token() {
         let source = "10 001 00 1100000 01";
         let encoded = encode_binary_projection_ternary(source).unwrap();
         assert_eq!(open_ternary_program(&encoded).unwrap(), source);
@@ -311,18 +306,55 @@ mod tests {
     }
 
     #[test]
-    fn explicit_terminator_and_tail_are_canonical() {
+    fn file_eof_and_padding_are_canonical_without_22() {
         let original = words("1");
         let physical = encode_ternary_words(&original).unwrap();
         assert_eq!(decode_ternary_words(&physical).unwrap(), original);
+        // Голий single-word теж має кінець: EOF файла, не закривальна дужка.
+        assert_eq!(physical.len(), 1);
         let mut extra = physical.clone();
-        extra.push(242); // trailing physical byte, навіть якщо це п'ять 2
+        extra.push(242); // п'ять зайвих тритів 2 — не канонічний padding
         assert_eq!(decode_ternary_words(&extra),
                    Err(TernaryTransportError::InvalidTail));
         assert_eq!(decode_ternary_words(&[243]),
                    Err(TernaryTransportError::InvalidPhysicalByte));
         assert_eq!(decode_ternary_words(&[242]),
-                   Err(TernaryTransportError::EmptyDomainWord));
+                   Err(TernaryTransportError::InvalidTail));
+        // Старий EOF=22 не дозволено приймати як новий canonical wire,
+        // якщо він створює зайвий фізичний байт.
+        let closed = words("10 01");
+        assert_eq!(encode_ternary_words(&closed).unwrap(), [0x64]);
+        assert_eq!(decode_ternary_words(&[0x64, 0xf2]),
+                   Err(TernaryTransportError::InvalidTail));
+    }
+
+    #[test]
+    fn bracket_close_is_not_required_by_physical_eof() {
+        for source in ["000", "1", "10 01", "10 001 01",
+                       "10 001 01 10 000 01"] {
+            let original = words(source);
+            let encoded = encode_ternary_words(&original).unwrap();
+            assert_eq!(decode_ternary_words(&encoded).unwrap(), original, "{source}");
+            assert_eq!(decode_ternary_program(&encoded).unwrap(), original, "{source}");
+        }
+        // Крайній випадок: код у 5 тритів, padding відсутній.
+        let single_exact = words("00000");
+        let physical = encode_ternary_words(&single_exact).unwrap();
+        assert_eq!(physical.len(), 1);
+        assert_eq!(decode_ternary_words(&physical).unwrap(), single_exact);
+    }
+
+    #[test]
+    fn no_eos_saves_byte_for_short_parenthesized_forms() {
+        for (source, expected_bytes) in [
+            ("10 01", 1usize),
+            ("10 001 01", 2usize),
+        ] {
+            let original = words(source);
+            let physical = encode_ternary_words(&original).unwrap();
+            assert_eq!(physical.len(), expected_bytes);
+            assert_eq!(decode_ternary_program(&physical).unwrap(), original);
+        }
     }
 
     #[test]
@@ -354,7 +386,6 @@ mod tests {
         let binary = encode_ternary_words(&original).unwrap();
         let mut mutated = binary.clone();
         *mutated.last_mut().unwrap() -= 1;
-        assert_eq!(decode_ternary_words(&mutated),
-                   Err(TernaryTransportError::InvalidTail));
+        assert!(decode_ternary_words(&mutated).is_err());
     }
 }
