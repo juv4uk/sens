@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, DomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, Bit6, CoreD4, CoreD5, CoreD6, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -122,6 +122,29 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     direct_domain_identity_for_surface(name).or_else(|| {
         registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
     })
+}
+
+/// Tooling-only bridge from historical compatibility identities to already-ratified
+/// exact-domain successors. This does not define runtime semantic meaning.
+pub(crate) fn migration_domain_identity_from_registry_byte(
+    byte: u8,
+) -> Option<CoreDomainIdentity> {
+    if let Some(identity) = legacy_domain_identity_from_registry_byte(byte) {
+        return Some(identity);
+    }
+
+    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
+    let d6 = |raw| CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(raw).unwrap()));
+    match byte {
+        0b0010_1010 => Some(d5(0b10100)),
+        0b0001_0100 => Some(d5(0b10111)),
+        0b0010_1101 => Some(d5(0b11100)),
+        0b0010_1100 => Some(d5(0b11101)),
+        0b1010_1100 => Some(d5(0b11111)),
+        0b1001_1100 => Some(d6(0b001000)),
+        0b1001_1101 => Some(d6(0b001001)),
+        _ => None,
+    }
 }
 
 pub(crate) fn surface_for_domain_identity(
