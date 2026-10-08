@@ -9,6 +9,7 @@ SOURCE = FIXTURE / "atom-empty.lisp"
 PHYSICAL = FIXTURE / "atom-empty.sens"
 EXPECTED = "10 010 00 000 01\n"
 EXPECTED_BYTES = bytes.fromhex("643806a1")
+EXPECTED_TRITS = [1,0,2,0,1,0,2,0,0,2,0,0,0,2,0,1,2,2,2,2]
 
 class AtomT5Cohort(unittest.TestCase):
     def test_exact_projection_and_physical_bytes(self):
@@ -28,8 +29,8 @@ class AtomT5Cohort(unittest.TestCase):
                 digits[i] = value % 3
                 value //= 3
             trits.extend(digits)
-        self.assertEqual(trits[22], 2)
-        self.assertEqual(trits[28:], [2,2,2,2])
+        self.assertEqual(trits, EXPECTED_TRITS)
+        self.assertEqual(trits[16:], [2,2,2,2])
 
 if __name__ == "__main__":
     unittest.main()
