@@ -13,7 +13,7 @@
   (updated 2026-10-08)
 
   (vertical
-    (identity exact-domain-bits)
+    (ідентичність exact-domain-bits)
     (law language-owned)
     (source-structure d2-binary)
     (storage mechanism-only)
@@ -50,7 +50,7 @@
          compatibility-provenance-only not-universal-identity))
     (8 (packed-transport preserves exact-width-sequence
          without byte-padding-as-semantics))
-    (9 (no parallel canonical identity beside exact-domain-bits))
+    (9 (no parallel canonical ідентичність beside exact-domain-bits))
     (10 (conflict historical-lisp-vs-sens-clarity -> sens-wins
           compatibility-built-on-top)))
 
