@@ -192,8 +192,13 @@
 (00001001 x86-project-machine-effects
   (00001000 (effects)
     (00000111
-      ((00000011 effects (00000001 ())) ())
-      (t
+      ; Historical machine-source ATOM is three-valued here:
+      ; () -> (), ordinary atom -> (1), pair -> (0).
+      ; Only pair may reach CAR/CDR.
+      ((00000010 effects) () ())
+      ((00000010 effects) (1)
+       (00000001 x86-projection-rejected))
+      ((00000010 effects) (0)
        (10011100
          ((projected (x86-project-machine-effect (00000101 effects))))
          (00000111
@@ -207,13 +212,15 @@
                 ((x86-projection-rejected? rest-projected)
                  (00000001 x86-projection-rejected))
                 (t
-                 (00101001 projected rest-projected)))))))))))
+                 (00101001 projected rest-projected))))))))))))
 
 (00001001 x86-project-machine-effects-with-layout
   (00001000 (effects field0-offset field1-offset)
     (00000111
-      ((00000011 effects (00000001 ())) ())
-      (t
+      ((00000010 effects) () ())
+      ((00000010 effects) (1)
+       (00000001 x86-projection-rejected))
+      ((00000010 effects) (0)
        (10011100
          ((projected
             (x86-project-structural-machine-effect-with-layout
@@ -234,7 +241,7 @@
                 ((x86-projection-rejected? rest-projected)
                  (00000001 x86-projection-rejected))
                 (t
-                 (00101001 projected rest-projected)))))))))))
+                 (00101001 projected rest-projected))))))))))))
 
 (00001001 x86-encode-machine-effect
   (00001000 (effect)
