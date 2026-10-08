@@ -53,7 +53,7 @@
        ((0010 (head) (110
            ((010 head)
             (110
-              ((101 head (001 cons))
+              ((101 head (001 111))
                (native-first-plan-car-cons-u64 expression argument))
               ((native-first-domain-true ())
                (native-first-fallback expression))))
@@ -81,7 +81,7 @@
        ((0010 (head) (110
            ((010 head)
             (110
-              ((101 head (001 car))
+              ((101 head (001 100))
                (native-first-plan-car expression))
               ((native-first-domain-true ())
                (native-first-fallback expression))))
