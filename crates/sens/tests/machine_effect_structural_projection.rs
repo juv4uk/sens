@@ -147,7 +147,47 @@ fn structural_effect_is_target_neutral_and_layout_free() {
 #[test]
 fn each_structural_effect_form_projects_or_rejects_explicitly() {
     let mut session = machine_session();
-    for (effect, expected) in [
+    let store = "(00100111 (00000001 store-u64) (00000001 arena) (00000001 field0) (00000001 work))";
+    assert_eq!(
+        eval_value(
+            &format!("(x86-machine-effect-form? {store} (00000001 store-u64) 4)"),
+            &mut session,
+        ),
+        "t",
+        "store effect form must satisfy the machine-effect form contract"
+    );
+    assert_eq!(
+        eval_value(&format!("(x86-structural-machine-effect? {store})"), &mut session),
+        "t",
+        "store effect must be admitted to the structural machine-effect family"
+    );
+    assert_eq!(
+        eval_value(
+            "(x86-project-structural-slot-offset (00000001 field0) 0 8)",
+            &mut session,
+        ),
+        "0",
+        "field0 must project to the supplied target offset"
+    );
+    assert_eq!(
+        eval_value("(x86-projection-rejected? 0)", &mut session),
+        "()",
+        "zero displacement is not a projection rejection"
+    );
+    assert_eq!(
+        eval_value("(x86-admission-disp8? 0)", &mut session),
+        "t",
+        "zero displacement must pass disp8 admission"
+    );
+    assert_eq!(
+        eval_value(
+            &format!("(x86-project-structural-machine-effect-with-layout {store} 0 8)"),
+            &mut session,
+        ),
+        "((mov-mem-disp8-r64 rdi 0 rax))",
+        "direct structural projection must lower store-u64"
+    );
+    for (effect, expected) = [
         (
             "(00100111 (00000001 materialize-u64) (00000001 work) 2)",
             "((mov-r64-imm64 rax 2))",
