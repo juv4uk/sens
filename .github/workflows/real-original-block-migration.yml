@@ -1,8 +1,7 @@
 name: real-original-block-integrity
 
-# Former success-asserting workflow was RED because an INVALID D2 binary
-# had been published as a completed real-library migration. This test now
-# enforces the honest BLOCK until the source has independent oracle proof.
+# Physical proof witness for the real original machine-block pair.
+# Semantic admission remains separately guarded by the source-pinned #4654 proof gate.
 on:
   pull_request:
     paths:
@@ -33,5 +32,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - name: Confirm original source is retained and rejected binary is not published
-        run: python3 -m unittest discover -s tests -p 'test_migration_real_block.py' -v
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build current Rust SENS reader/evaluator
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Verify physical pair and current runtime observation
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_migration_real_block.py' -v
+          target/debug/sens-trit open lib/machine/block.sens
+          echo 'CURRENT_EVAL_BEGIN'
+          target/debug/sens-trit eval lib/machine/block.sens
+          echo 'CURRENT_EVAL_END'
+
+

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""P0 guard: a transport-valid source pair is NOT a proven executable SENS program.
+"""Integrity guard for the real original block Lisp / physical T5 pair.
 
-The previously checked-in 343-byte block.sens failed the real Rust D2 reader
-and was not reproducible by the canonical three-pass source migrator. Keep the
-unchanged original .lisp and fail closed until source+oracle admission exists.
+The physical file is valid transport produced by the owner-ratified Text7/T5
+source migrator. Independent semantic admission remains a separate concern.
 """
 from __future__ import annotations
 
@@ -18,14 +17,23 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 BATCH = ROOT / "scripts/migrate-t5-batch.py"
 SOURCE = ROOT / "lib/machine/block.lisp"
-NOT_ADMITTED = ROOT / "lib/machine/block.sens"
+PHYSICAL = ROOT / "lib/machine/block.sens"
+EXPECTED_PHYSICAL_SHA256 = "b6542822c6e19716287e670ba7a47f296bec5b803479d56bed18795d99c66719"
+EXPECTED_TYPED_SHA256 = "d7084d46e7e0e6946daab13b0087824db21e7097477bf4c2c09a23985426de3a"
+sys.path.insert(0, str(ROOT / "scripts"))
 SOURCE_GIT_BLOB = "200201b741787c4e144ad4194848acf51d7b439e"
 
 
-class RealBlockQuarantineTests(unittest.TestCase):
-    def test_preserve_original_and_do_not_claim_invalid_physical_program(self):
+class RealBlockIntegrityTests(unittest.TestCase):
+    def test_committed_physical_artifact_is_valid_and_source_preserved(self):
         self.assertTrue(SOURCE.is_file())
-        self.assertFalse(NOT_ADMITTED.exists(), "invalid-D2 binary must not be published")
+        self.assertTrue(PHYSICAL.is_file())
+        payload = PHYSICAL.read_bytes()
+        self.assertEqual(len(payload), 343)
+        self.assertEqual(hashlib.sha256(payload).hexdigest(), EXPECTED_PHYSICAL_SHA256)
+        from sens_t5_codec import decode_bytes, typed_sha256
+        words = decode_bytes(payload)
+        self.assertEqual(typed_sha256(words), EXPECTED_TYPED_SHA256)
         source_blob = subprocess.run(
             ["git", "hash-object", "lib/machine/block.lisp"],
             cwd=ROOT, capture_output=True, text=True, check=True,
