@@ -269,6 +269,96 @@ class OriginalCandidateTests(unittest.TestCase):
             mod.blocker_coordinate_cohorts([{**a,"status":"CANDIDATE_NOT_ADMITTED"}])
         self.assertEqual(mod.blocker_coordinate_cohorts([]), [])
 
+    def test_reviewed_isa_catalogues_are_data_not_executable_candidates(self):
+        # Real manifest and REAL tracked sources: no synthetic pairs credited.
+        rows = mod.load_nonprogram_classification(ROOT)
+        isa = [x for x in rows.values() if x["cohort"] == "isa"]
+        self.assertEqual(len(isa), 25)
+        self.assertTrue(all(x["source_class"] == "NONPROGRAM_DATA_REVIEWED"
+                            for x in isa))
+        self.assertTrue(all(not x["automatic_sens_companion"] for x in isa))
+        self.assertNotIn("lib/core1.lisp", rows)
+        self.assertNotIn("lib/machine/block.lisp", rows)
+        self.assertNotIn("benchmarks/arithmetic.lisp", rows)
+
+    def test_reviewed_nonprogram_blob_drift_and_forged_pair_fail_closed(self):
+        source = self.root / "item.lisp"
+        source.write_text("(isa-catalogue/1)\n", encoding="utf-8")
+        sha = mod.git_blob_sha(source)
+        row = mod._checked_nonprogram_entry(self.root, "item.lisp", sha)
+        self.assertEqual(row["source_git_blob_sha"], sha)
+        self.assertFalse(row["semantic_oracle_admitted"])
+        with self.assertRaisesRegex(ValueError, "drift"):
+            mod._checked_nonprogram_entry(self.root, "item.lisp", "a" * 40)
+        source.with_suffix(".sens").write_bytes(b"invalid")
+        with self.assertRaisesRegex(ValueError, "unproven physical pair"):
+            mod._checked_nonprogram_entry(self.root, "item.lisp", sha)
+
+    def test_nonprogram_loader_never_accepts_arbitrary_executable_claim(self):
+        src = self.root / "lib/core1.lisp"
+        src.parent.mkdir(parents=True)
+        src.write_text("(DEFINE x (QUOTE ()))\n", encoding="utf-8")
+        folder = self.root / "knowledge"
+        folder.mkdir()
+        manifest = folder / "migration-nonprogram-isa-manifest-2026-10-08.json"
+        manifest.write_text(json.dumps({
+            "schema": "sens-migration-nonprogram-manifest/1",
+            "automatic_sens_companion": False,
+            "issue": 4460,
+            "entries": [{"path": "lib/core1.lisp",
+                         "git_blob_sha1": mod.git_blob_sha(src)}] * 25,
+        }), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "mis-scoped ISA catalogue"):
+            mod.load_nonprogram_classification(self.root)
+
+
+    def test_priority_queue_excludes_reviewed_data_but_retains_raw_census(self):
+        for name in ("record.lisp", "program.lisp"):
+            (self.root / name).write_text("(unknown)\n", encoding="utf-8")
+        raw = {
+            "mode": "dry-run",
+            "summary": {
+                "files_seen": 2, "files_written": 0,
+                "files_would_write": 0, "files_blocked": 2,
+                "files_skipped_paired": 0,
+            },
+            "skipped_paired_paths": [],
+            "files": [
+                {"path": "record.lisp", "status": "blocked", "reason": "word 2"},
+                {"path": "program.lisp", "status": "blocked",
+                 "reason": "ambiguous 8-bit head 00001001"},
+            ],
+        }
+        verified_data = {
+            "record.lisp": {
+                "path": "record.lisp",
+                "source_class": "NONPROGRAM_DATA_REVIEWED",
+                "cohort": "schema",
+                "source_git_blob_sha": mod.git_blob_sha(self.root / "record.lisp"),
+                "automatic_sens_companion": False,
+                "semantic_oracle_admitted": False,
+            }
+        }
+        def fake_run(command, **kwargs):
+            Path(command[command.index("--report") + 1]).write_text(
+                json.dumps(raw), encoding="utf-8"
+            )
+            return subprocess.CompletedProcess(command, 2, "", "")
+        with patch.object(mod.subprocess, "run", side_effect=fake_run), \
+             patch.object(mod, "load_nonprogram_classification",
+                          return_value=verified_data):
+            result = mod.build_report(self.root)
+        summary = result["summary"]
+        self.assertEqual(summary["scanned"], 2)
+        self.assertEqual(summary["blocked"], 2)
+        self.assertEqual(summary["classified_nonprogram"], 1)
+        self.assertEqual(summary["blocked_excluding_classified_nonprogram"], 1)
+        self.assertEqual(summary["mechanical_candidates"], 0)
+        self.assertEqual(summary["physical_outputs_created"], 0)
+        self.assertEqual(result["priority_blocker_sample"][0]["path"], "program.lisp")
+        self.assertEqual(result["nonprogram_classification"][0]["path"], "record.lisp")
+        self.assertEqual(result["blocked_sources"][0]["path"], "program.lisp")
+
 
 if __name__ == "__main__":
     unittest.main()

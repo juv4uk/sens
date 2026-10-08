@@ -174,6 +174,79 @@ def git_blob_sha(path: Path) -> str:
     return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
 
 
+# Reviewed non-executable Lisp records, sourced from separate SHA-pinned
+# manifests (#4460). This overlays the RESEARCH work queue only; it does
+# NOT modify SENS semantics or suppress the raw canonical migration scan.
+NONPROGRAM_MANIFESTS = (
+    ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
+    ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
+    ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
+    ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
+)
+
+
+def _checked_nonprogram_entry(root: Path, path: str, expected_sha: str) -> dict:
+    """Reject invalid manifests, source changes and fake .sens admission."""
+    rel = Path(path)
+    if (rel.is_absolute() or ".." in rel.parts or "." in rel.parts
+            or rel.suffix != ".lisp" or not rel.parts):
+        raise ValueError(f"unsafe nonprogram source path: {path}")
+    source = root / rel
+    if not source.is_file() or source.is_symlink():
+        raise ValueError(f"missing/symlink nonprogram source: {path}")
+    if (len(expected_sha) != 40 or
+            not all(c in "0123456789abcdef" for c in expected_sha)):
+        raise ValueError(f"bad source Git SHA: {path}")
+    actual = git_blob_sha(source)
+    if actual != expected_sha:
+        raise ValueError(f"nonprogram source drift: {path}: {actual} != {expected_sha}")
+    if source.with_suffix(".sens").exists() or source.with_suffix(".sens").is_symlink():
+        raise ValueError(f"nonprogram source has unproven physical pair: {path}")
+    return {"path": rel.as_posix(), "source_git_blob_sha": actual,
+            "source_class": "NONPROGRAM_DATA_REVIEWED",
+            "semantic_oracle_admitted": False, "automatic_sens_companion": False}
+
+
+def load_nonprogram_classification(root: Path) -> dict[str, dict]:
+    """Read ONLY the reviewed fixed cohort manifests, no dynamic wildcard."""
+    rows: dict[str, dict] = {}
+    for cohort, name, expected_count in NONPROGRAM_MANIFESTS:
+        manifest = root / name
+        if not manifest.exists():
+            continue  # independently merged cohorts may arrive later
+        if not manifest.is_file() or manifest.is_symlink():
+            raise ValueError(f"unsafe nonprogram manifest: {name}")
+        record = json.loads(manifest.read_text(encoding="utf-8"))
+        if (record.get("schema") != "sens-migration-nonprogram-manifest/1"
+                or record.get("automatic_sens_companion") is not False
+                or record.get("issue") != 4460):
+            raise ValueError(f"nonprogram authority mismatch: {name}")
+        entries = record.get("entries")
+        if not isinstance(entries, list) or len(entries) != expected_count:
+            raise ValueError(f"nonprogram cohort size changed: {name}")
+        for item in entries:
+            row = _checked_nonprogram_entry(
+                root, item["path"], item["git_blob_sha1"]
+            )
+            path = row["path"]
+            if path in rows:
+                raise ValueError(f"duplicate nonprogram source path: {path}")
+            # A fixed reviewed cohort is not permission to designate arbitrary
+            # executable source as DATA.
+            if cohort == "isa" and not path.startswith("lib/machine/isa/"):
+                raise ValueError(f"mis-scoped ISA catalogue: {path}")
+            if cohort == "schema" and not path.startswith(
+                    ("contracts/", "lib/", "tests/fixtures/")):
+                raise ValueError(f"mis-scoped schema data: {path}")
+            if cohort == "evidence" and not path.startswith(
+                    ("evidence/", "tests/fixtures/")):
+                raise ValueError(f"mis-scoped evidence data: {path}")
+            if cohort == "expr-record" and not path.startswith("tests/fixtures/"):
+                raise ValueError(f"mis-scoped test-record envelope: {path}")
+            row["cohort"] = cohort
+            rows[path] = row
+    return rows
+
 def categorize(row: dict, root: Path) -> dict:
     rel = Path(row["path"])
     if rel.is_absolute() or ".." in rel.parts or rel.suffix != ".lisp":
@@ -227,6 +300,17 @@ def build_report(root: Path = ROOT) -> dict:
         if list(output_dir.rglob("*.sens")) if output_dir.exists() else []:
             raise RuntimeError("dry-run emitted physical output")
         rows = [categorize(row, root) for row in report["files"]]
+        classified = load_nonprogram_classification(root)
+        rows_by_path = {row["path"]: row for row in rows}
+        if len(rows_by_path) != len(rows):
+            raise RuntimeError("duplicate original source in migration report")
+        for path, data in classified.items():
+            if path not in rows_by_path:
+                raise RuntimeError(f"classified nonprogram source missing from original census: {path}")
+            rows_by_path[path]["source_class"] = data["source_class"]
+            rows_by_path[path]["classification_cohort"] = data["cohort"]
+            rows_by_path[path]["automatic_sens_companion"] = False
+
         # The migrator's --unpaired-only contract must be enforced in BOTH
         # producer and consumer; counting a new paired canary as old progress is
         # a factual error, even if the physical bytes round-trip.
@@ -258,6 +342,12 @@ def build_report(root: Path = ROOT) -> dict:
             raise RuntimeError("exact coordinate cohort total differs from blocked corpus")
         if sum(cohort["count"] for cohort in cohorts) != blocked:
             raise RuntimeError("source blocker cohort totals inconsistent")
+        priority_blocked = [
+            row for row in blocked_sources if row["path"] not in classified
+        ]
+        priority_cohorts = blocker_cohorts(priority_blocked)
+        if sum(cohort["count"] for cohort in priority_cohorts) != len(priority_blocked):
+            raise RuntimeError("unclassified priority cohort totals inconsistent")
         if len({row["path"] for row in rows}) != len(rows):
             raise RuntimeError("duplicate original source in migration ledger")
         return {
@@ -268,7 +358,20 @@ def build_report(root: Path = ROOT) -> dict:
                 "scanned": len(rows),
                 "original_unpaired_sources_scanned": len(rows),
                 "already_paired_sources_excluded": len(excluded),
+                "classified_nonprogram": len(classified),
+                "executable_or_unclassified_unpaired": len(rows) - len(classified),
+                "classified_nonprogram_by_cohort": {
+                    cohort: sum(1 for value in classified.values()
+                                if value["cohort"] == cohort)
+                    for cohort, _, _ in NONPROGRAM_MANIFESTS
+                    if any(value["cohort"] == cohort for value in classified.values())
+                },
                 "blocked": blocked,
+                "blocked_excluding_classified_nonprogram": len(priority_blocked),
+                "priority_first_blocker_counts": {
+                    cohort["family"]: cohort["count"]
+                    for cohort in priority_cohorts
+                },
                 "blocker_family_counts": {cohort["family"]: cohort["count"] for cohort in cohorts},
                 "exact_blocker_coordinates": len(exact_cohorts),
                 "mechanical_candidates": len(candidates),
@@ -280,9 +383,18 @@ def build_report(root: Path = ROOT) -> dict:
             "source_era": "auto",
             "authority": "original unpaired current D1-D9 source; candidate only; no oracle admission",
             "already_paired_sources_excluded": excluded,
+            "nonprogram_classification": sorted(classified.values(),
+                                               key=lambda item: item["path"]),
+            "work_queue_rule": (
+                "raw 3-pass totals are retained; reviewed SHA-pinned nonprogram "
+                "records are classified as DATA, not physical .sens migrations; "
+                "all remaining original sources still require independent oracle"
+            ),
             "mechanical_candidates": candidates,
             "blocked_sources": blocked_sources,
             "blocker_cohorts": cohorts,
+            "priority_blocker_cohorts_excluding_nonprogram": priority_cohorts,
+            "priority_blocker_sample": priority_blocked[:20],
             "exact_blocker_cohorts": exact_cohorts,
             "unpaired_blocker_sample": blocked_sources[:20],
             "required_evidence": [

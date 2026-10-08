@@ -8,6 +8,9 @@ on:
       - 'scripts/migrate-three-pass.py'
       - 'scripts/sens_t5_codec.py'
       - 'tests/test_report_original_migration_candidates.py'
+      - 'knowledge/migration-nonprogram-*-manifest-2026-10-08.json'
+      - 'knowledge/migration-nonprogram-expr-records-2026-10-08.json'
+      - 'knowledge/migration-nonprogram-isa-manifest-2026-10-08.json'
       - 'knowledge/d1-d9-foundation.json'
       - 'contracts/core1-historical-sid-map.lisp'
       - '.github/workflows/report-original-migration-candidates.yml'
@@ -45,6 +48,12 @@ jobs:
           assert r['schema']=='sens-original-three-pass-eligibility/v1'
           assert s['scanned']==s['blocked']+s['mechanical_candidates']
           assert s['scanned']==s['original_unpaired_sources_scanned']
+          assert s['classified_nonprogram']==len(r['nonprogram_classification'])
+          assert s['executable_or_unclassified_unpaired']+s['classified_nonprogram']==s['scanned']
+          assert all(x['automatic_sens_companion'] is False for x in r['nonprogram_classification'])
+          assert all(x['semantic_oracle_admitted'] is False for x in r['nonprogram_classification'])
+          assert s['blocked_excluding_classified_nonprogram']==sum(c['count'] for c in r['priority_blocker_cohorts_excluding_nonprogram'])
+          assert s['blocked']-s['blocked_excluding_classified_nonprogram']<=s['classified_nonprogram']
           assert s['already_paired_sources_excluded']==len(r['already_paired_sources_excluded'])
           assert len(r['blocked_sources'])==s['blocked']
           assert sum(c['count'] for c in r['blocker_cohorts'])==s['blocked']
@@ -69,6 +78,8 @@ jobs:
               out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
               out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
+              out.write(f"- SHA-pinned declarative DATA sources: **{s['classified_nonprogram']}**\\n")
+              out.write(f"- Original executable-or-unknown sources: **{s['executable_or_unclassified_unpaired']}**\\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
               out.write('### Shared mechanical blockers — reusable owner work\n\n')
               for cohort in r['blocker_cohorts']:
@@ -81,6 +92,9 @@ jobs:
                       f"{group['coordinate']} -> {group['owner_issue']}; {examples}\n"
                   )
               out.write('\nEvery source appears in exactly one exact-coordinate group. First blocker is NOT semantic admission.\n')
+              out.write('\\n### Priority unclassified first blockers (data records excluded)\\n\\n')
+              for cohort in r['priority_blocker_cohorts_excluding_nonprogram'][:12]:
+                  out.write(f"- **{cohort['family']}**: {cohort['count']} original program-or-unknown sources\\n")
               out.write('\n### First blocked originals (exact source paths)\n\n')
               for row in r['unpaired_blocker_sample'][:12]:
                   reason=row.get('reason','unknown').replace('\n',' ')[:200]
