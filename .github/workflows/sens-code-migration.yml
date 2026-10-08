@@ -10,7 +10,9 @@ on:
       - "scripts/sens_t5_codec.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
+      - "scripts/migrate-exact-domain.py"
       - "tests/test_sens_code_migration.py"
+      - "tests/test_migrate_exact_domain.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
       - "tests/test_sens_t5_codec.py"
@@ -28,7 +30,9 @@ on:
       - "scripts/sens_t5_codec.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
+      - "scripts/migrate-exact-domain.py"
       - "tests/test_sens_code_migration.py"
+      - "tests/test_migrate_exact_domain.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
       - "tests/test_sens_t5_codec.py"
@@ -51,6 +55,7 @@ jobs:
           set +e
           python3 -m unittest \
             tests/test_sens_code_migration.py \
+            tests/test_migrate_exact_domain.py \
             tests/test_classify_lisp_source_forms.py \
             tests/test_three_pass_migration.py \
             tests/test_sens_t5_codec.py > migration-test.log 2>&1
