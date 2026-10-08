@@ -1,0 +1,326 @@
+{
+  "schema": "domain-altitude-economy/d8-research-corpus/v1",
+  "status": "research-only",
+  "created_from_main": "e3434699a96eb7613dbaeb9eec7bcb6c3d352fd5",
+  "authority": {
+    "contract": "Contract 11.8 / #4008",
+    "d8": "owner-ratified-256/256",
+    "source_map": {
+      "path": "knowledge/d8-recovery-candidate-map.json",
+      "content_sha": "f80e8d335373ceffb1d12ff8ec3be93fda320882"
+    },
+    "selector_source": "#3646/#3673",
+    "product_source": "#3667/#3668/#3704/#3712"
+  },
+  "selection_policy": {
+    "total": 20,
+    "recovery": 12,
+    "selector_law": 4,
+    "product_family": 4,
+    "note": "Deterministic research cohort only. Membership does not ratify, remove, demote, or privilege any D8 resident."
+  },
+  "equivalence_law": "digest(execute(candidate_d8)) == digest(execute(candidate_d3_expansion))",
+  "metrics_pending": [
+    "max_exact_width_used",
+    "semantic_bits_d3_expansion",
+    "semantic_bits_d8_resident",
+    "pareto_relation",
+    "residency_dividend"
+  ],
+  "dynamic_metrics": {
+    "optional": [
+      "cachegrind_instruction_refs"
+    ],
+    "authority": "mechanism-evidence-only"
+  },
+  "candidates": [
+    {
+      "id": "recovery-01",
+      "resident": "RPLACA",
+      "exact_d8_coordinate": "00000000",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ],
+      "source_reason": "Current D1-D7 can reconstruct a new pair but cannot mutate an existing pair cell observed through aliases.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-02",
+      "resident": "RPLACD",
+      "exact_d8_coordinate": "00000001",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3943",
+        "Lisp 1.5 Programmer's Manual §7.4"
+      ],
+      "source_reason": "Current D1-D7 can reconstruct a new pair but cannot mutate an existing pair cell observed through aliases.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-03",
+      "resident": "ERRORSET",
+      "exact_d8_coordinate": "00000010",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3929",
+        "LISP 1.5 Programmer's Manual §6.4",
+        "Memo 26 Errorset"
+      ],
+      "source_reason": "Current D1-D7 can produce/fail with language errors but has no language-level local error boundary that converts failure into a recoverable control result.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-04",
+      "resident": "ERROR",
+      "exact_d8_coordinate": "00000011",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3931",
+        "LISP 1.5 Programmer's Manual §6.3 and evaluator/list definitions"
+      ],
+      "source_reason": "Current SENS has accidental/runtime LanguageError outcomes but no language operation whose intended meaning is to signal an error with an explicit payload.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-05",
+      "resident": "ENV-REFLECTION",
+      "exact_d8_coordinate": "00000100",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3924",
+        "docs/FUNCTIONS.md",
+        "NOTE-FOR-SAKSHI.md",
+        "crates/sens/src/eval/builtins.rs"
+      ],
+      "source_reason": "Current language exposes zero-argument environment reflection while D1-D7 has no resident for first-class environment enumeration.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-06",
+      "resident": "READ",
+      "exact_d8_coordinate": "00000101",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3937",
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/tests/mccarthy.rs"
+      ],
+      "source_reason": "D1-D7 structure does not contain a general parser from text to Lisp data.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-07",
+      "resident": "WRITE-TO-STRING",
+      "exact_d8_coordinate": "00000110",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3937",
+        "crates/sens/src/eval/special_forms/io.rs",
+        "crates/sens/src/value.rs"
+      ],
+      "source_reason": "Canonical structural serialization is not derivable from D1-D7 without a structure-to-text boundary.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-08",
+      "resident": "SYMBOL->STRING",
+      "exact_d8_coordinate": "00000111",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ],
+      "source_reason": "Exact symbol-name observation is distinct from general serialization.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-09",
+      "resident": "STRING->SYMBOL",
+      "exact_d8_coordinate": "00001000",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3939",
+        "crates/sens/src/eval/special_forms/strings.rs",
+        "crates/sens/tests/string_first_class.rs"
+      ],
+      "source_reason": "Can materialize symbol names that are not a single readable token, so it is not derivable from READ alone.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-10",
+      "resident": "VECTOR",
+      "exact_d8_coordinate": "00001001",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs",
+        "Lisp 1.5 ARRAY lineage"
+      ],
+      "source_reason": "D1-D7 pair/list structure does not itself construct the current opaque indexed aggregate carrier.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-11",
+      "resident": "VECTOR-REF",
+      "exact_d8_coordinate": "00001010",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs"
+      ],
+      "source_reason": "CAR/CDR/list selectors do not observe an opaque vector cell by numeric index.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "recovery-12",
+      "resident": "VECTOR-SET!",
+      "exact_d8_coordinate": "00001011",
+      "provenance_status": "PROVISIONAL-D8-RECOVERY-CANDIDATE",
+      "provenance_evidence": [
+        "#3933",
+        "crates/sens/tests/vectors.rs"
+      ],
+      "source_reason": "Alias-visible in-place update is not reproduced by a pure persistent list rewrite without importing shared mutable identity.",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "selector-01",
+      "resident": "CAAAAAAR",
+      "exact_d8_coordinate": "10000000",
+      "provenance_status": "LAW-FORCED-CANDIDATE",
+      "provenance_evidence": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "source_reason": "D3 CAR followed by 5 exact selector bits",
+      "d3_expansion_status": "derivation-family-known; executable witness required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "selector-02",
+      "resident": "CAAAAADR",
+      "exact_d8_coordinate": "10000001",
+      "provenance_status": "LAW-FORCED-CANDIDATE",
+      "provenance_evidence": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "source_reason": "D3 CAR/CDR composition under the selector generator",
+      "d3_expansion_status": "derivation-family-known; executable witness required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "selector-03",
+      "resident": "CAAAADAR",
+      "exact_d8_coordinate": "10000010",
+      "provenance_status": "LAW-FORCED-CANDIDATE",
+      "provenance_evidence": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "source_reason": "D3 CAR/CDR composition under the selector generator",
+      "d3_expansion_status": "derivation-family-known; executable witness required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "selector-04",
+      "resident": "CAAAADDR",
+      "exact_d8_coordinate": "10000011",
+      "provenance_status": "LAW-FORCED-CANDIDATE",
+      "provenance_evidence": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "source_reason": "D3 CAR/CDR composition under the selector generator",
+      "d3_expansion_status": "derivation-family-known; executable witness required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "product-01",
+      "resident": "DROP-right",
+      "exact_d8_coordinate": "11000011",
+      "provenance_status": "PRODUCT-CANDIDATE",
+      "provenance_evidence": [
+        "#3667"
+      ],
+      "source_reason": "D6 TAKE/DROP × edge research family",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "product-02",
+      "resident": "ALL(NOT p)",
+      "exact_d8_coordinate": "11110011",
+      "provenance_status": "PRODUCT-CANDIDATE",
+      "provenance_evidence": [
+        "#3668"
+      ],
+      "source_reason": "D6 ANY/ALL × predicate-polarity research family",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "product-03",
+      "resident": "SCAN-right",
+      "exact_d8_coordinate": "10111011",
+      "provenance_status": "PRODUCT-CANDIDATE-NONEMPTY",
+      "provenance_evidence": [
+        "#3704"
+      ],
+      "source_reason": "D6 REDUCE/SCAN × direction research family",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    },
+    {
+      "id": "product-04",
+      "resident": "UNZIP-swapped",
+      "exact_d8_coordinate": "11100011",
+      "provenance_status": "PRODUCT-CANDIDATE-TYPED",
+      "provenance_evidence": [
+        "#3712"
+      ],
+      "source_reason": "D6 ZIP/UNZIP × orientation research family",
+      "d3_expansion_status": "required",
+      "equivalence_status": "required",
+      "benchmark_status": "candidate"
+    }
+  ]
+}
