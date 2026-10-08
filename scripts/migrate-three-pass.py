@@ -594,6 +594,13 @@ class Resolver:
             if count: self.counts["pass1-sens8"]+=1
             return [ident[0]],"pass1-sens8"
 
+        # Source-proven global DEFINE targets have lexical precedence over
+        # builtin/current surface names. Their call heads reuse the same
+        # D2/W7 frame as the target; spelling alone does not rebind them.
+        if t in self.global_binding_words:
+            if count: self.counts["pass4-text7-global"]+=1
+            return self.global_binding_words[t],"pass4-text7-global"
+
         # Pass 2: known my-lisp/current admitted surfaces. A surface known to
         # the old registry but lacking a current resident is a blocker.
         if t in self.my:
@@ -616,12 +623,6 @@ class Resolver:
                 )
             if count: self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
-        # A source-proven global DEFINE target is a contextual Text7 binding,
-        # not a semantic function identity. Its call head uses the exact same
-        # D2/W7 frame as the DEFINE target.
-        if t in self.global_binding_words:
-            if count: self.counts["pass4-text7-global"]+=1
-            return self.global_binding_words[t],"pass4-text7-global"
         # D1/D2 or any unresolved dynamic/user function stays exactly as written.
         if count: self.counts["passthrough-head"]+=1
         return [t],"passthrough-head"
