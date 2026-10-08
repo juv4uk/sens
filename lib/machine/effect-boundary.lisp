@@ -35,6 +35,19 @@
   (target-projection-may-be-replaceable required)
   (semantic-observable-preserved required)
 
+  ; #4381 — no implicit target-state channel may cross effect composition.
+  ; Semantically relevant outputs belong to the canonical effect object.
+  ; A target may realize those outputs through internal mechanisms such as
+  ; processor flags, carry chains, predicate masks, or explicit wires, but a
+  ; downstream effect consumes only explicit canonical outputs.
+  (effect-output-contract explicit-complete)
+  (effect-explicit-outputs required)
+  (effect-hidden-target-state forbidden)
+  (effect-output-consumer explicit-only)
+  (target-hidden-state-materialization projection-only)
+  (target-hidden-state-semantic-channel forbidden)
+  (effect-output-arity target-invariant)
+
   (machine-block-container lib/machine/block.lisp)
   (first-proof-slice bounded-vertical-witness)
   (first-proof-status contract-seam-only)
