@@ -7,10 +7,9 @@ const UK_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
 
 #[test]
 fn real_compiler_preserves_uk_source_and_lowers_all_definitions_to_exact_heads() {
-    let source_definitions = UK_SOURCE
-        .lines()
-        .filter(|line| line.starts_with("(визначити "))
-        .count();
+    // Six definitions wrap the Ukrainian name onto the following line;
+    // a line-start-only counter would silently ignore valid D4 DEFINE forms.
+    let source_definitions = UK_SOURCE.matches("(визначити").count();
     assert_eq!(source_definitions, 51, "compiler has 51 original callable definitions");
     assert_eq!(UK_SOURCE.matches("(функція ").count(), 51);
     assert!(!UK_SOURCE.contains("(0011 "), "the .lisp human projection must not become raw D4");
