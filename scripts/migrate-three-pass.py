@@ -462,7 +462,7 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     return words
 
 class Resolver:
-    def __init__(self,legacy,my,upper,source_era="legacy",admitted_d8=None):
+    def __init__(self,legacy,my,upper,source_era="auto",admitted_d8=None):
         if source_era not in ("auto","legacy","current"):
             raise ValueError(f"invalid source era {source_era!r}")
         if source_era=="current" and not admitted_d8:
@@ -709,8 +709,8 @@ def main():
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
-    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="legacy",
-                    help="legacy = сумісний старий SID8; auto блокує W8; current = ратифікований D8")
+    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
+                    help="auto блокує W8; legacy = сумісний старий SID8 лише з provenance; current = ратифікований D8")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
