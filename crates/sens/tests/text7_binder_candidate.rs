@@ -5,8 +5,7 @@
 //! participate in existing local/global binding machinery without a new SID
 //! or a new AST payload variant.
 
-use sens::{eval_parsed_expressions, parse_canonical_binary, Bit1, DomainIdentity, Exactness, Session, Value};
-use std::rc::Rc;
+use sens::{eval_parsed_expressions, parse_canonical_binary, Bit1, DomainIdentity, Session, Value};
 
 fn t7(name: &[u8]) -> String {
     let body = name
