@@ -174,3 +174,5 @@ jobs:
             real-silicon-census.json
             real-silicon-coverage.json
           if-no-files-found: error
+
+# 4349 structural replay CI rerun after D3 predicate-value guard repair
