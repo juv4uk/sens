@@ -310,6 +310,53 @@ def parse_legacy_successors(semantic_registry: Path, necessary_forms: Path):
         out[byte]=(bits,"D4","necessary-form-successor")
     return out
 
+
+def parse_audited_legacy_successors(path: Path, foundation: dict):
+    """Load explicit legacy SID8 -> current exact-domain dispositions.
+
+    Only rows already audited as DIRECT-CURRENT-IDENTITY or
+    CURRENT-PROJECTION-DERIVED are eligible, and only when the target reduces
+    to exactly one current D1-D9 identity present in the supplied foundation.
+    Compound projections (for example MACRO + DEFINE), internal helpers,
+    holds, research candidates and blank cells remain unmapped.
+    """
+    data=json.loads(path.read_text(encoding="utf-8"))
+    if data.get("status")!="AUDIT-COMPLETE":
+        raise MigrationError(f"{path}: legacy coverage ledger is not AUDIT-COMPLETE")
+
+    allowed={"DIRECT-CURRENT-IDENTITY","CURRENT-PROJECTION-DERIVED"}
+    domains=foundation.get("domains",{})
+    out={}
+    target_re=re.compile(r"\b(D[1-9]):([01]{1,9})\b")
+
+    for row in data.get("rows",()):
+        if row.get("classification") not in allowed:
+            continue
+        legacy=row.get("legacy_code")
+        target=row.get("current_target") or ""
+        if not isinstance(legacy,str) or not re.fullmatch(r"[01]{8}",legacy):
+            continue
+
+        identities={(domain,bits) for domain,bits in target_re.findall(target)}
+        if len(identities)!=1:
+            continue
+        domain,bits=next(iter(identities))
+        desc=domains.get(domain)
+        if desc is None:
+            continue
+        width=int(desc["width"])
+        if len(bits)!=width:
+            raise MigrationError(
+                f"{path}: audited target {domain}:{bits} has wrong width {len(bits)} != {width}"
+            )
+        resident=desc.get("residents",{}).get(bits)
+        if resident is None:
+            raise MigrationError(
+                f"{path}: audited target {domain}:{bits} absent from current foundation"
+            )
+        out[legacy]=(bits,domain,"audited-sens8-current-coverage")
+    return out
+
 def parse_semantic_rows(path: Path):
     text=path.read_text(encoding="utf-8")
     rows={}
@@ -327,10 +374,21 @@ def parse_semantic_rows(path: Path):
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
                           semantic_registry: Path, necessary_forms: Path,
-                          historical_map: Path|None=None):
+                          historical_map: Path|None=None,
+                          legacy_coverage: Path|None=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
     proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
+    if legacy_coverage is not None:
+        audited=parse_audited_legacy_successors(legacy_coverage,data)
+        for byte,ident in audited.items():
+            previous=proven_legacy.get(byte)
+            if previous is not None and previous[:2]!=ident[:2]:
+                raise MigrationError(
+                    f"legacy successor conflict for {byte}: "
+                    f"{previous[1]}:{previous[0]} vs {ident[1]}:{ident[0]}"
+                )
+            proven_legacy.setdefault(byte,ident)
     sem_rows=parse_semantic_rows(semantic_generated)
 
     # A historical byte may gain a successor through semantic-name
@@ -369,7 +427,10 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
 
     # Preserve knowledge that an old function existed even when it has no
     # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
-    legacy={byte:proven_legacy.get(byte) for byte in sem_rows}
+    legacy={
+        byte:proven_legacy.get(byte)
+        for byte in sorted(set(sem_rows) | set(proven_legacy))
+    }
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
@@ -509,7 +570,7 @@ class Resolver:
             ident=self.legacy[t]
             if ident is None:
                 raise MigrationError(
-                    f"legacy-unmapped SID8/Sens8 {t}: no current D3-D6 resident",
+                    f"legacy-unmapped SID8/Sens8 {t}: no audited current D1-D9 successor",
                     tok,
                 )
             if ident[1]=="D3" and ident[0]==D3_EMPTY:
@@ -526,7 +587,7 @@ class Resolver:
             ident=self.my[t]
             if ident is None:
                 raise MigrationError(
-                    f"legacy-unmapped my-lisp function {t!r}: no current D3-D6 resident",
+                    f"legacy-unmapped my-lisp function {t!r}: no audited current D1-D9 successor",
                     tok,
                 )
             self.counts["pass2-my-lisp"]+=1
@@ -537,7 +598,7 @@ class Resolver:
             ident=self.upper[t]
             if ident is None:
                 raise MigrationError(
-                    f"legacy-unmapped Lisp 1-1.5 function {t}: no current D3-D6 resident",
+                    f"legacy-unmapped Lisp 1-1.5 function {t}: no audited current D1-D9 successor",
                     tok,
                 )
             self.counts["pass3-lisp15"]+=1
@@ -705,6 +766,7 @@ def main():
     ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
     ap.add_argument("--necessary-forms", type=Path, default=REPO_ROOT / "crates/sens/src/eval/necessary_forms_generated.rs")
     ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
+    ap.add_argument("--legacy-coverage", type=Path, default=REPO_ROOT / "knowledge/sens8-current-coverage-v1.json")
     ap.add_argument("--text7", type=Path, default=REPO_ROOT / "crates/sens/src/text7_projection_generated.rs")
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
@@ -723,7 +785,8 @@ def main():
     admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
     legacy, my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
-        args.semantic_registry, args.necessary_forms, args.historical_map
+        args.semantic_registry, args.necessary_forms, args.historical_map,
+        args.legacy_coverage
     )
     text7 = build_text7(data, args.text7)
     rows = []
