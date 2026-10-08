@@ -88,6 +88,24 @@ class ThreePassMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
             self.migrate("(11111111 x)\n")
 
+    def test_divide_never_silently_becomes_d5_quotient(self):
+        # The actual lib/si-derived.lisp contains historic 00001111 DIVIDE.
+        # Its old 3-pass output incorrectly selected D5 10111 QUOTIENT.
+        # Current D8 DIVIDE is a distinct semantic resident, so fail closed
+        # until explicit migration/admission is implemented.
+        for name in ("00001111", "divide", "DIVIDE", "/", "поділити"):
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(
+                    mod.MigrationError, "unsafe DIVIDE -> D5 QUOTIENT"
+                ):
+                    self.migrate(f"({name} 2 2)\\n")
+
+    def test_real_si_derived_does_not_emit_wrong_quotient(self):
+        source=(ROOT/"lib"/"si-derived.lisp").read_text(encoding="utf-8")
+        with self.assertRaisesRegex(mod.MigrationError,
+                                    "unsafe DIVIDE -> D5 QUOTIENT"):
+            self.migrate(source)
+
     def test_old_print_sid8_without_current_resident_blocks(self):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
             self.migrate("(01001000 x)\n")
