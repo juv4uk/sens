@@ -149,5 +149,85 @@ class OriginalCandidateTests(unittest.TestCase):
                 mod.build_report(self.root)
 
 
+    def test_first_blocker_families_do_not_claim_semantic_admission(self):
+        samples = {
+            "ambiguous 8-bit head 00001001": "w8-provenance",
+            "legacy-unmapped my-lisp function 'print'": "host-effect",
+            "legacy-unmapped my-lisp function 'foo'": "unmapped-function",
+            "word 2 is not a ratified data domain": "d2-or-domain-data",
+            "unbound lexical variable x": "lexical-binding",
+            "unratified numeric literal": "numeric-law",
+            "text7 symbol not admitted": "text-or-quote",
+            "no proof of unknown symbol": "other-unproved",
+        }
+        for reason, family in samples.items():
+            with self.subTest(reason=reason):
+                self.assertEqual(mod.blocker_family(reason), family)
+                self.assertTrue(mod.BLOCKER_ACTIONS[family])
+
+    def test_exhaustive_sha_pinned_cohorts_are_disjoint_and_stable(self):
+        def row(name, reason, sha):
+            return {
+                "path": name, "source_git_blob_sha": sha,
+                "status": "BLOCKED", "same_stem_sens_already_exists": False,
+                "reason": reason,
+                "source_is_executable_proven": False,
+                "independent_semantic_oracle_passed": False,
+            }
+        sources = [
+            row("z.lisp", "ambiguous 8-bit head 00001001", "a"*40),
+            row("a.lisp", "word 2 invalid", "b"*40),
+            row("b.lisp", "ambiguous 8-bit head 00001011", "c"*40),
+        ]
+        cohorts = mod.blocker_cohorts(sources)
+        self.assertEqual([c["family"] for c in cohorts],
+                         ["w8-provenance", "d2-or-domain-data"])
+        self.assertEqual([c["count"] for c in cohorts], [2, 1])
+        self.assertEqual(
+            [x["path"] for x in cohorts[0]["original_sources"]],
+            ["b.lisp", "z.lisp"]
+        )
+        self.assertEqual(
+            cohorts[0]["original_sources"][1]["source_git_blob_sha"], "a"*40
+        )
+        self.assertTrue(all(c["status"] == "BLOCKED_NOT_ORACLE_ADMITTED"
+                            for c in cohorts))
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            mod.blocker_cohorts(sources + sources[:1])
+        with self.assertRaisesRegex(ValueError, "not an unpaired"):
+            mod.blocker_cohorts([{**sources[0],
+                                  "same_stem_sens_already_exists": True}])
+
+    def test_full_old_original_blocker_rows_retained_not_only_first_20(self):
+        for i in range(25):
+            (self.root / f"item{i}.lisp").write_text("(unknown)\\n")
+        rows = [{"path": f"item{i}.lisp", "status": "blocked",
+                 "reason": "ambiguous 8-bit head 00001001" if i%2 else "word 2"}
+                for i in range(25)]
+        report = {
+            "mode": "dry-run",
+            "summary": {
+                "files_seen": 25, "files_written": 0,
+                "files_would_write": 0, "files_blocked": 25,
+                "files_skipped_paired": 0,
+            },
+            "skipped_paired_paths": [],
+            "files": rows,
+        }
+        def fake_run(command, **kwargs):
+            Path(command[command.index("--report")+1]).write_text(json.dumps(report))
+            return subprocess.CompletedProcess(command, 2, "", "")
+        with patch.object(mod.subprocess, "run", side_effect=fake_run):
+            result = mod.build_report(self.root)
+        self.assertEqual(len(result["blocked_sources"]), 25)
+        self.assertEqual(len(result["unpaired_blocker_sample"]), 20)
+        self.assertEqual(sum(c["count"] for c in result["blocker_cohorts"]), 25)
+        self.assertEqual(result["summary"]["blocker_family_counts"],
+                         {"d2-or-domain-data": 13, "w8-provenance": 12})
+        self.assertEqual(result["summary"]["mechanical_candidates"], 0)
+        self.assertTrue(all(len(x["source_git_blob_sha"]) == 40
+                            for x in result["blocked_sources"]))
+
+
 if __name__ == "__main__":
     unittest.main()
