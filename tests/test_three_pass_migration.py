@@ -34,8 +34,10 @@ class ThreePassMigrationTests(unittest.TestCase):
         )
         cls.text7=mod.build_text7(data,TEXT7)
 
-    def migrate(self,source):
-        resolver=mod.Resolver(self.legacy,self.my,self.upper)
+    def migrate(self,source,source_era="legacy"):
+        # Most direct unit cases intentionally exercise a proven historical
+        # fixture. The production CLI default is tested separately and is auto.
+        resolver=mod.Resolver(self.legacy,self.my,self.upper,source_era=source_era)
         return mod.migrate_file(source,resolver,self.text7),resolver
 
     def test_empty_list_is_compact_d3_empty(self):
