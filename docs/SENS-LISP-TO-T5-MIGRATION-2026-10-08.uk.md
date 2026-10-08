@@ -57,3 +57,29 @@ python3 scripts/migrate-to-sens-codes.py /path/to/approved-corpus \
 **Задачі:** [головна #4449](https://github.com/juv4uk/sens/issues/4449); [фізичний T5 #4446](https://github.com/juv4uk/sens/pull/4446); [конвертер #4450](https://github.com/juv4uk/sens/issues/4450); [маніфест #4451](https://github.com/juv4uk/sens/issues/4451); [CI #4452](https://github.com/juv4uk/sens/issues/4452).
 
 73.
+
+## Короткий запуск чинного мігратора
+
+Конвертер має вбудовані шляхи до поточної ратифікованої D1–D9 основи, generated surfaces, history map та Text7. Тому окремий підтверджений файл запускається **без переліку всіх реєстрів**:
+
+```sh
+python3 scripts/migrate-three-pass.py \
+  tests/fixtures/migration-multiform-cohort/two-forms.lisp \
+  --out /tmp/sens-one --source-era legacy
+```
+
+Результат: `/tmp/sens-one/two-forms.sens` — **фізичний T5**, а звіт — `/tmp/sens-one.report.json`. Оригінальний `.lisp` залишається незмінним, наявні `.sens` у mirror не перезаписуються.
+
+Для **саме ще не переведених** вихідних файлів, без повторного підрахунку вже наявних T5-пар:
+
+```sh
+python3 scripts/migrate-three-pass.py . \
+  --out /tmp/sens-unpaired-audit \
+  --unpaired-only --dry-run --source-era legacy
+```
+
+`files_skipped_paired` показує кількість пропущених пар; `files_seen` і `files_blocked` належать до тих, які сканувалися. Жоден `.sens` у режимі `--dry-run` не створюється.
+
+**Важлива неоднозначність восьми бітів:** `--source-era legacy` означає історичний SID8; `--source-era current` з ратифікованим D8 фундаментом залишає сучасний D8; `--source-era auto` блокує неоднозначний W8 head, не вгадує за формою бітів. Для змішаного корпусу спочатку класифікуйте походження файлів, тоді запускайте обмежені підкорпуси. Чинний D8 resident сам по собі **не доводить викликуваності**.
+
+Механічний T5 roundtrip **не є** oracle-parity. Нерозпізнані binders, текст, числа та host-ефекти залишаються BLOCKED, без псевдоконвертації.
