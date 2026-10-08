@@ -64,8 +64,8 @@
                      (00100111
                        (00000001 return-u64)
                        (00000001 result))))
-                  ((00000011 0 0) t (00000001 machine-effect-rejected))))
-               ((00000011 0 0) t (00000001 machine-effect-rejected))))
-            ((00000011 0 0) t (00000001 machine-effect-rejected))))
-         ((00000011 0 0) t (00000001 machine-effect-rejected))))
-      ((00000011 0 0) t (00000001 machine-effect-rejected)))))
+                  ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
+               ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
+            ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
+         ((00000011 0 0) 1 (00000001 machine-effect-rejected))))
+      ((00000011 0 0) 1 (00000001 machine-effect-rejected)))))
