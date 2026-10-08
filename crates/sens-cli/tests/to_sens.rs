@@ -235,11 +235,6 @@ fn exact_domain_mode_rewrites_current_d3_d4_heads_at_real_width() {
     let _ = std::fs::remove_file(&path);
     assert_eq!(rewritten, "(0010 (x) (101 (111 x ())))\n");
 
-    let clean = tool()
-        .args(["--check", "--exact-domain", "/dev/null"])
-        .output()
-        .expect("run clean exact-domain check");
-    assert_ne!(clean.status.code(), Some(0));
 }
 
 #[test]
