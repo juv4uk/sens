@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -56,11 +57,32 @@ def parser() -> argparse.ArgumentParser:
     return p
 
 
+def blocked_reasons(report: Path) -> list[str]:
+    """Вивести лише причини блокування; ніколи не сертифікувати семантику."""
+    try:
+        state = json.loads(report.read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeError):
+        return []
+    if not isinstance(state, dict) or not isinstance(state.get("files"), list):
+        return []
+    reasons = []
+    for entry in state["files"]:
+        if not isinstance(entry, dict) or entry.get("status") != "blocked":
+            continue
+        source = str(entry.get("path", "?"))[:180].replace("\n", " ").replace("\r", " ")
+        why = str(entry.get("reason", "непідтверджена семантика"))[:400].replace("\n", " ").replace("\r", " ")
+        reasons.append(f"{source}: {why}")
+    return reasons
+
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     # Передаємо status без трансформації: BLOCK не має перетворюватися на PASS.
     try:
-        return subprocess.run(command(args), cwd=ROOT, check=False).returncode
+        status = subprocess.run(command(args), cwd=ROOT, check=False).returncode
+        if status != 0 and args.action == "preview":
+            for reason in blocked_reasons(args.report):
+                print(f"BLOCKED {reason}", file=sys.stderr)
+        return status
     except OSError as exc:
         print(f"BLOCKED: неможливо запустити міграцію: {exc}", file=sys.stderr)
         return 2
