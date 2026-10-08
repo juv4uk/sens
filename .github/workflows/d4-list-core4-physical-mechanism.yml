@@ -1,0 +1,29 @@
+name: D4 LIST exact Core4 physical mechanism
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - ".github/workflows/d4-list-core4-physical-mechanism.yml"
+  workflow_dispatch:
+
+jobs:
+  d4-list-is-language-owned:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact D4 LIST bootstrap slot and real D2 executable probe
+        run: cargo test -p sens --lib explicit_core4_bootstrap_binds_ratified_d4_list_as_language_owned_closure -- --nocapture
+      - name: Existing D4 APPEND, selector precedence and dotted-right historical parity
+        run: cargo test -p sens --test d4_d5_append_dedup -- --nocapture
+      - name: Ensure no new English executable identity debt
+        run: cargo test -p sens --test english_names_in_code english_names_in_code_never_grow -- --nocapture
+      - name: Read-only invariant
+        run: git diff --exit-code
