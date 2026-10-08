@@ -5,6 +5,9 @@ import importlib.util
 from pathlib import Path
 import sys
 import unittest
+import tempfile
+import subprocess
+import json
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -204,6 +207,40 @@ class SensCodeMigrationTests(unittest.TestCase):
         converted, _, _ = self.binary('(CONS "привіт" test-name)\n')
         self.assertRegex(converted, r"^[01\s]+$")
         converted.encode("ascii")
+
+    def test_new_sens_mirror_is_actual_physical_file_and_no_extensionless(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / 'source'
+            root.mkdir()
+            (root / 'hello.lisp').write_text('()\n', encoding='utf-8')
+            out = Path(td) / 'out'
+            report = Path(td) / 'report.json'
+            args = [
+                sys.executable, str(SCRIPT), str(root),
+                '--foundation', str(FOUNDATION),
+                '--sens-mirror', str(out),
+                '--text7-projection', str(TEXT7),
+                '--historical-map', str(HISTORICAL),
+                '--semantic-registry', str(REGISTRY),
+                '--report', str(report),
+                '--domain-surfaces', *[str(x) for x in DOMAIN_SURFACES],
+            ]
+            first = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(first.returncode, 0, first.stderr)
+            from sens_t5_codec import decode_bytes, encode_projection
+            target = out / 'hello.sens'
+            self.assertTrue(target.is_file())
+            self.assertFalse((out / 'hello').exists())
+            self.assertFalse((out / 'hello.lisp').exists())
+            self.assertEqual(target.read_bytes(), encode_projection('000'))
+            self.assertEqual(decode_bytes(target.read_bytes()), ['000'])
+            self.assertEqual((root / 'hello.lisp').read_text(), '()\n')
+            state=json.loads(report.read_text())
+            self.assertEqual(state['mode'], 'sens-mirror')
+            self.assertEqual(state['files'][0]['status'], 'sens-written')
+            second=subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(second.returncode, 2, second.stderr)
+            self.assertEqual(target.read_bytes(), encode_projection('000'))
 
 
 if __name__ == "__main__":
