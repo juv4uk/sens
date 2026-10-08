@@ -21,5 +21,15 @@
       "migration_multiform_cohort"
     ]
   ],
-  "expected_current_eval_stdout": "(())\n"
+  "expected_current_eval_stdout": "(())\n",
+  "oracle_witnesses": {
+    "historical": {
+      "path": "tests/test_migration_multiform_cohort.py",
+      "git_blob_sha1": "c812e501563839b47eb1effca9bc156a25f34426"
+    },
+    "current": {
+      "path": "crates/sens/tests/migration_multiform_cohort.rs",
+      "git_blob_sha1": "62966dc8ee589891460dd37bc10c01c4d64b7906"
+    }
+  }
 }
