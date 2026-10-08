@@ -130,7 +130,13 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
         if canonical is None or canonical[0] != item["source_git_blob_sha"]:
             raise PlanError(f"reviewed data source not in canonical blocked ledger or stale Git SHA: {path}")
         source_row = next(row for row in authoritative if row["path"] == path)
-        if (source_row.get("source_class") != "NONPROGRAM_DATA_REVIEWED"
+        # Reporter v1 overlays reviewed semantics onto source_scope, while
+        # a historical candidate shape used source_class. Never trust a
+        # classification that contradicts either field if both are present.
+        source_kind = source_row.get("source_scope", source_row.get("source_class"))
+        if (source_kind != "NONPROGRAM_DATA_REVIEWED"
+                or (source_row.get("source_class", source_kind)
+                    != "NONPROGRAM_DATA_REVIEWED")
                 or source_row.get("automatic_sens_companion") is not False):
             raise PlanError(f"canonical original does not confirm nonprogram policy: {path}")
         reviewed[path] = item
