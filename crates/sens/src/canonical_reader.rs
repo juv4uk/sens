@@ -7,7 +7,7 @@
 
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
-    Span,
+    Span, Text7,
 };
 use crate::syntax::ExprKind;
 use std::rc::Rc;
@@ -26,6 +26,52 @@ const D2_DOT: u8 = 0b11;
 pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> {
     let tokens = parse_binary_source_words(source)?;
     CanonicalReader::new(&tokens, source.len()).parse_program()
+}
+
+/// Recognize a lossless D2/W7 sequence as Text7 without changing reader meaning.
+///
+/// This helper never rewrites the parsed AST. Callers must invoke it only at an
+/// owner-ratified syntactic role such as a binder or binding reference.
+pub(crate) fn text7_atom(expression: &Expr) -> Option<Text7> {
+    let ExprKind::List(items) = &expression.kind else {
+        return None;
+    };
+    if items.is_empty() {
+        return None;
+    }
+
+    let cells = items
+        .iter()
+        .map(|item| match item.kind {
+            ExprKind::DomainIdentity(crate::DomainIdentity::D7(word)) => {
+                Some(word.word().packed_bits())
+            }
+            _ => None,
+        })
+        .collect::<Option<Vec<u8>>>()?;
+
+    Text7::from_cells(cells).ok()
+}
+
+/// Stable internal binding key for a contextual Text7 identifier.
+pub(crate) fn text7_binding_key(expression: &Expr) -> Option<Rc<str>> {
+    text7_atom(expression).map(|text| Rc::from(text.to_canonical_wire_token()))
+}
+
+/// Convert a Text7 value back to the exact D2/W7 structural representation.
+pub(crate) fn text7_to_expr(text: &Text7, span: Span) -> Expr {
+    let items = text
+        .to_source_words()
+        .into_iter()
+        .map(|word| Expr {
+            kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
+            span,
+        })
+        .collect::<Vec<_>>();
+    Expr {
+        kind: ExprKind::List(Rc::from(items.into_boxed_slice())),
+        span,
+    }
 }
 
 struct CanonicalReader<'a> {
