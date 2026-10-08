@@ -1,0 +1,196 @@
+{
+  "schema": "d10-flavors-restarts-research-v1/v1",
+  "status": "RESEARCH-UNRATIFIED-NOT-IN-INVENTORY",
+  "date": "2026-10-09",
+  "owner_issues": [
+    "#4013",
+    "#4463",
+    "#3910",
+    "#3135"
+  ],
+  "intent": "Bring historically evidenced Lisp-machine methods and restart semantics for D10 owner review, while preserving D2 as sole structural/control authority; proposing names does not mint 10-bit residents",
+  "snapshot": {
+    "selected_main_at_authoring": 625,
+    "ratified": 0,
+    "proposed_rows": 8,
+    "existing_semantic_inventory_mutated": false
+  },
+  "sources": [
+    {
+      "id": "MIT-FLAVORS-1980",
+      "url": "https://dspace.mit.edu/entities/publication/86c7fee8-196c-49e1-83a8-81f31c4295f0",
+      "notes": "Daniel Weinreb and David Moon era Lisp Machine Flavors; message dispatch; research only"
+    },
+    {
+      "id": "CLHS-7-6-6",
+      "url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-3.html",
+      "notes": "Later Common Lisp standard method precedence and next-method context"
+    },
+    {
+      "id": "CLHS-METHOD-COMB",
+      "url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_define-me_-combination.html",
+      "notes": "Effective method combination order as independent semantic law"
+    },
+    {
+      "id": "CLHS-RESTART",
+      "url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
+      "notes": "Lexical restarts, condition association and explicit invocation; later standard"
+    }
+  ],
+  "excluded": [
+    {
+      "name": "DEFCLASS",
+      "reason": "already selected in D10 inventory"
+    },
+    {
+      "name": "DEFMETHOD",
+      "reason": "already selected in D10 inventory"
+    },
+    {
+      "name": "DEFGENERIC",
+      "reason": "already selected in D10 inventory"
+    },
+    {
+      "name": "MAKE-INSTANCE",
+      "reason": "already selected in D10 inventory"
+    },
+    {
+      "name": "UNDO",
+      "reason": "already selected historical D10 research; not equivalent to restart scope"
+    },
+    {
+      "name": "INTERLISP-HISTORY-REPLAY",
+      "reason": "already selected history replay; do not duplicate"
+    },
+    {
+      "name": "PACKAGE-LOADER",
+      "reason": "OS/package mechanism rather than language meaning"
+    },
+    {
+      "name": "SOURCE-BINARY-TRANSPORT",
+      "reason": "T5 transport, not a D10 semantic resident"
+    }
+  ],
+  "rows": [
+    {
+      "proposal_id": "D10-FR-001",
+      "semantic_name": "APPLICABLE-METHODS",
+      "surface_uk": "застосовні-методи",
+      "surface_ukr": "методи-які-можна-застосувати",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-3.html",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Given explicit method signatures and argument type evidence, derive the deterministic ordered list of applicable methods; never invoke one",
+      "falsifier": "Two equally-specific incomparable methods must yield explicit ambiguity unless a ratified precedence law disambiguates",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "distinct_from_existing": "DEFMETHOD and DEFGENERIC already selected: distinguish query/ordering from definition",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-FR-002",
+      "semantic_name": "NEXT-METHOD-AVAILABLE?",
+      "surface_uk": "є-наступний-метод?",
+      "surface_ukr": "чи-є-наступний-метод?",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-3.html",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Inside an admitted effective-method context return exact D1 yes/no for whether another applicable method exists",
+      "falsifier": "At last primary method answer D1 NO; outside a method context BLOCK rather than truthy NIL",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "distinct_from_existing": "No new D1 resident; D10 library predicate returns the existing D1 value",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-FR-003",
+      "semantic_name": "CALL-NEXT-METHOD",
+      "surface_uk": "викликати-наступний-метод",
+      "surface_ukr": "виконати-наступний-застосовний-метод",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-3.html",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Delegate to the next ordered method preserving or explicitly replacing arguments under established method-combination semantics",
+      "falsifier": "Invoking at end or outside dynamic method context must signal defined error, never fall back to guessed function identity",
+      "triage_status": "HOLD-D2-CONTROL",
+      "distinct_from_existing": "Invocation sequencing may belong to D2 sole language-control owner; do not ratify D10 as new control syntax",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-FR-004",
+      "semantic_name": "STANDARD-METHOD-COMBINATION",
+      "surface_uk": "поєднати-методи",
+      "surface_ukr": "утворити-підсумковий-метод",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_define-me_-combination.html",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Construct an effective-method plan with before, primary, after and around method roles in a specified precedence order",
+      "falsifier": "Same method set with different registration order must yield identical effective plan when precedence is fully specified",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "distinct_from_existing": "Compare existing DEFGENERIC/DEFMETHOD and ordinary CONS/LIST as representation, not equivalent precedence semantics",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-FR-005",
+      "semantic_name": "MESSAGE-UNHANDLED",
+      "surface_uk": "повідомлення-не-оброблено",
+      "surface_ukr": "невідоме-повідомлення-для-обєкта",
+      "source_url": "https://dspace.mit.edu/entities/publication/86c7fee8-196c-49e1-83a8-81f31c4295f0",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Represent failure of explicit message dispatch when no applicable method is available, keeping object/message identity in data",
+      "falsifier": "A method-not-found case must not invent an execution result or silently select another method",
+      "triage_status": "HOLD-ERROR-TAXONOMY",
+      "distinct_from_existing": "Possibly merely an existing explicit error result; require independent observable law before D10 slot",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-FR-006",
+      "semantic_name": "SIGNAL-CONDITION",
+      "surface_uk": "сповістити-про-умову",
+      "surface_ukr": "передати-умову-обробникам",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Present a first-class condition value to an explicitly supplied lexical handler chain without turning it into host I/O",
+      "falsifier": "Unmatched condition must remain available as typed failure with unmodified payload; no implicit host exception",
+      "triage_status": "HOLD-D2-CONTROL",
+      "distinct_from_existing": "Signaling/handler control likely belongs to D2 or effect ledger rather than D10 new structural control",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-FR-007",
+      "semantic_name": "FIND-RESTART",
+      "surface_uk": "знайти-відновлення",
+      "surface_ukr": "знайти-доступний-шлях-відновлення",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Resolve a restart by stable identity in an explicit scope/condition association; return presence or a typed descriptor without executing",
+      "falsifier": "An out-of-scope restart must fail lookup and never be invoked, with quote/data and source identity preserved",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "distinct_from_existing": "Not equal to already-selected historical UNDO/INTERLISP-HISTORY-REPLAY, which concern historical state",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-FR-008",
+      "semantic_name": "INVOKE-RESTART",
+      "surface_uk": "застосувати-відновлення",
+      "surface_ukr": "виконати-заявлений-шлях-відновлення",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
+      "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
+      "semantic_law": "Invoke a selected restart with exact supplied arguments, with scope and continuation preserved",
+      "falsifier": "Invoking stale/out-of-scope restart BLOCK; no default branch or OS capability is inferred",
+      "triage_status": "HOLD-D2-CONTROL",
+      "distinct_from_existing": "Nonlocal transfer is control; D2 owns language control; owner must approve a pure functional encoding",
+      "ratified_resident": false,
+      "coordinate": null,
+      "physical_t5_authorized": false
+    }
+  ]
+}
