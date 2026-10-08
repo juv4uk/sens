@@ -1,0 +1,31 @@
+name: migration-probe-peer-identity
+
+on:
+  push:
+    branches:
+      - migration-probe-peer-identity
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Probe physical T5 migration
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate-one-to-sens.py             lib/surface/peer-identity-acceptance.lisp             --dry-run | tee /tmp/peer-migration.json
+      - name: Prove original runtime observable
+        run: |
+          cargo test -p sens --test uk_sa_surface peer_identity_acceptance_program_passes -- --nocapture
+      - name: Upload probe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: peer-identity-migration-probe
+          path: /tmp/peer-migration.json
+          if-no-files-found: warn
