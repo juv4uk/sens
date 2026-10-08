@@ -533,7 +533,16 @@ class Resolver:
         self.upper=upper
         self.source_era=source_era
         self.admitted_d8=set(admitted_d8 or ())
-        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
+        self.global_binding_words={}
+        self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,
+                     "pass4-text7-global":0,"passthrough-head":0}
+
+    def set_global_bindings(self, bindings, text7):
+        self.global_binding_words = {
+            name: frame_text7(text7_encode(name, text7, tok), tok)
+            for name, tok in bindings
+        }
+
     def head(self,tok: Tok):
         t=tok.text
         # D2 is structural control only. A two-bit word in executable-head
@@ -603,9 +612,61 @@ class Resolver:
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
+        if t in self.global_binding_words:
+            self.counts["pass4-text7-global"]+=1
+            return self.global_binding_words[t],"pass4-text7-global"
         # D1/D2 or any unresolved dynamic/user function stays exactly as written.
         self.counts["passthrough-head"]+=1
         return [t],"passthrough-head"
+
+def frame_text7(cells, tok: Tok):
+    if not cells:
+        raise MigrationError("empty Text7 identifier is not admissible",tok)
+    words=[D2_OPEN]
+    for index,cell in enumerate(cells):
+        if index:
+            words.append(D2_SEP)
+        words.append(cell)
+    words.append(D2_CLOSE)
+    return words
+
+def encode_text7_identifier(spelling: str,text7,tok: Tok):
+    return frame_text7(text7_encode(spelling,text7,tok), tok)
+
+def collect_global_bindings(forms):
+    bindings=[]
+    seen=set()
+    for form in forms:
+        if not isinstance(form,ListNode) or form.tail is not None or len(form.items)<2:
+            continue
+        head=form.items[0]
+        if not isinstance(head,Atom) or head.tok.text not in {"00001001","0011","define","def"}:
+            continue
+        target=form.items[1]
+        if isinstance(target,Atom):
+            name=target.tok.text
+            if name not in seen:
+                seen.add(name)
+                bindings.append((name,target.tok))
+        elif isinstance(target,ListNode) and target.tail is None and target.items and isinstance(target.items[0],Atom):
+            name=target.items[0].tok.text
+            if name not in seen:
+                seen.add(name)
+                bindings.append((name,target.items[0].tok))
+    return bindings
+
+def encode_lambda_params(node: ListNode,text7):
+    if node.tail is not None:
+        raise MigrationError("dotted lambda parameter list has no candidate Text7 binding law",node.tok)
+    words=[D2_OPEN]
+    for index,param in enumerate(node.items):
+        if not isinstance(param,Atom):
+            raise MigrationError("lambda parameter must be a human identifier atom",node.tok)
+        if index:
+            words.append(D2_SEP)
+        words.extend(encode_text7_identifier(param.tok.text,text7,param.tok))
+    words.append(D2_CLOSE)
+    return words
 
 def encode_atom_data(node: Atom,text7):
     # W2 is reserved by the grammar. It can only be emitted by the structural
@@ -679,14 +740,21 @@ def encode(node,resolver,text7,quoted=False):
 
             # LAMBDA: first argument is the parameter-list grammar.
             if not quoted and head_bits=="0010" and idx==1:
-                words.extend(encode(item,resolver,text7,quoted=True))
+                if not isinstance(item,ListNode):
+                    raise MigrationError("lambda parameters must be a proper list", item.tok if isinstance(item,Atom) else None)
+                words.extend(encode_lambda_params(item,text7))
                 continue
 
-            # DEFINE: a shorthand signature (define (f x) body) is data at the
-            # signature level. A plain name is already encoded as atom data.
-            if not quoted and head_bits=="0011" and idx==1 and isinstance(item,ListNode):
-                words.extend(encode(item,resolver,text7,quoted=True))
-                continue
+            # DEFINE: the target identifier is a proven global binding site.
+            # A shorthand signature remains data-shaped; only its first name
+            # is currently upgraded to the same Text7 identity.
+            if not quoted and head_bits=="0011" and idx==1:
+                if isinstance(item,Atom):
+                    words.extend(encode_text7_identifier(item.tok.text,text7,item.tok))
+                    continue
+                if isinstance(item,ListNode):
+                    words.extend(encode(item,resolver,text7,quoted=True))
+                    continue
 
             # COND: each clause is a grammar container, not a call itself.
             if not quoted and head_bits=="110":
@@ -752,6 +820,7 @@ def migrate_file(source: str,resolver,text7):
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
     forms=Parser(tokens).parse_program()
+    resolver.set_global_bindings(collect_global_bindings(forms), text7)
     all_words=[]
     for i,form in enumerate(forms):
         if i: all_words.append(D2_SEP)
@@ -797,8 +866,8 @@ def main():
     rows = []
     written = 0
     blocked = 0
-    totals = {"already-exact": 0, "pass1-sens8": 0,
-              "pass2-my-lisp": 0, "pass3-lisp15": 0, "passthrough-head": 0}
+    totals = {"already-exact": 0, "pass1-sens8": 0, "pass2-my-lisp": 0, "pass3-lisp15": 0,
+              "pass4-text7-global": 0, "passthrough-head": 0}
 
     root = args.root.resolve()
     # An explicit .lisp path means ONE input file, not an empty directory scan.
