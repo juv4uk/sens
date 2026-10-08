@@ -36,6 +36,7 @@ mod error;
 pub(crate) mod eval;
 mod language_items;
 mod parser;
+mod mixed_source;
 mod presentation;
 mod semantic_registry;
 mod source_words;
@@ -143,6 +144,7 @@ pub use binary_number::{BinaryNumber, BinaryNumberError};
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::parse_canonical_binary;
+pub use mixed_source::parse_mixed_exact_domain;
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
