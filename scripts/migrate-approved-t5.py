@@ -118,7 +118,7 @@ def migrate_one(source: Path, root: Path, maps, original: bytes | None = None, *
     # The owner-ratified D8 shares 8 visible bits with historical SID8.
     # Never silently treat current D8 as old SID8. Only explicit legacy
     # provenance may activate the historical successor mapping.
-    foundation = engine.load_foundation(root / "knowledge/d1-d9-foundation.json")
+    foundation = engine.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
     admitted_d8 = foundation["domains"].get("D8", {}).get("residents", {})
     resolver = engine.Resolver(legacy, my, upper, source_era, admitted_d8)
     if original is None:
