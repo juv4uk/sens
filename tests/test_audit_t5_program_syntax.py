@@ -104,10 +104,10 @@ class AuditT5D2SyntaxTests(unittest.TestCase):
         self.assertEqual(self.examine(strict=True)["status"], "BLOCKED")
 
     def test_typed_boundary_collision_is_preserved_not_guessed(self):
-        a = self.pair("a", "0 00\n", ["0", "00"])
-        b = self.pair("b", "000\n", ["000"])
+        a = self.pair("a", "01 000\n", ["01", "000"])
+        b = self.pair("b", "01000\n", ["01000"])
         self.assertNotEqual(a.read_bytes(), b.read_bytes())
-        # A naked D2 separator is not universally a top-level form.
+        # Naked D2 CLOSE is not a legal top-level expression, but D5 atom is.
         report = self.examine()
         self.assertEqual(report["summary"]["physical_pass"], 2)
         self.assertEqual(report["summary"]["d2_syntax_pass"], 1)
