@@ -6,18 +6,26 @@
 `scripts/sens_t5_codec.py`. D2 єдиний власник структури.
 Текстові файли з ASCII `0/1/2` не вважаються фізичним `.sens`.
 
+**Безпечний стандарт — `--source-era auto`.** Якщо вихідний виклик має рівно 8 біт,
+він може бути історичним SID8 або чинним D8. `auto` його **блокує**;
+`--source-era legacy` дозволяється лише коли історичне походження доведене,
+`--source-era current` — лише для сучасного ратифікованого D8. Жоден
+режим сам по собі не доводить семантичну тотожність або можливість виконання.
+
 ## Запуск
 
 ```bash
 # 1. Аудит конкретних файлів без жодного запису .sens (за замовчуванням)
 python3 scripts/migrate-t5-batch.py \
     tests/fixtures/core1-third-domain-canary/third.lisp \
-    --out /tmp/sens-staged --report /tmp/sens-batch-report.json
+    --out /tmp/sens-staged --report /tmp/sens-batch-report.json \
+    --source-era legacy
 
 # 2. Після перевірки манифесту: створити фізичні .sens, без перезапису
 python3 scripts/migrate-t5-batch.py \
     tests/fixtures/core1-third-domain-canary/third.lisp \
-    --out /tmp/sens-staged --report /tmp/sens-batch-report.json --write
+    --out /tmp/sens-staged --report /tmp/sens-batch-report.json \
+    --source-era legacy --write
 
 # 3. Можна задати декілька файлів і каталогів, зокрема lib/
 python3 scripts/migrate-t5-batch.py lib/ \
@@ -38,10 +46,11 @@ python3 scripts/migrate-t5-batch.py lib/ \
 байтового потоку та **типізованих слів із їхньою шириною**, кількість
 проходів 1/2/3, обсяг і статус кожного файла. Звіт не є дозволом
 на автоматичне злиття: перед PR потрібні окремі D2 parser/oracle parity,
-CI і перевірка provenance. Поточний драйвер використовує **історичний
-SID8-профіль**. Не трактуйте сучасний D8 як історичний SID8; доки
-немає ратифікованого явного вибору епохи, такі файли потребують
-окремого дослідження, а не здогаду.
+CI і перевірка provenance. Поточний драйвер використовує **`auto` за замовчуванням**, щоби ніколи
+мовчки не трактувати сучасний D8 як історичний SID8. Для перевіреного
+історичного Core1 слід явно зазначати `--source-era legacy`; для чинного D8 —
+`--source-era current` із його ратифікованими координатами. Після механічного
+кодування потрібне окреме підтвердження роботи оракула.
 
 **Приклад із реального коду**: наявний Core1 `C1-THIRD`, а не новий
 вигаданий інтерпретатор. Тести порівнюють результат міграції
