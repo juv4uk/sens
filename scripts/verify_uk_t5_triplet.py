@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """#4430 — conservative Ukrainian <-> typed words <-> physical T5 triplet proof.
 
-Deliberately bounded: only ratified D1 predicates, D3 CAR/COND/EMPTY and D2
-grammar. Unknown numbers, Text7, strings, binders, operators, aliases and
-quoted forms BLOCK. This is a read-only canary proof, NOT a universal SENS
-renderer, language authority or release admission.
+Deliberately bounded: ratified D1 predicates, exact D3 call-head syntax
+QUOTE/ATOM/CDR/CAR/EQ/COND/CONS and literal D3 EMPTY, plus D2 grammar.
+QUOTE accepts only proven atomic D1 or literal-empty data, never unproven
+quoted list/Text7/Number/binder payloads. This read-only canonical source
+proof does NOT establish evaluation semantics or release admission.
 """
 from __future__ import annotations
 
@@ -87,7 +88,7 @@ class WordParser:
             return ("empty",)
         if token in ("0", "1"):
             return ("predicate", token)
-        if token in ("100", "110"):
+        if token in ("001", "010", "011", "100", "101", "110", "111"):
             return ("head", token)
         raise ProjectionBlocked(f"outside bounded D1/D3 callable or data law: {token!r}")
 
@@ -112,10 +113,23 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str]) -> str:
     if not items or items[0][0] != "head":
         raise ProjectionBlocked("unknown callable head or COND clause context")
     opcode = items[0][1]
-    if opcode == "100":
+    # Each admitted spelling comes from the owner's D3 domain table. A
+    # callable D3 slot is not permission to invent unproved datum grammar.
+    if opcode == "001":
         if len(items) != 2:
-            raise ProjectionBlocked("D3 CAR requires exactly one argument")
+            raise ProjectionBlocked("D3 QUOTE requires exactly one datum")
+        if items[1][0] not in ("predicate", "empty"):
+            raise ProjectionBlocked("D3 QUOTE structured/Text7 data not proven")
         return "(" + d3[opcode] + " " + render_uk(items[1], d1, d3) + ")"
+    if opcode in ("010", "011", "100"):
+        if len(items) != 2:
+            raise ProjectionBlocked("D3 unary ATOM/CDR/CAR requires one argument")
+        return "(" + d3[opcode] + " " + render_uk(items[1], d1, d3) + ")"
+    if opcode in ("101", "111"):
+        if len(items) != 3:
+            raise ProjectionBlocked("D3 binary EQ/CONS requires two arguments")
+        return ("(" + d3[opcode] + " " + render_uk(items[1], d1, d3)
+                + " " + render_uk(items[2], d1, d3) + ")")
     if opcode == "110":
         if len(items) < 2:
             raise ProjectionBlocked("D3 COND requires at least one paired clause")
@@ -198,7 +212,7 @@ def verify(lisp: Path, sens: Path, view: Path) -> dict:
     return {
         "schema": SCHEMA,
         "status": "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION",
-        "scope": "D1 PREDICATE / D3 CAR COND EMPTY / D2",
+        "scope": "D1 predicates / D3 exact-call syntax & restricted QUOTE data / D2",
         "source": str(lisp),
         "sens": str(sens),
         "view": str(view),
