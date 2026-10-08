@@ -27,5 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build actual Rust D2 SENS reader
+        run: cargo build -q -p sens-cli --bin sens-trit
       - name: One source, SHA-pinned transaction, binary parity, dry-run and no-clobber
+        env:
+          SENS_TRIT_BIN: ${{ github.workspace }}/target/debug/sens-trit
         run: python3 -m unittest discover -s tests -p 'test_migrate_sens.py' -v
