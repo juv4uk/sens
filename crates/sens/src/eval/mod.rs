@@ -33,6 +33,7 @@ pub(crate) use macro_substrate::install as install_macro_substrate;
 pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
+use crate::canonical_reader::text7_binding_key;
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -189,9 +190,20 @@ pub(crate) fn evaluate_step(
                 expression.span,
             ))
         }
-        // Empty structure is a structural value, not any function SID.
-        ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
-        ExprKind::List(items) => evaluate_list(items, environment, expression.span),
+        ExprKind::List(items) => {
+            if items.is_empty() {
+                // Empty structure is a structural value, not any function SID.
+                return Ok(EvalStep::Value(Value::Nil));
+            }
+            // Position-aware Text7 reference: a canonical D2/W7 frame is
+            // interpreted as an identifier only when its binding key exists.
+            if let Some(key) = text7_binding_key(expression) {
+                if let Some(value) = environment.get(&key) {
+                    return Ok(EvalStep::Value(value));
+                }
+            }
+            evaluate_list(items, environment, expression.span)
+        },
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
@@ -227,6 +239,16 @@ fn evaluate_list(
 ) -> Result<EvalStep, LanguageError> {
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
+    }
+    if let Some(key) = text7_binding_key(&items[0]) {
+        let function = environment.get(&key).ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::UnknownSymbol,
+                format!("unknown Text7 binding: {key}"),
+                items[0].span,
+            )
+        })?;
+        return closures::apply(function, &items[1..], environment, span);
     }
     dispatch_call(
         items[0].kind.as_symbol(),
