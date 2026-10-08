@@ -1,0 +1,33 @@
+name: Public physical T5 Core4 LIST APPEND CLI proof
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens-cli/tests/physical_core4_sequence_cli.rs"
+      - ".github/workflows/physical-core4-sequence-cli.yml"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-cli-core4-physical-sequence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Real public sens-trit physical LIST and APPEND CLI probes
+        run: cargo test -q -p sens-cli --test physical_core4_sequence_cli -- --nocapture
+      - name: Independent language-owned historical APPEND law
+        run: cargo test -q -p sens --test d4_d5_append_dedup -- --nocapture
+      - name: Original source untouched; no executable original published
+        run: |
+          test "$(git hash-object lib/machine/block.lisp)" = "200201b741787c4e144ad4194848acf51d7b439e"
+          test ! -e lib/machine/block.sens
+          git diff --exit-code
+          git diff --cached --exit-code
