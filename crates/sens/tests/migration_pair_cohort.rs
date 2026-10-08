@@ -39,8 +39,8 @@ fn physical_cdr_returns_the_pair_tail_not_the_car_head() {
     let observed = eval_file(CDR_T5);
     match &observed {
         Value::Pair(head, tail) => {
-            assert!(matches!(&*head, Value::Nil));
-            assert!(matches!(&*tail, Value::Nil));
+            assert!(matches!(&**head, Value::Nil));
+            assert!(matches!(&**tail, Value::Nil));
         }
         other => panic!("CDR should return the quoted singleton, got {other:?}"),
     }
