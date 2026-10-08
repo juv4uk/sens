@@ -75,7 +75,7 @@ jobs:
           for witness in proof["oracle_witnesses"].values():
               path = Path(witness["path"])
               data = path.read_bytes()
-              sha = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\0" + data).hexdigest()
+              sha = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
               assert sha == witness["git_blob_sha1"], path
           PY
       - name: Real proof-gated .lisp → .sens and bitwise parity / no-clobber
