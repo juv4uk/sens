@@ -297,7 +297,7 @@ mod tests {
             ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0011));
         // Owner-ratified binding targets are lexical DATA, not callable heads.
         assert!(!matches!(&defined[1].kind, ExprKind::DomainIdentity(_)));
-        let ExprKind::List(lambda) = &defined[2].kind else { panic!("lambda"); };
+        let ExprKind::List(lambda) = &defined[2].kind else { panic!("звʼязування"); };
         assert!(matches!(&lambda[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0010));
         let ExprKind::List(body) = &lambda[2].kind else { panic!("lambda body"); };
@@ -318,7 +318,7 @@ mod tests {
     fn ukrainian_quote_data_and_binding_position_are_not_retyped() {
         let source = "(як-є (перше x))";
         let quoted = only(parse_mixed_exact_domain(source).expect("quoted data"));
-        let ExprKind::List(outer) = quoted.kind else { panic!("quote"); };
+        let ExprKind::List(outer) = quoted.kind else { panic!("цитування"); };
         assert!(matches!(&outer[0].kind,
             ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b001));
         let ExprKind::List(data) = &outer[1].kind else { panic!("quoted data"); };
@@ -329,7 +329,7 @@ mod tests {
         ).expect("binder data"));
         let ExprKind::List(definition) = binder.kind else { panic!("definition"); };
         assert!(!matches!(&definition[1].kind, ExprKind::DomainIdentity(_)));
-        let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("звʼязування"); };
         let ExprKind::List(parameters) = &lambda[1].kind else { panic!("parameters"); };
         assert!(!matches!(&parameters[0].kind, ExprKind::DomainIdentity(_)));
         let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
@@ -341,7 +341,7 @@ mod tests {
     fn unknown_english_and_legacy_heads_get_no_new_current_identity() {
         for source in ["(car x)", "(CONS x y)", "(00000101 x)", "(невідоме x)"] {
             let expr = only(parse_mixed_exact_domain(source).expect("bounded mixed syntax"));
-            let ExprKind::List(items) = expr.kind else { panic!("list"); };
+            let ExprKind::List(items) = expr.kind else { panic!("список"); };
             assert!(!matches!(&items[0].kind, ExprKind::DomainIdentity(_)),
                 "{source} must not become a ratified current domain from spelling");
         }
@@ -351,7 +351,7 @@ mod tests {
     fn local_callable_shadows_ratified_uk_surface_in_lambda_body() {
         let forms = parse_mixed_exact_domain("(функція (перше) (перше x))")
             .expect("local shadowing remains valid source");
-        let ExprKind::List(lambda) = &forms[0].kind else { panic!("lambda"); };
+        let ExprKind::List(lambda) = &forms[0].kind else { panic!("звʼязування"); };
         assert!(matches!(&lambda[0].kind, ExprKind::DomainIdentity(id)
             if id.width() == 4 && id.packed_bits() == 0b0010));
         let ExprKind::List(body) = &lambda[2].kind else { panic!("body"); };
@@ -388,8 +388,8 @@ mod tests {
         let parsed = parse_mixed_exact_domain(
             "(функція (перше) (за-умовою ((атом? x) (перше x))))"
         ).expect("nested clause");
-        let ExprKind::List(lambda) = &parsed[0].kind else { panic!("lambda"); };
-        let ExprKind::List(cond) = &lambda[2].kind else { panic!("cond"); };
+        let ExprKind::List(lambda) = &parsed[0].kind else { panic!("звʼязування"); };
+        let ExprKind::List(cond) = &lambda[2].kind else { panic!("умова"); };
         let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
         let ExprKind::List(body) = &clause[1].kind else { panic!("branch"); };
         assert!(matches!(&body[0].kind, ExprKind::Symbol(name)
