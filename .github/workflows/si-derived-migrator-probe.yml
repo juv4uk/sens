@@ -1,6 +1,9 @@
 name: SI derived actual migrator probe
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/si-derived-migrator-probe.yml"
   push:
     branches: [research/4430-typed-domain-carrier]
     paths:
