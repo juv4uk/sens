@@ -1,0 +1,30 @@
+name: migration-atom-t5-cohort
+
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/migration-atom-cohort/**'
+      - 'tests/test_migration_atom_cohort.py'
+      - 'crates/sens/tests/migration_atom_cohort.rs'
+      - '.github/workflows/migration-atom-t5-cohort.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/fixtures/migration-atom-cohort/**'
+      - 'tests/test_migration_atom_cohort.py'
+      - 'crates/sens/tests/migration_atom_cohort.rs'
+      - '.github/workflows/migration-atom-t5-cohort.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate exact source and physical T5
+        run: python3 -m unittest discover -s tests -p 'test_migration_atom_cohort.py' -v
+      - name: Current SENS oracle executes physical migrated program
+        run: cargo test -p sens --test migration_atom_cohort
