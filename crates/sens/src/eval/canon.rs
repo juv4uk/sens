@@ -458,6 +458,19 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
+    // The ratified D4:1110 LIST derives from repeated D3 CONS over the
+    // ALREADY EVALUATED argument values. This is a value-call mechanism for
+    // ONE existing exact-domain identity, not a new opcode or a W8 alias.
+    // It restores the current runtime route required by the original
+    // machine-block LIST heads audited in #4761 and surfaced by #4774.
+    // Do not fall through to a generic D4 handler: APPEND 1111 and all other
+    // D4 residents retain their own independently admitted mechanisms/gates.
+    if let CoreDomainIdentity::D4(word) = identity {
+        if word.word().packed_bits() == 0b1110 {
+            return Ok(Value::list(args.iter().cloned()));
+        }
+    }
+
     if let Some(result) = super::d5_arithmetic::invoke(identity, args, environment, span) {
         let value = result?;
         return canonicalize_domain_result(identity, value, span);
