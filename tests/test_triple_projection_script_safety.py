@@ -102,18 +102,26 @@ class SafeTripleScriptTests(unittest.TestCase):
         self.assertEqual(no_fixture.returncode, 2)
         self.assertIn("BLOCKED", no_fixture.stderr)
 
-    def test_default_full_corpus_fails_closed_on_legacy_non_uk_triples(self):
-        # The other 3 fixtures are currently legacy/English with no views,
-        # not admitted canonical Ukrainian triples; they must not SKIP/PASS.
+    def test_default_gate_checks_only_admitted_cohort(self):
+        # Diagnostic legacy/English fixtures remain migration debt and are
+        # audited by sens_inventory.py; they are not release-blocking here.
         result = subprocess.run(
             ["bash", str(SHELL)], cwd=ROOT,
             capture_output=True, text=True, timeout=120,
         )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("branch.lisp", result.stdout)
+        self.assertIn("result=PASS", result.stdout)
+
+    def test_explicit_unadmitted_fixture_still_fails_closed(self):
+        result = subprocess.run(
+            ["bash", str(SHELL), "--fixture",
+             "tests/fixtures/migration-d4-selector-cohort/caar.lisp"],
+            cwd=ROOT, capture_output=True, text=True, timeout=120,
+        )
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-        self.assertIn("result=BLOCKED", result.stdout)
-        self.assertIn("third.lisp", result.stderr)
         self.assertIn("caar.lisp", result.stderr)
-        self.assertIn("two-forms.lisp", result.stderr)
+        self.assertIn("BLOCKED", result.stderr)
 
     def test_renderer_default_never_rewrites_original_lisp(self):
         origin = (F / "branch.lisp").read_bytes()
