@@ -230,7 +230,7 @@ def build_report() -> dict:
                     and not nonarchive_auto
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
-                "rule": "every ORIGINAL UNPAIRED .lisp remains BLOCKED under safe auto until independent oracle proof; no .sens emitted",
+                "rule": "every ACTIVE/UNCLASSIFIED original remains BLOCKED until independent oracle proof; archived benchmark mechanical candidate is NONPROGRAM and never executable credit; no .sens emitted",
             },
         }
         return result
