@@ -339,5 +339,20 @@ class OriginalCandidateTests(unittest.TestCase):
             mod.load_nonprogram_classification(self.root)
 
 
+    def test_ratified_domain_tables_are_data_not_executable_migration(self):
+        classified = mod.load_nonprogram_classification(ROOT)
+        rows = [v for v in classified.values() if v["cohort"] == "domain-table"]
+        self.assertEqual(len(rows), 9)
+        self.assertEqual(
+            sorted(r["path"] for r in rows),
+            sorted(f"lib/domains/d{i}.lisp" for i in range(1, 10)),
+        )
+        self.assertTrue(all(r["source_class"] == "NONPROGRAM_DATA_REVIEWED"
+                            and r["semantic_oracle_admitted"] is False
+                            and r["automatic_sens_companion"] is False for r in rows))
+        self.assertNotIn("lib/domains/d10.lisp", classified)
+        self.assertNotIn("lib/core1.lisp", classified)
+
+
 if __name__ == "__main__":
     unittest.main()
