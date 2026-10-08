@@ -658,6 +658,21 @@ def binary_rewrite(
             return True
         return bool(frames and (frames[-1]["quoted"] or frames[-1]["quote_children"]))
 
+    def emit_text7_atom(token: str):
+        # A Lisp atom is ONE D2 term, not a naked run of D7 glyph cells.
+        # Text7 characters do not establish an owner-ratified token-length or
+        # binder identity law. The legacy converter used to silently flatten
+        # machine-block/forms into consecutive 7-bit words and falsely call
+        # the packed T5 "migrated", although real Rust D2 rejects it.
+        cells = encode_text7_spelling(token, text7_candidates)
+        if len(cells) != 1:
+            raise BinaryMigrationError(
+                f"UNFRAMED_TEXT7_ATOM {token!r}: {len(cells)} D7 cells are "
+                "not one canonical D2 term; a ratified Text7 atom/binder "
+                "framing law and current executable oracle are required"
+            )
+        out.extend(cells)
+
     def begin_item():
         nonlocal top_has_item
         if frames:
@@ -737,7 +752,7 @@ def binary_rewrite(
             else:
                 raise BinaryMigrationError("unterminated string")
             token = source[start:i]
-            out.extend(encode_text7_spelling(token, text7_candidates))
+            emit_text7_atom(token)
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
             elif frames and frames[-1]["data_slots"] > 0:
@@ -748,20 +763,20 @@ def binary_rewrite(
         # Reader abbreviations stay spelling, but are now D7 cells.
         if source.startswith("#'", i):
             begin_item()
-            out.extend(encode_text7_spelling("#'", text7_candidates))
+            emit_text7_atom("#'")
             i += 2
             pending_quote = True
             continue
         if ch in ("'", "`"):
             begin_item()
-            out.extend(encode_text7_spelling(ch, text7_candidates))
+            emit_text7_atom(ch)
             i += 1
             pending_quote = True
             continue
         if ch == ",":
             begin_item()
             token = ",@" if i + 1 < len(source) and source[i + 1] == "@" else ","
-            out.extend(encode_text7_spelling(token, text7_candidates))
+            emit_text7_atom(token)
             i += len(token)
             pending_quote = True
             continue
@@ -859,7 +874,7 @@ def binary_rewrite(
                     "numeric lowering is not yet supplied by this migration"
                 )
             else:
-                out.extend(encode_text7_spelling(token, text7_candidates))
+                emit_text7_atom(token)
 
         if frame and frame["head"]:
             frame["head"] = False
