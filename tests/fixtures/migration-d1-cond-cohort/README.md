@@ -8,3 +8,31 @@ Issue: [SENS #4455](https://github.com/juv4uk/sens/issues/4455), coordinated by 
 - `scripts/migrate-three-pass.py` is the *existing* source-to-transport code; focused Python tests prove its projection, byte identity, no-overwrite, typed digest and manifest. Rust tests independently load committed bytes and run the current exact SENS oracle.
 - Provenance stays separate from original strict scan 37810152645 (491 BLOCKED/0 admitted). This is a **new, bounded executable canary**, not an assertion that an old unsupported source migrated.
 - Do not merge without both dedicated Python and Rust evidence; no codec/ratified-domain/release-pin edits.
+
+## Відтворюваний бітовий view (#4694)
+
+Жодного нового wire-формату: тільки існуючий T5 reader/codec та один канонічний
+ASCII-рядок без суфікса. Новий інструмент нічого не записує в дерево репозиторію
+і **не засвідчує** семантичну оберненість довільної української програми.
+
+```sh
+cargo build -q -p sens-cli --bin sens-trit
+python3 scripts/sens_spaced_view.py preview \
+  --sens tests/fixtures/migration-d1-cond-cohort/branch.sens
+python3 scripts/sens_spaced_view.py verify \
+  --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+  --reader target/debug/sens-trit
+python3 scripts/sens_spaced_view.py stage \
+  --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+  --reader target/debug/sens-trit \
+  --mirror /tmp/sens-view-stage --write
+```
+
+`verify` вимагає наявний правильний бітовий `branch` та його повну побайтову
+відповідність фізичному `branch.sens`. `stage` пише **лише** до зовнішньої
+порожньої staging-теки, no-clobber; без `--write` лише прев'ю.
+`--report` дозволений тільки поза деревом репозиторію, також no-clobber.
+У звіті — SHA джерела, SHA T5, typed-word SHA та SHA view, статус
+`VIEW_PARITY_ONLY_NOT_RELEASE` і `source_semantic_oracle=NOT_VERIFIED`.
+Повний `ук` ↔ exact-domain ↔ фізичний T5 розбирається у #4430;
+цей тестовий cohort **не** є міграцією історичної програми.
