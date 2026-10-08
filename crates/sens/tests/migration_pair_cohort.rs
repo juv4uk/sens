@@ -29,10 +29,10 @@ fn cons_legacy_source_lowers_to_exact_current_words_and_returns_pair_of_empty_li
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), CONS_T5);
     let expressions = parse_canonical_binary(&visible).expect("current exact D3/D2 source parses");
     let result = eval_parsed_expressions(&expressions, &mut Session::default()).expect("CONS/QUOTE executes");
-    match result.value {
+    match &result.value {
         Value::Pair(head, tail) => {
-            assert!(matches!(&*head, Value::Nil));
-            assert!(matches!(&*tail, Value::Nil));
+            assert!(matches!(head.as_ref(), Value::Nil));
+            assert!(matches!(tail.as_ref(), Value::Nil));
         }
         other => panic!("expected CONS(EMPTY, EMPTY) pair, got {other:?}"),
     }
