@@ -3,7 +3,7 @@
 //! is bootstrapped from `lib/macro.lisp`; the Rust kernel no longer implements it.
 
 use crate::eval::canon;
-use crate::eval::{evaluate, evaluate_step, EvalStep};
+use crate::eval::{evaluate, evaluate_step, text7_binding_key, EvalStep};
 use crate::environment::{CondClauseMode, CoreProfile};
 use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
 
