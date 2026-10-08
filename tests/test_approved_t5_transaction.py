@@ -39,7 +39,7 @@ spec.loader.exec_module(mod)
 class ApprovedT5TransactionTests(unittest.TestCase):
     def test_true_rust_d2_rejects_t5_transport_valid_invalid_program(self):
         words = ["01"]  # D2 CLOSE alone is transport-valid, grammar-invalid.
-        physical = mod.engine.encode_words(words)
+        physical = mod.engine.encode_projection("01\n")
         self.assertEqual(mod.engine.decode_bytes(physical), words)
         with self.assertRaisesRegex(mod.engine.SensT5Error, "Rust D2 reader rejected"):
             mod.verify_rust_d2(physical, words, actual_d2_reader())
