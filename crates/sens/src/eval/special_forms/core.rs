@@ -329,6 +329,12 @@ pub(crate) fn quoted(expression: &Expr) -> Result<Value, LanguageError> {
             ));
         }
         Ok(match &expression.kind {
+            _ if text7_binding_key(expression).is_some() => {
+                Value::Text7(
+                    crate::canonical_reader::text7_atom(expression)
+                        .expect("text7 binding key implies a valid Text7 atom")
+                )
+            }
             ExprKind::Number(number, exactness) => Value::Number(*number, *exactness),
             ExprKind::Rational(rational) => Value::Rational(rational.clone()),
             ExprKind::BinaryNumber(number) => Value::BinaryNumber(number.clone()),
