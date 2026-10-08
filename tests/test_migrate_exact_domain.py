@@ -45,9 +45,9 @@ class ExactDomainMigrationTests(unittest.TestCase):
         self.assertEqual(self.rewrite(source), expected)
 
     def test_already_exact_heads_are_idempotent(self):
-        source = "(100 x)
+        source = """(100 x)
 (011 (100 x))
-"
+"""
         self.assertEqual(self.rewrite(source), source)
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
 
@@ -56,9 +56,10 @@ class ExactDomainMigrationTests(unittest.TestCase):
             mod.plan("(car x", self.surfaces, self.legacy)
 
     def test_unknown_heads_are_left_for_semantic_review(self):
-        source = "(user-defined x)
-"
+        source = """(user-defined x)
+"""
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
+
 
 
 if __name__ == "__main__":
