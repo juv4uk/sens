@@ -767,6 +767,7 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
         Value::BinaryNumber(number) => ExprKind::BinaryNumber(number.clone()),
+        Value::Text7(text) => crate::canonical_reader::text7_to_expr(text, span).kind,
         Value::Sid(sid) => ExprKind::Sid(*sid),
         Value::DomainIdentity(identity) => ExprKind::DomainIdentity(*identity),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
