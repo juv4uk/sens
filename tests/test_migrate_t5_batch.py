@@ -25,10 +25,11 @@ class RealBatchTest(unittest.TestCase):
         shutil.copy2(PROVEN.with_suffix(".lisp"), self.root / "lib/third.lisp")
         (self.root / "lib/unknown.lisp").write_text("(UNKNOWN ())\n", encoding="utf-8")
 
-    def call(self, *paths, write=False, out=None):
+    def call(self, *paths, write=False, out=None, era="legacy"):
         return subprocess.run([
             sys.executable, str(DRIVER), *paths, "--root", str(self.root),
             "--out", str(out or self.out), "--report", str(self.report),
+            *(["--source-era", era] if era else []),
             *(["--write"] if write else []),
         ], text=True, capture_output=True)
 
@@ -50,6 +51,42 @@ class RealBatchTest(unittest.TestCase):
         rerun = self.call("lib/third.lisp", write=True)
         self.assertEqual(rerun.returncode, 2)
         self.assertEqual((self.out / "lib/third.sens").read_bytes(), expected)
+
+    def test_auto_blocks_ambiguous_historical_w8_without_writing(self):
+        # The real previously admitted C1-THIRD source uses historical
+        # exact-eight heads; unqualified W8 is NOT proof of a modern D8 call.
+        p = self.call("lib/third.lisp", write=True, era=None)
+        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        doc = json.loads(self.report.read_text())
+        self.assertEqual(doc["authority"]["source_era"], "auto")
+        self.assertEqual(doc["summary"]["files_written"], 0)
+        self.assertIn("ambiguous W8", doc["files"][0]["reason"])
+        self.assertFalse((self.out / "lib/third.sens").exists())
+
+    def test_explicit_legacy_is_recorded_and_cannot_be_inferred(self):
+        p = self.call("lib/third.lisp", write=True, era="legacy")
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        doc = json.loads(self.report.read_text())
+        self.assertEqual(doc["authority"]["source_era"], "legacy")
+        self.assertEqual(doc["files"][0]["source_era"], "legacy")
+        self.assertEqual(doc["files"][0]["passes"]["pass1-sens8"], 12)
+        self.assertEqual((self.out / "lib/third.sens").read_bytes(),
+                         PROVEN.with_suffix(".sens").read_bytes())
+
+    def test_current_d8_head_stays_exact_and_legacy_is_not_guessed(self):
+        src = self.root / "lib/current.lisp"
+        src.write_text("(10000000 ())\n", encoding="utf-8")
+        p = self.call("lib/current.lisp", era="auto")
+        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        self.assertIn("ambiguous W8", json.loads(self.report.read_text())
+                      ["files"][0]["reason"])
+        p = self.call("lib/current.lisp", era="current", write=True)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        data = json.loads(self.report.read_text())
+        self.assertEqual(data["files"][0]["passes"]["already-exact"], 1)
+        self.assertEqual(data["files"][0]["passes"]["pass1-sens8"], 0)
+        self.assertEqual(data["authority"]["source_era"], "current")
+        self.assertTrue((self.out / "lib/current.sens").is_file())
 
     def test_mixed_selection_reports_real_blocks_and_preserves_admitted(self):
         p = self.call("lib", write=True)
