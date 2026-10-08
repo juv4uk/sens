@@ -10,6 +10,8 @@ on:
       - ".github/workflows/si-derived-migrator-probe.yml"
       - "scripts/domain_word_carrier.py"
       - "tests/test_actual_si_derived_library_migration.py"
+      - "scripts/migrate-three-pass.py"
+      - "tests/test_three_pass_migration.py"
   workflow_dispatch:
 
 permissions:
@@ -20,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Run three-pass regression tests
+        run: python3 -m unittest tests/test_three_pass_migration.py -v
       - name: Run ACTUAL existing migration scripts against real lib/si-derived.lisp
         shell: bash
         run: |
