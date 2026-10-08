@@ -8,6 +8,15 @@ on:
       - "crates/**/Cargo.toml"
       - ".github/workflows/release.yml"
       - ".github/workflows/release-preflight.yml"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/report_t5_triplet_inventory.py"
+      - "scripts/audit_t5_file_pairs.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - "tests/test_verify_uk_t5_triplet.py"
+      - "tests/test_report_t5_triplet_inventory.py"
+      - "lib/domains/d1.lisp"
+      - "lib/domains/d3.lisp"
   workflow_dispatch:
 
 concurrency:
@@ -38,6 +47,34 @@ jobs:
 
       - name: Ізольовані перевірки інсталятора
         run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
+
+      - name: Owner's 2026-10-09 Ukrainian / physical T5 / ASCII triple preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_verify_uk_t5_triplet.py' -v
+          python3 -m unittest discover -s tests -p 'test_report_t5_triplet_inventory.py' -v
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --view tests/fixtures/migration-d1-cond-cohort/branch
+          python3 scripts/report_t5_triplet_inventory.py . \
+            --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --report "$RUNNER_TEMP/t5-preflight-triple-ledger.json"
+          python3 - "$RUNNER_TEMP/t5-preflight-triple-ledger.json" <<'PY'
+          import json, sys
+          from pathlib import Path
+          data=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert data["schema"] == "sens-t5-triplet-inventory/v1"
+          assert data["failed_required"] == []
+          assert data["summary"]["physical_pairs_seen"] > 0
+          assert data["summary"]["physical_blocked"] == 0
+          assert data["summary"]["view_present_valid"] >= 1
+          assert data["summary"]["release_admitted"] == 0
+          assert data["summary"]["original_executable_migrations_certified"] == 0
+          print("BOUNDED_TRIPLE_PREFLIGHT_PASS / GENERAL_UK_ORACLE_AND_FULL_VIEW_RELEASE_STILL_BLOCKED")
+          print("REMAINING_MISSING_SPACED_VIEWS", data["summary"]["view_missing"])
+          PY
 
       - name: translation boundary regression
         run: cargo test --locked -p sens --test translation_boundary
