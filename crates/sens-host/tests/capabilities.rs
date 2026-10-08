@@ -44,6 +44,33 @@ fn conformance_tcp_connect_type_error_holds_with_host_installed() {
 }
 
 #[test]
+fn load_executes_exact_domain_source_through_mixed_reader() {
+    let path = std::env::temp_dir().join("sens-load-exact-domain.lisp");
+    let path_str = path
+        .to_str()
+        .expect("temp path should be valid UTF-8")
+        .replace('\\', "/");
+    std::fs::write(
+        &path,
+        "(0011 exact-loaded-value 41)",
+    )
+    .expect("exact-domain source should be writable");
+
+    let mut session = capability_session();
+    let result = eval_program(
+        &format!(r#"(load "{path_str}")"#),
+        &mut session,
+    )
+    .expect("load must execute exact-domain source");
+    assert_eq!(
+        result.value,
+        Value::Number(41.0, Exactness::Exact),
+    );
+
+    std::fs::remove_file(&path).ok();
+}
+
+#[test]
 fn write_file_then_read_file_round_trips_the_same_content() {
     let path = std::env::temp_dir().join("sens-write-file-round-trip.txt");
     // Forward slashes only: sens's string reader treats an unrecognized
