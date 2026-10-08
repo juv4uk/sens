@@ -17,7 +17,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
 ARGS = [
-    "--foundation", "knowledge/d1-d7-foundation.json",
+    "--foundation", "knowledge/d1-d9-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
     "--semantic-generated", "crates/sens/src/semantic_registry_generated.rs",
     "--semantic-registry", "crates/sens/src/semantic_registry.rs",
@@ -70,7 +70,8 @@ def build_report(root: Path = ROOT) -> dict:
         proc = subprocess.run(
             [sys.executable, str(root / "scripts/migrate-three-pass.py"),
              str(root), "--out", str(output_dir), *ARGS,
-             "--report", str(report_path), "--dry-run"],
+             "--report", str(report_path), "--dry-run",
+             "--unpaired-only", "--source-era", "auto"],
             cwd=root, capture_output=True, text=True, timeout=210
         )
         if not report_path.exists():
@@ -83,6 +84,22 @@ def build_report(root: Path = ROOT) -> dict:
         if list(output_dir.rglob("*.sens")) if output_dir.exists() else []:
             raise RuntimeError("dry-run emitted physical output")
         rows = [categorize(row, root) for row in report["files"]]
+        # The migrator's --unpaired-only contract must be enforced in BOTH
+        # producer and consumer; counting a new paired canary as old progress is
+        # a factual error, even if the physical bytes round-trip.
+        if any(row["same_stem_sens_already_exists"] for row in rows):
+            raise RuntimeError("unpaired original census included already paired .lisp")
+        excluded = report.get("skipped_paired_paths", [])
+        if len(excluded) != report["summary"].get("files_skipped_paired"):
+            raise RuntimeError("paired-source exclusion count mismatch")
+        if len(set(excluded)) != len(excluded):
+            raise RuntimeError("duplicate paired-source exclusion")
+        for excluded_path in excluded:
+            rel = Path(excluded_path)
+            if rel.is_absolute() or ".." in rel.parts or rel.suffix != ".lisp":
+                raise RuntimeError("unsafe paired-source exclusion path")
+            if not (root / rel.with_suffix(".sens")).is_file():
+                raise RuntimeError("excluded pair is missing")
         candidates = [r for r in rows if r["status"] == "CANDIDATE_NOT_ADMITTED"]
         unpaired = [r for r in candidates if not r["same_stem_sens_already_exists"]]
         blocked = len(rows) - len(candidates)
@@ -94,6 +111,8 @@ def build_report(root: Path = ROOT) -> dict:
             "mode": "read-only canonical migrator dry-run",
             "summary": {
                 "scanned": len(rows),
+                "original_unpaired_sources_scanned": len(rows),
+                "already_paired_sources_excluded": len(excluded),
                 "blocked": blocked,
                 "mechanical_candidates": len(candidates),
                 "already_paired_candidates": len(candidates)-len(unpaired),
@@ -101,6 +120,9 @@ def build_report(root: Path = ROOT) -> dict:
                 "original_unpaired_executables_migrated_by_this_tool": 0,
                 "physical_outputs_created": 0,
             },
+            "source_era": "auto",
+            "authority": "original unpaired current D1-D9 source; candidate only; no oracle admission",
+            "already_paired_sources_excluded": excluded,
             "mechanical_candidates": candidates,
             "unpaired_blocker_sample": [r for r in rows if r["status"] == "BLOCKED" and not r["same_stem_sens_already_exists"]][:20],
             "required_evidence": [
