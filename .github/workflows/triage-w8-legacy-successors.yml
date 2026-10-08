@@ -57,7 +57,7 @@ jobs:
               f.write(f"- Historical-blob-identical originals: **{s['chronology_proven_same_blob']}**\n")
               f.write(f"- Still blocked by exact next law: **{s['hypothetical_second_blocked']}**\n")
               f.write(f"- Hypothetical mechanical candidates only: **{s['hypothetical_mechanical_candidates_only']}**\n")
-              f.write(f"- Semantically oracle-admitted: **0**; physical .sens created: **0**\n\n')
+              f.write("- Semantically oracle-admitted: **0**; physical .sens created: **0**\n\n")
               f.write('### Top next law blockers by exact token / position\n\n')
               for cohort in r['next_barrier_cohorts'][:12]:
                   examples=', '.join(cohort['example_paths'][:2])
