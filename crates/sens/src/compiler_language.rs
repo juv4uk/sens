@@ -715,7 +715,7 @@ pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, Lang
     let mut session = Session::default();
     load_core_library(&mut session)?;
     install_compiler_program_bindings(&mut session, program)?;
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    eval_compiler_nucleus(&mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
 }
 
@@ -770,7 +770,7 @@ pub fn compiler_program_artifact_from_sens(
             Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
         ]),
     );
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    eval_compiler_nucleus(&mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
 }
 
