@@ -10,8 +10,10 @@
 ; or native mechanism rejects it; doing so would hide machine bugs.
 ;
 ; This file is loaded through load-mixed-exact-domain. Current D3/D4 heads are
-; exact domain identities; the remaining EVAL/READ-ALL seams stay compatibility
-; mechanisms until their own current-domain owners migrate them.
+; exact domain identities. D4:1110 LIST is deliberately NOT used here because
+; residency does not grant callability; records are built from exact D3 CONS.
+; The remaining EVAL/READ-ALL seams stay compatibility mechanisms until their
+; own current-domain owners migrate them.
 ;
 ; Required layers are loaded by the caller:
 ;   lib/machine/encoding/x86-64.lisp
@@ -19,21 +21,29 @@
 ;   lib/machine/admission/x86-64.lisp
 ;   lib/machine/dispatch/native-first.lisp
 
+(0011 native-first-list-2
+  (0010 (a b)
+    (111 a (111 b (001 ())))))
+
+(0011 native-first-list-4
+  (0010 (a b c d)
+    (111 a (111 b (111 c (111 d (001 ())))))))
+
 (0011 native-first-execution-completed
   (0010 (route value)
-    (1110
+    (native-first-list-4
       (001 execution-route)
       route
       (001 (status completed))
-      (1110 (001 value) value))))
+      (native-first-list-2 (001 value) value))))
 
 (0011 native-first-execution-rejected
   (0010 (route detail)
-    (1110
+    (native-first-list-4
       (001 execution-route)
       route
       (001 (status rejected))
-      (1110 (001 detail) detail))))
+      (native-first-list-2 (001 detail) detail))))
 
 (0011 native-first-proper-list-length-2?
   (0010 (value)
@@ -94,7 +104,7 @@
             ((native-first-domain-true ())
              (native-first-execution-rejected
                (001 native)
-               (1110 (001 malformed-native-plan) plan)))))
+               (native-first-list-2 (001 malformed-native-plan) plan)))))
          ((101 native-state (001 distinct))
           ((0010 (fallback-state)
              (110
@@ -107,11 +117,15 @@
                   ((native-first-domain-true ())
                    (native-first-execution-rejected
                      (001 evaluator)
-                     (1110 (001 malformed-evaluator-fallback) plan)))))
+                     (native-first-list-2
+                       (001 malformed-evaluator-fallback)
+                       plan)))))
                ((101 fallback-state (001 distinct))
                 (native-first-execution-rejected
                   (001 invalid-plan)
-                  (1110 (001 unknown-native-first-plan) plan)))))
+                  (native-first-list-2
+                    (001 unknown-native-first-plan)
+                    plan)))))
            (native-first-plan-tag-state
              plan
              (001 evaluator-fallback))))))
@@ -128,10 +142,13 @@
       ((101 forms ())
        (001 ()))
       ((010 forms)
-       (1110
+       (native-first-list-2
          (native-first-execution-rejected
            (001 evaluator)
-           (1110 (001 malformed-source-form-tail) forms))))
+           (native-first-list-2
+             (001 malformed-source-form-tail)
+             forms))
+         (001 ())))
       ((native-first-domain-true ())
        (111
          (native-first-execute-expression (100 forms))
@@ -139,7 +156,7 @@
 
 (0011 native-first-execute-source
   (0010 (source)
-    (1110
+    (native-first-list-2
       (001 source-execution)
       (native-first-execute-source-forms
         (01001011 source)))))
