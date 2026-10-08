@@ -33,6 +33,25 @@ jobs:
         run: cargo build -p sens-cli --bin sens
       - name: D7 domain table is canonical-parser re-readable
         run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
+      - name: Exact-domain migrator canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          canary="$RUNNER_TEMP/exact-domain-migrator.lisp"
+          clean="$RUNNER_TEMP/exact-domain-migrator-clean.out"
+          cat > "$canary" <<'EOF'
+          (функція (x) (перше (сполучити x ())))
+          EOF
+          set +e
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain "$canary"
+          status=$?
+          set -e
+          test "$status" -eq 1
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --exact-domain "$canary"
+          grep -Fq '(0010 (x) (101 (111 x ())))' "$canary"
+          cargo run --quiet -p sens-cli --bin sens-to-sens -- --check --exact-domain "$canary" > "$clean"
+          grep -Fq 'convertible=0' "$clean"
+
       - name: Current Core4 FASL freshness
         run: cargo test -p sens --test core_fasl_freshness -- --nocapture
       - name: Current semantic slice
