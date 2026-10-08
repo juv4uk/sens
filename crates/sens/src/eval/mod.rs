@@ -228,6 +228,19 @@ fn evaluate_list(
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
     }
+    // A D2/W7 frame becomes a Text7 binding only in executable call-head
+    // position. Ordinary D2 lists, quoted data and dotted data remain governed
+    // solely by the canonical D2 reader.
+    if let Some(key) = text7_binding_key(&items[0]) {
+        let function = environment.get(&key).ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::UnknownSymbol,
+                format!("unknown Text7 binding: {key}"),
+                items[0].span,
+            )
+        })?;
+        return closures::apply(function, &items[1..], environment, span);
+    }
     dispatch_call(
         items[0].kind.as_symbol(),
         binary_head_sid(&items[0]),
