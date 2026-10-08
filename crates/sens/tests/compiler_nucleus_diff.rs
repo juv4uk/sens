@@ -213,8 +213,8 @@ fn session(law: &LawProjection) -> Result<Session, HarnessError> {
     session
         .environment
         .define(PROVENANCE_NAME, provenance_value(law));
-    eval_program(NUCLEUS, &mut session)
-        .map_err(|error| HarnessError::Bootstrap(format!("nucleus load: {error:?}")))?;
+    let expressions = parse_mixed_exact_domain(NUCLEUS).map_err(|error| HarnessError::Bootstrap(format!("nucleus parse: {error:?}")))?;
+    eval_parsed_expressions(&expressions, &mut session).map_err(|error| HarnessError::Bootstrap(format!("nucleus load: {error:?}")))?;
     Ok(session)
 }
 
