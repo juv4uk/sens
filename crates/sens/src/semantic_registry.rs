@@ -306,22 +306,16 @@ mod tests {
         }
     }
     #[test]
-    fn historical_null_surface_projects_to_ratified_d4() {
-        let identity = domain_identity_for_surface("null?")
-            .expect("historical null? surface must resolve through its exact-domain successor");
+    fn historical_d4_successor_materializes_exact_slot() {
+        let identity = legacy_domain_identity_from_registry_byte(0b1010_1011)
+            .expect("historical registry row must have an exact-domain successor");
         assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0101));
-        assert_eq!(
-            legacy_domain_identity_from_registry_byte(0b1010_1011),
-            Some(CoreDomainIdentity::D4(CoreD4::from_word(
-                Bit4::new(0b0101).unwrap()
-            )))
-        );
 
         let mut session = crate::Session::default();
-        crate::load_core_library(&mut session).expect("Core bootstrap must materialize NULL");
+        crate::load_core_library(&mut session).expect("Core bootstrap must materialize the exact slot");
         assert!(
             session.environment.domain_code_slot(identity).is_some(),
-            "Core bootstrap must bind null? closure into the exact D4:0101 slot"
+            "Core bootstrap must bind the language-owned closure into its exact D4 slot"
         );
     }
 
