@@ -146,6 +146,31 @@ def build_report() -> dict:
                 "physical_published": False,
             })
 
+        # First-error visibility is insufficient: the initial AUTO W8 error
+        # often masks a deeper value/number/binder blocker. Summarize the
+        # second error exposed by each explicit-era diagnostic run, WITHOUT
+        # treating that run as semantic authorization.
+        reasons_by_era = {
+            era: dict(collections.Counter(
+                classify(row.get("reason", ""))
+                for row in views[era]["state"]["files"]
+                if row.get("status") == "blocked"
+            ).most_common())
+            for era in ("auto", "legacy", "current")
+        }
+        transitions: collections.Counter[tuple[str, str, str]] = collections.Counter()
+        for row in queue_rows:
+            reasons = row["blocker_by_era"]
+            transitions[tuple(
+                classify(reasons.get(era) or "mechanical-candidate")
+                for era in ("auto", "legacy", "current")
+            )] += 1
+        top_transitions = [
+            {"auto": reasons[0], "legacy": reasons[1], "current": reasons[2],
+             "files": count}
+            for reasons, count in transitions.most_common(40)
+        ]
+
         auto = views["auto"]["state"]
         summary = auto["summary"]
         reasons = collections.Counter(
@@ -167,6 +192,8 @@ def build_report() -> dict:
                 era: views[era]["state"]["summary"] for era in ("auto", "legacy", "current")
             },
             "candidate_queues": dict(queues.most_common()),
+            "blocker_by_era_reason_counts": reasons_by_era,
+            "top_blocker_transitions": top_transitions,
             "candidate_rows": queue_rows,
             "gate": {
                 "pass": (
@@ -188,7 +215,7 @@ def main() -> int:
     result = build_report()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"summary": result["migrator_summary"], "candidate_queues": result["candidate_queues"], "reason_counts": result["reason_counts"], "gate": result["gate"]}, ensure_ascii=False))
+    print(json.dumps({"summary": result["migrator_summary"], "per_era_summary": result["per_era_summary"], "candidate_queues": result["candidate_queues"], "top_blocker_transitions": result["top_blocker_transitions"][:12], "per_era_top_reasons": {era: dict(list(rows.items())[:12]) for era, rows in result["blocker_by_era_reason_counts"].items()}, "gate": result["gate"]}, ensure_ascii=False))
     if not result["gate"]["pass"]:
         return 1
     return 0
