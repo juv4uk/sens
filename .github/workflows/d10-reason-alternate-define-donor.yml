@@ -1,0 +1,30 @@
+name: D10 historical reason donor exact-source audit
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-reason-alternate-define-donor-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "knowledge/d10-library-harvest-v1.json"
+      - "knowledge/d10-library-source-symbols-v1.json"
+      - "lib/reason.lisp"
+      - "scripts/check_d10_reason_alternate_define_donor_v1.py"
+      - "tests/test_d10_reason_alternate_define_donor_v1.py"
+      - ".github/workflows/d10-reason-alternate-define-donor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-reason-is-evidence-not-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently recompute historical Git blob and 37 current definitions
+        run: python3 scripts/check_d10_reason_alternate_define_donor_v1.py
+      - name: Reject forged D10 residents and historical source mutation
+        run: python3 -m unittest discover -s tests -p 'test_d10_reason_alternate_define_donor_v1.py' -v
+      - name: Research-only guard cannot rewrite original source or inventory
+        run: git diff --exit-code
