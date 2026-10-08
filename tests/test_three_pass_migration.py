@@ -503,7 +503,7 @@ class ThreePassMigrationTests(unittest.TestCase):
         from sens_t5_codec import encode_projection, decode_bytes, encode_words, typed_sha256
         raw=(ROOT/"lib"/"machine"/"block.lisp").read_bytes()
         blob=hashlib.sha1(
-            b"blob "+str(len(raw)).encode("ascii")+b"\\0"+raw
+            b"blob "+str(len(raw)).encode("ascii")+b"\0"+raw
         ).hexdigest()
         self.assertEqual(blob,"200201b741787c4e144ad4194848acf51d7b439e")
         projection,resolver=self.migrate(raw.decode("utf-8"),source_era="legacy")
