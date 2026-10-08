@@ -17,7 +17,7 @@ jobs:
           ref: replay/4604-compiler-current-main-1008
       - uses: dtolnay/rust-toolchain@stable
       - name: Generate current Core4 FASL
-        run: cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+        run: cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
       - name: Commit snapshot only
         run: |
           git diff --check
