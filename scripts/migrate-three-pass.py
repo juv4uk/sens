@@ -708,8 +708,8 @@ def main():
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--dry-run", action="store_true",
                     help="переклад/перевірка без запису фізичних файлів")
-    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
-                    help="auto блокує двозначні W8; legacy = SID8, current = ратифікований D8")
+    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="legacy",
+                    help="legacy = сумісний старий SID8; auto блокує W8; current = ратифікований D8")
     args = ap.parse_args()
 
     data = load_foundation(args.foundation)
