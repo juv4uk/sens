@@ -38,19 +38,20 @@ jobs:
         run: |
           bash scripts/check-triple-projection.sh \
             --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
-      - name: The OLD legacy/incomplete corpus MUST NOT be reported green
+      - name: Explicit legacy fixture remains fail-closed
         shell: bash
         run: |
           set -euo pipefail
           set +e
-          bash scripts/check-triple-projection.sh > "$RUNNER_TEMP/full-triple.log" 2>&1
+          bash scripts/check-triple-projection.sh             --fixture tests/fixtures/migration-d4-selector-cohort/caar.lisp             > "$RUNNER_TEMP/legacy-triple.log" 2>&1
           status=$?
           set -e
-          cat "$RUNNER_TEMP/full-triple.log"
+          cat "$RUNNER_TEMP/legacy-triple.log"
           test "$status" -eq 2
-          grep -q "result=BLOCKED" "$RUNNER_TEMP/full-triple.log"
-          printf '%s\n' 'Scope: bounded canonical D1/D3 proof only; 3 legacy/incomplete fixtures BLOCK.' >> "$GITHUB_STEP_SUMMARY"
-          printf '%s\n' 'No physical/uk release admission or historical executable conversion from this check.' >> "$GITHUB_STEP_SUMMARY"
+          grep -q "caar.lisp" "$RUNNER_TEMP/legacy-triple.log"
+          grep -q "BLOCKED" "$RUNNER_TEMP/legacy-triple.log"
+          printf '%s\n' 'Scope: admitted cohort blocks by default; explicit unadmitted fixtures remain fail-closed.' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' 'Full migration debt is reported separately by sens_inventory.py and is not release admission.' >> "$GITHUB_STEP_SUMMARY"
       - name: Prove no source or output was rewritten
         shell: bash
         run: |
