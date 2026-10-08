@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - README.md
+      - docs/ukrainian-api.md
+      - lib/surface/semantic-registry.lisp
+      - lib/surface/uk-docs.lisp
       - tests/test_readme_owner_contract.py
       - .github/workflows/readme-owner-contract.yml
       - scripts/verify-repo.lisp
@@ -12,6 +15,9 @@ on:
     branches: [main]
     paths:
       - README.md
+      - docs/ukrainian-api.md
+      - lib/surface/semantic-registry.lisp
+      - lib/surface/uk-docs.lisp
       - tests/test_readme_owner_contract.py
       - .github/workflows/readme-owner-contract.yml
       - scripts/verify-repo.lisp
