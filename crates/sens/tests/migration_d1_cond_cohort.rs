@@ -20,7 +20,7 @@ fn run_visible(source: &str) -> Result<Value, sens::LanguageError> {
 
 #[test]
 fn physical_t5_d1_cond_executes_in_current_sens_oracle() {
-    assert_eq!(SOURCE, "(110 (0 (100 ())) (1 1))\n");
+    assert_eq!(SOURCE, "(за-умовою (ні (перше ())) (так так))\n");
     assert_eq!(T5, [0x67, 0x38, 0x65, 0x15, 0xbf, 0x12, 0x3b, 0x2d, 0xc4, 0xa9, 0xb1, 0xa1]);
     let words = decode_ternary_program(T5).expect("committed file must be canonical T5");
     let current = render_ternary_words_spaced(&words);
