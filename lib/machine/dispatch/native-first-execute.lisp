@@ -141,16 +141,18 @@
 (0011 native-first-execute-source-forms
   (0010 (forms)
     (110
-      ((101 forms ())
-       (001 ()))
       ((010 forms)
-       (111
-         (native-first-execution-rejected
-           (001 evaluator)
-           (native-first-list-2
-             (001 malformed-source-form-tail)
-             forms))
-         (001 ())))
+       (110
+         ((101 forms ())
+          (001 ()))
+         ((native-first-domain-true ())
+          (111
+            (native-first-execution-rejected
+              (001 evaluator)
+              (native-first-list-2
+                (001 malformed-source-form-tail)
+                forms))
+            (001 ())))))
       ((native-first-domain-true ())
        (111
          (native-first-execute-expression (100 forms))
