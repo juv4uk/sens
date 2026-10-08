@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -48,16 +48,27 @@ fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
 /// evaluator. Transport identity, D2 structural parsing, then semantic eval
 /// are independent gates; success does not prove that an old Lisp source
 /// has the same behavior or that a D24+/host effect is admitted.
-fn eval_t5_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+fn decode_t5_forms(bytes: &[u8]) -> Result<(String, Vec<sens::Expr>), String> {
     let visible = sens::open_ternary_program(bytes)
         .map_err(|e| format!("physical T5/D2 decode rejected: {e:?}"))?;
     let forms = sens::parse_canonical_binary(&visible)
         .map_err(|e| format!("canonical SENS parser rejected: {}", e.render(&visible)))?;
+    Ok((visible, forms))
+}
+
+fn eval_t5_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    let (visible, forms) = decode_t5_forms(bytes)?;
+    sens::eval_parsed_expressions(&forms, &mut sens::Session::default())
+        .map_err(|e| format!("current SENS oracle rejected: {}", e.render(&visible)))
+}
+
+fn eval_t5_bytes_core4(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    let (visible, forms) = decode_t5_forms(bytes)?;
     let mut session = sens::Session::default();
     sens::load_core_library(&mut session)
-        .map_err(|e| format!("current Core4 bootstrap rejected: {}", e.render(sens::CORE_LIBRARY_SOURCE)))?;
+        .map_err(|e| format!("explicit Core4 bootstrap rejected: {}", e.render(sens::CORE_LIBRARY_SOURCE)))?;
     sens::eval_parsed_expressions(&forms, &mut session)
-        .map_err(|e| format!("current SENS oracle rejected: {}", e.render(&visible)))
+        .map_err(|e| format!("current Core4 SENS oracle rejected: {}", e.render(&visible)))
 }
 
 /// Diagnose why a physical packed T5 file fails the existing canonical D2
@@ -126,12 +137,17 @@ fn execute() -> Result<(), String> {
             println!("{}", explain_t5_bytes(&bytes)?);
             Ok(())
         }
-        "eval" => {
+        "eval" | "eval-core4" => {
             // Explicit opt-in. Merely opening, viewing or decoding a .sens
-            // NEVER invokes the evaluator, and Session::default provides
-            // no host capabilities or permission to execute OS commands.
+            // NEVER invokes the evaluator. `eval` uses the empty
+            // capability-free environment; `eval-core4` explicitly installs
+            // the language-owned Core4 library before evaluating the bytes.
             let bytes = read_sens(path)?;
-            let result = eval_t5_bytes(&bytes)?;
+            let result = if command == "eval-core4" {
+                eval_t5_bytes_core4(&bytes)?
+            } else {
+                eval_t5_bytes(&bytes)?
+            };
             for output in result.output {
                 println!("{output}");
             }
@@ -226,7 +242,7 @@ mod eval_tests {
             .map(|word| word.to_string())
             .collect::<Vec<_>>();
         let trits = sens::encode_ternary_words(&words).expect("D2 source encodes");
-        let evaluated = eval_t5_bytes(&trits).expect("Core4 LIST must be available to physical eval");
+        let evaluated = eval_t5_bytes_core4(&trits).expect("explicit Core4 LIST must be available to physical eval");
         assert_eq!(evaluated.value.to_string(), "(1 2 3)");
     }
 
