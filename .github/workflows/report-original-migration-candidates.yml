@@ -53,6 +53,28 @@ jobs:
           assert (s['executable_or_unclassified_unpaired']+s['classified_nonprogram']+
                   s['archived_benchmark_data_sources'])==s['scanned']
           assert sum(c['count'] for c in r['actionable_blocker_cohorts'])==s['actionable_blocked_sources']
+          # Build the migration workload from the EXISTING SHA-pinned ledger.
+          # A raw FIRST blocker for archived DATA is not an executable task.
+          inactive = {'NONPROGRAM_DATA_REVIEWED', 'ARCHIVED_BENCHMARK_NONPROGRAM'}
+          live = {row['path']: row['source_git_blob_sha']
+                  for row in r['blocked_sources']
+                  if row['source_scope'] not in inactive}
+          assert len(live) == s['actionable_blocked_sources']
+          actionable_exact = []
+          seen = set()
+          for group in r['exact_blocker_cohorts']:
+              active = [row for row in group['original_sources']
+                        if row['path'] in live]
+              for row in active:
+                  path = row['path']
+                  assert path not in seen, f'duplicate active original {path}'
+                  assert live[path] == row['source_git_blob_sha'], path
+                  seen.add(path)
+              if active:
+                  actionable_exact.append((len(active), group, active))
+          assert seen == set(live), 'a real source lacks an exact-owner group'
+          assert sum(n for n, _, _ in actionable_exact) == s['actionable_blocked_sources']
+          actionable_exact.sort(key=lambda item: (-item[0], item[1]['coordinate']))
           assert all(row['automatic_sens_companion'] is False and
                      row['semantic_oracle_admitted'] is False
                      for row in r['reviewed_nonprogram_sources'])
@@ -79,11 +101,26 @@ jobs:
           with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a',encoding='utf-8') as out:
               out.write('## Original Lisp → physical SENS — current ratified D1–D9\n\n')
               out.write(f"- Historical unpaired originals scanned: **{s['scanned']}**\n")
+              out.write(f"- Reviewed nonprogram DATA: **{s['classified_nonprogram']}**\\n")
+              out.write(f"- Archived benchmark evidence: **{s['archived_benchmark_data_sources']}**\\n")
+              out.write(f"- Executable or not yet classified: **{s['executable_or_unclassified_unpaired']}**\\n")
+              out.write(f"- Actionable FIRST blockers (still unproved): **{s['actionable_blocked_sources']}**\\n")
+
               out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
               out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
-              out.write('### Shared mechanical blockers — reusable owner work\n\n')
+              out.write('### Work queue: real executable/unknown sources ONLY\\n\\n')
+              out.write('These are still BLOCKED and need source-era, owner-law and independent oracle proof.\\n\\n')
+              for n, group, sources in actionable_exact[:15]:
+                  examples = ', '.join(f"`{row['path']}`" for row in sources[:2])
+                  out.write(
+                      f"- **{n} source(s)** — {group['family']} "
+                      f"`{group['coordinate']}` → {group['owner_issue']}: "
+                      f"{examples}\\n"
+                  )
+              out.write('\\nEvery item is SHA-checked against the unmodified canonical report. No automatic .sens emission.\\n\\n')
+              out.write('### Raw FIRST blockers (includes DATA and archives; diagnostic only)\\n\\n')
               for cohort in r['blocker_cohorts']:
                   out.write(f"- **{cohort['family']}**: {cohort['count']} original SHA-pinned sources — {cohort['next_action']}\n")
               out.write('\n### Top exact FIRST-BLOCKER coordinates (single-law agent work)\n\n')
