@@ -381,5 +381,32 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertEqual(source.read_text(), "()\n")
 
 
+    def test_default_source_era_blocks_ambiguous_w8_without_guessing(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "ambiguous.lisp"
+            source.write_text("(00000101 ())\n", encoding="utf-8")
+            out = base / "mirror"
+            report = base / "report.json"
+            process = subprocess.run([
+                sys.executable, str(SCRIPT), str(source),
+                "--out", str(out),
+                "--report", str(report),
+                "--foundation", str(ROOT / "knowledge" / "d1-d9-foundation.json"),
+                "--domain-surfaces", str(DOMAIN_SURFACES),
+                "--semantic-generated", str(SEMANTIC_GENERATED),
+                "--semantic-registry", str(SEMANTIC_REGISTRY),
+                "--necessary-forms", str(NECESSARY),
+                "--historical-map", str(HISTORICAL),
+                "--text7", str(TEXT7),
+            ], capture_output=True, text=True)
+            self.assertEqual(process.returncode, 2, process.stderr)
+            self.assertFalse((out / "ambiguous.sens").exists())
+            state = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(state["source_era"], "auto")
+            self.assertEqual(state["summary"]["files_blocked"], 1)
+            self.assertIn("ambiguous W8", state["files"][0]["reason"])
+
+
 if __name__=="__main__":
     unittest.main()
