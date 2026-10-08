@@ -38,6 +38,17 @@ Text7-контекст і lexical/global binding є найбільшим пов�
 
 **Чому цифра мала:** не через відсутність конвертера. Не завершена повна однакова-самість між незмінним джерелом, фактичним фізичним T5, current runtime, independent 9-case oracle і трьома canonical projections. `open`, кілька успішних викликів або text-source parity не замінюють цього доказу.
 
+## Latest proof-result correction — 2026-10-09
+
+The newest current-main replay evidence is useful but **does not increment the original migration count**:
+
+- Workflow [#37858480643](https://github.com/juv4uk/sens/actions/runs/37858480643) reports the nine named outputs as `MACHINE_BLOCK_CURRENT_TEXT_PARITY=9/9; PHYSICAL_T5_ORACLE=NOT_VERIFIED`. That is source-text old/current parity, not execution of the generated physical artifact.
+- Workflow [#37858480876](https://github.com/juv4uk/sens/actions/runs/37858480876) reports `lib/machine/block.lisp` as `SYNTAX_ONLY_UNVERIFIED`, `files_written=0`, `oracle=NOT_VERIFIED`; it records a 459-byte candidate and typed-word digest but publishes nothing.
+- Workflow [#37858480942](https://github.com/juv4uk/sens/actions/runs/37858480942) successfully wrote only the reviewed `tests/fixtures/migration-multiform-cohort/two-forms.lisp` canary. It is not an admission for `lib/machine/block.lisp`.
+- The #4799 Hosted CI run [#37858480853](https://github.com/juv4uk/sens/actions/runs/37858480853) was still in progress at last check. Some focused gates passing does not mean the whole PR is green.
+
+So current evidence confirms the exact gap: **execute the just-generated physical `.sens` for the same nine cases** through the explicit language-owned Core4 path and compare byte-exactly to the pinned historical oracle; then only admit the canonical three-view tuple. Keep original count **0** until this is green and merged on `main`.
+
 ## D10: паралельний research, не обхід міграції
 
 На останньому прямому читанні `knowledge/d10-fill-v1-state.json` та `knowledge/d10-v1-semantic-inventory.json`: **625/1024 selected, 399 remaining, 256 law-forced, 369 unplaced, 0 ratified**. #4798 (+23) вже включено; #4800’s 8 Flavors/restart proposals — поза selected inventory, поки owner-review не вирішить інакше.
