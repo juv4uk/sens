@@ -16,6 +16,7 @@ import subprocess
 import sys
 
 from report_t5_triplet_inventory import inspect as inspect_triplets
+from verify_uk_t5_triplet import ProjectionBlocked, verify as verify_bounded_uk
 
 SCHEMA = "sens-t5-triplet-delta-ratchet/v1"
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")
@@ -72,12 +73,20 @@ def inspect(root: Path, *, base: str) -> dict:
     census = inspect_triplets(root)
     by_sens = {row["sens"]: row for row in census["files"]}
     targets: set[str] = set()
+    source_changed: set[str] = set()
     delta = []
     for status, name in changes:
         path = safe_path(name)
         if path.suffix == ".sens":
             targets.add(name)
             delta.append({"change": status, "path": name, "kind": "physical"})
+        elif path.suffix == ".lisp" and name[:-5] + ".sens" in tracked:
+            # A canonical Ukrainian source edit is a semantic delta even if
+            # committed packed T5 and human bit-view are byte-for-byte stable.
+            target = name[:-5] + ".sens"
+            targets.add(target)
+            source_changed.add(target)
+            delta.append({"change": status, "path": name, "kind": "uk_source"})
         elif path.suffix == "" and name + ".sens" in tracked:
             # Deleting an existing extensionless view must be noticed too.
             targets.add(name + ".sens")
@@ -96,12 +105,43 @@ def inspect(root: Path, *, base: str) -> dict:
                          "view_status": entry["view_status"],
                          "reason": entry.get("reason", "T5↔view check failed")})
         else:
+            # Physical T5↔view is necessary but NOT sufficient when somebody
+            # changes the actual human Ukrainian source of a paired program.
+            # Reuse the EXISTING ratified bounded uk adapter. Unsupported
+            # D4/Text7/binders/aliases or source drift must fail closed.
+            if name in source_changed:
+                stem = (root / name).with_suffix("")
+                try:
+                    proof = verify_bounded_uk(
+                        stem.with_suffix(".lisp"),
+                        stem.with_suffix(".sens"),
+                        stem,
+                    )
+                except (ProjectionBlocked, OSError, ValueError) as exc:
+                    rows.append({
+                        "sens": name,
+                        "status": "BLOCKED",
+                        "reason": "UK_SOURCE_DELTA: " + str(exc)[:320],
+                        "view_status": "PHYSICAL_VIEW_PASS",
+                        "uk_oracle": "NOT_VERIFIED",
+                    })
+                    continue
+                if not proof.get("canonical_uk_roundtrip"):
+                    rows.append({
+                        "sens": name, "status": "BLOCKED",
+                        "reason": "UK_SOURCE_DELTA: bounded canonical witness missing",
+                    })
+                    continue
             rows.append({
                 "sens": name, "status": "PHYSICAL_VIEW_PASS_UK_ORACLE_PENDING",
                 "source_sha256": entry["source_sha256"],
                 "physical_sha256": entry["physical_sha256"],
                 "typed_word_sha256": entry["typed_word_sha256"],
                 "view_sha256": entry["view_sha256"],
+                "bounded_uk_source_roundtrip": (
+                    "PASS_NOT_RUNTIME_ORACLE" if name in source_changed
+                    else "NOT_CHECKED_SOURCE_UNCHANGED"
+                ),
                 "uk_oracle": "NOT_VERIFIED", "release_admitted": False,
             })
     blocked = sum(row["status"] == "BLOCKED" for row in rows)
