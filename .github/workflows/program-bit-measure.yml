@@ -4,12 +4,18 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
   push:
     branches: [main]
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
 
@@ -22,3 +28,27 @@ jobs:
       - name: Prove canonical source bit measure and dense packing parity
         run: |
           cargo test -p sens source_packing::tests::
+          cargo test -p sens ternary_transport::tests::
+      - name: Physical T5 file must open as spaces, never transport 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- verify "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/opened.txt"
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/expected.txt"
+          cmp "$RUNNER_TEMP/opened.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/direct.txt"
+          cmp "$RUNNER_TEMP/direct.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- view "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/viewed.txt"
+          cmp "$RUNNER_TEMP/viewed.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/vertical.txt"
+          printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/expected-vertical.txt"
+          cmp "$RUNNER_TEMP/vertical.txt" "$RUNNER_TEMP/expected-vertical.txt"
+          test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          printf '\000' >> "$RUNNER_TEMP/sample.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.sens"; then
+            echo "ERROR: corrupted T5 physical tail opened"
+            exit 1
+          fi
