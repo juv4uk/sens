@@ -16,10 +16,10 @@
     (00000111
       ((00100010 actual expected)
        (1)
-       (00000001 pass))
+       (quote pass))
       ((00100010 actual expected)
        (0)
-       (00100111 (00000001 fail) actual expected)))))
+       (00100111 (quote fail) actual expected)))))
 
 (00001001 native-first-execution-witness
   (00001000 ()
@@ -27,8 +27,8 @@
       ; Supported bounded structural slice really reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (00000001 (car (cons 2 3))))
-        (00000001
+          (quote (car (cons 2 3))))
+        (quote
           (execution-route native
             (status completed)
             (value 2))))
@@ -36,8 +36,8 @@
       ; Unsupported ordinary Lisp is not an error: it stays evaluator-owned.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (00000001 (+ 2 3)))
-        (00000001
+          (quote (+ 2 3)))
+        (quote
           (execution-route evaluator
             (status completed)
             (value 5))))
@@ -47,7 +47,7 @@
         (native-first-execute-source
           "(+ 1 2)
 (car (cons 7 9))")
-        (00000001
+        (quote
           (source-execution
             ((execution-route evaluator
                (status completed)
@@ -58,11 +58,11 @@
 
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (00000001
+          (quote
             (native-plan
               ((definitely-not-an-admitted-machine-form))
               0)))
-        (00000001
+        (quote
           (execution-route native
             (status rejected)
             (detail
@@ -73,8 +73,8 @@
       ; Malformed native plans also fail closed on the native route.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (00000001 (native-plan ((ret)))))
-        (00000001
+          (quote (native-plan ((ret)))))
+        (quote
           (execution-route native
             (status rejected)
             (detail
