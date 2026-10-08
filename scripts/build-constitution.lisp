@@ -22,6 +22,43 @@
 
 (00001001 fixtures (01001011 (10100110 "tests/fixtures/conformance.lisp")))
 
+(00001001 transitions (01001011 (10100110 "tests/fixtures/conformance-transition-witness.lisp")))
+
+;; The transition overlay is the sole source for historical supersession.
+;; Generated projections expose that status without changing the historical
+;; conformance records or inventing a second classification file.
+
+(00001001 асоц-рядок
+  (00001000 (ключ рядок)
+    (00000111
+      ((00000010 рядок) () ())
+      ((00000011 (00110011 рядок) ключ)
+       (00000110 (00000101 рядок)))
+      (t (асоц-рядок ключ (00000110 рядок))))))
+
+(00001001 є-у-переходах?
+  (00001000 (вираз залишок)
+    (00000111
+      ((00000010 залишок) ())
+      ((00100010 вираз (асоц-рядок (00000001 supersedes-expr)
+                                      (00000101 залишок)))
+       (1))
+      (t (є-у-переходах? вираз (00000110 залишок))))))
+
+(00001001 позначити-історичне
+  (00001000 (фікстура)
+    (00000111
+      ((є-у-переходах?
+        (асоц-рядок (00000001 expr) фікстура)
+        transitions)
+       (00000100
+        (00000001 fixture)
+        (00000100
+          (00000100 (00000001 authority-status)
+                     (00000001 historical-superseded))
+          (00000110 фікстура))))
+      (t фікстура))))
+
 (01001000 (00000100 (00000001 about) "my-lisp-constitution.lisp — the executable proof of docs/language-core-axioms.md's project principles and axioms (G1-G8 generative, S1-S3 safety). Each fixture is one of the observable claims from tests/fixtures/conformance.lisp, tagged with the tier (1 CORE SEMANTICS, 2 LANGUAGE CONTRACT, 3 ECOSYSTEM CONFORMANCE) and, where one applies, the axiom(s) it is evidence for. Symbolic-reasoning fixtures (tier 3, unify/reason) carry no axiom tag on purpose — they are evidence for project principle 3, not the G/S axiom list."))
 
 (01001000 (00000100 (00000001 status) "draft — not yet ratified; will become read-only once ratified"))
@@ -59,7 +96,7 @@
 
 (00001001 print-fixture
   (00001000 (fixture)
-    (01001000 (00000100 (00000001 fixture) fixture))))
+    (01001000 (00000100 (00000001 fixture) (позначити-історичне fixture)))))
 
 (00001001 print-fixtures
   (00001000 (remaining)

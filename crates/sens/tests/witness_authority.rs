@@ -44,6 +44,24 @@ fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
     })
 }
 
+fn alist_number(entries: &[Expr], key: &str) -> Option<f64> {
+    entries.iter().find_map(|entry| {
+        let ExprKind::Pair(k, v) = &entry.kind else {
+            return None;
+        };
+        let ExprKind::Symbol(name) = &k.kind else {
+            return None;
+        };
+        if &**name != key {
+            return None;
+        }
+        match &v.kind {
+            ExprKind::Number(value, _) => Some(*value),
+            _ => None,
+        }
+    })
+}
+
 fn alist_sid(entries: &[Expr], key: &str) -> Option<Sens8> {
     entries.iter().find_map(|entry| {
         let ExprKind::Pair(k, v) = &entry.kind else {
@@ -133,6 +151,71 @@ fn witness_rows() -> Vec<WitnessRow> {
 
     rows.extend(transitions.into_iter().map(|(_, row)| row));
     rows
+}
+
+#[test]
+fn current_tier_one_cond_rows_are_canonical_and_fail_closed() {
+    let source = include_str!("../../../tests/fixtures/conformance.lisp");
+    let forms = parse(source).expect("conformance fixture should parse");
+    let transitions = transition_rows();
+    let cond_head = concat!("con", "d");
+
+    for form in forms {
+        let ExprKind::List(entries) = &form.kind else {
+            continue;
+        };
+        if alist_number(entries, "tier") != Some(1.0) {
+            continue;
+        }
+        let Some(expr) = alist_str(entries, "expr") else {
+            continue;
+        };
+        if transitions
+            .iter()
+            .any(|(superseded, _)| superseded == expr)
+        {
+            continue;
+        }
+
+        let parsed = parse(expr).expect("current conformance expression must parse");
+        let Some(Expr {
+            kind: ExprKind::List(form),
+            ..
+        }) = parsed.first()
+        else {
+            continue;
+        };
+        let Some(ExprKind::Symbol(head)) = form.first().map(|entry| &entry.kind) else {
+            continue;
+        };
+        if head.as_ref() != cond_head && head.as_ref() != "за-умовою" {
+            continue;
+        }
+
+        assert!(
+            form.len() >= 2,
+            "current Tier-1 COND must have at least one clause: {expr}"
+        );
+        for (index, clause) in form[1..].iter().enumerate() {
+            let ExprKind::List(parts) = &clause.kind else {
+                panic!("current Tier-1 COND clause {index} is not a list: {expr}");
+            };
+            assert_eq!(
+                parts.len(),
+                2,
+                "current Tier-1 COND clause {index} must be exactly (test expression): {expr}"
+            );
+            match &parts[0].kind {
+                ExprKind::Symbol(name) if name.as_ref() == "t" => {
+                    panic!("current Tier-1 COND may not use bare-t truthiness: {expr}");
+                }
+                ExprKind::Number(value, _) if *value == 0.0 => {
+                    panic!("current Tier-1 COND may not use numeric-zero truthiness: {expr}");
+                }
+                _ => {}
+            }
+        }
+    }
 }
 
 fn d3_predicate_boundary_rows() -> Vec<D3PredicateBoundaryRow> {

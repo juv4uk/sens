@@ -29,3 +29,15 @@
  (compiler-corpus . t)
  (reason . exact-q-result-algebra-supersedes-truth-sentinel)
  (owner . "216/220/631"))
+
+((supersedes-expr . "(cond (() (quote first)) (() (quote second)) (t (quote third)))")
+ (expr . "(за-умовою (() (як-є first)) (() (як-є second)))")
+ (expected . "()")
+ (meta-eval . t)
+ (owner . "4196/4166"))
+
+((supersedes-expr . "(cond ((quote radio) antenna (quote wrong)))")
+ (expr . "(за-умовою ((тотожне? (як-є radio) (як-є radio)) (як-є antenna)))")
+ (expected . "antenna")
+ (meta-eval . t)
+ (owner . "4196/4166"))
