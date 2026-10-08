@@ -43,6 +43,106 @@ class MigrationBlocked(ValueError):
     pass
 
 
+# Source classification is NOT inferred from whether three-pass can emit
+# physical bytes. These previously reviewed manifests pin non-program records
+# to their exact immutable Git object, not merely to a filename glob.
+NONPROGRAM_MANIFESTS = (
+    "migration-nonprogram-isa-manifest-2026-10-08.json",
+    "migration-nonprogram-schema-manifest-2026-10-08.json",
+    "migration-nonprogram-evidence-manifest-2026-10-08.json",
+    "migration-nonprogram-expr-records-2026-10-08.json",
+)
+ARCHIVE_POLICY = "migration-benchmark-snapshot-2026-10-08.json"
+
+
+def _git_blob_sha(content: bytes) -> str:
+    return hashlib.sha1(
+        b"blob " + str(len(content)).encode("ascii") + b"\\0" + content
+    ).hexdigest()
+
+
+def _nonprogram_manifest_paths(root: Path) -> dict[str, str]:
+    """Load reviewed path/blob records; fail closed if the contract drifts."""
+    indexed: dict[str, str] = {}
+    for filename in NONPROGRAM_MANIFESTS:
+        manifest = root / "knowledge" / filename
+        if manifest.is_symlink() or not manifest.is_file():
+            raise MigrationBlocked(f"missing/unsafe nonprogram authority: {filename}")
+        try:
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+        except (ValueError, UnicodeError) as exc:
+            raise MigrationBlocked(f"invalid nonprogram authority: {filename}") from exc
+        if (not isinstance(document, dict)
+                or document.get("schema") != "sens-migration-nonprogram-manifest/1"
+                or document.get("automatic_sens_companion") is not False
+                or not isinstance(document.get("entries"), list)
+                or not document["entries"]):
+            raise MigrationBlocked(f"invalid nonprogram authority contract: {filename}")
+        for row in document["entries"]:
+            if not isinstance(row, dict) or set(row) != {"path", "git_blob_sha1"}:
+                raise MigrationBlocked(f"invalid SHA-locked nonprogram row: {filename}")
+            name, blob = row["path"], row["git_blob_sha1"]
+            if not isinstance(name, str) or "\\\\" in name:
+                raise MigrationBlocked("nonprogram source path must be relative POSIX")
+            posix = PurePosixPath(name)
+            if (posix.is_absolute() or ".." in posix.parts or posix.suffix != ".lisp"
+                    or posix.as_posix() != name):
+                raise MigrationBlocked(f"unsafe nonprogram path: {name}")
+            if (not isinstance(blob, str) or len(blob) != 40
+                    or any(c not in "0123456789abcdef" for c in blob)):
+                raise MigrationBlocked(f"invalid Git source blob pin for {name}")
+            if name in indexed:
+                raise MigrationBlocked(f"duplicate nonprogram authority path: {name}")
+            indexed[name] = blob
+    return indexed
+
+
+def _is_archived_benchmark(path: PurePosixPath, root: Path) -> bool:
+    """Frozen measurement programs are archived evidence, not active SENS."""
+    parts = path.parts
+    if not (len(parts) == 6 and parts[:3] ==
+            ("benchmarks", "sens-surface", "results") and
+            parts[4] == "programs" and path.suffix == ".lisp"):
+        return False
+    source = root / "knowledge" / ARCHIVE_POLICY
+    if source.is_symlink() or not source.is_file():
+        raise MigrationBlocked("missing benchmark archive authority")
+    try:
+        document = json.loads(source.read_text(encoding="utf-8"))
+    except (ValueError, UnicodeError) as exc:
+        raise MigrationBlocked("invalid benchmark archive authority") from exc
+    if (document.get("schema") != "sens-t5-archive-evidence/v1"
+            or document.get("status") != "NONPROGRAM_ARCHIVED_BENCHMARK_EVIDENCE"
+            or document.get("allow_bulk_conversion") is not False
+            or document.get("admitted_as_executable") != 0):
+        raise MigrationBlocked("benchmark archive authority contract changed")
+    return True
+
+
+def reject_classified_nonprogram(sources: list[str], root: Path) -> None:
+    """Early all-or-nothing embargo before any conversion or T5 publication."""
+    classified = _nonprogram_manifest_paths(root)
+    for name in sources:
+        rel = PurePosixPath(name)
+        if _is_archived_benchmark(rel, root):
+            raise MigrationBlocked(
+                f"NONPROGRAM archived benchmark measurement; no executable .sens: {name}"
+            )
+        expected = classified.get(name)
+        if expected is None:
+            continue
+        data = (root / name).read_bytes()
+        actual = _git_blob_sha(data)
+        if actual != expected:
+            raise MigrationBlocked(
+                f"NONPROGRAM source authority drift: {name}; "
+                f"expected original Git blob {expected}, actual {actual}; independent review required"
+            )
+        raise MigrationBlocked(
+            f"NONPROGRAM Git-blob-locked data/record; no executable .sens: {name}"
+        )
+
+
 def outside(candidate: Path, root: Path, what: str) -> None:
     if candidate == root or root in candidate.parents:
         raise MigrationBlocked(f"{what} must be outside source root: {candidate}")
@@ -73,6 +173,9 @@ def pin_sources(sources: list[str], root: Path) -> dict:
         # verifies this SHA again before publishing. Never silently trust names.
         sha = hashlib.sha256(candidate.read_bytes()).hexdigest()
         entries.append({"path": rel, "sha256": sha})
+    # Every selected path is checked as one atomic batch. A source may be
+    # mechanically convertible while being reviewed NONPROGRAM archive/data.
+    reject_classified_nonprogram([row["path"] for row in entries], root)
     return {"files": sorted(entries, key=lambda item: item["path"])}
 
 
