@@ -16,6 +16,10 @@ from sens_t5_codec import encode_words
 WORDS = ["10", "000", "01"]
 PHYSICAL = encode_words(WORDS)
 VIEW = (" ".join(WORDS) + "\n").encode("ascii")
+UK_WORDS = ["10", "100", "00", "000", "01"]
+UK_PHYSICAL = encode_words(UK_WORDS)
+UK_VIEW = (" ".join(UK_WORDS) + "\n").encode("ascii")
+UK_SOURCE = "(перше ())\n"
 
 
 class IncrementalTripletGate(unittest.TestCase):
@@ -47,10 +51,10 @@ class IncrementalTripletGate(unittest.TestCase):
     def new_pair(self, *, sens="new.sens", with_view=True):
         stem = self.root / sens[:-5]
         stem.parent.mkdir(parents=True, exist_ok=True)
-        stem.with_suffix(".lisp").write_text("(так)\n", encoding="utf-8")
-        stem.with_suffix(".sens").write_bytes(PHYSICAL)
+        stem.with_suffix(".lisp").write_text(UK_SOURCE, encoding="utf-8")
+        stem.with_suffix(".sens").write_bytes(UK_PHYSICAL)
         if with_view:
-            stem.write_bytes(VIEW)
+            stem.write_bytes(UK_VIEW)
         self.commit("new pair")
         return stem
 
@@ -155,6 +159,71 @@ class IncrementalTripletGate(unittest.TestCase):
         result = self.scan()
         self.assertEqual(result["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
         self.assertEqual(result["files"][0]["sens"], "lib/диво.sens")
+
+    def baseline_uk_triplet(self, source=UK_SOURCE):
+        stem = self.root / "uk-program"
+        stem.with_suffix(".lisp").write_text(source, encoding="utf-8")
+        stem.with_suffix(".sens").write_bytes(UK_PHYSICAL)
+        stem.write_bytes(UK_VIEW)
+        self.commit("bounded current D1/D3 source baseline")
+        self.base = self.cmd("rev-parse", "HEAD").strip()
+        return stem
+
+    def test_uk_source_only_semantic_drift_blocks_with_unchanged_t5_and_view(self):
+        stem = self.baseline_uk_triplet()
+        binary_before = stem.with_suffix(".sens").read_bytes()
+        view_before = stem.read_bytes()
+        stem.with_suffix(".lisp").write_text("(перше (так))\n", encoding="utf-8")
+        self.commit("change uk source semantics but keep physical and view")
+        report = self.scan()
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["summary"]["changed_pairs"], 1)
+        self.assertEqual(report["changed_paths"][0]["kind"], "uk_source")
+        self.assertIn("UK_SOURCE_DELTA:", report["files"][0]["reason"])
+        self.assertEqual(stem.with_suffix(".sens").read_bytes(), binary_before)
+        self.assertEqual(stem.read_bytes(), view_before)
+        self.assertEqual(report["summary"]["release_admitted"], 0)
+
+    def test_canonical_uk_source_correction_passes_bounded_only_not_oracle(self):
+        stem = self.baseline_uk_triplet("(неправильне)\n")
+        stem.with_suffix(".lisp").write_text(UK_SOURCE, encoding="utf-8")
+        self.commit("fix prior invalid source to ratified canonical ukrainian")
+        report = self.scan()
+        self.assertEqual(report["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
+        self.assertEqual(report["files"][0]["bounded_uk_source_roundtrip"],
+                         "PASS_NOT_RUNTIME_ORACLE")
+        self.assertEqual(report["files"][0]["uk_oracle"], "NOT_VERIFIED")
+        self.assertEqual(report["summary"]["original_executable_migrations_certified"], 0)
+
+    def test_noncanonical_uk_whitespace_source_only_is_rejected(self):
+        stem = self.baseline_uk_triplet()
+        stem.with_suffix(".lisp").write_text("(перше ( ))\n", encoding="utf-8")
+        self.commit("noncanonical whitespace variant source")
+        self.assertEqual(self.scan()["status"], "BLOCKED")
+
+    def test_bounded_uk_source_does_not_guess_d4_projection(self):
+        stem = self.baseline_uk_triplet()
+        stem.with_suffix(".lisp").write_text("(підміна ())\n", encoding="utf-8")
+        self.commit("unsupported source")
+        report = self.scan()
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["files"][0]["view_status"], "PHYSICAL_VIEW_PASS")
+
+    def test_deleted_uk_source_of_unchanged_t5_blocks(self):
+        stem = self.baseline_uk_triplet()
+        stem.with_suffix(".lisp").unlink()
+        self.commit("delete source only")
+        report = self.scan()
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("uk_source", [x["kind"] for x in report["changed_paths"]])
+
+    def test_unpaired_lisp_change_keeps_historical_debt_visible_without_false_fail(self):
+        (self.root / "notes.lisp").write_text("(архів)\n", encoding="utf-8")
+        self.commit("standalone unpaired Lisp documentation")
+        report = self.scan()
+        self.assertEqual(report["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
+        self.assertEqual(report["summary"]["changed_pairs"], 0)
+        self.assertEqual(report["summary"]["historical_missing_views_remain_release_debt"], 1)
 
     def test_no_base_or_unsafe_ref_never_succeeds(self):
         for sha in ("main", "0" * 40, "../abc", "a" * 38):
