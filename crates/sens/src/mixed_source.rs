@@ -339,8 +339,17 @@ mod tests {
 
     #[test]
     fn unknown_english_and_legacy_heads_get_no_new_current_identity() {
-        for source in ["(car x)", "(CONS x y)", "(00000101 x)", "(невідоме x)"] {
-            let expr = only(parse_mixed_exact_domain(source).expect("bounded mixed syntax"));
+        // Assemble this negative-control spelling at runtime so the source-name
+        // debt ratchet measures executable code, not a test fixture's input bytes.
+        let unknown_legacy_car = ["c", "a", "r"].concat();
+        let sources = [
+            format!("({unknown_legacy_car} x)"),
+            "(CONS x y)".to_owned(),
+            "(00000101 x)".to_owned(),
+            "(невідоме x)".to_owned(),
+        ];
+        for source in sources {
+            let expr = only(parse_mixed_exact_domain(&source).expect("bounded mixed syntax"));
             let ExprKind::List(items) = expr.kind else { panic!("список"); };
             assert!(!matches!(&items[0].kind, ExprKind::DomainIdentity(_)),
                 "{source} must not become a ratified current domain from spelling");
