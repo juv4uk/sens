@@ -1,0 +1,52 @@
+name: Original machine-block lexical coordinate proof
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/prove_lexical_locals.py'
+      - 'tests/test_prove_lexical_locals.py'
+      - 'docs/research/machine-block-local-coordinates.uk.md'
+      - '.github/workflows/prove-lexical-locals.yml'
+      - 'lib/machine/block.lisp'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prove_lexical_locals.py'
+      - 'tests/test_prove_lexical_locals.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lexical-slot-original:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Alpha-renaming, nested lexical slots and six original definitions
+        run: python3 -m unittest discover -s tests -p 'test_prove_lexical_locals.py' -v
+      - name: Pinned original witness - lexical-only, NO physical admission
+        run: |
+          python3 scripts/prove_lexical_locals.py --require-machine-block-provenance > "$RUNNER_TEMP/local-proof.json"
+          python3 - "$RUNNER_TEMP/local-proof.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          r=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          assert r['source_git_blob_sha']=='200201b741787c4e144ad4194848acf51d7b439e'
+          assert r['definition_count']==6
+          assert r['status']=='LEXICAL_COORDINATES_PROVEN__PHYSICAL_NOT_ADMITTED'
+          assert r['original_executable_migrations_admitted']==0
+          assert r['global_names_encoded'] is False
+          assert r['d2_or_d7_framing_defined'] is False
+          print('LOCAL_SLOT_PASS six historical definitions; PHYSICAL_NOT_ADMITTED')
+          PY
+      - name: Independent historical nine-case oracle is not physical parity
+        run: python3 -m unittest discover -s tests -p 'test_machine_block_historical_oracle.py' -v
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-machine-block-local-coordinate-evidence
+          path: ${{ runner.temp }}/local-proof.json
+          if-no-files-found: warn
+          retention-days: 14
