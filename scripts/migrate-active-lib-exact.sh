@@ -36,7 +36,7 @@ else TOOL=(cargo run --quiet -p sens-cli --bin sens-to-sens --); fi
 # --- gate predicates (mirror crates/sens-cli/tests/active_lib_sens_completion.rs) ---
 is_explicit_non_implementation() {
   case "$1" in
-    lib/generated/*|lib/surface/*|lib/machine/encoding/coverage.lisp) return 0 ;;
+    lib/generated/*|lib/surface/*|lib/machine/encoding/coverage.lisp|lib/machine/encoding/admitted-iclass-index.lisp) return 0 ;;
     *) return 1 ;;
   esac
 }
