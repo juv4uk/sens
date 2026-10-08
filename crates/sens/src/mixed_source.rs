@@ -93,6 +93,18 @@ fn lift_head(source: &str, head: Expr) -> Result<Expr, LanguageError> {
     };
 
     if !spelling.bytes().all(|byte| matches!(byte, b'0' | b'1')) {
+        // Human-facing .lisp stays Ukrainian. Lift ONLY a ratified callable
+        // list HEAD into the same exact DomainIdentity as its binary spelling.
+        // This is reader-time projection, not runtime dispatch by names.
+        // The source registry deliberately has NO legacy SID/English fallback.
+        if let Some(identity) =
+            crate::semantic_registry::exact_uk_callable_for_source_head(spelling)
+        {
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(identity),
+                span: head.span,
+            });
+        }
         return Ok(head);
     }
 
@@ -187,6 +199,65 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn ukrainian_callable_heads_lower_to_exact_domain_without_rewriting_lisp() {
+        let source = "(визначити хід (функція (x) (перше x)))";
+        let parsed = only(parse_mixed_exact_domain(source).expect("ratified ук surface"));
+        let ExprKind::List(defined) = parsed.kind else { panic!("definition"); };
+        assert!(matches!(&defined[0].kind,
+            ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0011));
+        // Owner-ratified binding targets are lexical DATA, not callable heads.
+        assert!(!matches!(&defined[1].kind, ExprKind::DomainIdentity(_)));
+        let ExprKind::List(lambda) = &defined[2].kind else { panic!("lambda"); };
+        assert!(matches!(&lambda[0].kind,
+            ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0010));
+        let ExprKind::List(body) = &lambda[2].kind else { panic!("lambda body"); };
+        assert!(matches!(&body[0].kind,
+            ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b100));
+
+        let byte_source = "(0011 хід (0010 (x) (100 x)))";
+        let exact = only(parse_mixed_exact_domain(byte_source).expect("exact source"));
+        let ExprKind::List(encoded) = exact.kind else { panic!("exact definition"); };
+        let ExprKind::List(encoded_lambda) = &encoded[2].kind else { panic!("exact lambda"); };
+        assert_eq!(defined[0].kind, encoded[0].kind);
+        assert_eq!(lambda[0].kind, encoded_lambda[0].kind);
+        let ExprKind::List(encoded_body) = &encoded_lambda[2].kind else { panic!("exact body"); };
+        assert_eq!(body[0].kind, encoded_body[0].kind);
+    }
+
+    #[test]
+    fn ukrainian_quote_data_and_binding_position_are_not_retyped() {
+        let source = "(як-є (перше x))";
+        let quoted = only(parse_mixed_exact_domain(source).expect("quoted data"));
+        let ExprKind::List(outer) = quoted.kind else { panic!("quote"); };
+        assert!(matches!(&outer[0].kind,
+            ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b001));
+        let ExprKind::List(data) = &outer[1].kind else { panic!("quoted data"); };
+        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)));
+
+        let binder = only(parse_mixed_exact_domain(
+            "(визначити перше (функція (перше) (атом? перше)))"
+        ).expect("binder data"));
+        let ExprKind::List(definition) = binder.kind else { panic!("definition"); };
+        assert!(!matches!(&definition[1].kind, ExprKind::DomainIdentity(_)));
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
+        let ExprKind::List(parameters) = &lambda[1].kind else { panic!("parameters"); };
+        assert!(!matches!(&parameters[0].kind, ExprKind::DomainIdentity(_)));
+        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+        assert!(matches!(&call[0].kind,
+            ExprKind::DomainIdentity(id) if id.width() == 3 && id.packed_bits() == 0b010));
+    }
+
+    #[test]
+    fn unknown_english_and_legacy_heads_get_no_new_current_identity() {
+        for source in ["(car x)", "(CONS x y)", "(00000101 x)", "(невідоме x)"] {
+            let expr = only(parse_mixed_exact_domain(source).expect("bounded mixed syntax"));
+            let ExprKind::List(items) = expr.kind else { panic!("list"); };
+            assert!(!matches!(&items[0].kind, ExprKind::DomainIdentity(_)),
+                "{source} must not become a ratified current domain from spelling");
+        }
     }
 
     #[test]
