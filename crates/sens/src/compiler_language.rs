@@ -1032,6 +1032,23 @@ mod tests {
     }
 
     #[test]
+    fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
+        let expressions =
+            parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("active core loads");
+        for (index, expression) in expressions.iter().enumerate() {
+            if let Err(error) =
+                eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+            {
+                panic!(
+                    "compiler nucleus form {index} failed: {error:?}; expression={expression:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn compiled_driver_bootstrap_bundle_contains_verified_representation_only_inputs() {
         let bundle = compiler_program_bootstrap_bundle().expect("verified compiler bootstrap bundle");
 
