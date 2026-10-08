@@ -8,6 +8,7 @@ on:
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/compiler_language.rs"
       - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/selfhost_lineage.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   push:
@@ -18,6 +19,7 @@ on:
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/compiler_language.rs"
       - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/selfhost_lineage.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   workflow_dispatch:
