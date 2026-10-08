@@ -50,6 +50,29 @@ class OriginalCandidateTests(unittest.TestCase):
         self.assertFalse(row["independent_semantic_oracle_passed"])
         self.assertEqual(row["proposed_bytes"], 4)
 
+    def test_actual_archived_candidate_is_immutable_nonprogram_evidence(self):
+        original = ("benchmarks/sens-surface/results/"
+                    "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        src = ROOT / original
+        self.assertEqual(mod.git_blob_sha(src),
+                         "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f")
+        row = mod.categorize({
+            "path": original, "status": "would-write",
+            "bytes": 4, "physical_sha256": "a"*64,
+            "typed_word_sha256": "b"*64,
+            "semantic_word_count": 5, "passes": {"pass2-my-lisp": 1},
+        }, ROOT)
+        self.assertEqual(row["source_scope"], "ARCHIVED_BENCHMARK_NONPROGRAM")
+        self.assertFalse(row["source_is_executable_proven"])
+        self.assertFalse(row["independent_semantic_oracle_passed"])
+
+    def test_unclassified_lib_cannot_be_mistaken_for_archival_snapshot(self):
+        source = self.root / "real.lisp"
+        source.write_text("(00000001 ())\\n", encoding="utf-8")
+        row = mod.categorize({"path": "real.lisp", "status": "blocked",
+                              "reason": "ambiguous W8 executable head 00001001"}, self.root)
+        self.assertEqual(row["source_scope"], "UNCLASSIFIED_NEEDS_SOURCE_PROOF")
+
     def test_already_paired_cannot_count_as_old_unpaired(self):
         self.root.joinpath("old.lisp").write_text("(001 ())\n", encoding="utf-8")
         self.root.joinpath("old.sens").write_bytes(b"not relevant to classification")
