@@ -49,7 +49,7 @@ class PhysicalMultiformMigration(unittest.TestCase):
         self.assertEqual(SOURCE.read_text(encoding="utf-8"), SOURCE_TEXT)
         self.assertEqual(self.legacy["00000001"][:2], ("001", "D3"))
         self.assertEqual(self.legacy["00000100"][:2], ("111", "D3"))
-        resolver = module.Resolver(self.legacy, self.my, self.upper)
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
         projection = module.migrate_file(SOURCE_TEXT, resolver, self.text7)
         self.assertEqual(projection, WORDS + "\n")
         self.assertEqual(resolver.counts["pass1-sens8"], 4)
@@ -72,6 +72,8 @@ class PhysicalMultiformMigration(unittest.TestCase):
                 *[item for key, value in ARGS.items()
                   for item in ("--" + key.replace("_", "-"), str(value))],
                 "--report", str(report),
+                # This exact fixture predates D8 and preserves old SID8 heads.
+                "--source-era", "legacy",
             ]
             first = subprocess.run(command, capture_output=True, text=True)
             self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
@@ -80,6 +82,7 @@ class PhysicalMultiformMigration(unittest.TestCase):
             self.assertFalse((target / "two-forms.lisp").exists())
             self.assertEqual(SOURCE.read_text(encoding="utf-8"), SOURCE_TEXT)
             record = json.loads(report.read_text(encoding="utf-8"))
+            self.assertEqual(record["source_era"], "legacy")
             self.assertEqual(record["summary"]["files_seen"], 1)
             self.assertEqual(record["summary"]["files_written"], 1)
             self.assertEqual(record["summary"]["files_blocked"], 0)
@@ -93,7 +96,7 @@ class PhysicalMultiformMigration(unittest.TestCase):
             module.decode_bytes(BYTES + bytes([242]))
         with self.assertRaises(module.SensT5Error):
             module.decode_bytes(bytes([243]))
-        resolver = module.Resolver(self.legacy, self.my, self.upper)
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
         with self.assertRaises(module.MigrationError):
             module.migrate_file("(11111111 ())", resolver, self.text7)
 
