@@ -17,7 +17,8 @@ mod=importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name]=mod
 SPEC.loader.exec_module(mod)
 
-FOUNDATION=ROOT/"knowledge"/"d1-d7-foundation.json"
+FOUNDATION=ROOT/"knowledge"/"d1-d9-foundation.json"
+COVERAGE=ROOT/"knowledge"/"sens8-current-coverage-v1.json"
 DOMAIN_SURFACES=ROOT/"crates"/"sens"/"src"/"domain_surface_registry_generated.rs"
 SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
