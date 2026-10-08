@@ -27,7 +27,7 @@
       ; Supported bounded structural slice really reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          '(car (cons 2 3)))
+          '(100 (111 2 3)))
         '(execution-route native
             (status completed)
             (value 2)))
