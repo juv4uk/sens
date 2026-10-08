@@ -65,7 +65,7 @@ class AuditT5PairsTests(unittest.TestCase):
             b"0 0 000\n", b"0 00 00\n", b"0 00 001\n",
             b"0 00 0002\n", b"D1:0 00 000\n",
             b"(0 00 000)\n", b"0 00 000# comment\n",
-            b"\xd0° 00 000\n",
+            bytes([255]) + b" 00 000\\n",
         ):
             with self.subTest(bad=bad):
                 if bad is None:
