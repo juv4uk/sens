@@ -191,7 +191,18 @@ pub(crate) fn evaluate_step(
         }
         // Empty structure is a structural value, not any function SID.
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
-        ExprKind::List(items) => evaluate_list(items, environment, expression.span),
+        ExprKind::List(items) => {
+            // A whole D2/W7 frame is a Text7 identifier only when the
+            // executable context already has the corresponding binding.
+            // This is the value-reference case for local/global variables;
+            // quoted/data lists never reach here as executable references.
+            if let Some(key) = text7_binding_key(expression) {
+                if let Some(value) = environment.get(&key) {
+                    return Ok(EvalStep::Value(value));
+                }
+            }
+            evaluate_list(items, environment, expression.span)
+        },
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
