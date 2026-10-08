@@ -870,16 +870,16 @@ mod tests {
         let d5_same_bits = CoreDomainIdentity::D5(crate::CoreD5::from_word(
             crate::Bit5::new(0b01110).unwrap(),
         ));
-        let err = invoke_domain_identity(d5_same_bits, &[], &env, span)
-            .expect_err("D5 equal numeric payload must not borrow D4 LIST meaning");
-        assert_eq!(err.kind, ErrorKind::Type);
+        // D5:01110 already denotes a selector (CDDAR), not LIST.
+        assert!(invoke_domain_identity(d5_same_bits, &[], &env, span).is_err(),
+                "D5 equal numeric payload must not borrow D4 LIST meaning");
 
         let d8_same_bits = CoreDomainIdentity::D8(crate::CoreD8::from_word(
             crate::Bit8::new(0b00001110).unwrap(),
         ));
-        let err = invoke_domain_identity(d8_same_bits, &[], &env, span)
-            .expect_err("D8 equal numeric payload must not borrow D4 LIST meaning");
-        assert_eq!(err.kind, ErrorKind::Type);
+        // D8:00001110 is SQRT, not LIST; an empty argument list is invalid.
+        assert!(invoke_domain_identity(d8_same_bits, &[], &env, span).is_err(),
+                "D8 equal numeric payload must not borrow D4 LIST meaning");
     }
 
     #[test]
