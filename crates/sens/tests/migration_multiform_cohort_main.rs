@@ -20,7 +20,7 @@ fn two_forms_roundtrip_and_execute_on_current_oracle() {
     let first = eval_parsed_expressions(&forms[0..1], &mut Session::default()).unwrap().value;
     assert!(matches!(first, Value::Nil));
     let second = eval_parsed_expressions(&forms[1..2], &mut Session::default()).unwrap().value;
-    assert!(matches!(second, Value::Pair(head, tail) if matches!(head.as_ref(), Value::Nil) && matches!(tail.as_ref(), Value::Nil)));
+    assert!(matches!(&second, Value::Pair(head, tail) if matches!(head.as_ref(), Value::Nil) && matches!(tail.as_ref(), Value::Nil)));
 }
 
 #[test]

@@ -1,0 +1,28 @@
+name: Migration non-program ISA manifest
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
+      - "tests/test_migration_nonprogram_isa_manifest.py"
+      - "lib/machine/isa/*.lisp"
+      - ".github/workflows/migration-nonprogram-isa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
+      - "tests/test_migration_nonprogram_isa_manifest.py"
+      - "lib/machine/isa/*.lisp"
+      - ".github/workflows/migration-nonprogram-isa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify path-pinned non-program ISA cohort
+        run: python3 -m unittest tests.test_migration_nonprogram_isa_manifest -v
