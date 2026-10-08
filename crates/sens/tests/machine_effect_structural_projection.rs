@@ -223,6 +223,15 @@ fn effect_and_projection_rejections_stay_at_different_boundaries() {
         assert_eq!(eval_value(source, &mut session), "machine-effect-rejected");
     }
 
+    assert_eq!(
+        eval_value(
+            "(x86-project-machine-effects (00000001 malformed-effect-tail))",
+            &mut session,
+        ),
+        "x86-projection-rejected",
+        "an atom where an effect-list is required must fail closed before CAR/CDR"
+    );
+
     let effects = structural_effects(&mut session);
     assert_eq!(
         eval_value(
