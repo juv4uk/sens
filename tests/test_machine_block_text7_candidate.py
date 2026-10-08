@@ -106,7 +106,7 @@ class OriginalPhysicalCandidate(unittest.TestCase):
         reader = Path(os.environ.get(
             "SENS_TRIT_BIN", ROOT / "target/debug/sens-trit"
         ))
-        outcome = process(reader, "eval", self.payload)
+        outcome = process(reader, "eval-core4", self.payload)
         self.assertEqual(
             outcome.returncode, 0,
             "REAL Rust current evaluator BLOCKS six historical DEFINE closures; "
@@ -150,7 +150,7 @@ class OriginalPhysicalCandidate(unittest.TestCase):
                 self.assertTrue(packed.is_file())
                 self.assertEqual(encode_words(decode_bytes(packed.read_bytes())),
                                  packed.read_bytes())
-                observed = process(reader, "eval", packed)
+                observed = process(reader, "eval-core4", packed)
                 self.assertEqual(observed.returncode, 0,
                                  "ACTUAL original global call current eval BLOCKED: "
                                  + " FIRST: " + observed.stderr[:1700]
