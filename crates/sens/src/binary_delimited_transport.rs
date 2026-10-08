@@ -233,6 +233,35 @@ mod tests {
     }
 
     #[test]
+    fn educational_one_close_vs_open_one_are_distinct_typed_word_sequences() {
+        // Same naked bit string 101; mechanically valid exact-width words:
+        // [D1(1), D2(01)] vs [D2(10), D1(1)]. This is not an AST
+        // equivalence claim: top-level D2 CLOSE may be syntactically invalid.
+        let lhs = words("1 01");
+        let rhs = words("10 1");
+        assert_eq!(lhs.iter().map(ToString::to_string).collect::<String>(),
+                   rhs.iter().map(ToString::to_string).collect::<String>());
+        assert_ne!(lhs, rhs);
+        for (encode, decode) in [
+            (crate::encode_ternary_words as fn(&[crate::BinarySourceWord])
+                -> Result<Vec<u8>, crate::TernaryTransportError>,
+             crate::decode_ternary_words as fn(&[u8])
+                -> Result<Vec<crate::BinarySourceWord>, crate::TernaryTransportError>)
+        ] {
+            let a = encode(&lhs).unwrap();
+            let b = encode(&rhs).unwrap();
+            assert_ne!(a, b);
+            assert_eq!(decode(&a).unwrap(), lhs);
+            assert_eq!(decode(&b).unwrap(), rhs);
+        }
+        let a = encode_binary_delimited_words(&lhs).unwrap();
+        let b = encode_binary_delimited_words(&rhs).unwrap();
+        assert_ne!(a, b);
+        assert_eq!(decode_binary_delimited_words(&a).unwrap(), lhs);
+        assert_eq!(decode_binary_delimited_words(&b).unwrap(), rhs);
+    }
+
+    #[test]
     fn same_physical_8f_can_mean_different_words_in_two_valid_codecs() {
         // An actual physical collision, not just a naked-payload ambiguity:
         // base3 byte 0x8f => trits 12022 => words [D1(1), D1(0)].
