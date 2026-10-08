@@ -325,7 +325,7 @@ def parse_audited_legacy_successors(path: Path, foundation: dict):
 
     allowed={"DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"}
     domains=foundation.get("domains", {})
-    target_re=re.compile(r"\\b(D[1-9]):([01]{1,9})\\b")
+    target_re=re.compile(r"\b(D[1-9]):([01]{1,9})\b")
     out={}
     for row in data.get("rows", ()):
         if row.get("classification") not in allowed:
