@@ -44,6 +44,7 @@ on:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
+      - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
       - "crates/sens/tests/machine_semantic_effect_lowering.rs"
       - "crates/sens/tests/native_first_exact_domain.rs"
