@@ -448,12 +448,12 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
-        source="""\\
-(00001001 foo
-  (00001000 ()
-    1))
-(foo)
-"""
+        source = (
+            "(00001001 foo\n"
+            "  (00001000 ()\n"
+            "    1))\n"
+            "(foo)\n"
+        )
         projection,resolver=self.migrate(source)
         frame=mod.frame_text7(
             mod.text7_encode("foo",self.text7,mod.Tok("ATOM","foo",0)),
@@ -530,11 +530,11 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertNotIn(" x ", " " + projection + " ")
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
-        source="""\\
-(00001001 first
-  (00001000 (first)
-    (first)))
-"""
+        source = (
+            "(00001001 first\n"
+            "  (00001000 (first)\n"
+            "    (first)))\n"
+        )
         projection,resolver=self.migrate(source)
         words=projection.split()
         self.assertTrue(all(set(word) <= {"0","1"} for word in words))
