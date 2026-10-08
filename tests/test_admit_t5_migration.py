@@ -40,6 +40,18 @@ def fixture_manifest() -> dict:
             [sys.executable, "tests/test_migration_multiform_cohort.py", "-q"],
             ["cargo", "test", "-p", "sens", "--test", "migration_multiform_cohort"],
         ],
+        "oracle_witnesses": {
+            "historical": {
+                "path": "tests/test_migration_multiform_cohort.py",
+                "git_blob_sha1": gate.git_blob_sha(
+                    (ROOT / "tests/test_migration_multiform_cohort.py").read_bytes()),
+            },
+            "current": {
+                "path": "crates/sens/tests/migration_multiform_cohort.rs",
+                "git_blob_sha1": gate.git_blob_sha(
+                    (ROOT / "crates/sens/tests/migration_multiform_cohort.rs").read_bytes()),
+            },
+        },
     }
 
 
@@ -178,6 +190,51 @@ class T5ProofPublisherTests(unittest.TestCase):
             with self.assertRaisesRegex(gate.Blocked, "impersonate"):
                 gate.checked_manifest(location)
 
+    def test_noop_echo_or_true_cannot_claim_semantic_oracle(self):
+        for junk in (
+            [["echo", "PASS"], ["cargo", "test", "-p", "sens",
+                                "--test", "migration_multiform_cohort"]],
+            [[sys.executable, "-c", "print('OK')"],
+             ["cargo", "test", "-p", "sens", "--test", "migration_multiform_cohort"]],
+            [[sys.executable, "tests/test_migration_multiform_cohort.py", "-q"],
+             ["true"]],
+        ):
+            with self.subTest(junk=junk):
+                proof = fixture_manifest()
+                proof["oracle_commands"] = junk
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "fake.json"
+                    path.write_text(json.dumps(proof))
+                    with self.assertRaisesRegex(gate.Blocked, "ORACLE"):
+                        gate.checked_manifest(path)
+
+    def test_missing_current_oracle_cannot_pass_proof(self):
+        proof = fixture_manifest()
+        del proof["oracle_witnesses"]["current"]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "incomplete.json"
+            path.write_text(json.dumps(proof))
+            with self.assertRaisesRegex(gate.Blocked, "ORACLE"):
+                gate.checked_manifest(path)
+
+    def test_tampered_witness_blob_blocks_even_when_command_exits_zero(self):
+        proof = fixture_manifest()
+        proof["oracle_witnesses"]["historical"]["git_blob_sha1"] = "0" * 40
+        with tempfile.TemporaryDirectory() as directory:
+            mirror = Path(directory) / "mirror"
+            with self.assertRaisesRegex(gate.Blocked, "ORACLE: historical witness changed"):
+                gate.admit(ROOT, mirror, proof, READER, write=True)
+            self.assertFalse(mirror.exists())
+
+    def test_witness_path_drift_is_not_a_valid_original_oracle(self):
+        proof = fixture_manifest()
+        proof["oracle_witnesses"]["historical"]["path"] = "tests/test_some_other.py"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "drift.json"
+            path.write_text(json.dumps(proof))
+            with self.assertRaisesRegex(gate.Blocked, "ORACLE"):
+                gate.checked_manifest(path)
+
     def test_symlink_traversal_and_non_lisp_source_block(self):
         for source in ("../escape.lisp", "/tmp/escape.lisp", "tests/test.py"):
             with self.assertRaises(gate.Blocked, msg=source):
@@ -206,7 +263,7 @@ class T5ProofPublisherTests(unittest.TestCase):
         proof["oracle_commands"] = [[sys.executable, "-c", "import sys;sys.exit(12)"]]
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "mirror"
-            with self.assertRaisesRegex(gate.Blocked, "PROCESS: exit=12"):
+            with self.assertRaisesRegex(gate.Blocked, "ORACLE"):
                 gate.admit(ROOT, output, proof, READER, write=True)
             self.assertFalse((output / Path(SOURCE).with_suffix(".sens")).exists())
 
@@ -225,6 +282,8 @@ class T5ProofPublisherTests(unittest.TestCase):
             self.assertFalse((mirror / Path(PHYSICAL)).exists())
             actual = gate.admit(ROOT, mirror, proof, READER, write=True)
             self.assertEqual(actual["status"], "WRITTEN")
+            self.assertEqual(len(actual["oracle_witnesses_pinned"]), 2)
+            self.assertEqual(actual["semantic_review"], "NAMED_TESTS_PASSED_OWNER_REVIEW_REQUIRED")
             self.assertEqual((mirror / PHYSICAL).read_bytes(), expected)
             self.assertEqual((ROOT / PHYSICAL).read_bytes(), expected)
             with self.assertRaisesRegex(gate.Blocked, "existing"):
