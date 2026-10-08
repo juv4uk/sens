@@ -116,6 +116,47 @@ class OriginalPhysicalCandidate(unittest.TestCase):
         self.assertTrue(outcome.stdout.strip(),
                         "eval returned zero but did not produce observable output")
 
+    def test_first_real_global_calls_match_historical_nil_and_list_nil(self):
+        """Prove TWO observable results from ORIGINAL six functions, not all nine."""
+        self.test_real_current_rust_evaluator_accepts_emitted_six_definitions()
+        reader = Path(os.environ.get(
+            "SENS_TRIT_BIN", ROOT / "target/debug/sens-trit"
+        ))
+        # Appending a *probe call* to the pinned original in the external
+        # fixture mirror tests runtime; it does NOT change original Git blob,
+        # and this longer staged T5 is NOT a same-stem original admission.
+        for suffix, expected in (
+            ("(machine-block-empty)\n", "()"),
+            ("(machine-block-one (00000001 ()))\n", "(())"),
+        ):
+            with self.subTest(call=suffix.strip()), tempfile.TemporaryDirectory(
+                prefix="sens-block-real-call-"
+            ) as folder:
+                folder_path = Path(folder)
+                trial = folder_path / "original-plus-probe.lisp"
+                trial.write_bytes(self.original + b"\n" + suffix.encode("ascii"))
+                payload_out = folder_path / "physical"
+                receipt = folder_path / "receipt.json"
+                cmd = process(
+                    sys.executable, ROOT / "scripts/migrate-three-pass.py",
+                    trial, "--out", payload_out, "--report", receipt,
+                    "--source-era", "legacy",
+                )
+                self.assertEqual(cmd.returncode, 0, cmd.stderr[-1100:])
+                run_record = json.loads(receipt.read_text(encoding="utf-8"))
+                self.assertEqual(run_record["files"][0]["passes"]["pass1-sens8"], 18 if "00000001" in suffix else 17)
+                self.assertEqual(run_record["files"][0]["passes"]["pass4-text7-global"], 1)
+                packed = payload_out / "original-plus-probe.sens"
+                self.assertTrue(packed.is_file())
+                self.assertEqual(encode_words(decode_bytes(packed.read_bytes())),
+                                 packed.read_bytes())
+                observed = process(reader, "eval", packed)
+                self.assertEqual(observed.returncode, 0,
+                                 "ACTUAL original global call current eval BLOCKED: "
+                                 + observed.stderr[-1200:])
+                self.assertEqual(observed.stdout.strip().splitlines()[-1], expected)
+                self.assertEqual(SOURCE.read_bytes(), self.original)
+
     def test_historical_nine_case_oracle_is_not_misreported_as_physical(self):
         self.assertEqual(self.old_git_sha, EXPECTED_BLOB)
         self.assertEqual(SOURCE.read_bytes(), self.original)
