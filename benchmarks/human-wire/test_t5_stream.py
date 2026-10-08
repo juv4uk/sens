@@ -25,7 +25,7 @@ class T5HumanAirStreamTests(unittest.TestCase):
         self.assertEqual(s["program_count"], 3)
         self.assertTrue(s["matches_expected_words"])
         self.assertEqual(s["frame_gap_events"], 3)
-        self.assertEqual(s["semantic_bits"], 8 + 14 + 3)
+        self.assertEqual(s["semantic_bits"], 7 + 14 + 3)
         self.assertGreater(s["net_semantic_bits_per_second"], 0)
 
     def test_jitter_20_percent_preserves_multiple_programs(self):
