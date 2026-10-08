@@ -22,6 +22,9 @@ SCRIPTS = str(ROOT / "scripts")
 if SCRIPTS not in sys.path:
     sys.path.insert(0, SCRIPTS)
 from migration_source_scope import scope
+# Reuse the existing SHA-pinned original-data registry; never infer a
+# nonprogram classification from a filename or an unfamiliar Lisp head.
+from report_original_migration_candidates import load_nonprogram_classification, git_blob_sha
 ARTIFACT_ARGS = [
     "--foundation", "knowledge/d1-d9-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
@@ -126,12 +129,25 @@ def build_report() -> dict:
         if original_paths.intersection(original_paired):
             raise RuntimeError("a source was both paired and unpaired")
 
+        # 25 ISA + 21 schema + 8 evidence + 13 expr-record DATA sources have
+        # already been reviewed and Git-blob-pinned in original-corpus work.
+        # Check them against this EXACT three-era unpaired source set, or fail.
+        reviewed = load_nonprogram_classification(ROOT)
+        if not set(reviewed).issubset(original_paths):
+            missing = sorted(set(reviewed) - original_paths)
+            raise RuntimeError(f"reviewed nonprogram missing from unpaired source set: {missing[:5]}")
         queues: collections.Counter[str] = collections.Counter()
         queue_rows: list[dict] = []
         for path in sorted(original_paths):
             source = (ROOT / path).resolve()
             if not source.is_relative_to(ROOT) or source.is_symlink() or not source.is_file():
                 raise RuntimeError(f"unsafe/missing source in original census: {path}")
+            reviewed_row = reviewed.get(path)
+            if reviewed_row is not None:
+                if git_blob_sha(source) != reviewed_row["source_git_blob_sha"]:
+                    raise RuntimeError(f"reviewed source SHA mismatch: {path}")
+                if reviewed_row["semantic_oracle_admitted"] or reviewed_row["automatic_sens_companion"]:
+                    raise RuntimeError(f"nonprogram incorrectly granted executable admission: {path}")
             states = {era: by_era[era][path].get("status", "") for era in views}
             if not all(v in ("blocked", "would-write") for v in states.values()):
                 raise RuntimeError(f"unrecognized migration status on {path}: {states}")
@@ -141,7 +157,12 @@ def build_report() -> dict:
                 "path": path,
                 "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 "queue": cohort,
-                "source_scope": scope(path),
+                "source_scope": (reviewed_row["source_class"] if reviewed_row
+                                 else scope(path)),
+                "reviewed_nonprogram_cohort": (reviewed_row["cohort"] if reviewed_row
+                                               else None),
+                "reviewed_nonprogram_git_blob": (reviewed_row["source_git_blob_sha"] if reviewed_row
+                                                 else None),
                 "status": states,
                 "blocker_by_era": {
                     era: by_era[era][path].get("reason") if states[era] == "blocked" else None
@@ -156,11 +177,27 @@ def build_report() -> dict:
             if row["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"
             and row["status"]["auto"] == "would-write"
         ]
-        nonarchive_auto = [
+        reviewed_auto = [
             row for row in queue_rows
-            if row["source_scope"] != "ARCHIVED_BENCHMARK_NONPROGRAM"
+            if row["source_scope"] == "NONPROGRAM_DATA_REVIEWED"
             and row["status"]["auto"] == "would-write"
         ]
+        nonarchive_auto = [
+            row for row in queue_rows
+            if row["source_scope"] not in ("ARCHIVED_BENCHMARK_NONPROGRAM",
+                                          "NONPROGRAM_DATA_REVIEWED")
+            and row["status"]["auto"] == "would-write"
+        ]
+        actionable_rows = [
+            row for row in queue_rows
+            if row["source_scope"] not in ("ARCHIVED_BENCHMARK_NONPROGRAM",
+                                          "NONPROGRAM_DATA_REVIEWED")
+        ]
+        actionable_queues = collections.Counter(row["queue"] for row in actionable_rows)
+        if len(actionable_rows) + len(reviewed) + sum(
+                row["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"
+                for row in queue_rows) != len(queue_rows):
+            raise RuntimeError("source class partitions overlap or omit originals")
 
         # First-error visibility is insufficient: the initial AUTO W8 error
         # often masks a deeper value/number/binder blocker. Summarize the
@@ -212,10 +249,20 @@ def build_report() -> dict:
                 era: views[era]["state"]["summary"] for era in ("auto", "legacy", "current")
             },
             "candidate_queues": dict(queues.most_common()),
+            "actionable_executable_unknown_queues": dict(actionable_queues.most_common()),
+            "reviewed_nonprogram_sources": sorted(reviewed.values(),
+                                                 key=lambda item: item["path"]),
             "blocker_by_era_reason_counts": reasons_by_era,
             "top_blocker_transitions": top_transitions,
             "candidate_rows": queue_rows,
             "source_scope": {
+                "reviewed_nonprogram_originals": len(reviewed),
+                "reviewed_nonprogram_auto_mechanical_only": len(reviewed_auto),
+                "reviewed_nonprogram_by_cohort": {
+                    cohort: sum(x["cohort"] == cohort for x in reviewed.values())
+                    for cohort in sorted({x["cohort"] for x in reviewed.values()})
+                },
+                "active_or_unknown_originals": len(actionable_rows),
                 "archived_benchmark_mechanical_only": len(archived_auto),
                 "nonarchive_mechanical_unproved": len(nonarchive_auto),
                 "archived_candidate_paths": [row["path"] for row in archived_auto],
@@ -226,11 +273,11 @@ def build_report() -> dict:
                 "pass": (
                     views["auto"]["exit"] in (0, 2)
                     and summary["files_written"] == 0
-                    and summary["files_would_write"] == len(archived_auto)
+                    and summary["files_would_write"] == len(archived_auto) + len(reviewed_auto)
                     and not nonarchive_auto
                     and summary["files_blocked"] + summary["files_would_write"] == summary["files_seen"]
                 ),
-                "rule": "every ACTIVE/UNCLASSIFIED original remains BLOCKED until independent oracle proof; archived benchmark mechanical candidate is NONPROGRAM and never executable credit; no .sens emitted",
+                "rule": "every ACTIVE/UNCLASSIFIED original remains BLOCKED until independent oracle proof; Git-SHA reviewed DATA and archived mechanical candidates are NONPROGRAM, never executable credit; no .sens emitted",
             },
         }
         return result
@@ -243,7 +290,7 @@ def main() -> int:
     result = build_report()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"summary": result["migrator_summary"], "per_era_summary": result["per_era_summary"], "candidate_queues": result["candidate_queues"], "source_scope": result["source_scope"], "top_blocker_transitions": result["top_blocker_transitions"][:12], "per_era_top_reasons": {era: dict(list(rows.items())[:12]) for era, rows in result["blocker_by_era_reason_counts"].items()}, "gate": result["gate"]}, ensure_ascii=False))
+    print(json.dumps({"summary": result["migrator_summary"], "per_era_summary": result["per_era_summary"], "candidate_queues": result["candidate_queues"], "actionable_queues": result["actionable_executable_unknown_queues"], "source_scope": result["source_scope"], "top_blocker_transitions": result["top_blocker_transitions"][:12], "per_era_top_reasons": {era: dict(list(rows.items())[:12]) for era, rows in result["blocker_by_era_reason_counts"].items()}, "gate": result["gate"]}, ensure_ascii=False))
     if not result["gate"]["pass"]:
         return 1
     return 0

@@ -73,6 +73,7 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        0b1010_1011 => Some(d4(0b0101)), // NULL
         0b0010_1001 => Some(d4(0b1111)), // APPEND
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
@@ -304,6 +305,20 @@ mod tests {
             assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
         }
     }
+    #[test]
+    fn historical_d4_successor_materializes_exact_slot() {
+        let identity = legacy_domain_identity_from_registry_byte(0b1010_1011)
+            .expect("historical registry row must have an exact-domain successor");
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0101));
+
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core bootstrap must materialize the exact slot");
+        assert!(
+            session.environment.domain_code_slot(identity).is_some(),
+            "Core bootstrap must bind the language-owned closure into its exact D4 slot"
+        );
+    }
+
     #[test]
     fn append_surface_projects_only_to_ratified_d4() {
         let identity = domain_identity_for_surface("приєднати")

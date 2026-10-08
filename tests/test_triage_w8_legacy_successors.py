@@ -138,7 +138,8 @@ class W8SecondBarrierTests(unittest.TestCase):
         return {
             "source_era": "auto",
             "summary": {
-                "blocked": 1, "physical_outputs_created": 0,
+                "blocked": 1, "mechanical_candidates": 0, "scanned": 1,
+                "physical_outputs_created": 0,
                 "original_unpaired_executables_migrated_by_this_tool": 0,
                 "classified_nonprogram": int(kind == "NONPROGRAM_DATA_REVIEWED"),
                 "archived_benchmark_data_sources": int(kind == "ARCHIVED_BENCHMARK_NONPROGRAM"),
@@ -195,6 +196,63 @@ class W8SecondBarrierTests(unittest.TestCase):
                 self.scoped_census("ARCHIVED_BENCHMARK_NONPROGRAM")
             )
 
+    def mechanical_scope(self, kind="NONPROGRAM_DATA_REVIEWED"):
+        """Canonical no-write original moved BLOCKED → CANDIDATE, not admitted."""
+        census = self.scoped_census(kind)
+        item = census["blocked_sources"].pop()
+        item["status"] = "CANDIDATE_NOT_ADMITTED"
+        census["mechanical_candidates"] = [item]
+        census["summary"]["blocked"] = 0
+        census["summary"]["mechanical_candidates"] = 1
+        # total source count remains one and no semantic oracle is certified
+        return census
+
+    def test_historical_data_mechanical_candidate_is_still_data_only(self):
+        joined = self.run_join()
+        report = triage.add_owner_reviewed_source_scope(
+            joined, self.mechanical_scope()
+        )
+        self.assertEqual(report["summary"]["data_only_next_barrier_originals"], 1)
+        self.assertEqual(report["summary"]["executable_or_unclassified_next_barrier_originals"], 0)
+        self.assertEqual(report["sources"][0]["work_lane"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertFalse(report["sources"][0]["release_admitted"])
+        self.assertEqual(report["summary"]["physical_outputs_created"], 0)
+
+    def test_archived_mechanical_candidate_counts_with_blocked_corpus(self):
+        archived_path = ("benchmarks/sens-surface/results/"
+                         "20260925-icount-33bfb53a/programs/old.lisp")
+        joined = self.run_join()
+        joined["sources"][0]["path"] = archived_path
+        candidate = self.mechanical_scope("ARCHIVED_BENCHMARK_NONPROGRAM")
+        candidate["mechanical_candidates"][0]["path"] = archived_path
+        report = triage.add_owner_reviewed_source_scope(joined, candidate)
+        self.assertEqual(report["summary"]["data_only_next_barrier_originals"], 1)
+        self.assertEqual(report["sources"][0]["work_lane"], "DATA_CONTRACT_NO_EXECUTABLE_T5")
+        self.assertFalse(report["sources"][0]["current_source_era_permission"])
+        self.assertFalse(report["sources"][0]["release_admitted"])
+
+    def test_candidate_scope_tampering_or_duplicate_source_blocks(self):
+        joined = self.run_join()
+        wrong = self.mechanical_scope()
+        wrong["mechanical_candidates"][0]["independent_semantic_oracle_passed"] = True
+        with self.assertRaisesRegex(triage.TriageError, "unapproved original"):
+            triage.add_owner_reviewed_source_scope(joined, wrong)
+        wrong = self.mechanical_scope()
+        wrong["summary"]["mechanical_candidates"] = 0
+        with self.assertRaisesRegex(triage.TriageError, "count disagreement"):
+            triage.add_owner_reviewed_source_scope(joined, wrong)
+        wrong = self.mechanical_scope()
+        wrong["mechanical_candidates"][0]["source_git_blob_sha"] = "0" * 40
+        with self.assertRaisesRegex(triage.TriageError, "Git SHA differs"):
+            triage.add_owner_reviewed_source_scope(joined, wrong)
+        wrong = self.mechanical_scope()
+        wrong["blocked_sources"].append(dict(wrong["mechanical_candidates"][0],
+                                            status="BLOCKED"))
+        wrong["summary"]["blocked"] = 1
+        wrong["summary"]["scanned"] = 2
+        with self.assertRaisesRegex(triage.TriageError, "duplicate"):
+            triage.add_owner_reviewed_source_scope(joined, wrong)
+
     def test_fake_data_classification_or_stale_source_sha_fails_closed(self):
         report = self.run_join()
         forged = self.scoped_census("NONPROGRAM_DATA_REVIEWED")
@@ -208,6 +266,7 @@ class W8SecondBarrierTests(unittest.TestCase):
         doubled = self.scoped_census()
         doubled["blocked_sources"].append(dict(doubled["blocked_sources"][0]))
         doubled["summary"]["blocked"] = 2
+        doubled["summary"]["scanned"] = 2
         with self.assertRaisesRegex(triage.TriageError, "duplicate"):
             triage.add_owner_reviewed_source_scope(report, doubled)
 
