@@ -448,9 +448,10 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
+        # Use ratified D4 identities; W8 era is tested independently.
         source="""\\
-(00001001 foo
-  (00001000 ()
+(0011 foo
+  (0010 ()
     1))
 (foo)
 """
@@ -531,9 +532,10 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertNotIn(" x ", " " + projection + " ")
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
+        # Exercise lexical shadowing, not historical W8 lookup.
         source="""\\
-(00001001 first
-  (00001000 (first)
+(0011 first
+  (0010 (first)
     (first)))
 """
         projection,resolver=self.migrate(source)
