@@ -96,7 +96,15 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
     # This classification is supplied by the SHA-pinned owner-reviewed
     # manifests in the existing candidates report. Do not trust a standalone
     # cohort label or an arbitrary path glob as semantic/data authority.
-    records = report.get("nonprogram_classification", [])
+    # Current main canonical reporter exposes reviewed_nonprogram_sources; the
+    # former nonprogram_classification name remains accepted for older reports,
+    # but two simultaneous sources of authority must be byte-equivalent.
+    records = report.get("reviewed_nonprogram_sources",
+                         report.get("nonprogram_classification", []))
+    if ("reviewed_nonprogram_sources" in report and
+            "nonprogram_classification" in report and
+            report["reviewed_nonprogram_sources"] != report["nonprogram_classification"]):
+        raise PlanError("conflicting nonprogram source classifications")
     if not isinstance(records, list):
         raise PlanError("reviewed nonprogram classification must be a list")
     if summary.get("classified_nonprogram", 0) != len(records):
