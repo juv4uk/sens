@@ -134,6 +134,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertTrue(
             all(entry.domain in mod.CONTRACT_CALL_DOMAINS for entry in code_map.values())
         )
+        self.assertEqual(mod.CONTRACT_CALL_DOMAINS, ("D3", "D4", "D5", "D6"))
         self.assertIn((8, "00000101"), authority)
         self.assertIn((9, "100000001"), authority)
         self.assertNotIn("ROUND", code_map)
