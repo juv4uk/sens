@@ -73,6 +73,7 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        0b1010_1011 => Some(d4(0b0101)), // NULL
         0b0010_1001 => Some(d4(0b1111)), // APPEND
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
@@ -304,6 +305,19 @@ mod tests {
             assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
         }
     }
+    #[test]
+    fn historical_null_surface_projects_to_ratified_d4() {
+        let identity = domain_identity_for_surface("null?")
+            .expect("historical null? surface must resolve through its exact-domain successor");
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0101));
+        assert_eq!(
+            legacy_domain_identity_from_registry_byte(0b1010_1011),
+            Some(CoreDomainIdentity::D4(CoreD4::from_word(
+                Bit4::new(0b0101).unwrap()
+            )))
+        );
+    }
+
     #[test]
     fn append_surface_projects_only_to_ratified_d4() {
         let identity = domain_identity_for_surface("приєднати")
