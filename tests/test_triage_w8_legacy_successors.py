@@ -194,6 +194,89 @@ class W8SecondBarrierTests(unittest.TestCase):
                 self.scoped_census("ARCHIVED_BENCHMARK_NONPROGRAM")
             )
 
+    def _append_mechanical_candidate(self, census, path, kind, sha="b"*40):
+        census.setdefault("mechanical_candidates", []).append({
+            "path": path, "source_git_blob_sha": sha,
+            "status": "CANDIDATE_NOT_ADMITTED",
+            "same_stem_sens_already_exists": False,
+            "independent_semantic_oracle_passed": False,
+            "source_is_executable_proven": False,
+            "source_scope": kind,
+        })
+        census["summary"]["mechanical_candidates"] = len(census["mechanical_candidates"])
+        census["summary"]["scanned"] = (len(census["blocked_sources"])
+                                         + len(census["mechanical_candidates"]))
+        return census["mechanical_candidates"][-1]
+
+    def test_archive_mechanical_candidate_is_still_data_not_a_false_total_drift(self):
+        # Audited successor laws may mechanically admit a frozen measurement,
+        # but it must stay DATA and not invalidate 197 W8 blocked originals.
+        archive = ("benchmarks/sens-surface/results/"
+                   "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        census = self.scoped_census()
+        self._append_mechanical_candidate(
+            census, archive, "ARCHIVED_BENCHMARK_NONPROGRAM")
+        census["summary"]["archived_benchmark_data_sources"] = 1
+        result = triage.add_owner_reviewed_source_scope(self.run_join(), census)
+        self.assertEqual(result["summary"]["chronology_proven_same_blob"], 1)
+        self.assertEqual(result["summary"]["data_only_next_barrier_originals"], 0)
+        self.assertEqual(result["summary"]["executable_or_unclassified_next_barrier_originals"], 1)
+        self.assertEqual(result["sources"][0]["path"], "old.lisp")
+        self.assertFalse(result["sources"][0]["release_admitted"])
+        self.assertEqual(result["summary"]["physical_outputs_created"], 0)
+
+    def test_forged_archive_candidate_and_counts_fail_closed(self):
+        archive = ("benchmarks/sens-surface/results/"
+                   "20260925-icount-33bfb53a/programs/empty-en.lisp")
+        census = self.scoped_census()
+        row = self._append_mechanical_candidate(
+            census, archive, "ARCHIVED_BENCHMARK_NONPROGRAM")
+        census["summary"]["archived_benchmark_data_sources"] = 1
+        row["source_scope"] = "UNCLASSIFIED_NEEDS_SOURCE_PROOF"
+        with self.assertRaisesRegex(triage.TriageError, "archive source-scope"):
+            triage.add_owner_reviewed_source_scope(self.run_join(), census)
+        row["source_scope"] = "ARCHIVED_BENCHMARK_NONPROGRAM"
+        row["status"] = "BLOCKED"
+        with self.assertRaisesRegex(triage.TriageError, "unapproved original"):
+            triage.add_owner_reviewed_source_scope(self.run_join(), census)
+        row["status"] = "CANDIDATE_NOT_ADMITTED"
+        row["source_is_executable_proven"] = True
+        with self.assertRaisesRegex(triage.TriageError, "unapproved original"):
+            triage.add_owner_reviewed_source_scope(self.run_join(), census)
+        row["source_is_executable_proven"] = False
+        census["summary"]["mechanical_candidates"] = 0
+        with self.assertRaisesRegex(triage.TriageError, "candidate total changed"):
+            triage.add_owner_reviewed_source_scope(self.run_join(), census)
+        census["summary"]["mechanical_candidates"] = 1
+        census["summary"]["scanned"] = 1
+        with self.assertRaisesRegex(triage.TriageError, "total includes"):
+            triage.add_owner_reviewed_source_scope(self.run_join(), census)
+        census["summary"]["scanned"] = 2
+        census["mechanical_candidates"].append(dict(row))
+        census["summary"]["mechanical_candidates"] = 2
+        census["summary"]["scanned"] = 3
+        with self.assertRaisesRegex(triage.TriageError, "duplicate"):
+            triage.add_owner_reviewed_source_scope(self.run_join(), census)
+
+    def test_reviewed_nonprogram_candidate_keeps_pinned_data_policy(self):
+        census = self.scoped_census()
+        name = "lib/machine/isa/adx.lisp"
+        sha = "c"*40
+        row = self._append_mechanical_candidate(
+            census, name, "NONPROGRAM_DATA_REVIEWED", sha)
+        census["summary"]["classified_nonprogram"] = 1
+        census["reviewed_nonprogram_sources"] = [{
+            "path": name, "source_git_blob_sha": sha,
+            "source_class": "NONPROGRAM_DATA_REVIEWED",
+            "automatic_sens_companion": False,
+            "semantic_oracle_admitted": False,
+        }]
+        result = triage.add_owner_reviewed_source_scope(self.run_join(), census)
+        self.assertEqual(result["summary"]["current_semantic_admissions"], 0)
+        row["source_git_blob_sha"] = "d"*40
+        with self.assertRaisesRegex(triage.TriageError, "Git SHA differs"):
+            triage.add_owner_reviewed_source_scope(self.run_join(), census)
+
     def test_fake_data_classification_or_stale_source_sha_fails_closed(self):
         report = self.run_join()
         forged = self.scoped_census("NONPROGRAM_DATA_REVIEWED")
