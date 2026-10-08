@@ -181,6 +181,30 @@ fn each_structural_effect_form_projects_or_rejects_explicitly() {
     );
     assert_eq!(
         eval_value(
+            "(00000111
+               ((x86-projection-rejected? 0)
+                (00000001 x86-projection-rejected))
+               ((00000011 arena (00000001 arena))
+                (00000111
+                  ((00000011 work (00000001 work))
+                   (00000111
+                     ((x86-admission-disp8? 0)
+                      (00100111
+                       (00100111
+                        (00000001 mov-mem-disp8-r64)
+                        (00000001 rdi)
+                        0
+                        (00000001 rax))))
+                     (t (00000001 x86-projection-rejected))))
+                  (t (00000001 x86-projection-rejected))))
+               (t (00000001 x86-projection-rejected)))",
+            &mut session,
+        ),
+        "((mov-mem-disp8-r64 rdi 0 rax))",
+        "store branch nested COND must survive all target-neutral guards"
+    );
+    assert_eq!(
+        eval_value(
             &format!("(x86-project-structural-machine-effect-with-layout {store} 0 8)"),
             &mut session,
         ),
