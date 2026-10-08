@@ -190,9 +190,13 @@ pub(crate) fn evaluate_step(
                 expression.span,
             ))
         }
-        // A candidate canonical Text7 atom is an interned binding key.
-        // Its source/debug spelling is not a semantic function identity.
-        ExprKind::List(items) if !items.is_empty() => {
+        ExprKind::List(items) => {
+            if items.is_empty() {
+                // Empty structure is a structural value, not any function SID.
+                return Ok(EvalStep::Value(Value::Nil));
+            }
+            // A candidate canonical Text7 atom is an interned binding key.
+            // Its source/debug spelling is not a semantic function identity.
             if let Some(key) = text7_binding_key(expression) {
                 return environment.get(&key).map(EvalStep::Value).ok_or_else(|| {
                     LanguageError::new(
@@ -203,9 +207,7 @@ pub(crate) fn evaluate_step(
                 });
             }
             evaluate_list(items, environment, expression.span)
-        }
-        // Empty structure is a structural value, not any function SID.
-        ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
+        },
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
