@@ -5,7 +5,7 @@
 
 use sens::syntax::{Expr, ExprKind};
 use sens::{
-    compiler_execution_role_from_sens, compiler_lowering_role_from_sens, lower_program, parse,
+    compiler_execution_role_from_sens, compiler_lowering_role_from_sens, lower_program, parse_mixed_exact_domain,
     Bit4, Bit5, Bit8, CompilerExecutionRole, CompilerLoweringRole, CoreD4, CoreD5, CoreD8,
     CoreDomainIdentity,
 };
@@ -53,7 +53,7 @@ fn collect_roles(expr: &Expr, roles: &mut Vec<CompilerLoweringRole>) {
 
 #[test]
 fn real_compiler_nucleus_is_closed_over_nine_sens_derived_roles() {
-    let parsed = parse(NUCLEUS).expect("current compiler nucleus parses");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus parses");
     let lowered = lower_program(&parsed);
 
     let mut roles = Vec::new();
@@ -101,7 +101,7 @@ fn equal_payloads_in_other_domains_do_not_gain_selfhost_roles() {
 
 #[test]
 fn established_three_role_execution_api_remains_compatibility_stable() {
-    let parsed = parse(NUCLEUS).expect("current compiler nucleus parses");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus parses");
     let lowered = lower_program(&parsed);
 
     let mut saw_old_role = false;
