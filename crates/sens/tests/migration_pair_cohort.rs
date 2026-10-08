@@ -17,7 +17,7 @@ fn car_cdr_legacy_source_lowers_to_exact_current_words_and_returns_empty_list() 
     let expressions = parse_canonical_binary(&visible).expect("current exact D3/D2 source parses");
     let result = eval_parsed_expressions(&expressions, &mut Session::default()).expect("CAR/CDR/QUOTE executes");
     assert!(matches!(result.value, Value::Nil));
-    assert_eq!(words.join(" "), expected);
+    assert_eq!(words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" "), expected);
 }
 
 #[test]
