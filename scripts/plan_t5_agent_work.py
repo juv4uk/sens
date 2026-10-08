@@ -76,6 +76,23 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
     if not isinstance(cohorts, list) or not isinstance(candidates, list):
         raise PlanError("need exhaustive blocker_cohorts and mechanical_candidates")
 
+    # Canonical rows are the source of truth. A cohort is only a scheduling
+    # projection: its 40-hex pin and first symptom MUST match the real ledger.
+    # Matching totals/path exclusivity alone cannot detect a substituted SHA.
+    authoritative = report.get("blocked_sources")
+    if not isinstance(authoritative, list):
+        raise PlanError("missing canonical blocked_sources ledger")
+    original_by_path: dict[str, tuple[str, str]] = {}
+    for row in authoritative:
+        if not isinstance(row, dict) or row.get("status") != "BLOCKED":
+            raise PlanError("canonical blocked source has invalid status")
+        item = checked_source(row, status="BLOCKED")
+        if item["path"] in original_by_path:
+            raise PlanError(f"duplicate canonical blocked source: {item['path']}")
+        original_by_path[item["path"]] = (item["source_git_blob_sha"], item["reason"])
+    if len(original_by_path) != summary.get("blocked"):
+        raise PlanError("canonical blocked source count disagrees")
+
     seen: set[str] = set()
     groups: list[tuple[str, str, list[dict]]] = []
     sum_blocked = 0
@@ -104,10 +121,18 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             item = checked_source(candidate, status="BLOCKED")
             if item["path"] in seen:
                 raise PlanError(f"duplicate source path: {item['path']}")
+            canonical = original_by_path.get(item["path"])
+            if canonical is None:
+                raise PlanError(f"cohort source missing in canonical ledger: {item['path']}")
+            if (item["source_git_blob_sha"], item["reason"]) != canonical:
+                raise PlanError(f"cohort Git SHA or first blocker differs from canonical ledger: {item['path']}")
             seen.add(item["path"])
             members.append(item)
         sum_blocked += len(members)
         groups.append((family, action, sorted(members, key=lambda x: x["path"])))
+
+    if seen != set(original_by_path):
+        raise PlanError("cohorts do not cover canonical blocked sources exactly")
 
     pending = []
     for row in candidates:
