@@ -46,7 +46,7 @@
       (native-first-execution-witness-check
         (native-first-execute-source
           "(+ 1 2)
-(100 (111 7 9))")
+(car (cons 7 9))")
         (00000001
           (source-execution
             ((execution-route evaluator
