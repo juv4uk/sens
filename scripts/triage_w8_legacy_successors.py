@@ -201,8 +201,22 @@ def add_owner_reviewed_source_scope(next_report: dict, census: dict) -> dict:
         or summary.get("original_unpaired_executables_migrated_by_this_tool") != 0
     ):
         raise TriageError("source-kind authority must be no-write source-era auto")
+    # A lawful successor may make a *frozen archive* mechanically T5-ready.
+    # The canonical candidate census counts source kind across all unpaired
+    # originals, NOT just its first-blocker subset. Join BOTH statuses here,
+    # retaining the source Git pin and no-semantic-admission invariant.
+    candidates = census.get("mechanical_candidates", [])
+    if not isinstance(candidates, list) or len(candidates) != summary.get(
+            "mechanical_candidates", 0):
+        raise TriageError("canonical unpaired candidate total changed")
+    if ("scanned" in summary and
+            summary["scanned"] != len(blocked) + len(candidates)):
+        raise TriageError("canonical total includes lost/duplicated originals")
     by_path: dict[str, dict] = {}
-    for row in blocked:
+    for row, required_status in (
+            *((entry, "BLOCKED") for entry in blocked),
+            *((entry, "CANDIDATE_NOT_ADMITTED") for entry in candidates),
+    ):
         if not isinstance(row, dict):
             raise TriageError("canonical source row is malformed")
         path = row.get("path")
@@ -210,7 +224,7 @@ def add_owner_reviewed_source_scope(next_report: dict, census: dict) -> dict:
         scope = row.get("source_scope")
         if not isinstance(path, str) or path in by_path:
             raise TriageError("duplicate/malformed canonical source scope")
-        if (row.get("status") != "BLOCKED"
+        if (row.get("status") != required_status
                 or row.get("same_stem_sens_already_exists") is not False
                 or row.get("independent_semantic_oracle_passed") is not False
                 or row.get("source_is_executable_proven") is not False
