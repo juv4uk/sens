@@ -11,6 +11,8 @@ on:
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
+      - "crates/sens-host/tests/machine_effect_structural.rs"
+      - "crates/sens/tests/machine_effect_structural_projection.rs"
       - "crates/sens/tests/machine_semantic_effect_lowering.rs"
       - "crates/sens/src/program_data.rs"
       - "crates/sens/tests/native_first_exact_domain.rs"
@@ -42,6 +44,8 @@ on:
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
+      - "crates/sens-host/tests/machine_effect_structural.rs"
+      - "crates/sens/tests/machine_effect_structural_projection.rs"
       - "crates/sens/tests/machine_semantic_effect_lowering.rs"
       - "crates/sens/tests/native_first_exact_domain.rs"
       - "crates/sens/src/program_data.rs"
@@ -91,6 +95,7 @@ jobs:
           cargo test -p sens --test machine_effect_add_projection -- --nocapture
           cargo test -p sens --test machine_effect_explicit_outputs -- --nocapture
           cargo test -p sens --test machine_semantic_effect_lowering -- --nocapture
+          cargo test -p sens --test machine_effect_structural_projection -- --nocapture
           # Exact lowered DomainCall data must select native CAR(CONS ...) without spelling/SID authority.
           cargo test -p sens --test native_first_exact_domain -- --nocapture
           cargo test -p sens --test machine_exact_d3_structural -- --nocapture
@@ -117,7 +122,9 @@ jobs:
       - name: Lisp-owned x86 encoder bytes
         run: cargo test -p sens --test x86_64_lisp_encoder -- --nocapture
       - name: Native machine-byte boundary
-        run: cargo test -p sens-host --test native_lisp_bytes -- --nocapture
+        run: |
+          cargo test -p sens-host --test native_lisp_bytes -- --nocapture
+          cargo test -p sens-host --test machine_effect_structural -- --nocapture
       - name: Compile owner-silicon witness without claiming hosted hardware evidence
         run: cargo test -p sens-host --test real_silicon_sweep --no-run
 
