@@ -188,7 +188,7 @@ class OperationalMigrationTests(unittest.TestCase):
                 with self.assertRaisesRegex(runner.MigrationBlocked, "NONPROGRAM"):
                     runner.pin_sources([name], ROOT)
         self.assertEqual(
-            runner._git_blob_sha(b"hello\\n"),
+            runner._git_blob_sha(b"hello\n"),
             "ce013625030ba8dba906f756967f9e9ca394464a"
         )
 
@@ -196,7 +196,7 @@ class OperationalMigrationTests(unittest.TestCase):
         historical = ("benchmarks/sens-surface/results/"
                       "20260925-icount-33bfb53a/programs/empty-en.lisp")
         original = ROOT / historical
-        self.assertEqual(original.read_bytes(), b"(print 0)\\n")
+        self.assertEqual(original.read_bytes(), b"(print 0)\n")
         self.assertEqual(
             runner._git_blob_sha(original.read_bytes()),
             "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f",
