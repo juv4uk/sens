@@ -27,7 +27,7 @@ fn physical_t5_d1_cond_executes_in_current_sens_oracle() {
     let words = decode_ternary_program(T5).expect("committed file must be canonical T5");
     let current = render_ternary_words_spaced(&words);
     assert_eq!(current, WORDS);
-    assert_eq!(SPACED_VIEW, format!("{current}\\n"));
+    assert_eq!(SPACED_VIEW, format!("{current}\n"));
     assert_eq!(encode_binary_projection_ternary(SPACED_VIEW).unwrap(), T5);
     assert_eq!(open_ternary_program(T5).unwrap(), WORDS);
     assert_eq!(encode_binary_projection_ternary(WORDS).unwrap(), T5);
