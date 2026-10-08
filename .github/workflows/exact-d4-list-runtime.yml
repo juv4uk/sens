@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/tests/exact_d4_list_runtime.rs"
       - ".github/workflows/exact-d4-list-runtime.yml"
   push:
     branches: [main]
     paths:
       - "crates/sens/src/eval/canon.rs"
+      - "crates/sens/tests/exact_d4_list_runtime.rs"
       - ".github/workflows/exact-d4-list-runtime.yml"
 
 permissions:
@@ -23,5 +25,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Exact-width D4 LIST mechanism and negative cross-domain tests
         run: cargo test -p sens --lib exact_d4_list_constructs_proper_values_without_cross_width_fallback -- --nocapture
+      - name: Current exact-domain EVAL of nested NIL and proper LIST
+        run: cargo test -p sens --test exact_d4_list_runtime -- --nocapture
       - name: Previously-admitted exact D3/D4 root contracts
         run: cargo test -p sens --lib canonical_d3_primitive_route_is_role_aware_not_numeric_projection -- --nocapture
