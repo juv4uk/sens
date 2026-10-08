@@ -470,8 +470,8 @@ mod tests {
 (0011 walk
   (0010 (xs)
     (110
-      ((010 xs) (1) (001 done))
-      ((101 (001 left) (001 left)) (1) (walk (011 xs))))))
+      ((010 xs) (001 done))
+      ((101 (001 left) (001 left)) (walk (011 xs))))))
 (walk (001 (a b)))
 ";
         let parsed = parse_mixed_exact_domain(source).expect("recursive exact-domain source parses");
