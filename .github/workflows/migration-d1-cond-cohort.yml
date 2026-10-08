@@ -5,6 +5,8 @@ on:
     paths:
       - 'tests/fixtures/migration-d1-cond-cohort/**'
       - 'tests/test_migration_d1_cond_cohort.py'
+      - 'scripts/sens_spaced_view.py'
+      - 'tests/test_sens_spaced_view.py'
       - 'tests/test_migration_d1_cond_integrated_audit.py'
       - 'crates/sens/tests/migration_d1_cond_cohort.rs'
       - '.github/workflows/migration-d1-cond-cohort.yml'
@@ -31,5 +33,36 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_cohort.py' -v
       - name: Independent repository T5 pair audit - physical PASS, symbolic pending oracle
         run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_integrated_audit.py' -v
+      - name: Build real Rust D2 T5 reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Current canonical spaced-view CLI preview and exact Rust D2 parity
+        env:
+          SENS_VIEW_READER: ${{ github.workspace }}/target/debug/sens-trit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_sens_spaced_view.py' -v
+          mkdir -p "$RUNNER_TEMP/physical-view-preview"
+          python3 scripts/sens_spaced_view.py \
+            --root . --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --reader "$SENS_VIEW_READER" --preview-stage "$RUNNER_TEMP/physical-view-preview" \
+            > "$RUNNER_TEMP/physical-view-preview-ledger.json"
+          test ! -e "$RUNNER_TEMP/physical-view-preview/tests/fixtures/migration-d1-cond-cohort/branch"
+          python3 scripts/sens_spaced_view.py \
+            --root . --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --reader "$SENS_VIEW_READER" --verify \
+            > "$RUNNER_TEMP/physical-view-verified-ledger.json"
+          sha256sum tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            tests/fixtures/migration-d1-cond-cohort/branch
+      - name: Preserve read-only exact view evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-cond-spaced-view-rust-d2-receipts
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/physical-view-preview-ledger.json
+            ${{ runner.temp }}/physical-view-verified-ledger.json
       - name: Current Rust D1-only COND oracle reads committed physical bytes
         run: cargo test -p sens --test migration_d1_cond_cohort -- --nocapture
