@@ -90,7 +90,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
     def test_reviewed_nonprogram_original_gets_separate_no_t5_data_shard(self):
         a = fixture()
         src = a["blocked_sources"][0]
-        src["source_class"] = "NONPROGRAM_DATA_REVIEWED"
+        src["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
         src["automatic_sens_companion"] = False
         a["reviewed_nonprogram_sources"] = [{
             "path": src["path"],
@@ -124,7 +124,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         for variant in variants:
             a = fixture()
             src = a["blocked_sources"][0]
-            src["source_class"] = "NONPROGRAM_DATA_REVIEWED"
+            src["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
             src["automatic_sens_companion"] = False
             row = {
                 "path": src["path"],
@@ -149,7 +149,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
             elif variant == "oracle-claim":
                 row["semantic_oracle_admitted"] = True
             elif variant == "missing-canonical-label":
-                src.pop("source_class")
+                src.pop("source_scope")
             elif variant == "incorrect-count":
                 a["summary"]["classified_nonprogram"] = 2
             elif variant == "missing-records":
@@ -163,7 +163,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
     def test_simultaneous_conflicting_old_and_current_classifications_fail_closed(self):
         a = fixture()
         src = a["blocked_sources"][0]
-        src["source_class"] = "NONPROGRAM_DATA_REVIEWED"
+        src["source_scope"] = "NONPROGRAM_DATA_REVIEWED"
         src["automatic_sens_companion"] = False
         reviewed = [{
             "path": src["path"],
