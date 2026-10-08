@@ -144,6 +144,10 @@ def export(root: Path, mirror: Path, report: Path,
     mirror = mirror.absolute()
     report = report.absolute()
     mirror_safety(root, mirror, report)
+    if report.exists() or report.is_symlink():
+        raise ProjectionBlocked("existing report forbidden (no overwrite)")
+    if any(part.is_symlink() for part in report.parents):
+        raise ProjectionBlocked("symlink report parent forbidden")
     if not 1 <= len(requested) <= MAX_FILES:
         raise ProjectionBlocked("expected 1..100 explicitly chosen sources")
     seen: set[str] = set()
