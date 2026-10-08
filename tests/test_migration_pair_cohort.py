@@ -94,7 +94,7 @@ class PairCohort(unittest.TestCase):
                 with self.assertRaises(module.SensT5Error):
                     module.decode_bytes(case["t5"] + b"\xf2")
                 with self.assertRaises(module.SensT5Error):
-                    module.encode_projection(case["words"].replace("011", "text"))
+                    module.encode_projection(" ".join(["x", *case["words"].split()[1:]]))
 
 
 if __name__ == "__main__":
