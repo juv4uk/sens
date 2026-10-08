@@ -101,6 +101,18 @@ fn rust_test_is_semantic_authority(rel: &str) -> bool {
     })
 }
 
+/// This specific Lisp-shaped document declares itself operational doctrine,
+/// not an executable SENS source and not language-contract authority.
+/// Do NOT exempt a whole directory or unmarked Lisp files: the English
+/// name migration ratchet must still catch actual executable growth.
+fn is_operational_doctrine_data(rel: &str, text: &str) -> bool {
+    rel == "knowledge/sens-primary.lisp"
+        && text.lines().take(8).any(|line| {
+            line.trim() == "; Status: operational doctrine (not language-contract authority)."
+        })
+        && text.lines().take(20).any(|line| line.trim() == "(sens-primary/2")
+}
+
 fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static str {
     if rel.starts_with("crates/")
         && rel.contains("/tests/")
@@ -109,7 +121,9 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
     {
         return "rust-test-instrument";
     }
-    if !rel.ends_with(".rs") && explicit_nonsemantic_lisp_evidence(text) {
+    if !rel.ends_with(".rs")
+        && (explicit_nonsemantic_lisp_evidence(text) || is_operational_doctrine_data(rel, text))
+    {
         return "lisp-evidence";
     }
     base_kind
@@ -428,7 +442,7 @@ fn baseline_entry_enforced(key: &str) -> bool {
     }
     if !file.ends_with(".rs") {
         let text = fs::read_to_string(repo_root().join(file)).unwrap_or_default();
-        if explicit_nonsemantic_lisp_evidence(&text) {
+        if explicit_nonsemantic_lisp_evidence(&text) || is_operational_doctrine_data(file, &text) {
             return false;
         }
     }
@@ -596,6 +610,21 @@ fn no_english_names_in_code() {
         .map(|(kind, file, line, name)| format!("{file}:{line}\t{name}\t{kind}"))
         .collect();
     assert!(places.is_empty(), "{}\n{}", summary(&places), listing.join("\n"));
+}
+
+#[test]
+fn sens_primary_operational_doctrine_does_not_count_as_executable_english() {
+    let rel = "knowledge/sens-primary.lisp";
+    let content = fs::read_to_string(repo_root().join(rel)).unwrap();
+    assert!(is_operational_doctrine_data(rel, &content));
+    assert_eq!(classified_kind(rel, &content, "lisp"), "lisp-evidence");
+    assert!(!ratchet_enforced_kind(classified_kind(rel, &content, "lisp")));
+
+    // A different executable source with identical Lisp-shaped content is
+    // never automatically exempted; nor is a source lacking the header.
+    assert!(!is_operational_doctrine_data("lib/core.lisp", &content));
+    assert!(ratchet_enforced_kind(classified_kind("lib/core.lisp", &content, "lisp")));
+    assert!(ratchet_enforced_kind(classified_kind(rel, "(identity 1)", "lisp")));
 }
 
 #[test]
