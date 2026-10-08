@@ -547,6 +547,18 @@ mod single_pass_eval_tests {
     }
 
     #[test]
+    fn exact_d6_let_macro_executes_through_domain_slot() {
+        let mut session = Session::default();
+        crate::load_core_library(&mut session).expect("core library");
+        let parsed = crate::parse_mixed_exact_domain("(001000 ((x 41)) x)")
+            .expect("exact D6 LET source");
+        let lowered = crate::eval::lower::lower_program(&parsed);
+        let result = eval_lowered_expressions(&lowered, &mut session)
+            .expect("exact D6 LET macro should execute through its bound domain slot");
+        assert_eq!(result.value, Value::Number(41.0, crate::Exactness::Exact));
+    }
+
+    #[test]
     fn canonical_define_introduces_a_binding() {
         let source = "(define x 41) (+ x 1)";
         let mut session = Session::default();
