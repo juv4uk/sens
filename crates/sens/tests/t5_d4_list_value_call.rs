@@ -58,3 +58,36 @@ fn ratified_d4_list_preserves_order_and_values() {
     let nested = "10 1110 00 000 00 10 1110 00 000 01 01";
     assert_eq!(run_t5_exact(nested).unwrap().to_string(), "(() (()))");
 }
+
+
+#[test]
+fn ratified_d4_append_two_empty_proper_lists_returns_nil() {
+    assert_eq!(run_t5_exact("10 1111 00 000 00 000 01")
+        .unwrap().to_string(), "()");
+}
+
+#[test]
+fn ratified_d4_append_copies_left_spine_preserving_order() {
+    // APPEND (LIST ()) (LIST ()) -> (() ()), exactly two proper lists.
+    let source = "10 1111 00 10 1110 00 000 01 00 10 1110 00 000 01 01";
+    assert_eq!(run_t5_exact(source).unwrap().to_string(), "(() ())");
+}
+
+#[test]
+fn ratified_d4_append_original_machine_block_nested_list_case() {
+    // Machine-block-append uses APPEND block (LIST form).
+    // Here block = QUOTE Nil and form = QUOTE Nil, so result = (()).
+    let source = "10 1111 00 10 001 00 000 01 00 10 1110 00 10 001 00 000 01 01 01";
+    assert_eq!(run_t5_exact(source).unwrap().to_string(), "(())");
+}
+
+#[test]
+fn ratified_d4_append_rejects_unproved_arity_and_improper_values() {
+    // Unlike variadic historical extension, the audited 1959-60 original
+    // machine-block contract takes exactly two proper list values.
+    assert!(run_t5_exact("10 1111 01").is_err());
+    assert!(run_t5_exact("10 1111 00 000 01").is_err());
+    // Quote an ATOM domain identity as a non-list value, never silently coerce.
+    let source = "10 1111 00 10 001 00 010 01 00 000 01";
+    assert!(run_t5_exact(source).is_err());
+}
