@@ -48,6 +48,9 @@ jobs:
           assert s['already_paired_sources_excluded']==len(r['already_paired_sources_excluded'])
           assert len(r['blocked_sources'])==s['blocked']
           assert sum(c['count'] for c in r['blocker_cohorts'])==s['blocked']
+          assert sum(c['count'] for c in r['exact_blocker_cohorts'])==s['blocked']
+          assert s['exact_blocker_coordinates']==len(r['exact_blocker_cohorts'])
+          assert len({row['path'] for g in r['exact_blocker_cohorts'] for row in g['original_sources']})==s['blocked']
           assert sum(s['blocker_family_counts'].values())==s['blocked']
           assert len({x['path'] for x in r['blocked_sources']})==s['blocked']
           assert all(x['source_git_blob_sha'] for x in r['blocked_sources'])
@@ -70,6 +73,14 @@ jobs:
               out.write('### Shared mechanical blockers — reusable owner work\n\n')
               for cohort in r['blocker_cohorts']:
                   out.write(f"- **{cohort['family']}**: {cohort['count']} original SHA-pinned sources — {cohort['next_action']}\n")
+              out.write('\n### Top exact FIRST-BLOCKER coordinates (single-law agent work)\n\n')
+              for group in r['exact_blocker_cohorts'][:12]:
+                  examples=', '.join(group['example_paths'][:2])
+                  out.write(
+                      f"- {group['count']} originals x {group['family']} "
+                      f"{group['coordinate']} -> {group['owner_issue']}; {examples}\n"
+                  )
+              out.write('\nEvery source appears in exactly one exact-coordinate group. First blocker is NOT semantic admission.\n')
               out.write('\n### First blocked originals (exact source paths)\n\n')
               for row in r['unpaired_blocker_sample'][:12]:
                   reason=row.get('reason','unknown').replace('\n',' ')[:200]
