@@ -87,8 +87,8 @@ class ThreePassMigrationTests(unittest.TestCase):
         # Owner's .lisp is Ukrainian; its exact D4 identities belong to T5.
         # The only source-text identity here is a proven, explicitly defined
         # global and its bound local parameter, never an inferred W8 callable.
-        ukrainian="(визначити foo (функція (x) x))\\n(foo так)\\n"
-        exact="(0011 foo (0010 (x) x))\\n(foo 1)\\n"
+        ukrainian="(визначити foo (функція (x) x))\n(foo так)\n"
+        exact="(0011 foo (0010 (x) x))\n(foo 1)\n"
         uk_words,uk_resolver=self.migrate(ukrainian,source_era="auto")
         exact_words,_=self.migrate(exact,source_era="auto")
         self.assertEqual(uk_words,exact_words)
