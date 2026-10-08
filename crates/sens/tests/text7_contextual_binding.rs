@@ -76,10 +76,10 @@ fn plain_w7_d2_list_has_no_implicit_text7_retyping_in_reader() {
         panic!("ordinary W7 D2 list changed AST shape");
     };
     assert_eq!(items.len(), 2);
-    assert!(matches!(items[0].kind, sens::syntax::ExprKind::DomainIdentity(
+    assert!(matches!(&items[0].kind, sens::syntax::ExprKind::DomainIdentity(
         DomainIdentity::D7(_)
     )));
-    assert!(matches!(items[1].kind, sens::syntax::ExprKind::DomainIdentity(
+    assert!(matches!(&items[1].kind, sens::syntax::ExprKind::DomainIdentity(
         DomainIdentity::D7(_)
     )));
 }
