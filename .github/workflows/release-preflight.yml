@@ -8,6 +8,13 @@ on:
       - "crates/**/Cargo.toml"
       - ".github/workflows/release.yml"
       - ".github/workflows/release-preflight.yml"
+      - "scripts/domain_word_carrier.py"
+      - "scripts/sens_source_pair_codec.py"
+      - "scripts/sens-uk-encode.py"
+      - "scripts/sens-uk-decode.py"
+      - "scripts/verify-source-pairs.py"
+      - "tests/test_ukrainian_packed_source_codec.py"
+      - "tests/test_verify_source_pairs.py"
   workflow_dispatch:
 
 concurrency:
