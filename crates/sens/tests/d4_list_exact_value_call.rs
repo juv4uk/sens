@@ -63,6 +63,8 @@ fn byte_width_and_d2_boundaries_not_conflated_with_historical_sid8() {
     let widened = encode_binary_projection_ternary("10 01110 01").unwrap();
     assert_ne!(d4, old_width);
     assert_ne!(d4, widened);
-    assert!(run_physical("10 1110 00 10 001 00 000 01").is_err(),
+    let malformed = encode_binary_projection_ternary("10 1110 00 10 001 00 000 01")
+        .expect("valid physical T5 transport is not necessarily valid D2 syntax");
+    assert!(open_ternary_program(&malformed).is_err(),
             "unclosed D2 LIST must remain invalid rather than execute");
 }
