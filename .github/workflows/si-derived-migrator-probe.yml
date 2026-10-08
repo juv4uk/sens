@@ -55,7 +55,7 @@ jobs:
           echo "::group::Existing migrate-three-pass.py"
           python3 scripts/migrate-three-pass.py "$RUNNER_TEMP/si-input" \
             --out "$RUNNER_TEMP/si-3pass" \
-            --foundation knowledge/d1-d7-foundation.json \
+            --foundation knowledge/d1-d9-foundation.json \
             --domain-surfaces crates/sens/src/domain_surface_registry_generated.rs \
             --semantic-generated crates/sens/src/semantic_registry_generated.rs \
             --semantic-registry crates/sens/src/semantic_registry.rs \
