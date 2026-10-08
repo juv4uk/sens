@@ -6,7 +6,7 @@
 
 use sens::syntax::{Expr, ExprKind};
 use sens::{
-    compiler_lowering_role_from_sens, lower_program, parse, parse_mixed_exact_domain, Bit4, Bit5, Bit8,
+    compiler_lowering_role_from_sens, lower_program, parse_mixed_exact_domain, Bit4, Bit5, Bit8,
     CompilerLoweringRole, CoreD4, CoreD5, CoreD8, CoreDomainIdentity,
 };
 
