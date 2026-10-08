@@ -26,10 +26,10 @@ fn existing_c1_third_closed_specialization_returns_third_nonempty_pair() {
     let parsed = parse_canonical_binary(&visible).expect("current exact D2 structure");
     let result = eval_parsed_expressions(&parsed, &mut Session::default())
         .expect("current CAR(CDR(CDR(X))) must execute");
-    match result.value {
+    match &result.value {
         Value::Pair(car, cdr) => {
-            assert_eq!(*car, Value::Nil);
-            assert_eq!(*cdr, Value::Nil);
+            assert_eq!(car.as_ref(), &Value::Nil);
+            assert_eq!(cdr.as_ref(), &Value::Nil);
         }
         other => panic!("third element must be Pair(Nil,Nil), not first/second Nil: {other:?}"),
     }
