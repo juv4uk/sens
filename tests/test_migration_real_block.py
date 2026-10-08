@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import subprocess
+import sys
 from pathlib import Path
 import unittest
 
@@ -17,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/machine/block.lisp"
 SENS = ROOT / "lib/machine/block.sens"
 SOURCE_GIT_BLOB = "200201b741787c4e144ad4194848acf51d7b439e"
-PHYSICAL_SHA256 = "1540c7e9a69c7dcb953713469a2c6ac803ae5aebfc40e2cd1ab529e66f0271"
+PHYSICAL_SHA256 = "1540c7e9a69c7dcb953713469a2c6ac803ae5aebcbfc40e2cd1ab529e66f0271"
 EXPECTED_BYTES = 343
 
 
