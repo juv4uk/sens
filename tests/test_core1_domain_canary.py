@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -59,6 +60,26 @@ class ExistingCore1DomainCanaryTests(unittest.TestCase):
             decode_bytes(physical + bytes([243]))
         with self.assertRaises(SensT5Error):
             decode_bytes(physical + bytes([242]))  # obsolete/extra EOS22 tail
+
+    def test_unratified_domain_coordinate_change_blocks_canary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "lib").mkdir()
+            (root / "knowledge").mkdir()
+            (root / "lib" / "core1.lisp").write_bytes(
+                (ROOT / "lib" / "core1.lisp").read_bytes()
+            )
+            foundation = json.loads(
+                (ROOT / "knowledge" / "d1-d9-foundation.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            foundation["domains"]["D3"]["residents"]["100"] = "OTHER"
+            (root / "knowledge" / "d1-d9-foundation.json").write_text(
+                json.dumps(foundation), encoding="utf-8"
+            )
+            with self.assertRaisesRegex(ValueError, "BLOCK"):
+                mod.words_from_existing_core1(root)
 
     def test_unproved_core1_source_change_blocks_canary(self):
         with tempfile.TemporaryDirectory() as tmp:
