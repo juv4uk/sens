@@ -38,18 +38,25 @@ jobs:
         run: |
           bash scripts/check-triple-projection.sh \
             --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
-      - name: The OLD legacy/incomplete corpus MUST NOT be reported green
+      - name: Legacy/D4/multiform fixtures MUST remain explicit BLOCKS
         shell: bash
         run: |
           set -euo pipefail
-          set +e
-          bash scripts/check-triple-projection.sh > "$RUNNER_TEMP/full-triple.log" 2>&1
-          status=$?
-          set -e
-          cat "$RUNNER_TEMP/full-triple.log"
-          test "$status" -eq 2
-          grep -q "result=BLOCKED" "$RUNNER_TEMP/full-triple.log"
-          printf '%s\n' 'Scope: bounded canonical D1/D3 proof only; 3 legacy/incomplete fixtures BLOCK.' >> "$GITHUB_STEP_SUMMARY"
+          fixtures=(
+            tests/fixtures/core1-third-domain-canary/third.lisp
+            tests/fixtures/migration-d4-selector-cohort/caar.lisp
+            tests/fixtures/migration-multiform-cohort/two-forms.lisp
+          )
+          for fixture in "${fixtures[@]}"; do
+            set +e
+            output="$(bash scripts/check-triple-projection.sh --fixture "$fixture" 2>&1)"
+            status=$?
+            set -e
+            printf '%s\n' "$output"
+            test "$status" -eq 2
+            grep -q "BLOCKED" <<<"$output"
+          done
+          printf '%s\n' 'Scope: certified bounded D1/D3 triple is the shared default; legacy/D4/multiform cohorts remain explicit BLOCKs.' >> "$GITHUB_STEP_SUMMARY"
           printf '%s\n' 'No physical/uk release admission or historical executable conversion from this check.' >> "$GITHUB_STEP_SUMMARY"
       - name: Prove no source or output was rewritten
         shell: bash
