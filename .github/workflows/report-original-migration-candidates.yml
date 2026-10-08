@@ -49,6 +49,8 @@ jobs:
           assert s['scanned']==s['blocked']+s['mechanical_candidates']
           assert s['scanned']==s['original_unpaired_sources_scanned']
           assert s['classified_nonprogram']==len(r['nonprogram_classification'])
+          assert s['blocked_excluding_classified_nonprogram']==sum(c['count'] for c in r['priority_blocker_cohorts_excluding_nonprogram'])
+          assert s['blocked']-s['blocked_excluding_classified_nonprogram']<=s['classified_nonprogram']
           assert s['executable_or_unclassified_unpaired']+s['classified_nonprogram']==s['scanned']
           assert all(x['automatic_sens_companion'] is False for x in r['nonprogram_classification'])
           assert all(x['semantic_oracle_admitted'] is False for x in r['nonprogram_classification'])
@@ -73,6 +75,8 @@ jobs:
               out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
               out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
               out.write(f"- BLOCKED: **{s['blocked']}**\n")
+              out.write(f"- SHA-pinned declarative DATA sources: **{s['classified_nonprogram']}**\\n")
+              out.write(f"- Original executable-or-unknown sources: **{s['executable_or_unclassified_unpaired']}**\\n")
               out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
               out.write('### Shared mechanical blockers — reusable owner work\n\n')
               for cohort in r['blocker_cohorts']:
