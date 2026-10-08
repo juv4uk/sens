@@ -77,7 +77,9 @@
 (00001001 machine-effect-u64-carrier?
   (00001000 (value)
     (00000111
-      ((machine-effect-exact-integer? value)
-       (machine-effect-within-inclusive-integer-range?
-         value 0 18446744073709551615))
-      (t (00000001 ())))))
+      ((machine-effect-exact-integer? value) 1
+       (00000111
+         ((machine-effect-within-inclusive-integer-range?
+            value 0 18446744073709551615) 1 t)
+         ((00000011 0 0) 1 (00000001 ()))))
+      ((00000011 0 0) 1 (00000001 ())))))
