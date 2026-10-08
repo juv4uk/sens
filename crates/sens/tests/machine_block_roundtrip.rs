@@ -48,6 +48,32 @@ fn render_forms(forms: &[String]) -> String {
     format!("({})", forms.join(" "))
 }
 
+fn encode_canonical_forms(forms: &str, session: &mut Session) -> Vec<u8> {
+    let encoded = eval_value(
+        &format!("(x86-encode-admitted-program (00000001 {forms}))"),
+        session,
+    );
+    parse_byte_list(&encoded)
+}
+
+fn assert_canonical_round_trip(forms: &str, session: &mut Session) {
+    let bytes = encode_canonical_forms(forms, session);
+    let decoded = x86_64_block_decoder::decode_machine_block(&bytes)
+        .unwrap_or_else(|error| panic!("independent decoder rejected {bytes:?}: {error}"));
+    let normalized = render_forms(&decoded);
+
+    assert_eq!(
+        normalized, forms,
+        "decode(encode(forms)) must reconstruct the canonical structured forms"
+    );
+
+    let reencoded = encode_canonical_forms(&normalized, session);
+    assert_eq!(
+        reencoded, bytes,
+        "encode(decode(bytes)) must reproduce canonical admitted bytes"
+    );
+}
+
 #[test]
 fn composed_machine_block_round_trips_through_independent_decoder() {
     let mut session = machine_session();
@@ -69,6 +95,44 @@ fn composed_machine_block_round_trips_through_independent_decoder() {
         block,
         "decoder must reconstruct the exact Lisp-owned machine forms, not merely accept the byte stream"
     );
+}
+
+#[test]
+fn current_observer_subset_has_bidirectional_canonical_round_trip() {
+    let mut session = machine_session();
+
+    let cases = [
+        "((ret))",
+        "((mov-r64-imm64 rax 0))",
+        "((mov-r64-imm64 rsp 42))",
+        "((mov-r64-imm64 r8 4294967295))",
+        "((mov-r64-imm64 r15 18446744073709551615))",
+        "((add-r64-r64 rax rcx))",
+        "((or-r64-r64 r8 r15))",
+        "((and-r64-r64 rsp r12))",
+        "((sub-r64-r64 r15 rax))",
+        "((xor-r64-r64 r9 r10))",
+        "((cmp-r64-r64 r12 rsp))",
+        "((mov-mem-disp8-r64 rax -128 rdx))",
+        "((mov-mem-disp8-r64 rsp -1 r8))",
+        "((mov-mem-disp8-r64 r12 0 r15))",
+        "((mov-mem-disp8-r64 r15 127 rax))",
+        "((mov-r64-mem-disp8 rdx rax -128))",
+        "((mov-r64-mem-disp8 r8 rsp -1))",
+        "((mov-r64-mem-disp8 r15 r12 0))",
+        "((mov-r64-mem-disp8 rax r15 127))",
+        "((jnz-rel8 -128))",
+        "((jnz-rel8 -1))",
+        "((jnz-rel8 0))",
+        "((jnz-rel8 1))",
+        "((jnz-rel8 127))",
+        "((mov-r64-imm64 r8 2) (mov-r64-imm64 r9 3) (add-r64-r64 r8 r9) (ret))",
+        "((mov-r64-imm64 r10 7) (mov-mem-disp8-r64 r12 8 r10) (mov-r64-mem-disp8 r15 r12 8) (ret))",
+    ];
+
+    for forms in cases {
+        assert_canonical_round_trip(forms, &mut session);
+    }
 }
 
 #[test]
