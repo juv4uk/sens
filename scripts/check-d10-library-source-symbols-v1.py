@@ -28,6 +28,54 @@ def git_blob_sha1(content: bytes) -> str:
     return hashlib.sha1(b"blob " + str(len(content)).encode() + b"\0" + content).hexdigest()
 
 
+def historical_top_level_define_rows(lines: list[str]) -> list[dict]:
+    """Classify exact historical DEFINE-shaped TOP-LEVEL forms, not meanings.
+
+    Unlike a regex over untrusted whole-file text, this walks Lisp structural
+    parentheses while respecting quoted strings, escapes and ; comments.
+    Indented/nested/quoted textual copies never qualify as a top-level donor
+    binding. The byte spelling is HISTORICAL evidence, not current D8 identity.
+    """
+    out: list[dict] = []
+    depth = 0
+    in_string = False
+    escape = False
+    pattern = re.compile(r"^\\(00001011[ \\t]+([^\\s()'\";]+)(?=\\s|\\))")
+    for number, line in enumerate(lines, 1):
+        if depth == 0 and not in_string:
+            found = pattern.match(line)
+            if found:
+                out.append({
+                    "line": number, "name": found.group(1),
+                    "source_head": "00001011",
+                    "classification": "HISTORICAL_TOP_LEVEL_BINDER_SHAPE_ONLY",
+                    "semantic_admission": False,
+                })
+        for char in line:
+            if in_string:
+                if escape:
+                    escape = False
+                elif char == "\\\\":
+                    escape = True
+                elif char == '"':
+                    in_string = False
+                continue
+            if char == ";":
+                break
+            if char == '"':
+                in_string = True
+                continue
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth < 0:
+                    raise ValueError(f"unbalanced historical Lisp donor at line {number}")
+    if depth != 0 or in_string:
+        raise ValueError("unclosed historical Lisp donor form or string")
+    return out
+
+
 def validate(raw: dict, library: dict, inventory: dict, state: dict,
              root: Path = ROOT) -> dict:
     if (raw.get("schema") != "d10-library-harvest/v1"
@@ -125,11 +173,37 @@ def validate(raw: dict, library: dict, inventory: dict, state: dict,
         "lib/si.lisp": 29, "lib/reason.lisp": 0,
     }:
         raise ValueError("donor harvest shape drift; reason requires separate source-form reader")
+
+    # The historical reason donor uses a DIFFERENT exact-eight spelling from
+    # the 102 literal-harvest rows. Its definitions are evidence, not D8 calls,
+    # never inserted into raw.candidates or the selected D10 owner inventory.
+    reason_path = "lib/reason.lisp"
+    historical = historical_top_level_define_rows(file_lines[reason_path])
+    if len(historical) != 37 or len({r["name"] for r in historical}) != 37:
+        raise ValueError("reason historical top-level binder corpus has changed")
+    overlaps = sorted(r["name"] for r in historical
+                      if r["name"].casefold() in selected_names)
+    if len(overlaps) != 6:
+        raise ValueError("D10 historical donor duplicate-name evidence drift")
+    for row in historical:
+        row["exact_name_already_selected"] = row["name"] in overlaps
+    reason_sha = next(src["blob_sha"] for src in sources if src["path"] == reason_path)
     return {
         "schema": "d10-raw-symbol-source-evidence-audit/v1",
         "status": "RAW_NOT_SEMANTICALLY_SELECTED",
         "raw_definitions_checked": len(rows),
         "source_counts": counts,
+        "historical_alternate_head_donor": {
+            "path": reason_path,
+            "blob_sha": reason_sha,
+            "source_head": "00001011",
+            "top_level_definitions_observed": len(historical),
+            "selected_exact_name_duplicates": overlaps,
+            "semantic_meanings_selected_from_history": 0,
+            "new_D10_coordinates": 0,
+            "definitions": historical,
+            "next_gate": "derive portable behavior, prove D1-D9/D10 dedup and oracle before any proposal",
+        },
         "exact_name_duplicates_with_selected": len(exact_duplicates),
         "duplicate_names": sorted(exact_duplicates),
         "data_constant_like_names": sorted(constant_like),
