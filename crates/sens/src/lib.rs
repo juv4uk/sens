@@ -35,6 +35,7 @@ mod environment;
 mod error;
 pub(crate) mod eval;
 mod language_items;
+mod mixed_source;
 mod parser;
 mod presentation;
 mod semantic_registry;
@@ -99,6 +100,21 @@ pub mod semantic_registry_export {
     pub fn semantic_id_for_admitted_surface(name: &str) -> Option<super::Sens8> {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
+    /// Current exact-domain identity for an admitted source-routable surface.
+    pub fn domain_identity_for_admitted_surface(
+        name: &str,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::domain_identity_for_surface(name)
+    }
+
+    /// Migration-only bridge to an already-ratified exact-domain successor.
+    pub fn exact_domain_successor_for_compatibility_id(
+        semantic_id: super::Sens8,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::migration_domain_identity_from_registry_byte(
+            semantic_id.packed_byte(),
+        )
+    }
 
     /// Legacy packed-byte export for external projection consumers.
     ///
@@ -140,6 +156,7 @@ mod text7_projection_generated;
 mod value;
 
 pub use binary_number::{BinaryNumber, BinaryNumberError};
+pub use mixed_source::parse_mixed_exact_domain;
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::parse_canonical_binary;
