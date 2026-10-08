@@ -17,6 +17,10 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATOR = ROOT / "scripts/migrate-three-pass.py"
+SCRIPTS = str(ROOT / "scripts")
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
+from migration_source_scope import scope
 ARGS = [
     "--foundation", "knowledge/d1-d9-foundation.json",
     "--domain-surfaces", "crates/sens/src/domain_surface_registry_generated.rs",
@@ -187,6 +191,7 @@ def categorize(row: dict, root: Path) -> dict:
         "source_git_blob_sha": git_blob_sha(source),
         "same_stem_sens_already_exists": pair.exists() or pair.is_symlink(),
         "source_is_executable_proven": False,
+        "source_scope": scope(rel.as_posix()),
         "independent_semantic_oracle_passed": False,
     }
     if row["status"] == "would-write":
@@ -245,6 +250,8 @@ def build_report(root: Path = ROOT) -> dict:
                 raise RuntimeError("excluded pair is missing")
         candidates = [r for r in rows if r["status"] == "CANDIDATE_NOT_ADMITTED"]
         unpaired = [r for r in candidates if not r["same_stem_sens_already_exists"]]
+        archived = [r for r in unpaired if r["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"]
+        actionable = [r for r in unpaired if r["source_scope"] != "ARCHIVED_BENCHMARK_NONPROGRAM"]
         blocked = len(rows) - len(candidates)
         if len(rows) != report["summary"]["files_seen"] or blocked != report["summary"]["files_blocked"]:
             raise RuntimeError("migrator report totals inconsistent")
@@ -273,7 +280,9 @@ def build_report(root: Path = ROOT) -> dict:
                 "exact_blocker_coordinates": len(exact_cohorts),
                 "mechanical_candidates": len(candidates),
                 "already_paired_candidates": len(candidates)-len(unpaired),
-                "unpaired_candidates_needing_original_oracle": len(unpaired),
+                "unpaired_candidates_needing_original_oracle": len(actionable),
+                "archived_nonprogram_mechanical_candidates": len(archived),
+                "nonarchive_mechanical_unproved": len(actionable),
                 "original_unpaired_executables_migrated_by_this_tool": 0,
                 "physical_outputs_created": 0,
             },
@@ -281,6 +290,8 @@ def build_report(root: Path = ROOT) -> dict:
             "authority": "original unpaired current D1-D9 source; candidate only; no oracle admission",
             "already_paired_sources_excluded": excluded,
             "mechanical_candidates": candidates,
+            "archived_nonprogram_candidates": archived,
+            "actionable_not_yet_oracle_proven_candidates": actionable,
             "blocked_sources": blocked_sources,
             "blocker_cohorts": cohorts,
             "exact_blocker_cohorts": exact_cohorts,
