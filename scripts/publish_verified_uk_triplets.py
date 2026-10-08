@@ -219,17 +219,20 @@ def export(root: Path, mirror: Path, report: Path,
     }
     # The report belongs to the SAME transaction: if it cannot be written,
     # roll back new triplets rather than leave unaccounted orphan .sens files.
+    report_created = False
     try:
         report.parent.mkdir(parents=True, exist_ok=True)
         if report.is_symlink() or report.exists():
             raise ProjectionBlocked("existing or symlink report forbidden")
         with report.open("x", encoding="utf-8") as f:
+            report_created = True  # ONLY our own created report can be removed
             json.dump(payload, f, ensure_ascii=False, indent=2)
             f.write("\n")
     except (OSError, ValueError, ProjectionBlocked):
         for target in reversed(created):
             target.unlink(missing_ok=True)
-        report.unlink(missing_ok=True) if report.exists() and not report.is_symlink() else None
+        if report_created:
+            report.unlink(missing_ok=True)
         raise
     return payload
 
