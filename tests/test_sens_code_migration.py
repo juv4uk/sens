@@ -121,7 +121,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         converted, hits, shadowed = self.binary(source)
         self.assertEqual([hit.label for hit in hits], ["DEFINE", "LAMBDA"])
         self.assertFalse(shadowed)
-        self.assertRegex(converted, r"^[01\\s]+$")
+        self.assertRegex(converted, r"^[01\s]+$")
         self.assertNotIn("machine-block", converted)
         self.assertNotIn("forms", converted)
 
