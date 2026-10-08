@@ -22,7 +22,7 @@ sys.modules[spec.name] = census
 spec.loader.exec_module(census)
 
 
-def fake_migrator_call(*, newly_eligible=0):
+def fake_migrator_call(*, newly_eligible=0, archived=False):
     """Write a report in the location selected by census; never touch lib/."""
     observed = []
 
@@ -32,6 +32,7 @@ def fake_migrator_call(*, newly_eligible=0):
         assert kwargs["timeout"] == 180
         out = Path(argv[argv.index("--report") + 1])
         blocked = 2 - newly_eligible
+        archive_path = "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/empty-en.lisp"
         state = {
             "schema": "sens-migration-three-pass/v1",
             "authority": {"foundation_sha256": "mock-ratified-sha256"},
@@ -47,7 +48,11 @@ def fake_migrator_call(*, newly_eligible=0):
                  "reason": "ambiguous W8 executable head 00000001: choose source era"},
                 {"path": "lib/old-2.lisp", "status": "blocked",
                  "reason": "legacy unmapped function: no current law"},
-            ][:blocked],
+            ][:blocked] + ([
+                {"path": archive_path if archived else "lib/admitted-unverified.lisp",
+                 "status": "would-write", "bytes":4, "physical_sha256": "a"*64,
+                 "typed_word_sha256": "b"*64, "semantic_word_count": 5}
+            ] if newly_eligible else []),
         }
         out.write_text(json.dumps(state), encoding="utf-8")
         return SimpleNamespace(returncode=2, stdout="", stderr="")
@@ -87,6 +92,26 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertEqual(report["migrator_summary"]["files_would_write"], 1)
         self.assertEqual(report["physical_outputs_created"], [])
         self.assertEqual(report["migrator_summary"]["files_written"], 0)
+
+    def test_only_archived_snapshot_mechanically_eligible_does_not_block_active_gate(self):
+        _, fn = fake_migrator_call(newly_eligible=1, archived=True)
+        with patch.object(census.subprocess, "run", side_effect=fn):
+            report = census.build_report()
+        self.assertTrue(report["gate"]["pass"])
+        self.assertEqual(report["source_scope"]["archived_benchmark_mechanically_eligible"], 1)
+        self.assertEqual(report["source_scope"]["active_or_unclassified_mechanically_eligible"], 0)
+        self.assertEqual(report["source_scope"]["executable_originals_semantically_certified"], 0)
+        self.assertEqual(report["migrator_summary"]["files_would_write"], 1)
+        self.assertEqual(report["physical_outputs_created"], [])
+
+    def test_work_queue_assigns_unresolved_w8_to_provenance_not_d8(self):
+        _, fn = fake_migrator_call()
+        with patch.object(census.subprocess, "run", side_effect=fn):
+            report = census.build_report()
+        work = {q["cohort"]: q for q in report["agent_work_queue"]}
+        self.assertIn("W8_ERA_PROVENANCE", work)
+        self.assertEqual(work["W8_ERA_PROVENANCE"]["blocked_count"], 1)
+        self.assertEqual(work["W8_ERA_PROVENANCE"]["examples"][0]["path"], "lib/old-1.lisp")
 
     def test_missing_oracle_evidence_is_not_marked_as_executable(self):
         _, fn = fake_migrator_call()
