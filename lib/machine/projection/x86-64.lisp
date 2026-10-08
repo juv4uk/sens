@@ -45,6 +45,7 @@
          effect
          (00000001 materialize-u64)
          3)
+       (1)
         (10011100
           ((slot
              (00000101
@@ -68,6 +69,7 @@
          effect
          (00000001 store-u64)
          4)
+       (1)
         (10011100
           ((base
              (00000101
@@ -117,6 +119,7 @@
          effect
          (00000001 load-u64)
          4)
+       (1)
         (10011100
           ((result-slot
              (00000101
@@ -166,6 +169,7 @@
          effect
          (00000001 return-u64)
          2)
+       (1)
         (10011100
           ((slot
              (00000101
@@ -179,8 +183,7 @@
                   (00000001 ret))))
             (t
               (00000001 x86-projection-rejected)))))
-      (t
-        (00000001 x86-projection-rejected)))))))
+      (t t (00000001 x86-projection-rejected)))))))
 
 (00001001 x86-project-machine-effect
   (00001000 (effect)
