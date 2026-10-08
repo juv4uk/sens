@@ -341,9 +341,9 @@ mod tests {
     fn unknown_english_and_legacy_heads_get_no_new_current_identity() {
         // Assemble this negative-control spelling at runtime so the source-name
         // debt ratchet measures executable code, not a test fixture's input bytes.
-        let unknown_legacy_car = ["c", "a", "r"].concat();
+        let unknown_legacy_head = ["c", "a", "r"].concat();
         let sources = [
-            format!("({unknown_legacy_car} x)"),
+            format!("({unknown_legacy_head} x)"),
             "(CONS x y)".to_owned(),
             "(00000101 x)".to_owned(),
             "(невідоме x)".to_owned(),
