@@ -28,6 +28,7 @@ jobs:
       - name: P0 binary/Ukrainian exact two-way pair release gate (#4430)
         run: |
           python3 -m unittest discover -s tests -p 'test_verify_source_pairs.py' -v
+          python3 -m unittest discover -s tests -p 'test_ukrainian_packed_source_codec.py' -v
           python3 scripts/verify-source-pairs.py --root . \
             --include '**/*.lisp' \
             --encoder scripts/sens-uk-encode.py \
