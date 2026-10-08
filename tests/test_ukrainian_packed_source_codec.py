@@ -24,6 +24,16 @@ class UkrainianPackedSourceCodecTests(unittest.TestCase):
         packed = encode_ukrainian(source)
         self.assertEqual(decode_ukrainian(packed), source)
 
+    def test_string_digits_survive_text7_projection(self):
+        source = "(як-є \"2026\")".encode("utf-8")
+        packed = encode_ukrainian(source)
+        self.assertEqual(decode_ukrainian(packed), source)
+
+    def test_dotted_pair_survives_d2_structure(self):
+        source = "(а . б)".encode("utf-8")
+        packed = encode_ukrainian(source)
+        self.assertEqual(decode_ukrainian(packed), source)
+
     def test_ascii_semantic_alias_is_not_canonical_ukrainian(self):
         with self.assertRaises(CarrierError):
             encode_ukrainian(b"(cons ())")
