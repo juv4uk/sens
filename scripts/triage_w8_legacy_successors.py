@@ -47,13 +47,14 @@ def next_barrier(reason: str) -> tuple[str, str]:
     m = re.search(r"ambiguous W8 executable head ([01]{8})", reason)
     if m:
         return "STILL_W8_AMBIGUOUS", m.group(1)
-    m = re.search(r"\bword\s+(\d+)\b", reason, re.I)
+    # D2 control words cannot be indexed lexical data words.
+    if re.search(r"D2 word|structural control", reason):
+        return "D2_STRUCTURE_UNPROVED", "D2"
+    m = re.search(r"\\bword\\s+(\\d+)\\b", reason, re.I)
     if m:
         return "NON_BINARY_OR_UNTYPED", "word" + m.group(1)
     if re.search(r"print|host|I/O|read-all", reason, re.I):
         return "HOST_EFFECT_UNPROVED", "effect"
-    if re.search(r"D2 word|structural control", reason):
-        return "D2_STRUCTURE_UNPROVED", "D2"
     if re.search(r"unbound|lambda|binding|dynamic|passthrough", reason, re.I):
         return "BINDING_UNPROVED", "binding"
     return "OTHER_UNPROVED", "other"
