@@ -1,0 +1,20 @@
+name: ladder-reader-research
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/ladder_reader.rs"
+      - "crates/sens/src/lib.rs"
+      - ".github/workflows/ladder-reader-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe-ratified-ladder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify the bottom-up D1-D9 reader never guesses through ambiguity
+        run: cargo test -p sens ladder_reader::tests:: -- --nocapture
