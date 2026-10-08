@@ -5,6 +5,9 @@ on:
     paths:
       - 'tests/fixtures/migration-d1-cond-cohort/**'
       - 'tests/test_migration_d1_cond_cohort.py'
+      - 'scripts/sens_spaced_view.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/test_sens_spaced_view.py'
       - 'tests/test_migration_d1_cond_integrated_audit.py'
       - 'crates/sens/tests/migration_d1_cond_cohort.rs'
       - '.github/workflows/migration-d1-cond-cohort.yml'
@@ -31,5 +34,37 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_cohort.py' -v
       - name: Independent repository T5 pair audit - physical PASS, symbolic pending oracle
         run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_integrated_audit.py' -v
+      - name: Build actual Rust D2 reader for spaced-view parity
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Canonical extensionless view, fail-closed, no-clobber and actual D2
+        env:
+          SENS_VIEW_READER: ${{ github.workspace }}/target/debug/sens-trit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_sens_spaced_view.py' -v
+          python3 scripts/sens_spaced_view.py verify \
+            --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --reader "$SENS_VIEW_READER" \
+            --report "$RUNNER_TEMP/sens-spaced-view-verification.json"
+          python3 scripts/sens_spaced_view.py stage \
+            --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --reader "$SENS_VIEW_READER" \
+            --mirror "$RUNNER_TEMP/view-stage" --write \
+            --report "$RUNNER_TEMP/sens-spaced-view-staging.json"
+          cmp tests/fixtures/migration-d1-cond-cohort/branch \
+            "$RUNNER_TEMP/view-stage/tests/fixtures/migration-d1-cond-cohort/branch"
+          sha256sum tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            tests/fixtures/migration-d1-cond-cohort/branch
+      - name: Archive SHA/typed-word/physical+view evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-cond-exact-view-parity-ledger
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/sens-spaced-view-verification.json
+            ${{ runner.temp }}/sens-spaced-view-staging.json
       - name: Current Rust D1-only COND oracle reads committed physical bytes
         run: cargo test -p sens --test migration_d1_cond_cohort -- --nocapture
