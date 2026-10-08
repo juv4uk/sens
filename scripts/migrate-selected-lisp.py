@@ -145,7 +145,10 @@ def run(args) -> dict:
     text7 = migration.build_text7(
         foundation, ROOT / "crates/sens/src/text7_projection_generated.rs")
     resolver = migration.Resolver(legacy, my, upper)
-    projection = migration.migrate_file(source_text, resolver, text7)
+    try:
+        projection = migration.migrate_file(source_text, resolver, text7)
+    except migration.MigrationError as exc:
+        raise ValueError("three-pass migration BLOCKED: " + str(exc)) from exc
     physical = encode_projection(projection)  # Unknown names/numbers fail here.
     words = decode_bytes(physical)
     if " ".join(words) + "\n" != projection:
