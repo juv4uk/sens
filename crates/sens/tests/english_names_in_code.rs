@@ -132,7 +132,7 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
 fn ratchet_enforced_kind(kind: &str) -> bool {
     !matches!(
         kind,
-        "rust-test-instrument" | "lisp-evidence" | "rust-contract-data" | "rust-evidence-data"
+        "rust-test-instrument" | "lisp-evidence" | "rust-contract-data" | "rust-evidence-data" | "rust-cli-surface"
     )
 }
 
@@ -154,6 +154,16 @@ fn rust_nonsemantic_data_kind(
         && line_text.contains("forbidden_legacy_operation: \"numeric-buffer-map\".to_string()")
     {
         return Some("rust-evidence-data");
+    }
+
+    // The command line dispatch of sens-trit is a human-facing surface, not
+    // an English-named SENS semantic primitive. Exempt EXACTLY this single
+    // match arm; an ordinary Rust `"eval"` elsewhere remains ratchet debt.
+    if rel == "crates/sens-cli/src/bin/sens-trit.rs"
+        && literal == "eval"
+        && line_text.trim() == "\"eval\" => {"
+    {
+        return Some("rust-cli-surface");
     }
 
     None
@@ -544,6 +554,36 @@ fn summary(places: &[Place]) -> String {
         by_kind,
         top.join(", ")
     )
+}
+
+#[test]
+fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
+    let relative = "crates/sens-cli/src/bin/sens-trit.rs";
+    let source = fs::read_to_string(repo_root().join(relative))
+        .expect("read exact real CLI");
+    let arms: Vec<_> = source.lines()
+        .filter(|line| line.trim() == "\"eval\" => {")
+        .collect();
+    assert_eq!(arms.len(), 1, "the reviewed CLI dispatch shape must not drift");
+    assert!(english_names().contains("eval"), "keep the real semantic name scanned");
+    assert_eq!(
+        rust_nonsemantic_data_kind(relative, arms[0], "eval"),
+        Some("rust-cli-surface"),
+    );
+    assert!(!ratchet_enforced_kind("rust-cli-surface"));
+    for (path, line) in [
+        (relative, "let function_name = \"eval\";"),
+        (relative, "\"eval\" => execute_host_command(),"),
+        ("crates/sens/src/eval/mod.rs", "\"eval\" => {"),
+        ("crates/sens-cli/src/bin/other.rs", "\"eval\" => {"),
+    ] {
+        assert_eq!(
+            rust_nonsemantic_data_kind(path, line, "eval"),
+            None,
+            "English executable names must remain debt outside the exact reviewed CLI arm",
+        );
+    }
+    assert!(ratchet_enforced_kind("rust"));
 }
 
 #[test]
