@@ -144,6 +144,7 @@ class W8SecondBarrierTests(unittest.TestCase):
                 "archived_benchmark_data_sources": int(kind == "ARCHIVED_BENCHMARK_NONPROGRAM"),
             },
             "blocked_sources": [row],
+            "mechanical_candidates": [],
             "reviewed_nonprogram_sources": (
                 [{
                     "path": "old.lisp", "source_git_blob_sha": self.sha,
