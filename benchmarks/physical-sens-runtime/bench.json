@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "physical-sens-runtime",
+  "wing": "Current D1–D9 binary execution and T5",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "What are actual physical .sens startup, execution, T5 decode and storage costs on the same exact-bit workloads?",
+  "claim": "GitHub-hosted release-build wall-clock samples with process startup included, identical T5 payloads, per-SHA environment and parity. Comparing SENS and Python language performance or proving semantics is explicitly out of scope.",
+  "witness": [
+    "README.md",
+    "run.py"
+  ],
+  "status": "ACTIVE-MEASURED",
+  "generation": "Contract 11.8 exact D1–D9 carrier",
+  "axis": "physical-sens/runtime-startup-t5-decode-execution",
+  "reproduce": "cargo build --release --locked -p sens-cli --bin sens --bin sens-trit && python3 benchmarks/physical-sens-runtime/run.py --sens target/release/sens --sens-trit target/release/sens-trit --out /tmp/sens-physical-bench --reps 19 --warmups 3"
+}
