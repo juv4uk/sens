@@ -1,0 +1,32 @@
+name: D10 exact affine quantity point delta evidence
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-affine-quantity-point-delta-20261009.json'
+      - 'scripts/check_d10_affine_quantity.py'
+      - 'tests/oracles/d10_affine_quantity_sbcl.lisp'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - '.github/workflows/d10-affine-quantity-proof.yml'
+  push:
+    branches:
+      - research/d10-affine-quantity-point-delta-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  point-vs-delta-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile exact rational mathematical model
+        run: python3 -m py_compile scripts/check_d10_affine_quantity.py
+      - name: Check rational transport invariants and 10 adversarial mutations
+        run: python3 scripts/check_d10_affine_quantity.py --self-test
+      - name: Install real Lisp donor oracle
+        run: sudo apt-get install -y -qq sbcl
+      - name: Verify SI physical point and delta on SBCL
+        run: sbcl --noinform --script tests/oracles/d10_affine_quantity_sbcl.lisp
