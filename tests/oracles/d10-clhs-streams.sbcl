@@ -1,13 +1,13 @@
 ;;;; Незалежний донорський оракул ANSI Common Lisp / SBCL.
 ;;;; Не є програмою SENS, не створює D10 коди та не ратифікує значення.
 (in-package :cl-user)
+(defvar *d10-oracle-input* nil)
 
 (defun ensure-equal (actual expected label)
   (unless (equal actual expected)
     (error "D10 STREAMS ORACLE BLOCK ~A: observed=~S expected=~S" label actual expected)))
 
 (defun witness-synonym-stream ()
-  (defparameter *d10-oracle-input* nil)
   (let* ((*d10-oracle-input* (make-string-input-stream "a"))
          (alias (make-synonym-stream '*d10-oracle-input*)))
     (unwind-protect
