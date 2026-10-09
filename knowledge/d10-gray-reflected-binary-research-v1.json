@@ -1,0 +1,87 @@
+{
+  "schema": "d10-gray-reflected-binary-cross-hobby/v1",
+  "date": "2026-10-09",
+  "status": "SOURCE-PINNED-RESEARCH-SELECTED-UNRATIFIED",
+  "scope": "Universal finite bit-word bijection; NOT device driver, not modulation, not D2 control. Core vs library minimality requires independent owner review.",
+  "history": {
+    "origin": "Frank Gray, Pulse Code Communication, US2632058A, filed 1947, granted 1953; IBM Johnsson/Ho 1995",
+    "primary_url": "https://patents.google.com/patent/US2632058A/en",
+    "secondary_url": "https://research.ibm.com/publications/on-the-conversion-between-binary-code-and-binary-reflected-gray-code-on-binary-cubes",
+    "passage": "Reflected n-bit code has unique codeword per rank, every adjacent codeword differs in one bit."
+  },
+  "owners_hobbies": [
+    "FPGA Tang computing and CDC pointers",
+    "ESP32-S3 rotary sensors and encoders",
+    "SDR and binary-framed signaling",
+    "horology and phase-indexed clocks",
+    "digital and analog electronics",
+    "SENS binary-first programming"
+  ],
+  "checks": {
+    "lower_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_preselection_sha": "34efd273000e3de8510441764cb59acbb5ab284b",
+    "d10_selected_preselection": 631,
+    "coordinate_added": 0,
+    "ratified_added": 0,
+    "known_neighbors": [
+      "D8 ROTATE",
+      "D8 LOGBITP",
+      "D10 BIT-VECTOR-P",
+      "D10 DIFFERENTIAL-ENCODE separately proposed, not a synonym"
+    ],
+    "novelty_caveat": "XOR/shift projections may be composed; owner must decide if named map is an admissible D10 resident or library derivation; exact name absence is not semantic irreducibility evidence."
+  },
+  "rows": [
+    {
+      "semantic_name": "GRAY-ENCODE-WORD",
+      "surface_uk": "кодувати-відбитим-двійковим",
+      "surface_ukr": "кд-грей",
+      "stable_id": "d10.fpga.gray.encode-word.20261009",
+      "relation_class": "FINITE-BIT-WORD-REFLECTED-GRAY-BIJECTION",
+      "behavior": "For unsigned w-bit binary rank n (0<=n<2^w), return w-bit binary-reflected Gray codeword n XOR (n shifted right once); preserve declared width including leading zeroes.",
+      "signature": "(width:nonnegative-int, unsigned-rank:0..2^width-1)->unsigned-w-bit-word",
+      "primary_formula": "g = n XOR (n >> 1), restricted to width w",
+      "positive_witnesses": [
+        "w=4, rank7=0111 -> 0100",
+        "w=4, rank11=1011 -> 1110",
+        "w=0, n=0 -> empty word",
+        "Adjacent and cyclic ranks have Hamming distance 1 for w>=1"
+      ],
+      "falsifiers": [
+        "w4 rank7 gives 0111 not 0100",
+        "w4 gray 7 vs gray8 changes more than one bit",
+        "drops leading zeroes or permits 16 at width4"
+      ],
+      "root_question": "Derivable using XOR and right shift; a selected named mathematical map but not independently proven primitive."
+    },
+    {
+      "semantic_name": "GRAY-DECODE-WORD",
+      "surface_uk": "декодувати-відбитий-двійковий",
+      "surface_ukr": "дк-грей",
+      "stable_id": "d10.fpga.gray.decode-word.20261009",
+      "relation_class": "FINITE-BIT-WORD-REFLECTED-GRAY-BIJECTION",
+      "behavior": "For a width w reflected Gray codeword g, recover unsigned rank n by XOR prefix from most significant Gray bit to least, preserving width.",
+      "signature": "(width:nonnegative-int, gray-codeword:0..2^width-1)->unsigned-w-bit-rank",
+      "primary_formula": "binary_bit[i]=XOR(gray_bit[j] for j>=i); prefix XOR modulo 2",
+      "positive_witnesses": [
+        "w4 Gray0100 -> binary0111 (rank7)",
+        "w4 Gray1110 -> binary1011 (rank11)",
+        "decode(encode(n,w),w)=n for all in range",
+        "w0 Gray0 -> rank0"
+      ],
+      "falsifiers": [
+        "Gray1110 decoded to 14 rather than 11",
+        "Gray0100 decoded to 4 rather than 7",
+        "allows out-of-range 16 at w4"
+      ],
+      "root_question": "Prefix XOR expressible using general reductions; owner to decide Core vs derived library."
+    }
+  ],
+  "constraints": {
+    "coordinate": null,
+    "ratified_resident": false,
+    "selection_is_not_owner_ratification": true,
+    "D2_control_untouched": true,
+    "T5_binaries_untouched": true
+  }
+}
