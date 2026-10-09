@@ -4,12 +4,12 @@
 
 use sens::{
     decode_ternary_words, encode_ternary_words, eval_lowered_expressions, eval_parsed_expressions, lower_program,
-    open_ternary_program, parse_canonical_binary, parse_canonical_packed_words,
+    open_ternary_program, render_ternary_words_spaced, parse_canonical_binary, parse_canonical_packed_words,
     parse_binary_source_words, parse_canonical_word_sequence, pack_binary_source_tokens, pack_binary_source_words, Session,
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
-const PHASES: &[&str] = &["t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"];
+const PHASES: &[&str] = &["t5_render_legacy", "t5_render_one_pass", "t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"];
 
 /// Попередній двопрохідний алгоритм тільки для порівняння механіки.
 /// Жодна T5-цифра не є мовним резидентом; виконуваний код не викликає цей
@@ -31,6 +31,12 @@ fn two_pass_t5_allocation_control(words: &[sens::BinarySourceWord]) -> Vec<u8> {
     trits.chunks_exact(5).map(|five| {
         five.iter().fold(0u16, |acc, &digit| acc * 3 + u16::from(digit)) as u8
     }).collect()
+}
+
+/// Старий людський перегляд: для кожного слова окремий String та
+/// додаткова тимчасова колекція. Використовується тільки в бенчмарку.
+fn legacy_visible_word_renderer(words: &[sens::BinarySourceWord]) -> String {
+    words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")
 }
 
 fn median_ns(mut xs: Vec<u128>) -> (u128, u128, u128) {
@@ -89,6 +95,13 @@ fn main() {
     assert_eq!(encode_ternary_words(&t5_words).expect("current T5 encoder"), physical,
         "streaming T5 encoder differs from source physical T5");
 
+    // Біт за бітом, без інтерпретації: нова одноалокаційна проєкція
+    // має бути рівною початковому формату для кожного реального T5.
+    assert_eq!(
+        legacy_visible_word_renderer(&t5_words),
+        render_ternary_words_spaced(&t5_words),
+        "оптимізація не може змінити exact-width вивід"
+    );
     let t5_widths = t5_words.iter().map(|word| word.width()).collect::<Vec<_>>();
     let t5_dense = pack_binary_source_words(&t5_words);
     let t5_parsed = parse_canonical_packed_words(&t5_dense, &t5_widths)
@@ -130,6 +143,14 @@ fn main() {
 
     for &phase in PHASES {
         let observations = match phase {
+            "t5_render_legacy" => measure(
+                || { black_box(legacy_visible_word_renderer(black_box(&t5_words))); },
+                count, samples,
+            ),
+            "t5_render_one_pass" => measure(
+                || { black_box(render_ternary_words_spaced(black_box(&t5_words))); },
+                count, samples,
+            ),
             "t5_open_d2" => measure(
                 || { black_box(open_ternary_program(black_box(&physical)).expect("T5/D2")); },
                 count, samples,
