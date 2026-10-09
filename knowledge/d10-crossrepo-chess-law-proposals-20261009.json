@@ -125,7 +125,12 @@
         "MCTS/zero-sum chess",
         "adversarial planning",
         "proof-search with alternating perspectives"
-      ]
+      ],
+      "external_rule_reference": {
+        "url": "https://davidbarbera.github.io/blog/mcts/",
+        "section": "6. Backup: sharing the result (and the sign flip)",
+        "claim": "Independent documented explanation of alternating player-to-move perspective, not authoritative to SENS or source execution."
+      }
     },
     {
       "proposal_key": "CHESS-20261009-02",
@@ -207,7 +212,18 @@
       "unblock_fanout": [
         "chess-lisp-zero semantic parity",
         "FEN and search state correctness"
-      ]
+      ],
+      "external_rule_reference": {
+        "authority": "FIDE Laws of Chess effective 2023-01-01",
+        "url": "https://handbook.fide.com/chapter/e012023",
+        "sections": [
+          "3.8.2.1",
+          "9.2.3.2"
+        ],
+        "claim": "Castling rights are permanently forfeited once king or corresponding rook moves; loss of rights distinguishes otherwise identical positions in repetition adjudication.",
+        "scope_limit": "Standard chess corner-square convention a1/h1/a8/h8 only. Chess960 requires a separately specified castling origin mapping; do not silently generalize this fixed-square law.",
+        "note": "Independent official rules witness, not automatically proof that the current donor implementation has passed runtime parity."
+      }
     }
   ],
   "holds": [
