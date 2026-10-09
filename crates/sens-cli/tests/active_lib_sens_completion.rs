@@ -293,6 +293,23 @@ fn assert_ordinary_sources_have_mixed_projection(
 }
 
 #[test]
+fn active_authored_lib_has_role_aware_exact_domain_projection() {
+    let files = active_lisp_files();
+    let (language, ordinary): (Vec<_>, Vec<_>) = files
+        .into_iter()
+        .partition(|(rel, _)| is_language_definition_file(rel));
+
+    // The language's own first-definition files have a distinct code-slot
+    // contract; keep the stronger no-convertible-surface requirement there.
+    assert_language_definitions_are_exact("language-definition lib", &language);
+
+    // Ordinary canonical Ukrainian source is not required to become opaque
+    // bit strings. It must instead produce a valid exact-domain projection
+    // wherever the actual role-aware reader admits one.
+    assert_ordinary_sources_have_mixed_projection("ordinary active lib", &ordinary);
+}
+
+#[test]
 fn generated_iclass_snapshot_is_data_only_when_full_record_contract_holds() {
     let rel = "lib/machine/encoding/admitted-iclass-index.lisp";
     let source_path = repo_root().join(rel);
