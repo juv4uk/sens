@@ -86,8 +86,13 @@
 (00001001 compiler-bit-xor
   (00001000 (seed left right)
     (00000111
-      ((00100010 left right) (compiler-false seed))
-      ((compiler-true seed) (compiler-true seed)))))
+      (left
+       (00000111
+         (right (compiler-false seed))
+         ((compiler-true seed) (compiler-true seed))))
+      ((00000111
+         (right (compiler-true seed))
+         ((compiler-true seed) (compiler-false seed)))))))
 
 (00001001 compiler-xor-bits
   (00001000 (seed left right)
