@@ -79,9 +79,12 @@ def check(inv, batch, state, source, doc):
     assert state["target"]["unplaced_selected_candidates"] == len(inv["rows"])-256
     assert state["target"]["law_forced_coordinates"] == 256
     assert state["target"]["ratified_residents"] == 0
-    assert "D10 selected              627/1024" in doc
-    assert "unplaced                  371" in doc
-    assert "remaining                 397" in doc
+    # Projection belongs to the live canonical inventory, not to the frozen
+    # historical batch-1 snapshot. 625->627 proof remains mandatory above.
+    selected_live = len(inv["rows"])
+    assert f"D10 selected              {selected_live}/1024" in doc
+    assert f"unplaced                  {selected_live - 256}" in doc
+    assert f"remaining                 {1024 - selected_live}" in doc
     return True
 
 def model_dpb(newbyte, width, offset, target):
@@ -124,6 +127,6 @@ def main():
     reference_model_tests()
     import sys
     if "--self-test" in sys.argv: self_test(inv,batch,state,source,doc)
-    print("D10-HISTORICAL-ADMISSION-BATCH1 PASS: 627/1024, two source-backed selected, 0 coords, 0 ratified")
+    print(f"D10-HISTORICAL-ADMISSION-BATCH1 PASS: historical batch 625->627; live selected {len(inv['rows'])}/1024; 0 new coords, 0 ratified")
 if __name__ == "__main__":
     main()
