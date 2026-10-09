@@ -1,0 +1,84 @@
+{
+  "geometry": {
+    "candidate_transform": "UNKNOWN",
+    "required_next_gate": "#3099 matched conditional geometry search",
+    "solver_credit": 0,
+    "status": "RELATION-ONLY"
+  },
+  "issue": "#3105",
+  "oracle": {
+    "carrier": "python.fractions.Fraction exact Q",
+    "checks": {
+      "geq_via_neg_leq": true,
+      "leq_via_neg_geq": true,
+      "max_via_neg_min": true,
+      "min_via_neg_max": true,
+      "neg_involution": true
+    },
+    "false_control_single_operand_negation": false,
+    "pair_count": 8649,
+    "value_count": 93
+  },
+  "parents": [
+    "#3095",
+    "#3099",
+    "#3077",
+    "#3039"
+  ],
+  "residents": {
+    "GEQ": {
+      "current_bits_diagnostic_only": "011110",
+      "semantic_role": "predicate",
+      "stable_resident_id": "sr-wtfwqasswbym",
+      "typed_behavior": "non-strict greater-than-or-equal (>=)"
+    },
+    "LEQ": {
+      "current_bits_diagnostic_only": "011100",
+      "semantic_role": "predicate",
+      "stable_resident_id": "sr-yrkaryqscnkp",
+      "typed_behavior": "non-strict less-than-or-equal (<=)"
+    },
+    "MAX": {
+      "current_bits_diagnostic_only": "011111",
+      "semantic_role": "arithmetic",
+      "stable_resident_id": "sr-xpftsrbepvhk",
+      "typed_behavior": "extremum maximum of numbers"
+    },
+    "MIN": {
+      "current_bits_diagnostic_only": "011101",
+      "semantic_role": "arithmetic",
+      "stable_resident_id": "sr-bbzkrkjhkqts",
+      "typed_behavior": "extremum minimum of numbers"
+    },
+    "NEG": {
+      "current_bits_diagnostic_only": "010111",
+      "semantic_role": "arithmetic",
+      "stable_resident_id": "sr-jksmnurxmrzb",
+      "typed_behavior": "additive inverse negation (-x)"
+    }
+  },
+  "schema": "d6-order-reversal-law/v1",
+  "semantic_transform": {
+    "affected_residents": [
+      "sr-yrkaryqscnkp",
+      "sr-wtfwqasswbym",
+      "sr-bbzkrkjhkqts",
+      "sr-xpftsrbepvhk"
+    ],
+    "equations": [
+      "NEG(NEG(a)) = a",
+      "GEQ(a,b) = LEQ(NEG(a),NEG(b))",
+      "LEQ(a,b) = GEQ(NEG(a),NEG(b))",
+      "MAX(a,b) = NEG(MIN(NEG(a),NEG(b)))",
+      "MIN(a,b) = NEG(MAX(NEG(a),NEG(b)))"
+    ],
+    "generator_resident": "sr-jksmnurxmrzb",
+    "law_id": "D6-ORDER-REVERSAL-BY-NEG",
+    "relation_type": "INVOLUTION+DUALITY+LATTICE-AUTOMORPHISM"
+  },
+  "stable_corpus": {
+    "corpus_hash": "sha256:4cb258dbe135e2de93c49916a5b68b192cc6c04e625c87c72675891cfaf035bc",
+    "current_coordinates_used_as_evidence": false,
+    "schema": "d3-d8-stable-resident-corpus/v1"
+  }
+}
