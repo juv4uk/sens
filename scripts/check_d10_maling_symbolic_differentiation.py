@@ -7,9 +7,12 @@ from __future__ import annotations
 
 import argparse
 import copy
+import csv
+import io
 import json
 import pathlib
 import random
+import re
 import sys
 from typing import Any
 
@@ -231,10 +234,36 @@ def check_dossier_data(
         for name in domain.get("residents", {}).values()
     }
     require(CANDIDATE not in lower_names, "candidate exact name collides with D1-D9")
-    ledger_rows = [line for line in ledger.splitlines()[1:] if line.strip()]
-    require(not any(len(line.split("\t")) > 3 and line.split("\t")[3].upper() == CANDIDATE
-                    for line in ledger_rows),
-            "candidate exact name already exists in the canonical proposal ledger")
+    ledger_rows = list(csv.DictReader(io.StringIO(ledger), delimiter="\t"))
+    proposal = dossier.get("proposal_ledger", {})
+    matches = [row for row in ledger_rows
+               if str(row.get("semantic_name", "")).upper() == CANDIDATE]
+    require(len(matches) == 1, "exactly one pending-review proposal row is required")
+    row = matches[0]
+    require(proposal.get("proposal_id") == "D10P-0015", "proposal ID must avoid active 0012–0014 lanes")
+    for field in ("proposal_id", "surface_uk", "surface_ukr", "width",
+                  "donor_provenance", "dedup_check", "ownership_test",
+                  "blocked_source", "status", "ratified"):
+        require(row.get(field) == proposal.get(field),
+                f"proposal ledger/dossier mismatch in {field}")
+    require(row.get("width") == "D10", "proposal width must be D10")
+    require(row.get("status") == "pending-review" and row.get("ratified") == "0",
+            "proposal row must remain pending-review and unratified")
+    require(row.get("blocked_source") == "NOT-A-MIGRATION-BLOCK",
+            "historical idea must not be invented as a migration blocker")
+    provenance = row.get("donor_provenance", "")
+    require(re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{7,40}:[^:\t\n]+:[1-9][0-9]*", provenance) is not None,
+            "proposal provenance must pin repo@commit:path:line")
+    require(re.fullmatch(r"D1-D9@[0-9a-f]{40}=NO-MATCH;D10@[0-9a-f]{40}=NO-MATCH",
+                         row.get("dedup_check", "")) is not None,
+            "proposal must carry explicit D1-D9 and D10 no-match snapshots")
+    require(row.get("surface_uk") == dossier.get("surface_uk"),
+            "proposal Ukrainian surface differs from dossier")
+    require(row.get("surface_ukr") == dossier.get("surface_ukr"),
+            "proposal Ukrainian second surface differs from dossier")
+    require("CORE" in row.get("ownership_test", "").upper() and
+            "owner review" in row.get("ownership_test", "").lower(),
+            "proposal must preserve unresolved Core-vs-library review")
     require(len(inventory.get("rows", [])) == inventory.get("accounting", {}).get(
         "selected_semantic_candidates"), "inventory row/accounting mismatch")
     require(inventory.get("accounting", {}).get("ratified_d10_residents") == 0,
@@ -281,6 +310,25 @@ def self_test_authority(dossier: dict[str, Any], inventory: dict[str, Any],
         attempts += 1
     else:
         raise AssertionError("exact-name collision mutation was not blocked")
+
+    header = lines = ledger.splitlines()
+    for field in ("proposal_id", "donor_provenance", "dedup_check",
+                  "ownership_test", "blocked_source", "status", "ratified"):
+        damaged = list(lines)
+        row_index = next(
+            i for i, line in enumerate(damaged[1:], start=1)
+            if len(line.split("\t")) > 3 and line.split("\t")[3].upper() == CANDIDATE
+        )
+        values = damaged[row_index].split("\t")
+        field_index = damaged[0].split("\t").index(field)
+        values[field_index] = "UNSAFE-MUTATION"
+        damaged[row_index] = "\t".join(values)
+        try:
+            check_dossier_data(dossier, inventory, foundation, "\n".join(damaged) + "\n")
+        except ValueError:
+            attempts += 1
+        else:
+            raise AssertionError(f"unsafe proposal-ledger mutation was not blocked: {field}")
     return attempts
 
 
