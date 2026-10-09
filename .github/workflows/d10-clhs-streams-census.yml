@@ -26,3 +26,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Довести перепис Streams без підміни D10
         run: python3 scripts/check_d10_clhs_streams_census.py
+      - name: Установити справжній CL-оракул SBCL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sbcl
+      - name: Перевірити донорські закони на реальному SBCL
+        run: |
+          sbcl --version
+          sbcl --script tests/oracles/d10-clhs-streams.sbcl
