@@ -67,7 +67,7 @@ def enumerate_diagnoses(universe,conflicts):
             return
         uncovered=next((edge for edge in edges if not (chosen&edge)),None)
         if uncovered is None:
-            solutions.difference_update(s for s in solutions if chosen < s)
+            solutions.difference_update(tuple(s for s in solutions if chosen < s))
             solutions.add(chosen)
             return
         for value in sorted(uncovered):
@@ -118,10 +118,11 @@ def validate_dossier(doc,inv,foundation):
     assert doc["history"][0]["year"]==1987
     assert doc["history"][0]["doi"]=="10.1016/0004-3702(87)90062-2"
     assert doc["history"][1]["doi"]=="10.1016/0004-3702(87)90063-4"
+    assert doc["history"][1]["year"]==1987
     assert doc["history"][0]["url"].startswith("https://www.sciencedirect.com/")
     assert doc["original_vs_ours"].startswith("Reiter supplies")
     assert c["semantic_name"]==SEMANTIC
-    assert c["proposal_id"]=="D10P-REITER-1987"
+    assert c["proposal_id"]=="D10P-5007"
     assert c["width"]==10 and c["coordinate"] is None
     assert c["ratified"] is False and c["selected"] is False
     assert c["proposal_status"]=="pending-review"
