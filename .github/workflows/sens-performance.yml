@@ -143,16 +143,52 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Build single shared CPU benchmark helper
         run: cargo build --locked --release -p sens --example current_en_vs_d1d8_cpu
-      - name: Measure only independently preflight-admitted D3 fixture
+      - name: Measure admitted D3 pairs or publish explicit historical-lane block
+        shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/sens-d3-cpu"
+          set -euo pipefail
+          root="$RUNNER_TEMP/sens-d3-cpu"
+          mkdir -p "$root"
+          set +e
           python3 benchmarks/current-en-vs-d1d8/cpu_runner.py \
             --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
             --helper "$(pwd)/target/release/examples/current_en_vs_d1d8_cpu" \
-            --out "$RUNNER_TEMP/sens-d3-cpu/phases.jsonl" \
-            --reps 7 --repeat-n 64 --phases session,ingest,lower,execute,full,repeated
-          python3 benchmarks/current-en-vs-d1d8/validate.py \
-            "$RUNNER_TEMP/sens-d3-cpu/phases.jsonl"
+            --out "$root/phases.jsonl" \
+            --reps 7 --repeat-n 64 --phases session,ingest,lower,execute,full,repeated \
+            > "$root/preflight.log" 2>&1
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            if grep -qF 'legacy byte identity entered current D1-D8 CPU preflight' \
+                "$root/preflight.log"; then
+              python3 - "$root" "$GITHUB_SHA" <<'PY'
+          import json, sys
+          from pathlib import Path
+          root, sha = Path(sys.argv[1]), sys.argv[2]
+          record = {
+              "schema": "sens-performance-blocked/v1",
+              "status": "BLOCKED_NO_TIMING",
+              "git_sha": sha,
+              "reason": "historical English surface produces retired SID identity",
+              "semantic_oracle_parity": "NOT_PROVED",
+              "speed_ratio": None,
+          }
+          (root / "blocked.json").write_text(json.dumps(record, indent=2) + "\n")
+          (root / "blocked.md").write_text(
+              "## English/Binary D3 historical pair: BLOCKED_NO_TIMING\n\n"
+              f"SHA: \x60{sha}\x60\n\n"
+              "English candidate constructs retired SID identity. "
+              "No paired result or speed ratio is admitted.\n"
+          )
+          PY
+              cat "$root/blocked.md"
+              exit 0
+            fi
+            cat "$root/preflight.log" >&2
+            exit "$status"
+          fi
+          cat "$root/preflight.log"
+          python3 benchmarks/current-en-vs-d1d8/validate.py "$root/phases.jsonl"
       - name: Publish paired phase medians, speed ratios and measurement limits
         if: always()
         shell: bash
@@ -162,8 +198,10 @@ jobs:
               --cpu-jsonl "$RUNNER_TEMP/sens-d3-cpu/phases.jsonl" \
               --out "$RUNNER_TEMP/sens-d3-cpu/scoreboard.md"
             cat "$RUNNER_TEMP/sens-d3-cpu/scoreboard.md" >> "$GITHUB_STEP_SUMMARY"
+          elif test -s "$RUNNER_TEMP/sens-d3-cpu/blocked.md"; then
+            cat "$RUNNER_TEMP/sens-d3-cpu/blocked.md" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo 'Paired phase benchmark BLOCKED: parity or runtime was not admitted.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Paired phase benchmark failed before parity admission; inspect preflight.log.' >> "$GITHUB_STEP_SUMMARY"
           fi
       - uses: actions/upload-artifact@v4
         if: always()
