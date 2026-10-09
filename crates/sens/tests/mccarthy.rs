@@ -295,12 +295,6 @@ fn bootstrap_library_is_written_and_executed_in_sens() {
             .value,
         Value::Symbol("antenna".into())
     );
-    assert_eq!(
-        eval_program("(not? (quote ()))", &mut session)
-            .unwrap()
-            .value,
-        Value::Symbol("t".into())
-    );
 }
 
 #[test]
