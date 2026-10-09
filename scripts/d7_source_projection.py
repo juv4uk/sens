@@ -104,6 +104,8 @@ def main() -> int:
     try:
         if opts.check:
             load_current_d7()
+            for bits in ("0000001", "0001110"):
+                project(bits, role="local-ordinal")
             print("D7-PROJECTION=PASS; owner-residents=126/128; reserved=2; no-Rust-law")
             return 0
         if opts.coordinate is None or opts.role is None:
