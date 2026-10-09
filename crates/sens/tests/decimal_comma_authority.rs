@@ -2,12 +2,13 @@
 //! Retired three-part COND / legacy Lisp truth assertions are not Rust oracles.
 //! Execution and semantic parity of historical fixtures need separate admission.
 
-use sens::{parse, ExprKind};
+use sens::{parse, Exactness, ExprKind};
 
 #[test]
 fn decimal_comma_reader_preserves_exact_rational_identity() {
-    // Both input surfaces must produce the same exact rational syntax object,
-    // not independent approximate f64 values or host truthiness.
+    // Both source spellings must parse to the same exact numeric value.
+    // Integral scientific values may use a compact Exact Number; fractional
+    // values must retain their exact Rational rather than approximate f64.
     for (comma, dot) in [
         ("12,455", "12.455"),
         ("-0,25", "-0.25"),
@@ -20,9 +21,12 @@ fn decimal_comma_reader_preserves_exact_rational_identity() {
 
         match (&left[0].kind, &right[0].kind) {
             (ExprKind::Rational(a), ExprKind::Rational(b)) => {
-                assert_eq!(a, b, "{comma} and {dot} must be exact equal rationals");
+                assert_eq!(a, b, "{comma} and {dot} must be the same exact rational");
             }
-            (a, b) => panic!("both spellings must be exact rationals: {a:?} vs {b:?}"),
+            (ExprKind::Number(a, Exactness::Exact), ExprKind::Number(b, Exactness::Exact)) => {
+                assert_eq!(a, b, "{comma} and {dot} must be the same exact integer");
+            }
+            (a, b) => panic!("both spellings must be identical exact numbers: {a:?} vs {b:?}"),
         }
     }
 }
