@@ -14,6 +14,9 @@ on:
       - "crates/sens/examples/domain12345678_bench.rs"
       - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
   workflow_dispatch:
+  schedule:
+    # Нічний фіксований контроль у період нижчого CI-навантаження (UTC).
+    - cron: "17 02 * * *"
 
 permissions:
   contents: read
