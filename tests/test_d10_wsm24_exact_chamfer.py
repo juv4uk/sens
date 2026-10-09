@@ -94,7 +94,7 @@ def validate_metadata(dossier,inventory,foundation):
     require(proposal["epistemic_status"]=="RESEARCH-ONLY-HOLD","owner hold removed")
     require(len(proposal["positive_witnesses"])>=4 and len(proposal["falsifiers"])>=6,
             "witness/falsifier minimum")
-    require("squared Euclidean" in proposal["behavior"],"squared versus Euclidean confused")
+    require("squared-L2" in proposal["behavior"],"squared versus Euclidean confused")
     require("likely implement" in proposal["minimality_attack"]["derivability"],
             "derivability review suppressed")
     require(dossier["outcome"]["new_d10_selected"]==0 and
