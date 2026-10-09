@@ -1,0 +1,24 @@
+name: Canon and decimal authority exact smoke
+on:
+  pull_request:
+    paths:
+      - 'lib/core4.lisp'
+      - 'lib/core4.lisp.fasl'
+      - 'lib/core.lisp'
+      - 'crates/sens/src/semantic_registry.rs'
+      - 'tests/fixtures/decimal-comma-authority-witness.lisp'
+      - '.github/workflows/canon-decimal-exact.yml'
+  workflow_dispatch:
+jobs:
+  exact-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check committed FASL freshness
+        run: cargo test -p sens --test core_fasl_freshness
+      - name: Canon V2 exact witness
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+      - name: Decimal comma D1 witness
+        run: cargo test -p sens --test decimal_comma_authority -- --nocapture
