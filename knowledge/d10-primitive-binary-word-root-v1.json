@@ -26,9 +26,9 @@
   ],
   "baseline": {
     "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
-    "previous_d10_blob": "a55f307c27f17091795d75ebfcd7d051547d80bc",
-    "previous_count": 630,
-    "proposed_count": 631,
+    "previous_d10_blob": "34efd273000e3de8510441764cb59acbb5ab284b",
+    "previous_count": 631,
+    "proposed_count": 632,
     "d10_ratified": 0
   },
   "selection": [
@@ -112,7 +112,7 @@
     "coordinates_added": 0,
     "ratified_added": 0,
     "physical_t5_admitted": false,
-    "proposal_id": "D10P-0006",
+    "proposal_id": "D10P-0007",
     "issue": "#4013 / #4463",
     "target": "one append and one SHA-linked transition, no overwrite of 625/627/630 history"
   }

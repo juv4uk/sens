@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 631,
+    "selected_semantic_candidates": 632,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 375,
-    "remaining_semantic_inventory": 393,
+    "unplaced_selected_candidates": 376,
+    "remaining_semantic_inventory": 392,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13364,6 +13364,65 @@
       "ratified_resident": false
     },
     {
+      "stable_id": "d10.hobby.spanda.bounded-rational-approx.v1",
+      "semantic_name": "BOUNDED-RATIONAL-APPROX",
+      "surface_uk": "наблизити-дробом",
+      "surface_ukr": "найближчий-дріб-із-межею-знаменника",
+      "source_class": "CROSSREPO-SPANDA-EXACT-RECOVERY",
+      "relation_class": "EXACT-NUMERIC-APPROXIMATION",
+      "arity": "(x: exact rational, maximum_denominator: positive integer)->(closest exact rational, signed exact residual)",
+      "behavior": "For exact x and Q>=1, return reduced p/q with 1<=q<=Q minimizing exact |x-p/q| over all rationals. Break ties by smallest reduced denominator, then smallest signed numerator. Return residual r=x-p/q exactly; no float, no ADC uncertainty inference, no machine or physical T5 authority.",
+      "falsifiers": [
+        "RATIONALIZE returns an arbitrary exact rational without enforcing Q, so it is not equivalent to a bounded recovery.",
+        "Returning a float or silently discarding signed residual violates exact representation.",
+        "Returning q>Q or any fraction with larger exact error violates best-approximation law.",
+        "Breaking Q=1 halfway ties differently from the declared denominator/numerator order.",
+        "ADC measurement uncertainty must not be inferred from the approximation residual."
+      ],
+      "dedup": {
+        "exact_in_d1_d9": false,
+        "exact_in_prior_d10": false,
+        "neighbors": [
+          "D8 RATIONAL",
+          "D8 RATIONALIZE",
+          "D9 DIVMOD",
+          "D10 numeric/accuracy families"
+        ],
+        "derivable": "A higher-order library program can enumerate candidate rationals using D8/D9 exact arithmetic; derivability does not establish duplicate semantic identity, but Core versus Core-Math ownership remains owner-review.",
+        "independence_test": "Universal denominator-constrained closest-rational relation with explicit residual/tie is not the same observable contract as unconstrained RATIONALIZE; requires proof whether it deserves a 10-bit Core resident."
+      },
+      "language_visible": true,
+      "mechanism_only": false,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "proposal_status": "pending-owner-review",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-hobby-exact-measurement-intake-v1.json",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "juv4uk/spanda:README.md@d339363e03798941280d7394fb6b24a76ff43dd3",
+        "https://docs.python.org/3/library/fractions.html#fractions.Fraction.limit_denominator"
+      ],
+      "positive_witnesses": [
+        {
+          "input": "x=355/113, Q=100",
+          "result": "p/q=311/99; residual=355/113-311/99"
+        },
+        {
+          "input": "x=2/3, Q=3",
+          "result": "p/q=2/3; residual=0"
+        },
+        {
+          "input": "x=-1/2, Q=1",
+          "result": "p/q=-1; residual=+1/2 (tie chooses smaller signed numerator)"
+        }
+      ]
+    },
+    {
       "stable_id": "d10.words.primitive-binary-root.v1",
       "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
       "surface_uk": "первісний-двійковий-блок",
@@ -13448,6 +13507,7 @@
     "knowledge/d10-historical-primary-admission-batch1-v1.json",
     "knowledge/d10-clos-slot-state-historical-review-v1.json",
     "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+    "knowledge/d10-hobby-exact-measurement-intake-v1.json",
     "knowledge/d10-primitive-binary-word-root-v1.json"
   ]
 }

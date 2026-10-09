@@ -14,7 +14,7 @@ HISTORY="knowledge/d10-selection-transition-history.json"
 LEDGER="knowledge/d10-proposal-ledger.tsv"
 NAME="PRIMITIVE-BINARY-WORD-ROOT"
 SID="d10.words.primitive-binary-root.v1"
-PREVIOUS_SHA="a55f307c27f17091795d75ebfcd7d051547d80bc"
+PREVIOUS_SHA="34efd273000e3de8510441764cb59acbb5ab284b"
 
 def read(path):
     return json.loads((ROOT/path).read_text(encoding="utf-8"))
@@ -22,10 +22,10 @@ def read(path):
 def check(dossier,inv,lower,history):
     assert dossier["schema"] == "d10-binary-word-primitive-root-selection/v1"
     assert dossier["baseline"]["previous_d10_blob"] == PREVIOUS_SHA
-    assert dossier["baseline"]["previous_count"] == 630
-    assert dossier["baseline"]["proposed_count"] == 631
+    assert dossier["baseline"]["previous_count"] == 631
+    assert dossier["baseline"]["proposed_count"] == 632
     assert dossier["admission"]["selected_delta"] == 1
-    assert dossier["admission"]["proposal_id"] == "D10P-0006"
+    assert dossier["admission"]["proposal_id"] == "D10P-0007"
     assert dossier["admission"]["coordinates_added"] == dossier["admission"]["ratified_added"] == 0
     assert len(dossier["selection"]) == 1
     target=dossier["selection"][0]
@@ -40,9 +40,9 @@ def check(dossier,inv,lower,history):
     assert len(target["positive_witnesses"]) >= 5 and len(target["falsifiers"]) >= 2
     assert "minimal_period" in target["falsifiers"][0]
     assert target["primary_url"].startswith("https://doc.sagemath.org/")
-    assert len(inv["rows"]) == inv["accounting"]["selected_semantic_candidates"] == 631
-    assert inv["accounting"]["remaining_semantic_inventory"] == 393
-    assert inv["accounting"]["unplaced_selected_candidates"] == 375
+    assert len(inv["rows"]) == inv["accounting"]["selected_semantic_candidates"] == 632
+    assert inv["accounting"]["remaining_semantic_inventory"] == 392
+    assert inv["accounting"]["unplaced_selected_candidates"] == 376
     assert inv["accounting"]["law_forced_coordinates"] == 256
     assert inv["accounting"]["ratified_d10_residents"] == 0
     assert inv["rows"][-1] == target, "selected row not identical to source-law dossier"
@@ -57,7 +57,7 @@ def check(dossier,inv,lower,history):
     t=history["transitions"][-1]
     assert t["id"] == "d10.word-primitive-full-repeat.20261009"
     assert t["previous_inventory_blob_sha"] == PREVIOUS_SHA
-    assert t["previous_selected"] == 630 and t["resulting_selected"] == 631
+    assert t["previous_selected"] == 631 and t["resulting_selected"] == 632
     assert t["delta_selected"] == 1 and t["added_stable_ids"] == [SID]
     assert t["appended_sources"] == [DOSSIER]
     assert t["coordinates_added"] == t["ratified_added"] == 0
@@ -65,7 +65,7 @@ def check(dossier,inv,lower,history):
     assert DOSSIER in inv["sources"]
     ledger=(ROOT/LEDGER).read_text(encoding="utf-8")
     exact=[line.split("\t") for line in ledger.splitlines()[1:] if "\t"+NAME+"\t" in line]
-    assert len(exact) == 1 and exact[0][0] == "D10P-0006"
+    assert len(exact) == 1 and exact[0][0] == "D10P-0007"
     assert exact[0][-2:] == ["pending-review","0"]
     return True
 
@@ -94,5 +94,5 @@ def main():
     d,i,l,h=map(read,(DOSSIER,INVENTORY,FOUNDATION,HISTORY))
     check(d,i,l,h)
     if "--self-test" in sys.argv:negative_controls(d,i,l,h)
-    print("D10 PRIMITIVE WORD research selected PASS: 631/1024; 0 coordinates; 0 ratified")
+    print("D10 PRIMITIVE WORD research selected PASS: 632/1024; 0 coordinates; 0 ratified")
 if __name__ == "__main__":main()
