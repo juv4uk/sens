@@ -113,7 +113,7 @@ class IncrementalTripletGate(unittest.TestCase):
         self.commit("change source but not physical")
         report = self.scan()
         self.assertEqual(report["status"], "BLOCKED")
-        self.assertIn("exact binary source differs", report["files"][0]["reason"])
+        self.assertIn("binary source word identities differ", report["files"][0]["reason"])
 
     def test_existing_binary_modified_without_matching_view_is_rejected(self):
         old = self.root / "old"
