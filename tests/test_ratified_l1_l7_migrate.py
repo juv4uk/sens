@@ -100,7 +100,7 @@ class Ratification(unittest.TestCase):
             source = root / "source.lisp"
             source.write_text("(110 (t (001 1)))", encoding="utf-8")
             candidate = root / "candidate.sens"
-            candidate.write_bytes(m.encode_projection("1\\n".replace("\\n", "\n")))
+            candidate.write_bytes(m.encode_projection("1\n"))
             fake = root / "fake-oracle"
             fake.write_text(
                 "#!/usr/bin/env python3\n"
