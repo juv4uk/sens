@@ -1,6 +1,12 @@
 # D10: перевірка часових законів — source-grounded, без автоматичної ратифікації
 
-Цей пакет **не додає резидентів D10**. Він переводить 9 знайдених у `lib/time.lisp` визначень у перевірювані пропозиції з pinned Git blob SHA `74013e20c0c5abb9a68c62334f40095c29294a53`, точними рядками і 34 позитивними/негативними **референсними** прикладами. Канонічний `sens/main` на початок: **625/1024 selected; 399 missing; 256 law-forced; 369 unplaced; 0 ratified**. Не додавати число 9 до selected до завершення семантичного review.
+Цей пакет **не додає резидентів D10**. Він переводить 9 знайдених у `lib/time.lisp` визначень у перевірювані пропозиції з current source Git blob SHA `48fd4014e3126858913d02641ede07ac71b0b4f2`, точними рядками і 34 позитивними/негативними **референсними** прикладами. Канонічний `sens/main` на початок: **625/1024 selected; 399 missing; 256 law-forced; 369 unplaced; 0 ratified**. Не додавати число 9 до selected до завершення семантичного review.
+
+## Перехід джерела (2026-10-09)
+
+Початковий зафіксований source blob: `74013e20c0c5abb9a68c62334f40095c29294a53`. Після міграції Contract 11.8 поточний blob: `48fd4014e3126858913d02641ede07ac71b0b4f2`. Міграція прибрала трипольні `D3:110 COND (test expected expression)` клаузи з активного `lib/time.lisp`, перевівши їх на двопольні `(D1-test expression)` та явні D1:1 fallback-и. Стара SHA збережена в `knowledge/d10-time-law-review-v2.json` у `source_history`; позиції визначень оновлено.
+
+**Це не є доказом поведінкової еквівалентності.** `behavior_equivalence_proven` лишається `false`, незалежний мовний свідок лишається `PENDING`, власницький огляд — `PENDING-REVIEW`; кількість резидентів D10, selected та ratified не змінилася (0 додано).
 
 ## Попередній відбір
 
@@ -16,9 +22,9 @@
 
 `tests/test_d10_time_law_review_v2.py` contains independent reference-model cases for leap years, NTP epoch/valid mode/stratum/fraction, timezone precedence, validation boundaries, tagged accepted/rejected. These are **NOT** executions of `lib/time.lisp`; no language-runtime parity claimed. In a real `sens` checkout, `scripts/check_d10_time_law_review_v2.py` additionally validates the exact Git blob SHA and definition-line pins and checks semantic name duplicates against full D1–D9/D10 inventories.
 
-## Deploy into repository (when GitHub restriction lifts)
+## Перевірка в поточному репозиторії
 
-Copy `knowledge/`, `scripts/`, `tests/`, `docs/` contents onto the same relative paths in `juv4uk/sens`. Run:
+Запусти перевірки у checkout `juv4uk/sens`: 
 
 ```sh
 python3 scripts/check_d10_time_law_review_v2.py
