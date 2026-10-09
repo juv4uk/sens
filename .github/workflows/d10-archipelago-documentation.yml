@@ -1,0 +1,29 @@
+name: D10 Archipelago inventory and Markdown parity
+
+on:
+  pull_request:
+    paths:
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'tests/test_d10_archipelago_documentation.py'
+      - '.github/workflows/d10-archipelago-documentation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'tests/test_d10_archipelago_documentation.py'
+      - '.github/workflows/d10-archipelago-documentation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-counts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check D10 research counts and negative drift controls
+        run: python3 -m unittest discover -s tests -p 'test_d10_archipelago_documentation.py' -v

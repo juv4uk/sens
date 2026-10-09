@@ -91,16 +91,18 @@ TOTAL              87
 Поточний стан:
 
 ```text
-D10 selected              434/1024
+D10 selected              625/1024
 law-forced                256
-unplaced                  178
-remaining                 590
+unplaced                  369
+remaining                 399
 ratified                    0
 
 definite non-Core selected  0
 review-required selected    0
 Core bridge meanings        6
 ```
+
+Це **похідна проєкція**, а не семантична влада: рахунок має точно збігатися з `knowledge/d10-v1-semantic-inventory.json`. Потік кандидатів лишається дослідницьким, **ратифікованих D10 residents — 0**.
 
 Отже D10 зараз ownership-clean.
 
