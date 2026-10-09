@@ -92,14 +92,14 @@ fn historical_and_current_rust_execution_match_for_nine_immutable_calls() {
     // are emitted by a SEPARATE original historical Python interpreter.
     let cases = [
         ("empty", "(machine-block-empty)"),
-        ("one_nested", "(machine-block-one (quote (mov (r1 r2))))"),
-        ("append", "(machine-block-append (quote ((mov (r1 r2)) (branch L1))) (quote ret))"),
-        ("concat", "(machine-block-concat (quote ((mov (r1 r2)) (branch L1))) (quote ((label L2))))"),
-        ("forms", "(machine-block-forms (quote ((mov (r1 r2)) (branch L1))))"),
-        ("identity", "(machine-block (quote ((mov (r1 r2)) (branch L1))))"),
-        ("append_empty", "(machine-block-append (quote ()) (quote nop))"),
-        ("concat_left_empty", "(machine-block-concat (quote ()) (quote ((mov (r1 r2)) (branch L1))))"),
-        ("concat_right_empty", "(machine-block-concat (quote ((mov (r1 r2)) (branch L1))) (quote ()))"),
+        ("one_nested", "(machine-block-one (001 (mov (r1 r2))))"),
+        ("append", "(machine-block-append (001 ((mov (r1 r2)) (branch L1))) (001 ret))"),
+        ("concat", "(machine-block-concat (001 ((mov (r1 r2)) (branch L1))) (001 ((label L2))))"),
+        ("forms", "(machine-block-forms (001 ((mov (r1 r2)) (branch L1))))"),
+        ("identity", "(machine-block (001 ((mov (r1 r2)) (branch L1))))"),
+        ("append_empty", "(machine-block-append (001 ()) (001 nop))"),
+        ("concat_left_empty", "(machine-block-concat (001 ()) (001 ((mov (r1 r2)) (branch L1))))"),
+        ("concat_right_empty", "(machine-block-concat (001 ((mov (r1 r2)) (branch L1))) (001 ()))"),
     ];
     assert_eq!(original.as_object().expect("case keyed observations").len(), cases.len());
     for (name, current_expression) in cases {
