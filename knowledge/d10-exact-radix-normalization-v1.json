@@ -1,0 +1,103 @@
+{
+  "schema": "d10-exact-radix-normalization-research/v1",
+  "date": "2026-10-09",
+  "status": "SOURCE-MOTIVATED-RESEARCH-NOT-SELECTED",
+  "authority": [
+    "juv4uk/sens#4013",
+    "juv4uk/sens#4463",
+    "juv4uk/sens#4162"
+  ],
+  "donor_sources": [
+    {
+      "class": "OWNER-PROJECT-MOTIVATION-NOT-AN-IMPLEMENTATION",
+      "repository": "juv4uk/spanda",
+      "revision": "cf9caa1e52b9e832f865f3a06cb86b20059d8927",
+      "path": "README.md",
+      "line_range": "20-37",
+      "url": "https://github.com/juv4uk/spanda/blob/cf9caa1e52b9e832f865f3a06cb86b20059d8927/README.md#L20-L37",
+      "fact": "The user's E-P Dance explicitly connects exact arbitrary-width p/q to FPGA/analog scaling; not a direct implementation of normalized-radix decomposition."
+    },
+    {
+      "class": "HISTORICAL-ANALOGY-NOT-EQUIVALENCE",
+      "source": "ANSI Common Lisp HyperSpec",
+      "name": "DECODE-FLOAT",
+      "url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_decode-fl_decode-float.html",
+      "difference": "CLHS normalizes a floating-point value and returns float significand, exponent and sign (float radix). Proposed law takes any signed exact rational and any integer radix >=2, preserving exactness; never claims CLHS implemented this extension."
+    }
+  ],
+  "proposed_root": {
+    "semantic_name": "RADIX-NORMALIZE-EXACT",
+    "surface_uk": "нормалізувати-основою",
+    "surface_ukr": "нормалізувати-точний-дріб-за-основою",
+    "status": "PENDING-BEHAVIORAL-AND-OWNER-REVIEW",
+    "coordinate": null,
+    "ratified": false,
+    "selected": false,
+    "arity": 2,
+    "argument_shape": "(x: exact rational; b: integer >= 2) -> (m: exact signed rational; e: exact integer)",
+    "behavior": "For x=0 return (m=0,e=0). Otherwise return the unique pair of exact values such that x=m*b^e, 1<=abs(m)<b, and m has the sign of x. Invalid radix b<2 or non-exact rational input is an ERROR, never approximate/coerce to float. Values are not rounded.",
+    "positive_witnesses": [
+      {
+        "input": "x=3/4, b=2",
+        "expected": "m=3/2, e=-1"
+      },
+      {
+        "input": "x=-40/3, b=2",
+        "expected": "m=-5/3, e=3"
+      },
+      {
+        "input": "x=8, b=2",
+        "expected": "m=1, e=3"
+      },
+      {
+        "input": "x=1/1000, b=10",
+        "expected": "m=1, e=-3"
+      },
+      {
+        "input": "x=0, b=2",
+        "expected": "m=0, e=0"
+      }
+    ],
+    "falsifiers": [
+      "Returning a float for an exact 3/4 input loses exact type and violates preservation of exact rational identity.",
+      "For x=8,b=2 returning (m=2,e=2) violates the strict upper bound |m|<2.",
+      "For x=-40/3,b=2 returning positive mantissa violates signed reconstruction.",
+      "For x=0 any nonzero exponent violates canonical uniqueness of the zero representation.",
+      "Radix 1 and invalid inexact inputs must not silently loop or coerce."
+    ],
+    "dedup": {
+      "checked": "EXACT-NAME-ONLY-D9-D10; BEHAVIORAL-PROOF-PENDING",
+      "exact_name_in_current_d9": false,
+      "exact_name_in_current_d10": false,
+      "neighbors": [
+        "D8 RATIONAL",
+        "D8 RATIONALIZE",
+        "D9 DIVMOD",
+        "D10 BOUNDED-RATIONAL-APPROX",
+        "CLHS DECODE-FLOAT (float only)"
+      ],
+      "exact_duplicate_attack": "RATIONALIZE and BOUNDED-RATIONAL-APPROX optimize/approximate an input rather than produce a unique arbitrary-base exponent and exact mantissa. DECODE-FLOAT discloses representation of floats rather than normalize arbitrary rational in caller-selected radix.",
+      "derivability_attack": "An ordinary Lisp program can repeatedly multiply/divide exact rationals by b. Therefore this may be a *derived library operation* even though its result-level contract differs from the neighbors; owner must decide if a D10 identity is warranted.",
+      "mechanism_only_attack": "No CPU floating-point, FPGA register, ADC, ABI, transport, vendor instruction or host-device requirement.",
+      "core_vs_library_decision": "HOLD-UNTIL-IRREDUCIBLE-ROOT-REVIEW"
+    },
+    "cross_hobby_uses": [
+      "spanda p/q ↔ analog gain and FPGA switch matrices: exact radix scaling without losing rational source",
+      "music/acoustics: octave normalization b=2 with exponent as octave displacement",
+      "SDR: exact scaling of frequency and sampling ratio before substrate-specific synthesis",
+      "astronomy and chronometry: dynamic range of exact period and duration ratios",
+      "math/number representation: normalized arbitrary-base rational value"
+    ],
+    "oracle": {
+      "status": "PENDING-CI-EXECUTION",
+      "lisp": "tests/oracles/d10-exact-radix-normalization.sbcl",
+      "python": "tests/test_d10_exact_radix_normalization_v1.py",
+      "caveat": "These are newly written independent reference witnesses for proposed mathematical semantics, NOT a source-donor runtime implementing this novel operation; no SENS execution or owner ratification."
+    }
+  },
+  "accounting": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0
+  }
+}
