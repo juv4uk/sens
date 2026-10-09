@@ -7,6 +7,7 @@ on:
     paths:
       - "examples/binary/**"
       - "crates/sens/tests/binary_program_e2e.rs"
+      - "crates/sens/tests/strict_cond_legacy_binary_rejection.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/eval/**"
       - "crates/sens/src/ternary_transport.rs"
@@ -29,4 +30,16 @@ jobs:
       - name: Check D7 ratified source coordinates
         run: python3 scripts/check-d7-current-authority.py
       - name: Execute physical-binary-only program and fail-closed negatives
-        run: cargo test --locked -p sens --test binary_program_e2e --test text7_contextual_binding -- --nocapture
+        run: cargo test --locked -p sens --test binary_program_e2e --test text7_contextual_binding --test strict_cond_legacy_binary_rejection -- --nocapture
+
+      - name: Retired three-field D3 COND must be rejected by physical CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked -p sens-cli --bin sens-trit
+          if target/debug/sens-trit eval examples/binary/d3-cond-three-field-rejected.sens > "$RUNNER_TEMP/d3-legacy.out" 2> "$RUNNER_TEMP/d3-legacy.err"; then
+            echo "ERROR: malformed retired three-field COND was executed" >&2
+            exit 1
+          fi
+          grep -F "D3:110 COND requires exactly (test expression)" "$RUNNER_TEMP/d3-legacy.err"
+          test ! -s "$RUNNER_TEMP/d3-legacy.out"
