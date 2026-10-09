@@ -90,13 +90,16 @@ def check_intake() -> None:
 
     assert inventory["domain"] == "D10" and inventory["capacity"] == 1024
     assert inventory["status"].startswith("RESEARCH")
-    assert acct["selected_semantic_candidates"] == 627
-    assert acct["unplaced_selected_candidates"] == 371
-    assert acct["remaining_semantic_inventory"] == 397
+    # Historical source-pinned cohort starts at 625+2, but later independent
+    # tranches may append other reviewed rows in the SAME D10 namespace.
+    selected = acct["selected_semantic_candidates"]
+    assert isinstance(selected, int) and 627 <= selected <= 1024
+    assert acct["unplaced_selected_candidates"] == selected - 256
+    assert acct["remaining_semantic_inventory"] == 1024 - selected
     assert acct["law_forced_coordinates"] == 256
     assert acct["ratified_d10_residents"] == 0
-    assert len(rows) == 627 and 627 + 397 == inventory["capacity"]
-    assert sum(row["coordinate"] is None for row in rows) == 371
+    assert len(rows) == selected and selected + acct["remaining_semantic_inventory"] == inventory["capacity"]
+    assert sum(row["coordinate"] is None for row in rows) == selected - 256
     assert len({row["stable_id"] for row in rows}) == len(rows)
     assert len({row["semantic_name"] for row in rows}) == len(rows)
     assert len(evidence["rows"]) == 2
@@ -129,8 +132,13 @@ def check_intake() -> None:
     assert evidence["baseline"]["selected_after"] == 627
     assert evidence["boundary"]["language_structure"] == "D2 exclusively"
     assert evidence["boundary"]["physical_t5_authorized"] is False
+    assert all(not r["ratified_resident"] for r in rows)
+    assert len([r for r in rows if r["coordinate"] is not None]) == 256
+    assert evidence["baseline"]["selected_in_research_pr"] == 2
     assert all(hold["status"].startswith("HOLD") for hold in evidence["holds"])
-    print("D10 LOOPS intake: PASS 627/1024 selected, 371 unplaced, 397 remaining, 0 ratified")
+    print(f"D10 LOOPS intake: PASS {selected}/1024 selected, "
+          f"{selected-256} unplaced, {1024-selected} remaining, 0 ratified; "
+          "two LOOPS roots present")
 
 
 class HistoricalLawWitness(unittest.TestCase):
