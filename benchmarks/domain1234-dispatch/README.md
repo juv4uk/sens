@@ -9,7 +9,7 @@ It asks one narrow question: when the identity is already available in the AST, 
 The same six operations and the same pair tree are executed through:
 
 - **u8-flat-ready** — a favorable 256-slot flat table keyed by an already-ready byte identity;
-- **d3d4-prefix-ready** — the ratified D3 roots `101 CAR`, `110 CDR` and the D4 suffix law `0 -> compose CAR`, `1 -> compose CDR`;
+- **d3d4-prefix-ready** — the current ratified D3 roots `100 CAR`, `011 CDR` and the D4 suffix law `0 -> compose CAR`, `1 -> compose CDR`;
 - **direct-static/direct-dynamic** — repeated fixed call sites use a branch-free direct CAR/CDR chain as the compile-away lower bound; random/mixed streams retain a dynamic switch control.
 
 The flat lane is intentionally generous to the old mechanism: there is no text, hash lookup, parser, or wire decode in the measured execution delta. It is a mechanical 8-bit flat-slot baseline, **not** a claim that historical Function8 allocated all four D4 selectors symmetrically. Historical evidence contains CAAR/CADR/CDDR rows, while CDAR does not have the same canonical legacy-row coverage.

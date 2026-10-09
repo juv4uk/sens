@@ -215,7 +215,7 @@ def main():
             "",
             "Interpretation boundary:",
             "- u8-flat-ready is a favorable 256-slot mechanical baseline, not a claim that the historical Function8 table contained a symmetric row for every D4 selector.",
-            "- d3d4-prefix-ready uses the ratified 101/110 roots and one D4 suffix bit; no descendant row lookup.",
+            "- d3d4-prefix-ready uses current ratified D3 roots 100 CAR / 011 CDR and one D4 suffix bit; no descendant row lookup.",
             "- direct-static is used only for repeated fixed call sites and is the compile-away lower-bound lane.",
             "- direct-dynamic remains a switch-based control for random/mixed streams; it is not a compiled lower bound.",
             "- identity parsing/framing is intentionally excluded; #1993 owns framing cost.",

@@ -43,12 +43,12 @@ static Row flat_table[256];
 static volatile int32_t start_value;
 
 static const Call OPS[6] = {
-    {0, 0, 3, 0b101},
-    {1, 1, 3, 0b110},
-    {2, 2, 4, 0b1010},
-    {3, 3, 4, 0b1011},
-    {4, 4, 4, 0b1100},
-    {5, 5, 4, 0b1101},
+    {0, 0, 3, 0b100},
+    {1, 1, 3, 0b011},
+    {2, 2, 4, 0b1000},
+    {3, 3, 4, 0b1001},
+    {4, 4, 4, 0b0110},
+    {5, 5, 4, 0b0111},
 };
 
 static uint64_t rng_state = 0x9e3779b97f4a7c15ULL;
@@ -101,8 +101,8 @@ static int32_t exec_prefix_d3(const Call *call, int32_t value) {
     CNT(dispatches, 1);
     CNT(bits, 3);
     CNT(root_selections, 1);
-    if (call->bits == 0b101) return step(value, 0);
-    if (call->bits == 0b110) return step(value, 1);
+    if (call->bits == 0b100) return step(value, 0);
+    if (call->bits == 0b011) return step(value, 1);
     fprintf(stderr, "bad D3 selector word\n");
     exit(3);
 }
@@ -113,13 +113,13 @@ static int32_t exec_prefix_d4(const Call *call, int32_t value) {
     CNT(root_selections, 1);
     const uint8_t root = call->bits >> 1;
     const uint8_t suffix = call->bits & 1;
-    if (root != 0b101 && root != 0b110) {
+    if (root != 0b100 && root != 0b011) {
         fprintf(stderr, "bad D4 selector root\n");
         exit(3);
     }
     CNT(gens, 1);
     value = step(value, suffix);
-    return step(value, root == 0b110);
+    return step(value, root == 0b011);
 }
 
 static int32_t exec_prefix(const Call *call, int32_t value) {
