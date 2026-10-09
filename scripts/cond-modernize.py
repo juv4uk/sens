@@ -1,35 +1,15 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""cond-modernize.py — двопрохідний перехід 3-частинних cond-клауз на актуальну логіку.
+"""Історичний сканер тричастинних COND-клауз (лише інвентаризація).
 
-КЛАС B (з #5029): стара логіка
-    (cond ((eq X Y) 1 EXPR) ...)      ; eq/atom колись повертали exact-Q 1/0
-актуальна логіка (per experiments/probabilistic-decision-jev-like.lisp):
-    eq/atom/equal? повертають СТРУКТУРНИЙ ЗАПИС або t/(), тож порівняння з 1/0
-    ніколи не збігається -> UnsatisfiedConditional.
+УВАГА: legacy regex-сканер не доводить AST-контекст, D1 PredicateBit,
+поточну D3:110 голову, квотування чи полярність NO. Попередній автоматичний
+rewrite однаково видаляв expected (1) та (0), підмінюючи NO на YES і
+переписуючи .lisp на місці. Це заборонено Contract 11.8 / #5029 / #3170.
 
-ФОРМА ПЕРЕХОДУ (обрано безпечну): 3-частинна -> 2-частинна міграційна
-    (cond ((eq X Y) 1 EXPR) ...)  ->  (cond ((eq X Y) EXPR) ...)
-тобто прибираємо застарілий literal-tag `1`/`0`, лишаючи предикат-запит як test;
-cond резолвить його через структурну істинність.
-
-ДВА ПРОХОДИ:
-  ПРОХІД 1 (rewrite): знайти кожну 3-частинну клаузу з query=(EQ|ATOM|EQUAL)
-                      і expected=(1)|(0); прибрати expected.
-  ПРОХІД 2 (verify):
-      (a) жодного (EQ ...) (1) / (0) не лишилось;
-      (b) кількість змінених клауз дорівнює знайденій;
-      (c) дужки збалансовані;
-      (d) усі НЕ-клаузові фрагменти ідентичні (нічого зайвого не зачеплено).
-
-fail-closed: якщо хоч одна клауза не піддається безпечному переписуванню —
-файл НЕ виводиться, друкується причина.
-
-Використання:
-    python3 scripts/cond-modernize.py <file.lisp> [--out DIR]
-    python3 scripts/cond-modernize.py --scan lib/     # карта по дереву
-"""
-import sys, re, pathlib, argparse
+--scan зберігається як приблизна карта, а будь-який виклик із файлом
+завжди завершується BLOCK (код 4) без запису байтів. Для AST-класифікації
+використовуйте #3170 / PR #3182; канонічний .sens admission іде через
+scripts/migrate.py тільки після окремих оракулів і CI.
+"""import sys, re, pathlib, argparse
 
 EQ    = "00000011"   # sens8 EQ
 ATOM  = "00000010"   # sens8 ATOM
@@ -129,36 +109,6 @@ def find_cond_clauses(text: str):
                     hits.append((s+1+cs, s+1+ce, second))
     return hits
 
-def rewrite(text: str, hits):
-    """Прибрати literal expected: ((eq X Y) 1 EXPR) -> ((eq X Y) EXPR)."""
-    out = text
-    for cs, ce, second in sorted(hits, key=lambda x: -x[0]):
-        clause = out[cs:ce]
-        # знайти позицію literal expected у клаузі
-        m = re.search(r'\(\s*' + re.escape(second[1:-1]) + r'\s*\)', clause)
-        if not m: continue
-        new_clause = clause[:m.start()] + clause[m.end():]
-        # прибрати подвійний пробіл, що лишився
-        new_clause = re.sub(r'\s+\)', ')', new_clause)
-        out = out[:cs] + new_clause + out[ce:]
-    return out
-
-def verify(orig: str, out: str, hits):
-    probs = []
-    # (a) жодного (EQ/ATOM ...) (1)/(0) не лишилось
-    left = 0
-    for s, e in split_forms(out):
-        form = out[s:e]
-        if re.match(r'\(\s*' + COND + r'\b', form):
-            if re.search(r'\(\s*(' + EQ + r'|' + ATOM + r')\b[^\n]*\)\s*\((1|0)\)', form):
-                left += 1
-    if left: probs.append(f"лишилось {left} старих клауз")
-    # (c) дужки
-    if out.count('(') != out.count(')'):
-        probs.append("дужки не збалансовані")
-    # (d) нічого зайвого: прибираємо всі клаузи -> решта мусить збігтися
-    return probs
-
 def scan(root: pathlib.Path):
     rows = []
     for p in sorted(list((root/"lib").rglob("*.lisp")) + list((root/"tests").rglob("*.lisp"))):
@@ -186,19 +136,12 @@ def main():
     text = p.read_text(encoding="utf-8")
     hits = find_cond_clauses(text)
     print(f"ПРОХІД 1: знайдено старих клауз = {len(hits)}")
-    if not hits:
-        print("нічого переписувати — OK")
-        return
-    out = rewrite(text, hits)
-    probs = verify(text, out, hits)
-    print("ПРОХІД 2:", "OK" if not probs else probs)
-    if probs:
-        sys.exit(3)
-    outdir = pathlib.Path(a.out) if a.out else p.parent
-    outdir.mkdir(parents=True, exist_ok=True)
-    dst = outdir / p.name
-    dst.write_text(out, encoding="utf-8")
-    print(f"OK -> {dst}")
+    yes = sum(1 for _, _, expected in hits if expected == "(1)")
+    no = sum(1 for _, _, expected in hits if expected == "(0)")
+    print(f"ІНВЕНТАР (не повний AST-аудит): YES={yes}; NO={no}")
+    print("BLOCK: автоматичну заміну вимкнено; немає доказу exact D1/D3 і збереження NO-полярності.")
+    print("Джерело не змінено. Далі: #3170 / PR #3182, оракул, scripts/migrate.py.")
+    sys.exit(4)
 
 if __name__ == "__main__":
     main()
