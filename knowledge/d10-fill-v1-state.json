@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 641,
-    "remaining_semantic_candidates": 383,
+    "selected_semantic_candidates": 645,
+    "remaining_semantic_candidates": 379,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 385,
+    "unplaced_selected_candidates": 389,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -382,5 +382,15 @@
     "coordinates_added": 0,
     "ratification_effect": "NONE",
     "source_boundary": "NIST/NASA SPICE/GNU Radio mathematical donor oracles, not binary SENS execution"
+  },
+  "hobby_clock_radio_current_main_replay": {
+    "source": "knowledge/d10-clock-radio-math-selection-20261009.json",
+    "selected": 4,
+    "previous_selected": 641,
+    "resulting_selected": 645,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "base_inventory_blob_sha": "9b1c4984283d923516a618f9fc99dea247711857",
+    "resulting_inventory_blob_sha": "259382f69460c6d5a5ba8b2b171fe13815d6916f"
   }
 }

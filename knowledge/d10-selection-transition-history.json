@@ -263,6 +263,36 @@
       "tests": [
         "scripts/check_d10_science_interests_v1.py"
       ]
+    },
+    {
+      "id": "d10.hobby.clock-radio.20261009",
+      "authority": "#4013 #4463 owner hobby-directed selection",
+      "evidence": [
+        "knowledge/d10-clock-radio-math-selection-20261009.json",
+        "NIST SP1065 §5.2.2",
+        "GNU Radio Differential Encoder, Decoder, Phasor docs"
+      ],
+      "previous_inventory_blob_sha": "9b1c4984283d923516a618f9fc99dea247711857",
+      "resulting_inventory_blob_sha": "259382f69460c6d5a5ba8b2b171fe13815d6916f",
+      "added_stable_ids": [
+        "d10.hobby.clock.allan-variance.v1",
+        "d10.hobby.radio.differential-encode.v1",
+        "d10.hobby.radio.differential-decode.v1",
+        "d10.hobby.radio.differential-phasor.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-clock-radio-math-selection-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 4,
+      "previous_selected": 641,
+      "resulting_selected": 645,
+      "decision": "4 universal math/stream-law research selections; derivability and owner ratification still pending",
+      "tests": [
+        "scripts/check_d10_hobby_clock_radio_selection.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }
