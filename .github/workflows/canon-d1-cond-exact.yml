@@ -1,0 +1,21 @@
+name: Canon exact D1 COND regression
+on:
+  pull_request:
+    paths:
+      - 'lib/canon.lisp'
+      - 'crates/sens/tests/canon_laws_v2_contract.rs'
+      - '.github/workflows/canon-d1-cond-exact.yml'
+  workflow_dispatch:
+jobs:
+  canon-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Real Canon 13-row Lisp-owned execution
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+      - name: Current Core4 FASL must remain exact
+        run: cargo test -p sens --test core_fasl_freshness
+      - name: Source is not mutated by tests
+        run: git diff --exit-code
