@@ -34,12 +34,17 @@ use generated::{SemanticRow, SEMANTIC_ROWS};
 pub(crate) type SemanticId = Sens8;
 
 fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
-    match width {
-        3 => Some(CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(bits)?))),
-        4 => Some(CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(bits)?))),
-        5 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(bits)?))),
-        _ => None,
-    }
+    // Канонічний маршрут: точне слово драбини → домен → допущений механізм.
+    // Ні ширина сама по собі, ні старий байт не створюють callable identity.
+    use crate::BinarySourceWord;
+    let source = match width {
+        3 => BinarySourceWord::W3(Bit3::new(bits)?),
+        4 => BinarySourceWord::W4(Bit4::new(bits)?),
+        5 => BinarySourceWord::W5(Bit5::new(bits)?),
+        6 => BinarySourceWord::W6(crate::Bit6::new(bits)?),
+        _ => return None,
+    };
+    CoreDomainIdentity::from_source_word(source)
 }
 
 /// Direct D3/D4/D5 human-surface projection.
@@ -313,6 +318,26 @@ mod tests {
             None,
             "APPEND must not retain a transitional D5 binding"
         );
+    }
+
+    #[test]
+    fn callable_projection_uses_exact_domain_ladder_not_width_alone() {
+        for (width, bits, admitted) in [
+            (3, 0b110, true),
+            (4, 0b0010, true),
+            (5, 0b01010, true),
+            (6, 0b001110, true), // D6 ADD1: допущений механізм
+            (6, 0b001111, true), // D6 SUB1: допущений механізм
+            (6, 0b001101, false), // інші D6: fail-closed
+            (7, 0b0000010, false), // D7: не callable за шириною
+            (8, 0b00000101, false), // D8: не callable за шириною
+        ] {
+            assert_eq!(
+                exact_domain_identity_from_projection(width, bits).is_some(),
+                admitted,
+                "D{width} exact-width mechanism admission must come from the ladder"
+            );
+        }
     }
 
     #[test]
