@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - "benchmarks/physical-sens-runtime/**"
+      - "examples/binary/d5-label-*.bits"
       - "crates/sens/examples/physical_sens_hot_bench.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/src/main.rs"
@@ -17,6 +18,7 @@ on:
   pull_request:
     paths:
       - "benchmarks/physical-sens-runtime/**"
+      - "examples/binary/d5-label-*.bits"
       - "crates/sens-cli/src/**"
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/canonical_reader.rs"
@@ -97,5 +99,48 @@ jobs:
         with:
           name: sens-physical-runtime-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/sens-physical-bench/
+          if-no-files-found: warn
+          retention-days: 30
+
+  d5-real-execution:
+    name: D5 binary recursion / list copy / higher-order MAP · p50/p95
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: physical-sens-d5-release
+
+      - name: Build physical executable SENS release entrypoints
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+
+      - name: Measure real executable D5 recursion, copy and MAP
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/d5_workloads.py \\
+            --sens target/release/sens \\
+            --sens-trit target/release/sens-trit \\
+            --out "$RUNNER_TEMP/sens-d5-bench" \\
+            --reps 19 --warmups 3
+
+      - name: Publish actual D5 execution latency and physical sizes
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/sens-d5-bench/d5-report.md"; then
+            cat "$RUNNER_TEMP/sens-d5-bench/d5-report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'D5 benchmark BLOCKED: no measured rows, see log; no speed claim.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Preserve per-SHA D5 raw wall samples, parity and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-d5-perf-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sens-d5-bench/
           if-no-files-found: warn
           retention-days: 30
