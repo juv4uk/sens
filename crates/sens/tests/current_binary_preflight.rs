@@ -2,7 +2,10 @@
 //! binary width and payload, never a human spelling or historical SID8.
 //! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-use sens::{eval_parsed_expressions, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
+use sens::{
+    eval_parsed_expressions, parse_canonical_binary, wire_decode_program, wire_encode_program,
+    Expr, ExprKind, Session, Value,
+};
 
 fn binary_trace(expression: &Expr) -> String {
     match &expression.kind {
@@ -119,7 +122,9 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     let words = source.split_whitespace().collect::<Vec<_>>();
     assert!(!words.is_empty());
     assert!(
-        words.iter().all(|word| word.bytes().all(|byte| matches!(byte, b'0' | b'1'))),
+        words.iter().all(|word| {
+            word.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+        }),
         "the reference file must contain only visible binary words and whitespace"
     );
     assert!(
