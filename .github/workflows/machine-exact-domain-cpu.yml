@@ -95,13 +95,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Exact-domain CPU bridge
         run: |
+          # Validate the mechanical word layer before any semantic machine witnesses.
+          cargo test --locked -p sens --test native_first_exact_domain -- --nocapture
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
           cargo test -p sens --test machine_effect_add_projection -- --nocapture
           cargo test -p sens --test machine_effect_d5_arithmetic_projection -- --nocapture
           cargo test -p sens --test machine_effect_explicit_outputs -- --nocapture
           cargo test -p sens --test machine_semantic_effect_lowering -- --nocapture
           # Exact lowered DomainCall data must select native CAR(CONS ...) without spelling/SID authority.
-          cargo test -p sens --test native_first_exact_domain -- --nocapture
           cargo test -p sens --test machine_exact_d3_structural -- --nocapture
           cargo test -p sens --test machine_exact_d3_eq_cond -- --nocapture
           cargo test -p sens --test machine_exact_d5_arithmetic -- --nocapture
