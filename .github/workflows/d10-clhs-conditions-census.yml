@@ -6,8 +6,6 @@ on:
       - knowledge/d10-clhs-conditions-census-20261009.json
       - knowledge/d10-proposal-ledger.tsv
       - scripts/check-d10-clhs-conditions-census.py
-      - tests/oracles/d10_clhs_conditions_restart_sbcl.lisp
-      - knowledge/d10-proposal-ledger.tsv
       - .github/workflows/d10-clhs-conditions-census.yml
   push:
     branches: [main]
@@ -32,11 +30,7 @@ jobs:
           sbcl --version
       - name: Audit 51 direct CLHS sources, owner map and ten negative controls
         run: python3 scripts/check-d10-clhs-conditions-census.py
-      - name: Independent live SBCL donor witness for COMPUTE-RESTARTS
-        run: sbcl --script tests/oracles/d10_clhs_conditions_restart_sbcl.lisp
       - name: Check canonical D10 proposal ledger and selected audit
         run: python3 scripts/check-d10-proposal-ledger.py
-      - name: Install independent ANSI Common Lisp oracle
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq sbcl
       - name: Verify COMPUTE-RESTARTS semantics on actual SBCL
         run: sbcl --noinform --script tests/d10-clhs-compute-restarts-sbcl.lisp
