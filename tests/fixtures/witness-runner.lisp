@@ -24,7 +24,7 @@
 (00001001 witness-find-entry
   (00001000 (key alist)
     (00000111
-      ((00000010 alist) (00000001 ()))
+      ((00100010 alist (00000001 ())) (00000001 ()))
       ((00100010 key (00000101 (00000101 alist))) (00000101 alist))
       ((witness-d1-no? (00100010 key (00000101 (00000101 alist))))
        (witness-find-entry key (00000110 alist))))))
