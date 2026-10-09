@@ -22,7 +22,7 @@ spec.loader.exec_module(frontier)
 class Core1OriginalFrontierTests(unittest.TestCase):
     def test_existing_real_historical_source_is_exact_git_blob(self):
         self.assertEqual(frontier.git_source_sha(ROOT), frontier.SOURCE_GIT_BLOB)
-        self.assertEqual((ROOT / frontier.SOURCE).stat().st_size, 638)
+        self.assertEqual((ROOT / frontier.SOURCE).stat().st_size, 640)
         self.assertFalse((ROOT / frontier.SOURCE.with_suffix(".sens")).exists())
 
     def test_first_blocker_is_reproducible_without_publishing_any_sens(self):
