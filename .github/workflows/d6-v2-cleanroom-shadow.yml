@@ -1,0 +1,18 @@
+name: D6 v2 cleanroom shadow
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-v2-cleanroom-shadow.json"
+      - "docs/research/d6-v2-cleanroom-shadow.md"
+      - "docs/research/d6-v2-cleanroom-shadow.uk.md"
+      - "scripts/check-d6-v2-cleanroom-shadow.py"
+      - ".github/workflows/d6-v2-cleanroom-shadow.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d6-v2-cleanroom-shadow.py
