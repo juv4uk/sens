@@ -1,0 +1,113 @@
+name: Verify 471 EQ vs static COND
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-471-eq-cond-static.yml'
+      - 'docs/research/471/**'
+
+jobs:
+  eq-cond-static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install temporary EQ/COND observer
+        shell: bash
+        run: |
+          cat > crates/my-lisp/tests/verify_471_eq_cond_static.rs <<'RS'
+          use my_lisp::{eval_program, ErrorKind, Session};
+
+          fn value(source: &str) -> String {
+              eval_program(source, &mut Session::default())
+                  .expect(source)
+                  .value
+                  .to_string()
+          }
+
+          fn error_kind(source: &str) -> ErrorKind {
+              eval_program(source, &mut Session::default())
+                  .expect_err(source)
+                  .kind
+          }
+
+          #[test]
+          fn eq_compares_two_runtime_atoms_but_rejects_pairs() {
+              let same = r#"
+                  ((lambda (left right) (eq left right))
+                   (quote radio)
+                   (quote radio))
+              "#;
+              let distinct = r#"
+                  ((lambda (left right) (eq left right))
+                   (quote right)
+                   (quote radio))
+              "#;
+
+              assert_eq!(value(same), "(identity-relation same)");
+              assert_eq!(value(distinct), "(identity-relation distinct)");
+              assert_eq!(
+                  error_kind("(eq (quote (radio . antenna)) (quote (radio . antenna)))"),
+                  ErrorKind::Type
+              );
+          }
+
+          #[test]
+          fn canonical_cond_matches_a_static_atom_datum() {
+              let source = r#"
+                  (cond
+                    ((quote radio) radio (quote selected))
+                    ((quote fallback) fallback (quote missed)))
+              "#;
+              assert_eq!(value(source), "selected");
+          }
+
+          #[test]
+          fn canonical_cond_matches_a_static_pair_datum_even_where_eq_is_outside_domain() {
+              let source = r#"
+                  (cond
+                    ((quote (radio . antenna)) (radio . antenna) (quote selected))
+                    ((quote fallback) fallback (quote missed)))
+              "#;
+              assert_eq!(value(source), "selected");
+          }
+
+          #[test]
+          fn using_a_variable_name_as_cond_expected_datum_false_negatives_equal_runtime_values() {
+              let source = r#"
+                  ((lambda (left right)
+                     (cond
+                       (left right (quote same))
+                       ((quote fallback) fallback (quote distinct))))
+                   (quote radio)
+                   (quote radio))
+              "#;
+              assert_eq!(value(source), "distinct");
+          }
+
+          #[test]
+          fn using_a_variable_name_as_cond_expected_datum_false_positives_distinct_runtime_values() {
+              let source = r#"
+                  ((lambda (left right)
+                     (cond
+                       (left right (quote same))
+                       ((quote fallback) fallback (quote distinct))))
+                   (quote right)
+                   (quote radio))
+              "#;
+              assert_eq!(value(source), "same");
+          }
+          RS
+
+      - name: Execute EQ versus static COND probes
+        run: cargo test -p my-lisp --test verify_471_eq_cond_static -- --nocapture
+
+      - name: Remove temporary observer
+        run: rm crates/my-lisp/tests/verify_471_eq_cond_static.rs
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
