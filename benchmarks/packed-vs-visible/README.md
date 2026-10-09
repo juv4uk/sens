@@ -45,3 +45,40 @@ the independently checked parity gate is retained so speeds cannot hide a
 wrong AST. For execution/load/English-vs-binary comparisons, see the separate
 `benchmarks/current-en-vs-d1d8` and `benchmarks/execution-ladder-objective`
 standards. No historical SID8 translation is performed.
+
+## Real execution (second measurement lane)
+
+`crates/sens/examples/packed_vs_visible_runtime.rs` adds a paired **parse → lower
+→ evaluate** benchmark for 1, 64, and 256 quoted-empty D3 forms, plus 64
+exact D1:1 values. It measures two independent cases per workload:
+
+- `warm-session-parse-lower-eval`: reuse an already-created bare Session;
+  each invocation parses fresh source, lowers and actually executes all forms.
+- `fresh-session-parse-lower-eval`: create a fresh bare Session each invocation,
+  then parse, lower and actually execute the forms.
+
+Each report also records a separate `execute_only_baseline_ns` measured on a
+pre-lowered AST under the same executable. **It is not a ratio denominator**;
+its purpose is to reveal how much of end-to-end time remains after ingestion.
+
+Result identity is checked **before measuring**. D1 must remain exact D1:1,
+whereas D3 QUOTE returns structural EMPTY, never an implicit truth value.
+Any different result blocks the whole benchmark. Same program and executable,
+24 warm-up invocations, nine alternating-order batch samples, variable iteration
+count, median per invocation and full raw samples.
+
+```bash
+cargo build --locked --release -p sens --example packed_vs_visible_runtime
+target/release/examples/packed_vs_visible_runtime --samples 9 \
+  > /tmp/sens-packed-runtime.jsonl
+```
+
+The hosted workflow publishes `packed-vs-visible-runtime.jsonl` and
+`runtime-summary.md` alongside the ingest metrics and hardware provenance.
+
+**Limitations:** Fresh Session is **not process cold start** and does not load
+Core4 or compile Rust. All phase measurements exclude disk I/O, physical file
+framing, the cost of transmitting/storing the caller-supplied word-width
+schedule, and terminal output. This lane compares physical vs visible input to
+one Rust interpreter, not Python/Chez/LLVM. Microbenchmark results on
+GitHub-hosted CPUs are noisy: never use one run to assert a universal speedup.
