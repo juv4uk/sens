@@ -107,8 +107,14 @@ fn exact_width_payloads_remain_distinct_across_d1_d3_d7_and_d9() {
 #[test]
 fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
     for source in ["01", "11"] {
-        let packed = encode_binary_projection_ternary(source)
-            .expect("physical transport can encode a structurally invalid D2 word");
+        // Bypass only the D2 grammar gate: encode these exact-width words
+        // directly into physical T5 so the decoder sees valid transport but
+        // structurally invalid program input.
+        let tokens = sens::parse_binary_source_words(source)
+            .expect("invalid D2 form is still a valid width-qualified word");
+        let words = tokens.into_iter().map(|token| token.word).collect::<Vec<_>>();
+        let packed = sens::encode_ternary_words(&words)
+            .expect("exact words encode into physical T5 independently of D2 grammar");
         assert!(open_ternary_program(&packed).is_err(),
             "invalid D2 control word unexpectedly opened: {source}");
     }
