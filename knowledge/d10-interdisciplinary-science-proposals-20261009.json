@@ -1,0 +1,158 @@
+{
+  "schema": "d10-interdisciplinary-scientific-laws/v1",
+  "status": "RESEARCH-SELECTED-ONLY-NOT-RATIFIED",
+  "foundation": "Contract 11.8 / ratified D1-D9",
+  "target": "one universal 10-bit D10 semantic namespace",
+  "authority": "#4013 #4463 user-directed interdisciplinary interest harvest",
+  "selected_semantic_candidates": [
+    {
+      "stable_id": "d10.science.covariance-transport.20261009",
+      "semantic_name": "COVARIANCE-TRANSPORT",
+      "source_url": "https://www.nist.gov/publications/guide-expression-uncertainty-measurement",
+      "law": "Given an n×n symmetric covariance matrix Sigma and an m×n Jacobian J at the same linearization point, yield m×m J*Sigma*transpose(J), retaining nonzero cross-covariances; reject inconsistent shapes. This is a first-order linearized covariance law and must not claim exact uncertainty propagation for arbitrary nonlinear distributions.",
+      "positive_witnesses": [
+        "For Sigma=[[4,2],[2,9]] and J=[[1,1],[1,-1]], result is [[17,-5],[-5,9]]; dropping cross-covariance incorrectly yields [[13,-5],[-5,13]].",
+        "For identity Jacobian I2, result equals the original covariance matrix, including its off-diagonal entries."
+      ],
+      "falsifiers": [
+        "Discarding cross-covariance off-diagonal terms while composing the output covariance.",
+        "Claiming exact covariance for arbitrary nonlinear transforms, or silently accepting incompatible Jacobian and covariance dimensions."
+      ]
+    },
+    {
+      "stable_id": "d10.science.frame-state-transform.20261009",
+      "semantic_name": "FRAME-STATE-TRANSFORM",
+      "source_url": "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html",
+      "law": "For an epoch-aligned frame rotation R(t), derivative Rdot(t), source position p and source velocity v, yield target p'=R*p and v'=R*v+Rdot*p. A rotation-only position law does not suffice for velocity in a time-varying frame; reject mismatched dimensions and epochs.",
+      "positive_witnesses": [
+        "R rotates +90 deg about z; angular speed 2 radians/time; p=(1,0,0), v=(0,0,0). Then p'=(0,1,0) and v'=(-2,0,0), not (0,0,0).",
+        "With R=I and Rdot=0, both position and velocity remain identical."
+      ],
+      "falsifiers": [
+        "Return only R*v without derivative term Rdot*p during changing frame.",
+        "Confuse positions with velocities or allow rotation/derivative matrices from different epochs."
+      ]
+    },
+    {
+      "stable_id": "d10.science.rational-resample.20261009",
+      "semantic_name": "RATIONAL-RESAMPLE",
+      "source_url": "https://wiki.gnuradio.org/index.php/Rational_Resampler",
+      "law": "For input signal x sampled at fs, positive integer interpolation L and decimation M, and explicit FIR taps h, zero-insert by L, convolve causally with h, then retain indices divisible by M: output rate fs*L/M. The explicit finite-output convention is output indices n<length(x)*L, with zero prehistory; repeated processing on disjoint chunks must preserve FIR history and global decimation phase.",
+      "positive_witnesses": [
+        "x=[2,4,6], L=2, M=3, taps=[1/4,1/2,1/4] yields [1/2,2] under declared causal/truncated finite-output convention.",
+        "Processing a signal as one block or two consecutive blocks with retained FIR history and decimation phase yields the same output sequence, and output sampling rate is input_fs*L/M."
+      ],
+      "falsifiers": [
+        "Change the output rate but skip FIR filtering, producing aliasing/images while claiming source-law parity.",
+        "Reset decimation phase at each chunk boundary or silently discard FIR history, yielding a different result from uninterrupted processing."
+      ]
+    }
+  ],
+  "hold_for_derivability": [
+    {
+      "semantic_name": "FOURIER-TRANSFORM",
+      "topic": "radio, astronomy, music",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "DFT follows from exact complex arithmetic; FFT is algorithmic acceleration and convention, not independent semantic identity",
+      "closest_existing_law": "D8 COMPLEX and arithmetic; check library composite before code assignment",
+      "source_url": "https://fftw.org/doc/Complex-DFTs.html",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    },
+    {
+      "semantic_name": "PHASE-UNWRAP",
+      "topic": "SDR, horology, music",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "Cumulative wrapped-difference scan; tie/equality at ±pi and nan behavior need owner-specified semantics",
+      "closest_existing_law": "D6 SCAN and existing trigonometric operations",
+      "source_url": "https://wiki.gnuradio.org/index.php/Phase_Unwrap",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    },
+    {
+      "semantic_name": "SATURATING-ADD",
+      "topic": "FPGA and microcontrollers",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "Likely composite of arithmetic MIN/MAX with a fixed-width bounds law; need signedness and width contract",
+      "closest_existing_law": "D5 PLUS and D6 MIN/MAX",
+      "source_url": "https://doc.rust-lang.org/std/primitive.i32.html#method.saturating_add",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    },
+    {
+      "semantic_name": "TIME-SCALE-CONVERT",
+      "topic": "astronomy, clocks",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "UTC↔TAI↔UT1 depends on authoritative time-scale tables at epoch, not timezone offset or fixed 37-second constant",
+      "closest_existing_law": "D9 UNIX-TIME-OBSERVATION->UTC and TIMEZONE-OFFSET-SECONDS; external data effect boundary",
+      "source_url": "https://www.iers.org/iers/en/dataproducts/tools/webservices/webservice-time",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    },
+    {
+      "semantic_name": "PANINI-PHONEME-TRANSDUCE",
+      "topic": "Sanskrit, linguistics",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "Need show new semantic law beyond ratified D7 phoneme identities and D10 Panini derivation functions; not a new alphabet table",
+      "closest_existing_law": "D7 phoneme coordinate identities, D10 RESOLVE-PRATYAHARA/DERIVE-VERB-*",
+      "source_url": "https://www.sanskritlibrary.org/Sanskrit/Vyakarana/",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    },
+    {
+      "semantic_name": "OSCILLATOR-PHASE-STEP",
+      "topic": "analogue computation and music",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "Discrete oscillator phase advancement might be derived from modulo + arithmetic; must specify phase error and fixed-point precision",
+      "closest_existing_law": "D10 MODULO and numeric arithmetic",
+      "source_url": "https://wiki.gnuradio.org/index.php/Signal_Source",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    },
+    {
+      "semantic_name": "ADC-QUANTIZE",
+      "topic": "ESP32 electronics and metrology",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "Likely derived clipping and rounding; source-specific ADC calibration curves and saturation must be separated from core semantics",
+      "closest_existing_law": "D8 ROUND and numerical comparisons",
+      "source_url": "https://www.nist.gov/publications/guide-expression-uncertainty-measurement",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    },
+    {
+      "semantic_name": "CRC-UPDATE",
+      "topic": "FPGA, bitstream, radio framing",
+      "triage": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "reason": "CRC polynomial and bit order are caller parameters; transport/link framing stays outside D2 language structure",
+      "closest_existing_law": "D8 LOGBITP + arithmetic + binary carrier, not a D2 syntax operation",
+      "source_url": "https://www.itu.int/rec/T-REC-V.42/en",
+      "coordinate": null,
+      "selected": false,
+      "ratified": false
+    }
+  ],
+  "selected_count": 3,
+  "hold_count": 8,
+  "owner_note": "Scientific operations can be composites; selected here means auditable research identity, NOT primitive/bit assignment, ratification, T5 or real FPGA/CUDA semantics. No actual SENS executable code added.",
+  "reference_tests": "scripts/check_d10_science_interests_v1.py",
+  "scientific_evidence": {
+    "covariance": [
+      "https://www.nist.gov/publications/guide-expression-uncertainty-measurement",
+      "https://www.nist.gov/publications/correlation-uncertainty-measurement-discussion-state-art-techniques"
+    ],
+    "frame": [
+      "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html"
+    ],
+    "resampling": [
+      "https://wiki.gnuradio.org/index.php/Rational_Resampler",
+      "https://www.gnuradio.org/doc/doxygen/classgr_1_1filter_1_1rational__resampler.html"
+    ]
+  }
+}
