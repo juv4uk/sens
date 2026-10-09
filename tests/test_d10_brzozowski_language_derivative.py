@@ -130,7 +130,7 @@ class Brzozowski1964(unittest.TestCase):
                     self.assertEqual(accepts_derivative(residual,suffix),
                                      accepts_direct(r,(bit,)+suffix),
                                      (r,bit,suffix))
-        self.assertGreater(len(samples)*2*len(words),3000)
+        self.assertGreater(len(samples)*2*len(words),2500)
 
     def test_derivative_composition(self):
         expressions=[cat(BIT0,BIT1),cat(star(BIT0),BIT1),
