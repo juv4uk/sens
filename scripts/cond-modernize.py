@@ -281,10 +281,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--apply", action="store_true", help="opt-in safe staging")
     ap.add_argument("--out", type=Path, help="distinct output directory, mandatory for --apply")
     args = ap.parse_args(argv)
-    if args.apply and (args.scan or args.out is None):
-        ap.error("--apply requires --out DIR and cannot be combined with --scan")
     if args.out and not args.apply:
-        ap.error("--out is only allowed with --apply")
+        print("BLOCK: --out requires explicit --apply; no files written")
+        return 4
+    if args.apply and (args.scan or args.out is None):
+        print("BLOCK: --apply requires --out DIR and cannot be combined with --scan")
+        return 4
     target = Path(args.target)
     if not target.exists():
         ap.error(f"not found: {target}")
@@ -339,12 +341,19 @@ def main(argv: list[str] | None = None) -> int:
         for r in rows:
             print(f"{r['path']}:{r['line']}: {r['status']} "
                   f"{r['cond']}/{r['producer']} {r['expected']}: {r['reason']}")
+        legacy_files = {r["path"] for r in rows if r["status"] in ("HOLD", "AUTO_YES")}
+        print(f"# файлів зі старими cond-клаузами: {len(legacy_files)}")
         print(f"Inventory: {len(rows)} clauses; "
               f"{sum(r['status'] == 'HOLD' for r in rows)} HOLD; "
               f"{sum(r['status'] == 'AUTO_YES' for r in rows)} auto YES")
         for failure in failures:
             print(f"BLOCKED: {failure}", file=sys.stderr)
-    return 2 if failures else 0
+    if failures:
+        return 4
+    if not args.scan and not args.json and not args.apply:
+        print("BLOCK: target invocation is inventory-only by default; use --scan/--json or explicit --apply --out DIR")
+        return 4
+    return 0
 
 
 if __name__ == "__main__":

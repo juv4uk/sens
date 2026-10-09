@@ -106,7 +106,8 @@ class SafeCondMigration(unittest.TestCase):
             source.write_text("(110 ((010 x) (1) pass))", encoding="utf-8")
             a = subprocess.run([sys.executable, str(SCRIPT), str(source)],
                                capture_output=True, text=True)
-            self.assertEqual(a.returncode, 0)
+            self.assertEqual(a.returncode, 4, a.stdout + a.stderr)
+            self.assertIn("BLOCK:", a.stdout)
             self.assertEqual(source.read_text(encoding="utf-8"),
                              "(110 ((010 x) (1) pass))")
 
