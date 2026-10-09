@@ -45,4 +45,4 @@ That last point is the main unresolved question. Derivability is not automatical
 
 The JSON dossier pins the historical source, input/output contract, witnesses, falsifiers, and review limits. The Python oracle generates the symbolic derivative and compares its polynomial meaning with an independently implemented coefficient-map derivative. The SWI-Prolog oracle provides a second executable implementation with its own coefficient algebra. CI must report the real oracle results; no runtime parity in SENS is claimed.
 
-Scope is source/tests/docs/workflow only: no D10 inventory/state, proposal ledger, selection history, D1–D9, D2, T5, or executable `.sens` changes. The proposal remains `selected=false`, `coordinate=null`, `ratified=false`, pending owner and peer review.
+Scope is source/tests/docs/workflow plus exactly one **pending-review** row `D10P-0015` in `knowledge/d10-proposal-ledger.tsv`. No D10 inventory/state, selection history, D1–D9, D2, T5, or executable `.sens` changes. The proposal remains `selected=false`, `coordinate=null`, `ratified=false`, `status=pending-review`; owner/peer review and Core-vs-library minimality remain unresolved.
