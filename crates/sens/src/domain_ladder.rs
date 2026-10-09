@@ -74,6 +74,14 @@ mod tests {
                 "owner-reserved D7 words must stay unassigned"
             );
             admitted += usize::from(admission);
+            let typed = crate::DomainIdentity::from_source_word(
+                crate::BinarySourceWord::W7(
+                    crate::Bit7::new(bits as u8).expect("seven-bit word"),
+                ),
+            );
+            assert_eq!(typed.width(), 7);
+            assert_eq!(typed.packed_bits(), bits);
+            assert!(typed.core_operation().is_none(), "D7 residency is not callability");
         }
         assert_eq!(admitted, 126);
         // Width or equal payload in another domain must not inherit D7 occupancy.
