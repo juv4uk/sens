@@ -1,0 +1,25 @@
+name: D10 independent CLOS slot donor oracle
+on:
+  pull_request:
+    paths:
+      - 'tests/oracles/d10_clos_slot_states.lisp'
+      - 'knowledge/d10-clos-slot-observation-v1.json'
+      - 'knowledge/d10-clos-slot-state-historical-review-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'scripts/check_d10_clos_slot_observation_v1.py'
+      - '.github/workflows/d10-clos-independent-oracle.yml'
+  workflow_dispatch:
+jobs:
+  historical-common-lisp-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify provenance and zero false D10 admission
+        run: python3 scripts/check_d10_clos_slot_observation_v1.py --static-only
+      - name: Install independent Common Lisp donor interpreter
+        run: sudo apt-get update -qq && sudo apt-get install -y sbcl
+      - name: Run 17 executable historical CLOS witnesses under SBCL
+        run: python3 scripts/check_d10_clos_slot_observation_v1.py --sbcl sbcl
