@@ -67,7 +67,7 @@ jobs:
           PY
       - name: Upload source-physical-view coverage evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-t5-three-projection-inventory
           path: ${{ runner.temp }}/sens-t5-triplet-inventory.json

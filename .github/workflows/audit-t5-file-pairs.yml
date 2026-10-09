@@ -107,7 +107,7 @@ jobs:
           PY
       - name: Keep audit evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-t5-file-pairs-report
           if-no-files-found: warn

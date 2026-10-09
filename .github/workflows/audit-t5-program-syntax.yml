@@ -182,7 +182,7 @@ jobs:
           PY
       - name: Upload provenance + D2 grammar report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: t5-d2-syntax-audit
           if-no-files-found: warn

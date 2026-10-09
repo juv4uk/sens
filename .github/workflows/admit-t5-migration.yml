@@ -89,7 +89,7 @@ jobs:
           PY
       - name: Upload physical binaries and per-source admission evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: reviewed-t5-migration-admissions
           path: ${{ runner.temp }}/sens-t5-admission

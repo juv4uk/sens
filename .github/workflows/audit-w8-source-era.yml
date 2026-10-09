@@ -63,7 +63,7 @@ jobs:
               f.write('\nSee JSON artifact for EVERY exact path + original Git SHA. No source-era mode is automatically selected.\n')
           PY
       - name: Keep per-source SHA-provenance evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-original-w8-history
           path: ${{ runner.temp }}/w8-pre-d8-provenance.json

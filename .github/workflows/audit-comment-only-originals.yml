@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Test conservative Git SHA and no-executable-form audit
@@ -57,7 +57,7 @@ jobs:
             exit 1
           }
       - name: Save original SHA-pinned comment-only evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: original-comment-only-scope-no-publish
           path: ${{ runner.temp }}/comment-only-originals.json
