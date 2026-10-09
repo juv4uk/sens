@@ -24,5 +24,24 @@ class StateSuffixTests(unittest.TestCase):
         self.assertEqual(r["selected_delta"], 0)
         self.assertEqual(r["original_executable_migrations_admitted"], 0)
 
+    def test_epsilon_is_a_real_witness(self):
+        args = ([[0, 0], [1, 1]], [0, 1], 0, 1)
+        self.assertEqual(law.product_bfs(*args), law.result(""))
+        self.assertNotEqual(law.result(""), law.result(None))
+        with self.assertRaises(law.Blocked):
+            law.assert_exact_witness(*args, law.result(None))
+
+    def test_falsified_tables_and_lex_order_block(self):
+        for args in [([], [], 0, 0), ([[0]], [0], 0, 0),
+                     ([[0, 2]], [0], 0, 0), ([[0, 0]], [True], 0, 0),
+                     ([[0, 0]], [2], 0, 0), ([[0, 0]], [0], True, 0)]:
+            with self.subTest(args=args), self.assertRaises(law.Blocked):
+                law.product_bfs(*args)
+        args = ([[2, 3], [3, 2], [2, 2], [3, 3]], [0, 0, 1, 0], 0, 1)
+        self.assertEqual(law.product_bfs(*args), law.result("0"))
+        for word in ("1", "00", None):
+            with self.assertRaises(law.Blocked):
+                law.assert_exact_witness(*args, law.result(word))
+
 if __name__ == "__main__":
     unittest.main()
