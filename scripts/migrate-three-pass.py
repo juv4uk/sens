@@ -297,17 +297,6 @@ def parse_current_surface_rows(path: Path):
             rows[name]=(bits,f"D{width}")
     return rows
 
-def parse_legacy_successors(semantic_registry: Path, necessary_forms: Path):
-    """Compatibility is reconstructed from ratified domain evidence, not Rust code.
-
-    The Rust semantic registry no longer defines or exports an old SID -> domain
-    resolver.  An absent Rust mechanism must never block canonical migration
-    or recreate historical language authority.
-    """
-    _ = (semantic_registry, necessary_forms)
-    return {}
-
-
 def parse_audited_legacy_successors(path: Path, foundation: dict):
     """Consume owner-audited SENS8 history; never treat old W8 as current D8.
 
@@ -369,7 +358,11 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                           legacy_coverage: Path|None=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
-    proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
+    # Джерело міграції — тільки ратифіковані координати й перевірена
+    # таблиця provenance. Видалений Rust-маршрутизатор не є законом мови.
+    # Параметри semantic_registry/necessary_forms збережені лише для
+    # сумісності наявних викликів інструмента; їхній вміст не читається.
+    proven_legacy={}
     if legacy_coverage is not None:
         for byte,ident in parse_audited_legacy_successors(legacy_coverage,data).items():
             existing=proven_legacy.get(byte)
