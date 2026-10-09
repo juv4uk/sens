@@ -98,5 +98,18 @@
     "#4977",
     "#4998"
   ],
-  "reviewer_state": "PENDING-OWNER-AND-PEER-REVIEW"
+  "reviewer_state": "PENDING-OWNER-AND-PEER-REVIEW",
+  "proposal_ledger": {
+    "proposal_id": "D10P-0070",
+    "surface_uk": "симв-диф",
+    "surface_ukr": "символьно-диференціювати",
+    "width": "D10",
+    "donor_provenance": "juv4uk/sens@8cfc58bc1dadb847b9eaaf3187bc1e7a27b303ce:knowledge/d10-maling-symbolic-differentiation-1959-v1.json:19",
+    "dedup_check": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@3db40a04c1094c9ea13b0c8d6099ef1d882cf203=NO-MATCH",
+    "ownership_test": "UNIVERSAL-BORDER: formal differentiation is a substrate-independent transformation of symbolic expressions; whether it is irreducible Core semantics or derived from existing expression/evaluator operations remains under owner review.",
+    "blocked_source": "NOT-A-MIGRATION-BLOCK",
+    "status": "pending-review",
+    "ratified": "0",
+    "note": "PENDING only; no selection, coordinate, runtime, or T5 authority."
+  }
 }
