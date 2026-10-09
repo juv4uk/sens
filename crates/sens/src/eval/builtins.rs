@@ -531,15 +531,15 @@ pub(super) fn prim_00111011(args: &[Value], _env: &Environment, span: Span) -> R
 
 fn string_prefix_answer(prefix: &Value, text: &Value, span: Span) -> Result<Value, crate::LanguageError> {
     match (prefix, text) {
-        (Value::String(p), Value::String(t)) => Ok(Value::truth(t.starts_with(p.as_ref()))),
+        (Value::String(p), Value::String(t)) => Ok(Value::predicate_bit(t.starts_with(p.as_ref()))),
         _ => {
             // Той самий порядок кроків, що в мовній версії.
             if is_empty_string(prefix) {
-                return Ok(Value::truth(true));
+                return Ok(Value::predicate_bit(true));
             }
             string_empty_answer(prefix, span)?;
             if is_empty_string(text) {
-                return Ok(Value::Nil);
+                return Ok(Value::predicate_bit(false));
             }
             string_empty_answer(text, span)?;
             string_first_or_error(prefix, span)?;
@@ -560,15 +560,15 @@ pub(super) fn prim_00111110(args: &[Value], _env: &Environment, span: Span) -> R
     exact_args(crate::sens!(00111110), args, 2, span)?;
     match (&args[0], &args[1]) {
         (Value::String(needle), Value::String(text)) => {
-            Ok(Value::truth(text.contains(needle.as_ref())))
+            Ok(Value::predicate_bit(text.contains(needle.as_ref())))
         }
         (needle, text) => {
             // Мовна версія: спершу string-prefix?, потім string-empty?, потім string-rest.
-            if string_prefix_answer(needle, text, span)? == Value::truth(true) {
-                return Ok(Value::truth(true));
+            if string_prefix_answer(needle, text, span)? == Value::predicate_bit(true) {
+                return Ok(Value::predicate_bit(true));
             }
             if is_empty_string(text) {
-                return Ok(Value::Nil);
+                return Ok(Value::predicate_bit(false));
             }
             string_empty_answer(text, span)?;
             string_rest_or_error(text, span)?;
