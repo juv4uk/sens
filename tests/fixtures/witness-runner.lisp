@@ -95,15 +95,11 @@
              ((00100010 error-entry (00000001 ()))
               (witness-malformed-result (00000001 missing-outcome) witness))
              ((witness-d1-no? (00100010 error-entry (00000001 ())))
-              (00100111 (00000001 witness-result)
-                    (00100111 (00000001 status) (00000001 error))
-                    (00100111 (00000001 actual) error-entry))))
+              (00100111 (00000001 error) error-entry)))
           ((witness-d1-no? (00100010 expected-entry (00000001 ())))
            (00000111
              ((00100010 error-entry (00000001 ()))
-              (00100111 (00000001 witness-result)
-                    (00100111 (00000001 status) (00000001 value))
-                    (00100111 (00000001 actual) expected-entry)))
+              (00100111 (00000001 value) expected-entry))
              ((witness-d1-no? (00100010 error-entry (00000001 ())))
               (witness-malformed-result (00000001 expected-and-error) witness))))))))))(00001001 witness-verdict
   (00001000 (witness actual)
