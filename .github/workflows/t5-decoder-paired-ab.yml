@@ -52,6 +52,12 @@ jobs:
       - name: Build candidate release hot benchmark
         run: cargo build --locked --release --manifest-path candidate/Cargo.toml -p sens --example physical_sens_hot_bench
 
+      - name: Prove exact transport parity for all 65,792 files up to two bytes
+        run: |
+          cargo test --locked --manifest-path candidate/Cargo.toml -p sens --lib \
+            optimized_t5_matches_independent_full_trit_oracle_on_all_one_and_two_byte_files \
+            -- --nocapture
+
       - name: Measure interleaved same-CPU T5 decoder phases
         shell: bash
         run: |
