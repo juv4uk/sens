@@ -9,7 +9,7 @@
 //! Жодного D7-пробілу чи нового D10-резидента тут немає.
 //! Number D24+ ще не допускається до цього механічного носія.
 
-use crate::{parse_binary_source_words, parse_canonical_binary, BinarySourceWord};
+use crate::{parse_binary_source_words, parse_canonical_words, BinarySourceWord};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TernaryTransportError {
@@ -185,9 +185,10 @@ pub fn encode_binary_projection_ternary(
     if words.is_empty() {
         return Err(TernaryTransportError::EmptyProgram);
     }
-    parse_canonical_binary(projection)
+    let exact_words = words.iter().map(|token| token.word).collect::<Vec<_>>();
+    parse_canonical_words(&exact_words)
         .map_err(|_| TernaryTransportError::InvalidProgramSyntax)?;
-    encode_ternary_words(&words.iter().map(|word| word.word).collect::<Vec<_>>())
+    encode_ternary_words(&exact_words)
 }
 
 /// Формально валідує повноту D2-структури через наявний
@@ -196,8 +197,9 @@ pub fn decode_ternary_program(
     data: &[u8],
 ) -> Result<Vec<BinarySourceWord>, TernaryTransportError> {
     let words = decode_ternary_words(data)?;
-    let projection = render_ternary_words_vertical(&words);
-    parse_canonical_binary(&projection)
+    // Validate the real D2 grammar over typed words, not a synthesized
+    // textual 0/1 surface. Display rendering is strictly a UI concern.
+    parse_canonical_words(&words)
         .map_err(|_| TernaryTransportError::InvalidProgramSyntax)?;
     Ok(words)
 }
