@@ -134,37 +134,52 @@ pub fn decode_ternary_words(
     if data.len() > MAX_FILE_BYTES {
         return Err(TernaryTransportError::TransportTooLarge);
     }
-    let mut trits = Vec::with_capacity(data.len() * TRITS_PER_BYTE);
-    for byte in data.iter().copied() {
-        if byte >= 243 {
-            return Err(TernaryTransportError::InvalidPhysicalByte);
-        }
+    // Preserve the original rejection priority: an impossible physical byte
+    // is rejected before inspecting padding or individual source words.
+    if data.iter().any(|&byte| byte >= 243) {
+        return Err(TernaryTransportError::InvalidPhysicalByte);
+    }
+
+    // Count trailing pad trits from the least-significant base-3 digit of
+    // each final byte. EOF is the only endpoint: no semantic EOS token.
+    // This avoids a 5 * physical_bytes temporary trit allocation.
+    let mut tail = 0usize;
+    'padding: for &byte in data.iter().rev() {
         let mut value = byte;
-        let mut digits = [0u8; TRITS_PER_BYTE];
-        for digit in digits.iter_mut().rev() {
-            *digit = value % 3;
+        for _ in 0..TRITS_PER_BYTE {
+            if value % 3 != 2 {
+                break 'padding;
+            }
+            tail += 1;
             value /= 3;
         }
-        trits.extend_from_slice(&digits);
     }
-    // Не слід шукати EOS=22: межу файла вже дає кількість байтів.
-    // Після останнього слова може бути тільки 0..4 trit-2 як padding.
-    // У самих словах допустимі лише 0 та 1, тому фізичний хвіст
-    // однозначно відділяється від останнього слова.
-    let tail = trits.iter().rev().take_while(|digit| **digit == 2).count();
     if tail >= TRITS_PER_BYTE {
         return Err(TernaryTransportError::InvalidTail);
     }
-    trits.truncate(trits.len() - tail);
-    if trits.is_empty() {
+    let payload_trits = data.len() * TRITS_PER_BYTE - tail;
+    if payload_trits == 0 {
         return Err(TernaryTransportError::EmptyDomainWord);
     }
 
     let mut words = Vec::<BinarySourceWord>::new();
     let mut current_value = 0u16;
     let mut current_width = 0usize;
-    for digit in trits {
-        match digit {
+    let mut seen = 0usize;
+    'payload: for &byte in data {
+        // One five-trit byte at a time; only five stack bytes are needed.
+        let mut value = byte;
+        let mut digits = [0u8; TRITS_PER_BYTE];
+        for digit in digits.iter_mut().rev() {
+            *digit = value % 3;
+            value /= 3;
+        }
+        for digit in digits {
+            if seen == payload_trits {
+                break 'payload;
+            }
+            seen += 1;
+            match digit {
             0 | 1 => {
                 current_value = (current_value << 1) | u16::from(digit);
                 current_width += 1;
@@ -180,9 +195,11 @@ pub fn decode_ternary_words(
                 current_value = 0;
                 current_width = 0;
             }
-            _ => unreachable!(),
+                _ => unreachable!(),
+            }
         }
     }
+    debug_assert_eq!(seen, payload_trits);
     if current_width == 0 {
         return Err(TernaryTransportError::EmptyDomainWord);
     }
