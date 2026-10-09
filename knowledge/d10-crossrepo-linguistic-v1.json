@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "batch": "D10-CROSSREPO-LINGUISTIC-V1",
+  "parent": "#4300",
+  "authority": "#4162",
+  "base_main": "9f20e0c0a29384f2ead1fa584ed215f2fa9e27f3",
+  "d10_state": {
+    "selected": 527,
+    "capacity": 1024,
+    "law_forced_coordinates": 256,
+    "unplaced_selected": 271,
+    "remaining": 497,
+    "ratified": 0,
+    "status": "RESEARCH-UNRATIFIED"
+  },
+  "donor_scope": [
+    "juv4uk/dict_uk",
+    "juv4uk/latynka",
+    "juv4uk/nlp_uk",
+    "juv4uk/russian-lang",
+    "juv4uk/sanskritworld_texts",
+    "juv4uk/vidyut"
+  ],
+  "nonduplication_exclusions": [
+    "my-lisp-panini#52",
+    "shiva-sutras#124",
+    "panca-vac#11"
+  ],
+  "rows": [
+    {
+      "stable_id": "d10.ling.latynka.contextual-rewrite.v1",
+      "repository": "juv4uk/latynka",
+      "source": [
+        "src/js/translit.js@52166a26220cb5fdd63ec834d0693f4ad49181cd",
+        "spec/translit.spec.js@52166a26220cb5fdd63ec834d0693f4ad49181cd"
+      ],
+      "semantic_name": "CONTEXTUAL-TEXT-REWRITE",
+      "behavior": "Apply a finite rewrite table where the result for a matched input depends on lexical context classes such as word-start and after-consonant, with deterministic longest-key matching and case projections.",
+      "decision": "HOLD",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No current D10 semantic-name match; exact behavioral lower-domain audit still required.",
+      "coordinate": null,
+      "provenance_note": "Actual transliteration operation; not admitted as a slot yet."
+    },
+    {
+      "stable_id": "d10.ling.vidyut.unicode-normalization.v1",
+      "repository": "juv4uk/vidyut",
+      "source": [
+        "vidyut-lipi/src/unicode_norm.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea",
+        "vidyut-lipi/tests/basic.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea"
+      ],
+      "semantic_name": "CANONICAL-UNICODE-NORMALIZE",
+      "behavior": "Map Unicode-equivalent representations to canonical NFC/NFD forms while preserving semantic equivalence for downstream transliteration.",
+      "decision": "HOLD",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D10 name match; exact D1-D9 behavioral audit remains.",
+      "coordinate": null,
+      "provenance_note": "Executable normalization law with equivalence tests."
+    },
+    {
+      "stable_id": "d10.ling.vidyut.greedy-span-mapping.v1",
+      "repository": "juv4uk/vidyut",
+      "source": [
+        "vidyut-lipi/src/transliterate.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea",
+        "vidyut-lipi/src/mapping.rs@8da2f90bee3ce1c07505fa432fc3729e3f7e02ea"
+      ],
+      "semantic_name": "LONGEST-MATCH-TEXT-MAPPING",
+      "behavior": "At each input position choose the longest defined mapping key starting there, with token-kind context for marks/consonants.",
+      "decision": "HOLD",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "Could be an implementation strategy for generic matching rather than an independent language law.",
+      "coordinate": null,
+      "provenance_note": "Evidence only."
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.tokenize-sentences.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/TokenizeText.groovy@9ee55703fbdd003ae217d83347db40f520fdb29c"
+      ],
+      "semantic_name": "TOKENIZE-SENTENCES",
+      "behavior": "Transform text into an ordered sequence of sentence units using the Ukrainian sentence-boundary tokenizer, preserving paragraph processing and normalized line separation.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for sentence tokenization; STRING-SPLIT exists but does not encode language-specific sentence boundary behavior.",
+      "coordinate": null,
+      "provenance_note": "Executable Ukrainian-specific sentence segmentation.",
+      "independent_law_witness": {
+        "canonical_input_shape": "UTF-8 paragraph/string text; sentence mode consumes each paragraph buffer.",
+        "canonical_output_relation": "ordered sentence units in source order, with configured line-separator normalization.",
+        "positive_witness": "TokenizeText.splitSentences calls SRXSentenceTokenizer.tokenize(text) and emits each returned sentence as one output unit.",
+        "boundary_witness": "A generic STRING-SPLIT cannot express tokenizer state/context; this implementation delegates sentence boundaries to the Ukrainian SRX tokenizer rather than a fixed separator.",
+        "near_match_identity": "STRING-SPLIT",
+        "provenance_sha": "9ee55703fbdd003ae217d83347db40f520fdb29c",
+        "witness_kind": "source-level-static"
+      }
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.tokenize-words.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/TokenizeText.groovy@9ee55703fbdd003ae217d83347db40f520fdb29c"
+      ],
+      "semantic_name": "TOKENIZE-WORDS",
+      "behavior": "Transform a sentence into ordered lexical/token units using the Ukrainian word tokenizer, with language-specific token adjustments and optional filtering to lexical words.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match; generic STRING-SPLIT is not equivalent to language-specific token boundary rules.",
+      "coordinate": null,
+      "provenance_note": "Executable Ukrainian-specific word segmentation.",
+      "independent_law_witness": {
+        "canonical_input_shape": "One sentence unit from the Ukrainian sentence tokenizer; optional onlyWords mode filters the resulting lexical items.",
+        "canonical_output_relation": "ordered token units, optionally reduced to lexical words, after UkrainianWordTokenizer plus token-adjustment rules.",
+        "positive_witness": "TokenizeText.splitWords calls wordTokenizer.tokenize(sent), then TextUtils.adjustTokens(words, true), and in onlyWords mode applies WORD_PATTERN filtering before joining the tokens.",
+        "boundary_witness": "For punctuation-attached text or mixed token classes, generic STRING-SPLIT would preserve separator-defined chunks; this implementation additionally applies Ukrainian tokenization and TextUtils.adjustTokens.",
+        "near_match_identity": "STRING-SPLIT",
+        "provenance_sha": "9ee55703fbdd003ae217d83347db40f520fdb29c",
+        "witness_kind": "source-level-static"
+      }
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.lemmatize-text.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/LemmatizeText.groovy@e33b3c5f02ac742ced189db1f9a5a4e012230f5f"
+      ],
+      "semantic_name": "LEMMATIZE-TEXT",
+      "behavior": "Map analyzed token readings to lemma representatives; when multiple lemmas remain, optionally select one by an explicit lemma-frequency policy after tag-based filtering.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for lemmatization; current STRING/MAP/translation validation rows are not the same operation.",
+      "coordinate": null,
+      "provenance_note": "LanguageTool-backed executable lemma mapping with an explicit ambiguity policy.",
+      "independent_law_witness": {
+        "canonical_input_shape": "UTF-8 text analyzed as LanguageTool Ukrainian sentences and token readings.",
+        "canonical_output_relation": "each analyzable token is mapped to one or more unique lemmas; optional firstLemmaOnly applies an explicit frequency-based ambiguity policy.",
+        "positive_witness": "LemmatizeText.analyzeText calls MultiThreadedJLanguageTool.analyzeText(text), reads token lemma fields, and emits unique lemma values; findSingleLemma selects among surviving lemmas by lemmaFreqs when ambiguity remains.",
+        "boundary_witness": "STRING/MAP/translation rows can transform or validate representations but do not derive morphological lemma representatives from analyzed token readings.",
+        "near_match_identity": "UNDERSTAND-QUERY / TRANSLATION-*",
+        "provenance_sha": "e33b3c5f02ac742ced189db1f9a5a4e012230f5f",
+        "witness_kind": "source-level-static"
+      }
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.inflect-word.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/Inflect.groovy@a59975b48b1771de90136d512606e831a855ab0a",
+        "juv4uk/dict_uk:data/affix/*.aff"
+      ],
+      "semantic_name": "INFLECT-WORD",
+      "behavior": "Generate all word forms of a lemma satisfying a requested morphological tag or tag regular expression.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for morphological inflection; donor affix rules are supporting evidence, not independent slots.",
+      "coordinate": null,
+      "provenance_note": "Executable synthesizer plus Ukrainian affix-rule evidence.",
+      "independent_law_witness": {
+        "canonical_input_shape": "lemma/token string + morphological tag or tag regular expression + regexp mode.",
+        "canonical_output_relation": "set/list of synthesized word forms satisfying the requested morphological tag constraint.",
+        "positive_witness": "Inflect.inflectWord constructs an AnalyzedToken from the lemma and directly calls UkrainianSynthesizer.synthesize(token, tag, regexp). The CLI documents `місто` + `noun:inanim:n:v_rod` as a concrete witness shape.",
+        "boundary_witness": "DERIVE-VERB-LAKARA is a staged Paninian verb derivation law; this operation instead accepts an arbitrary lemma plus morphological tag constraint and synthesizes the matching word forms.",
+        "near_match_identity": "DERIVE-VERB-LAKARA",
+        "provenance_sha": "a59975b48b1771de90136d512606e831a855ab0a",
+        "witness_kind": "source-level-static"
+      }
+    },
+    {
+      "stable_id": "d10.ling.nlp-uk.pos-morph-tag.v1",
+      "repository": "juv4uk/nlp_uk",
+      "source": [
+        "src/main/groovy/org/nlp_uk/tools/TagText.groovy@64da8876e4ca877d3c129bbd5e4d594df4977422"
+      ],
+      "semantic_name": "MORPHO-SYNTACTIC-TAG",
+      "behavior": "For each analyzed token expose lemma and one or more part-of-speech/morphological readings, with explicit handling of punctuation, symbols, unknown and unclassified tokens.",
+      "decision": "SELECT",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": null,
+      "duplicate_audit": "No D1-D9/D10 exact semantic-name match for POS/morphological tagging.",
+      "coordinate": null,
+      "provenance_note": "Executable analysis operation with structured token readings.",
+      "independent_law_witness": {
+        "canonical_input_shape": "UTF-8 text analyzed into LanguageTool Ukrainian token readings.",
+        "canonical_output_relation": "structured per-token readings exposing token value, lemma, POS/morphological tags, with explicit punctuation/symbol/unknown/unclassified handling.",
+        "positive_witness": "TagText.tagAsObject constructs token records containing value, lemma and tags for analyzed readings; the fallback branches explicitly emit `punct`, `symb`, `unknown`, `xmltag`, or `unclass` tags.",
+        "boundary_witness": "STRING->SYMBOL / STRING-VECTOR families change representation only; they do not compute or expose POS/morphological readings or the explicit linguistic fallback classes.",
+        "near_match_identity": "STRING->SYMBOL / STRING-VECTOR families",
+        "provenance_sha": "64da8876e4ca877d3c129bbd5e4d594df4977422",
+        "witness_kind": "source-level-static"
+      }
+    },
+    {
+      "stable_id": "d10.ling.dict-uk.affix-generation.v1",
+      "repository": "juv4uk/dict_uk",
+      "source": [
+        "README.md@master",
+        "data/affix/a.aff@e6b2fc9c718a4a7576e2bd93cafa3c05cbd91fdb"
+      ],
+      "semantic_name": "AFFIX-RULE-WORDFORM-GENERATION",
+      "behavior": "Generate inflected word forms from lemma-class affix rules, including tag-bearing alternatives and alternation classes.",
+      "decision": "PROJECTION",
+      "language_visible": true,
+      "mechanism_only": false,
+      "duplicate_target": "d10.ling.nlp-uk.inflect-word.v1",
+      "coordinate": null,
+      "provenance_note": "Independent donor corroborates the inflection law; do not mint a second D10 slot."
+    }
+  ],
+  "negative_evidence": [
+    {
+      "repository": "juv4uk/dict_uk",
+      "query_scope": "lookup",
+      "result": "NO_INDEXED_CODE_HIT",
+      "note": "Repository is code/data indexed incompletely; direct root/src/data inspection found executable affix-generation evidence."
+    },
+    {
+      "repository": "juv4uk/nlp_uk",
+      "query_scope": "token",
+      "result": "INITIAL_SEARCH_MISS",
+      "note": "Repository was later inspected directly; executable tokenization, lemmatization, inflection and tagging were found."
+    },
+    {
+      "repository": "juv4uk/russian-lang",
+      "query_scope": "grammar",
+      "result": "NO_INDEXED_CODE_HIT",
+      "note": "Initial search miss; root/reader inspection showed a small language implementation but no new D10 candidate admitted in this pass."
+    },
+    {
+      "repository": "juv4uk/sanskritworld_texts",
+      "query_scope": "normalize",
+      "result": "NO_INDEXED_CODE_HIT",
+      "note": "Inspection found corpus/task/documentation material; no independent language operation selected in this pass."
+    }
+  ],
+  "acceptance_state": {
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE",
+    "inventory_mutation": "NONE",
+    "selected_candidates_in_artifact": 5,
+    "projected_candidates_in_artifact": 1,
+    "hold_candidates_in_artifact": 3,
+    "next_gate": "Independent-law witnesses for all five SELECT rows are recorded at source level; remaining gate is explicit reviewer agreement and consolidated D10 admission as UNPLACED only.",
+    "base_revalidated_against_current_main": "9f20e0c0a29384f2ead1fa584ed215f2fa9e27f3"
+  },
+  "duplicate_audit": {
+    "lower_domain_sources": [
+      "knowledge/d1-d9-foundation.json",
+      "knowledge/d9-v1-semantic-inventory.json",
+      "knowledge/d8-v2-semantic-inventory.json",
+      "knowledge/d6-v2-complete-semantic-inventory.json",
+      "knowledge/d5-ratified.json"
+    ],
+    "d1_d9_result": {
+      "exact_candidates_found": 0,
+      "note": "No TOKENIZE-SENTENCES, TOKENIZE-WORDS, LEMMATIZE-TEXT, INFLECT-WORD or MORPHO-SYNTACTIC-TAG behavioral twin was found in the inspected lower-domain inventories. D9 does contain query/evidence/provenance operations, but those are not linguistic tokenization or morphology."
+    },
+    "current_d10_near_matches": [
+      {
+        "candidate": "TOKENIZE-SENTENCES",
+        "existing": "STRING-SPLIT",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "separator-based splitting does not encode sentence-boundary language law"
+      },
+      {
+        "candidate": "TOKENIZE-WORDS",
+        "existing": "STRING-SPLIT",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "language-specific lexical boundary and token adjustment differ from generic separator splitting"
+      },
+      {
+        "candidate": "INFLECT-WORD",
+        "existing": "DERIVE-VERB-LAKARA",
+        "verdict": "NOT_EXACT_DUPLICATE",
+        "reason": "existing row is a staged Paninian verb derivation; donor candidate is generic lemma+morphological-tag form generation, so keep separate pending law-level review"
+      },
+      {
+        "candidate": "LEMMATIZE-TEXT",
+        "existing": "UNDERSTAND-QUERY / TRANSLATION-*",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "existing rows operate on controlled knowledge/translation structures, not morphological lemma normalization"
+      },
+      {
+        "candidate": "MORPHO-SYNTACTIC-TAG",
+        "existing": "STRING->SYMBOL / STRING-VECTOR families",
+        "verdict": "NOT_DUPLICATE",
+        "reason": "representation conversion does not expose linguistic POS/morphological readings"
+      }
+    ],
+    "donor_projection": {
+      "AFFIX-RULE-WORDFORM-GENERATION": "INFLECT-WORD"
+    }
+  },
+  "evidence_standard": {
+    "law_witnesses": "Five SELECT rows now each carry canonical input shape, canonical output relation, positive witness, boundary/negative witness, exact near-match identity, provenance SHA, and witness kind.",
+    "scope": "Evidence-only; no coordinates, no ratification, no D10 inventory mutation."
+  }
+}
