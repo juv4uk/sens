@@ -54,3 +54,15 @@
 | `crates/sens/tests/mccarthy_1960_functions.rs` | `675b8cd3dc936ce4443842a1680ec4f1beac9d20` | historical forms із executable 8-бітними слотами замість чинних координат D1–D10 |
 
 Поточні тести D1/D3/PredicateBit та fail-closed правила залишено. Цей реєстр суто історичний, не є нормативним тестовим corpus.
+
+## D5 ZEROP/NUMBERP — вилучення Rust-оракулів
+
+Власницька директива: Rust не створює числового закону D5 лише з координати. Історичний поріг ZEROP 3/1000000 не був ратифікованим законом на межі Rust. Поточний точний D5 носій зберігається; за відсутності мовної реалізації виконання fail-closed, не підміняється новим порогом.
+
+- `crates/sens/src/eval/d5_predicates.rs` — видалений дубль; Git blob `0c0b8090ba1158826d7c0e6f9faa686b981e4f21`.
+- `crates/sens/tests/d5_zero_number_predicates.rs` — вилучені Rust-assertions ZEROP/NUMBERP; blob `ebd02fdcafe7cea5779e47ba0155545cb48f64d5`.
+- `crates/sens/tests/d5_zerop_numberp_runtime.rs` — вилучені Rust-assertions ZEROP/NUMBERP; blob `3a33b71febbd4a427e2dcff3643d121d21affd0c`.
+- `crates/sens/tests/machine_exact_d5_zerop.rs` — прибрано `exact_d5_zerop_language_law_crosses_only_as_d1`; збережено лише механічні перевірки обмеженого machine bridge.
+- Окремі CI workflows `d5-zero-number-predicates.yml` і `d5-zerop-numberp.yml` видалені, аби CI не вимагав застарілі закони.
+
+Відновлення цих семантичних оракулів у Rust заборонене; закон має бути встановлений у Lisp-owned SENS, із незалежною перевіркою, а не доданий до хостового evaluator.
