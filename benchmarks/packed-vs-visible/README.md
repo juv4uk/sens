@@ -164,3 +164,29 @@ automatic claim: macro loading and Core evaluation still dominate.
 
 This cache is per thread (not process-global across non-`Send` AST nodes),
 and therefore does not reduce the first load after an OS process start.
+
+## Controlled A/B: same Core4, actual cached-versus-uncached loader
+
+The hosted performance job also runs one explicitly ignored **Release
+measurement**, not an old semantic regression suite:
+
+```bash
+cargo test --locked --release -p sens --lib \
+  core4_bootstrap_cache_tests::benchmark_core4_cache_vs_fresh \
+  -- --ignored --nocapture
+```
+
+In **both** branches a NEW bare Session is created, the Lisp-owned macro
+library runs, the complete Core4 program executes, and an exact D3 QUOTE
+is evaluated to structural EMPTY with no output. The experiment changes
+one mechanical variable: revalidate/decode/lower the embedded FASL **on each
+call**, or clone the already SHA-verified lowered AST from the per-thread
+immutable cache. This control is internal-only: the production API always
+selects the verified cache, and arbitrary/stale caller FASL retains the old
+fallback behavior.
+
+Nine alternated-order samples, eight full independent bootstraps in each
+sample; all raw timings, medians, environment provenance and positive/negative
+observed speed ratio are uploaded. No speed threshold is used to turn noise
+into a failing contract. The benchmark is an A/B within the same warmed
+process, **not** a cold-process launch nor a cache of evaluated Lisp state.
