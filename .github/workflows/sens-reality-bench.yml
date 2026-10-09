@@ -1,0 +1,64 @@
+name: SENS reality benchmarks — binary release
+
+# Benchmarks are primary performance evidence; parity is checked before timing.
+# Avoid launching a new expensive run for every unrelated swarm commit.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "19 3 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/physical-reality/**"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+      - ".github/workflows/sens-reality-bench.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  physical-binary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sens-reality-release
+
+      - name: Build production release binaries
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+
+      - name: Measure physical T5 process latency and bytes, not tests
+        run: |
+          python3 benchmarks/physical-reality/run.py \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --out "$RUNNER_TEMP/sens-reality" \
+            --reps 21 --warmups 4
+
+      - name: Put the measured numbers in GitHub Actions summary
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/sens-reality/report.md"; then
+            cat "$RUNNER_TEMP/sens-reality/report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "BENCHMARK_BLOCKED: no measured report; see failed steps. No invented timing." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Keep raw samples, environment and source/binary digests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-reality-physical-T5
+          path: ${{ runner.temp }}/sens-reality/
+          if-no-files-found: warn
+          retention-days: 30
