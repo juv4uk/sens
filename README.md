@@ -59,7 +59,16 @@ D1 1  ≠  D2 01  ≠  D3 001  ≠  D4 0001
 ~~~shell
 cargo run -q -p sens-cli --bin sens-trit -- encode path/program.lisp
 cargo run -q -p sens-cli --bin sens-trit -- open path/program.sens
+
+# Фізична двійкова програма виконується без текстового Lisp-парсера:
+cargo run -q -p sens-cli --bin sens -- tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
+
+# Еквівалентний явно викликаний чистий evaluator:
+cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
 ~~~
+
+
+**Поточна виконавча межа:** `sens file.sens` читає фізичні T5-байти, перевіряє канонічну D2-структуру й передає точні доменні слова чинному SENS-виконавцю **без** текстового Lisp-reader, неявного Core4-bootstrap або host capabilities. `sens-trit open file.sens` тільки показує бітовий перегляд, не виконує його. `sens-trit eval-core4 file.sens` є окремим *явним* запитом завантажити Core4, а не наслідком відкриття файлу. Недопущені закони чи дефектне T5 викликають відмову; чистий CLI-запуск сам по собі не є доказом історичної/української semantic-oracle parity. Перевірка механіки — [Physical binary SENS CLI smoke](.github/workflows/physical-binary-sens-cli.yml).
 
 **Правило міграції репозиторіїв:** існуючий `каталог/назва.lisp` має відповідник `каталог/назва.sens`, який містить справжні T5-байти з транспортною `2` лише між точними двійковими словами. Створювати **третій однойменний файл `каталог/назва` без розширення** як похідний перевірюваний перегляд точних бітових слів `0/1`, розділених **одним ASCII-пробілом**, із одним завершальним LF. Не зберігати текст `0/1/2` у `.sens` і не підміняти фізичні T5-байти видимим бітовим записом. `.lisp`, `.sens` і файл-view мають проходити спільний перевірений roundtrip; сам лише транспортний view **не підтверджує семантичного допуску**. [Міграція `.lisp → .sens`](docs/SENS-LISP-TO-T5-MIGRATION-2026-10-08.uk.md), [координація агентів #4449](https://github.com/juv4uk/sens/issues/4449).
 
