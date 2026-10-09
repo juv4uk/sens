@@ -1,0 +1,15 @@
+name: D4 eval apply prerequisite probe
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/d4_eval_apply_probe.rs"
+      - ".github/workflows/d4-eval-apply-probe.yml"
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: cargo test -p sens --test d4_eval_apply_probe -- --nocapture

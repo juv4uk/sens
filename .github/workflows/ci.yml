@@ -327,6 +327,9 @@ jobs:
           cargo test --workspace
           cargo build --workspace
 
+      - name: Check generated domain owner projection
+        run: python3 scripts/generate-domain-owner-registry.py --check
+
       - name: Check generated semantic registry
         if: (steps.changes.outputs.surface == 'true' || steps.changes.outputs.semantic == 'true') && steps.changes.outputs.workspace != 'true'
         run: |
