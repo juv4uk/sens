@@ -65,7 +65,7 @@ def cpu_report(path: Path) -> tuple[list[str], dict]:
         })
     out += [
         "",
-        "> An Ukrainian/binary ratio above 1 means the binary lane measured faster "
+        "> A Ukrainian/binary ratio above 1 means the binary lane measured faster "
         "for that phase on this runner. These two small D3 smoke programs "
         "cannot establish a general SENS-vs-Lisp or SENS-vs-Python win.",
         "",
