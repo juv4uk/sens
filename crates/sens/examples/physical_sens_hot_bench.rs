@@ -4,12 +4,12 @@
 
 use sens::{
     decode_ternary_words, encode_ternary_words, eval_lowered_expressions, eval_parsed_expressions, lower_program,
-    open_ternary_program, parse_canonical_binary, parse_canonical_packed_words,
+    open_ternary_program, render_ternary_words_spaced, parse_canonical_binary, parse_canonical_packed_words,
     parse_binary_source_words, parse_canonical_word_sequence, pack_binary_source_tokens, pack_binary_source_words, Session,
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
-const PHASES: &[&str] = &["t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"];
+const PHASES: &[&str] = &["t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming", "t5_render_collect", "t5_render_single_buffer"];
 
 /// Попередній двопрохідний алгоритм тільки для порівняння механіки.
 /// Жодна T5-цифра не є мовним резидентом; виконуваний код не викликає цей
@@ -31,6 +31,12 @@ fn two_pass_t5_allocation_control(words: &[sens::BinarySourceWord]) -> Vec<u8> {
     trits.chunks_exact(5).map(|five| {
         five.iter().fold(0u16, |acc, &digit| acc * 3 + u16::from(digit)) as u8
     }).collect()
+}
+
+/// Exact old visible projection retained only as a same-SHA performance
+/// control. No semantic names or new D7 role are materialized here.
+fn collect_and_join_render_control(words: &[sens::BinarySourceWord]) -> String {
+    words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")
 }
 
 fn median_ns(mut xs: Vec<u128>) -> (u128, u128, u128) {
@@ -88,6 +94,11 @@ fn main() {
         "two-pass measurement control differs from source physical T5");
     assert_eq!(encode_ternary_words(&t5_words).expect("current T5 encoder"), physical,
         "streaming T5 encoder differs from source physical T5");
+
+    // Proof before timing: both routes produce the identical exact-width
+    // human-facing binary projection of the same packed physical bytes.
+    assert_eq!(collect_and_join_render_control(&t5_words), visible);
+    assert_eq!(render_ternary_words_spaced(&t5_words), visible);
 
     let t5_widths = t5_words.iter().map(|word| word.width()).collect::<Vec<_>>();
     let t5_dense = pack_binary_source_words(&t5_words);
@@ -190,6 +201,16 @@ fn main() {
                 || {
                     black_box(encode_ternary_words(black_box(&t5_words))
                         .expect("streaming T5 encoder"));
+                }, count, samples,
+            ),
+            "t5_render_collect" => measure(
+                || {
+                    black_box(collect_and_join_render_control(black_box(&t5_words)));
+                }, count, samples,
+            ),
+            "t5_render_single_buffer" => measure(
+                || {
+                    black_box(render_ternary_words_spaced(black_box(&t5_words)));
                 }, count, samples,
             ),
             "eval_lowered" => measure(
