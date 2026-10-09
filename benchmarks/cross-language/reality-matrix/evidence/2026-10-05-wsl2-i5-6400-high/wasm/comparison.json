@@ -1,0 +1,412 @@
+{
+  "system": "wasm",
+  "sens": {
+    "commit": "9714e8cb714cff7ffc27f37d8a03447d8df094e2",
+    "contract": "11.6",
+    "ratified_domains": "D1-D7"
+  },
+  "competitor": {
+    "name": "WebAssembly via Node/V8",
+    "version": "v18.19.1",
+    "commit": null
+  },
+  "environment": {
+    "os": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "arch": "x86_64",
+    "cpu": "x86_64",
+    "load_context": "high",
+    "evidence_mode": "performance",
+    "rss_measurement": "withheld-until-#3698",
+    "toolchain": {
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+      "node": "v18.19.1"
+    }
+  },
+  "workloads": [
+    {
+      "id": "d3-quote-empty",
+      "parity": "pass",
+      "params": {
+        "outer_reps": 10,
+        "inner_repeats": 10000,
+        "scope": "D3 smoke mechanism control",
+        "evidence_mode": "performance",
+        "sens_semantic_bits": 13,
+        "sens_packed_bytes": 2,
+        "wasm_module_bytes": 36
+      },
+      "measurements": [
+        {
+          "axis": "program_semantic_or_module_bits",
+          "status": "measured",
+          "unit": "bits",
+          "sens_samples": [
+            13.0
+          ],
+          "competitor_samples": [
+            288.0
+          ],
+          "sens_median": 13.0,
+          "competitor_median": 288.0,
+          "sens_p95": 13.0,
+          "competitor_p95": 288.0,
+          "notes": "SENS exact semantic payload bits vs complete executable Wasm module bits; both exclude generic runtime binaries."
+        },
+        {
+          "axis": "program_container_or_module_bytes",
+          "status": "measured",
+          "unit": "bytes",
+          "sens_samples": [
+            2.0
+          ],
+          "competitor_samples": [
+            36.0
+          ],
+          "sens_median": 2.0,
+          "competitor_median": 36.0,
+          "sens_p95": 2.0,
+          "competitor_p95": 36.0,
+          "notes": "SENS production packed byte container vs complete .wasm module bytes."
+        },
+        {
+          "axis": "ingest_vs_compile_ns",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            16500.0,
+            17417.0,
+            17142.0,
+            13658.0,
+            18425.0,
+            13933.0,
+            14759.0,
+            17325.0,
+            15500.0,
+            11100.0
+          ],
+          "competitor_samples": [
+            340175.0,
+            406908.0,
+            463008.0,
+            330825.0,
+            372808.0,
+            372533.0,
+            297550.0,
+            442934.0,
+            394600.0,
+            572500.0
+          ],
+          "sens_median": 16000.0,
+          "competitor_median": 383704.0,
+          "sens_p95": 18425.0,
+          "competitor_p95": 572500.0,
+          "notes": "Recorded, not ranked: SENS exact-domain ingest is parse/decode only; WebAssembly.Module includes decode, validation and compilation."
+        },
+        {
+          "axis": "warm_ready_execution_ns_per_op",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            93.8391,
+            103.8125,
+            91.795,
+            90.9058,
+            95.26,
+            94.6734,
+            95.5258,
+            92.7025,
+            102.23,
+            104.43
+          ],
+          "competitor_samples": [
+            159.5642,
+            113.1258,
+            112.2,
+            111.4667,
+            112.31,
+            163.8725,
+            108.79,
+            114.5467,
+            118.81,
+            145.09
+          ],
+          "sens_median": 94.9667,
+          "competitor_median": 113.83625,
+          "sens_p95": 104.43,
+          "competitor_p95": 163.8725,
+          "notes": "Already-ready SENS interpreter execution vs compiled Wasm exported call."
+        },
+        {
+          "axis": "cold_total_internal_ns",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            8903767.0,
+            9154750.0,
+            8595492.0,
+            8928059.0,
+            9291975.0,
+            8654067.0,
+            9021925.0,
+            8694492.0,
+            9179700.0,
+            9067900.0
+          ],
+          "competitor_samples": [
+            472725.0,
+            391967.0,
+            465666.0,
+            474100.0,
+            379042.0,
+            593450.0,
+            453200.0,
+            476500.0,
+            428500.0,
+            622000.0
+          ],
+          "sens_median": 8974992.0,
+          "competitor_median": 469195.5,
+          "sens_p95": 9291975.0,
+          "competitor_p95": 622000.0,
+          "notes": "Recorded, not ranked: SENS full includes current Core/session prep; Wasm cold assumes host engine already exists."
+        },
+        {
+          "axis": "process_maxrss_kb",
+          "status": "inconclusive",
+          "unit": "KiB",
+          "sens_samples": [],
+          "competitor_samples": [],
+          "sens_median": null,
+          "competitor_median": null,
+          "sens_p95": null,
+          "competitor_p95": null,
+          "notes": "Withheld until shared per-process RSS owner #3698 lands."
+        }
+      ]
+    },
+    {
+      "id": "d3-car-empty",
+      "parity": "pass",
+      "params": {
+        "outer_reps": 10,
+        "inner_repeats": 10000,
+        "scope": "D3 smoke mechanism control",
+        "evidence_mode": "performance",
+        "sens_semantic_bits": 26,
+        "sens_packed_bytes": 4,
+        "wasm_module_bytes": 60
+      },
+      "measurements": [
+        {
+          "axis": "program_semantic_or_module_bits",
+          "status": "measured",
+          "unit": "bits",
+          "sens_samples": [
+            26.0
+          ],
+          "competitor_samples": [
+            480.0
+          ],
+          "sens_median": 26.0,
+          "competitor_median": 480.0,
+          "sens_p95": 26.0,
+          "competitor_p95": 480.0,
+          "notes": "SENS exact semantic payload bits vs complete executable Wasm module bits; both exclude generic runtime binaries."
+        },
+        {
+          "axis": "program_container_or_module_bytes",
+          "status": "measured",
+          "unit": "bytes",
+          "sens_samples": [
+            4.0
+          ],
+          "competitor_samples": [
+            60.0
+          ],
+          "sens_median": 4.0,
+          "competitor_median": 60.0,
+          "sens_p95": 4.0,
+          "competitor_p95": 60.0,
+          "notes": "SENS production packed byte container vs complete .wasm module bytes."
+        },
+        {
+          "axis": "ingest_vs_compile_ns",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            45300.0,
+            11800.0,
+            18800.0,
+            16600.0,
+            20020.0,
+            15745.0,
+            20701.0,
+            34696.0,
+            30226.0,
+            16133.0
+          ],
+          "competitor_samples": [
+            372700.0,
+            494700.0,
+            631600.0,
+            362500.0,
+            438122.0,
+            587208.0,
+            614906.0,
+            535893.0,
+            468055.0,
+            378254.0
+          ],
+          "sens_median": 19410.0,
+          "competitor_median": 481377.5,
+          "sens_p95": 45300.0,
+          "competitor_p95": 631600.0,
+          "notes": "Recorded, not ranked: SENS exact-domain ingest is parse/decode only; WebAssembly.Module includes decode, validation and compilation."
+        },
+        {
+          "axis": "warm_ready_execution_ns_per_op",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            482.44,
+            512.91,
+            481.53,
+            480.21,
+            451.2325,
+            548.9547,
+            454.5271,
+            473.8286,
+            480.3888,
+            453.6234
+          ],
+          "competitor_samples": [
+            119.08,
+            143.01,
+            163.39,
+            123.01,
+            115.2839,
+            126.7618,
+            140.8929,
+            112.7086,
+            121.018,
+            134.1092
+          ],
+          "sens_median": 480.2994,
+          "competitor_median": 124.88589999999999,
+          "sens_p95": 548.9547,
+          "competitor_p95": 163.39,
+          "notes": "Already-ready SENS interpreter execution vs compiled Wasm exported call."
+        },
+        {
+          "axis": "cold_total_internal_ns",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            9429500.0,
+            9083800.0,
+            9332000.0,
+            9590800.0,
+            8970031.0,
+            8929601.0,
+            9239629.0,
+            8980333.0,
+            9522932.0,
+            9997693.0
+          ],
+          "competitor_samples": [
+            617600.0,
+            466500.0,
+            488600.0,
+            526800.0,
+            456976.0,
+            601495.0,
+            495171.0,
+            648144.0,
+            462127.0,
+            576614.0
+          ],
+          "sens_median": 9285814.5,
+          "competitor_median": 510985.5,
+          "sens_p95": 9997693.0,
+          "competitor_p95": 648144.0,
+          "notes": "Recorded, not ranked: SENS full includes current Core/session prep; Wasm cold assumes host engine already exists."
+        },
+        {
+          "axis": "process_maxrss_kb",
+          "status": "inconclusive",
+          "unit": "KiB",
+          "sens_samples": [],
+          "competitor_samples": [],
+          "sens_median": null,
+          "competitor_median": null,
+          "sens_p95": null,
+          "competitor_p95": null,
+          "notes": "Withheld until shared per-process RSS owner #3698 lands."
+        }
+      ]
+    }
+  ],
+  "semantic_density": null,
+  "verdicts": [
+    {
+      "axis": "d3-quote-empty:program_semantic_or_module_bits",
+      "verdict": "sens",
+      "evidence": "SENS=13.000; Wasm=288.000"
+    },
+    {
+      "axis": "d3-quote-empty:program_container_or_module_bytes",
+      "verdict": "sens",
+      "evidence": "SENS=2.000; Wasm=36.000"
+    },
+    {
+      "axis": "d3-quote-empty:ingest_vs_compile_ns",
+      "verdict": "inconclusive",
+      "evidence": "observation only: SENS=16000.000; Wasm=383704.000; phase/runtime boundary is not equivalent"
+    },
+    {
+      "axis": "d3-quote-empty:warm_ready_execution_ns_per_op",
+      "verdict": "sens",
+      "evidence": "SENS=94.967; Wasm=113.836"
+    },
+    {
+      "axis": "d3-quote-empty:cold_total_internal_ns",
+      "verdict": "inconclusive",
+      "evidence": "observation only: SENS=8974992.000; Wasm=469195.500; phase/runtime boundary is not equivalent"
+    },
+    {
+      "axis": "d3-quote-empty:process_maxrss_kb",
+      "verdict": "inconclusive",
+      "evidence": "RSS withheld pending shared owner #3698"
+    },
+    {
+      "axis": "d3-car-empty:program_semantic_or_module_bits",
+      "verdict": "sens",
+      "evidence": "SENS=26.000; Wasm=480.000"
+    },
+    {
+      "axis": "d3-car-empty:program_container_or_module_bytes",
+      "verdict": "sens",
+      "evidence": "SENS=4.000; Wasm=60.000"
+    },
+    {
+      "axis": "d3-car-empty:ingest_vs_compile_ns",
+      "verdict": "inconclusive",
+      "evidence": "observation only: SENS=19410.000; Wasm=481377.500; phase/runtime boundary is not equivalent"
+    },
+    {
+      "axis": "d3-car-empty:warm_ready_execution_ns_per_op",
+      "verdict": "competitor",
+      "evidence": "SENS=480.299; Wasm=124.886"
+    },
+    {
+      "axis": "d3-car-empty:cold_total_internal_ns",
+      "verdict": "inconclusive",
+      "evidence": "observation only: SENS=9285814.500; Wasm=510985.500; phase/runtime boundary is not equivalent"
+    },
+    {
+      "axis": "d3-car-empty:process_maxrss_kb",
+      "verdict": "inconclusive",
+      "evidence": "RSS withheld pending shared owner #3698"
+    }
+  ]
+}
