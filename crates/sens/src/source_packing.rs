@@ -92,15 +92,31 @@ pub fn semantic_source_bits(tokens: &[BinarySourceToken]) -> usize {
 /// payload. The returned value is deliberately not self-describing with respect
 /// to source word widths. Canonical wire/EOS and boundary metadata are owned
 /// separately by framing work.
-pub fn pack_binary_source_tokens(tokens: &[BinarySourceToken]) -> PackedBitstream {
-    let total_bits = semantic_source_bits(tokens);
+fn pack_source_words<I>(words: I, total_bits: usize) -> PackedBitstream
+where
+    I: IntoIterator<Item = BinarySourceWord>,
+{
     let mut packer = BitPacker::with_capacity_bits(total_bits);
-
-    for token in tokens {
-        append_binary_source_word(&mut packer, token.word);
+    for word in words {
+        append_binary_source_word(&mut packer, word);
     }
-
     packer.finish()
+}
+
+/// Pack already-decoded exact-width words directly, without constructing a
+/// visible zero/one source string or reparsing its tokens.
+pub fn pack_binary_source_words(words: &[BinarySourceWord]) -> PackedBitstream {
+    let total_bits = words.iter().map(|word| word.width()).sum();
+    pack_source_words(words.iter().copied(), total_bits)
+}
+
+/// Pack exact source tokens in program order with zero interior byte padding.
+/// This retains the source-token adapter for callers that already own spans.
+pub fn pack_binary_source_tokens(tokens: &[BinarySourceToken]) -> PackedBitstream {
+    pack_source_words(
+        tokens.iter().map(|token| token.word),
+        semantic_source_bits(tokens),
+    )
 }
 
 fn read_binary_source_word(
@@ -183,6 +199,20 @@ mod tests {
         assert_eq!(semantic_source_bits(&tokens), 45);
         assert_eq!(packed.bit_len(), semantic_source_bits(&tokens));
         assert_eq!(packed.byte_len(), 6);
+    }
+
+    #[test]
+    fn decoded_words_pack_without_visible_source_reconstruction() {
+        let tokens = parse_binary_source_words("10 001 01").unwrap();
+        let words: Vec<_> = tokens.iter().map(|token| token.word).collect();
+        let widths: Vec<_> = words.iter().map(|word| word.width()).collect();
+
+        let packed = pack_binary_source_words(&words);
+        let unpacked = unpack_binary_source_words(&packed, &widths).unwrap();
+
+        assert_eq!(packed.bit_len(), 7);
+        assert_eq!(packed.bytes(), &[0b1000_1010]);
+        assert_eq!(unpacked, words);
     }
 
     #[test]
