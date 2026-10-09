@@ -1,0 +1,62 @@
+{
+  "schema": "d10-class-of-proposal/v1",
+  "status": "PENDING-OWNER-REVIEW",
+  "selected_d10_candidate": false,
+  "ratified": false,
+  "coordinate": null,
+  "coordinate_basis": "UNPLACED",
+  "semantic_name": "CLASS-OF",
+  "surface_uk": "безпосередній-клас",
+  "surface_ukr": "безпосередній-клас",
+  "source": {
+    "title": "ANSI Common Lisp HyperSpec — CLASS-OF",
+    "url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_clas_1.htm",
+    "donor_oracle_pr": 4862,
+    "oracle_path": "tests/oracles/d10_clos_slot_states.lisp",
+    "oracle_artifact": "knowledge/d10-clos-slot-observation-v1.json",
+    "observed_cases": [
+      "CLASS_OF_EXACT_CLASS_OBJECT",
+      "CLASS_OF_NOT_CLASS_SYMBOL",
+      "CLASS_OF_CHILD_NOT_PARENT"
+    ],
+    "runtime": "SBCL, external Common Lisp donor; not SENS runtime",
+    "recorded_result": "17/17 historical CLOS slot/object observations passed in #4862"
+  },
+  "law": {
+    "signature": "CLASS-OF(object) -> class-object",
+    "statement": "Return the class object of which object is a direct instance.",
+    "positive_witnesses": [
+      "For a named standard class C and instance x, CLASS-OF(x) is EQ to (FIND-CLASS 'C).",
+      "For an instance of child class CHILD inheriting PARENT, CLASS-OF(x) is the CHILD class object, not the PARENT class object.",
+      "CLASS-OF(x) is a class metaobject, not the class-name symbol returned by TYPE-OF for a named standard-class instance."
+    ],
+    "falsifiers": [
+      "Return the symbol C rather than the class metaobject.",
+      "Return a superclass rather than the direct class.",
+      "Return a newly fabricated/non-identical class object instead of the class object for the direct class."
+    ]
+  },
+  "dedup": {
+    "d1_d9_exact_name_match": false,
+    "current_d10_exact_name_match": false,
+    "adjacent_existing": [
+      "TYPE-OF",
+      "TYPEP",
+      "CLASS-NAME",
+      "FIND-CLASS"
+    ],
+    "note": "Exact-name absence only routes review; the SBCL observational witnesses are the evidence of difference from TYPE-OF."
+  },
+  "ownership": {
+    "test": "Observable class-object identity is language-visible; do not include printer addresses, memory handles, or host ABI identity.",
+    "blocked_source": "D10 owner intake #4013 / #4463; oracle evidence #4862",
+    "decision_required": "Owner must decide whether the class-object observation is an independent Core law or derivable from selected introspection vocabulary."
+  },
+  "owner_decision": {
+    "proposed_action": "REVIEW-SELECT-D10-CANDIDATE",
+    "status": "pending-review",
+    "ratified": 0,
+    "coordinate": null,
+    "physical_t5_authorized": false
+  }
+}
