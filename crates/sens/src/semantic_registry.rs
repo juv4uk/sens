@@ -105,15 +105,15 @@ pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomai
 pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
     byte: u8,
 ) -> Option<CoreDomainIdentity> {
-    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
-    match byte {
-        0b0010_1010 => Some(d5(0b10100)), // REVERSE
-        0b0001_0100 => Some(d5(0b10111)), // QUOTIENT
-        0b0010_1101 => Some(d5(0b11100)), // ASSOC
-        0b0010_1100 => Some(d5(0b11101)), // MEMBER
-        0b1010_1100 => Some(d5(0b11111)), // SUBST
-        _ => None,
-    }
+    // Історичний байт тільки знаходить рядок *згенерованого* Lisp-реєстру.
+    // Точна D5-координата походить виключно з Lisp-owned binding projection.
+    // Жодної локальної таблиці SID8 -> D5 у Rust.
+    live_rows()
+        .iter()
+        .find(|row| row.semantic_id == byte)
+        .into_iter()
+        .flat_map(|row| row.surfaces.iter())
+        .find_map(|surface| d5_binding_identity_for_definition(surface.name))
 }
 /// Канонічний surface → domain маршрут читає тільки ратифіковану
 /// exact-width проєкцію. Історичний SID/байт не визначає домен.
