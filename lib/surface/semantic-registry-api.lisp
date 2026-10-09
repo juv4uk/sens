@@ -31,12 +31,20 @@
   (00001000 ()
     (00000001 (en ук укр sa sym))))
 
+; This local negation accepts an exact D1 PredicateBit and is deliberately
+; narrower than legacy truthiness. The API only calls it on ATOM/EQUAL results.
+(00001001 semantic-registry-not-d1
+  (00001000 (predicate)
+    (00000111
+      (predicate (00000001 ()))
+      (t t))))
+
 (00001001 semantic-registry-row-namespaces
   (00001000 (surfaces)
     (00000111
       ((00000010 surfaces)
        (00000001 ()))
-      ((not? (00000010 surfaces))
+      ((semantic-registry-not-d1 (00000010 surfaces))
        (00000100
          (00000101 (00000101 surfaces))
          (semantic-registry-row-namespaces
@@ -60,11 +68,11 @@
     (00000111
       ((00000010 surfaces)
        (00000001 ()))
-      ((not? (00000010 surfaces))
+      ((semantic-registry-not-d1 (00000010 surfaces))
        (00000111
          ((00000011 namespace (00000101 (00000101 surfaces)))
           (00000101 surfaces))
-         ((not? (00000011 namespace (00000101 (00000101 surfaces))))
+         ((semantic-registry-not-d1 (00000011 namespace (00000101 (00000101 surfaces))))
           (semantic-registry-find-surface namespace (00000110 surfaces))))))))
 
 (00001001 semantic-registry-surface-name
@@ -76,7 +84,7 @@
       (00000111
         ((00100010 entry (00000001 ()))
          (00000001 ()))
-        ((not? (00100010 entry (00000001 ())))
+        ((semantic-registry-not-d1 (00100010 entry (00000001 ())))
          (00101111 entry))))))
 
 (00001001 semantic-registry-find-row
@@ -84,11 +92,11 @@
     (00000111
       ((00000010 rows)
        (00000001 ()))
-      ((not? (00000010 rows))
+      ((semantic-registry-not-d1 (00000010 rows))
        (00000111
          ((00100010 sens-ref (semantic-registry-row-id (00000101 rows)))
           (00000101 rows))
-         ((not? (00100010 sens-ref (semantic-registry-row-id (00000101 rows))))
+         ((semantic-registry-not-d1 (00100010 sens-ref (semantic-registry-row-id (00000101 rows))))
           (semantic-registry-find-row sens-ref (00000110 rows))))))))
 
 (00001001 semantic-registry-find-id-in-namespaces
@@ -96,7 +104,7 @@
     (00000111
       ((00000010 namespaces)
        (00000001 ()))
-      ((not? (00000010 namespaces))
+      ((semantic-registry-not-d1 (00000010 namespaces))
        (10011100 ((candidate
                (semantic-registry-surface-name
                  (00000101 namespaces)
@@ -104,7 +112,7 @@
          (00000111
            ((00100010 name candidate)
             (semantic-registry-row-id row))
-           ((not? (00100010 name candidate))
+           ((semantic-registry-not-d1 (00100010 name candidate))
             (semantic-registry-find-id-in-namespaces
               name
               row
@@ -115,7 +123,7 @@
     (00000111
       ((00000010 rows)
        (00000001 ()))
-      ((not? (00000010 rows))
+      ((semantic-registry-not-d1 (00000010 rows))
        (10011100 ((sens-ref
                (semantic-registry-find-id-in-namespaces
                  name
@@ -124,7 +132,7 @@
          (00000111
            ((00100010 sens-ref (00000001 ()))
             (semantic-registry-id-for-surface name (00000110 rows)))
-           ((not? (00100010 sens-ref (00000001 ())))
+           ((semantic-registry-not-d1 (00100010 sens-ref (00000001 ())))
             sens-ref)))))))
 
 (00001001 semantic-registry-round-trip
