@@ -1,0 +1,128 @@
+{
+  "schema": "d10-unique-bounded-modular-lift-research/v1",
+  "status": "SOURCE-REVIEW-PENDING-CORE-VS-LIBRARY",
+  "as_of_date": "2026-10-09",
+  "authority": "#4013 #4463 user-directed D10 interest harvest",
+  "selected": false,
+  "ratified": false,
+  "coordinate": null,
+  "physical_t5_authorized": false,
+  "candidate": {
+    "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+    "surface_uk": "єдине-підняття-остачі",
+    "surface_ukr": "відновити-єдине-ціле-за-циклічним-відліком",
+    "arity": 4,
+    "argument_contract": "(positive integer modulus M>=2, normalized integer residue 0<=r<M, integer inclusive bound lo, integer inclusive bound hi with lo<=hi)",
+    "law": "Find all integers z with lo<=z<=hi and z mod M=r. Return NONE with count 0 if there are none; return UNIQUE with the exact only z if count 1; return AMBIGUOUS with exact count>=2 and first two solutions in increasing order if there are at least two. All integer arithmetic; invalid domains are reported as ERROR, never guessed or clamped.",
+    "math": "kmin = ceil((lo-r)/M), kmax = floor((hi-r)/M), solutions z=r+k*M for integer k in [kmin,kmax], count=max(0,kmax-kmin+1)",
+    "geometry": "No orientation, rotation direction, sample-rate or physical-clock assumption; an application maps its measured wrapped counter and rate bound into an explicit admissible interval. This law does not prove correct selection of the interval.",
+    "source_boundary": "AS5600 raw angle 12-bit cyclic register and NumPy unwrap period-complement procedure are real donor context, but neither specifies our UNIQUE/NONE/AMBIGUOUS certificate; that certificate is a new derived integer law proposed here.",
+    "positives": [
+      {
+        "M": 4096,
+        "r": 2,
+        "lo": 4090,
+        "hi": 4100,
+        "result": "UNIQUE 4098"
+      },
+      {
+        "M": 4096,
+        "r": 2,
+        "lo": 3,
+        "hi": 4097,
+        "result": "NONE count=0"
+      },
+      {
+        "M": 4096,
+        "r": 2,
+        "lo": 0,
+        "hi": 8194,
+        "result": "AMBIGUOUS count=3 first=2 second=4098"
+      },
+      {
+        "M": 7,
+        "r": 6,
+        "lo": -10,
+        "hi": -1,
+        "result": "AMBIGUOUS count=2 first=-8 second=-1"
+      },
+      {
+        "M": 5,
+        "r": 2,
+        "lo": -3,
+        "hi": -3,
+        "result": "UNIQUE -3"
+      },
+      {
+        "M": 7,
+        "r": 0,
+        "lo": 1,
+        "hi": 6,
+        "result": "NONE count=0"
+      },
+      {
+        "M": 7,
+        "r": 0,
+        "lo": 0,
+        "hi": 7,
+        "result": "AMBIGUOUS count=2 first=0 second=7"
+      }
+    ],
+    "falsifiers": [
+      "Return nearest unwrapped branch even when both 2 and 4098 are inside allowed interval [0,8194]: an explicit ambiguous result is required.",
+      "Treat residues from a circular sector CONTAINS predicate as unique absolute position; membership alone does not specify turn count.",
+      "Return 0 where lo=1,hi=6,M=7,r=0, or omit negative lifts, or exclude a matching inclusive endpoint.",
+      "Claim a fixed 4096 period for all counters: the modulus is a caller-supplied integer and generic law is exact.",
+      "Claim data from a wrapped register alone reveals number of full turns, velocity, direction or phase under aliasing: without admissible interval no such information is justified."
+    ],
+    "nearby": [
+      {
+        "law": "NumPy unwrap(period)",
+        "difference": "Chooses a complementary nearest change with an implicit branch; no explicit multiplicity certificate and no caller interval [lo,hi]."
+      },
+      {
+        "law": "D10 GENERALIZED-CONGRUENCE-MERGE research #4938",
+        "difference": "Merges two modular residue constraints, while this law intersects one residue class with absolute integer bounds and certifies zero/one/many."
+      },
+      {
+        "law": "Forth WITHIN research #4949",
+        "difference": "Circular membership decision rather than counting absolute integer lifts."
+      },
+      {
+        "law": "D10 MODULO / D9 DIVMOD",
+        "difference": "Arithmetic ingredients for a derived implementation; core admission still requires proof of distinct public meaning."
+      }
+    ],
+    "hobby_fanout": [
+      "ESP32/AS5600 encoder turn reconstruction under speed bounds",
+      "RTL-SDR sampled phase and alias detection",
+      "FPGA finite-width counter wraps",
+      "astronomical epoch/phase cycle counters",
+      "clock overflow and metrology",
+      "musical beat phase over multiple cycles"
+    ]
+  },
+  "sources": [
+    {
+      "type": "HARDWARE-PRIMARY",
+      "title": "ams OSRAM AS5600 datasheet",
+      "url": "https://look.ams-osram.com/m/7059eac7531a86fd/original/AS5600-DS000365.pdf",
+      "claim": "RAW ANGLE register contains a 12-bit cyclic, unscaled angular reading; no turn count."
+    },
+    {
+      "type": "NUMERICAL-REFERENCE",
+      "title": "NumPy unwrap documentation",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html",
+      "claim": "Complement wrapped consecutive differences relative to period; NOT uniqueness certification."
+    },
+    {
+      "type": "NEW-MATHEMATICAL-LAW",
+      "title": "Integer bounded congruence uniqueness proof",
+      "url": null,
+      "claim": "Finite intersection of arithmetic progression with inclusive bounds, proven by floor/ceiling identities and independent exact enumeration."
+    }
+  ],
+  "real_oracle": "tests/oracles/d10_unique_bounded_modular_lift_chez.ss",
+  "independent_crosscheck": "tests/test_d10_unique_bounded_modular_lift.py",
+  "acceptance": "Research dossier only; no D10 selected row, proposal ledger, bit assignment, owner ratification, native SENS execution or hardware driver implementation is asserted."
+}
