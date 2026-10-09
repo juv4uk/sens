@@ -1,0 +1,65 @@
+name: D5 remap solver S2
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d3-d8-remap-solver/d5_s2.py"
+      - "knowledge/d5-multilaw-atlas.json"
+      - "knowledge/d3-d8-stable-residents.json"
+      - ".github/workflows/d5-remap-solver-s2.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d3-d8-remap-solver/d5_s2.py"
+      - "knowledge/d5-multilaw-atlas.json"
+      - "knowledge/d3-d8-stable-residents.json"
+      - ".github/workflows/d5-remap-solver-s2.yml"
+  workflow_dispatch:
+
+jobs:
+  d5-s2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Materialize pinned stable-resident donor
+        run: |
+          git fetch --no-tags --depth=1 origin 86d49ef4477345082e60452800bae6c2d184390c
+          git show 86d49ef4477345082e60452800bae6c2d184390c:knowledge/d3-d8-stable-residents.json \
+            > /tmp/d3-d8-stable-residents.json
+
+      - name: Validate stable resident corpus
+        run: |
+          rm -rf /tmp/stable-resident-audit
+          python3 scripts/check-3051-stable-resident-corpus.py \
+            --corpus /tmp/d3-d8-stable-residents.json \
+            --out /tmp/stable-resident-audit
+
+      - name: Validate D5 multilaw atlas
+        run: |
+          rm -rf /tmp/d5-multilaw-audit
+          python3 scripts/check-3039-d5-multilaw-atlas.py \
+            --corpus /tmp/d3-d8-stable-residents.json \
+            --out /tmp/d5-multilaw-audit
+
+      - name: Run D5 family-constrained S2
+        run: |
+          rm -rf /tmp/d5-remap-s2
+          python3 benchmarks/d3-d8-remap-solver/d5_s2.py \
+            --corpus /tmp/d3-d8-stable-residents.json \
+            --out /tmp/d5-remap-s2
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d5-remap-s2/report.md; then
+            cat /tmp/d5-remap-s2/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d5-remap-s2
+          path: /tmp/d5-remap-s2/
+          retention-days: 14
