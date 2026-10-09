@@ -45,111 +45,148 @@ def resident_code(foundation: dict, domain: str, label: str) -> str | None:
     return codes[0] if len(codes) == 1 else None
 
 
+@dataclass
+class GateContext:
+    foundation: dict
+    source_era: str
+    admitted: set[str]
+    findings: list[Finding]
+    changes: list[tuple[int, int, str]]
+
+    def mark(self, law: str, verdict: str, reason: str, node) -> None:
+        self.findings.append(Finding(law, verdict, reason, node.tok.offset))
+
+    def change(self, atom, new_name: str) -> None:
+        start = atom.tok.offset
+        self.changes.append((start, start + len(atom.tok.text), new_name))
+
+
+def _parse_existing(source: str):
+    clean = engine.strip_comments(source)
+    return clean, engine.Parser(engine.tokenize(clean)).parse_program()
+
+
+def _admitted_bits(foundation: dict) -> set[str]:
+    domains = ("D3", "D4", "D5", "D6", "D7", "D8", "D9")
+    return {
+        code
+        for domain in domains
+        for code, label in foundation["domains"][domain]["residents"].items()
+        if label != "EMPTY"
+    }
+
+
+def _query_exact_d1(node) -> bool:
+    if isinstance(node, engine.Atom):
+        return node.tok.text in {"0", "1"}
+    if not isinstance(node, engine.ListNode) or node.tail is not None:
+        return False
+    if not node.items or not isinstance(node.items[0], engine.Atom):
+        return False
+    return node.items[0].tok.text in PREDICATES
+
+
+def _map_helper(ctx: GateContext, head):
+    name = head.tok.text
+    if name not in HELPERS:
+        return name, False
+    domain, label = HELPERS[name]
+    code = resident_code(ctx.foundation, domain, label)
+    if code is None:
+        ctx.mark("L4", "BLOCK", "no unique resident; D3 expansion needs independent law/oracle", head)
+        return None, True
+    ctx.change(head, code)
+    ctx.mark("L4", "STAGED", f"ratified {domain} resident {code} for {label}", head)
+    return code, True
+
+
+def _check_callable(ctx: GateContext, name: str, head, mapped: bool) -> bool:
+    if name not in ctx.admitted:
+        ctx.mark("L3", "BLOCK", f"unresolved executable head {name!r}; D10 proposal, do not mint coordinate", head)
+        return False
+    if len(name) == 8 and ctx.source_era == "auto" and not mapped:
+        ctx.mark("L3", "BLOCK", "eight-bit head ambiguous between SID8 and current D8", head)
+        return False
+    if len(name) == 8 and ctx.source_era == "legacy" and not mapped:
+        ctx.mark("L3", "BLOCK", "legacy SID8 needs history-aware resolver, not current D8 assertion", head)
+        return False
+    return True
+
+
+def _visit_clause(ctx: GateContext, clause) -> None:
+    if not isinstance(clause, engine.ListNode) or clause.tail is not None:
+        ctx.mark("L1", "BLOCK", "COND clause must be a proper two-member list", clause)
+        return
+    if len(clause.items) != 2:
+        ctx.mark("L6", "BLOCK", "old fixture/three-part COND: regenerate via canonical fixture tool", clause)
+        return
+    query, branch = clause.items
+    if isinstance(query, engine.Atom) and query.tok.text == "t":
+        ctx.change(query, "1")
+        ctx.mark("L2", "STAGED", "explicit D1:1 clause; t is not a special symbol", query)
+    elif not _query_exact_d1(query):
+        ctx.mark("L1", "BLOCK", "no static exact-D1 predicate proof; arbitrary truthiness forbidden", query)
+    _visit(ctx, query)
+    _visit(ctx, branch)
+
+
+def _visit_cond(ctx: GateContext, node, name: str, head) -> None:
+    if name == "00000111":
+        ctx.mark("L1", "BLOCK", "historical SID8 COND needs separately proven source-era mapping", head)
+        return
+    for clause in node.items[1:]:
+        _visit_clause(ctx, clause)
+
+
+def _visit(ctx: GateContext, node) -> None:
+    if isinstance(node, engine.Quote):
+        return  # Historical archaeology in quoted data is not executable.
+    if not isinstance(node, engine.ListNode) or not node.items:
+        return
+    if node.tail is not None:
+        ctx.mark("L3", "BLOCK", "dotted executable form is not certified", node)
+        return
+    head = node.items[0]
+    if not isinstance(head, engine.Atom):
+        ctx.mark("L3", "BLOCK", "computed executable head: no ratified coordinate proof", node)
+        return
+    name = head.tok.text
+    if name in QUOTES:
+        return
+    if name.lower() in RETIRED:
+        ctx.mark("L5", "BLOCK", "retired semantic executable; separately audit archaeology", head)
+        return
+    name, mapped = _map_helper(ctx, head)
+    if name is None:
+        return
+    if name in COND:
+        _visit_cond(ctx, node, name, head)
+        return
+    if _check_callable(ctx, name, head, mapped):
+        for arg in node.items[1:]:
+            _visit(ctx, arg)
+
+
 def inspect(source: str, foundation: dict, *, source_era: str = "auto"):
-    """Return (staged_readable_source, findings). Does not write any file."""
-    findings: list[Finding] = []
-    changes: list[tuple[int, int, str]] = []
+    """Read-only AST normalization preview using the existing SENS parser."""
     if source_era not in {"auto", "legacy", "current"}:
         raise ValueError("unrecognised source provenance")
     try:
-        # Exact same lexical/parser logic as the production three-pass migrator.
-        clean = engine.strip_comments(source)
-        roots = engine.Parser(engine.tokenize(clean)).parse_program()
+        clean, roots = _parse_existing(source)
     except engine.MigrationError as exc:
-        return None, [Finding("L7", "BLOCK", str(exc), getattr(exc.tok, "offset", 0) if exc.tok else 0)]
-
-    admitted: dict[str, str] = {}
-    for domain in ("D3", "D4", "D5", "D6", "D7", "D8", "D9"):
-        for bits, label in foundation["domains"][domain]["residents"].items():
-            if label != "EMPTY":
-                admitted[bits] = domain
-
-    def mark(law, verdict, reason, node):
-        findings.append(Finding(law, verdict, reason, node.tok.offset))
-
-    def query_exact(node) -> bool:
-        if isinstance(node, engine.Atom):
-            return node.tok.text in {"0", "1"}  # exact D1 literals; not numeric truthiness
-        return (isinstance(node, engine.ListNode) and node.tail is None
-                and bool(node.items) and isinstance(node.items[0], engine.Atom)
-                and (node.items[0].tok.text in PREDICATES))
-
-    def visit(node, quoted=False):
-        if isinstance(node, engine.Quote):
-            return  # Lisp quote is data; no executable-head rewriting
-        if not isinstance(node, engine.ListNode) or not node.items:
-            return
-        if node.tail is not None and not quoted:
-            mark("L3", "BLOCK", "dotted executable form is not certified", node)
-            return
-        head = node.items[0]
-        if quoted:
-            return
-        if not isinstance(head, engine.Atom):
-            mark("L3", "BLOCK", "computed executable head: no ratified coordinate proof", node)
-            return
-        name = head.tok.text
-        if name in QUOTES:
-            return
-        if name.lower() in RETIRED:
-            mark("L5", "BLOCK", "retired semantic executable; remove via separately audited archaeology", head)
-            return
-        mapped_helper = name in HELPERS
-        if mapped_helper:
-            domain, label = HELPERS[name]
-            code = resident_code(foundation, domain, label)
-            if code is None:
-                mark("L4", "BLOCK", "no unique resident; D3 expansion needs independent law/oracle", head)
-                return
-            changes.append((head.tok.offset, head.tok.offset + len(name), code))
-            mark("L4", "STAGED", f"ratified {domain} resident {code} for {label}", head)
-            name = code
-        if name in COND:
-            if name == "00000111":
-                mark("L1", "BLOCK", "historical SID8 COND needs separately proven source-era mapping", head)
-                return
-            for clause in node.items[1:]:
-                if not isinstance(clause, engine.ListNode) or clause.tail is not None:
-                    mark("L1", "BLOCK", "COND clause must be a proper two-member list", clause)
-                    continue
-                if len(clause.items) != 2:
-                    mark("L6", "BLOCK", "old fixture/three-part COND: regenerate via canonical fixture tool", clause)
-                    continue
-                query, branch = clause.items
-                if isinstance(query, engine.Atom) and query.tok.text == "t":
-                    # L2 has one explicitly ratified rewriting, not global T truthiness.
-                    changes.append((query.tok.offset, query.tok.offset + 1, "1"))
-                    mark("L2", "STAGED", "explicit D1:1 clause; t is not a special symbol", query)
-                elif not query_exact(query):
-                    mark("L1", "BLOCK", "no static exact-D1 predicate proof; arbitrary truthiness forbidden", query)
-                visit(query)
-                visit(branch)
-            return
-        if name not in admitted:
-            if name in HELPERS:
-                return
-            # Source names are *not* coordinates; no unproven callable Text7 fallback.
-            mark("L3", "BLOCK", f"unresolved executable head {name!r}; D10 proposal, do not mint coordinate", head)
-            return
-        if len(name) == 8 and source_era == "auto" and not mapped_helper:
-            mark("L3", "BLOCK", "eight-bit head ambiguous between SID8 and current D8", head)
-            return
-        if len(name) == 8 and source_era == "legacy" and not mapped_helper:
-            mark("L3", "BLOCK", "legacy SID8 needs history-aware resolver, not current D8 assertion", head)
-            return
-        for arg in node.items[1:]:
-            visit(arg)
-
+        offset = exc.tok.offset if exc.tok else 0
+        return None, [Finding("L7", "BLOCK", str(exc), offset)]
+    ctx = GateContext(foundation, source_era, _admitted_bits(foundation), [], [])
     for root in roots:
-        visit(root)
+        _visit(ctx, root)
     staged = clean
-    for start, stop, replace in sorted(changes, reverse=True):
-        staged = staged[:start] + replace + staged[stop:]
+    for start, end, word in sorted(ctx.changes, reverse=True):
+        staged = staged[:start] + word + staged[end:]
     try:
-        engine.Parser(engine.tokenize(staged)).parse_program()
+        _parse_existing(staged)
     except engine.MigrationError as exc:
-        findings.append(Finding("L7", "BLOCK", f"post-normalization parse failed: {exc}", 0))
-    return staged, findings
+        ctx.findings.append(Finding("L7", "BLOCK", f"post-normalization parse failed: {exc}", 0))
+    return staged, ctx.findings
 
 
 def main(argv=None) -> int:
