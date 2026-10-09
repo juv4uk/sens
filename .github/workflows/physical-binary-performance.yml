@@ -1,0 +1,114 @@
+name: SENS physical binary performance measurements
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/physical-binary-performance/**"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+      - ".github/workflows/physical-binary-performance.yml"
+  pull_request:
+    paths:
+      - "benchmarks/physical-binary-performance/**"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - ".github/workflows/physical-binary-performance.yml"
+  workflow_dispatch:
+    inputs:
+      repetitions:
+        description: "Measured process launches per lane, after warmup"
+        type: number
+        default: 21
+      cachegrind:
+        description: "Include actual CPU instruction references via Valgrind"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "23 3 * * *"
+
+permissions:
+  contents: read
+
+# One evidence artifact per measured SHA; no cancelled push measurements.
+concurrency:
+  group: physical-binary-perf-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  real-physical-binary:
+    name: physical T5 bytes / startup / execution / p95
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sens-physical-performance
+      - name: Capture immutable build environment
+        run: |
+          mkdir -p /tmp/sens-physical-performance
+          git rev-parse HEAD > /tmp/sens-physical-performance/source.sha
+          uname -a > /tmp/sens-physical-performance/host.txt
+          rustc -Vv >> /tmp/sens-physical-performance/host.txt
+          sha256sum \
+            crates/sens-cli/src/main.rs \
+            crates/sens-cli/src/bin/sens-trit.rs \
+            benchmarks/physical-binary-performance/run.py \
+            tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
+            > /tmp/sens-physical-performance/inputs.sha256
+      - name: Build release binaries that actually run the language
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+      - name: Install instruction-count profiler only when explicitly requested
+        if: ${{ inputs.cachegrind == true }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+      - name: Benchmark physical T5 files, not unit tests
+        env:
+          REPS: ${{ inputs.repetitions || '21' }}
+          RUN_CACHEGRIND: ${{ inputs.cachegrind || false }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          options=()
+          if [[ "$RUN_CACHEGRIND" == "true" ]]; then
+            options+=(--cachegrind)
+          fi
+          python3 benchmarks/physical-binary-performance/run.py \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --reps "$REPS" \
+            --warmup 4 \
+            --out /tmp/sens-physical-performance \
+            "${options[@]}"
+          sha256sum --check /tmp/sens-physical-performance/inputs.sha256
+          test "$(cat /tmp/sens-physical-performance/source.sha)" = "$GITHUB_SHA"
+      - name: Show actual medians, p95 and physical size
+        if: always()
+        shell: bash
+        run: |
+          if test -s /tmp/sens-physical-performance/report.md; then
+            cat /tmp/sens-physical-performance/report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Physical benchmark has no successful parity-admitted measurements.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Preserve SHA-bound raw measurements even if benchmark fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-binary-perf-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/sens-physical-performance/
+          retention-days: 21
+          if-no-files-found: warn
