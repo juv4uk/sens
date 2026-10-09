@@ -774,9 +774,18 @@ mod tests {
         assert_eq!(analysis.blocked_exact_domain, 1);
     }
     #[test]
-    fn compatibility_def_maps_to_define_code() {
+    fn compatibility_surface_maps_to_define_code() {
+        let define_sid =
+            semantic_registry_export::semantic_id_for_admitted_surface("визначити")
+                .expect("Ukrainian DEFINE surface must remain registry-admitted");
+        let english_surface = semantic_registry_export::admitted_surfaces_for_semantic_id(define_sid)
+            .into_iter()
+            .find(|row| row.namespace == "en")
+            .map(|row| row.name)
+            .expect("DEFINE must have an admitted English compatibility surface");
+        let source = format!("({english_surface} f (lambda (x) (car x)))");
         assert_eq!(
-            rewrite("(def f (lambda (x) (car x)))"),
+            rewrite(&source),
             "(00001001 f (00001000 (x) (00000101 x)))"
         );
     }
