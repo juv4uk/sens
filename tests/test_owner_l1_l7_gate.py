@@ -54,6 +54,25 @@ class OwnerLaws(unittest.TestCase):
         self.assertIn(("L3", "BLOCK"), verdicts(found))
         self.assertIn("D10 proposal", found[0].reason)
 
+    def test_l3_unique_human_function_surface_gets_ratifed_code(self):
+        staged, found = apply("(CAR (001 ()))")
+        self.assertTrue(staged.startswith("(100 "))
+        self.assertIn(("L3", "STAGED"), verdicts(found))
+        self.assertNotIn(("L3", "BLOCK"), verdicts(found))
+
+    def test_l3_ambiguous_map_label_stays_blocked(self):
+        # Current D6 and D8 both have MAP; no guessed domain.
+        staged, found = apply("(MAP (001 ()))")
+        self.assertEqual(staged, "(MAP (001 ()))")
+        self.assertIn(("L3", "BLOCK"), verdicts(found))
+
+    def test_l1_human_cond_and_predicate_resolve_through_foundation(self):
+        staged, found = apply("(COND ((ATOM (001 ())) (001 ())))")
+        self.assertTrue(staged.startswith("(110 ((010 "))
+        self.assertFalse(any(item.verdict == "BLOCK" for item in found))
+        self.assertIn(("L3", "STAGED"), verdicts(found))
+
+
     def test_l3_unproven_w8_blocks(self):
         _, found = apply("(11110111 (001 ()))")
         self.assertIn(("L3", "BLOCK"), verdicts(found))
