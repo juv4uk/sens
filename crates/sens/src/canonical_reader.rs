@@ -28,6 +28,49 @@ pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> 
     CanonicalReader::new(&tokens, source.len()).parse_program()
 }
 
+/// Parse real packed binary payload bytes directly through the ratified D2 reader.
+///
+/// The `widths` schedule is **required framing metadata** supplied by the
+/// caller, not a substitute semantic registry. A bare packed bitstream cannot
+/// identify word boundaries by itself. No visible `0`/`1` text, ASCII token
+/// parser, host Lisp surface, or historical SID8 route is constructed here.
+///
+/// The resulting AST spans refer to *physical byte ranges*, rounded outwards
+/// at word boundaries: two adjacent words may therefore share the same byte
+/// span. This is not a self-describing canonical file format.
+pub fn parse_canonical_packed_words(
+    packed: &crate::PackedBitstream,
+    widths: &[usize],
+) -> Result<Vec<Expr>, LanguageError> {
+    let words = crate::unpack_binary_source_words(packed, widths).ok_or_else(|| {
+        LanguageError::new(
+            ErrorKind::Parse,
+            "packed binary payload requires an exact, complete 1..9-bit word-boundary schedule",
+            Span {
+                start: 0,
+                end: packed.byte_len(),
+            },
+        )
+    })?;
+
+    let mut bit_offset = 0usize;
+    let mut tokens = Vec::with_capacity(words.len());
+    for word in words {
+        let start = bit_offset / 8;
+        // `unpack_binary_source_words` has already checked the complete
+        // schedule for overflow, valid widths and total payload length.
+        bit_offset += word.width();
+        let end = bit_offset / 8 + usize::from(bit_offset % 8 != 0);
+        tokens.push(BinarySourceToken {
+            word,
+            span: Span { start, end },
+        });
+    }
+    debug_assert_eq!(bit_offset, packed.bit_len());
+
+    CanonicalReader::new(&tokens, packed.byte_len()).parse_program()
+}
+
 /// Recognize a D2-framed Text7 identifier without changing the canonical D2 AST.
 ///
 /// This helper is consumed only by contextual binding/call-head code. Ordinary
@@ -282,6 +325,92 @@ mod tests {
             ExprKind::DomainIdentity(identity) => identity,
             ref other => panic!("expected DomainIdentity, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn packed_word_reader_executes_real_non_utf8_bytes_without_text_parser() {
+        // Physical ten-bit stream: D2 OPEN (10), D3 QUOTE (001),
+        // D3 EMPTY (000), D2 CLOSE (01). Last six physical pad bits are zero.
+        let packed = crate::PackedBitstream::from_parts(
+            vec![0b1000_1000, 0b0100_0000],
+            10,
+        )
+        .expect("canonical MSB-first binary bytes");
+        let forms = parse_canonical_packed_words(&packed, &[2, 3, 3, 2])
+            .expect("D2 parses directly from packed binary");
+        assert_eq!(forms.len(), 1);
+        let ExprKind::List(ref call) = forms[0].kind else {
+            panic!("expected executable D2-framed form");
+        };
+        assert_eq!(call.len(), 2);
+        assert_eq!((domain(&call[0]).width(), domain(&call[0]).packed_bits()), (3, 1));
+        assert!(matches!(call[1].kind, ExprKind::List(ref items) if items.is_empty()));
+
+        let result = crate::eval_parsed_expressions(&forms, &mut crate::Session::default())
+            .expect("exact D3 QUOTE executes without text source");
+        assert_eq!(result.value, crate::Value::Nil);
+    }
+
+    #[test]
+    fn packed_binary_and_visible_binary_share_one_d2_grammar() {
+        let visible = "10 101 00 10 110 01 01";
+        let source_tokens = crate::parse_binary_source_words(visible).unwrap();
+        let packed = crate::pack_binary_source_tokens(&source_tokens);
+        let widths: Vec<usize> = source_tokens.iter().map(|token| token.word.width()).collect();
+
+        let direct = parse_canonical_packed_words(&packed, &widths).unwrap();
+        let visual = parse_canonical_binary(visible).unwrap();
+        assert_eq!(direct.len(), visual.len());
+        // Spans are byte offsets for packed source and UTF-8 offsets for
+        // visible source; compare the semantic D2 tree, not their spans.
+        let ExprKind::List(ref packed_outer) = direct[0].kind else {
+            panic!("expected outer D2 list from packed bytes");
+        };
+        let ExprKind::List(ref visible_outer) = visual[0].kind else {
+            panic!("expected outer D2 list from visible bits");
+        };
+        assert_eq!(packed_outer.len(), visible_outer.len());
+        assert_eq!(domain(&packed_outer[0]), domain(&visible_outer[0]));
+        let ExprKind::List(ref packed_inner) = packed_outer[1].kind else {
+            panic!("expected packed nested D2 list");
+        };
+        let ExprKind::List(ref visible_inner) = visible_outer[1].kind else {
+            panic!("expected visible nested D2 list");
+        };
+        assert_eq!(domain(&packed_inner[0]), domain(&visible_inner[0]));
+    }
+
+    #[test]
+    fn packed_boundary_mismatch_fails_closed_without_legacy_fallback() {
+        let packed = crate::PackedBitstream::from_parts(
+            vec![0b1000_1000, 0b0100_0000],
+            10,
+        ).unwrap();
+        for wrong in [&[2usize, 3, 3][..], &[2, 3, 0, 5], &[2, 3, 3, 3], &[2, 3, 3, 10]] {
+            let err = parse_canonical_packed_words(&packed, wrong).unwrap_err();
+            assert_eq!(err.kind, ErrorKind::Parse);
+            assert!(err.message.contains("word-boundary schedule"));
+        }
+        assert!(parse_canonical_packed_words(&packed, &[2, 3, 3, 2]).is_ok());
+        assert!(
+            crate::PackedBitstream::from_parts(
+                vec![0b1000_1000, 0b0100_0001],
+                10,
+            )
+            .is_none(),
+            "nonzero unused padding bits are not a second spelling"
+        );
+    }
+
+    #[test]
+    fn packed_d7_is_typed_data_not_an_executable_sid8() {
+        let packed = crate::PackedBitstream::from_parts(vec![0b0000_0010], 7).unwrap();
+        let roots = parse_canonical_packed_words(&packed, &[7]).unwrap();
+        assert_eq!(roots.len(), 1);
+        let identity = domain(&roots[0]);
+        assert_eq!(identity.width(), 7);
+        assert_eq!(identity.packed_bits(), 1);
+        assert!(identity.core_operation().is_none());
     }
 
     #[test]
