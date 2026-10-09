@@ -1,0 +1,102 @@
+{
+  "schema": "sens-d10-cross-hobby-transducer-research/v1",
+  "status": "HOLD-RESEARCH-UNRATIFIED",
+  "as_of": "2026-10-09",
+  "baseline": {
+    "D10_selected": 630,
+    "D10_capacity": 1024,
+    "D10_ratified": 0,
+    "canonical_d10_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc"
+  },
+  "roots": [
+    {
+      "semantic_name": "FINITE-MEALY-RUN",
+      "surface_uk": "станоплин",
+      "surface_ukr": "виконати-скінченний-перетворювач",
+      "arity": 3,
+      "law": "Given a partial deterministic finite map (state,input) -> (new-state,ordered-output-word), initial state and finite input word: consume left-to-right, concatenate output words, return final state and output; absent edge returns typed failure with input index; empty input preserves state and emits empty output.",
+      "witnesses": [
+        "run(empty-input,S)=(S,())",
+        "run(A,(1,))=(B,(x,y))",
+        "run(A,X++Y) = run(run(A,X).state,Y), outputs concatenated"
+      ],
+      "falsifiers": [
+        "silent skip of missing edge",
+        "reorder or loss of output symbols",
+        "accept duplicate transition labels"
+      ],
+      "source": "https://srfi.schemers.org/srfi-158/srfi-158.html",
+      "status": "HOLD-PENDING-D1-D9-EXPRESSIBILITY",
+      "coordinate": null,
+      "ratified": false,
+      "selected": false
+    },
+    {
+      "semantic_name": "FINITE-TRANSDUCER-COMPOSE",
+      "surface_uk": "зчепити-станоплини",
+      "surface_ukr": "скомпонувати-скінченні-перетворювачі",
+      "arity": 2,
+      "law": "Compose product-state machines: each T1 transition emits a word that T2 consumes sequentially, preserving order. If T2 lacks any transition, the composed input edge is undefined. Empty intermediate word leaves second state unchanged.",
+      "witnesses": [
+        "composition output equals two-stage streaming cascade",
+        "empty emitted word leaves second state",
+        "ordered x,y emissions are both consumed"
+      ],
+      "falsifiers": [
+        "skip missing T2 edge",
+        "reverse intermediate output",
+        "change T2 state for empty output"
+      ],
+      "source": "https://github.com/google-research/openfst/blob/main/docs/quick_tour.md",
+      "status": "DERIVED-NO-SEPARATE-ROOT",
+      "coordinate": null,
+      "ratified": false,
+      "selected": false
+    }
+  ],
+  "owner_donors": [
+    {
+      "repo": "juv4uk/shiva-sutras",
+      "path": "README.md",
+      "git_blob": "6c932545f63f6c1895767c42b85f679272237f02",
+      "meaning": "Panini phonological classes and evidence, not a proven FST implementation"
+    },
+    {
+      "repo": "juv4uk/radio-log",
+      "path": "docs/features.md",
+      "git_blob": "28b7f82072a3b976c740bb3f3768a6cbdf23ad45",
+      "meaning": "radio modes and ordered QSO events, not modem protocol"
+    },
+    {
+      "repo": "juv4uk/esp32-pendulum",
+      "path": "README.md",
+      "git_blob": "811aad8a5946b93515c01a9eb281009176a920df",
+      "meaning": "AS5600 discrete measurements; README explicitly skeleton/TODO"
+    },
+    {
+      "repo": "juv4uk/WSM-24",
+      "path": "README.md",
+      "git_blob": "d81f58bd42e2fe2c9613f2b721010dc53596e160",
+      "meaning": "24h/longitude navigation; archival prototype"
+    },
+    {
+      "repo": "juv4uk/spanda",
+      "path": "README.md",
+      "git_blob": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "meaning": "exact rational, FPGA, analog interface; design evidence only"
+    }
+  ],
+  "family_triage": {
+    "astronomy, WSM-24, horology": "cyclic longitude difference derives modulo; keep math library",
+    "music, acoustics": "rhythm/tone rules are application data; avoid new Core residents",
+    "radio, RTL-SDR, Olivia": "demodulation and transport remain physical/air substrate",
+    "FPGA, ESP32, analog": "MMIO and switch-matrix masks remain hardware island",
+    "Panini, Sanskrit, Text7": "phonological rewriting is linguistic island; do not duplicate selected Panini D10",
+    "Lisp, Prolog, AI": "APPLY/MAP/FOLD or reasoning-state laws are D1-D9/D10 dedup attacks",
+    "chess/search": "move generation and evaluation remain chess island",
+    "space game, astrophysics": "ephemerides and coordinate systems remain domain libraries",
+    "Spanda exact fractions": "already covered by peer #4891/#4892, no duplicate",
+    "convolution, phase unwrap, sample rates": "already covered by peer #4888/#4890, no duplicate"
+  },
+  "governance": "Only research laws: no canonical selection, no D10 coordinates, no executable .sens, no D1-D9 changes; require real SENS Core expressibility negative test and independent donor oracle before selection."
+}
