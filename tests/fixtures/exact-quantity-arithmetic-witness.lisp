@@ -143,7 +143,9 @@
               (00100111 (00000001 status) (00000001 fail))
               (00100111 (00000001 case) (00000101 row))
               (00100111 (00000001 actual) (00101111 row))
-              (00100111 (00000001 expected) (00110000 row)))))))))))(00001001 exact-quantity-arithmetic-witness
+              (00100111 (00000001 expected) (00110000 row))))))))))
+
+(00001001 exact-quantity-arithmetic-witness
   (00001000 ()
     (exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))))
 
