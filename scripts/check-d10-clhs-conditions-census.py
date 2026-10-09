@@ -116,6 +116,8 @@ def validate(census: dict, inventory: dict, foundation: dict) -> list[str]:
             errors.append("proposal dossier disagrees with the per-symbol census row")
     if decisions["PROPOSE"] != 1:
         errors.append("per-symbol table must contain exactly one PROPOSE")
+    if acc.get("by_decision") != decisions:
+        errors.append("per-symbol decision accounting mismatch")
 
     return errors
 
