@@ -1,0 +1,136 @@
+{
+  "schema": "d10-gf2-linear-complexity-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-SEMANTIC-DEDUP-NOT-SELECTED",
+  "coordination": [
+    "#4013",
+    "#4463",
+    "#4162",
+    "#4867"
+  ],
+  "scope": "Єдиний D10 10-бітний семантичний потік, лише дослідження. Жодного нового коду виконання, координати, фізичного .sens, ратифікації або правки D1–D9.",
+  "candidate": {
+    "stable_id": "d10.words.gf2-linear-complexity.20261009",
+    "semantic_name": "GF2-LINEAR-COMPLEXITY",
+    "surface_uk": "двійкова-лінійна-складність",
+    "surface_ukr": "найменша-довжина-лінійного-регістра-для-бітів",
+    "signature": "(скінченне слово з D1-бітів)->невід'ємне точне ціле",
+    "law": "Найменше L від 0 до n, для якого існують коефіцієнти c[1..L]∈GF(2), що для кожного i=L..n−1 виконують s[i] = XOR_{j=1..L}(c[j] AND s[i−j]). Для порожнього слова L=0. Початкові біти до індексу L є довільним початковим станом, не штучними нулями. Усі послідовності точні, жодного шуму чи випадковості не виводимо.",
+    "witnesses": [
+      {
+        "word": "",
+        "L": 0
+      },
+      {
+        "word": "000",
+        "L": 0
+      },
+      {
+        "word": "1111",
+        "L": 1
+      },
+      {
+        "word": "1000",
+        "L": 1
+      },
+      {
+        "word": "001",
+        "L": 3
+      },
+      {
+        "word": "010101",
+        "L": 2
+      },
+      {
+        "word": "1101011110001",
+        "L": 4
+      }
+    ],
+    "falsifiers": [
+      "001 -> L=2: попередні два біти нулі, неможливо одержати третій 1 з жодними GF(2) коефіцієнтами.",
+      "1000 -> L=4: регістр довжини 1 з нульовим зворотним коефіцієнтом уже відтворює слово.",
+      "Порожнє слово -> L=1: L=0 є мінімальним.",
+      "Повторюваний період слова не дорівнює загальному лінійному GF(2)-рангу."
+    ],
+    "coordinate": null,
+    "selected": false,
+    "ratified": false,
+    "admitted_T5": false,
+    "primitive_question": "Точна скалярна характеристика послідовності відмінна від PRIMITIVE-BINARY-WORD-ROOT і GRAY-ENCODE. Проте обчислюється звичайною GF(2) арифметикою та циклом; власник має вирішити D10 Core чи окрема Core-Math бібліотека, після незалежного semantic dedup."
+  },
+  "primary_references": [
+    {
+      "title": "NIST SP 800-22 Rev 1a, §2.10/§3.10: Linear Complexity Test",
+      "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=906762",
+      "claim": "Berlekamp–Massey дає довжину найкоротшого LFSR для скінченного бітового блоку; статистичний висновок NIST тут НЕ переноситься."
+    },
+    {
+      "title": "Baragaña & Roca, Linear Algebra and its Applications 576 (2019), doi 10.1016/j.laa.2018.06.009",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0024379518302933",
+      "claim": "Задача короткого лінійного регістра — мінімальна реалізація скінченної послідовності."
+    }
+  ],
+  "owner_project_motivation": [
+    {
+      "repo": "juv4uk/radio-log",
+      "file": "src/lib/sens-radio/channel-lab.ts",
+      "git_blob": "7d8c70691dc19f0c3d7121d8945529dd2b2335e7",
+      "boundary": "Реальна лабораторія бітових радіоканалів; НЕ реалізація GF2-LINEAR-COMPLEXITY."
+    },
+    {
+      "repo": "juv4uk/fpga-lisp",
+      "file": "README.md",
+      "git_blob": "fe9713029ae67fce5c3ded5decc55b7c3e803fc8",
+      "boundary": "Авторська FPGA Lisp-машина; НЕ свідчення HDL LFSR чи апаратного виконання кандидата."
+    },
+    {
+      "repo": "juv4uk/WSM-24",
+      "file": "README.md",
+      "git_blob": "d81f58bd42e2fe2c9613f2b721010dc53596e160",
+      "boundary": "Історія циклічних годинникових уявлень; тут лише міждисциплінарна мотивація."
+    }
+  ],
+  "dedup": {
+    "foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_pre_review_git_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "selected_at_scan": 634,
+    "name_matches": 0,
+    "close_semantic_neighbors": [
+      "D10 PRIMITIVE-BINARY-WORD-ROOT: мінімальний повний повтор, не мінімальна XOR-рекуренція",
+      "D10 GRAY-ENCODE-WORD: відбите кодування рангу, не LFSR мінімальність",
+      "D8 ROTATE: задане циклічне переставляння, не складність скінченного сигналу"
+    ],
+    "note": "Name/behavior search is preliminary, explicit peer semantic-dedup needed; no unjustified NO-MATCH in canonical proposal-ledger before review."
+  },
+  "oracle_plan": {
+    "reference_a": "Berlekamp–Massey over GF(2), sequential connection polynomial",
+    "reference_b": "Independent exhaustive enumeration of all binary coefficient tuples for each candidate L, until first feasible recurrence",
+    "bounded_verification": "All 2047 bit words of lengths 0..10; fixed witness 13-bit NIST sequence; invalid-symbol rejection",
+    "negative_controls": [
+      "001 is not order2",
+      "zeros require L0",
+      "0001 requires L4"
+    ],
+    "source_file": "tests/test_d10_gf2_linear_complexity.py"
+  },
+  "holds": [
+    {
+      "name": "MINIMAL-LFSR-POLYNOMIAL",
+      "reason": "Для коротких слів мінімальний поліном може бути неєдиним; потрібна власна політика tie без вигаданої унікальності."
+    },
+    {
+      "name": "LINEAR-COMPLEXITY-PREFIX-PROFILE",
+      "reason": "Тривіальна послідовність викликів скалярного L на префіксах — імовірно похідний library профіль."
+    },
+    {
+      "name": "NIST-LINEAR-COMPLEXITY-RANDOMNESS-TEST",
+      "reason": "Статистична процедура і p-value не дорівнюють точному семантичному кореню й можуть бути окремим пакетним застосунком."
+    }
+  ],
+  "acceptance": [
+    "Незалежні оракули згодні, зафіксовані позитивні й негативні свідки.",
+    "Жодних координат або ратифікації з назви функції.",
+    "Core-versus-library + D1-D9/D10 поведінкова дедуплікація рецензовані незалежно.",
+    "Фізична FPGA/SDR працездатність не проголошена без hardware evidence."
+  ]
+}
