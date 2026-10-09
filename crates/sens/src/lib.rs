@@ -13,26 +13,10 @@ mod bit9;
 mod binary_number;
 mod bits;
 mod canonical_reader;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod compilation_artifact;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod compilation_artifact_producer;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod conformance_oracle;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod fixpoint_checkpoint;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod gpu_admission;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod gpu_oracle;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod program_compiler;
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod selfhost_lineage;
 mod domain_words;
 mod domain_identity;
 pub mod domain_ladder;
