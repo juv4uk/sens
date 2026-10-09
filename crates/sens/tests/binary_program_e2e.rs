@@ -15,6 +15,8 @@ const D3_PRIMITIVES_PROGRAM: &str =
     include_str!("../../../examples/binary/d3-primitives-program.bits");
 const D5_LABEL_RECURSION_PROGRAM: &str =
     include_str!("../../../examples/binary/d5-label-recursion.bits");
+const D5_LABEL_COPY_PROGRAM: &str =
+    include_str!("../../../examples/binary/d5-label-copy.bits");
 
 fn assert_exact_domain_ast(expression: &Expr) {
     match &expression.kind {
@@ -83,6 +85,29 @@ fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
     let parsed = parse_canonical_binary(&visible)
         .expect("D2 reader preserves D5 LABEL and D7 binding heads");
     assert_eq!(parsed.len(), 1, "LABEL and its recursive application form one D2 call");
+    assert_exact_domain_ast(&parsed[0]);
+}
+
+
+
+#[test]
+fn d5_label_list_copy_preserves_exact_d1_and_empty_data_coordinates() {
+    assert_bit_projection(D5_LABEL_COPY_PROGRAM);
+    let physical = encode_binary_projection_ternary(D5_LABEL_COPY_PROGRAM)
+        .expect("D5 recursive list-copy source encodes as physical T5");
+    let words = decode_ternary_program(&physical).expect("recursive list-copy T5 decodes");
+    let visible = open_ternary_program(&physical).expect("recursive list-copy T5 opens");
+    let normalized = D5_LABEL_COPY_PROGRAM
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    assert_eq!(visible, normalized);
+    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
+
+    let parsed = parse_canonical_binary(&visible)
+        .expect("canonical D2 reader preserves the recursive list-copy program");
+    assert_eq!(parsed.len(), 1);
     assert_exact_domain_ast(&parsed[0]);
 }
 
