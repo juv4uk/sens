@@ -110,6 +110,8 @@ class EqCondCohort(unittest.TestCase):
                     for flag, file in FLAGS.items()
                     for item in ("--" + flag, str(ROOT / file))
                 ],
+                "--source-era",
+                "legacy",
                 "--report",
                 str(report),
             ]
