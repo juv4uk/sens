@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - AGENTS.md
+      - docs/agent-doctrine.md
       - docs/architecture/ARCHIPELAGO-V1.uk.md
       - docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md
       - knowledge/d10-proposal-ledger.tsv
@@ -22,6 +23,8 @@ on:
       - knowledge/d10-selection-transition-history.json
       - knowledge/d10-growth-baseline-v1.json
       - docs/architecture/ARCHIPELAGO-V1.uk.md
+      - docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md
+      - docs/agent-doctrine.md
       - scripts/check-d10-proposal-ledger.py
       - tests/test_d10_proposal_ledger_growth.py
       - .github/workflows/d10-proposal-intake.yml
