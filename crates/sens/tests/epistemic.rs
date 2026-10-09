@@ -436,7 +436,7 @@ fn supporting_evidence_record_is_not_implicit_cond_truth() {
             (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "d")))
             (quote (claim-ref cml-build-available)))
           (quote flows-through))
-         (t (quote unreachable)))"#;
+         (1 (quote unreachable)))"#;
 
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
