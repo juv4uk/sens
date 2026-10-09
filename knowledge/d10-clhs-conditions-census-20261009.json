@@ -34,9 +34,9 @@
     "ratified_added": 0,
     "selected_added": 0,
     "by_decision": {
-      "DERIVED": 17,
-      "DUPLICATE": 9,
-      "HOLD": 24,
+      "DUPLICATE": 0,
+      "DERIVED": 5,
+      "HOLD": 45,
       "PROPOSE": 1
     },
     "donor_primary_url_complete": 51
@@ -57,10 +57,10 @@
       "falsifier": "Any implementation that collapses same-name restart objects, drops the anonymous restart, reverses nested restart order, includes a restart associated only with another condition, or invokes a restart while merely listing it.",
       "behavioral_dedup": {
         "D1-D9": "Current foundation exact-name audit: no COMPUTE-RESTARTS name collision. Existing condition signaling and D2 control laws are not treated as a duplicate; the list-valued observation and ordering still require an explicit owner check.",
-        "D10": "Current 635-row inventory contains FIND-RESTART but not COMPUTE-RESTARTS. FIND-RESTART is a one-restart/name lookup and cannot produce the full ordered list with anonymous and same-name distinct entries. This witnesses a shape/observability distinction, not automatic Core authority."
+        "D10": "Live 636-row main inventory has FIND-RESTART but not COMPUTE-RESTARTS. FIND-RESTART returns one restart by name or object and cannot yield the full ordered list of active restart objects with anonymous and same-name distinct entries. This is a result-shape and observable-order distinction, not automatic Core admission."
       },
-      "owner_gate": "PENDING: the value law is distinct from FIND-RESTART lookup, but access to active restarts depends on D2 dynamic-control context. Owner must decide Core observation vs D2/library boundary.",
-      "donor_revision": "ANSI Common Lisp HyperSpec (X3.226-1994), §9.2 Dictionary entry 9.2.32; CLHS entry URL pinned above."
+      "owner_gate": "PENDING: the list-valued observation appears distinct from FIND-RESTART lookup, but available restarts depend on the D2 dynamic-control context. Owner must decide Core observation vs D2/library boundary.",
+      "donor_revision": "ANSI Common Lisp HyperSpec (X3.226-1994), §9.2 Dictionary entry COMPUTE-RESTARTS; exact direct CLHS entry URL is pinned above."
     },
     {
       "name": "RESTART-BIND",
