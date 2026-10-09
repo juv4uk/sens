@@ -28,7 +28,8 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(00001001 list (00001000 args args))
+(00001001 список (00001000 args args))
+(00001001 list список)
 
 ; and/or are Lisp-owned short-circuit macros. A tested operand must return
 ; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
@@ -217,9 +218,10 @@
 ; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
-(00001001 append
+(00001001 приєднати
   (00001000 (left right)
     (зворот-до (00101010 left) right)))
+(00001001 append приєднати)
 
 (00001001 map-onto
   (00001000 (f values acc)
