@@ -8,6 +8,7 @@ on:
       - "examples/binary/**"
       - "crates/sens/tests/binary_program_e2e.rs"
       - "crates/sens/tests/strict_cond_legacy_binary_rejection.rs"
+      - "crates/sens/tests/data/d3-cond-three-field-rejected.t5-negative"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/eval/**"
       - "crates/sens/src/ternary_transport.rs"
@@ -37,7 +38,11 @@ jobs:
         run: |
           set -euo pipefail
           cargo build --locked -p sens-cli --bin sens-trit
-          if target/debug/sens-trit eval examples/binary/d3-cond-three-field-rejected.sens > "$RUNNER_TEMP/d3-legacy.out" 2> "$RUNNER_TEMP/d3-legacy.err"; then
+          # A negative is test data, not a tracked, admitted .sens program.
+          # The public CLI correctly requires .sens extension; copy the *same*
+          # physical bytes into the isolated runner temp directory first.
+          cp crates/sens/tests/data/d3-cond-three-field-rejected.t5-negative "$RUNNER_TEMP/d3-legacy.sens"
+          if target/debug/sens-trit eval "$RUNNER_TEMP/d3-legacy.sens" > "$RUNNER_TEMP/d3-legacy.out" 2> "$RUNNER_TEMP/d3-legacy.err"; then
             echo "ERROR: malformed retired three-field COND was executed" >&2
             exit 1
           fi
