@@ -16,7 +16,7 @@
 //!
 //! Versioning: artifacts are immutable once sealed. Version bumps go to separate schema.
 
-use serde::{Deserialize, Serialize};
+// Serde is deliberately test-only in this capability-free core.
 use std::collections::BTreeMap;
 
 /// Semantic versioning for artifact schema.
@@ -33,7 +33,8 @@ pub const ARTIFACT_VERSION_MINOR: u32 = 0;
 /// The artifact uniquely identifies a compilation result without committing
 /// to any target/backend mechanism. Mechanisms may have their own digests,
 /// but the artifact itself is target-neutral.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct CompilationArtifact {
     /// Artifact schema version (major.minor).
     pub version: (u32, u32),
@@ -70,7 +71,8 @@ pub struct CompilationArtifact {
 }
 
 /// SENS contract and law authority facts.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct ContractAuthority {
     /// language-contract.lisp version/digest.
     pub contract_version: String,  // e.g., "11.8"
@@ -85,7 +87,8 @@ pub struct ContractAuthority {
 }
 
 /// Reference to the compiler nucleus that produced this artifact.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct CompilerNucleusRef {
     /// SENS repository commit SHA or version tag.
     pub nucleus_version: String,  // e.g., "d3938bb7c"
@@ -94,7 +97,8 @@ pub struct CompilerNucleusRef {
 }
 
 /// A mechanism required for execution of this artifact.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct MechanismRequirement {
     /// Name of the mechanism (e.g., "core-apply", "core-eval", "float-add").
     pub name: String,
@@ -111,7 +115,8 @@ pub struct MechanismRequirement {
 }
 
 /// Proof and evidence lineage for the compilation.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct ProofLineage {
     /// Witness of source verification (how source was validated).
     pub source_witness: String,  // e.g., "parsed-and-normalized"
@@ -131,7 +136,8 @@ pub struct ProofLineage {
 }
 
 /// Optional metadata for artifact tracing and debugging.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct CompilationMetadata {
     /// Timestamp of compilation (ISO 8601).
     pub compiled_at: Option<String>,
