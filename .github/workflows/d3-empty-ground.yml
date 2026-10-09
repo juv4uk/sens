@@ -1,0 +1,40 @@
+name: D3 EMPTY ground law research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d3-empty-ground/**"
+      - ".github/workflows/d3-empty-ground.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d3-empty-ground/**"
+      - ".github/workflows/d3-empty-ground.yml"
+  workflow_dispatch:
+
+jobs:
+  empty-ground:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run semantic witness plus exhaustive 8! audit
+        run: |
+          rm -rf /tmp/d3-empty-ground
+          python3 benchmarks/d3-empty-ground/run.py \
+            --out /tmp/d3-empty-ground
+
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d3-empty-ground/report.md; then
+            cat /tmp/d3-empty-ground/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d3-empty-ground
+          path: /tmp/d3-empty-ground/
+          retention-days: 14
