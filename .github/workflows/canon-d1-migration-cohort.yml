@@ -1,0 +1,19 @@
+name: Canon D1 migration cohort
+
+on:
+  pull_request:
+    paths:
+      - 'lib/canon.lisp'
+      - 'crates/sens/tests/canon_d1_migration_cohort.rs'
+      - '.github/workflows/canon-d1-migration-cohort.yml'
+  workflow_dispatch:
+
+jobs:
+  canon-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Compile and run current Canon YES/NO and exhaustion witnesses
+        run: cargo test --locked -p sens --test canon_d1_migration_cohort -- --nocapture
