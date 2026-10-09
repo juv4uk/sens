@@ -99,8 +99,10 @@ def main() -> int:
             expected = baseline.rstrip("\n").encode("utf-8").hex()
             output = run([helper, str(target), name, str(args.iterations), str(args.reps)])
             found = {}
+            observables = 0
             for line in output.splitlines():
                 if line.startswith("HOT_D5_OBSERVABLE\t"):
+                    observables += 1
                     item = fields(line, "HOT_D5_OBSERVABLE")
                     if item["case"] != name or item["value_hex"] != expected:
                         raise RuntimeError(f"{name}: in-process result differs from production CLI")
@@ -125,8 +127,8 @@ def main() -> int:
                     found[item["phase"]] = item
                 else:
                     raise RuntimeError(f"{name}: unexpected helper output {line!r}")
-            if set(found) != PHASES:
-                raise RuntimeError(f"{name}: absent phase or duplicate observable")
+            if set(found) != PHASES or observables != 1:
+                raise RuntimeError(f"{name}: absent phase or missing/duplicate observable")
             for phase, item in found.items():
                 matches = [r for r in raw if r["workload"] == name and r["phase"] == phase]
                 samples = sorted(r["ns_op"] for r in matches)
