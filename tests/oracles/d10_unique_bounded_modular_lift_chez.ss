@@ -46,7 +46,7 @@
 (check "SHIFTED_INTERVAL_UNIQUE"
   (equal? (bounded-lift 7 4 10 11) '(UNIQUE 11)))
 (check "LENGTH_PERIOD_PLUS_ONE_AMBIG"
-  (equal? (bounded-lift 9 6 0 9) '(AMBIGUOUS 2 6 15)))
+  (equal? (bounded-lift 9 6 6 15) '(AMBIGUOUS 2 6 15)))
 (check "BAD_MODULUS"
   (raises? (lambda () (bounded-lift 1 0 0 3))))
 (check "BAD_RESIDUE"
