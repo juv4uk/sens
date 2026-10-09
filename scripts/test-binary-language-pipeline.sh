@@ -125,6 +125,18 @@ physical_decoder = transport_source[decode_start:decode_end]
 assert "parts.join(" not in physical_decoder
 assert "parse_binary_source_words(&visible)" not in physical_decoder
 
+# The alternate sens-trit entrypoint must obey the same direct packed path.
+trit_source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
+trit_start = trit_source.index("fn eval_t5_bytes_core4(")
+trit_end = trit_source.index("\\n}\\n", trit_start) + 3
+trit_route = trit_source[trit_start:trit_end]
+assert "sens::decode_ternary_program(bytes)" in trit_route
+assert "sens::pack_binary_source_words(&words)" in trit_route
+assert "sens::parse_canonical_packed_words(&packed, &widths)" in trit_route
+assert "sens::open_ternary_program(bytes)" not in trit_route
+assert "sens::parse_canonical_binary(&visible)" not in trit_route
+
+print("SENS-TRIT-DIRECT-PACKED-PATH: PASS")
 print("PHYSICAL-T5-DIRECT-PACKED-PATH: PASS")
 print("BINARY-LANGUAGE-NEGATIVE-CONTROLS: PASS")
 print("leading-zero collapse: blocked")
