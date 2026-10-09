@@ -1,5 +1,6 @@
 use sens::{
-    installed_capabilities, parse, semantic_registry_export, Expr, ExprKind, Sens8,
+    installed_capabilities, parse, semantic_registry_export, CoreDomainIdentity, Expr, ExprKind,
+    Sens8,
 };
 use std::collections::HashSet;
 use std::env;
@@ -34,31 +35,61 @@ enum HeadKind {
     Other,
 }
 
-fn head_kind(sens: Sens8) -> HeadKind {
-    if sens == sens::sens!(00000001) {
-        HeadKind::Quote
-    } else if sens == sens::sens!(00000111) {
-        HeadKind::Cond
-    } else if sens == sens::sens!(00001000) {
-        HeadKind::Lambda
-    } else if sens == sens::sens!(00001001) || sens == sens::sens!(00001011) {
-        HeadKind::Define
-    } else if sens == sens::sens!(00001010) {
-        HeadKind::Defmacro
-    } else if sens == sens::sens!(10011100) {
-        HeadKind::Let
-    } else if sens == sens::sens!(10011101) {
-        HeadKind::LetStar
-    } else {
-        HeadKind::Other
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ResolvedIdentity {
+    Domain(CoreDomainIdentity),
+    Legacy(Sens8),
+}
+
+fn head_kind(identity: ResolvedIdentity) -> HeadKind {
+    match identity {
+        ResolvedIdentity::Domain(CoreDomainIdentity::D3(word)) => {
+            match word.word().packed_bits() {
+                0b001 => HeadKind::Quote,
+                0b011 => HeadKind::Cond,
+                _ => HeadKind::Other,
+            }
+        }
+        ResolvedIdentity::Domain(CoreDomainIdentity::D4(word)) => {
+            match word.word().packed_bits() {
+                0b0010 => HeadKind::Lambda,
+                0b0011 => HeadKind::Define,
+                _ => HeadKind::Other,
+            }
+        }
+        ResolvedIdentity::Domain(_) => HeadKind::Other,
+        ResolvedIdentity::Legacy(sens) => {
+            if sens == sens::sens!(00000001) {
+                HeadKind::Quote
+            } else if sens == sens::sens!(00000111) {
+                HeadKind::Cond
+            } else if sens == sens::sens!(00001000) {
+                HeadKind::Lambda
+            } else if sens == sens::sens!(00001001) || sens == sens::sens!(00001011) {
+                HeadKind::Define
+            } else if sens == sens::sens!(00001010) {
+                HeadKind::Defmacro
+            } else if sens == sens::sens!(10011100) {
+                HeadKind::Let
+            } else if sens == sens::sens!(10011101) {
+                HeadKind::LetStar
+            } else {
+                HeadKind::Other
+            }
+        }
     }
 }
 
-fn target_sens(sens: Sens8) -> Sens8 {
-    if sens == sens::sens!(00001011) {
-        sens::sens!(00001001)
-    } else {
-        sens
+fn replacement_bits(identity: ResolvedIdentity) -> String {
+    match identity {
+        ResolvedIdentity::Domain(identity) => identity.to_string(),
+        ResolvedIdentity::Legacy(sens) => {
+            if sens == sens::sens!(00001011) {
+                sens::sens!(00001001).to_string()
+            } else {
+                sens.to_string()
+            }
+        }
     }
 }
 
@@ -72,28 +103,38 @@ fn resolve_head<'a>(
     bound: &HashSet<String>,
     host_capabilities: &HashSet<String>,
     analysis: &mut Analysis,
-) -> Option<(Option<&'a str>, Sens8)> {
+) -> Option<(Option<&'a str>, ResolvedIdentity)> {
     match &head.kind {
-        ExprKind::Sid(sens) => Some((None, *sens)),
+        ExprKind::DomainIdentity(identity) => {
+            Some((None, ResolvedIdentity::Domain(*identity)))
+        }
+        ExprKind::Sid(sens) => Some((None, ResolvedIdentity::Legacy(*sens))),
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
+            let canonical =
+                semantic_registry_export::canonical_domain_identity_for_admitted_surface(name);
+            let legacy = semantic_registry_export::semantic_id_for_admitted_surface(name);
+
             if host_capabilities.contains(name.as_ref()) {
-                if semantic_registry_export::semantic_id_for_admitted_surface(name).is_some() {
+                if canonical.is_some() || legacy.is_some() {
                     analysis.blocked_host_capabilities += 1;
                 }
                 return None;
             }
-            semantic_registry_export::semantic_id_for_admitted_surface(name)
-                .map(|sens| (Some(name.as_ref()), sens))
+
+            canonical
+                .map(ResolvedIdentity::Domain)
+                .or_else(|| legacy.map(ResolvedIdentity::Legacy))
+                .map(|identity| (Some(name.as_ref()), identity))
         }
         _ => None,
     }
 }
 
-fn push_head_edit(head: &Expr, sens: Sens8, analysis: &mut Analysis) {
+fn push_head_edit(head: &Expr, identity: ResolvedIdentity, analysis: &mut Analysis) {
     analysis.edits.push(Edit {
         start: head.span.start,
         end: head.span.end,
-        replacement: target_sens(sens).to_string(),
+        replacement: replacement_bits(identity),
     });
 }
 
@@ -228,14 +269,14 @@ fn walk_expr(
     let arguments = &items[1..];
     let resolved = resolve_head(head, bound, host_capabilities, analysis);
 
-    if let Some((surface, sens)) = resolved {
+    if let Some((surface, identity)) = resolved {
         if surface.is_some() {
             analysis.named_calls += 1;
         }
 
-        let kind = head_kind(sens);
+        let kind = head_kind(identity);
         if surface.is_some() {
-            push_head_edit(head, sens, analysis);
+            push_head_edit(head, identity, analysis);
         }
 
         match kind {
@@ -538,7 +579,7 @@ mod tests {
     fn preserves_comments_strings_and_quote_data() {
         let source = "; (+ 8 9)\n(quote (+ 1 2))\n\"car (+ 3 4)\"\n(atom? x)\n";
         let expected =
-            "; (+ 8 9)\n(00000001 (+ 1 2))\n\"car (+ 3 4)\"\n(00000010 x)\n";
+            "; (+ 8 9)\n(001 (+ 1 2))\n\"car (+ 3 4)\"\n(010 x)\n";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -556,7 +597,7 @@ mod tests {
         let source =
             "(defmacro list (x) (quote shadowed)) (list (never-defined-function))";
         let expected =
-            "(00001010 list (x) (00000001 shadowed)) (list (never-defined-function))";
+            "(00001010 list (x) (001 shadowed)) (list (never-defined-function))";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -565,7 +606,7 @@ mod tests {
         let source =
             "(lambda (list) (list 1 2)) (let ((car (lambda (x) x))) (car (list 1 2)))";
         let expected =
-            "(00001000 (list) (list 1 2)) (10011100 ((car (00001000 (x) x))) (car (00100111 1 2)))";
+            "(0010 (list) (list 1 2)) (10011100 ((car (0010 (x) x))) (car (00100111 1 2)))";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -574,7 +615,7 @@ mod tests {
         let source =
             "(define list (lambda args (quote shadowed))) (list 1 2) (lambda () (define list (lambda args 7)) (list 1 2))";
         let expected =
-            "(00001001 list (00001000 args (00000001 shadowed))) (list 1 2) (00001000 () (00001001 list (00001000 args 7)) (list 1 2))";
+            "(0011 list (0010 args (001 shadowed))) (list 1 2) (0010 () (0011 list (0010 args 7)) (list 1 2))";
         assert_eq!(rewrite(source), expected);
     }
 
@@ -589,17 +630,17 @@ mod tests {
         // code slot 00101010 (#1468), so calls to it become the code.
         assert_eq!(
             rewrite_language("(define reverse (lambda (xs) (reverse xs))) (reverse (list 1))"),
-            "(00001001 reverse (00001000 (xs) (00101010 xs))) (00101010 (00100111 1))"
+            "(0011 reverse (0010 (xs) (00101010 xs))) (00101010 (00100111 1))"
         );
         // A primitive surface still shadows: redefining it is not the language's function.
         assert_eq!(
             rewrite_language("(define car (lambda (x) x)) (car 1)"),
-            "(00001001 car (00001000 (x) x)) (car 1)"
+            "(0011 car (0010 (x) x)) (car 1)"
         );
         // Local definitions always shadow.
         assert_eq!(
             rewrite_language("(lambda () (define reverse (lambda (x) x)) (reverse 1))"),
-            "(00001000 () (00001001 reverse (00001000 (x) x)) (reverse 1))"
+            "(0010 () (0011 reverse (0010 (x) x)) (reverse 1))"
         );
     }
 
@@ -607,7 +648,7 @@ mod tests {
     fn compatibility_def_maps_to_define_code() {
         assert_eq!(
             rewrite("(def f (lambda (x) (car x)))"),
-            "(00001001 f (00001000 (x) (00000101 x)))"
+            "(0011 f (0010 (x) (101 x)))"
         );
     }
 
@@ -630,8 +671,16 @@ mod tests {
     }
 
     #[test]
-    fn public_sens_display_is_the_replacement_format() {
-        assert_eq!(target_sens(sens::sens!(00000101)).to_string(), "00000101");
-        assert_eq!(target_sens(sens::sens!(00001011)).to_string(), "00001001");
+    fn replacement_format_preserves_exact_domain_width_and_legacy_lane() {
+        let d3 = semantic_registry_export::canonical_domain_identity_for_admitted_surface("перше")
+            .expect("D3 CAR identity");
+        let d4 = semantic_registry_export::canonical_domain_identity_for_admitted_surface("визначити")
+            .expect("D4 DEFINE identity");
+        assert_eq!(replacement_bits(ResolvedIdentity::Domain(d3)), "101");
+        assert_eq!(replacement_bits(ResolvedIdentity::Domain(d4)), "0011");
+        assert_eq!(
+            replacement_bits(ResolvedIdentity::Legacy(sens::sens!(10011100))),
+            "10011100"
+        );
     }
 }
