@@ -1,0 +1,99 @@
+name: Vertical Day non-cancelling smoke
+
+# Кожен SHA має власний відтворюваний результат: без paths-фільтрів
+# та cancel-in-progress. Зелений другий job не підміняє RED для цього SHA.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vertical:
+    name: Lisp-owned pair to real CPU, with fail-closed rejection
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CARGO_INCREMENTAL: "0"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: vertical-day-smoke
+
+      - name: Record immutable source SHA and input digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = x86_64
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p "$RUNNER_TEMP/vertical-day"
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/vertical-day/commit.sha"
+          sha256sum \
+            language-contract.lisp \
+            lib/domains/d1.lisp lib/domains/d2.lisp lib/domains/d3.lisp \
+            lib/machine/layout/pair-x86-64.lisp \
+            lib/machine/encoding/x86-64.lisp \
+            lib/machine/admission/x86-64.lisp \
+            lib/machine/lowering/semantic-x86-64.lisp \
+            crates/sens-host/tests/native_lisp_bytes.rs \
+            > "$RUNNER_TEMP/vertical-day/inputs.sha256"
+
+      - name: Verify exact-domain AST and width-preserving carriers
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p sens --test domain_ast_value_identity -- --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/vertical-day/domain.log"
+
+      - name: Interpreter oracle and native physical CAR/CDR agree
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p sens-host --test native_lisp_bytes \
+            native_pair_car_cdr_match_the_interpreter_reference_witness \
+            -- --exact --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/vertical-day/physical-cpu.log"
+
+      - name: Invalid machine form never reaches host
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p sens-host --test native_lisp_bytes \
+            unadmitted_ud2_form_is_rejected_before_host_executor \
+            -- --exact --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/vertical-day/rejection.log"
+
+      - name: Verify digests and bind green verdict to this SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/vertical-day"
+          test "$(cat "$root/commit.sha")" = "$GITHUB_SHA"
+          sha256sum --check "$root/inputs.sha256"
+          sha256sum "$root/domain.log" "$root/physical-cpu.log" "$root/rejection.log" \
+            > "$root/logs.sha256"
+          sha256sum --check "$root/logs.sha256"
+          find target/debug/deps -maxdepth 1 -type f -executable \
+            -name 'native_lisp_bytes-*' -print0 | sort -z | xargs -0 -r sha256sum \
+            > "$root/cpu-test-binaries.sha256"
+          test -s "$root/cpu-test-binaries.sha256"
+          sha256sum --check "$root/cpu-test-binaries.sha256"
+          printf 'VERTICAL_DAY_SMOKE_PASS sha=%s\n' "$GITHUB_SHA" \
+            | tee "$root/verdict.txt"
+          cat "$root/verdict.txt" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve run evidence even when red
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vertical-day-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/vertical-day/
+          if-no-files-found: warn

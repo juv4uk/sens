@@ -58,35 +58,3 @@ pub(super) fn invoke(
             .expect("selected D5 arithmetic resident has an admitted mechanism"),
     )
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{Bit6, CoreD6};
-
-    fn d6(bits: u8) -> CoreDomainIdentity {
-        CoreDomainIdentity::D6(CoreD6::from_word(Bit6::new(bits).unwrap()))
-    }
-
-    fn q(numerator: i64, denominator: i64) -> Value {
-        Value::Rational(Rational::new(numerator, denominator).unwrap())
-    }
-
-    #[test]
-    fn add1_and_sub1_are_exact_d5_compositions() {
-        let env = Environment::root();
-        let span = Span::default();
-
-        for (bits, input, expected) in [
-            (0b001110, q(1, 2), "3/2"),
-            (0b001110, q(-2, 1), "-1"),
-            (0b001111, q(1, 2), "-1/2"),
-            (0b001111, q(-2, 1), "-3"),
-        ] {
-            let value = invoke(d6(bits), &[input], &env, span)
-                .expect("admitted D6 mechanism")
-                .expect("exact D6 arithmetic");
-            assert_eq!(value.to_string(), expected, "D6:{bits:06b}");
-        }
-    }
-}

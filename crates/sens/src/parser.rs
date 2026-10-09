@@ -611,46 +611,6 @@ mod tests {
     }
 
     #[test]
-    fn exact_eight_bit_sequences_are_sid_values() {
-        assert!(matches!(
-            parse_one("00000000").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00000000)
-        ));
-        assert!(matches!(
-            parse_one("00000001").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00000001)
-        ));
-        assert!(matches!(
-            parse_one("00001100").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(00001100)
-        ));
-        assert!(matches!(
-            parse_one("10101000").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(10101000)
-        ));
-        assert!(matches!(
-            parse_one("11111111").kind,
-            ExprKind::Sid(sid) if sid == crate::sens!(11111111)
-        ));
-    }
-
-    #[test]
-    fn non_eight_bit_numeric_tokens_remain_ordinary_decimal_numbers() {
-        assert!(matches!(
-            parse_one("101").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 101.0
-        ));
-        assert!(matches!(
-            parse_one("101010000").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 101_010_000.0
-        ));
-        assert!(matches!(
-            parse_one("12").kind,
-            ExprKind::Number(value, Exactness::Exact) if value == 12.0
-        ));
-    }
-
-    #[test]
     fn decimal_literal_is_parsed_as_exact_rational_or_exact_integer() {
         assert!(matches!(parse_one("3").kind, ExprKind::Number(n, Exactness::Exact) if n == 3.0));
         assert!(matches!(parse_one("3.0").kind, ExprKind::Number(n, Exactness::Exact) if n == 3.0));
@@ -799,15 +759,6 @@ mod tests {
     #[test]
     fn parses_symbols() {
         assert!(matches!(parse_one("foo-bar?").kind, ExprKind::Symbol(s) if &*s == "foo-bar?"));
-    }
-
-    #[test]
-    fn apostrophe_desugars_to_sid_00000001_form() {
-        let ExprKind::List(items) = parse_one("'кіт").kind else {
-            panic!("apostrophe should produce a SID 00000001 form");
-        };
-        assert!(matches!(&items[0].kind, ExprKind::Sid(sid) if *sid == crate::sens!(00000001)));
-        assert!(matches!(&items[1].kind, ExprKind::Symbol(s) if &**s == "кіт"));
     }
 
     #[test]

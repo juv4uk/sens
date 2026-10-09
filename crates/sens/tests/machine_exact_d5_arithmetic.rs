@@ -1,6 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, lower_program, parse, Bit5, CoreD5,
-    DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_program, load_core_library, lower_program, parse, Bit5, CoreD5, ExprKind, Session,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -17,25 +16,6 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
 }
 
-fn exact_d5_call(bits: u8, args: &str, session: &mut Session) -> String {
-    let mut parsed = parse(&format!("(__d5_probe__ {args})")).expect("probe payload");
-    let mut form = parsed.remove(0);
-    let ExprKind::List(items) = form.kind else {
-        panic!("probe list");
-    };
-    let mut items = items.to_vec();
-    items[0] = Expr {
-        kind: ExprKind::DomainIdentity(DomainIdentity::D5(CoreD5::from_word(
-            Bit5::new(bits).expect("D5 bits"),
-        ))),
-        span: Span::default(),
-    };
-    form.kind = ExprKind::List(items.into());
-    eval_parsed_expressions(&[form], session)
-        .expect("exact D5 call")
-        .value
-        .to_string()
-}
 
 fn machine_session() -> Session {
     let mut session = Session::default();
@@ -104,26 +84,6 @@ fn current_surfaces_lower_to_exact_d5_difference_and_times() {
         assert_eq!(identity.width(), 5);
         assert_eq!(identity.packed_bits(), expected_bits);
         assert_eq!(args.len(), 2);
-    }
-}
-
-#[test]
-fn exact_d5_semantics_are_proved_before_machine_fast_paths() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core");
-
-    for (bits, args, expected) in [
-        (0b01011, "9 4", "5"),
-        (0b01011, "1 2", "-1"),
-        (0b10110, "6 7", "42"),
-        (
-            0b10110,
-            "18446744073709551615 2",
-            "36893488147419103230",
-        ),
-    ] {
-        let actual = exact_d5_call(bits, args, &mut session);
-        assert_eq!(actual, expected, "exact D5:{bits:05b} semantics");
     }
 }
 

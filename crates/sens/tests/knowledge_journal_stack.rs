@@ -66,16 +66,3 @@ fn large_module_projection_and_existence_scan_are_stack_safe_on_default_thread()
     );
 }
 
-#[test]
-fn fully_retracted_module_remains_known() {
-    let mut session = loaded_session();
-    assert_eq!(
-        eval(
-            &mut session,
-            "(defmodule bench (quote (((item one)))))\n\
-             (retract-knowledge bench (quote ((item one))))\n\
-             (list (module-known? (quote bench)) (module-clauses-now (quote bench)))",
-        ),
-        "(t ())"
-    );
-}

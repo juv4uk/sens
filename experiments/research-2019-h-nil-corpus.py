@@ -135,20 +135,15 @@ def scan_active_lisp() -> tuple[list[tuple[Path, Token]], list[tuple[Path, Token
     return nil_heads, zero_heads, zero_tokens, nil_token_count
 
 
-def route_evidence() -> tuple[bool, bool, bool]:
-    canon = (ROOT / "crates/sens/src/eval/canon.rs").read_text(encoding="utf-8")
+def route_evidence() -> tuple[bool, bool]:
+    """Inspect the historical metadata and the language-owned separation law.
+
+    The retired Rust SID_ROUTES table is neither a source of language meaning
+    nor a required fixture. Its absence must not cause this archaeology audit
+    to fail or be interpreted as proof about exact-domain execution.
+    """
     mechanism = (ROOT / "lib/function-table-mechanisms.lisp").read_text(encoding="utf-8")
     contract = (ROOT / "language-contract.lisp").read_text(encoding="utf-8")
-
-    route_match = re.search(
-        r"pub\(crate\) const SID_ROUTES.*?= \[(.*?)\];",
-        canon,
-        flags=re.S,
-    )
-    if not route_match:
-        raise SystemExit("H-NIL audit: cannot locate SID_ROUTES")
-
-    zero_in_sid_routes = "sens!(00000000)" in route_match.group(1)
 
     mechanism_tokens = tokenize_lisp(mechanism)
     zero_in_mechanism_rows = any(
@@ -161,7 +156,7 @@ def route_evidence() -> tuple[bool, bool, bool]:
         in contract.lower()
     )
 
-    return zero_in_sid_routes, zero_in_mechanism_rows, contract_separates_ground
+    return zero_in_mechanism_rows, contract_separates_ground
 
 
 def format_sites(sites: list[tuple[Path, Token]]) -> str:
@@ -172,7 +167,7 @@ def format_sites(sites: list[tuple[Path, Token]]) -> str:
 
 def main() -> int:
     nil_heads, zero_heads, zero_tokens, nil_token_count = scan_active_lisp()
-    zero_route, zero_mechanism, separated = route_evidence()
+    zero_mechanism, separated = route_evidence()
 
     # A ZERO8 token in executable lib source is not automatically NIL. We print
     # it as a review trigger rather than making the all-zero function slot
@@ -182,17 +177,12 @@ def main() -> int:
     print(f"callable_nil_heads\t{len(nil_heads)}\t{format_sites(nil_heads)}")
     print(f"zero8_call_heads_nonmetadata\t{len(zero_heads)}\t{format_sites(zero_heads)}")
     print(f"zero8_tokens_nonmetadata\t{len(zero_tokens)}\t{format_sites(zero_tokens)}")
-    print(f"zero8_in_sid_routes\t{int(zero_route)}\tcurrent evaluator route ownership")
     print(f"zero8_in_mechanism_rows\t{int(zero_mechanism)}\tcurrent function mechanism metadata")
     print(f"contract_ground_separated\t{int(separated)}\t() data is distinct from Function8 zero")
 
     failures: list[str] = []
     if nil_heads:
         failures.append("active Lisp contains callable (NIL ...) / (nil ...) head")
-    if zero_route:
-        failures.append(
-            "current zero Function8 has an evaluator route; H-NIL snapshot needs semantic reclassification"
-        )
     if zero_mechanism:
         failures.append(
             "current zero Function8 has mechanism metadata; H-NIL snapshot needs semantic reclassification"
@@ -207,7 +197,7 @@ def main() -> int:
 
     print(
         "PASS\tbounded current-corpus witness: structural empty is used as data, "
-        "while callable/operator NIL is not required by active Lisp heads or current zero-route metadata"
+        "while callable/operator NIL is not required by active Lisp heads or historical mechanism metadata"
     )
     return 0
 

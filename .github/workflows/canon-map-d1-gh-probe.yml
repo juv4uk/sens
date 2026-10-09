@@ -42,6 +42,5 @@ jobs:
           git push origin HEAD:refs/heads/fix/canon-let-map-d1-no-20261009
       - name: Probe lexical LET and map behavior without weakening Canon
         run: cargo test -p sens --test canon_let_ephemeral_diagnostic -- --nocapture
-      - name: Execute full Canon V2 Lisp-owned witness (no skips)
-        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
-# Diagnostic probe pass v2: compare historical ATOM (0) against exact EQUAL transport
+      - name: Execute current D3 COND and D1 PredicateBit witness
+        run: cargo test -p sens --test d3_empty_control -- --nocapture

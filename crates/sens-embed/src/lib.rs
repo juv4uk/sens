@@ -106,7 +106,7 @@ fn invoke_nullary(
     }
     match raw_result {
         MY_LISP_EMBED_NIL => Ok(sens::Value::Nil),
-        MY_LISP_EMBED_TRUE => Ok(sens::Value::truth(true)),
+        MY_LISP_EMBED_TRUE => Ok(sens::Value::predicate_bit(true)),
         _ => Err(sens::LanguageError::new(
             sens::ErrorKind::InvalidForm,
             format!("{surface}: host returned an unknown result tag {raw_result}"),
@@ -160,7 +160,7 @@ fn invoke_unary(
     }
     match raw_result {
         MY_LISP_EMBED_NIL => Ok(sens::Value::Nil),
-        MY_LISP_EMBED_TRUE => Ok(sens::Value::truth(true)),
+        MY_LISP_EMBED_TRUE => Ok(sens::Value::predicate_bit(true)),
         _ => Err(sens::LanguageError::new(
             sens::ErrorKind::InvalidForm,
             format!("{surface}: host returned an unknown result tag {raw_result}"),

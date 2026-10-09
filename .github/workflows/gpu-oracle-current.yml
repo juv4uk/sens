@@ -1,10 +1,9 @@
-name: Current GPU oracle
+name: GPU admission blocked evidence (no CUDA proof)
 
 on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "crates/sens/src/gpu_oracle.rs"
       - "crates/sens/Cargo.toml"
       - "crates/sens/src/lib.rs"
       - "benchmarks/gpu-oracle-current/**"
@@ -12,7 +11,6 @@ on:
   push:
     branches: [main]
     paths:
-      - "crates/sens/src/gpu_oracle.rs"
       - "crates/sens/Cargo.toml"
       - "crates/sens/src/lib.rs"
       - "benchmarks/gpu-oracle-current/**"
@@ -34,5 +32,14 @@ jobs:
       - uses: actions/checkout@v5
       - name: Validate machine-readable blocked artifact
         run: python3 -m json.tool benchmarks/gpu-oracle-current/blocked-gpu-admission.json >/dev/null
-      - name: Run GPU oracle unit tests
-        run: cargo test -p sens --lib --features legacy-evidence-schemas gpu_oracle::tests -- --nocapture --test-threads=1
+      - name: Fail closed on unratified GPU law; no Rust-owned oracle
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("benchmarks/gpu-oracle-current/blocked-gpu-admission.json").read_text())
+          assert data["status"] == "BLOCKED-MECHANISM"
+          assert data["positive_oracle_rows"] == []
+          assert data["unblock_rule"]["forbidden"]
+          print("GPU admission remains BLOCKED; no executable CUDA oracle claimed")
+          PY

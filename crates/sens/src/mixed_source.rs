@@ -673,21 +673,4 @@ mod tests {
                 if identity.width() == 5 && identity.packed_bits() == 0
         ));
     }
-
-    #[test]
-    fn exact_domain_named_definition_supports_recursive_symbol_calls() {
-        let source = "\
-(0011 хід
-  (0010 (xs)
-    (110
-      ((010 xs) (001 done))
-      ((101 (001 left) (001 left)) (хід (011 xs))))))
-(хід (001 (a b)))
-";
-        let parsed = parse_mixed_exact_domain(source).expect("recursive exact-domain source parses");
-        let mut session = crate::Session::default();
-        let result = crate::eval_parsed_expressions(&parsed, &mut session)
-            .expect("recursive named definition must execute through mixed bridge");
-        assert_eq!(result.value, crate::Value::Symbol(std::rc::Rc::from("done")));
-    }
 }

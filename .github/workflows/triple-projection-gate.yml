@@ -22,6 +22,16 @@ jobs:
         with:
           python-version: "3.12"
 
+      # D7 is owner-ratified source foundation; the semantic ledger stays in
+      # Lisp-owned data and no Rust phoneme/number table is introduced.
+      - name: D7 source admission and explicit W7 role boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check-d7-current-authority.py
+          python3 scripts/d7_source_projection.py --check
+          python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
+
       # One existing source-domain-bounded positive contract, NOT a claim
       # that D4 or historical no-view programs are already source-admitted.
       - name: Require committed Ukrainian D1 source / physical T5 / bit-view

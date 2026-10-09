@@ -297,33 +297,6 @@ def parse_current_surface_rows(path: Path):
             rows[name]=(bits,f"D{width}")
     return rows
 
-def parse_legacy_successors(semantic_registry: Path, necessary_forms: Path):
-    """Build old Sens8 byte -> proven exact-domain successor."""
-    text=semantic_registry.read_text(encoding="utf-8")
-    start=text.index("pub(crate) fn legacy_domain_identity_from_registry_byte")
-    end=text.index("pub(crate) fn d5_binding_identity_for_definition",start)
-    section=text[start:end]
-    out={}
-    for m in re.finditer(
-        r'0b([01_]{8})\s*=>\s*Some\(d([34])\(0b([01_]+)\)\)',
-        section
-    ):
-        byte=m.group(1).replace("_","")
-        width=int(m.group(2))
-        bits=m.group(3).replace("_","").zfill(width)
-        out[byte]=(bits,f"D{width}","explicit-legacy-successor")
-
-    nf=necessary_forms.read_text(encoding="utf-8")
-    for m in re.finditer(
-        r'semantic_id:\s*0b([01_]{8}),\s*mechanism:\s*NecessaryFormMechanism::(Lambda|Define)',
-        nf
-    ):
-        byte=m.group(1).replace("_","")
-        mech=m.group(2)
-        bits="0010" if mech=="Lambda" else "0011"
-        out[byte]=(bits,"D4","necessary-form-successor")
-    return out
-
 def parse_audited_legacy_successors(path: Path, foundation: dict):
     """Consume owner-audited SENS8 history; never treat old W8 as current D8.
 
@@ -385,7 +358,11 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
                           legacy_coverage: Path|None=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
-    proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
+    # Джерело міграції — тільки ратифіковані координати й перевірена
+    # таблиця provenance. Видалений Rust-маршрутизатор не є законом мови.
+    # Параметри semantic_registry/necessary_forms збережені лише для
+    # сумісності наявних викликів інструмента; їхній вміст не читається.
+    proven_legacy={}
     if legacy_coverage is not None:
         for byte,ident in parse_audited_legacy_successors(legacy_coverage,data).items():
             existing=proven_legacy.get(byte)

@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, Bit8, CoreD4, CoreD5, CoreD8, CoreDomainIdentity, DomainIdentity};
+use crate::{Bit3, Bit4, Bit5, CoreD5, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -23,23 +23,33 @@ mod domain_surface_generated {
     include!("domain_surface_registry_generated.rs");
 }
 
+mod d7_display_generated {
+    include!("d7_display_registry_generated.rs");
+}
+
 mod d5_definition_bindings_generated {
     include!("d5_definition_bindings_generated.rs");
 }
 
 use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
 use domain_surface_generated::DOMAIN_SURFACE_ROWS;
+use d7_display_generated::D7_DISPLAY_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
 
 fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
-    match width {
-        3 => Some(CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(bits)?))),
-        4 => Some(CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(bits)?))),
-        5 => Some(CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(bits)?))),
-        _ => None,
-    }
+    // Канонічний маршрут: точне слово драбини → домен → допущений механізм.
+    // Ні ширина сама по собі, ні старий байт не створюють callable identity.
+    use crate::BinarySourceWord;
+    let source = match width {
+        3 => BinarySourceWord::W3(Bit3::new(bits)?),
+        4 => BinarySourceWord::W4(Bit4::new(bits)?),
+        5 => BinarySourceWord::W5(Bit5::new(bits)?),
+        6 => BinarySourceWord::W6(crate::Bit6::new(bits)?),
+        _ => return None,
+    };
+    CoreDomainIdentity::from_source_word(source)
 }
 
 /// Direct D3/D4/D5 human-surface projection.
@@ -60,6 +70,33 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
     })
 }
  
+/// Сумісний SID лише знаходить рядок surface-реєстру; координату D3
+/// встановлює виключно ратифікована доменна таблиця. Немає збігу або
+/// кілька різних координат — fail-closed, жодної таблиці SID→роль у Rust.
+pub(crate) fn compatibility_d3_route_from_ratified_domains(
+    semantic_id: SemanticId,
+) -> Option<CoreDomainIdentity> {
+    let packed = semantic_id.packed_byte();
+    let row = SEMANTIC_ROWS.get(usize::from(packed))?;
+    if row.semantic_id != packed {
+        return None;
+    }
+    let mut admitted = None;
+    for surface in row.surfaces {
+        let Some(identity) = direct_domain_identity_for_surface(surface.name) else {
+            continue;
+        };
+        if !matches!(identity, CoreDomainIdentity::D3(_)) {
+            return None;
+        }
+        if admitted.is_some_and(|previous| previous != identity) {
+            return None;
+        }
+        admitted = Some(identity);
+    }
+    admitted
+}
+
 /// Canonical Ukrainian *source-head* projection, before evaluation.
 ///
 /// Only owner-ratified source-routable uk rows are eligible. This is NOT the
@@ -80,32 +117,6 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
 }
 
 
-pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
-    let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
-    let d4 = |raw| CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(raw).unwrap()));
-    match byte {
-        0b0000_0001 => Some(d3(0b001)), // QUOTE
-        0b0000_0010 => Some(d3(0b010)), // ATOM
-        0b0000_0111 => Some(d3(0b110)), // COND
-        0b0000_0100 => Some(d3(0b111)), // CONS
-        0b0000_0101 => Some(d3(0b100)), // CAR
-        0b0000_0110 => Some(d3(0b011)), // CDR
-        0b0000_0011 => Some(d3(0b101)), // EQ
-        0b0000_1000 => Some(d4(0b0010)), // LAMBDA
-        0b0000_1001 => Some(d4(0b0011)), // DEFINE
-        0b1010_1011 => Some(d4(0b0101)), // NULL
-        0b0010_0111 => Some(d4(0b1110)), // LIST: ratified D4, Lisp-owned closure
-        0b0010_1001 => Some(d4(0b1111)), // APPEND
-        // Existing selector surfaces project explicitly to their ratified D4
-        // identities. This is semantic-role mapping, never byte truncation.
-        0b0011_0011 => Some(d4(0b1000)), // CAAR
-        0b0011_0100 => Some(d4(0b1001)), // CADR
-        0b0011_0101 => Some(d4(0b0111)), // CDDR
-        0b0010_0010 => Some(CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b11110111).unwrap()))), // EQUAL (equal?)
-        _ => None,
-    }
-}
-
 /// Binding-only OD-005 bootstrap projection for Lisp-owned definitions.
 ///
 /// This MUST NOT be used to reinterpret historical Sens8 calls. Its only
@@ -123,34 +134,29 @@ pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomai
         .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
 }
 
-pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
-    byte: u8,
-) -> Option<CoreDomainIdentity> {
-    let d5 = |raw| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(raw).unwrap()));
-    match byte {
-        0b0010_1010 => Some(d5(0b10100)), // REVERSE
-        0b0001_0100 => Some(d5(0b10111)), // QUOTIENT
-        0b0010_1101 => Some(d5(0b11100)), // ASSOC
-        0b0010_1100 => Some(d5(0b11101)), // MEMBER
-        0b1010_1100 => Some(d5(0b11111)), // SUBST
-        _ => None,
-    }
-}
-/// Current staged surface lookup.
-///
-/// Ukrainian and Sanskrit D3/D4/D5 spellings resolve directly through the
-/// exact-domain projection. The byte-backed lookup remains only as a bounded
-/// compatibility fallback for still-unmigrated spellings.
+/// Канонічний surface → domain маршрут читає тільки ратифіковану
+/// exact-width проєкцію. Історичний SID/байт не визначає домен.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    direct_domain_identity_for_surface(name).or_else(|| {
-        registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
-    })
+    direct_domain_identity_for_surface(name)
 }
 
 pub(crate) fn surface_for_domain_identity(
     identity: DomainIdentity,
     namespace: &str,
 ) -> Option<&'static str> {
+    // D7 is a sound/text *display* projection only. Its exact W7 coordinate
+    // is already known; no reverse name lookup or callable status is inferred.
+    if matches!(identity, DomainIdentity::D7(_)) {
+        let row = D7_DISPLAY_ROWS.iter().find(|row|
+            u16::from(row.bits) == identity.packed_bits()
+        )?;
+        return match namespace {
+            "uk" => Some(row.uk),
+            "sa" => Some(row.sa),
+            _ => None,
+        };
+    }
+
     DOMAIN_SURFACE_ROWS
         .iter()
         .find(|row| {
@@ -169,12 +175,6 @@ fn live_rows() -> &'static [SemanticRow] {
     SEMANTIC_ROWS
 }
 
-fn registry_byte_for_surface(name: &str) -> Option<u8> {
-    live_rows()
-        .iter()
-        .find(|row| row.surfaces.iter().any(|surface| surface.name == name))
-        .map(|row| row.semantic_id)
-}
 
 
 pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
@@ -273,250 +273,26 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 }
 
 #[cfg(test)]
-mod tests {
+mod exact_d5_binding_projection_tests {
     use super::*;
-    use generated::SemanticSurface;
 
     #[test]
-    fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
-        let d3_110 = domain_identity_for_surface("за-умовою").unwrap();
-        let d3_101 = domain_identity_for_surface("тотожне?").unwrap();
-        let d4_0010 = domain_identity_for_surface("функція").unwrap();
-        let d4_0011 = domain_identity_for_surface("визначити").unwrap();
-
-        assert_eq!((d3_110.width(), d3_110.packed_bits()), (3, 0b110));
-        assert_eq!((d3_101.width(), d3_101.packed_bits()), (3, 0b101));
-        assert_eq!((d4_0010.width(), d4_0010.packed_bits()), (4, 0b0010));
-        assert_eq!((d4_0011.width(), d4_0011.packed_bits()), (4, 0b0011));
-
-        assert_ne!(d3_110.packed_bits(), 0b011);
-        assert_ne!(d3_101.packed_bits(), 0b111);
-        assert_ne!(d4_0010.packed_bits(), 0b1000);
-        assert_ne!(d4_0011.packed_bits(), 0b1001);
-    }
-
-    #[test]
-    fn existing_selector_surfaces_project_to_ratified_d4() {
-        for (surface, bits) in [
-            ("п-п", 0b1000),
-            ("п-р", 0b1001),
-            ("р-п", 0b0110),
-            ("р-р", 0b0111),
-        ] {
-            let identity = domain_identity_for_surface(surface)
-                .unwrap_or_else(|| panic!("selector surface must project: {surface}"));
-            assert_eq!((identity.width(), identity.packed_bits()), (4, bits));
-        }
-    }
-
-    #[test]
-    fn lisp_owned_d5_binding_projection_is_explicit_but_not_global_legacy_meaning() {
-        for (legacy_byte, bits) in [
-            (0b0010_1010, 0b10100),
-            (0b0001_0100, 0b10111),
-            (0b0010_1101, 0b11100),
-            (0b0010_1100, 0b11101),
-            (0b1010_1100, 0b11111),
-        ] {
-            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
-                .expect("ratified D5 bootstrap binding projection");
-            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
-
-            // A historical byte remains a historical byte during invocation.
-            // Only definition binding is allowed to consult the D5 bootstrap map.
-            assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
-        }
-    }
-    #[test]
-    fn historical_d4_successor_materializes_exact_slot() {
-        let identity = legacy_domain_identity_from_registry_byte(0b1010_1011)
-            .expect("historical registry row must have an exact-domain successor");
-        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0101));
-
-        let mut session = crate::Session::default();
-        crate::load_core_library(&mut session).expect("Core bootstrap must materialize the exact slot");
-        assert!(
-            session.environment.domain_code_slot(identity).is_some(),
-            "Core bootstrap must bind the language-owned closure into its exact D4 slot"
-        );
-    }
-
-    #[test]
-    fn explicit_core4_bootstrap_binds_ratified_d4_list_as_language_owned_closure() {
-        // Historical registry 00100111 and CURRENT D4:1110 are linked only
-        // by this audited successor; the numeric width remains domain-qualified.
-        let exact = legacy_domain_identity_from_registry_byte(0b0010_0111)
-            .expect("historical registry successor must exist");
-        assert_eq!((exact.width(), exact.packed_bits()), (4, 0b1110));
-        assert_eq!(domain_identity_for_surface("список"), Some(exact));
-
-        let mut session = crate::Session::default();
-        assert!(session.environment.domain_code_slot(exact).is_none());
-        crate::load_core_library(&mut session)
-            .expect("existing language-owned Core4 bootstrap");
-        assert!(
-            matches!(
-                session.environment.domain_code_slot(exact),
-                Some(crate::Value::Closure(_))
-            ),
-            "D4:1110 requires the existing Lisp-owned closure, not a Rust primitive"
-        );
-
-        let source = "10 1110 00 10 001 00 000 01 01";
-        let forms = crate::parse_canonical_binary(source)
-            .expect("canonical exact D2/D3/D4 expression");
-        let observed = crate::eval_parsed_expressions(&forms, &mut session)
-            .expect("current exact D4 callable after explicit Core4 bootstrap");
-        assert_eq!(observed.value.to_string(), "(())");
-    }
-
-    #[test]
-    fn append_surface_projects_only_to_ratified_d4() {
-        let identity = domain_identity_for_surface("приєднати")
-            .expect("D4:1111 surface must project to ratified D4");
-        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b1111));
-        assert_eq!(
-            transitional_d5_binding_identity_from_registry_byte(0b0010_1001),
-            None,
-            "APPEND must not retain a transitional D5 binding"
-        );
-    }
-
-    #[test]
-    fn transitional_d5_binding_never_targets_ratified_selector_slots() {
-        for legacy_byte in [0b0010_1010, 0b0001_0100] {
-            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
-                .expect("compatibility binding should resolve");
-            assert!(
-                !matches!(identity.packed_bits(), 0b10001 | 0b10011),
-                "REVERSE/QUOTIENT compatibility binding must not target D5 selector coordinates"
-            );
-        }
-    }
-
-    #[test]
-    fn unmigrated_registry_rows_have_no_fake_domain_identity() {
-        assert_eq!(domain_identity_for_surface("+"), None);
-    }
-
-    #[test]
-    fn uk_sa_exact_domain_projection_does_not_need_a_legacy_byte_route() {
-        for (surface, width, bits) in [
-            ("aṇu", 3, 0b010),
-            ("р-п", 4, 0b0110),
-            ("phalana", 4, 0b0010),
-            ("saṅkalana", 4, 0b1111),
-        ] {
-            let identity = direct_domain_identity_for_surface(surface)
-                .unwrap_or_else(|| panic!("exact-domain surface must resolve directly: {surface}"));
-            assert_eq!((identity.width(), identity.packed_bits()), (width, bits));
-            assert_eq!(domain_identity_for_surface(surface), Some(identity));
-        }
-
-        // `aṇu` is also present in historical compatibility data. That overlap
-        // is allowed: the exact-domain table owns the current route, as proved above;
-        // historical byte presence must not be used as placement authority.
-        assert_eq!(
-            registry_byte_for_surface("р-п")
-                .and_then(legacy_domain_identity_from_registry_byte),
-            None,
-            "CDAR must be admitted by D4 projection even without a legacy byte mapping"
-        );
-    }
-
-    #[test]
-    fn d5_surfaces_resolve_directly_to_exact_domain_identity() {
-        for (surface, bits) in [
-            ("додати", 0b01010),
-            ("зворот", 0b10100),
-            ("п-р-п", 0b10010),
-        ] {
-            let identity = direct_domain_identity_for_surface(surface)
-                .unwrap_or_else(|| panic!("D5 surface must resolve directly: {surface}"));
-            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
-            assert_eq!(domain_identity_for_surface(surface), Some(identity));
-        }
-
-        assert_eq!(
-            registry_byte_for_surface("п-р-п")
-                .and_then(legacy_domain_identity_from_registry_byte),
-            None,
-            "D5 selector surface must not require the legacy byte registry"
-        );
-    }
-
-    #[test]
-    fn generated_registry_is_one_contiguous_byte_axis() {
-        assert_eq!(SEMANTIC_ROWS.len(), 256);
-        for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
-            assert_eq!(usize::from(row.semantic_id), expected);
-        }
-        assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
-        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
-    }
-
-    #[test]
-    fn reverse_projection_covers_d1_d4_without_making_structure_callable() {
-        let yes = DomainIdentity::D1(crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()));
-        let open = DomainIdentity::D2(crate::Racana2::from_word(crate::Bit2::new(0b10).unwrap()));
-        let empty = DomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(0b000).unwrap()));
-        let lambda = DomainIdentity::D4(crate::CoreD4::from_word(crate::Bit4::new(0b0010).unwrap()));
-
-        assert_eq!(surface_for_domain_identity(yes, "uk"), Some("так"));
-        assert_eq!(surface_for_domain_identity(yes, "sa"), Some("ām"));
-        assert_eq!(surface_for_domain_identity(open, "uk"), Some("відкрити"));
-        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("()"));
-        assert_eq!(surface_for_domain_identity(lambda, "uk"), Some("функція"));
-        assert_eq!(surface_for_domain_identity(lambda, "sa"), Some("phalana"));
-
-        assert_eq!(direct_domain_identity_for_surface("так"), None);
-        assert_eq!(direct_domain_identity_for_surface("відкрити"), None);
-        assert_eq!(direct_domain_identity_for_surface("порожнє"), None);
-        assert_eq!(exact_uk_callable_for_source_head("()"), None);
-    }
-
-    #[test]
-    fn generated_registry_contains_fixed_surface_namespaces() {
-        let quote = &SEMANTIC_ROWS[1].surfaces;
-        assert!(quote.contains(&SemanticSurface { namespace: "en", name: "quote" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "ук", name: "як-є" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "укр", name: "як-є" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "sa", name: "svarūpa" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "sym", name: "'" }));
-    }
-
-    #[test]
-    fn binary_spelling_is_identity_not_a_surface() {
-        assert_eq!(semantic_id_for_surface("00001010"), None);
-        assert_eq!(semantic_id_for_surface("10101000"), None);
-    }
-
-    #[test]
-    fn public_reverse_projection_preserves_identity() {
-        for surface in admitted_surfaces_for_semantic_id(crate::sens!(00001111)) {
+    fn every_generated_d5_definition_uses_its_exact_domain_word() {
+        for row in D5_DEFINITION_BINDINGS {
+            let identity = d5_binding_identity_for_definition(row.name)
+                .expect("generated Lisp-owned D5 binding must resolve");
             assert_eq!(
-                crate::semantic_registry_export::semantic_id_for_admitted_surface(surface),
-                Some(crate::sens!(00001111))
+                identity,
+                CoreDomainIdentity::D5(CoreD5::from_word(
+                    Bit5::new(row.bits).expect("generated D5 bit width")
+                )),
+                "the canonical D5 identity must come from the generated ladder row"
             );
         }
-        assert_eq!(
-            crate::semantic_registry_export::semantic_id_for_admitted_surface("not-a-surface"),
-            None
-        );
     }
 
     #[test]
-    fn unrelated_rows_are_projected_without_assigning_evaluator_meaning() {
-        assert_eq!(semantic_id_for_surface("+"), Some(crate::sens!(00001100)));
-    }
-
-    #[test]
-    fn surfaces_with_namespace_align_with_present_names_and_keep_namespace() {
-        let with_namespace = admitted_surfaces_with_namespace_for_semantic_id(crate::sens!(00000001));
-        let names_only = admitted_surfaces_for_semantic_id(crate::sens!(00000001));
-        assert_eq!(with_namespace.len(), names_only.len());
-        assert!(with_namespace.contains(&("en", "quote")));
-        assert!(with_namespace.contains(&("ук", "як-є")));
-        assert!(with_namespace.contains(&("sym", "'")));
+    fn unknown_definition_does_not_gain_a_d5_coordinate() {
+        assert_eq!(d5_binding_identity_for_definition("__unknown_d5_binding__"), None);
     }
 }

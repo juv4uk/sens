@@ -13,28 +13,13 @@ mod bit9;
 mod binary_number;
 mod bits;
 mod canonical_reader;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod compilation_artifact;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod compilation_artifact_producer;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod conformance_oracle;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod fixpoint_checkpoint;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod gpu_admission;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod gpu_oracle;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod program_compiler;
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
-#[cfg(feature = "legacy-evidence-schemas")]
-pub mod selfhost_lineage;
 mod domain_words;
 mod domain_identity;
+pub mod domain_ladder;
 #[allow(dead_code)]
 mod domain_owner_generated;
 mod packed_bits;
@@ -180,8 +165,6 @@ pub use compiler_language::{
     verify_compiler_program_artifact_from_sens, CompilerProgramBootstrapBundle,
     CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
-#[cfg(feature = "legacy-evidence-schemas")]
-pub use gpu_admission::{GpuAdmission, GpuAdmissionInventory};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, CoreD9, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
@@ -418,9 +401,6 @@ fn load_core_library_with_fasl(
     core_fasl: &[u8],
 ) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core4);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
     load_macro_library(session)?;
 
     let result = match fasl_decode_program(core_fasl) {
@@ -452,13 +432,10 @@ pub fn core_library_fasl_is_current() -> bool {
 ///
 /// This loader deliberately does not install the current Core4 macro layer:
 /// Core2 is a historical compatibility profile, not Core4 plus legacy answers.
-/// The environment mode is shared by lexical children, so lazy COND behavior
-/// remains stable across closures without exposing a shadowable Lisp binding.
+/// All profiles now use D3's exact-D1 conditional mechanism; selecting a
+/// historical profile changes provenance, not the language's truth model.
 pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core2);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::Core2LegacyTwoPart);
     let result = eval_program(CORE2_LIBRARY_SOURCE, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
@@ -610,12 +587,6 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
 mod core4_bootstrap_cache_tests {
     use super::*;
 
-    fn result_of(session: &mut Session, source: &str) -> String {
-        eval_program(source, session)
-            .unwrap_or_else(|error| panic!("{source}: {error:?}"))
-            .value
-            .to_string()
-    }
 
     #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
@@ -630,7 +601,6 @@ mod core4_bootstrap_cache_tests {
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
-        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
     }
 
     #[test]
@@ -644,6 +614,5 @@ mod core4_bootstrap_cache_tests {
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
-        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
     }
 }

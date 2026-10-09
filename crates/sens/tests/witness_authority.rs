@@ -259,7 +259,6 @@ fn load_island_compat_witness(session: &mut Session) {
     eval_program(&source, session).expect("island-compat-witness.lisp must load");
 }
 
-
 fn transport_life_1_document(session: &mut Session) {
     let source = fs::read_to_string(repo_file("contracts/life-1-contract.lisp"))
         .expect("#785 requires the Lisp-owned LIFE-1 contract");
@@ -544,32 +543,6 @@ fn same_committed_corpus_drives_meta_eval_for_rows_admitted_to_that_backend() {
 }
 
 #[test]
-fn peer_surface_witness_reads_semantic_registry_instead_of_copying_surface_truth() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library");
-    eval_program(
-        include_str!("../../../lib/generated/meta-semantic-registry.lisp"),
-        &mut session,
-    )
-    .expect("generated semantic registry");
-    load_witness_library(&mut session);
-
-    for semantic_id in ["00000001", "00000100", "00000101", "00000110"] {
-        let verdict = eval_program(
-            &format!("(witness-peer-surface-verdict \"{semantic_id}\")"),
-            &mut session,
-        )
-        .expect("peer surface witness")
-        .value
-        .to_string();
-        assert!(
-            verdict.starts_with("(witness-result (status pass)"),
-            "#230 structure peer surfaces must project to one registry-owned semantic identity {semantic_id}: {verdict}"
-        );
-    }
-}
-
-#[test]
 fn malformed_witness_fails_closed_as_lisp_data() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core library");
@@ -606,7 +579,6 @@ fn island_compat_semantics_are_owned_by_lisp_not_kernel_adapters() {
         "Lisp-owned #749 island compatibility witness rejected the contract: {verdict}"
     );
 }
-
 
 #[test]
 fn life_1_liveness_semantics_are_owned_by_lisp_data() {

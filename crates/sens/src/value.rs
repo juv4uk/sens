@@ -734,25 +734,7 @@ impl Value {
         !matches!(self, Value::Pair(_, _))
     }
 
-    pub fn is_truthy(&self) -> bool {
-        !matches!(self, Value::Nil | Value::Bool(false))
-    }
 
-    /// Classic-Lisp truth value for a core-language predicate result:
-    /// the symbol `t` (bound to itself, self-evaluating -- see
-    /// `Environment::root`) for true, `Nil` for false. `eq`/`atom` use
-    /// this instead of `Value::Bool` -- Boolean-ness stays a logic
-    /// convention on top of the existing core types, not a separate
-    /// core runtime datatype. `Value::Bool` itself is unchanged and
-    /// still used by boundary code (JSON, swarm protocol, host API)
-    /// that this narrow slice deliberately does not touch.
-    pub fn truth(holds: bool) -> Value {
-        if holds {
-            Value::Symbol(Rc::from("t"))
-        } else {
-            Value::Nil
-        }
-    }
 }
 
 impl fmt::Display for Value {

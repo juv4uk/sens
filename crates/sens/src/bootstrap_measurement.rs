@@ -18,9 +18,6 @@ fn root_session() -> Session {
 
 fn prepare_profile(session: &mut Session) {
     session.environment.select_core_profile(CoreProfile::Core4);
-    session
-        .environment
-        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
 }
 
 fn load_first_macro(session: &mut Session) {

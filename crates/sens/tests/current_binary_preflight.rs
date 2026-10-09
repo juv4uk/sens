@@ -23,7 +23,7 @@ fn trace(expr: &Expr) -> String {
         }
         ExprKind::Pair(head, tail) => format!("pair[{},{}]", trace(head), trace(tail)),
         ExprKind::Sid(_) | ExprKind::Call(_, _) => {
-            panic!("legacy byte identity entered current D1-D8 preflight")
+            panic!("legacy byte identity entered current D1-D9 preflight")
         }
         other => panic!("unsupported node in Number/local-free preflight: {other:?}"),
     }
@@ -45,6 +45,10 @@ fn lowered_binary(source: &str) -> Vec<String> {
 
 #[test]
 fn current_english_and_canonical_binary_match_on_d3_number_local_free_subset() {
+
+    // D3 executable coordinates come from lib/domains/d3.lisp:
+    // 001 QUOTE, 010 ATOM, 011 CDR, 100 CAR, 101 EQ, 110 COND, 111 CONS.
+    // Do not let an English spelling quietly select a different three-bit law.
     let cases = [
         (
             "(quote ())",
@@ -52,19 +56,19 @@ fn current_english_and_canonical_binary_match_on_d3_number_local_free_subset() {
         ),
         (
             "(car (quote ()))",
-            "10 101 00 10 001 00 10 01 01 01",
+            "10 100 00 10 001 00 10 01 01 01",
         ),
         (
             "(cdr (quote ()))",
-            "10 110 00 10 001 00 10 01 01 01",
+            "10 011 00 10 001 00 10 01 01 01",
         ),
         (
             "(cons (quote ()) (quote ()))",
-            "10 100 00 10 001 00 10 01 01 00 10 001 00 10 01 01 01",
+            "10 111 00 10 001 00 10 01 01 00 10 001 00 10 01 01 01",
         ),
         (
             "(eq? (quote ()) (quote ()))",
-            "10 111 00 10 001 00 10 01 01 00 10 001 00 10 01 01 01",
+            "10 101 00 10 001 00 10 01 01 00 10 001 00 10 01 01 01",
         ),
         (
             "(atom? (quote ()))",
