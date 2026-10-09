@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
+PHASES = {"t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -195,6 +195,26 @@ def main() -> int:
         "Same T5 bytes, same D2 reader and identical observable. The new "
         "adapter skips re-packing and un-packing already typed W1..W9 words.",
         "Measured in one process, with warm caches; this is NOT a cross-language speedup.",
+        "",
+    ])
+    lines.extend([
+        "", "## Фізичний T5 encoder: проміжний масив проти потокового пакування",
+        "",
+        "| Форми | Старе два проходи, p50 нс | Потоковий encoder, p50 нс | old/new |",
+        "|---:|---:|---:|---:|",
+    ])
+    for count in sizes:
+        phase = {row["phase"]: row for row in measures if row["forms"] == count}
+        old_ns = phase["t5_encode_two_pass"]["median_ns_op"]
+        new_ns = phase["t5_encode_streaming"]["median_ns_op"]
+        ratio = f"{old_ns / new_ns:.3f}x" if new_ns else "undefined"
+        lines.append(f"| {count} | {old_ns:,} | {new_ns:,} | {ratio} |")
+    lines.extend([
+        "",
+        "До вимірювання byte-for-byte доведено однаковість T5 для всіх форм. "
+        "Потоковий encoder не матеріалізує окремий масив тритів. "
+        "Медіани взяті з одного процесу/runner; результат може бути "
+        "повільнішим, це вимір, не безумовна оптимізація.",
         "",
     ])
     lines.extend(["", "## Dense payload vs visible 0/1 D2 parser (same forms)", "",
