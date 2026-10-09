@@ -30,6 +30,29 @@ fn spy_executor(
 }
 
 #[test]
+fn inclusive_integer_range_helper_returns_exact_d1_at_boundaries() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core must bootstrap before range admission");
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    for (source, expected) in [
+        ("(x86-admission-within-inclusive-integer-range? -128 -128 127)", true),
+        ("(x86-admission-within-inclusive-integer-range? 127 -128 127)", true),
+        ("(x86-admission-within-inclusive-integer-range? -129 -128 127)", false),
+        ("(x86-admission-within-inclusive-integer-range? 128 -128 127)", false),
+    ] {
+        let value = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            value.as_predicate_bit(),
+            Some(expected),
+            "{source} must return exact D1"
+        );
+    }
+}
+
+#[test]
 fn canonical_machine_gateway_rejects_raw_bytes_register_bypass_and_truncation_before_host() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before admission adversaries");
