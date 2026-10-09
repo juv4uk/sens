@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "tests/fixtures/semantic-coordinate-law-axis-v1.lisp"
-      - "crates/sens/tests/semantic_coordinate_law_axis.rs"
+      - "crates/sens/tests/domain_width_authority_test.rs"
       - ".github/workflows/834-semantic-coordinate-targeted.yml"
 
 jobs:
@@ -15,4 +15,4 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run bounded mathematical-law coordinate witnesses
-        run: cargo test -p sens --test semantic_coordinate_law_axis -- --nocapture
+        run: cargo test -p sens --test domain_width_authority_test -- --nocapture
