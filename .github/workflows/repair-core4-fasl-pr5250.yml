@@ -1,0 +1,41 @@
+name: PR 5250 regenerate Core4 FASL on repair branch
+
+on:
+  push:
+    branches:
+      - fix/binary-replace-stale-cond-20261010
+    paths:
+      - lib/core4.lisp
+      - .github/workflows/repair-core4-fasl-pr5250.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/binary-replace-stale-cond-20261010
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Generate real source-bound FASL bytes using canonical Rust writer
+        run: cargo run --locked --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Verify exact source hash and decode parity before commit
+        run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Publish verified physical cache on PR branch (never main)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "Exact physical FASL already current"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(core): regenerate exact-source Core4 FASL snapshot'
+          git push origin HEAD:refs/heads/fix/binary-replace-stale-cond-20261010
