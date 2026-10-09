@@ -26,6 +26,13 @@ def check(doc, inv, foundation):
         assert x["proposed_owner"] == "CORE-MATH-LIBRARY-REVIEW"
         assert x["law"] and x["core_question"] and len(x["witnesses"]) >= 3
         assert len(x["falsifiers"]) >= 2 and x["reference"].startswith("https://numpy.org/")
+    donors=doc["owned_repo_donors"]
+    assert len(donors) == 4
+    assert {r["repo"] for r in donors} == {"juv4uk/spanda","juv4uk/radio-log","juv4uk/my-lisp-panini"}
+    for r in donors:
+        assert len(r["blob"]) == 40 and all(c in "0123456789abcdef" for c in r["blob"])
+        assert r["url"].startswith("https://github.com/"+r["repo"]+"/blob/")
+        assert r["file"] and r["relevance"] and r["disposition"]
     assert len(doc["rejected_as_core"]) >= 7
     return True
 
