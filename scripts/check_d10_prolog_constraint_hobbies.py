@@ -22,9 +22,9 @@ INVENTORY = REPO / "knowledge/d10-v1-semantic-inventory.json"
 ORACLE = REPO / "tests/d10_prolog_constraint_oracle.pl"
 STATUS = "SOURCE_GROUNDED_RESEARCH_HOLD"
 FIELDS = {
-    "UNIFY-WITH-OCCURS-CHECK": ("unify_with_occurs_check/2", "/unify_with_occurs_check"),
-    "DELAYED-TERM-DISEQUALITY": ("dif/2", "/dif"),
-    "COPY-RESIDUAL-CONSTRAINTS": ("copy_term/3", "/copy_term"),
+    "UNIFY-WITH-OCCURS-CHECK": ("unify_with_occurs_check/2", "predicate=unify_with_occurs_check"),
+    "DELAYED-TERM-DISEQUALITY": ("dif/2", "predicate=dif"),
+    "COPY-RESIDUAL-CONSTRAINTS": ("copy_term/3", "predicate=copy_term"),
 }
 
 
