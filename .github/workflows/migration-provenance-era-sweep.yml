@@ -1,0 +1,136 @@
+name: migration-provenance-era-sweep
+
+on:
+  push:
+    branches:
+      - migration-provenance-era-sweep
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Retry only blob-proven pre-D8 sources as legacy
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import collections, json, pathlib, subprocess, sys
+
+          BOUNDARY="cf7011418d1daf583ce7cdfe78f16af74ef66e2c"
+          parent=subprocess.check_output(
+              ["git","rev-parse",f"{BOUNDARY}^"], text=True
+          ).strip()
+
+          def run(source, era):
+              p=subprocess.run(
+                  [sys.executable,"scripts/migrate-one-to-sens.py",str(source),
+                   "--dry-run","--source-era",era],
+                  capture_output=True,text=True
+              )
+              try:
+                  body=json.loads(p.stdout)
+              except Exception:
+                  body={"status":"blocked","reason":(p.stderr or p.stdout).strip()[:800]}
+              return p.returncode, body
+
+          def git_blob(rev, path):
+              p=subprocess.run(
+                  ["git","rev-parse",f"{rev}:{path}"],
+                  capture_output=True,text=True
+              )
+              return p.stdout.strip() if p.returncode==0 else None
+
+          lisps=sorted(pathlib.Path(".").rglob("*.lisp"))
+          unpaired=[p for p in lisps if not p.with_suffix(".sens").exists()]
+          admitted=[]
+          legacy_proven=[]
+          legacy_retry_blocked=[]
+          auto_blockers=collections.Counter()
+
+          for i,p in enumerate(unpaired,1):
+              rc,body=run(p,"auto")
+              reason=body.get("reason","unknown")
+              if body.get("status")=="would-write":
+                  admitted.append({
+                      "path":str(p),"source_era":"auto",
+                      "proof":"not-needed","report":body
+                  })
+              elif reason.startswith("ambiguous W8 executable head"):
+                  current_blob=subprocess.check_output(
+                      ["git","hash-object",str(p)],text=True
+                  ).strip()
+                  pre_blob=git_blob(parent,str(p))
+                  if pre_blob and pre_blob==current_blob:
+                      legacy_proven.append({
+                          "path":str(p),
+                          "blob":current_blob,
+                          "pre_d8_parent":parent,
+                      })
+                      lrc,lbody=run(p,"legacy")
+                      if lbody.get("status")=="would-write":
+                          admitted.append({
+                              "path":str(p),
+                              "source_era":"legacy",
+                              "proof":"current blob == pre-D8 boundary-parent blob",
+                              "blob":current_blob,
+                              "report":lbody,
+                          })
+                      else:
+                          legacy_retry_blocked.append({
+                              "path":str(p),
+                              "blob":current_blob,
+                              "reason":lbody.get("reason","unknown"),
+                              "returncode":lrc,
+                          })
+                  else:
+                      auto_blockers["ambiguous W8; no byte-identical pre-D8 blob proof"]+=1
+              else:
+                  auto_blockers[reason]+=1
+
+              if i%50==0:
+                  print(
+                      f"progress {i}/{len(unpaired)} "
+                      f"legacy_proven={len(legacy_proven)} admitted={len(admitted)}"
+                  )
+
+          report={
+              "schema":"migration-provenance-era-sweep/v1",
+              "d8_ratification_commit":BOUNDARY,
+              "pre_d8_parent":parent,
+              "unpaired":len(unpaired),
+              "legacy_proven":len(legacy_proven),
+              "legacy_proven_rows":legacy_proven,
+              "admitted":len(admitted),
+              "admitted_rows":admitted,
+              "legacy_retry_blocked":legacy_retry_blocked,
+              "top_auto_blockers":auto_blockers.most_common(50),
+              "top_legacy_retry_blockers":collections.Counter(
+                  r["reason"] for r in legacy_retry_blocked
+              ).most_common(50),
+          }
+          out=pathlib.Path("/tmp/migration-provenance-era-sweep.json")
+          out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps({
+              "unpaired":report["unpaired"],
+              "legacy_proven":report["legacy_proven"],
+              "admitted":report["admitted"],
+              "admitted_paths":[
+                  {"path":r["path"],"era":r["source_era"]}
+                  for r in admitted
+              ],
+              "top_legacy_retry_blockers":report["top_legacy_retry_blockers"][:20],
+              "top_auto_blockers":report["top_auto_blockers"][:20],
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Upload provenance sweep
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-provenance-era-sweep
+          path: /tmp/migration-provenance-era-sweep.json
+          if-no-files-found: error
