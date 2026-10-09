@@ -3,6 +3,19 @@ name: SENS performance scoreboard
 on:
   push:
     branches: [main]
+    paths:
+      - ".github/workflows/sens-performance.yml"
+      - "benchmarks/sens-performance/**"
+      - "benchmarks/byte-pack/**"
+      - "benchmarks/domain12345678/**"
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "crates/sens/examples/byte_pack_bench.rs"
+      - "crates/sens/examples/domain12345678_bench.rs"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/eval/**"
   pull_request:
     paths:
       - ".github/workflows/sens-performance.yml"
@@ -13,6 +26,8 @@ on:
       - "crates/sens/examples/byte_pack_bench.rs"
       - "crates/sens/examples/domain12345678_bench.rs"
       - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+  schedule:
+    - cron: "20 4 * * *"
   workflow_dispatch:
   schedule:
     # Нічний фіксований контроль у період нижчого CI-навантаження (UTC).
