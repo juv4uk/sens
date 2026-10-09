@@ -23,6 +23,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+import hashlib
 from dataclasses import dataclass
 import json
 from pathlib import Path
@@ -103,7 +104,7 @@ def lex(source: str) -> list[Tok]:
             while i < n and not source[i].isspace() and source[i] not in "();":
                 i += 1
             out.append(Tok("atom", source[start:i], start, i, at))
-        elif c in ('"', '|'):
+        elif c == '"':
             delim = c
             i += 1
             closed = False
@@ -168,6 +169,15 @@ QUOTE_HEADS = frozenset(("001", "00000001", "quote", "QUOTE"))
 CURRENT_COND = "110"      # exact D3 bīja3 identity, not 8-bit SID8
 LEGACY_COND = frozenset(("00000111", "cond", "COND"))
 EXACT_D1_PRODUCERS = frozenset(("010", "101"))  # D3 ATOM and EQ
+
+# This exact blob is a historical TABLE FRAGMENT, not a complete executable
+# Lisp form. A changed blob MUST fail inventory so the exception cannot hide
+# new source or silently grow. Paths are relative to the repository root.
+PINNED_NON_PROGRAM_FRAGMENTS = {
+    "lib/surface/semantic-registry-experiment.lisp":
+        "c5a375605cca330445adda18b9f08a7fb5e17c09",
+}
+
 # Eight-bit 00100010 EQUAL is a known D1-result mechanism in some profiles,
 # but it is not an exact three-bit D3 call and thus not auto-certified here.
 
@@ -285,21 +295,41 @@ def main(argv: list[str] | None = None) -> int:
     failures = []
     for p in paths:
         try:
-            source = p.read_text(encoding="utf-8")
-            findings, _ = inspect(source)
-            for f in findings:
-                rows.append({"path": str(p), "line": f.line, "status": f.status,
-                             "reason": f.reason, "cond": f.cond,
-                             "producer": f.producer, "expected": f.expected})
-            if args.apply:
-                result, selected = stage(source)
-                output = args.out / p.name
-                if output.resolve() == p.resolve():
-                    raise Blocked("output must be different from source")
-                output.parent.mkdir(parents=True, exist_ok=True)
-                output.write_text(result, encoding="utf-8")
-                print(f"STAGED {len(selected)} proven YES clauses → {output}",
-                      file=sys.stderr)
+            raw = p.read_bytes()
+            # A documented table fragment is preserved as provenance, not
+            # accepted into the executable Lisp grammar. Exact bytes pinned.
+            normalized = p.as_posix()
+            for marker, pinned in PINNED_NON_PROGRAM_FRAGMENTS.items():
+                if normalized == marker or normalized.endswith("/" + marker):
+                    blob = hashlib.sha1(
+                        b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw
+                    ).hexdigest()
+                    if blob != pinned:
+                        raise Blocked("changed pinned historical fragment; manual review")
+                    if args.apply:
+                        raise Blocked("historical table fragment is not executable")
+                    rows.append({"path": str(p), "line": 0,
+                                 "status": "SKIP_PINNED_FRAGMENT",
+                                 "reason": "historical non-program source; Git blob pinned",
+                                 "cond": "", "producer": "", "expected": ""})
+                    break
+            else:
+                source = raw.decode("utf-8")
+                findings, _ = inspect(source)
+                for f in findings:
+                    rows.append({"path": str(p), "line": f.line, "status": f.status,
+                                 "reason": f.reason, "cond": f.cond,
+                                 "producer": f.producer, "expected": f.expected})
+                if args.apply:
+                    result, selected = stage(source)
+                    output = args.out / p.name
+                    if output.resolve() == p.resolve():
+                        raise Blocked("output must be different from source")
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    output.write_text(result, encoding="utf-8")
+                    print(f"STAGED {len(selected)} proven YES clauses → {output}",
+                          file=sys.stderr)
+            continue
         except (OSError, UnicodeError, Blocked, RecursionError) as exc:
             failures.append(f"{p}: {exc}")
     if args.json:
