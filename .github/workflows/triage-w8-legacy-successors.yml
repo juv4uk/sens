@@ -83,7 +83,7 @@ jobs:
               f.write('\nThis is a source-SHA-linked dry-run diagnosis, not permission to migrate legacy or release.\n')
           PY
       - name: Upload per-source next barrier proof
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: w8-historical-next-barriers-no-write
           path: ${{ runner.temp }}/w8-next-barriers.json

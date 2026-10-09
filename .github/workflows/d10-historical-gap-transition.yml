@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Historical 15 HOLD snapshot and negative tests
         run: |
           python3 scripts/check_d10_historical_gap_audit.py --self-test

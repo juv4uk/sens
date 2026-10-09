@@ -19,14 +19,14 @@ jobs:
   strict-baseline:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Cross-check strict theorem-generated residents
         run: |
           python3 benchmarks/cross-language/reality-matrix/semantic-density/run.py             --out-dir "$RUNNER_TEMP/semantic-density"
 
       - name: Upload baseline
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: reality-matrix-semantic-density
           path: |

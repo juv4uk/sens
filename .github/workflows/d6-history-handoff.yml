@@ -45,7 +45,7 @@ jobs:
           grep -F "occupancy-mutations=0" /tmp/d6-history-handoff.log
           grep -F "RESULT=KEEP-ALL-HISTORICAL-ROWS-UNPLACED" /tmp/d6-history-handoff.log
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: d6-history-handoff

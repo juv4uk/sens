@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Hard domain and no-ratification gate
         run: python3 -B scripts/check_d10_interlisp_dwim_safe_suggestion.py --verify-repo
       - name: Reference witness + adversarial tests

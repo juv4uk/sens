@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -43,7 +43,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload raw summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: d5-sens-derivation-closeout
           path: d5-sens-derivation-closeout.json

@@ -142,7 +142,7 @@ jobs:
 
       - name: Publish measured reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: execution-ladder-objective-11-8-${{ github.sha }}
           path: |

@@ -28,7 +28,7 @@ jobs:
             --out /tmp/nonlocal-exit-domain
       - name: Publish report
         run: cat /tmp/nonlocal-exit-domain/report.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: nonlocal-exit-domain
           path: /tmp/nonlocal-exit-domain

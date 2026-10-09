@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Test real Core1 physical T5 conversion and fail-closed batch
         run: python3 -m unittest discover -s tests -p test_migrate_t5_batch.py -v
 
@@ -87,7 +87,7 @@ jobs:
           if summary["files_blocked"]:
               print(f"::warning::REAL lib/ migration still BLOCKS {summary['files_blocked']} files; inspect artifact")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: real-lib-t5-migration-ledger
           path: /tmp/sens-library-batch.json

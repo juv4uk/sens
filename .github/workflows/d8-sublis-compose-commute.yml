@@ -38,7 +38,7 @@ jobs:
         run: |
           test ! -f /tmp/d8-sublis-compose-commute/report.md || \
             cat /tmp/d8-sublis-compose-commute/report.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: d8-sublis-compose-commute

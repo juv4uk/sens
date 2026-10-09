@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Three passes + true T5 artifact + negative controls
         run: python3 -m unittest discover -s tests -p 'test_migration_quote_cohort.py' -v
       - name: Current SENS oracle executes the physical migrated program

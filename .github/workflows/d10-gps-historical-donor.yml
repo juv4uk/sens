@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Audit 3 historical laws, five HOLD and ten anti-forgery controls
         run: python3 scripts/check_d10_gps_means_ends_history.py
       - name: Install independent Prolog runner

@@ -14,6 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Read only, source pin, no resident promotion
         run: python3 scripts/check-d10-archived-donors.py --self-test

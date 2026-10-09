@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Довести перепис Streams без підміни D10
         run: python3 scripts/check_d10_clhs_streams_census.py
       - name: Установити справжній CL-оракул SBCL

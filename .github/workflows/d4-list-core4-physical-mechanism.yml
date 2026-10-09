@@ -17,7 +17,7 @@ jobs:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Exact D4 LIST bootstrap slot and real D2 executable probe
         run: cargo test -p sens --lib explicit_core4_bootstrap_binds_ratified_d4_list_as_language_owned_closure -- --nocapture

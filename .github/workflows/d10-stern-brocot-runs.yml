@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check Python source syntax
         run: python3 -m py_compile scripts/check_d10_stern_brocot_runs.py
       - name: Formal Euclid subtractive vs quotient-batched model and falsifiers

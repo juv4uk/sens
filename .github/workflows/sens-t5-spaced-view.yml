@@ -45,7 +45,7 @@ jobs:
               assert len(row[key]) == 64
           print("T5/VIEW ROUNDTRIP PASS; Ukrainian bidirectional oracle NOT_VERIFIED")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: canonical-exact-view-digests
           path: /tmp/sens-spaced-view-receipt.json

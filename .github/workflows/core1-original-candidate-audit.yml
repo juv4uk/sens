@@ -51,7 +51,7 @@ jobs:
           git diff --exit-code -- lib/core1-compiler-sid-resolver.lisp
       - name: Retain exact verified original-source blocker evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: core1-original-11-case-frontier-not-admitted
           path: ${{ runner.temp }}/core1-original-frontier.json

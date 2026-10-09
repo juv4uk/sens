@@ -188,7 +188,7 @@ jobs:
           python3 scripts/silicon-coverage.py real-silicon-census.json \
             --output real-silicon-coverage.json
       - name: Upload real-silicon evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: real-silicon-sweep-${{ github.sha }}
           path: |

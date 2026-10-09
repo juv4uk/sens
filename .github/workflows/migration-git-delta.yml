@@ -58,7 +58,7 @@ jobs:
           PY
       - name: Save source-level evidence without claiming oracle admission
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: migration-git-delta
           path: migration-delta.json

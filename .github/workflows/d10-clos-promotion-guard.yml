@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Confirm historical CLOS proposals remain source pinned
         run: |
           python3 scripts/check_d10_clos_slot_state_history.py --self-test

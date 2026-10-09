@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Exact immutable original and quoted symbol frontier
         run: python3 scripts/report_machine_block_quote_data_frontier.py
       - name: Six adversarial original/source/D7/no-admission tests

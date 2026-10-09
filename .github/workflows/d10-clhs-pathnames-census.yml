@@ -15,7 +15,7 @@ jobs:
   corpus:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify CLHS chapter 19 source census
         run: python3 scripts/check_d10_clhs_pathnames_census.py --self-test
       - name: Install SBCL runtime

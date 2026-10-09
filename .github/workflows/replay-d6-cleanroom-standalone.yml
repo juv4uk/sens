@@ -19,6 +19,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Reproduce historical independent oracle
         run: python3 scripts/check-d6-v2-cleanroom-shadow.py

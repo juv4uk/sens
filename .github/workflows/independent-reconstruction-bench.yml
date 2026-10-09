@@ -32,7 +32,7 @@ jobs:
             --out /tmp/reconstruction-ablation/results
 
       - name: Upload raw reconstruction evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: independent-reconstruction

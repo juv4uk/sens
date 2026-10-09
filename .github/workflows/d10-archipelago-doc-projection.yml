@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify D10 625 count and the single stream from CURRENT repository authority
         run: python3 scripts/check-d10-archipelago-doc-projection.py
       - name: Regression tests reject stale counts and wrong owner namespace

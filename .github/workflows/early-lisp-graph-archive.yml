@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check archived graph corpus and append-only authority history
         run: python3 scripts/check-early-lisp-graph-archive.py --self-test
       - name: Prove no canonical-source edits

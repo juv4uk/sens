@@ -21,6 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Compare Rosenblatt Novikoff update with exact signed margin invariant
         run: python3 tests/test_d10_rosenblatt_perceptron_exact.py

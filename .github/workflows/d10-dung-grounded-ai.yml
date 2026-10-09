@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Compile strict finite-graph model
         run: python3 -m py_compile scripts/check_d10_dung_grounded.py
       - name: Prove grounding and 13 provenance mutants over finite directed graphs

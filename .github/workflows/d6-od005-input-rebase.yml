@@ -17,7 +17,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Prove OD-005 changed D6 theorem inputs
         run: |
           python3 benchmarks/d6-od005-input-rebase/run.py | tee /tmp/d6-rebase.txt

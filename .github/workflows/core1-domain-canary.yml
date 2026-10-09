@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify the checked-in physical T5 bytes from existing Core1
         run: python3 tests/fixtures/core1-domain-canary/regenerate.py
       - name: Fail-closed Core1 domain/transport regressions

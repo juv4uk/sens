@@ -28,7 +28,7 @@ jobs:
   default-artifact:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Test storage artifact without external runtimes
         run: cargo test -p wsm-native-result-types --no-default-features --lib

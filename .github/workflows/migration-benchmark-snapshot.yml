@@ -22,6 +22,6 @@ jobs:
   archive-evidence:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify archive-only, fail-closed, SHA-pinned evidence
         run: python3 -m unittest discover -s tests -p 'test_migration_benchmark_snapshot.py' -v

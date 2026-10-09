@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Independent product, refinement and exhaustive suffix tests
@@ -48,7 +48,7 @@ jobs:
           PY
       - name: Retain source-stamped nonadmission evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: d10-state-shortest-word-hold-evidence
           path: ${{ runner.temp }}/state-witness-evidence.json

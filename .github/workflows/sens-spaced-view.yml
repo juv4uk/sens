@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Build independent current Rust D2 physical T5 reader
         run: cargo build -q -p sens-cli --bin sens-trit
@@ -81,7 +81,7 @@ jobs:
           ))
           print(json.dumps(receipt, ensure_ascii=False, indent=2))
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: sens-spaced-view-ledger
           path: ${{ runner.temp }}/sens-view-ledger.json

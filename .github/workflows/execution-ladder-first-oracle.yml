@@ -19,7 +19,7 @@ jobs:
   d3-oracle:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build current exact-domain helper
         run: cargo build --release -p sens --example current_en_vs_d1d8_cpu
       - name: Emit real L0 oracle rows
@@ -33,7 +33,7 @@ jobs:
           python3 benchmarks/execution-ladder-conformance/validate.py \
             /tmp/d3-oracle.jsonl
           test "$(wc -l < /tmp/d3-oracle.jsonl)" -eq 2
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: sens-d3-oracle-jsonl
           path: /tmp/d3-oracle.jsonl

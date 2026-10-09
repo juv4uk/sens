@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Historical Core1 origin + actual three-pass packed mirror
         run: python3 -m unittest discover -s tests -p 'test_core1_third_domain_canary.py' -v
       - name: Current D2/D3 Rust oracle returns exact Pair(Nil,Nil)

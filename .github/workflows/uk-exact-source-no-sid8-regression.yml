@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Exact current Ukrainian domain projection, never legacy source replacement
         run: cargo test -p sens-cli --bin sens-to-sens ratified_uk_source_heads_remain_primary_not_old_eight_bit_tokens -- --nocapture

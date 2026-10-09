@@ -21,6 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Перевірити шахові закони, математичний оракул і негативні контролі
         run: python3 tests/test_d10_crossrepo_chess_semantic_donors.py

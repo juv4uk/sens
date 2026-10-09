@@ -13,7 +13,7 @@ jobs:
   parity:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build my-lisp
         run: cargo build --release -p my-lisp-cli --bin my-lisp

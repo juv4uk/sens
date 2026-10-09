@@ -55,7 +55,7 @@ jobs:
           PY
       - name: Retain actual runtime version and stable case witness
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: d10-real-prolog-constraint-witness
           path: ${{ runner.temp }}/d10-prolog-constraint-witness.json

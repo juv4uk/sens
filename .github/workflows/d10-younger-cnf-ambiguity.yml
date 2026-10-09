@@ -21,6 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Younger chart exact integers against unshared brute-force tree enumerator and Catalan formula
         run: python3 tests/test_d10_younger_cnf_ambiguity.py

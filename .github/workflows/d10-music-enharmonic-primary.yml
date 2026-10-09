@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: All paired positive, negative and admission-safety witnesses
@@ -50,7 +50,7 @@ jobs:
           PY
       - name: Preserve exact HOLD evidence for peer source review
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: d10-music-enharmonic-two-model-hold-ledger
           path: ${{ runner.temp }}/d10-music-hold-evidence.json

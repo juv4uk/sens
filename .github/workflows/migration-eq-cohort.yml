@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify real three-pass .lisp migration and physical T5 receipts
         run: python3 -m unittest discover -s tests -p 'test_migration_eq_cohort.py' -v
       - name: Check executable D3 EQ -> exact D1 oracle parity

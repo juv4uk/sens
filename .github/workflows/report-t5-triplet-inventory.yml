@@ -55,7 +55,7 @@ jobs:
           PY
       - name: Upload independent read-only triple coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-triple-view-inventory
           path: ${{ runner.temp }}/sens-triple-view-inventory.json

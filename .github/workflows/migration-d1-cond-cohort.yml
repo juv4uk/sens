@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Actual 3-pass source-to-T5 bytes and fail-closed Python guard
         run: python3 -m unittest discover -s tests -p 'test_migration_d1_cond_cohort.py' -v
@@ -57,7 +57,7 @@ jobs:
             tests/fixtures/migration-d1-cond-cohort/branch
       - name: Preserve read-only exact view evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: d1-cond-spaced-view-rust-d2-receipts
           if-no-files-found: warn

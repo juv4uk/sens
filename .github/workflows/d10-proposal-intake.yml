@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Перевірити D10 intake та негативні контролі
         run: python3 scripts/check-d10-proposal-ledger.py --self-test
       - name: Перевірити контракти зростання й 10 негативних випадків

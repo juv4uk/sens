@@ -20,6 +20,6 @@ jobs:
   stable-inputs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify neutral D6 theorem inputs and reopen behavior
         run: python3 benchmarks/d6-theorem-input-gate/run.py --self-test

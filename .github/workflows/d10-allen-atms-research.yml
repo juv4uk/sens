@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Fail closed on pre-existing domains and fake admission
         run: python3 scripts/check_d10_allen_atms_research.py
       - name: Exact rational and powerset independent oracles

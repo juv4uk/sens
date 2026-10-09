@@ -63,7 +63,7 @@ jobs:
           },ensure_ascii=False,indent=2))
           PY
       - name: Upload sweep evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: migration-admission-sweep-490
           path: /tmp/migration-admission-sweep.json

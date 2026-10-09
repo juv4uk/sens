@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload raw timings, SHA and statistics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: physical-t5-bench-${{ github.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/physical-t5-bench/

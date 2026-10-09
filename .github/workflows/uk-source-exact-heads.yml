@@ -31,7 +31,7 @@ jobs:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Ukrainian canonical heads are exact DomainIdentity, never runtime SID lookup
         run: cargo test -p sens --lib mixed_source::tests -- --nocapture

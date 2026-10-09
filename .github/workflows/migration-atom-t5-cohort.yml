@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate exact source and physical T5
         run: python3 -m unittest discover -s tests -p 'test_migration_atom_cohort.py' -v
       - name: Current SENS oracle executes physical migrated program

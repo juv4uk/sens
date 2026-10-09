@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: 1023 exact input words, Gaussian vs exhaustive oracle and metadata attacks
         run: python3 scripts/check_d10_gf2_minimal_recurrence.py --self-test
       - name: Install independent R6RS runtime

@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Reject D1-D9 duplicates and false D10 admissions
         run: python3 scripts/check_d10_r6rs_history_audit.py --self-test
       - name: Checker does not write source data

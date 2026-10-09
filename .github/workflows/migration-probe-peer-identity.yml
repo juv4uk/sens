@@ -24,7 +24,7 @@ jobs:
           cargo test -p sens --test uk_sa_surface peer_identity_acceptance_program_passes -- --nocapture
       - name: Upload probe evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: peer-identity-migration-probe
           path: /tmp/peer-migration.json

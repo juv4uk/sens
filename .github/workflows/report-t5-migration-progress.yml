@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Reject source omissions, duplicate physical names and fake oracle credit
@@ -61,7 +61,7 @@ jobs:
               out.write("- Non-program data are not executable backlog\n")
           print("MECHANICAL_COVERAGE",s)
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: t5-migration-progress-ledger

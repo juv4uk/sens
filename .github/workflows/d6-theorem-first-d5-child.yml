@@ -17,6 +17,6 @@ jobs:
   witness:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify current D5 yields no unexplained one-delta D6 child
         run: python3 benchmarks/d6-theorem-first-d5-child/run.py

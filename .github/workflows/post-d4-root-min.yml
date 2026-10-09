@@ -58,7 +58,7 @@ jobs:
             echo "- CARRIER-PREMISE is not a root/width/resident/coordinate claim."
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: post-d4-root-min-shared-location

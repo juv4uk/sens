@@ -22,7 +22,7 @@ jobs:
           python3 benchmarks/d6-historical-unplaced-handoff/run.py \
             --out /tmp/d6-historical-unplaced
           cat /tmp/d6-historical-unplaced/report.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: d6-historical-unplaced-handoff
           path: /tmp/d6-historical-unplaced

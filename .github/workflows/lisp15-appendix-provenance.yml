@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify 30 families, current dedup and fail-closed negative controls
         run: python3 scripts/check-lisp15-appendix-provenance.py --self-test
       - name: Guard current D1-D9/D8/D10 authority from accidental edits

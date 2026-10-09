@@ -15,6 +15,6 @@ jobs:
   chronology:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate Memo 24 chronology sidecar
         run: python3 benchmarks/memo24-arithmetic-ingest/run.py

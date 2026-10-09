@@ -98,7 +98,7 @@ jobs:
           fi
       - name: Preserve SHA-bound raw measurements even if benchmark fails
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: physical-binary-perf-${{ github.run_id }}-${{ github.run_attempt }}
           path: /tmp/sens-physical-performance/

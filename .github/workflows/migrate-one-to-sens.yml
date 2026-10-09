@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run real one-file canonical three-pass tests
         run: |
           set -euo pipefail
@@ -44,7 +44,7 @@ jobs:
           print(json.dumps({k:r[k] for k in ("status","source","bytes","physical_sha256","semantic_parity")},sort_keys=True))
           PY
       - name: Publish traceable preview report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: one-file-canonical-T5-preview
           path: /tmp/one-file-t5-report.json

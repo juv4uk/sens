@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install independent SWI-Prolog CLP(FD) runtime
         run: sudo apt-get update -qq && sudo apt-get install -y swi-prolog-nox
       - name: Exhaustive queue/round proofs + real SWI CLPFD oracle

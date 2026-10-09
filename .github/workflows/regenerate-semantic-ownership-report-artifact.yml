@@ -21,7 +21,7 @@ jobs:
         run: python3 scripts/semantic-ownership.py --write
       - name: Show diff
         run: git diff -- docs/semantic-ownership-report.md
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: regenerated-semantic-ownership-report
           path: docs/semantic-ownership-report.md

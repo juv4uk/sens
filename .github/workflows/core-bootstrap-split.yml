@@ -75,7 +75,7 @@ jobs:
           assert 'default_core_minus_session_i_refs' in summary['derived_diagnostics']
           PY
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: core-bootstrap-split-3629

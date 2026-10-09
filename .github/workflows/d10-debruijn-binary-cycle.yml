@@ -21,8 +21,8 @@ jobs:
   exact-cyclic-coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Source, D1-D9/D10 dedup, HOLD and 11 adverse controls

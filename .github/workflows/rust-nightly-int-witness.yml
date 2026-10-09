@@ -25,7 +25,7 @@ jobs:
           rustc --version --verbose
           python3 benchmarks/rust-nightly-int-witness/run.py             --toolchain nightly             --emit-llvm             --json-out /tmp/rust-nightly-int-witness.json
       - name: Publish probe result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: rust-nightly-int-witness
           path: /tmp/rust-nightly-int-witness.json

@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact PR state
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: D10 selector and accounting authority
         run: python3 scripts/check-d10-fill-v1-seed.py
       - name: Verify immutable 625-row baseline and two transitions 625 to 627 to 630

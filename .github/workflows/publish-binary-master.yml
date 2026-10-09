@@ -99,7 +99,7 @@ jobs:
           cmp "$RUNNER_TEMP/t5-canary-open.txt" "$RUNNER_TEMP/t5-canary-expected.txt"
       - name: Upload binary migration preview and blocker report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-t5-migration-preview
           if-no-files-found: warn

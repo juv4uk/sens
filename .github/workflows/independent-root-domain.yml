@@ -27,7 +27,7 @@ jobs:
             --out /tmp/independent-root-domain
       - name: Publish report
         run: cat /tmp/independent-root-domain/report.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: independent-root-domain
           path: /tmp/independent-root-domain

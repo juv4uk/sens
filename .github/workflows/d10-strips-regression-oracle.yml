@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Retain existing finite-state STRIPS regression witness
         run: python3 scripts/check_d10_strips_goal_regression.py --self-check
       - name: Check exact source, 10 negative controls and domain admission boundaries

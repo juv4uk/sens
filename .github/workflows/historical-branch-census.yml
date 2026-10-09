@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Verify merge-census classification on an isolated real Git repo
@@ -26,7 +26,7 @@ jobs:
       - name: Classify full historical branch list against current main
         run: python3 scripts/audit_branch_merges.py --main-ref origin/main --output artifacts/historical-branch-merge-census.json
       - name: Upload evidence only
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: historical-branch-merge-census
           path: artifacts/historical-branch-merge-census.json

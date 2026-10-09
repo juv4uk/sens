@@ -41,7 +41,7 @@ jobs:
           fi
 
       - name: Upload migration artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: migrated-active-lib
           path: migrated-active-lib.tgz

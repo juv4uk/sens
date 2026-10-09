@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Syntax-check linear Booth KMP reference and fail-closed gates
         run: python3 -m py_compile scripts/check_d10_cyclic_word_canon.py
       - name: Exhaustive binary orbit proof and 12 negative controls

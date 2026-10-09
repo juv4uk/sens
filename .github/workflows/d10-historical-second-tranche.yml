@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check 638-row monotonic D10 and adversarial bit/hash witnesses
         run: python3 scripts/check_d10_historical_second_tranche.py --self-test
       - name: Check no mutation of source tree

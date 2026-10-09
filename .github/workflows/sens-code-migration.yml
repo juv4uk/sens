@@ -65,7 +65,7 @@ jobs:
           exit 0
       - name: Upload migration test log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-code-migration-test-log
           path: |
@@ -79,7 +79,7 @@ jobs:
             --json /tmp/lisp-source-forms.json \
             --tsv /tmp/lisp-source-forms.tsv
       - name: Upload three-pass inventory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: lisp-source-three-pass-inventory
           path: |

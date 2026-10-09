@@ -124,7 +124,7 @@ jobs:
 
       - name: Save raw trials, environment, medians and digests
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-physical-runtime-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/sens-physical-bench/

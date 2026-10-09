@@ -25,7 +25,7 @@ jobs:
     name: Three-basis exact-Q execution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Focused formatting
         run: rustfmt --edition 2021 --check crates/sens/tests/core_math_arithmetic_live.rs

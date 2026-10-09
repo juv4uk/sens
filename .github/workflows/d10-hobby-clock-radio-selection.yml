@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify monotonic 630->634 research selection and exact source models
         run: python3 scripts/check_d10_hobby_clock_radio_selection.py --self-test
       - name: Verify all prior D10 transitions

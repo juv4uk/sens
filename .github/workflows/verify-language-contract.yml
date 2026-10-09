@@ -27,7 +27,7 @@ jobs:
       LOCK_PATH: ${{ inputs.lock_path }}
     steps:
       - name: Check out consumer repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Verify digest and exact pinned source
         shell: bash

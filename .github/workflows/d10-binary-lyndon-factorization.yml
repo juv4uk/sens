@@ -20,8 +20,8 @@ jobs:
   prove-donor-law:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Check donor status, present D1-D10 dedup, ten negative controls

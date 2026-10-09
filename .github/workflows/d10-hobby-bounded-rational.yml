@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Verify D10 selector count and shared inventory authority
         run: python3 scripts/check-d10-fill-v1-seed.py
       - name: Prove immutable 625 to 627 to 630 to 631 Git-blob chain

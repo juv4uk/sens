@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check historical metadata, current exact-name dedup and authority boundary
         run: python3 scripts/check_d10_maling_symbolic_differentiation.py --self-test
       - name: Python regression tests

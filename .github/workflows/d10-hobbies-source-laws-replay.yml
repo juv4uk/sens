@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify preserved source-pinned proposal-only metadata and independent models
         run: python3 -m unittest discover -s tests -p 'test_d10_hobbies_source_laws_v1.py' -v
       - name: Evidence boundary

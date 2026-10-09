@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Compile strict exact-rational proposal checker
         run: python3 -m py_compile scripts/check_d10_bounded_rational.py
       - name: Exhaustive rational oracle + standard library cross-check + negative tests

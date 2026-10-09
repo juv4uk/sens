@@ -138,7 +138,7 @@ jobs:
               out.write('\nFull SHA-pinned evidence for every original source, not just the first 20, is attached as JSON. Grouping is the FIRST mechanical block and never an executable/semantic admission.\n')
           PY
       - name: Save exact source SHA and admission decision
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: t5-original-candidate-report
           path: ${{ runner.temp }}/original-eligibility.json

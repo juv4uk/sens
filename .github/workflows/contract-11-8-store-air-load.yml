@@ -197,7 +197,7 @@ jobs:
           printf '%s\n' "$output" | grep -F 'artifact_bytes=3'
 
       - name: Опублікувати evidence artifact / Upload evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: contract-11-8-store-air-load-evidence
           path: /tmp/store-air-load.jsonl

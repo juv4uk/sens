@@ -21,7 +21,7 @@ jobs:
         run: python3 scripts/public_api_inventory.py --write-report
       - name: Show diff
         run: git diff -- docs/generated/public-api-discovery.md
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: regenerated-public-api-report
           path: docs/generated/public-api-discovery.md

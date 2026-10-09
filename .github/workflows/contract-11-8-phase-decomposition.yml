@@ -92,7 +92,7 @@ jobs:
           assert all(len(samples) == 3 for samples in d['core_bootstrap']['raw_i_ref_samples'].values())
           PY
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: contract-11-8-phase-decomposition
           path: /tmp/contract-11-8-phase-decomposition.json

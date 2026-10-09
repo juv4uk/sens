@@ -17,7 +17,7 @@ jobs:
   bounded-d1-d3:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
@@ -82,7 +82,7 @@ jobs:
           print("historical Contract 11.6 artifact provenance: PASS")
           PY
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: sens-bounded-d1-d3-conformance-11-8-jsonl
           path: /tmp/bounded-a.jsonl

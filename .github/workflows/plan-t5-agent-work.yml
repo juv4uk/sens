@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Test exhaustive disjoint family shards and all fail-closed blockers
@@ -100,7 +100,7 @@ jobs:
           }
       - name: Attach read-only candidate and agent shard ledgers
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: t5-agent-shards-no-publish
           if-no-files-found: ignore

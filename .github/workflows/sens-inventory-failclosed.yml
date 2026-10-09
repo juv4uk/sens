@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Regression — no mechanical or false W8 admission
         run: python3 -m unittest discover -s tests -p 'test_sens_inventory_failclosed.py' -v
       - name: Verify real canonical triplet is explicitly NOT release-admitted
@@ -44,7 +44,7 @@ jobs:
           assert receipt["files"][0]["status"] == "BOUNDED_UK_PROVEN_ORACLE_PENDING"
           print("Inventory fail-closed: bounded proof cannot become release admission")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: sens-inventory-failclosed-receipt
           path: /tmp/sens-inventory-failclosed.json

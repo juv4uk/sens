@@ -23,7 +23,7 @@ jobs:
           rm -rf /tmp/d5-row-typing
           python3 benchmarks/d5-row-typing/validate.py \
             --out /tmp/d5-row-typing/result.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: d5-row-typing

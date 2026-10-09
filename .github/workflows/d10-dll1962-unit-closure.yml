@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 9
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Independent 2304 finite model and BCP fixed-point cases
         run: python3 -m unittest discover -s tests -p test_d10_dll1962_unit_closure.py -v
       - name: Install real SAT engine PySAT Glucose3

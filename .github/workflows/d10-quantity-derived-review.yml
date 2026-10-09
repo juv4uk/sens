@@ -25,6 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Assert pinned donors, D10 duplicate guard and no unauthorized coordinates
         run: python3 -m unittest discover -s tests -p 'test_d10_quantity_derived_review.py' -v

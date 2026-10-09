@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Independently recompute historical Git blob and 37 current definitions
         run: python3 scripts/check_d10_reason_alternate_define_donor_v1.py
       - name: Reject forged D10 residents and historical source mutation

@@ -21,6 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate critical-pair theorem witnesses against independent exhaustive peaks
         run: python3 -m unittest discover -s tests -p 'test_d10_critical_pairs_confluence.py' -v

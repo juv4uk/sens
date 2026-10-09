@@ -57,7 +57,7 @@ jobs:
               print("HISTORICAL ONLY: these counts predate bīja3 A / D4 clean-room #3225 and are not current semantic census authority.")
               print("UNKNOWN is not an independent-root claim.")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: historical-pre-cleanroom-exact-width-function-census

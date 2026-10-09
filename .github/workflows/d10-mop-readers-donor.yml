@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check 17 reader census and 7 negative mutations
         run: python3 scripts/check_d10_mop_reader_census.py
       - name: Install real SBCL

@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Source-grade semantic and ten anti-forgery negative controls
         run: python3 scripts/check_d10_exact_barycentric_interpolation.py
       - name: Exact rational Lagrange versus barycentric differential

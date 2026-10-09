@@ -12,6 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Exact geometric law and 8 mutation controls
         run: python3 tests/test_d10_wsm24_exact_chamfer.py

@@ -75,7 +75,7 @@ jobs:
           PY
       - name: Preserve study witnesses, not selected or executable artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: d10-first-order-anti-unify-source-oracles
           if-no-files-found: warn

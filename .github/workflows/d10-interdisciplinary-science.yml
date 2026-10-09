@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Exact rational scientific oracle, sourced identities, anti-forgery negatives
         run: python3 scripts/check_d10_science_interests_v1.py
       - name: Canonical selected state and append-only Git SHA history

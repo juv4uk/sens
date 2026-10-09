@@ -19,6 +19,6 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify D6 owner-readiness without admission
         run: python3 scripts/research-2619-d6-residency-readiness.py

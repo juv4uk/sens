@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Historical examples
         run: python3 scripts/check_d10_unique_decipherability_historical.py --self-test
       - name: Fail closed against current D1-D9 / D10

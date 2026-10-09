@@ -68,7 +68,7 @@ jobs:
           test -z "$(find "$RUNNER_TEMP/sens-inspect-only" -name '*.sens' -type f -print -quit 2>/dev/null)"
       - name: Publish original-source blocker reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-original-lisp-triage
           path: triage-reports/*.json

@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check 13 historical HOLDs, legacy reconciliation and negative cases
         run: python3 scripts/check_d10_historical_primary_reconcile.py --self-test
       - name: Verify no source edits from checker

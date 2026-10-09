@@ -38,7 +38,7 @@ jobs:
             cat /tmp/foundation-debt/metrics.json
             echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: foundation-debt-ledger
           path: /tmp/foundation-debt/

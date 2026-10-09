@@ -21,6 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Exact pinhole homography and inverse ray witnesses, negative controls
         run: python3 tests/test_d10_astrophoto_pinhole_exact.py

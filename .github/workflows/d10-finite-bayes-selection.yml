@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify the immutable 625-based append-only history
         run: python3 scripts/check_d10_selection_transition_history.py --self-test
       - name: Verify Gray historical snapshot remains valid after this append

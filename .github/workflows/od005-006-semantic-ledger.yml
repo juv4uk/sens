@@ -18,6 +18,6 @@ jobs:
   ledger:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify residency/derivability split
         run: python3 scripts/research-2765-od005-006-semantic-ledger.py --check

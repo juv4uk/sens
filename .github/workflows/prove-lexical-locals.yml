@@ -43,7 +43,7 @@ jobs:
           PY
       - name: Independent historical nine-case oracle is not physical parity
         run: python3 -m unittest discover -s tests -p 'test_machine_block_historical_oracle.py' -v
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: original-machine-block-local-coordinate-evidence

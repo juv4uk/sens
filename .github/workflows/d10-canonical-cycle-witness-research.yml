@@ -19,7 +19,7 @@ jobs:
   semantic-research:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Independent DFS and permutation oracles, 4,627 bounded graphs
         run: python3 scripts/check_d10_cycle_witness_hobbies.py
       - name: Test cycle orientation, proof identity, negative guards

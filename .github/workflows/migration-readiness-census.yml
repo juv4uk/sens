@@ -64,7 +64,7 @@ jobs:
             --out /tmp/sens-t5-migration-readiness.json
       - name: Publish census artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-t5-migration-readiness-${{ github.sha }}
           path: /tmp/sens-t5-migration-readiness.json

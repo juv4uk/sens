@@ -218,7 +218,7 @@ jobs:
 
       - name: Upload full raw sample evidence and CPU provenance
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sens-packed-vs-visible-${{ github.sha }}
           path: artifacts/performance/

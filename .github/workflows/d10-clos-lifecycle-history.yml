@@ -13,6 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: No D10 false promotions or colliding historic names
         run: python3 scripts/check_d10_clos_lifecycle_history.py

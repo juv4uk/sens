@@ -276,7 +276,7 @@ jobs:
 
       - name: Keep the evidence on red as well as green
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: physical-binary-sens-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/sens-binary/

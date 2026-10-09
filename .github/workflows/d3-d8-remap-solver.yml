@@ -31,7 +31,7 @@ jobs:
             cat /tmp/d3-d8-remap-solver/report.md >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: d3-d8-remap-solver-s1

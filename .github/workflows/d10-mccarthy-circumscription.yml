@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Exact finite dominance vs grouped antichain and negative cases
         run: python3 scripts/check_d10_finite_circumscription.py --self-test
       - name: Verify research tests do not change the repository

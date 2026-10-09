@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify provenance and zero false D10 admission
         run: python3 scripts/check_d10_clos_slot_observation_v1.py --static-only
       - name: Install independent Common Lisp donor interpreter

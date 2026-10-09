@@ -22,6 +22,6 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify D6 admission matrix
         run: python3 scripts/research-2766-d6-runtime-admission-audit.py --check

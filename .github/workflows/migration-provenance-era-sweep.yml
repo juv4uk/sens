@@ -129,7 +129,7 @@ jobs:
           },ensure_ascii=False,indent=2))
           PY
       - name: Upload provenance sweep
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: migration-provenance-era-sweep
           path: /tmp/migration-provenance-era-sweep.json

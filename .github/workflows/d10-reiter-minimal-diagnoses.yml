@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 9
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check syntax of source-bound D10 arithmetic model
         run: python3 -m py_compile scripts/check_d10_reiter_minimal_diagnoses.py
       - name: Verify all finite hitting-set diagnoses against independent powerset

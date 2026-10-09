@@ -47,7 +47,7 @@ jobs:
           grep -F "occupancy-mutations=0" /tmp/d6-pure-unknown-antinumerology.log
           grep -F "RESULT=NO-CANDIDATE-FROM-COORDINATE-ONLY" /tmp/d6-pure-unknown-antinumerology.log
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: d6-pure-unknown-antinumerology
