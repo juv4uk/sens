@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+from domain_tables import D7_TABLE, read_domain_table
+
 root=Path(__file__).resolve().parents[1]
 d=json.loads((root/"knowledge/d7-ratified.json").read_text(encoding="utf-8"))
 ledger=json.loads((root/"knowledge/d7-v2-evidence-ledger.json").read_text(encoding="utf-8"))
@@ -55,6 +57,37 @@ assert ledger["baseline_missing_without_same_coordinate_overlay"]==["0100001","0
 assert ledger["migration_candidate"]["post_migration_candidate"]["occupancy"]==124
 assert d["future_migration_boundary"]["status"]=="NOT-RATIFIED"
 assert d["future_migration_boundary"]["candidate_occupancy"]==124
+
+# The owner-ratified JSON owns coordinates and roles; lib/domains/d7.lisp is
+# ONLY a human-readable projection. Every projected D7 row must be a real
+# ratified resident at the same exact seven-bit coordinate. Reserved pins are
+# neither empty allocation slots nor callable operations.
+table_rows = read_domain_table(D7_TABLE)
+ratified_bits = set(d["residents"])
+projected_bits = [row.bits for row in table_rows]
+assert len(table_rows) == d["occupancy"] == 126
+assert projected_bits == sorted(ratified_bits), "D7 surface coordinate drift"
+assert not (set(projected_bits) & set(d["reserved_coordinates"]))
+assert len({row.bits for row in table_rows}) == len(table_rows)
+for row in table_rows:
+    assert row.width == 7 and len(row.bits) == 7
+    assert row.en == d["residents"][row.bits], f"D7:{row.bits} owner map mismatch"
+    assert row.lisp is None, f"D7:{row.bits} must not mint a Lisp callable"
+    assert all(getattr(row, key) for key in ("uk", "ukr", "san")), (
+        f"D7:{row.bits} missing human projection"
+    )
+
+# The row-wise evidence must stay a one-to-one projection of the ratified
+# coordinates, not an alternative Rust/reader-generated semantic registry.
+authority_rows = {row["coordinate"]: row for row in d["rows"]}
+assert len(authority_rows) == len(d["rows"]) == 128
+for row in table_rows:
+    owner = authority_rows[row.bits]
+    assert owner["status"] == "OWNER-RATIFIED"
+    assert owner["report_name"] == row.en
+for reserved in d["reserved_coordinates"]:
+    assert authority_rows[reserved]["status"] != "OWNER-RATIFIED"
+
 
 assert "(owner-ratification . #3572)" in contract
 assert "(width . #d7)" in contract
