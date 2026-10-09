@@ -10,16 +10,16 @@
     (00000111
       ((00000010 request)
        (00000001 no))
-      ((not? (00000010 request))
+      ((semantic-registry-not-d1 (00000010 request))
        (10011100 ((first-field (00000101 request)))
          (00000111
            ((00000010 first-field)
             (00000001 no))
-           ((not? (00000010 first-field))
+           ((semantic-registry-not-d1 (00000010 first-field))
             (00000111
               ((00100010 (00000101 first-field) (00000001 sid))
                (00000001 yes))
-              ((not? (00100010 (00000101 first-field) (00000001 sid)))
+              ((semantic-registry-not-d1 (00100010 (00000101 first-field) (00000001 sid)))
                (00000001 no))))))))))
 
 (00001001 early-sid-lower
@@ -28,7 +28,7 @@
       (00000111
         ((00100010 sid (00000001 ()))
          (00000001 rejected))
-        ((not? (00100010 sid (00000001 ())))
+        ((semantic-registry-not-d1 (00100010 sid (00000001 ())))
          (00100111
            (00000100 (00000001 sid) sid)
            (00000100 (00000001 arguments) arguments)
@@ -47,11 +47,11 @@
             (00000111
               ((00100010 c d)
                (00100111 (00000001 same) a))
-              ((not? (00100010 c d))
+              ((semantic-registry-not-d1 (00100010 c d))
                (00000001 distinct))))
-           ((not? (00100010 b c))
+           ((semantic-registry-not-d1 (00100010 b c))
             (00000001 distinct))))
-        ((not? (00100010 a b))
+        ((semantic-registry-not-d1 (00100010 a b))
          (00000001 distinct))))))
 
 (00001001 early-sid-lowering-witness
