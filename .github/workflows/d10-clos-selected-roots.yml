@@ -7,6 +7,8 @@ on:
       - knowledge/d10-clos-slot-state-historical-review-v1.json
       - knowledge/d10-historical-clos-interlisp-residual-review-v1.json
       - scripts/check_d10_clos_roots_selection.py
+      - scripts/check_d10_selection_transition_history.py
+      - knowledge/d10-selection-transition-history.json
       - scripts/check-d10-fill-v1-seed.py
       - .github/workflows/d10-clos-selected-roots.yml
   workflow_dispatch:
@@ -18,5 +20,7 @@ jobs:
         uses: actions/checkout@v4
       - name: D10 selector and accounting authority
         run: python3 scripts/check-d10-fill-v1-seed.py
+      - name: Verify immutable 625-row baseline and append-only 628 transition
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
       - name: CLOS research root fail-closed gate
         run: python3 scripts/check_d10_clos_roots_selection.py --self-test
