@@ -89,7 +89,7 @@ fn main() {
         let (median, p95, minimum) = median_ns(observations.clone());
         for (rep, elapsed_ns) in observations.iter().enumerate() {
             println!(
-                "HOT_SAMPLE\\tforms={forms}\\tphase={phase}\\trep={}\\tns_op={elapsed_ns}",
+                "HOT_SAMPLE\tforms={forms}\tphase={phase}\trep={}\tns_op={elapsed_ns}",
                 rep + 1,
             );
         }
