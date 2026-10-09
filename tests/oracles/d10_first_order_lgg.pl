@@ -1,12 +1,14 @@
 % Independent executable SWI-Prolog witness for D10 first-order LGG HOLD.
 % It is NOT a native SENS implementation. Input: a JSON array from a file.
 % Atom: {"a":"..."} ; constructor: {"f":"...", "args":[...]}.
+% json_read_dict/2 yields anonymous dict tags that are variables; `==` would
+% mistake two equal JSON terms for different objects. `=@=` compares variants.
 % Output: JSON array generalizer + TWO explicit ground reconstructions.
 :- use_module(library(http/json)).
 :- initialization(main, main).
 
 lookup_pair([pair(X, Y, Hole) | _], A, B, Hole) :-
-    X == A, Y == B, !.
+    X =@= A, Y =@= B, !.
 lookup_pair([_ | Rest], A, B, Hole) :-
     lookup_pair(Rest, A, B, Hole).
 
@@ -16,7 +18,7 @@ join_args([A | As], [B | Bs], S0, S2, [G | Gs]) :-
     join_args(As, Bs, S1, S2, Gs).
 
 anti(A, B, S0, S1, G) :-
-    ( A == B ->
+    ( A =@= B ->
         G = A, S1 = S0
     ; is_dict(A), is_dict(B),
       get_dict(f, A, FA), get_dict(f, B, FB), FA == FB,
