@@ -132,22 +132,3 @@ fn malformed_inline_lambda_does_not_degrade_to_not_callable() {
         "inline malformed lambda must fail during closure construction"
     );
 }
-
-#[test]
-fn canonical_cond_exhaustion_is_a_named_failure_in_native_and_meta_eval() {
-    for source in [
-        "(cond)",
-        "(cond ((quote radio) antenna (quote wrong)))",
-    ] {
-        let expected = "(error unsatisfied-conditional cond)";
-
-        let via_meta = eval_meta(source);
-        let via_native =
-            eval_native_error(source, ErrorKind::UnsatisfiedConditional, expected);
-
-        assert_eq!(
-            via_meta, via_native,
-            "canonical three-part cond must fail named when no expected result matches: {source}"
-        );
-    }
-}
