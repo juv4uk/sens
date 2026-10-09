@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 630,
+    "selected_semantic_candidates": 632,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 374,
-    "remaining_semantic_inventory": 394,
+    "unplaced_selected_candidates": 376,
+    "remaining_semantic_inventory": 392,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13362,6 +13362,66 @@
       "coordinate_basis": "UNPLACED",
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.loops.1983.get",
+      "semantic_name": "ACTIVE-VALUE-GET",
+      "source_name": "GetValue / GetLocalState",
+      "source_class": "HISTORICAL-LOOPS-ACTIVE-VALUES",
+      "source_file": "The LOOPS Manual (1983), printed pp.25-28",
+      "primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "source_section": "5.1, 5.2, 5.5",
+      "source_pdf_pages": [
+        28,
+        29,
+        31
+      ],
+      "relation_class": "NESTED-ACCESS-EFFECT-PROTOCOL",
+      "behavior": "Nested getter evaluation first resolves deeper localState (inner→outer) and returns the outermost getFn result; a missing getFn yields the resolved localState.",
+      "surface_uk": "активне-значення-читати",
+      "surface_ukr": "читати-активне-значення",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-loops-active-values-intake-v1.json",
+        "The LOOPS Manual (1983) §5.1, 5.2, 5.5"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.loops.1983.put",
+      "semantic_name": "ACTIVE-VALUE-PUT",
+      "source_name": "PutValue / PutLocalState",
+      "source_class": "HISTORICAL-LOOPS-ACTIVE-VALUES",
+      "source_file": "The LOOPS Manual (1983), printed pp.25-28",
+      "primary_url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "source_section": "5.1, 5.2, 5.5",
+      "source_pdf_pages": [
+        28,
+        29,
+        31
+      ],
+      "relation_class": "NESTED-ACCESS-EFFECT-PROTOCOL",
+      "behavior": "An outer putFn is invoked first and may call PutLocalState, triggering inner putFns outer→inner; if putFn absent, store new value as this node's localState, without mandatory propagation; raw only bypass skips inner effects.",
+      "surface_uk": "активне-значення-записати!",
+      "surface_ukr": "записати-активне-значення!",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-loops-active-values-intake-v1.json",
+        "The LOOPS Manual (1983) §5.1, 5.2, 5.5"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE"
     }
   ],
   "parent_domain": {
@@ -13397,6 +13457,7 @@
     "knowledge/d10-selfhost-reason-harvest-v1.json",
     "knowledge/d10-historical-primary-admission-batch1-v1.json",
     "knowledge/d10-clos-slot-state-historical-review-v1.json",
-    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+    "knowledge/d10-loops-active-values-intake-v1.json"
   ]
 }
