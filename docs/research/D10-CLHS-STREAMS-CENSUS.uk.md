@@ -65,6 +65,6 @@
 - **D1–D9**: точні чинні семантичні ідентичності, їх не дублювати.
 - **D10**: 630 selected на початку; жодна з 70 словникових позицій не обрана цим пакетом, `ratified=0`.
 - **Механізм**: host stdout, мережа, файловий дескриптор, kernel port і ABI не дають нових кодів.
-- **Доказовість**: первинні CLHS сторінки + сформульовані незалежні позитивні й негативні свідчення, але *реальні SBCL/CCL/CLISP запуски ще НЕ проведено*. Моделі Python не видавати за реальні Lisp oracle.
+- **Доказовість**: первинні CLHS сторінки, позитивні й негативні свідчення, а тепер **реальний SBCL 2.2.9.debian**. У CI [run 37898108554](https://github.com/juv4uk/sens/actions/runs/37898108554), job 113714045451, отримано `PASS DYNAMIC-SYNONYM-STREAM-TARGET`, `PASS DRAIN-STRING-OUTPUT-STREAM`, `PASS ORDERED-CONCATENATED-INPUT` та `D10-CLHS-STREAMS-DONOR: PASS 3/3`. Машинний доказ `knowledge/d10-clhs-streams-sbcl-oracle-20261009.json` фіксує версію, запуск, SHA і назви тестів. Це **oracle донорської поведінки** Common Lisp, ще НЕ SENS-runtime/T5 parity і НЕ доказ відсутності дублікатів D1–D10.
 
 Після реального донорського oracle, повного behavior-level D1–D9/D10 dedup і review можна подати **лише незалежний** корінь до proposal-ledger, без автоматичного `selected` та фізичного `.sens`. Поки паралельні #4894/#4895/#4902 узгоджують обліковий gate, не змінювати сам реєстр.
