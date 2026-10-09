@@ -7,7 +7,7 @@
 - базовий STORE/AIR runner залишає LOAD-поля null; load.py збагачує paired
   рядки фазово ізольованими I-ref вимірами з чинних helpers.
 
-Парні English/canonical fixtures спочатку мають довести однаковий lowered
+Парні Ukrainian/canonical fixtures спочатку мають довести однаковий lowered
 semantic trace чинним exact-domain helper-ом. Mechanical fixtures явно
 позначені як carrier controls і не претендують на мовну семантичну рівність.
 """
@@ -144,7 +144,7 @@ def load_fixtures(path: Path) -> list[dict[str, object]]:
             raise ValueError(f"{fixture_id}: canonical_source is required")
         if kind == "paired-program":
             ukrainian = fixture.get("ukrainian_source")
-            if not isinstance(english, str) or not english:
+            if not isinstance(ukrainian, str) or not ukrainian:
                 raise ValueError(f"{fixture_id}: paired fixture needs ukrainian_source")
 
     return fixtures
@@ -430,22 +430,22 @@ def main() -> int:
             if storage_bits + framing_bits != int(facts["byte_container_total_bits"]):
                 raise ValueError(f"{fixture_id}: byte-container accounting mismatch")
 
-            english_source = fixture.get("english_source")
+            ukrainian_source = fixture.get("ukrainian_source")
             if fixture_kind == "paired-program":
-                assert isinstance(english_source, str)
+                assert isinstance(ukrainian_source, str)
                 ukrainian_path = write_source(
-                    tmp, fixture_id, "ukrainian", english_source
+                    tmp, fixture_id, "ukrainian", ukrainian_source
                 )
                 trace = semantic_preflight(
                     semantic_helper,
-                    english_path,
+                    ukrainian_path,
                     canonical_path,
                     expected_value=fixture.get("expected_value"),
                     expected_output=fixture.get("expected_output"),
                 )
                 identity_proof = "paired-lowered-trace"
                 identity_digest = sha256_bytes(trace.encode("utf-8"))
-                text_bytes = len(english_source.encode("utf-8"))
+                text_bytes = len(ukrainian_source.encode("utf-8"))
                 ratio = text_bytes / packed_bytes
             else:
                 identity_proof = "mechanical-exact-word-sequence"
