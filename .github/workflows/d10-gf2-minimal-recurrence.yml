@@ -1,0 +1,24 @@
+name: D10 GF2 minimal linear recurrence cross-hobby research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-gf2-minimal-recurrence-research-v1.json'
+      - 'scripts/check_d10_gf2_minimal_recurrence.py'
+      - 'tests/d10_gf2_minimal_recurrence_r6rs.ss'
+      - 'docs/research/d10-gf2-minimal-recurrence-20261009.uk.md'
+      - '.github/workflows/d10-gf2-minimal-recurrence.yml'
+  workflow_dispatch:
+jobs:
+  gf2-two-independent-models:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: 1023 exact input words, Gaussian vs exhaustive oracle and metadata attacks
+        run: python3 scripts/check_d10_gf2_minimal_recurrence.py --self-test
+      - name: Install independent R6RS runtime
+        run: sudo apt-get update -qq && sudo apt-get install -y chezscheme
+      - name: Execute R6RS finite recurrence oracle
+        run: scheme --script tests/d10_gf2_minimal_recurrence_r6rs.ss
+      - name: Verify no generated files and no source changes
+        run: git diff --exit-code
