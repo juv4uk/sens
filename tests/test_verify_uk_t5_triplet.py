@@ -117,9 +117,9 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.assertEqual(mod.uk_surface(3)["000"], "()")
 
     def test_two_sequential_proved_d3_forms_preserve_uk_t5_and_view(self):
-        # Дві окремі D2-форми; жодного D2 SPACE між ними не додаємо.
+        # Дві форми відділяє рівно одне D2 SPACE: 00, як в ук-конвертері.
         # QUOTE(EMPTY) і QUOTE(D1 NO) вже окремо доведені.
-        words = "10 001 00 000 01 10 001 00 0 01".split()
+        words = "10 001 00 000 01 00 10 001 00 0 01".split()
         uk = "(як-є ())\n(як-є ні)\n"
         self.assertEqual(mod.canonical_uk_from_words(words), uk)
         self.assertEqual(mod.project_current_uk(uk), words)
@@ -148,10 +148,13 @@ class BoundedUkTripletTests(unittest.TestCase):
         ]
         for second in unproved:
             with self.subTest(second=second), self.assertRaises(mod.ProjectionBlocked):
-                mod.canonical_uk_from_words(valid + second)
+                mod.canonical_uk_from_words(valid + ["00"] + second)
+        for wrong in (valid + valid, valid + ["00"], valid + ["00", "00"] + valid):
+            with self.subTest(wrong=wrong), self.assertRaises(mod.ProjectionBlocked):
+                mod.canonical_uk_from_words(wrong)
 
     def test_sequential_forms_need_exact_one_lf_per_uk_form(self):
-        words = "10 001 00 000 01 10 001 00 0 01".split()
+        words = "10 001 00 000 01 00 10 001 00 0 01".split()
         canonical = mod.canonical_uk_from_words(words)
         self.lisp.write_bytes(canonical.encode("utf-8"))
         self.sens.write_bytes(mod.encode_words(words))
