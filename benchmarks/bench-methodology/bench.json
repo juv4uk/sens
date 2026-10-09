@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "bench-methodology",
+  "wing": "Benchmark statistical methodology",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can paired wall-clock samples be given a defensible effect-size interval without conflating instruction counts, builds, or unverified machine controls?",
+  "claim": "Two-level paired bootstrap inspired by Kalibera-Jones; checks input-output parity, matched SHA/environment and build count. Single-build and uncontrolled runner results remain UNVERIFIED. This does not implement the complete Kalibera-Jones random-effects model or establish a SENS speedup.",
+  "witness": [
+    "paired_effect.py",
+    "test_paired_effect.py",
+    "README.md"
+  ],
+  "status": "RESEARCH-ONLY; SYNTHETIC-WITNESSES",
+  "generation": "Contract 11.8; 2026-10-09",
+  "axis": "performance/paired-wall-effect-multibuild",
+  "reproduce": "python3 -m unittest discover -s benchmarks/bench-methodology -p 'test_paired_effect.py' -v"
+}
