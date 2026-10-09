@@ -57,9 +57,13 @@ def validate(content: str) -> list[str]:
                 errors.append(f"{lineno}: surface_uk/ukr має містити кирилицю")
         if row["width"] != "D10":
             errors.append(f"{lineno}: дозволено тільки width=D10")
-        for key in ("donor_provenance", "blocked_source"):
-            if not PROVENANCE.fullmatch(row[key]):
-                errors.append(f"{lineno}: {key} потребує owner/repo@SHA:path:line")
+        if not PROVENANCE.fullmatch(row["donor_provenance"]):
+            errors.append(f"{lineno}: donor_provenance потребує owner/repo@SHA:path:line")
+        # Історичні словникові донори не обов'язково блокують міграцію.
+        # Не вигадувати фальшивий .lisp: використовувати явну відсутність BLOCK.
+        if (row["blocked_source"] != "NO-MIGRATION-BLOCK" and
+                not PROVENANCE.fullmatch(row["blocked_source"])):
+            errors.append(f"{lineno}: blocked_source потребує owner/repo@SHA:path:line або NO-MIGRATION-BLOCK")
         if not DEDUP.fullmatch(row["dedup_check"]):
             errors.append(f"{lineno}: dedup_check потребує окремих D1-D9 та D10 SHA")
         if not row["ownership_test"].startswith("UNIVERSAL-BORDER: ") or len(row["ownership_test"]) < 32:
@@ -133,6 +137,11 @@ def self_test() -> None:
     row = "\t".join(valid) + "\n"
     assert not validate(header), "порожній канонічний журнал має бути чинним"
     assert not validate(header + row), "правильний синтетичний запис має пройти"
+    source_only = valid.copy()
+    source_only[9] = "NO-MIGRATION-BLOCK"
+    assert not validate(header + "\\t".join(source_only) + "\\n"), "донор без міграційного BLOCK має пройти"
+    source_only[9] = "BLOCK-UNKNOWN"
+    assert validate(header + "\\t".join(source_only) + "\\n"), "нечесна невідомість BLOCK не допускається"
     tests = (
         (11, "1"),
         (10, "admitted"),
