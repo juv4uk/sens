@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value, PredicateBit, Bit1, DomainIdentity};
+use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -276,19 +276,6 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
-fn prim_equal(
-    args: &[Value],
-    _env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00100010), args, 2, span)?;
-    let bit = Bit1::new(u8::from(args[0] == args[1])).expect("boolean fits D1");
-    Ok(Value::DomainIdentity(DomainIdentity::D1(
-        PredicateBit::from_word(bit),
-    )))
-}
-
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum DomainPrimitiveKind {
     Equal,
@@ -321,13 +308,46 @@ pub(crate) fn domain_primitive_kind(
     }
 }
 
-fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
-    match domain_primitive_kind(identity)? {
-        DomainPrimitiveKind::AtomPredicate => Some(prim_00000010),
-        DomainPrimitiveKind::AtomEquality => Some(prim_00000011),
-        DomainPrimitiveKind::PairConstruct => Some(prim_00000100),
-        DomainPrimitiveKind::Equal => Some(prim_equal),
-    }
+/// Exact-domain primitive execution never reconstructs an historical SID8.
+/// The domain and its exact binary word select the already-admitted mechanism;
+/// historical byte dispatch is confined to invoke_semantic_ref below.
+fn invoke_domain_primitive(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let kind = domain_primitive_kind(identity)?;
+    Some((|| {
+        let expected = match kind {
+            DomainPrimitiveKind::AtomPredicate => 1,
+            DomainPrimitiveKind::AtomEquality => 2,
+            DomainPrimitiveKind::PairConstruct => 2,
+            DomainPrimitiveKind::Equal => 2,
+        };
+        if args.len() != expected {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!(
+                    "{identity}: expected {expected} arguments; received {}",
+                    args.len()
+                ),
+                span,
+            ));
+        }
+        match kind {
+            DomainPrimitiveKind::AtomPredicate => {
+                Ok(special_forms::atom_value(&args[0], environment))
+            }
+            DomainPrimitiveKind::AtomEquality => {
+                special_forms::eq_values(args[0].clone(), args[1].clone(), span)
+            }
+            DomainPrimitiveKind::PairConstruct => {
+                special_forms::cons_values(args[0].clone(), args[1].clone(), environment, span)
+            }
+            DomainPrimitiveKind::Equal => Ok(Value::predicate_bit(args[0] == args[1])),
+        }
+    })())
 }
 
 /// Canonical value-call mechanism bridge for migrated exact-domain identities.
@@ -435,9 +455,8 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
-    if let Some(primitive) = domain_primitive(identity) {
-        let value = primitive(args, environment, span)?;
-        return canonicalize_domain_result(identity, value, span);
+    if let Some(result) = invoke_domain_primitive(identity, args, environment, span) {
+        return canonicalize_domain_result(identity, result?, span);
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
@@ -532,7 +551,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     }
 
     if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
-        if domain_primitive(identity).is_some()
+        if domain_primitive_kind(identity).is_some()
             || super::necessary_forms::identity_for_domain_identity(identity).is_some()
         {
             return;
