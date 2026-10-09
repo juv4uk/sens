@@ -859,7 +859,7 @@
       "decision_reason": "Read-only dynamic restart discovery is observably distinct from FIND-RESTART (single-name lookup), but D2 environment ownership and core-vs-library remain owner HOLD; proposal alone never SELECT.",
       "evidence_oracle": "EXISTING-SBCL-WITNESS-IN-PR; INDEPENDENT-CROSS-IMPLEMENTATION-REVIEW-PENDING",
       "selected": false,
-      "d10_proposal_id": "D10P-0070"
+      "d10_proposal_id": "D10P-4896"
     },
     {
       "key": "function:FIND-RESTART",
@@ -1735,6 +1735,7 @@
     "ratified_delta": 0,
     "coordinates_added": 0,
     "primary_url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_comp_1.htm",
-    "behavioral_status": "D1-D9 and D10 name dedup complete against 630, behavioral differential vs FIND-RESTART documented, CORE-VS-LIBRARY D2 boundary HOLD"
+    "behavioral_status": "D1-D9 and D10 name dedup complete against 630, behavioral differential vs FIND-RESTART documented, CORE-VS-LIBRARY D2 boundary HOLD",
+    "proposal_id": "D10P-4896"
   }
 }
