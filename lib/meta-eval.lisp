@@ -658,7 +658,7 @@
          (migration-compatibility? (my-result-ok (00000001 ())))
          (t
           (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond)))))
+            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
       (t
        (10011100 ((clause (00000101 clauses)))
          (00000111
