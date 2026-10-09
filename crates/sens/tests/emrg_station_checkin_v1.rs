@@ -41,8 +41,8 @@ fn station_checkin_v1_has_runtime_verified_canonical_wire() {
 
 #[test]
 fn station_checkin_v1_records_exact_consumer_payload_size() {
-    assert_eq!(WIRE.as_bytes().len(), 69);
-    assert_eq!(WIRE.as_bytes().len() * 8, 552);
+    assert_eq!(WIRE.len(), 69);
+    assert_eq!(WIRE.len() * 8, 552);
     assert_eq!(hex(WIRE.as_bytes()), EXPECTED_WIRE_HEX);
 }
 
