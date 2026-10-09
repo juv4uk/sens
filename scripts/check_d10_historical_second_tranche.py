@@ -25,8 +25,8 @@ def verify(p,i,s,f,doc):
     assert p["coordinate_added"]==p["ratified_added"]==0
     assert [r["semantic_name"] for r in p["rows"]]==list(NAMES)
     assert len(i["rows"])==638
-    assert len({r["stable_id"] for r in i["rows"]})==629
-    assert len({r["semantic_name"] for r in i["rows"]})==629
+    assert len({r["stable_id"] for r in i["rows"]})==len(i["rows"])
+    assert len({r["semantic_name"] for r in i["rows"]})==len(i["rows"])
     assert i["accounting"]==dict(selected_semantic_candidates=638,law_forced_coordinates=256,unplaced_selected_candidates=382,remaining_semantic_inventory=386,ratified_d10_residents=0)
     assert s["target"]["selected_semantic_candidates"]==638
     assert s["target"]["unplaced_selected_candidates"]==382
