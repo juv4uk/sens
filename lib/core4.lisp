@@ -179,8 +179,13 @@
 (00001001 length-onto
   (00001000 (values acc)
     (00000111
-      ((00000010 values) () acc)
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values)
+       (00000111
+         ((00000011 values (00000001 ()))
+          acc)
+         ((00000010 (00000001 ()))
+          (00000001 ()))))
+      ((00000010 (00000001 ()))
        (length-onto (00000110 values) (00001100 acc 1))))))
 
 
@@ -190,11 +195,13 @@
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
+; Strict D3 COND tests are exact D1 bits: ATOM selects the empty-list base,
+; the always-true D1 comparison handles the non-empty recursive case.
 (00001001 зворот-до
   (00001000 (values acc)
     (00000111
-      ((00000010 values) () acc)
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values) acc)
+      ((00011010 0 1)
        (зворот-до (00000110 values) (00000100 (00000101 values) acc))))))
 
 (00001001 reverse-onto зворот-до)
@@ -224,9 +231,8 @@
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values)  (00000001 ()))
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values) (00101010 acc))
+      ((00011010 0 1)
        (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
 (00001001 map
@@ -236,14 +242,13 @@
 (00001001 filter-onto
   (00001000 (predicate values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values)  (00101010 acc))
-      ((00000010 values) 
+      ((00000010 values) (00101010 acc))
+      ((00011010 0 1)
        (10011100 ((decision (predicate (00000101 values))))
          (00000111
            (decision
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((00000010 predicate)
+           ((00011010 0 1)
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
@@ -253,9 +258,9 @@
 (00001001 reduce
   (00001000 (f acc values)
     (00000111
-      ((00000010 values) () acc)
-      ((00000010 values) 
-       (00111001 f (f acc (00000101 values)) (00000110 values))))))
+      ((00000010 values) acc)
+      ((00011010 0 1)
+       (reduce f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -333,40 +338,21 @@
 (00001001 equal?
   (00001000 (a b)
     (00000111
-      ((00000010 a) ()
+      ((00000010 a)
        (00000111
-         ((00000010 b) ()
-          (00000001 (1)))
-         ((00000010 b) 
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000001 (0)))))
-      ((00000010 a) 
+         ((00000010 b)
+          (00000011 a b))
+         ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
+      ((00000010 (00000001 ()))
        (00000111
-         ((00000010 b) ()
-          (00000001 (0)))
-         ((00000010 b) 
+         ((00000010 b) (00000010 (00000001 (00000000))))
+         ((00000010 (00000001 ()))
           (00000111
-            ((00000011 a b) 
-             (00000001 (1)))
-            ((00000011 a b) 
-             (00000001 (0)))))
-         ((00000010 b) 
-          (00000001 (0)))))
-      ((00000010 a) 
-       (00000111
-         ((00000010 b) ()
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000111
-            ((00100010 (00000101 a) (00000101 b)) (1)
-             (00100010 (00000110 a) (00000110 b)))
-            ((00100010 (00000101 a) (00000101 b)) (0)
-             (00000001 (0))))))))))
+            ((equal? (00000101 a) (00000101 b))
+             (equal? (00000110 a) (00000110 b)))
+            ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))))))))
 
-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
+; Exact-Q uses 1 for YES and 0 for NO. Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
 (00001001 truthy?
   (00001000 (value)
@@ -386,8 +372,10 @@
 (00001001 not?
   (00001000 (value)
     (00000111
-      ((truthy? value) t (00000001 ()))
-      ((truthy? value) () t))))
+      (value
+       (00000010 (00000001 (00000000))))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 ()))))))
 
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
@@ -637,8 +625,9 @@
 (00001001 largest-chunk
   (00001000 (a b chunk mult)
     (00000111
-      ((00011010 a (00001100 chunk chunk)) 1 (00000100 chunk mult))
-      ((00011010 a (00001100 chunk chunk)) 0
+      ((00011010 a (00001100 chunk chunk))
+       (00000100 chunk mult))
+      ((00000010 (00000001 ()))
        (00011001 a b (00001100 chunk chunk) (00001100 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
@@ -661,11 +650,13 @@
 (00001001 quotient
   (00001000 (a b)
     (00000111
-      ((00000011 b 0)  (00001111 a b))
-      ((00000011 b 0) 
+      ((00000011 b 0)
+       (00001111 a b))
+      ((00000010 (00000001 ()))
        (00000111
-         ((00011010 a b) 1 0)
-         ((00011010 a b) 0
+         ((00011010 a b)
+          0)
+         ((00000010 (00000001 ()))
           (10011100 ((chunk+mult (00011001 a b b 1)))
             (00001100 (00000110 chunk+mult)
                (00010100 (00001101 a (00000101 chunk+mult)) b)))))))))
@@ -682,22 +673,26 @@
 (00001001 nondecreasing-from?
   (00001000 (current remaining)
     (00000111
-      ((00000010 remaining) () 1)
-      ((00011010 current (00000101 remaining)) 1
-       (00011111 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 1
-       (00011111 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 0 0))))
+      ((00000010 remaining)
+       (00000010 (00000001 ())))
+      ((00011010 current (00000101 remaining))
+       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining))
+       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 (00000000)))))))
 
 (00001001 nonincreasing-from?
   (00001000 (current remaining)
     (00000111
-      ((00000010 remaining) () 1)
-      ((00011011 current (00000101 remaining)) 1
-       (00100000 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 1
-       (00100000 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 0 0))))
+      ((00000010 remaining)
+       (00000010 (00000101 (00000001 (00000000)))))
+      ((00011011 current (00000101 remaining))
+       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((00011100 current (00000101 remaining))
+       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 (00000000)))))))
 
 (00001001 <=
   (00001000 (first . remaining)
@@ -1047,9 +1042,10 @@
 (00001001 null?
   (00001000 (x)
     (00000111
-      ((00000010 x) () t)
-      ((00000010 x)  (00000001 ()))
-      ((00000010 x)  (00000001 ())))))
+      ((00000010 x)
+       (00000011 x (00000001 ())))
+      ((00000011 0 0)
+       (00000010 x)))))
 
 (00001001 subst
   (00001000 (x y z)

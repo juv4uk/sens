@@ -119,16 +119,15 @@
 (00001001 machine-capability-find-domain-row
   (00001000 (width bits rows)
     (00000111
-      ((00000010 rows) () ())
-      ((00000010 rows) (1) ())
-      ((00100010 width (00000101 (00000101 rows)))
+      ((00000010 rows) ())
+      ((00000011 width (00000101 (00000101 rows)))
        (00000111
-         ((00100010 bits (00000101 (00000110 (00000101 rows))))
+         ((00000011 bits (00000101 (00000110 (00000101 rows))))
           (00000101 rows))
-         (t
+         ((00000011 0 0)
           (machine-capability-find-domain-row
             width bits (00000110 rows)))))
-      (t
+      ((00000011 0 0)
        (machine-capability-find-domain-row
          width bits (00000110 rows))))))
 
@@ -140,23 +139,20 @@
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3)))
       (00000111
-        ((00000010 row) () ())
-        ((00000010 row) (1) ())
-        (t
+        ((00000010 row) ())
+        ((00000011 0 0)
          (00000101 (00000110 (00000110 row))))))))
 
 (00001001 machine-capability-find-row
   (00001000 (key rows)
     (00000111
-      ((00000010 rows) () ())
-      ((00000010 rows) (1) ())
-      ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
-      (t (machine-capability-find-row key (00000110 rows))))))
+      ((00000010 rows) ())
+      ((00000011 key (00000101 (00000101 rows))) (00000101 rows))
+      ((00000011 0 0) (machine-capability-find-row key (00000110 rows))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
     (10011100 ((row (machine-capability-find-row target machine-target-witness-status-v1)))
       (00000111
-        ((00000010 row) () (00000001 absent))
-        ((00000010 row) (1) (00000001 absent))
-        (t (00000101 (00000110 row)))))))
+        ((00000010 row) (00000001 absent))
+        ((00000011 0 0) (00000101 (00000110 row)))))))
