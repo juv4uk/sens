@@ -1,0 +1,36 @@
+name: D10 exact radix rational research
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-exact-radix-normalization-v1.json
+      - docs/research/D10-EXACT-RADIX-NORMALIZATION.uk.md
+      - tests/oracles/d10-exact-radix-normalization.sbcl
+      - tests/test_d10_exact_radix_normalization_v1.py
+      - .github/workflows/d10-exact-radix-normalization.yml
+  push:
+    branches:
+      - main
+    paths:
+      - knowledge/d10-exact-radix-normalization-v1.json
+      - tests/oracles/d10-exact-radix-normalization.sbcl
+      - tests/test_d10_exact_radix_normalization_v1.py
+      - .github/workflows/d10-exact-radix-normalization.yml
+
+permissions:
+  contents: read
+
+jobs:
+  exact-rational:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Незалежний раціональний оракул Python
+        run: python3 -m unittest discover -s tests -p test_d10_exact_radix_normalization_v1.py -v
+      - name: Справжній Common Lisp (SBCL)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sbcl
+          sbcl --version
+          sbcl --script tests/oracles/d10-exact-radix-normalization.sbcl

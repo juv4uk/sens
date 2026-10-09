@@ -1,0 +1,58 @@
+;;;; Виконуваний математичний свідок у справжньому SBCL, не SENS runtime.
+;;;; Узагальнення CLHS floating DECODE-FLOAT до точної раціональної арифметики.
+
+(defun normalize-exact-radix (x b)
+  (unless (and (rationalp x) (integerp b) (>= b 2))
+    (error "RADIX-NORMALIZE-EXACT: expected exact rational and integer radix >=2"))
+  (when (= x 0) (return-from normalize-exact-radix (values 0 0)))
+  (let ((mantissa (abs x))
+        (exponent 0))
+    (loop while (>= mantissa b) do
+          (setf mantissa (/ mantissa b))
+          (incf exponent))
+    (loop while (< mantissa 1) do
+          (setf mantissa (* mantissa b))
+          (decf exponent))
+    (values (if (minusp x) (- mantissa) mantissa) exponent)))
+
+(defun assert-witness (x b want-m want-e)
+  (multiple-value-bind (m e) (normalize-exact-radix x b)
+    (unless (and (eql m want-m) (eql e want-e)
+                 (eql x (* m (expt b e)))
+                 (or (zerop x) (and (<= 1 (abs m)) (< (abs m) b))))
+      (error "RADIX-NORMALIZE-EXACT mismatch x=~S b=~S got=(~S,~S) expected=(~S,~S)"
+             x b m e want-m want-e))))
+
+(defun rejects (x b)
+  (unless (handler-case
+              (progn (normalize-exact-radix x b) nil)
+            (error () t))
+    (error "RADIX-NORMALIZE-EXACT improperly accepted (~S,~S)" x b)))
+
+(format t "DONOR-REFERENCE-LANGUAGE ~A~%" (lisp-implementation-version))
+(assert-witness 3/4 2 3/2 -1)
+(assert-witness -40/3 2 -5/3 3)
+(assert-witness 8 2 1 3)
+(assert-witness 1/1000 10 1 -3)
+(assert-witness 0 2 0 0)
+(assert-witness -1/8 2 -1 -3)
+(assert-witness 1000 10 1 3)
+(assert-witness 7/3 3 7/3 0)
+(loop for base from 2 to 11 do
+      (loop for n from -31 to 31 do
+            (loop for d from 1 to 15 do
+                  (let ((x (/ n d)))
+                    (multiple-value-bind (m e)
+                        (normalize-exact-radix x base)
+                      (unless (and (eql x (* m (expt base e)))
+                                   (if (zerop x)
+                                       (and (zerop m) (zerop e))
+                                       (and (<= 1 (abs m))
+                                            (< (abs m) base)
+                                            (= (signum x) (signum m)))))
+                        (error "RADIX witness failed: x=~S radix=~S" x base)))))))
+(rejects 1 1)
+(rejects 1 0)
+(rejects 0.75 2)
+(rejects 1 2.0)
+(format t "D10-EXACT-RADIX-SBCL: PASS 9450 exact-rational reconstruction cases plus boundary/error witnesses~%")
