@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/examples/physical_sens_hot_bench.rs"
       - "crates/sens/src/compiler_language.rs"
       - "crates/sens/src/syntax.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
@@ -15,6 +16,7 @@ on:
     branches: [main]
     paths:
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/examples/physical_sens_hot_bench.rs"
       - "crates/sens/src/compiler_language.rs"
       - "crates/sens/src/syntax.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
