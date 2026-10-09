@@ -57,6 +57,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Check exact-width D1-D9 ladder and W7 mechanical round trips
         run: cargo test --locked -p sens --test domain_ladder --test d7_w7_pack --test d2_text7_frame_role_boundary --test text7_canonical_wire --test current_binary_preflight
+      - name: Test direct packed-byte D2 reader without text source
+        run: cargo test --locked -p sens --lib canonical_reader::tests::packed_
       - name: Verify owner-ratified D7 coordinates and two reserved cells
         run: python3 scripts/check-d7-current-authority.py
       - name: Verify D7 table surfaces agree with ratified coordinates
