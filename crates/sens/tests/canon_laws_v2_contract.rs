@@ -116,6 +116,9 @@ fn executable_canon_speaks_layered_answer_semantics() {
                     ("assoc/simple", "(00101101 (00000001 b) (00000001 ((a . 1) (b . 2))))".to_string()),
                     ("assoc/witness", format!("(00101101 (00000001 expected) (quote {}))", row.source)),
                     ("witness-field/expected", format!("(witness-field (00000001 expected) (quote {}))", row.source)),
+                    ("witness-field/error", format!("(witness-field (00000001 error) (quote {}))", row.source)),
+                    ("witness-superseded/outcome", format!("(witness-superseded-outcome (quote {}) (witness-field (00000001 expected) (quote {})))", row.source, row.source)),
+                    ("witness-expected/outcome", format!("(witness-expected-outcome (quote {}))", row.source)),
                 ] {
                     eprintln!(
                         "#229 probe {label}: {:?}",
