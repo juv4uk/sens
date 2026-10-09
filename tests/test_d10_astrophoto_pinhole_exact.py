@@ -57,7 +57,7 @@ def check_witnesses(data):
         count += 1
     all_xy = [F(x, d) for d in (1,2,3,5) for x in range(-5, 6)]
     all_xy = sorted(set(all_xy))
-    for x,y,z in product(all_xy, all_xy, (F(1),F(3),F(-2))):
+    for x,y,z in product(all_xy, all_xy, (F(1), F(3), F(-2), F(1,2), F(-3), F(5,2), F(7,4), F(9,5), F(11,3), F(-1,5))):
         fx,fy,cx,cy = F(11,3),F(5,2),F(-1,4),F(7,5)
         u,v = project(x,y,z,fx,fy,cx,cy)
         # Independent homogeneous relation, no shared division implementation.
