@@ -146,6 +146,35 @@
         "scripts/check-d10-proposal-ledger.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.hobby.finite-bayes-update-exact.20261009",
+      "authority": "#4013 #4463 owner-directed hobby-based D10 research filling",
+      "evidence": [
+        "#4956",
+        "knowledge/d10-finite-bayes-update-research-v1.json",
+        "Stanford Encyclopedia of Philosophy: Bayesian Epistemology, finite Bayes theorem"
+      ],
+      "previous_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+      "resulting_inventory_blob_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+      "added_stable_ids": [
+        "d10.math.finite-bayes-update-exact.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-finite-bayes-update-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 634,
+      "resulting_selected": 635,
+      "decision": "research selection only; exact-math library derivability remains pending owner review; coordinate=null and ratification pending",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check_d10_finite_bayes_selection.py",
+        "tests/test_d10_finite_bayes_selection.py",
+        "tests/test_d10_finite_bayes_update.py"
+      ]
     }
   ]
 }

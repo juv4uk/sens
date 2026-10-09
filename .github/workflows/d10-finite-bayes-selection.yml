@@ -1,0 +1,41 @@
+name: D10 finite Bayesian update selection
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'knowledge/d10-finite-bayes-update-research-v1.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'scripts/check_d10_selection_transition_history.py'
+      - 'scripts/check_d10_gray_word_selection.py'
+      - 'scripts/check_d10_finite_bayes_update.py'
+      - 'scripts/check_d10_finite_bayes_selection.py'
+      - 'tests/test_d10_finite_bayes_selection.py'
+      - 'tests/test_d10_finite_bayes_update.py'
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - '.github/workflows/d10-finite-bayes-selection.yml'
+  workflow_dispatch:
+jobs:
+  source-backed-research-selection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the immutable 625-based append-only history
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Verify Gray historical snapshot remains valid after this append
+        run: python3 scripts/check_d10_gray_word_selection.py
+      - name: Verify selected Bayesian row and reject authority leakage
+        run: python3 scripts/check_d10_finite_bayes_selection.py --self-test
+      - name: Re-run the independent exact-rational Bayes oracle
+        run: python3 -m unittest discover -s tests -p 'test_d10_finite_bayes_update.py' -v
+      - name: Test selection metadata and authority boundary
+        run: python3 -m unittest discover -s tests -p 'test_d10_finite_bayes_selection.py' -v
+      - name: D10 proposal and fill accounting gates
+        run: |
+          python3 scripts/check-d10-fill-v1-seed.py
+          python3 scripts/check-d10-proposal-ledger.py
+      - name: No generated changes
+        run: git diff --exit-code

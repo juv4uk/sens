@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 634,
-    "remaining_semantic_candidates": 390,
+    "selected_semantic_candidates": 635,
+    "remaining_semantic_candidates": 389,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 378,
+    "unplaced_selected_candidates": 379,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -80,6 +80,15 @@
       "mechanism_hold": 1,
       "donor_exhausted": true,
       "new_d10_candidates_added_by_this_audit": 0
+    },
+    "finite_bayes_update_v1": {
+      "authority": "#4013 #4463 #4956",
+      "artifact": "knowledge/d10-finite-bayes-update-research-v1.json",
+      "selected": 1,
+      "coordinates_assigned": 0,
+      "ratification_effect": "NONE",
+      "derivability": "PENDING-OWNER-REVIEW",
+      "oracle": "exact rational update vs independent common-denominator integer-weight enumeration"
     }
   },
   "recovery_v2": {
