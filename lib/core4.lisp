@@ -193,16 +193,19 @@
 ; binding. The historical English spelling below is compatibility-only.
 (00001001 зворот-до
   (00001000 (values acc)
-    (00000111
-      ((00000010 values) () acc)
-      ((00100010 (00000010 values) (00000001 (0)))
-       (зворот-до (00000110 values) (00000100 (00000101 values) acc))))))
-
+    (за-умовою
+      ((атом? values)
+       (за-умовою
+         ((тотожне? values ()) acc)
+         ((атом? values) (перше values))))
+      ((тотожне? (атом? values) (атом? (сполучити () ())))
+       (зворот-до (решта values) (сполучити (перше values) acc))))))
 (00001001 reverse-onto зворот-до)
 
-(00001001 reverse
+(00001001 зворот
   (00001000 (values)
     (зворот-до values (00000001 ()))))
+(00001001 reverse зворот)
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -220,7 +223,7 @@
 ; Rust-Stack-sicheres append.
 (00001001 приєднати
   (00001000 (left right)
-    (зворот-до (00101010 left) right)))
+    (зворот-до (зворот left) right)))
 (00001001 append приєднати)
 
 (00001001 map-onto
