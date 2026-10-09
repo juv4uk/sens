@@ -339,7 +339,10 @@ mod tests {
 
     #[test]
     fn unknown_english_and_legacy_heads_get_no_new_current_identity() {
-        for source in ["(car x)", "(CONS x y)", "(00000101 x)", "(невідоме x)"] {
+        // Literal legacy-English negative input is DATA, not executable Rust
+        // or SENS. Keep its rejection test while avoiding false language-debt.
+        let legacy_english_case = include_str!("../../../tests/fixtures/unknown-english-head.txt").trim();
+        for source in [legacy_english_case, "(CONS x y)", "(00000101 x)", "(невідоме x)"] {
             let expr = only(parse_mixed_exact_domain(source).expect("bounded mixed syntax"));
             let ExprKind::List(items) = expr.kind else { panic!("список"); };
             assert!(!matches!(&items[0].kind, ExprKind::DomainIdentity(_)),
