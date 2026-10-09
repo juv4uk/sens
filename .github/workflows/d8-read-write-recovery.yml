@@ -22,7 +22,7 @@ on:
 
 jobs:
   round-trip:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
