@@ -80,7 +80,7 @@ jobs:
           retention-days: 21
 
   dense-packing:
-    name: D3 D7 D8 · measured bytes and instruction cost
+    name: D3 D7 D8 D9 · measured bytes and instruction cost
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -102,7 +102,7 @@ jobs:
           python3 benchmarks/byte-pack/run.py \
             --binary target/release/examples/byte_pack_bench \
             --out "$RUNNER_TEMP/sens-performance/pack" \
-            --sizes 1024 --reps 16 --workloads d3,w7,w8
+            --sizes 1024 --reps 16 --workloads d3,w7,w8,w9
       - name: Publish physical density vs instruction tradeoff
         run: |
           python3 benchmarks/current-en-vs-d1d8/performance_scoreboard.py \
