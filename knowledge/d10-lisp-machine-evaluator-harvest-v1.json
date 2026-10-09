@@ -13,7 +13,8 @@
     {
       "repository": "juv4uk/sens",
       "path": "lib/persistent-map.lisp",
-      "source_sha": "db5d55c6da6b9cbb4933e439e0385d9770b7f7b5"
+      "source_sha": "db5d55c6da6b9cbb4933e439e0385d9770b7f7b5",
+      "snapshot_path": "knowledge/d10-source-snapshots/lisp-machine/persistent-map-20261009.lisp"
     }
   ],
   "accounting": {

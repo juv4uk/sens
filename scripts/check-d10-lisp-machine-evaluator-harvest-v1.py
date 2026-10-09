@@ -40,12 +40,18 @@ assert all(x["reason"] for x in ledger["excluded"])
 
 byid = {r["stable_id"]: r for r in inv["rows"]}
 assert len(byid) == len(inv["rows"])
-donors = {d["path"]: d["source_sha"] for d in ledger["donors"]}
+# Each source SHA names the immutable donor bytes used when this
+# research-only ledger was selected. If a live executable donor is later
+# refactored, retain and verify those exact bytes from the explicit snapshot
+# instead of silently re-pinning historical evidence to the current file.
+donors = {d["path"]: d for d in ledger["donors"]}
 source_lines = {}
-for file, expected_sha in donors.items():
-    raw = (root / file).read_bytes()
+for file, donor in donors.items():
+    expected_sha = donor["source_sha"]
+    snapshot_path = donor.get("snapshot_path", file)
+    raw = (root / snapshot_path).read_bytes()
     blob = b"blob " + str(len(raw)).encode("ascii") + bytes([0]) + raw
-    assert hashlib.sha1(blob).hexdigest() == expected_sha
+    assert hashlib.sha1(blob).hexdigest() == expected_sha, (snapshot_path, expected_sha)
     source_lines[file] = raw.decode("utf-8").splitlines()
 
 for row in rows:
@@ -53,7 +59,7 @@ for row in rows:
     assert got["semantic_name"] == row["semantic_name"]
     assert got["source_class"] == "LISP-MACHINE-EVALUATOR-SEMANTIC-HARVEST"
     assert got["status"] == "SELECTED-RESEARCH-CANDIDATE"
-    assert row["source_sha"] == donors[row["source_file"]]
+    assert row["source_sha"] == donors[row["source_file"]]["source_sha"]
     assert row["surface_uk"] and row["surface_ukr"] and row["behavior"]
     assert row["proposal_status"] == "pending-owner-review"
     assert row["ratified_resident"] is False
