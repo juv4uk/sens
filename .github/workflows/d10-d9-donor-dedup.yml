@@ -1,0 +1,23 @@
+name: D10 D9 donor dedup evidence
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-d9-donor-dedup-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'lib/persistent-vector.lisp'
+      - 'lib/unify.lisp'
+      - 'scripts/check_d10_d9_donor_dedup.py'
+      - 'tests/test_d10_d9_donor_dedup.py'
+      - '.github/workflows/d10-d9-donor-dedup.yml'
+  workflow_dispatch:
+jobs:
+  pinned-d9-research-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source blob, D9 coordinate and no D10 false promotion
+        run: python3 scripts/check_d10_d9_donor_dedup.py --root .
+      - name: Adversarial contract tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_d9_donor_dedup.py' -v
