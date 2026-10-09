@@ -8,6 +8,8 @@ const ENV: &str = include_str!("../src/environment.rs");
 const BOOT: &str = include_str!("../src/bootstrap_measurement.rs");
 const LIB: &str = include_str!("../src/lib.rs");
 const DOMAIN: &str = include_str!("../src/domain_identity.rs");
+const REGISTRY: &str = include_str!("../src/semantic_registry.rs");
+const EVALUATOR: &str = include_str!("../src/eval/canon.rs");
 
 #[test]
 fn exact_domain_route_has_no_retired_cond_or_graded_predicate_engine() {
@@ -52,4 +54,20 @@ fn d10_mechanical_width_does_not_add_semantic_dispatch() {
     assert!(DomainCoordinate::new(10, 1023).is_some());
     assert!(DomainCoordinate::new(10, 1024).is_none());
     assert!(DomainCoordinate::new(11, 0).is_none());
+}
+
+#[test]
+fn flat_sid8_cannot_choose_a_rung_or_call_a_domain_mechanism() {
+    assert!(
+        !REGISTRY.contains("fn legacy_domain_identity_from_registry_byte("),
+        "Rust must not own a flat SID8-to-domain meaning table"
+    );
+    assert!(
+        !EVALUATOR.contains("semantic_registry::legacy_domain_identity_from_registry_byte("),
+        "historical SID8 bytes must not be delegated to canonical domain operations"
+    );
+    assert!(
+        REGISTRY.contains("direct_domain_identity_for_surface(name)"),
+        "surface projection must originate only in the Lisp-generated domain ladder"
+    );
 }
