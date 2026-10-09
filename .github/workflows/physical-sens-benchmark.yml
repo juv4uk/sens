@@ -1,0 +1,72 @@
+name: Current physical SENS performance benchmarks
+
+# Longitudinal numerical evidence, not a semantics authority or unit-test clone.
+# No global cancel-in-progress: every selected SHA can finish its measurement.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/physical-sens-runtime/**"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_words.rs"
+      - ".github/workflows/physical-sens-benchmark.yml"
+  pull_request:
+    paths:
+      - "benchmarks/physical-sens-runtime/**"
+      - "crates/sens-cli/src/**"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - ".github/workflows/physical-sens-benchmark.yml"
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-runtime:
+    name: median/p95 of physical T5, D2, startup and execution
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: physical-sens-runtime-bench
+
+      - name: Compile actual production release entrypoints
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+
+      - name: Measure physical binary workloads and identical-byte T5 decoders
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/run.py \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --reps 19 --warmups 3 --sizes 1,16,128,1024 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
+      - name: Publish exact measurements (not unit-test tallies)
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/sens-physical-bench/report.md"; then
+            cat "$RUNNER_TEMP/sens-physical-bench/report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Benchmark did not finish. No performance claim from this run.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Save raw trials, environment, medians and digests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-physical-runtime-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sens-physical-bench/
+          if-no-files-found: warn
+          retention-days: 30
