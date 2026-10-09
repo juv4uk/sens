@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 634,
-    "remaining_semantic_candidates": 390,
+    "selected_semantic_candidates": 625,
+    "remaining_semantic_candidates": 399,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 378,
+    "unplaced_selected_candidates": 369,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -316,13 +316,6 @@
     "authority": "#4013 / #4162 / #4463",
     "artifact": "knowledge/d10-selfhost-reason-harvest-v1.json",
     "selected": 23,
-    "coordinates_assigned": 0,
-    "ratification_effect": "NONE"
-  },
-  "unify_lexical_harvest_v1": {
-    "authority": "#4013 / #4162 / #4463",
-    "artifact": "knowledge/d10-unify-lexical-harvest-v1.json",
-    "selected": 9,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
   }
