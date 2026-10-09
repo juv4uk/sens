@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 IREF_RE = re.compile(r"I\s+refs:\s+([0-9,]+)")
-WORKLOADS = ("d1","d2","d3","mixed","w4","w5","w6","w7","w8")
+WORKLOADS = ("d1","d2","d3","mixed","w4","w5","w6","w7","w8","w9")
 MODES = ("unpacked","pack","decode")
 
 def run(cmd, *, check=True):
