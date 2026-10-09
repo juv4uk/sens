@@ -30,7 +30,7 @@
 ## Доказова дисципліна
 - Досьє: `knowledge/d10-strips-goal-regression-research-v1.json`.
 - Реальний SWI-Prolog donor: `tests/oracles/d10_strips_regression_swi.pl`, 24 свідчення, вичерпна еквівалентність прямого й зворотного переходів на **13 824** допустимих скінченних наборах.
-- Перевірка: `scripts/check_d10_strips_goal_regression.py`, 10 негативних мутацій provenance/координати/стану.
+- Перевірка: `scripts/check_d10_strips_historical_source.py`, 10 негативних мутацій provenance/координати/стану.
 - Похідні HOLD-гіпотези: збереження незгаданих фактів (frame persistence), евристика корисності дії, Advice Taker action triggering, GPS means–ends difference.
 
 **Не стверджуємо**, що SWI donor доводить виконання двійкового SENS, або що старий STRIPS умів загальне заперечення, квантори й логіку невідомого світу. Інвентар D10, proposal-ledger, D2, D1–D9, координати, ратифікації та `.sens` не змінено.
