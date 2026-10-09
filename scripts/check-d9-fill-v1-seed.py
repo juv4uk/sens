@@ -84,9 +84,14 @@ assert target["remaining_semantic_candidates"]==512-target["selected_semantic_ca
 assert target["ratified_residents"]==0
 assert state["recovery_queue"]["automatic_admission"] is False
 
-assert "(minor . 7)" in lang
-assert "Contract 11.7" in lang
-assert "owner-ratifies D1–D8" in lang
+# This checker preserves the original D9 selector-seed audit as a historical artifact.
+# The seed was created under Contract 11.7; the live language contract has since
+# advanced to 11.8 and owner-ratifies D1–D9. Requiring the old version in the
+# live source incorrectly makes a provenance check fail after a valid contract update.
+assert state["foundation"]["contract"]=="11.7"
+assert "(major . #d11) (minor . 8)" in lang
+assert "Contract 11.8" in lang
+assert "owner-ratifies D1–D9" in lang
 
 print("D9-FILL-V1-SEED: PASS")
 print("selectors=128/512 remaining=384 ratified-D9=0")
