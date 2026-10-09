@@ -53,6 +53,40 @@ fn english_names() -> BTreeSet<String> {
     names
 }
 
+/// Історичні вимірювання та старі еталонні бенчмарки, а не діючі джерела.
+/// Перелік навмисно замкнутий: новий executable-код під benchmarks/ мусить
+/// проходити ті самі перевірки, що й увесь інший код СЕНС.
+fn is_historical_benchmark_data(rel: &str) -> bool {
+    const LEGACY_FIXTURES: &[&str] = &[
+        "benchmarks/arithmetic.lisp",
+        "benchmarks/closures.lisp",
+        "benchmarks/lists.lisp",
+        "benchmarks/parser.lisp",
+        "benchmarks/recursion.lisp",
+        "benchmarks/core-coremath-selector-convergence/src/main.rs",
+        "benchmarks/core-math-binary-exec/src/lib.rs",
+        "benchmarks/core-math-binary-exec/src/main.rs",
+        "benchmarks/core-math-binary-growth/src/lib.rs",
+        "benchmarks/core-math-binary-growth/src/main.rs",
+        "benchmarks/core-math-binary-seeds/src/lib.rs",
+        "benchmarks/core-math-binary-seeds/src/main.rs",
+        "benchmarks/foundation-ladder/foundation_ladder.rs",
+        "benchmarks/self-description/bench.rs",
+        "benchmarks/semantic-tree/bench.rs",
+        "benchmarks/sens-surface/results/20260927-three-way/phase_bench_legacy.rs",
+    ];
+    const PINNED_RESULT_PREFIXES: &[&str] = &[
+        "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/",
+        "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/",
+        "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/",
+        "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/",
+        "benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/",
+    ];
+    LEGACY_FIXTURES.contains(&rel)
+        || (rel.ends_with(".lisp")
+            && PINNED_RESULT_PREFIXES.iter().any(|prefix| rel.starts_with(prefix)))
+}
+
 /// Таблиця функцій і її проєкції — джерело імен, не код.
 fn is_table_source(rel: &str) -> bool {
     rel == "lib/surface/semantic-registry.lisp"
@@ -73,10 +107,8 @@ fn is_table_source(rel: &str) -> bool {
         || rel.starts_with("lib/generated/")
         || rel.ends_with("_generated.rs")
         || rel.starts_with("crates/sens/tests/data/")
-        // Benchmark, archive, and bak directories are not executable source.
-        || rel.starts_with("benchmarks/")
-        || rel.starts_with("archive/")
-        || rel.starts_with("crates/xtask.bak/")
+        // Pinned historical benchmark evidence only; never blanket-exempt a tree.
+        || is_historical_benchmark_data(rel)
         // Сам цей тест: імена в його перевірках сканера — вхідні дані.
         || rel == "crates/sens/tests/english_names_in_code.rs"
 }
@@ -746,6 +778,17 @@ fn scanners_find_names_in_lisp_and_rust() {
     assert!(!is_table_source("contracts/core-universal-contract.lisp"));
     assert!(!is_table_source("lib/compiler-nucleus.lisp"));
     assert!(!is_table_source("lib/machine/encoding/x86-64.lisp"));
+    // A new benchmark, archive or old xtask file must NOT inherit a
+    // blanket English-identity exemption from its parent directory.
+    assert!(is_table_source("benchmarks/arithmetic.lisp"));
+    assert!(is_table_source(
+        "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-en.lisp"
+    ));
+    assert!(!is_table_source("benchmarks/new-executable.lisp"));
+    assert!(!is_table_source("benchmarks/new-module/src/main.rs"));
+    assert!(!is_table_source("benchmarks/sens-surface/results/20261010-new/programs/fib-en.lisp"));
+    assert!(!is_table_source("archive/new-executable.lisp"));
+    assert!(!is_table_source("crates/xtask.bak/src/main.rs"));
     assert!(!rust_literal_has_lisp_source("CDR: list accessor (structural)"));
     assert!(!rust_literal_has_lisp_source("CONS: pair construction (structural)"));
     assert!(rust_literal_has_lisp_source("(атом? x)"));
