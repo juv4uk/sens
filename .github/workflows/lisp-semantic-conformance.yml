@@ -1,19 +1,20 @@
-name: Lisp semantic conformance
+name: Current D1/D3 semantic conformance
 
-# #1709. The laws live in tests/fixtures/semantic/*-v1.lisp. This lane only
-# proves the corpus still holds under the profiles it can run under today: the
-# Rust observer transports an actual envelope and the Lisp runner returns its
-# own verdict symbol. Nothing here decides what the law is.
+# Чинні доменні D1/D3 тести замість старого Function8 корпусу.
 on:
   pull_request:
     paths:
       - "tests/fixtures/semantic/*"
+      - "crates/sens/tests/d3_empty_control.rs"
+      - "crates/sens/tests/canon_d1_migration_cohort.rs"
       - "crates/sens/tests/semantic_authority.rs"
       - ".github/workflows/lisp-semantic-conformance.yml"
   push:
     branches: [main]
     paths:
       - "tests/fixtures/semantic/*"
+      - "crates/sens/tests/d3_empty_control.rs"
+      - "crates/sens/tests/canon_d1_migration_cohort.rs"
       - "crates/sens/tests/semantic_authority.rs"
       - ".github/workflows/lisp-semantic-conformance.yml"
   workflow_dispatch:
@@ -23,7 +24,7 @@ permissions:
 
 jobs:
   lisp-semantic-conformance:
-    name: Lisp-owned semantic corpus
+    name: Canonical exact-domain witnesses
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -33,17 +34,11 @@ jobs:
         with:
           shared-key: lisp-semantic-conformance
 
-      - name: Native profile agrees with the Lisp corpus
-        run: cargo test -p sens --test semantic_authority native_semantic_witnesses_agree_with_the_lisp_corpus -- --nocapture
+      - name: PredicateBit and exact COND witness
+        run: cargo test -p sens --test d3_empty_control -- --nocapture
 
-      - name: Core3 profile agrees with the Lisp corpus
-        run: cargo test -p sens --test semantic_authority core3_semantic_witnesses_agree_with_the_lisp_corpus -- --nocapture
-
-      - name: Every row declares its law and one envelope form
-        run: cargo test -p sens --test semantic_authority every_row_states_a_law -- --nocapture
-
-      - name: Core2 blocker stays measured, not assumed
-        run: cargo test -p sens --test semantic_authority core2_blocker_is_measured_not_assumed -- --nocapture
+      - name: Canonical D1/COND witness
+        run: cargo test -p sens --test canon_d1_migration_cohort -- --nocapture
 
       - name: Diff hygiene
         run: git diff --check
