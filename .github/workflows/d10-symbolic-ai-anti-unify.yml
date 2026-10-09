@@ -1,0 +1,25 @@
+name: D10 symbolic AI ground anti-unification
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-symbolic-ai-anti-unification-v1.json
+      - scripts/check_d10_symbolic_anti_unify.py
+      - tests/d10_symbolic_anti_unify_donor.pl
+      - docs/research/d10-symbolic-ai-anti-unification-uk.md
+      - .github/workflows/d10-symbolic-ai-anti-unify.yml
+  workflow_dispatch:
+jobs:
+  independent-symbolic-oracles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR commit
+        uses: actions/checkout@v4
+      - name: Source and finite-ground exact oracle with adversarial proofs
+        run: python3 scripts/check_d10_symbolic_anti_unify.py --self-test
+      - name: Install real SWI-Prolog runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y swi-prolog-nox
+          swipl --version
+      - name: Compare independent SWI term_subsumer source semantics
+        run: swipl -q -s tests/d10_symbolic_anti_unify_donor.pl -g "run_tests,halt(0)" -t "halt(1)"
