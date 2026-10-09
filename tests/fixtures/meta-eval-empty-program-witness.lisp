@@ -13,13 +13,17 @@
            (00000111
              ((00100010 (00000110 loaded) (00000001 ()))
               (00000001 (meta-eval-empty-program-witness (status pass))))
-             ((00100010 (00100010 (00000110 loaded) (00000001 ())) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+             ((00100010
+                (00100010 (00000110 loaded) (00000001 ()))
+                (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
               (00100111
                 (00000001 meta-eval-empty-program-witness)
                 (00000001 (status fail))
                 (00000001 (law empty-result))
                 (00100111 (00000001 actual) (00000110 loaded))))))
-          ((00100010 (00100010 (00000101 loaded) env-ref) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+          ((00100010
+             (00100010 (00000101 loaded) env-ref)
+             (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
            (00100111
              (00000001 meta-eval-empty-program-witness)
              (00000001 (status fail))
