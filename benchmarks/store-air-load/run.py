@@ -143,9 +143,9 @@ def load_fixtures(path: Path) -> list[dict[str, object]]:
         if not isinstance(canonical, str) or not canonical.strip():
             raise ValueError(f"{fixture_id}: canonical_source is required")
         if kind == "paired-program":
-            english = fixture.get("english_source")
+            ukrainian = fixture.get("ukrainian_source")
             if not isinstance(english, str) or not english:
-                raise ValueError(f"{fixture_id}: paired fixture needs english_source")
+                raise ValueError(f"{fixture_id}: paired fixture needs ukrainian_source")
 
     return fixtures
 
@@ -205,7 +205,7 @@ def packing_facts(
 
 def semantic_preflight(
     helper: Path,
-    english_path: Path,
+    ukrainian_path: Path,
     canonical_path: Path,
     *,
     expected_value: object,
@@ -213,7 +213,7 @@ def semantic_preflight(
 ) -> str:
     observed: dict[str, dict[str, str]] = {}
     for candidate, path in (
-        ("english-surface", english_path),
+        ("ukrainian-surface", ukrainian_path),
         ("canonical-d1d8", canonical_path),
     ):
         stdout = run_text([str(helper), candidate, "preflight", str(path)])
@@ -228,13 +228,13 @@ def semantic_preflight(
             "output": decode_hex(fields["OUTPUT_HEX"]),
         }
 
-    left = observed["english-surface"]
+    left = observed["ukrainian-surface"]
     right = observed["canonical-d1d8"]
     for field in ("trace", "value", "output"):
         if left[field] != right[field]:
             raise ValueError(
                 f"paired preflight mismatch for {field}: "
-                f"english={left[field]!r} canonical={right[field]!r}"
+                f"ukrainian={left[field]!r} canonical={right[field]!r}"
             )
 
     if expected_value is not None and left["value"] != expected_value:
@@ -433,8 +433,8 @@ def main() -> int:
             english_source = fixture.get("english_source")
             if fixture_kind == "paired-program":
                 assert isinstance(english_source, str)
-                english_path = write_source(
-                    tmp, fixture_id, "english", english_source
+                ukrainian_path = write_source(
+                    tmp, fixture_id, "ukrainian", english_source
                 )
                 trace = semantic_preflight(
                     semantic_helper,
