@@ -8,7 +8,8 @@
     {
       "repository": "juv4uk/sens",
       "path": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "snapshot_path": "knowledge/d10-source-snapshots/lisp-machine/meta-eval-20261009.lisp"
     },
     {
       "repository": "juv4uk/sens",
