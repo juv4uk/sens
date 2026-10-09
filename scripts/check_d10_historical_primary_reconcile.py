@@ -48,6 +48,8 @@ def check(r, low, high, ov, pin=True):
     props = r["proposals"]
     assert len(props) == r["accounting"]["proposals"] == 13
     assert len({z["historical_name"] for z in props}) == 13
+    assert sum(z["primary_name_attested"] is True for z in props) == r["accounting"]["primary_name_attested"] == 8
+    assert sum(z["primary_name_attested"] is False for z in props) == r["accounting"]["unverified_historical_labels"] == 5
     for z in props:
         assert z["historical_name"].upper() not in lower
         assert z["historical_name"].upper() not in sel
@@ -55,6 +57,10 @@ def check(r, low, high, ov, pin=True):
         assert z["exact_in_lower"] is False and z["exact_in_d10_selected"] is False
         assert z["triage"].startswith(("HOLD-", "D10-PROPOSAL-REVIEW"))
         assert z["source_url"].startswith("https://")
+        assert z["evidence_grade"] == ("PRIMARY-MANUAL-SPEC-READ" if z["primary_name_attested"] else "OLD-BRANCH-LEAD-NEEDS-PRIMARY-MANUAL")
+        if not z["primary_name_attested"]:
+            assert z["triage"].startswith("HOLD-"), "Unverified names may not be selected"
+            assert "UNVERIFIED" in z["source_section"].upper() or "Unverified" in z["source_section"]
         assert z["source_section"] and z["observable_claim"] and z["positive_witness_spec"] and z["falsifier_spec"]
         assert z["nearby_existing"] and z["proposed_owner"]
         if z["triage"].startswith("HOLD-D2"):
@@ -79,7 +85,9 @@ def test(r,lo,hi,ov):
     rejected(lambda x: x["proposals"][0].__setitem__("triage","ADMITTED"))
     rejected(lambda x: x["d9_overflow_leftover_exact_names"].pop())
     rejected(lambda x: x["historical_ledger_2344"]["rows"][0].__setitem__("lower_current","D10:0000000000"))
-    print("PASS: 13 historical HOLD/proposal rows, 19 legacy crosschecks, six overflow holds, 10 adverse cases")
+    rejected(lambda x: x["proposals"][-1].__setitem__("triage","D10-PROPOSAL-REVIEW"))
+    rejected(lambda x: x["proposals"][-1].__setitem__("primary_name_attested",True))
+    print("PASS: 13 historical HOLD/proposal rows, 19 legacy crosschecks, six overflow holds, 12 adverse cases")
 
 def main():
     ap=argparse.ArgumentParser()
