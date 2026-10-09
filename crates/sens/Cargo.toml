@@ -9,14 +9,13 @@ description = "Independent sens core · Незалежне ядро sens · Unab
 path = "src/lib.rs"
 
 [dependencies]
-# Machine transport/artifact records already derive serde; restore the
-# manifest edges recorded in Cargo.lock. Serde provides no OS capabilities.
-serde = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
+# JSON round-trip is test-only; default production sens stays dependency-free.
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Tests may opt into the explicit host capability crate, while the shipped
-# sens library uses serde for data-only records, without direct
+# sens library itself keeps an empty runtime dependency set and no direct
 # filesystem/network/process access.
 # Тести можуть явно підключати host-capability crate, тоді як сама бібліотека
 # sens лишається без runtime-залежностей і прямого доступу до ОС.
