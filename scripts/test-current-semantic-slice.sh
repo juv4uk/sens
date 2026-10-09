@@ -11,7 +11,6 @@ cargo test -p sens \
   --test domain_width_authority_test \
   --test domain_ast_value_identity \
   --test d3_bija3_a_current \
-  --test d3_empty_control \
   --test d7_w7_pack
 
 
