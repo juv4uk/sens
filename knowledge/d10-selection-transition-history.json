@@ -62,6 +62,32 @@
         "scripts/check_d10_clos_roots_selection.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.hobby.spanda.bounded-rational-approx.20261009",
+      "authority": "#4013 #4463 hobby-based research selection",
+      "evidence": [
+        "juv4uk/spanda README blob d339363e03798941280d7394fb6b24a76ff43dd3",
+        "Python Fraction.limit_denominator documented reference"
+      ],
+      "previous_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+      "resulting_inventory_blob_sha": "34efd273000e3de8510441764cb59acbb5ab284b",
+      "added_stable_ids": [
+        "d10.hobby.spanda.bounded-rational-approx.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-hobby-exact-measurement-intake-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 630,
+      "resulting_selected": 631,
+      "decision": "SELECTED-RESEARCH only, pending owner, no executable T5",
+      "tests": [
+        "scripts/check_d10_hobby_bounded_rational.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }
