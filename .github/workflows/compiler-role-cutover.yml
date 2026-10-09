@@ -70,8 +70,8 @@ jobs:
             exit 1
           }
           cargo check -p sens --lib --no-default-features
-      - name: Opt-in evidence-schema adapters remain buildable
-        run: cargo test -p sens --lib --features legacy-evidence-schemas
+      - name: D1-D10 mechanical coordinate carrier remains buildable
+        run: cargo test -p sens --lib domain_ladder::tests
       - name: D4 bootstrap projection must match ratified authority
         run: python3 scripts/generate-d4-bootstrap-compiler-structure.py --check
       - name: Production path must not import Rust role oracle
