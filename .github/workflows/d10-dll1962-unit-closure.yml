@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - knowledge/d10-dll1962-unit-closure-research-v1.json
+      - knowledge/d10-dll1962-glucose3-oracle-evidence-v1.json
       - docs/research/D10-DLL1962-UNIT-CLOSURE.uk.md
       - tests/test_d10_dll1962_unit_closure.py
       - tests/oracles/d10_real_pysat_unit.py
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - knowledge/d10-dll1962-unit-closure-research-v1.json
+      - knowledge/d10-dll1962-glucose3-oracle-evidence-v1.json
       - tests/test_d10_dll1962_unit_closure.py
       - tests/oracles/d10_real_pysat_unit.py
       - .github/workflows/d10-dll1962-unit-closure.yml
