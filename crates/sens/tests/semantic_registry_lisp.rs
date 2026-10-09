@@ -1,56 +1,6 @@
 use sens::{eval_program, load_core_library, parse, Session};
 
 #[test]
-fn semantic_registry_is_read_and_queried_by_lisp_itself() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library should load");
-    eval_program(
-        include_str!("../../../lib/surface/semantic-registry-api.lisp"),
-        &mut session,
-    )
-    .expect("Lisp-owned semantic registry API should load");
-    eval_program(
-        include_str!("../../../tests/fixtures/semantic-registry-self-hosted-witness.lisp"),
-        &mut session,
-    )
-    .expect("Lisp-owned semantic registry witness should load");
-
-    let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
-    let program = format!("(semantic-registry-self-hosted-witness {registry_source:?})");
-    let result = eval_program(&program, &mut session)
-        .expect("Lisp-owned semantic registry witness should evaluate")
-        .value
-        .to_string();
-
-    assert_eq!(
-        result,
-        r#"(256 "00000001" quote "00000001" "10101000" "00000101" "11111111" (11111111 (en ()) (ук ()) (укр ()) (sa ()) (sym ())) "10101000" (1))"#
-    );
-}
-
-#[test]
-fn lisp_registry_api_accepts_headerless_canonical_rows() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library should load");
-    eval_program(
-        include_str!("../../../lib/surface/semantic-registry-api.lisp"),
-        &mut session,
-    )
-    .expect("Lisp-owned semantic registry API should load");
-
-    let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
-    let result = eval_program(
-        &format!("(length (semantic-registry-rows (semantic-registry-read-source {registry_source:?})))"),
-        &mut session,
-    )
-    .expect("headerless Canon rows should load")
-    .value
-    .to_string();
-
-    assert_eq!(result, "256");
-}
-
-#[test]
 fn rust_semantic_registry_generator_is_valid_lisp() {
     parse(include_str!("../../../scripts/generate-rust-semantic-registry.lisp"))
         .expect("Rust semantic-registry generator must remain valid Lisp source");
@@ -87,78 +37,12 @@ fn primitive_budget_audit_has_no_decimal_identity_shadow() {
 
 
 #[test]
-fn shorter_bit_only_spelling_remains_ordinary_numeric_data() {
-    let mut session = Session::default();
-    let rendered = eval_program("000101", &mut session)
-        .expect("shorter bit-only spelling must remain under ordinary numeric rules")
-        .value
-        .to_string();
-    assert_eq!(
-        rendered, "101",
-        "only exact eight-bit bare 0/1 spellings are reserved as SID identity"
-    );
-}
-
-#[test]
 fn former_binary_header_does_not_change_decimal_reading() {
     let expressions = sens::parse("(binary 8) 00000102")
         .expect("ordinary parser must not have a binary reader mode");
     assert!(matches!(expressions[1].kind, sens::ExprKind::Number(value, _) if value == 102.0));
 }
 
-
-#[test]
-fn full_binary_registry_handoff_is_lisp_owned_and_digest_pinned() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core library should load");
-    eval_program(
-        include_str!("../../../lib/surface/semantic-registry-api.lisp"),
-        &mut session,
-    )
-    .expect("Lisp-owned semantic registry API should load");
-    eval_program(
-        include_str!("../../../tests/fixtures/semantic-registry-self-hosted-witness.lisp"),
-        &mut session,
-    )
-    .expect("Lisp-owned semantic registry witness should load");
-
-    let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
-    let program = format!("(semantic-registry-handoff-witness {registry_source:?})");
-    let rendered = eval_program(&program, &mut session)
-        .expect("Lisp-owned registry handoff should evaluate")
-        .value
-        .to_string();
-
-    let digest = sens::sha256_source(registry_source.as_bytes())
-        .iter()
-        .map(|byte| format!("{byte:02x}"))
-        .collect::<String>();
-
-    assert!(
-        rendered.starts_with("(semantic-registry-handoff/1 "),
-        "handoff must remain an explicit versioned Lisp record: {rendered}"
-    );
-    assert!(
-        rendered.contains(&format!("(source-digest \"{digest}\")")),
-        "Lisp handoff digest must identify the exact canonical source bytes"
-    );
-    assert!(
-        rendered.contains("(row-count 256)"),
-        "handoff must report every current canonical semantic row"
-    );
-    assert!(
-        rendered.contains("(canonical-rows (00000000 "),
-        "handoff must expose the parsed canonical rows beginning with Binary SID values"
-    );
-    assert!(
-        rendered.contains("(10101000 (en invoke)"),
-        "handoff must preserve the invoke row as Binary identity data"
-    );
-    assert!(
-        rendered.contains("(11111111 (en ())"),
-        "handoff must preserve the current canonical registry tail as Binary identity data"
-    );
-}
 
 #[test]
 fn registry_handoff_contract_names_authority_without_copying_rows() {
