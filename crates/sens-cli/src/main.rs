@@ -167,12 +167,9 @@ fn bootstrap_core(
 }
 
 fn main() {
-    // The CLI is a trusted local Lisp-machine surface: install the OS
-    // capability layer (filesystem, process execution, TCP). The semantic
-    // core itself ships none.
-    sens_host::install();
-    // Availability only; Core3×10101000 admission remains SENS-owned.
-    island_invoke::install();
+    // Keep argument parsing and --binary-check free of native capability
+    // registration. Install host capabilities only for an invocation that
+    // can proceed to bootstrap, evaluation, or the REPL.
     let args: Vec<String> = env::args().collect();
     let allowed = allowed_processes(&args);
     let sexpr_protocol = args.iter().any(|a| a == "--protocol=sexpr");
@@ -231,6 +228,12 @@ fn main() {
         eprintln!("sens: --binary requires an executable binary source file");
         process::exit(2);
     }
+    // The CLI is a trusted local Lisp-machine surface. Native OS capabilities
+    // are installed only after parser-only --binary-check has returned.
+    sens_host::install();
+    // Availability only; Core3×10101000 admission remains SENS-owned.
+    island_invoke::install();
+
     let allowed_for_tcp = allowed.clone();
     // Plain `f64`s, not a `Value` — `run_tcp_repl_sexpr` spawns one thread
     // per connection, and `Value`'s `Rc`-based sharing isn't `Send`; each
