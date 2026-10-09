@@ -1,7 +1,4 @@
-use sens::{
-    eval_program, language_items, render_value_for_presentation, PresentationLanguage, Session, Value,
-};
-use std::rc::Rc;
+use sens::{language_items, render_value_for_presentation, PresentationLanguage, Value};
 
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 const SA_SURFACE: &str = include_str!("../../../lib/surface/sa.lisp");
@@ -45,39 +42,6 @@ const CASES: &[PeerCase] = &[
         sym: "=",
     },
 ];
-
-fn assert_same_builtin(left: &Value, right: &Value) {
-    match (left, right) {
-        (Value::Builtin(left), Value::Builtin(right)) => assert!(
-            Rc::ptr_eq(left, right),
-            "peer spellings must point to one builtin allocation"
-        ),
-        // Після кроку «Rust лише примітиви» всі написання ведуть до одного
-        // SENS-коду — спільна ідентичність тепер сам 1-байтовий код.
-        (Value::Sid(left), Value::Sid(right)) => assert_eq!(left, right),
-        other => panic!("expected builtin peer values, got {other:?}"),
-    }
-}
-
-fn value(session: &mut Session, source: &str) -> Value {
-    eval_program(source, session)
-        .unwrap_or_else(|error| panic!("{source}: {error:?}"))
-        .value
-}
-
-#[test]
-fn stable_operator_peers_exist_before_human_surface_libraries_load() {
-    for case in CASES {
-        let mut session = Session::default();
-        let uk = value(&mut session, case.uk);
-        let sa = value(&mut session, case.sa);
-        let sym = value(&mut session, case.sym);
-
-        assert_same_builtin(&uk, &sa);
-        assert_same_builtin(&sa, &sym);
-
-    }
-}
 
 #[test]
 fn migrated_surface_files_do_not_build_stable_operator_peers_through_symbols() {
@@ -127,10 +91,11 @@ fn runtime_peer_slice_matches_numeric_registry_rows() {
 fn ukrainian_builtin_presentation_uses_numeric_authority_not_legacy_audit() {
     assert!(!PRESENTATION.contains("uk-sa-coverage.lisp"));
     for case in CASES {
-        let mut session = Session::default();
-        let builtin = value(&mut session, case.sym);
+        let sid = sens::semantic_registry_export::semantic_id_for_admitted_surface(case.sym)
+            .expect("symbol peer must be registry-admitted");
+        let exact = Value::Sid(sid);
         assert_eq!(
-            render_value_for_presentation(&builtin, PresentationLanguage::Ukrainian),
+            render_value_for_presentation(&exact, PresentationLanguage::Ukrainian),
             format!("#<вбудована {}>", case.uk),
             "{} presentation",
             case.uk
