@@ -1,0 +1,156 @@
+{
+  "schema": "d10-gf2-minimal-recurrence/v1",
+  "date": "2026-10-09",
+  "status": "SOURCE-PINNED-RESEARCH-PENDING-DEDUP-AND-OWNER",
+  "base_snapshot": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_selected_when_claimed": 634,
+    "d10_inventory_blob_when_claimed": "65014431ac3e64633cd0be3630cfafc5e7a9aea3"
+  },
+  "owner_interests": [
+    "radio-log: binary symbol streams and SDR",
+    "esp32-pendulum: sensor and oscillator traces",
+    "fpga-lisp: deterministic binary shift-register hardware",
+    "spanda/clock engineering: observable recurrence vs real-world noise",
+    "Pāṇini/śiva-sūtras: symbolic sequences; only D1-bit abstract mathematical sequences are covered",
+    "music/acoustics: repeated exact binary rhythm encodings, not analog signal inference"
+  ],
+  "primary_sources": [
+    {
+      "title": "SageMath Linear Feedback Shift Register Sequence Commands",
+      "url": "https://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lfsr.html",
+      "section": "lfsr_connection_polynomial and Berlekamp-Massey examples",
+      "direct_evidence": "Finite GF(2) sequences can admit polynomial/recurrence reconstruction; Sage explicitly distinguishes reverse polynomial conventions."
+    },
+    {
+      "title": "SageMath Minimal Polynomials of Linear Recurrence Sequences",
+      "url": "https://doc.sagemath.org/html/en/reference/matrices/sage/matrix/berlekamp_massey.html",
+      "section": "berlekamp_massey(a) function, input length and caveat",
+      "direct_evidence": "Minimal recurrence polynomial over a field, with explicit caveat concerning claims beyond observed finite data."
+    },
+    {
+      "title": "SageMath Linear Codes and Ciphers",
+      "url": "https://doc.sagemath.org/html/en/constructions/linear_codes.html",
+      "section": "LFSR sequences and Berlekamp–Massey reconstruction",
+      "direct_evidence": "Example length-20 GF2 trace reconstructed with a fourth-degree connection relation."
+    }
+  ],
+  "candidate": {
+    "semantic_name": "BINARY-LFSR-MINIMAL-RECURRENCE",
+    "surface_uk": "найкоротша-двійкова-рекуренція",
+    "surface_ukr": "мін-лін-рекур",
+    "semantic_kind": "PURE-FINITE-WORD-MATHEMATICAL-OBSERVATION",
+    "owner_boundary": "D10-VALUES-NOT-D2-FORM",
+    "signature": "(finite ordered list of D1 bits)->(minimal-order nonnegative integer, ordered list of binary taps a1..aL)",
+    "behavior": "For a finite GF(2) word s_0..s_(n-1), find the least L in [0,n] for which there exist a_1..a_L in {0,1} satisfying s_t = XOR_(j=1..L) a_j*s_(t-j), simultaneously for all observed t=L..n-1. Among all admissible tap lists for the minimal L choose the lexicographically smallest list (a1 foremost, 0<1). Return (L,taps). The empty word and any all-zero word return (0,[]). This describes only the observed finite word; it does not assert correct unseen future symbols, cryptographic strength, real SDR synchronization or physical hardware behavior.",
+    "positive_witnesses": [
+      {
+        "word": "",
+        "output": {
+          "L": 0,
+          "taps": ""
+        }
+      },
+      {
+        "word": "00000",
+        "output": {
+          "L": 0,
+          "taps": ""
+        }
+      },
+      {
+        "word": "1",
+        "output": {
+          "L": 1,
+          "taps": "0"
+        }
+      },
+      {
+        "word": "11111",
+        "output": {
+          "L": 1,
+          "taps": "1"
+        }
+      },
+      {
+        "word": "010101",
+        "output": {
+          "L": 2,
+          "taps": "01"
+        }
+      },
+      {
+        "word": "101001",
+        "output": {
+          "L": 3,
+          "taps": "101"
+        }
+      },
+      {
+        "word": "11010110010001111010",
+        "output": {
+          "L": 4,
+          "taps": "1001"
+        },
+        "source": "Sage 20-symbol LFSR example, with tap convention fixed by this D10 proposal"
+      }
+    ],
+    "falsifiers": [
+      "Claim that 010101 has order 1 merely because its visible primitive full-repeat root is 01; the first symbol 0 and second 1 cannot follow a degree-1 GF2 homogeneous recurrence.",
+      "Treat the input 1 as an L=0 recurrence; order zero forces all observed bits to zero.",
+      "Return a longer L when a shorter recurrence fits all observed positions.",
+      "Return lexicographically larger taps when two minimal-order recurrences both fit the observed finite word.",
+      "Claim the inferred finite recurrence predicts arbitrary unseen future bits or certifies SDR non-noisy clock lock.",
+      "Claim Sage berlekamp_massey returned taps are always identical without reversing the polynomial and applying the declared lexical tie rule."
+    ],
+    "nearby_existing": [
+      {
+        "name": "PRIMITIVE-BINARY-WORD-ROOT",
+        "difference": "shortest block whose exact copies form the entire word, not XOR recurrence."
+      },
+      {
+        "name": "GRAY-ENCODE-WORD",
+        "difference": "bit-label bijection, no recurrence inference."
+      },
+      {
+        "name": "GRAY-DECODE-WORD",
+        "difference": "inverse Gray-label bijection, no recurrence inference."
+      },
+      {
+        "name": "D8 XOR/SHIFT",
+        "difference": "arithmetic ingredients; no direct minimal-order-and-lex-taps contract."
+      },
+      {
+        "name": "BINARY-STATE-SHORTEST-WITNESS (open #4947)",
+        "difference": "distinguishing two abstract states rather than fitting single observed word."
+      }
+    ],
+    "minimality_review": "Derivable from finite GF(2) linear algebra, and the observed minimality is mathematical; whether this deserves a 10-bit Core semantic resident or a library function is PENDING OWNER REVIEW. Derivability alone does not prove duplication.",
+    "supported_sources_only": "Source-first mathematical proposal. Python Gaussian feasibility vs full exhaustive tap enumeration; neither is a claimed SENS runtime oracle.",
+    "selected": false,
+    "ratified": false,
+    "coordinate": null,
+    "physical_t5_authorized": false,
+    "not_a_migration_block": true,
+    "core_or_library": "PENDING-OWNER-REVIEW",
+    "provenance": [
+      "juv4uk/sens@395143bd87278cf59c36c6456f65d02a73b55f65:scripts/check_d10_gf2_minimal_recurrence.py:1",
+      "https://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lfsr.html",
+      "#4013",
+      "#4463"
+    ]
+  },
+  "review_steps": [
+    "Compare current D1–D9 and D10 rows before selecting",
+    "Independent GF(2) recurrence Gaussian-existence vs brute enumeration, finite data only",
+    "Independent Scheme reference witness if later selected",
+    "Owner rules on Core vs library composition",
+    "No coordinate/ratification without separate formal approval"
+  ],
+  "accounting": {
+    "research_rows": 1,
+    "selected_added": 0,
+    "ratified_added": 0,
+    "coordinates_added": 0
+  }
+}
