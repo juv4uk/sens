@@ -249,14 +249,14 @@
 (00001011 thread-conjunction
   (00001000 (conditions state try-one)
     (00000111
-      ((00000010 conditions) (00100111 state))
-      ((00000100 (00000010 conditions))
-       (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state)))))
+      ((00000010 conditions) () (00100111 state))
+      ((00000010 conditions) (1) (00100111 state))
+      (t (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state))))))
 
 (00001011 thread-conjunction-branches
   (00001000 (remaining try-one states)
     (00000111
-      ((00000010 states) (00000001 ()))
-      ((00000100 (00000010 states))
-       (00101001 (thread-conjunction remaining (00000101 states) try-one)
+      ((00000010 states) () (00000001 ()))
+      ((00000010 states) (1) (00000001 ()))
+      (t (00101001 (thread-conjunction remaining (00000101 states) try-one)
                  (thread-conjunction-branches remaining try-one (00000110 states)))))))
