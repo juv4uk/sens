@@ -120,14 +120,14 @@
   (00001000 (width bits rows)
     (00000111
       ((00000010 rows) ())
-      ((00000101 width (00000101 (00000101 rows)))
+      ((00000011 width (00000101 (00000101 rows)))
        (00000111
-         ((00000101 bits (00000101 (00000110 (00000101 rows))))
+         ((00000011 bits (00000101 (00000110 (00000101 rows))))
           (00000101 rows))
-         ((00000101 0 0)
+         ((00000011 0 0)
           (machine-capability-find-domain-row
             width bits (00000110 rows)))))
-      ((00000101 0 0)
+      ((00000011 0 0)
        (machine-capability-find-domain-row
          width bits (00000110 rows))))))
 
@@ -140,19 +140,19 @@
            width bits machine-capability-axis-v3)))
       (00000111
         ((00000010 row) ())
-        ((00000101 0 0)
+        ((00000011 0 0)
          (00000101 (00000110 (00000110 row))))))))
 
 (00001001 machine-capability-find-row
   (00001000 (key rows)
     (00000111
       ((00000010 rows) ())
-      ((00000101 key (00000101 (00000101 rows))) (00000101 rows))
-      ((00000101 0 0) (machine-capability-find-row key (00000110 rows))))))
+      ((00000011 key (00000101 (00000101 rows))) (00000101 rows))
+      ((00000011 0 0) (machine-capability-find-row key (00000110 rows))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
     (10011100 ((row (machine-capability-find-row target machine-target-witness-status-v1)))
       (00000111
         ((00000010 row) (00000001 absent))
-        ((00000101 0 0) (00000101 (00000110 row)))))))
+        ((00000011 0 0) (00000101 (00000110 row)))))))
