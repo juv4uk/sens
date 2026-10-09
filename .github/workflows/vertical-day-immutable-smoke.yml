@@ -44,6 +44,18 @@ jobs:
             "$RUNNER_TEMP/vertical-day-oracle.jsonl" \
             --expected-sha "$GITHUB_SHA"
 
+      # Точні доменні слова та фізичний T5 первинні; українська назва — лише проєкція.
+      # Цей bounded доказ не видається за незалежне підтвердження виконання.
+      - name: Canonical Ukrainian to exact D1-D4 words to physical T5 to bit view
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_verify_uk_t5_triplet.py' -v
+          bash scripts/check-triple-projection.sh \
+            --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            --fixture tests/fixtures/migration-d4-selector-cohort/caar.lisp
+
       - name: Native CPU vertical mechanism witnesses
         if: always()
         run: cargo test --locked -p sens-host --test native_lisp_bytes --test native_cond_profile

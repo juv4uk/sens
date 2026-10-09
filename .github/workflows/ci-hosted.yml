@@ -29,6 +29,10 @@ jobs:
           python3 scripts/public_api_inventory.py --check
           python3 scripts/sens8-semantic-ratchet.py --self-test
           python3 scripts/sens8-semantic-ratchet.py --summary
+      - name: Binary exact-width foundation and one-way authority
+        shell: bash
+        run: bash scripts/test-binary-language-pipeline.sh
+
       - name: One-file canonical T5 migration canary
         shell: bash
         run: |

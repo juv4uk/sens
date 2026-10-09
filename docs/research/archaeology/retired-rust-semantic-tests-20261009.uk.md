@@ -77,3 +77,29 @@ Rust-межа зберігає механічне виконання/транс�
 - `crates/sens/tests/compiler_l1_l5_role.rs`: вилучено окремий `sens_l1_l5_derivation_matches_rust_oracle_for_all_d3_identities`, залишено механічні тести ширини/ізоляції доменів.
 
 Не переносити ці історичні очікування в інші Rust-тести для «зеленого» CI: semantic authority залишається лише у ратифікованих SENS/Lisp джерелах.
+
+## Вилучення вбудованих evaluator-оракулів із Rust — 2026-10-09
+
+У commit `89f429cbea60b27bea847f0ff45b8fc3f293ebf5` прибрано тестовий модуль `single_pass_eval_tests` з `crates/sens/src/eval/mod.rs` (попередній blob `7fd13bab1810ee3589e261213e74c3e65a939add`). Він містив host-authored очікування на вивід програми, включно з історичною SID8-формою `COND`, старими поверхневими aliases, recursion, macro expansion і lexical binding.
+
+Вилучено такі Rust-тести:
+`single_pass_eval_parsed_expressions_evaluates_preparsed_ast`,
+`canonical_define_introduces_a_binding`,
+`binary_sids_dispatch_canon_and_necessary_forms_in_list_head`,
+`binary_sids_keep_quote_and_cond_as_syntax`,
+`canonical_define_and_lambda_support_recursion`,
+`make_macro_is_the_minimal_closure_to_macro_substrate`,
+`macros_expand_and_evaluate_correctly`,
+`macro_expansion_preserves_exact_rationals`,
+`canon_zero_empty_list_evaluates_directly`,
+`ukrainian_canonical_surface_executes_the_core`,
+`ukrainian_rest_obeys_proper_list_semantics`,
+`ukrainian_double_projection_reads_the_tree`,
+`sanskrit_canonical_surface_executes_the_same_core`,
+`surfaces_routing_to_function_sids_cannot_be_redefined`,
+`surfaces_routing_to_function_sids_cannot_be_lambda_parameters`,
+`ordinary_nonregistry_bindings_remain_lexical`,
+`canonical_resolution_ignores_even_preexisting_environment_shadow`.
+
+Це **не** зміна evaluator/runtime й не скасування мовних законів. Семантичні вимоги мають бути зафіксовані чинними SENS/Lisp-owned contracts та незалежними виконуваними witness-фікстурами. Rust-тести залишаються для механіки, exact-width domain identity, серіалізації, меж і fail-closed поведінки; просте очікування Rust на готову мовну відповідь не є незалежним семантичним доказом.
+

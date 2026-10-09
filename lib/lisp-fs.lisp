@@ -97,8 +97,8 @@
 (00001001 fs-object-addresses
   (00001000 (entries)
     (00000111
-      ((00000010 entries) 1 (00000001 ()))
-      ((fs-d1-no? (00000010 entries)) 1
+      ((00100010 entries (00000001 ())) (00000001 ()))
+      ((fs-d1-no? (00100010 entries (00000001 ())))
        (00000100 (00000101 (00000101 entries))
                  (fs-object-addresses (00000110 entries)))))))
 
@@ -110,8 +110,8 @@
   (00001000 (name package)
     (10011100 ((entry (00101101 name package)))
       (00000111
-        ((00000010 entry) (00000001 ()))
-        ((fs-d1-no? (00000010 entry)) (00000110 entry))))))
+        ((00100010 entry (00000001 ())) (00000001 ()))
+        ((fs-d1-no? (00100010 entry (00000001 ()))) (00000110 entry))))))
 (00001001 fs-object-package-decision
   (00001000 (package)
     (00000111

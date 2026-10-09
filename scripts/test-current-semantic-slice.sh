@@ -190,9 +190,9 @@ if [[ "$translation_symbol_status" != "(translation-symbol-boundary-witness (sta
 fi
 
 
-# #536: preserve comparison-peer topology before retiring stale Rust t-oracles.
-# RED phase intentionally requires a not-yet-added Lisp-owned witness.
-runtime_peer_topology_status="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp)"
+# #536: preserve comparison-peer topology after retiring stale Rust t-oracles.
+# The current Lisp-owned witness is observed only through its pass envelope.
+runtime_peer_topology_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp)"
 if [[ "$runtime_peer_topology_status" != "(runtime-peer-comparison-topology-witness (status pass))" ]]; then
   printf 'runtime comparison peer topology witness failed: %s\n' "$runtime_peer_topology_status" >&2
   exit 1

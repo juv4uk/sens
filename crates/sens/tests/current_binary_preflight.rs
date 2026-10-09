@@ -1,82 +1,114 @@
-use sens::{lower_program, parse, parse_canonical_binary, Expr, ExprKind};
+//! Canonical SENS preflight: the authority of a source word is its exact
+//! binary width and payload, never a human spelling or historical SID8.
+//! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-fn trace(expr: &Expr) -> String {
-    match &expr.kind {
-        ExprKind::DomainIdentity(id) => format!("id:D{}:{:0width$b}", id.width(), id.packed_bits(), width=id.width()),
-        ExprKind::DomainCall(id, args) => {
-            let mut out = format!("call:D{}:{:0width$b}[", id.width(), id.packed_bits(), width=id.width());
-            for (i, arg) in args.iter().enumerate() {
-                if i > 0 { out.push(','); }
-                out.push_str(&trace(arg));
-            }
-            out.push(']');
-            out
+use sens::{parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind};
+
+fn binary_trace(expression: &Expr) -> String {
+    match &expression.kind {
+        ExprKind::DomainIdentity(identity) => {
+            format!("D{}:{:0width$b}", identity.width(), identity.packed_bits(), width = identity.width())
         }
         ExprKind::List(items) => {
-            let mut out = "list[".to_owned();
-            for (i, item) in items.iter().enumerate() {
-                if i > 0 { out.push(','); }
-                out.push_str(&trace(item));
-            }
-            out.push(']');
-            out
+            let children = items.iter().map(binary_trace).collect::<Vec<_>>();
+            format!("({})", children.join(" "))
         }
-        ExprKind::Pair(head, tail) => format!("pair[{},{}]", trace(head), trace(tail)),
-        ExprKind::Sid(_) | ExprKind::Call(_, _) => {
-            panic!("legacy byte identity entered current D1-D8 preflight")
-        }
-        other => panic!("unsupported node in Number/local-free preflight: {other:?}"),
+        ExprKind::Pair(head, tail) => format!("({} . {})", binary_trace(head), binary_trace(tail)),
+        // Canonical source and its physical wire may never invent surface names,
+        // flat SIDs, or implicit callable admission from a naked binary width.
+        other => panic!("non-binary source identity entered canonical carrier: {other:?}"),
     }
 }
 
-fn lowered_english(source: &str) -> Vec<String> {
-    lower_program(&parse(source).expect("English surface parses"))
-        .iter()
-        .map(trace)
-        .collect()
-}
-
-fn lowered_binary(source: &str) -> Vec<String> {
-    lower_program(&parse_canonical_binary(source).expect("canonical binary parses"))
-        .iter()
-        .map(trace)
-        .collect()
+fn only(source: &str) -> Expr {
+    let expressions = parse_canonical_binary(source).expect("exact binary words parse");
+    assert_eq!(expressions.len(), 1);
+    expressions.into_iter().next().unwrap()
 }
 
 #[test]
-fn current_english_and_canonical_binary_match_on_d3_number_local_free_subset() {
-    let cases = [
-        (
-            "(quote ())",
-            "10 001 00 10 01 01",
-        ),
-        (
-            "(car (quote ()))",
-            "10 101 00 10 001 00 10 01 01 01",
-        ),
-        (
-            "(cdr (quote ()))",
-            "10 110 00 10 001 00 10 01 01 01",
-        ),
-        (
-            "(cons (quote ()) (quote ()))",
-            "10 100 00 10 001 00 10 01 01 00 10 001 00 10 01 01 01",
-        ),
-        (
-            "(eq? (quote ()) (quote ()))",
-            "10 111 00 10 001 00 10 01 01 00 10 001 00 10 01 01 01",
-        ),
-        (
-            "(atom? (quote ()))",
-            "10 010 00 10 001 00 10 01 01 01",
-        ),
-    ];
+fn each_current_binary_width_preserves_its_own_coordinate() {
+    // A width, not a numeric payload alone, identifies the rung.
+    // D2 is structural framing, not a standalone value word.
+    for width in [1usize, 3, 4, 5, 6, 7, 8, 9] {
+        for bits in [1u16, (1u16 << width) - 1] {
+            let token = format!("{bits:0width$b}");
+            let expression = only(&token);
+            let ExprKind::DomainIdentity(identity) = expression.kind else {
+                panic!("D{width} word changed from exact coordinate to surface");
+            };
+            assert_eq!(identity.width(), width);
+            assert_eq!(identity.packed_bits(), bits);
+            assert_eq!(identity.to_string(), token);
+        }
+    }
 
-    for (english, binary) in cases {
-        assert_eq!(
-            lowered_english(english),
-            lowered_binary(binary),
-            "semantic trace mismatch\nEnglish: {english}\nBinary: {binary}"
-        );
+    // D3 000 alone is the exact structural empty value, never a function ID.
+    assert!(matches!(only("000").kind, ExprKind::List(ref xs) if xs.is_empty()));
+    assert_ne!(binary_trace(&only("1")), binary_trace(&only("000000001")));
+}
+
+#[test]
+fn every_nonempty_d3_binary_head_round_trips_without_english_or_sid() {
+    // Check the seven nonempty 3-bit coordinates mechanically. The Lisp
+    // domain table, not this Rust test, determines each operation's meaning.
+    for bits in 1u8..=7 {
+        let head = format!("{bits:03b}");
+        let source = format!("10 {head} 00 000 01");
+        let expressions = parse_canonical_binary(&source).expect("D2-framed D3 word");
+        let ExprKind::List(items) = &expressions[0].kind else {
+            panic!("D2 structure must not become a named operation");
+        };
+        assert_eq!(items.len(), 2);
+        let ExprKind::DomainIdentity(identity) = items[0].kind else {
+            panic!("D3 head was routed through legacy SID");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (3, u16::from(bits)));
+        let expected = binary_trace(&expressions[0]);
+        let recovered = wire_decode_program(&wire_encode_program(&expressions))
+            .expect("width-preserving program wire");
+        assert_eq!(recovered.len(), 1);
+        assert_eq!(binary_trace(&recovered[0]), expected);
+    }
+}
+
+#[test]
+fn d7_payloads_remain_structural_data_without_implicit_text_names() {
+    let expression = only("10 1000001 00 1000010 01");
+    let ExprKind::List(items) = expression.kind else {
+        panic!("a D2 list of W7 coordinates must remain a list");
+    };
+    assert_eq!(items.len(), 2);
+    for (item, bits) in items.iter().zip([65u16, 66]) {
+        let ExprKind::DomainIdentity(identity) = item.kind else {
+            panic!("a raw W7 cell must not become an implicit Text7 symbol");
+        };
+        assert_eq!((identity.width(), identity.packed_bits()), (7, bits));
+        assert!(identity.core_operation().is_none());
+    }
+}
+
+#[test]
+fn mixed_width_binary_words_do_not_collapse_to_eight_bit_ids() {
+    let source = "10 1 00 001 00 0001 00 00001 00 000001 00 0000001 00 00000001 00 000000001 01";
+    let expression = only(source);
+    let expected = binary_trace(&expression);
+    let ExprKind::List(items) = &expression.kind else {
+        panic!("width-qualified words must remain D2 structural children");
+    };
+    let widths = items.iter().map(|item| match item.kind {
+        ExprKind::DomainIdentity(identity) => identity.width(),
+        ref other => panic!("binary word silently coerced to flat SID: {other:?}"),
+    }).collect::<Vec<_>>();
+    assert_eq!(widths, [1, 3, 4, 5, 6, 7, 8, 9]);
+    let decoded = wire_decode_program(&wire_encode_program(&[expression]))
+        .expect("mixed width wire");
+    assert_eq!(binary_trace(&decoded[0]), expected);
+}
+
+#[test]
+fn human_names_and_nonbinary_tokens_never_enter_canonical_source() {
+    for source in ["(001)", "car", "CONS", "010xyz", "2", "10 001"] {
+        assert!(parse_canonical_binary(source).is_err(), "{source}");
     }
 }

@@ -105,7 +105,6 @@ fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String>
     Ok((output, core))
 }
 
-
 /// The canonical executable source is an exact-width D1–D9 binary word
 /// stream. Human source remains an explicit migration compatibility path.
 /// These flags select the parser; they do not confer any domain semantics.
@@ -166,10 +165,71 @@ fn bootstrap_core(
     }
 }
 
+/// Identify an explicitly invoked physical binary program before loading any
+/// Lisp libraries or installing host capabilities. A .sens file is bytes,
+/// NEVER legacy textual Lisp or a source string with a new extension.
+fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
+    let (position, path) = args
+        .iter()
+        .enumerate()
+        .skip(1)
+        .find(|(_, argument)| {
+            std::path::Path::new(argument).extension().and_then(|ext| ext.to_str()) == Some("sens")
+        })?;
+    if position != 1 || args.len() != 2 {
+        return Some(Err(
+            "physical .sens accepts exactly one file argument; use sens-trit for explicit Core4 evaluation",
+        ));
+    }
+    Some(Ok(path.as_str()))
+}
+
+/// One pure T5 -> canonical binary D2 -> current evaluator route.
+/// Neither human spellings nor an eight-bit compatibility reader participate.
+/// An explicit binary file never gains ambient host capabilities or Core4.
+fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    let binary = sens::open_ternary_program(bytes)
+        .map_err(|err| format!("physical T5/D2 rejected: {err:?}"))?;
+    let forms = sens::parse_canonical_binary(&binary)
+        .map_err(|err| format!("exact binary reader rejected: {}", err.render(&binary)))?;
+    let mut pure = Session::default();
+    eval_parsed_expressions(&forms, &mut pure)
+        .map_err(|err| format!("current SENS execution rejected: {}", err.render(&binary)))
+}
+
 fn main() {
-    // Keep argument parsing and --binary-check free of native capability
-    // registration. Install host capabilities only for an invocation that
-    // can proceed to bootstrap, evaluation, or the REPL.
+    // Physical .sens is the exact binary entrypoint and needs no legacy
+    // bootstrap or ambient host capabilities. Reject extra flags instead of
+    // silently interpreting its bytes as textual Lisp.
+    let raw_args: Vec<String> = env::args().collect();
+    if let Some(request) = physical_t5_request(&raw_args) {
+        let result = match request {
+            Ok(filename) => fs::read(filename)
+                .map_err(|err| format!("read physical .sens: {err}"))
+                .and_then(|bytes| eval_physical_t5(&bytes)),
+            Err(message) => Err(message.to_owned()),
+        };
+        match result {
+            Ok(result) => {
+                for output in result.output {
+                    println!("{output}");
+                }
+                println!("{}", result.value);
+            }
+            Err(err) => {
+                eprintln!("sens: {err}");
+                process::exit(1);
+            }
+        }
+        return;
+    }
+
+    // The CLI is a trusted local Lisp-machine surface: install the OS
+    // capability layer (filesystem, process execution, TCP). The semantic
+    // core itself ships none.
+    sens_host::install();
+    // Availability only; Core3×10101000 admission remains SENS-owned.
+    island_invoke::install();
     let args: Vec<String> = env::args().collect();
     let allowed = allowed_processes(&args);
     let sexpr_protocol = args.iter().any(|a| a == "--protocol=sexpr");
@@ -380,7 +440,9 @@ fn main() {
         if arg == "--help" || arg == "-h" {
             println!("Usage: sens [file]");
             println!("If no file is provided, starts the REPL.");
-            println!("Canonical source extension: .lisp (per sens#81 -- extension != semantics); .wsm/.my remain supported legacy aliases; .всм/.мій/.лісп are equal-standing Ukrainian spellings of the same aliases; .sens/.сенс are supported SENS aliases (not canonical)");
+            println!("Textual compatibility source: .lisp and historical aliases; physical .sens is packed T5, not UTF-8 Lisp.");
+            println!("  sens program.sens            Run exact physical T5 with pure SENS (no implicit Core4/host effects)");
+            println!("  sens-trit open program.sens  Display exact binary words without running");
             println!("\nOptions:");
             println!("  lsp                          Run the Language Server (LSP over stdio)");
             println!("  install [--profile four-kernel]  Automatically bootstrap the execution-island runtimes for the current host");
@@ -630,6 +692,31 @@ fn main() {
 mod core_profile_bootstrap_tests {
     use super::*;
 
+    #[test]
+    fn explicit_physical_t5_is_a_pure_binary_entrypoint_not_an_alias() {
+        let arguments = vec!["sens".to_owned(), "program.sens".to_owned()];
+        assert_eq!(physical_t5_request(&arguments), Some(Ok("program.sens")));
+        let legacy = vec!["sens".to_owned(), "program.lisp".to_owned()];
+        assert_eq!(physical_t5_request(&legacy), None);
+        let flags = vec![
+            "sens".to_owned(), "--core=4".to_owned(), "program.sens".to_owned(),
+        ];
+        assert!(matches!(physical_t5_request(&flags), Some(Err(_))));
+    }
+
+    #[test]
+    fn physical_t5_enters_canonical_binary_reader_not_text_lisp() {
+        let bytes = include_bytes!(
+            "../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        let source = sens::open_ternary_program(bytes).expect("admitted physical bytes");
+        let forms = sens::parse_canonical_binary(&source).expect("canonical D2 program");
+        assert!(!forms.is_empty());
+        assert!(!source.contains("QUOTE"));
+        assert!(!source.contains("(quote"));
+        // Broken physical/truncated structural programs fail before evaluation.
+        assert!(sens::open_ternary_program(&[0xf3]).is_err());
+    }
 
     #[test]
     fn binary_cli_flags_are_explicit_mutually_exclusive() {

@@ -1,16 +1,33 @@
-name: Current binary semantic preflight
+name: Canonical binary-only preflight (D1-D9 exact source)
 
 on:
+  push:
+    branches: [main]
   pull_request:
     paths:
-      - 'crates/sens/tests/current_binary_preflight.rs'
-      - '.github/workflows/current-binary-preflight.yml'
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/domain_ladder.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/tests/current_binary_preflight.rs"
+      - "lib/domains/d3.lisp"
+      - "contracts/bija3-l1-l5-ratification.lisp"
+      - ".github/workflows/current-binary-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  preflight:
-    runs-on: ubuntu-latest
+  exact-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: English surface and canonical D1-D8 trace parity
-        run: cargo test -p sens --test current_binary_preflight -- --nocapture
+      - uses: Swatinem/rust-cache@v2
+      - name: Canonical binary syntax, exact widths and no SID8/English authority
+        run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture
+      - name: Ratified D3 domain table remains sole coordinate-to-law source
+        run: python3 scripts/check-domain-tables.py

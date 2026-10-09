@@ -1,0 +1,38 @@
+name: Binary-only SENS execution
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/fixtures/canonical-binary-smoke.lisp"
+      - "crates/sens/tests/binary_only_language.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - ".github/workflows/binary-only-language.yml"
+  pull_request:
+    paths:
+      - "tests/fixtures/canonical-binary-smoke.lisp"
+      - "crates/sens/tests/binary_only_language.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - ".github/workflows/binary-only-language.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-binary-program:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Execute code written only in bits
+        run: cargo test --locked -p sens --test binary_only_language -- --nocapture
