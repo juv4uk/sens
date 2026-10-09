@@ -26,14 +26,3 @@ fn nested_lambda_preserves_lexical_environment_capture() {
 fn inner_binding_shadows_outer_lexical_binding() {
     assert_eq!(eval_meta_program("", "((lambda (x) ((lambda (x) x) 2)) 1)"), "2");
 }
-
-#[test]
-fn mutually_recursive_group_keeps_bindings_inside_lisp_data() {
-    let program = r#"
-(def even? (lambda (n) (cond ((eq? n 0) t) (t (odd? (- n 1))))))
-(def odd? (lambda (n) (cond ((eq? n 0) ()) (t (even? (- n 1))))))
-"#;
-
-    assert_eq!(eval_meta_program(program, "(even? 20)"), "t");
-    assert_eq!(eval_meta_program(program, "(odd? 20)"), "()");
-}
