@@ -62,6 +62,34 @@
         "scripts/check_d10_clos_roots_selection.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.word-primitive-full-repeat.20261009",
+      "authority": "#4013 owner-directed D10 filling; #4463 semantic review pending",
+      "evidence": [
+        "#4013",
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+        "knowledge/d10-primitive-binary-word-root-v1.json"
+      ],
+      "previous_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+      "resulting_inventory_blob_sha": "f81fc22fcb5a31fcb78e8861237d5d273c1a802d",
+      "added_stable_ids": [
+        "d10.words.primitive-binary-root.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-primitive-binary-word-root-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 630,
+      "resulting_selected": 631,
+      "decision": "research-only semantic selection, unplaced, owner ratification pending; not T5 executable",
+      "tests": [
+        "scripts/check_d10_primitive_binary_word_root.py",
+        "tests/test_d10_primitive_binary_word_root.py",
+        "tests/d10_primitive_binary_root_chez.ss"
+      ]
     }
   ]
 }
