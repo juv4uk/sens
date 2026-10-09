@@ -1,0 +1,53 @@
+name: Temporary Core4 FASL regeneration for strict-D1 PR
+
+on:
+  push:
+    branches:
+      - fix/time-cond-contract-118-mainline-v2-20261009
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate Core4 binary snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          git diff --check
+      - name: Verify snapshot matches source
+        shell: bash
+        run: cargo test -p sens --test core_fasl_freshness -- --nocapture
+      - name: Upload generated FASL for recovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: temporary-core4-fasl-for-strict-d1
+          path: lib/core4.lisp.fasl
+          if-no-files-found: error
+          retention-days: 1
+      - name: Commit generated FASL to this PR branch only
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- lib/core4.lisp.fasl; then
+            echo "Core4 FASL already matches source; no commit required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core4.lisp.fasl
+          git commit -m "build(core4): regenerate FASL after deep equality repair"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
