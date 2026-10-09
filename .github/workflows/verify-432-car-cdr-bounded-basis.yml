@@ -1,0 +1,113 @@
+name: Verify 432 CAR CDR bounded basis
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-432-car-cdr-bounded-basis.yml'
+      - 'docs/research/canon-sculpt-car-cdr-bounded-search.lisp'
+
+jobs:
+  bounded-search:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Reproduce bounded eager ATOM EQ CONS closure
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from itertools import product
+
+          ERR = ('error',)
+          NIL = ('nil',)
+
+          def pair(a, b):
+              return ('pair', a, b)
+
+          def is_pair(v):
+              return isinstance(v, tuple) and len(v) == 3 and v[0] == 'pair'
+
+          def structural_record(kind, state):
+              return pair(kind, pair(state, NIL))
+
+          def atom(v):
+              if v == ERR:
+                  return ERR
+              if v == NIL:
+                  state = 'empty-list'
+              elif is_pair(v):
+                  state = 'pair'
+              else:
+                  state = 'atom'
+              return structural_record('structural-kind', state)
+
+          def eq(a, b):
+              if a == ERR or b == ERR:
+                  return ERR
+              if is_pair(a) or is_pair(b):
+                  return ERR
+              return structural_record('identity-relation', 'same' if a == b else 'distinct')
+
+          CONSTANTS = [
+              NIL, 'a', 'b', 'c', 'h', 'z',
+              structural_record('structural-kind', 'pair'),
+              structural_record('structural-kind', 'atom'),
+              structural_record('structural-kind', 'empty-list'),
+              structural_record('identity-relation', 'same'),
+              structural_record('identity-relation', 'distinct'),
+          ]
+
+          def closure(probes):
+              # behavior vector -> representative object-language term
+              known = {tuple(probes): 'x'}
+              for c in CONSTANTS:
+                  known.setdefault(tuple(c for _ in probes), repr(c))
+
+              totals = [len(known)]
+              new_counts = []
+              for _round in (1, 2):
+                  before = dict(known)
+                  items = list(before.items())
+
+                  for behavior, term in items:
+                      out = tuple(atom(v) for v in behavior)
+                      known.setdefault(out, f'(atom {term})')
+
+                  for (left, left_term), (right, right_term) in product(items, repeat=2):
+                      out = tuple(eq(a, b) for a, b in zip(left, right))
+                      known.setdefault(out, f'(eq {left_term} {right_term})')
+
+                      out = tuple(
+                          ERR if a == ERR or b == ERR else pair(a, b)
+                          for a, b in zip(left, right)
+                      )
+                      known.setdefault(out, f'(cons {left_term} {right_term})')
+
+                  new_counts.append(len(known) - len(before))
+                  totals.append(len(known))
+
+              varying = sum(1 for behavior in known if len(set(map(repr, behavior))) > 1)
+              return known, totals, new_counts, varying
+
+          cases = {
+              'car': [pair('a', 'z'), pair('b', 'z'), pair('c', 'z')],
+              'cdr': [pair('h', 'a'), pair('h', 'b'), pair('h', 'c')],
+          }
+          target = ('a', 'b', 'c')
+
+          for name, probes in cases.items():
+              known, totals, new_counts, varying = closure(probes)
+              print(name, 'totals=', totals, 'new=', new_counts, 'varying=', varying)
+              assert totals == [12, 157, 24349], (name, totals)
+              assert new_counts == [145, 24192], (name, new_counts)
+              assert varying == 6913, (name, varying)
+              assert target not in known, f'{name}: target behavior unexpectedly found as {known[target]}'
+
+          print('PASS: no CAR/CDR target behavior found through round 2 in the declared eager ATOM/EQ/CONS basis')
+          PY
+
+      - name: Research branch diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"

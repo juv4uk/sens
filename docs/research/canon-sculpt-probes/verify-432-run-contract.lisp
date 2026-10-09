@@ -1,0 +1,10 @@
+(run-contract
+  (issue 432)
+  (basis (atom eq cons))
+  (rounds 2)
+  (expected-totals (12 157 24349))
+  (expected-new (145 24192))
+  (expected-varying 6913)
+  (car-target (a b c))
+  (cdr-target (a b c))
+  (expected-target-status absent-through-bound))

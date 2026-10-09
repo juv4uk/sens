@@ -1,0 +1,2 @@
+VERIFICATION-ONLY / NEVER MERGE.
+This child exists only to execute the bounded #432 research search on GitHub Actions.
