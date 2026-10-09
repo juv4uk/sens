@@ -101,7 +101,7 @@ def assumptions_for(n):
 
 
 def generated():
-    """2048 portable mathematical cases: 256 2-var CNFs × 8 assumption sets."""
+    """2304 portable cases: 256 2-variable CNFs × 9 assumption sets."""
     universe = literal_universe(2)
     assert len(universe) == 8
     ass = list(assumptions_for(2))
@@ -169,9 +169,8 @@ class TestD10UnitPropagation(unittest.TestCase):
                 for lit in result["forced"]:
                     self.assertTrue(all(model[abs(lit)] == (lit > 0) for model in models))
                 if result["all_satisfied"]:
-                    self.assertEqual(len(result["forced"]),
-                                     len({abs(l) for c in cnf for l in c} |
-                                         {abs(l) for l in facts}))
+                    self.assertTrue(all(any(lit in result["forced"] for lit in clause)
+                                        for clause in cnf))
                 quiescent += 1
             count += 1
         self.assertEqual(count, 2304)
