@@ -79,6 +79,16 @@ def verify(inv,src,his,state,low,ledger,doc):
     for transition in records:
         for pointer in transition.get("appended_sources", []):
             assert pointer in inv["sources"], "append event source missing"
+    cursor=POST
+    gray_index=records.index(historical_gray)
+    appended_ids=[]
+    for transition in records[gray_index+1:]:
+        assert transition["previous_inventory_blob_sha"]==cursor, "transition SHA chain break"
+        cursor=transition["resulting_inventory_blob_sha"]
+        assert transition["coordinates_added"]==transition["ratified_added"]==0
+        appended_ids.extend(transition["added_stable_ids"])
+    assert cursor==blob(inv), "latest transition not equal to actual inventory Git blob"
+    assert appended_ids==[item["stable_id"] for item in inv["rows"][634:]]
     ledgerrows=list(csv.DictReader(io.StringIO(ledger),delimiter="\t"))
     for idx,(r,s) in enumerate(zip(inv["rows"][632:634],src["rows"])):
         assert r["stable_id"]==s["stable_id"]
