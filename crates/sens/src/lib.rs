@@ -35,6 +35,8 @@ mod compiler_language;
 pub mod selfhost_lineage;
 mod domain_words;
 mod domain_identity;
+#[allow(dead_code)]
+mod domain_owner_generated;
 mod packed_bits;
 mod outer_envelope;
 mod binary_framing;
