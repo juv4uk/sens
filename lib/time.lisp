@@ -19,8 +19,18 @@
                            (00001101 (00010100 yoe 4) (00010100 yoe #d100)))))
            (mp (00010100 (00001100 (00001110 5 doy) 2) 153))
            (day (00001100 (00001101 doy (00010100 (00001100 (00001110 153 mp) 2) 5)) 1))
-           (month (00001100 mp (00000111 ((00011010 mp #d10) 1 3) ((00011010 mp #d10) 0 -9))))
-           (year (00001100 y (00000111 ((00011101 month 2) 1 1) ((00011101 month 2) 0 0)))))
+           (month (00001100 mp
+  (00000111
+    ((00011010 mp #d10) (00001100 mp 3))
+    ((00000010 (00000001 ())) (00001100 mp -9))
+  )
+))
+           (year (00001100 y
+  (00000111
+    ((00011101 month 2) 1)
+    ((00000010 (00000001 ())) 0)
+  )
+)))
       (00100111 year month day))))
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
@@ -99,21 +109,21 @@
             ((00011010 ntp-seconds 2208988800)
              (00100111 (00000001 rejected) (00000001 invalid-epoch)))
             ((00000010 (00000001 ()))
-             (00100111
-               (00000001 accepted)
-               host
+             (00100111 (00000001 accepted) host
                (00001101 ntp-seconds 2208988800)
-               (00010100 (00001110 fraction #d1000000000) 4294967296))))
+               (00010100 (00001110 fraction #d1000000000) 4294967296))
+            )
+          )
+         )
          ((00000010 (00000001 ()))
-          (00100111 (00000001 rejected) (00000001 invalid-response))))
+          (00100111 (00000001 rejected) (00000001 invalid-response)))
+       )
+      )
       ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-response)))))
-)))
-
-; Adapter for the raw host boundary. The host returns either:
-;   (ntp-fields host mode stratum ntp-seconds fraction)
-; or a transport-level rejection such as (rejected receive-failed).
-; Lisp owns every protocol interpretation after that raw observation boundary.
+       (00100111 (00000001 rejected) (00000001 invalid-response)))
+    )
+  )
+)
 (00001001 internet-time-raw->observation
   (00001000 (raw)
     (00000111
@@ -139,19 +149,13 @@
   (00001000 (observation)
     (00000111
       ((00000011 (00000101 observation) (00000001 accepted))
-       (00100111
-         (00000001 accepted)
-         (00101111 observation)
-         (01011111
-           (00110000 observation)
-           (00000101 (00000110 (00000110 (00000110 observation))))))
-      ((00000010 (00000001 ())) observation)))
-))
-
-; Nanoseconds are the one monotonic host observation. Milliseconds are only a
-; coarser language-level view, so derive them instead of requiring a second
-; host clock primitive. For the non-negative monotonic counter, quotient gives
-; whole elapsed milliseconds (floor toward zero == floor here).
+       (00100111 (00000001 accepted) (00101111 observation)
+         (01011111 (00110000 observation)
+           (00000101 (00000110 (00000110 (00000110 observation)))))))
+      ((00000010 (00000001 ())) observation)
+    )
+  )
+)
 (00001001 milliseconds-from-nanoseconds
   (00001000 (nanoseconds)
     (00010100 nanoseconds #d1000000)))
@@ -226,13 +230,16 @@
          ((00011011 offset-seconds 86400)
           (00100111 (00000001 rejected) (00000001 invalid-offset)))
          ((00000010 (00000001 ()))
-          (00100111
-            (00000001 accepted)
-            (00100111 (00000001 timezone) name offset-seconds))))
+          (00100111 (00000001 accepted)
+            (00100111 (00000001 timezone) name offset-seconds))
+         )
+       )
+      )
       ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-name)))))
-))
-
+       (00100111 (00000001 rejected) (00000001 invalid-name)))
+    )
+  )
+)
 (00001001 timezone-name
   (00001000 (config)
     (00101111 config)))
