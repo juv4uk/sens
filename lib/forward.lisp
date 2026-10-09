@@ -1256,7 +1256,11 @@
 ; `append-new`/`member?` already handles that, same as Steps 1-5).
 (00001001 fire-rule-multi
   (00001000 (rule facts)
-    (map-apply-head (00000101 rule) (match-conditions (00000110 rule) facts (00000001 ())))))
+    (00000111
+      ((00000010 (00000110 rule))
+       (map-apply-head (00000101 rule) (00100111 (00000001 ()))))
+      ((00000100 (00000010 (00000110 rule)))
+       (map-apply-head (00000101 rule) (match-conditions (00000110 rule) facts (00000001 ()))))))))
 
 (00001001 fire-rules-multi
   (00001000 (rules facts)
