@@ -59,9 +59,9 @@
 (00001001 witness-superseded-outcome
   (00001000 (witness expected-entry)
     (00000111
-      ((00000010 expected-entry)
+      ((00100010 expected-entry (00000001 ()))
        (00000001 ()))
-      ((witness-d1-no? (00000010 expected-entry))
+      ((witness-d1-no? (00100010 expected-entry (00000001 ())))
        (10011100 ((expr (witness-field (00000001 expr) witness)))
          (00000111
            ((00100010 expr "(00000010 (quote radio))")
@@ -76,8 +76,10 @@
                (00100111 (00000001 value) "(1)"))
               ((00100010 (00000110 expected-entry) "()")
                (00100111 (00000001 value) "(0)"))
-              (t (00000001 ()))))
-           (t (00000001 ()))))))))
+              ((witness-d1-no? (witness-d1-no))
+               (00000001 ()))))
+           ((witness-d1-no? (witness-d1-no))
+               (00000001 ()))))))))
 
 ; Convert one authoritative conformance row into the current expected-outcome
 ; envelope. A non-empty supersession record wins over the historical expected
