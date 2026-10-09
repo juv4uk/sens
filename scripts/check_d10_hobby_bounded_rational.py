@@ -151,11 +151,11 @@ def self_test(inv, state, foundation, intake):
     mutants=[
        ("change old semantic",lambda i,s,d: i["rows"][5].update({"behavior":"forged"})),
        ("duplicate new ID",lambda i,s,d: i["rows"].append(copy.deepcopy(i["rows"][-1]))),
-       ("invent coordinate",lambda i,s,d: i["rows"][-1].update({"coordinate":"0000000000"})),
-       ("ratify",lambda i,s,d: i["rows"][-1].update({"ratified_resident":True})),
+       ("invent coordinate",lambda i,s,d: next(row for row in i["rows"] if row["stable_id"] == STABLE).update({"coordinate":"0000000000"})),
+       ("ratify",lambda i,s,d: next(row for row in i["rows"] if row["stable_id"] == STABLE).update({"ratified_resident":True})),
        ("change source SHA",lambda i,s,d: d["origin"].update({"donor_blob_sha":"0"*40})),
        ("erase falsifiers",lambda i,s,d: d["selected"][0].update({"falsifiers":[]})),
-       ("forge T5 permission",lambda i,s,d: i["rows"][-1].update({"physical_t5_authorized":True})),
+       ("forge T5 permission",lambda i,s,d: next(row for row in i["rows"] if row["stable_id"] == STABLE).update({"physical_t5_authorized":True})),
        ("wrong total",lambda i,s,d: s["target"].update({"remaining_semantic_candidates":-1})),
     ]
     # The changed-old-semantic row is rejected by transition-history checker;
