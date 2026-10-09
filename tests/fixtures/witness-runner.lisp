@@ -59,9 +59,9 @@
 (00001001 witness-superseded-outcome
   (00001000 (witness expected-entry)
     (00000111
-      ((00000010 expected-entry) () (00000001 ()))
-      ((00000010 expected-entry) (1) (00000001 ()))
-      ((00000010 expected-entry) (0)
+      ((00000010 expected-entry)
+       (00000001 ()))
+      ((witness-d1-no? (00000010 expected-entry))
        (10011100 ((expr (witness-field (00000001 expr) witness)))
          (00000111
            ((00100010 expr "(00000010 (quote radio))")
@@ -84,27 +84,28 @@
 ; field; otherwise the row is interpreted exactly as committed.
 (00001001 witness-expected-outcome
   (00001000 (witness)
-    (10011100 ((expected-entry (00101101 (00000001 expected) witness))
-          (error-entry (00101101 (00000001 error) witness)))
+    (10011100 ((expected-entry (witness-field (00000001 expected) witness))
+          (error-entry (witness-field (00000001 error) witness)))
       (10011100 ((superseded (witness-superseded-outcome witness expected-entry)))
         (00000111
-          ((00000010 superseded) (0) superseded)
-          ((00000010 expected-entry) (0)
+          ((witness-d1-no? (00100010 superseded (00000001 ())))
+           superseded)
+          ((00100010 expected-entry (00000001 ()))
            (00000111
-             ((00000010 error-entry) (0)
-              (00100111 (00000001 malformed) (00000001 expected-and-error)))
-             ((00000010 error-entry) ()
-              (00100111 (00000001 value) (00000110 expected-entry)))))
-          ((00000010 expected-entry) ()
+             ((00100010 error-entry (00000001 ()))
+              (witness-malformed-result (00000001 missing-outcome) witness))
+             ((witness-d1-no? (00100010 error-entry (00000001 ())))
+              (00100111 (00000001 witness-result)
+                    (00100111 (00000001 status) (00000001 error))
+                    (00100111 (00000001 actual) error-entry))))
+          ((witness-d1-no? (00100010 expected-entry (00000001 ())))
            (00000111
-             ((00000010 error-entry) (0)
-              (00100111 (00000001 error) (00000110 error-entry)))
-             ((00000010 error-entry) ()
-              (00100111 (00000001 malformed) (00000001 missing-outcome))))))))))
-
-; The normative comparator. Backends provide ACTUAL only. Expected authority is
-; read/derived above in Lisp.
-(00001001 witness-verdict
+             ((00100010 error-entry (00000001 ()))
+              (00100111 (00000001 witness-result)
+                    (00100111 (00000001 status) (00000001 value))
+                    (00100111 (00000001 actual) expected-entry)))
+             ((witness-d1-no? (00100010 error-entry (00000001 ())))
+              (witness-malformed-result (00000001 expected-and-error) witness))))))))))(00001001 witness-verdict
   (00001000 (witness actual)
     (10011100 ((expected (witness-expected-outcome witness)))
       (00000111
