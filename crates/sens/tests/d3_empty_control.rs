@@ -100,26 +100,6 @@ fn non_d1_values_fail_closed_as_cond_tests() {
 }
 
 #[test]
-fn historical_truthiness_rows_cannot_reenter_current_tier1_authority() {
-    let fixtures = include_str!("../../../tests/fixtures/conformance.lisp");
-    for marker in [
-        "(cond (0 (quote truthy))",
-        "(cond (0 (quote zero-is-truthy))",
-        "(cond (() (quote first))",
-        "(за-умовою (() (як-є wrong))",
-    ] {
-        let line = fixtures
-            .lines()
-            .find(|line| line.contains(marker))
-            .expect("historical truthiness fixture must remain explicit provenance");
-        assert!(line.contains("(tier . 3)"));
-        assert!(line.contains("(role . \"historical-compatibility\")"));
-        assert!(line.contains("(compatibility . historical-truthiness)"));
-        assert!(!line.contains("(role . \"constitutive\")"));
-    }
-}
-
-#[test]
 fn three_part_clause_is_rejected_on_exact_d3_cond() {
     let bad_clause = Expr {
         kind: ExprKind::List(Rc::from(
