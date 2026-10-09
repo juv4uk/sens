@@ -77,6 +77,76 @@ def cpu_report(path: Path) -> tuple[list[str], dict]:
     return out, {"git_sha": next(iter(shas)), "provenance": provenance, "cases": summaries}
 
 
+def physical_hot_report(path: Path) -> tuple[list[str], dict]:
+    """Compare actual same-byte T5/D2 mechanisms; never a cross-language win."""
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("no measured physical hot rows")
+    by_count: dict[int, dict[str, dict]] = defaultdict(dict)
+    for row in rows:
+        n, phase = row["forms"], row["phase"]
+        if not isinstance(n, int) or n < 1 or phase in by_count[n]:
+            raise ValueError("invalid or duplicate physical phase")
+        for key in ("median_ns_op", "p95_ns_op", "samples", "physical_bytes"):
+            if not isinstance(row[key], int):
+                raise ValueError(f"{phase}: invalid {key}")
+        if (row["median_ns_op"] <= 0 or row["p95_ns_op"] < row["median_ns_op"]
+                or row["samples"] < 3 or row["physical_bytes"] < 1):
+            raise ValueError(f"{phase}: invalid timing or evidence")
+        by_count[n][phase] = row
+
+    env_path = path.with_name("hot-environment.json")
+    environment = json.loads(env_path.read_text(encoding="utf-8")) if env_path.is_file() else {}
+    results = []
+    out = [
+        "## Physical T5 to D2 · measured hot CPU",
+        "",
+        "Same physical T5 bytes and D2 grammar per workload. Warm process; "
+        "p50/p95 are nanoseconds per packet; process startup is excluded.",
+        "",
+        "| D3 QUOTE forms | Physical T5 bytes | Visible T5→D2 p50 ns | Previous direct T5→D2 p50 ns | Typed-word T5→D2 p50 ns | Previous / typed | Visible / typed | Typed p95 ns |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for n, phases in sorted(by_count.items()):
+        required = {"t5_open_d2", "t5_direct_d2", "t5_words_d2"}
+        if not required.issubset(phases):
+            raise ValueError(f"{n} forms lacks required phases: {sorted(required - set(phases))}")
+        same_bytes = {r["physical_bytes"] for r in phases.values()}
+        hashes = {r["physical_sha256"] for r in phases.values()}
+        observables = {r["observable"] for r in phases.values()}
+        if len(same_bytes) != 1 or len(hashes) != 1 or len(observables) != 1:
+            raise ValueError(f"{n} forms has mismatched payload or result across phases")
+        visible = phases["t5_open_d2"]["median_ns_op"]
+        prior = phases["t5_direct_d2"]["median_ns_op"]
+        typed = phases["t5_words_d2"]["median_ns_op"]
+        p95 = phases["t5_words_d2"]["p95_ns_op"]
+        result = {
+            "forms": n, "physical_bytes": next(iter(same_bytes)),
+            "visible_median_ns": visible, "previous_direct_median_ns": prior,
+            "typed_word_median_ns": typed, "typed_word_p95_ns": p95,
+            "previous_over_typed": prior / typed, "visible_over_typed": visible / typed,
+            "samples": phases["t5_words_d2"]["samples"],
+            "payload_sha256": next(iter(hashes)),
+        }
+        results.append(result)
+        out.append(
+            f"| {n} | {result['physical_bytes']} | {visible:,} | {prior:,} | "
+            f"{typed:,} | {prior / typed:.3f}x | {visible / typed:.3f}x | {p95:,} |"
+        )
+    out += [
+        "",
+        "The previous direct lane performs extra typed-word repacking; the new "
+        "lane sends decoded typed words directly to the same D2 reader. "
+        "These ratios measure one reader task, not overall language execution "
+        "or SENS vs another runtime.",
+        "",
+        f"Benchmark commit: \`{environment.get('commit', 'unknown')}\`; "
+        f"samples per phase: {environment.get('samples', 'unknown')}.",
+        "",
+    ]
+    return out, {"environment": environment, "cases": results}
+
+
 def pack_report(path: Path) -> tuple[list[str], dict]:
     with path.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))
@@ -118,10 +188,11 @@ def pack_report(path: Path) -> tuple[list[str], dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cpu-jsonl", type=Path)
+    ap.add_argument("--physical-hot-json", type=Path)
     ap.add_argument("--pack-tsv", type=Path)
     ap.add_argument("--out", required=True, type=Path)
     args = ap.parse_args()
-    if not args.cpu_jsonl and not args.pack_tsv:
+    if not args.cpu_jsonl and not args.pack_tsv and not args.physical_hot_json:
         ap.error("supply at least one measured evidence file")
     sections = [
         "# SENS benchmark scoreboard",
@@ -135,6 +206,10 @@ def main() -> None:
         text, data = cpu_report(args.cpu_jsonl)
         sections.extend(text)
         report["cpu"] = data
+    if args.physical_hot_json:
+        text, data = physical_hot_report(args.physical_hot_json)
+        sections.extend(text)
+        report["physical_hot"] = data
     if args.pack_tsv:
         text, data = pack_report(args.pack_tsv)
         sections.extend(text)
