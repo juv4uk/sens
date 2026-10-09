@@ -1,0 +1,140 @@
+{
+ "schema": "d10-interest-proposal/v1",
+ "status": "RESEARCH-UNRATIFIED",
+ "authority": "#4013/#4463",
+ "basis": "owner interests evidenced by owner repositories; candidates only, NO positions, NO ratification",
+ "rule": "#4463 — candidates must carry donor provenance; owner ratifies; host/IO stays island",
+ "families": {
+  "chess": {
+   "donor_repos": [
+    "juv4uk/chess",
+    "juv4uk/lisp-chess-engine",
+    "juv4uk/simple-lisp-chess-engine",
+    "juv4uk/chess-lisp-zero",
+    "juv4uk/chess-tauri-zero",
+    "juv4uk/hsChess",
+    "juv4uk/alpha-zero-general",
+    "juv4uk/lc0"
+   ],
+   "candidate_functions": [
+    "board-from-fen",
+    "fen-from-board",
+    "piece-at",
+    "generate-moves",
+    "legal-moves?",
+    "apply-move",
+    "is-check?",
+    "is-mate?",
+    "is-stalemate?",
+    "perft",
+    "evaluate-position",
+    "alpha-beta-search",
+    "mcts-select",
+    "mcts-backpropagate",
+    "uci-parse",
+    "pgn-parse"
+   ],
+   "count": 16
+  },
+  "astronomy": {
+   "donor_repos": [
+    "juv4uk/vsop2013",
+    "juv4uk/VedicAstro"
+   ],
+   "candidate_functions": [
+    "julian-date",
+    "heliocentric-position",
+    "orbital-elements",
+    "ecliptic-to-equatorial",
+    "rise-set",
+    "planet-longitude",
+    "ayanamsa",
+    "nakshatra-of",
+    "tithi-of",
+    "aspect-angle"
+   ],
+   "count": 10
+  },
+  "sanskrit": {
+   "donor_repos": [
+    "juv4uk/shiva-sutras",
+    "juv4uk/vidyut",
+    "juv4uk/spanda",
+    "juv4uk/sanskritworld_texts",
+    "juv4uk/panca-vac"
+   ],
+   "candidate_functions": [
+    "apply-sandhi",
+    "pratyahara-members",
+    "guna-of",
+    "vrddhi-of",
+    "derive-lakara",
+    "stop-voice",
+    "stop-devoice"
+   ],
+   "count": 7
+  },
+  "ukrainian-nlp": {
+   "donor_repos": [
+    "juv4uk/dict_uk",
+    "juv4uk/nlp_uk",
+    "juv4uk/latynka",
+    "juv4uk/pravda",
+    "juv4uk/word2vec",
+    "juv4uk/Ucuddle-Search-Engine"
+   ],
+   "candidate_functions": [
+    "tokenize-uk",
+    "lemmatize-uk",
+    "translit-latynka",
+    "detranslit-latynka",
+    "stem-uk",
+    "word-embedding"
+   ],
+   "count": 6
+  },
+  "graph": {
+   "donor_repos": [
+    "juv4uk/basalt",
+    "juv4uk/graph-heavy-basalt",
+    "juv4uk/knowledge-graph-basalt"
+   ],
+   "candidate_functions": [
+    "add-edge",
+    "neighbors-of",
+    "shortest-path",
+    "topological-sort",
+    "connected-components?",
+    "subgraph-of"
+   ],
+   "count": 6
+  },
+  "physics": {
+   "donor_repos": [
+    "juv4uk/esp32-pendulum"
+   ],
+   "candidate_functions": [
+    "pendulum-step",
+    "pendulum-period",
+    "energy-of"
+   ],
+   "count": 3
+  },
+  "retro-os": {
+   "donor_repos": [
+    "juv4uk/coreboot",
+    "juv4uk/minix",
+    "juv4uk/me_cleaner",
+    "juv4uk/fpga-lisp"
+   ],
+   "candidate_functions": [
+    "memory-map-of",
+    "io-port-read",
+    "io-port-write",
+    "device-descriptor"
+   ],
+   "count": 4
+  }
+ },
+ "total_candidates": 52
+}
