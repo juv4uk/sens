@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 625,
-    "remaining_semantic_candidates": 399,
+    "selected_semantic_candidates": 627,
+    "remaining_semantic_candidates": 397,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 369,
+    "unplaced_selected_candidates": 371,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -318,5 +318,13 @@
     "selected": 23,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
+  },
+  "loops_active_values_intake": {
+    "artifact": "knowledge/d10-loops-active-values-intake-v1.json",
+    "source": "The LOOPS Manual (1983) §§5.1–5.5",
+    "selected_research": 2,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE",
+    "independent_historical_runtime_oracle": false
   }
 }
