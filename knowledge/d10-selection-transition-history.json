@@ -146,6 +146,33 @@
         "scripts/check-d10-proposal-ledger.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.words.cyclic-minimum-rotation.20261009",
+      "authority": "#4013 #4463 owner-directed cross-hobby semantic research",
+      "evidence": [
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+        "juv4uk/sens@03f71c59c382814d9b158f244b24e8a0c34cbd3d:knowledge/d10-cyclic-word-canonical-proposal-20261009.json:1"
+      ],
+      "previous_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+      "resulting_inventory_blob_sha": "4746be7be2f2aa2ae8551e7ba6615db7404e8788",
+      "added_stable_ids": [
+        "d10.words.cyclic-minimum-rotation.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-cyclic-word-canonical-proposal-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 634,
+      "resulting_selected": 635,
+      "decision": "SELECTED-RESEARCH only; explicit owner ratification pending; no physical T5",
+      "tests": [
+        "tests/test_d10_cyclic_least_rotation.py",
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }
