@@ -1,0 +1,26 @@
+name: D10 astrofoto pinhole exact research
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-astrophoto-exact-pinhole-research-20261009.json
+      - tests/test_d10_astrophoto_pinhole_exact.py
+      - .github/workflows/d10-astrophoto-pinhole-exact.yml
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-astrophoto-exact-pinhole-research-20261009.json
+      - tests/test_d10_astrophoto_pinhole_exact.py
+      - .github/workflows/d10-astrophoto-pinhole-exact.yml
+
+permissions:
+  contents: read
+
+jobs:
+  exact-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact pinhole homography and inverse ray witnesses, negative controls
+        run: python3 tests/test_d10_astrophoto_pinhole_exact.py
