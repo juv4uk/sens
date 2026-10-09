@@ -9,11 +9,12 @@
 //! - Compare C1/C2 via declared equivalence method
 //! - Record complete lineage with SelfhostLineage schema
 
-use serde::{Deserialize, Serialize};
+// Serde is deliberately test-only in this capability-free core.
 use std::collections::BTreeMap;
 
 /// State of one fixed-point cycle run.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct FixpointCycleCheckpoint {
     /// Cycle run identifier (timestamp or session ID).
     pub run_id: String,
@@ -41,7 +42,8 @@ pub struct FixpointCycleCheckpoint {
 }
 
 /// C0 bootstrap compiler state.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct C0Facts {
     /// C0 implementation SHA (CML commit).
     pub implementation_sha: String,
@@ -63,7 +65,8 @@ pub struct C0Facts {
 }
 
 /// Result of one compiler generation.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GenerationResult {
     /// Generation name ("C1" or "C2").
     pub name: String,
@@ -88,7 +91,8 @@ pub struct GenerationResult {
 }
 
 /// Equivalence check result.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct EquivalenceCheck {
     /// Method used: "byte-identical", "normalized-ir", "semantic+corpus".
     pub method: String,
