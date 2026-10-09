@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 625,
+    "selected_semantic_candidates": 626,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 369,
-    "remaining_semantic_inventory": 399,
+    "unplaced_selected_candidates": 370,
+    "remaining_semantic_inventory": 398,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13167,6 +13167,32 @@
       ],
       "status": "SELECTED-RESEARCH-CANDIDATE",
       "source_class": "SELFHOST-REASON-SEMANTIC-HARVEST"
+    },
+    {
+      "stable_id": "d10.historical.clos.find-method.c01",
+      "semantic_name": "FIND-METHOD",
+      "source_name": "find-method",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-EXACT-METHOD-LOOKUP",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "GENERIC-METHOD-IDENTITY",
+      "behavior": "Find the exact method object in one generic function by its ordered method qualifiers and required-parameter specializer identities; no method body executes. A specializer-arity mismatch is an error; an absent exact match returns NIL only when errorp is false, otherwise a D2-owned error path.",
+      "surface_uk": "знайти-метод",
+      "surface_ukr": "одержати-точний-метод",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "historical_source": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/stagenfun_find-method.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4182",
+        "#4842",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json:CLOS-01",
+        "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/stagenfun_find-method.html"
+      ],
+      "ratified_resident": false
     }
   ],
   "parent_domain": {
@@ -13199,6 +13225,7 @@
     "knowledge/d10-clips-library-harvest-v1.json",
     "knowledge/d10-lisp-machine-evaluator-harvest-v1.json",
     "knowledge/d10-interlisp-psl-history-harvest-v1.json",
-    "knowledge/d10-selfhost-reason-harvest-v1.json"
+    "knowledge/d10-selfhost-reason-harvest-v1.json",
+    "knowledge/d10-find-method-selection-v1.json"
   ]
 }
