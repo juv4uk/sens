@@ -22,5 +22,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test polarity, source preservation and fail-closed staging
         run: python3 scripts/test_cond_modernize.py
-      - name: Parse only (never overwrite active library source)
-        run: python3 scripts/cond-modernize.py --scan lib --json > "$RUNNER_TEMP/cond-report.json"
+      - name: Audit active library parse completeness (read-only)
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/cond-modernize.py --scan lib --json > "$RUNNER_TEMP/cond-report.json"
+          code=$?
+          set -e
+          python3 - "$RUNNER_TEMP/cond-report.json" <<'PY'
+          import json, sys
+          d=json.load(open(sys.argv[1], encoding="utf-8"))
+          print("Inventory findings:", len(d["findings"]))
+          print("Parse failures:", len(d["errors"]))
+          for error in d["errors"][:40]:
+              print("BLOCKED:", error)
+          PY
+          exit "$code"
