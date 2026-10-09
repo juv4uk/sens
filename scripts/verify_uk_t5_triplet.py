@@ -97,8 +97,18 @@ class WordParser:
             raise ProjectionBlocked("empty exact-word program")
         result = self.term()
         if self.index != len(self.words):
-            raise ProjectionBlocked("multiple top-level forms are not yet admitted here")
+            raise ProjectionBlocked("multiple top-level forms require parse_program")
         return result
+
+    def parse_program(self):
+        # Кожна форма завершується власним D2 CLOSE або є одним точним словом.
+        # Додаткове D2 SPACE між верхньорівневими формами НЕ є роздільником.
+        if not self.words:
+            raise ProjectionBlocked("empty exact-word program")
+        forms = []
+        while self.index < len(self.words):
+            forms.append(self.term())
+        return tuple(forms)
 
 
 def proved_nil_pair_tree(node) -> bool:
@@ -175,7 +185,12 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str],
 
 def canonical_uk_from_words(words: list[str]) -> str:
     d1, d3, d4 = uk_surface(1), uk_surface(3), uk_surface(4)
-    return render_uk(WordParser(words).parse(), d1, d3, d4) + "\n"
+    # Канонічне ук-представлення: рівно один LF після кожної D2-форми.
+    # Тільки вже доведений renderer окремої форми; жодної нової семантики.
+    return "".join(
+        render_uk(node, d1, d3, d4) + "\n"
+        for node in WordParser(words).parse_program()
+    )
 
 
 def project_current_uk(source: str) -> list[str]:
