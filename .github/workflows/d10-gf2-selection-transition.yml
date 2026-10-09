@@ -1,0 +1,27 @@
+name: D10 GF2 research selection immutable 635 to 636
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'scripts/check_d10_gf2_selection_transition.py'
+      - '.github/workflows/d10-gf2-selection-transition.yml'
+  workflow_dispatch:
+jobs:
+  gf2-selected:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify GF2 source admission, exact 635 baseline and negative controls
+        run: python3 scripts/check_d10_gf2_selection_transition.py --self-test
+      - name: Global transition invariants
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Proposal ledger and no unknown coordinates
+        run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - name: Prevent changes during validation
+        run: git diff --exit-code
