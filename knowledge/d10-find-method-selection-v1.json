@@ -1,0 +1,70 @@
+{
+  "schema": "d10-find-method-selection-v1/v1",
+  "date": "2026-10-09",
+  "status": "SELECTED-RESEARCH-PENDING-OWNER-REVIEW",
+  "semantic_name": "FIND-METHOD",
+  "stable_id": "d10.historical.clos.find-method.c01",
+  "source_class": "HISTORICAL-CLOS-EXACT-METHOD-LOOKUP",
+  "candidate_selection_increment": 1,
+  "selected_prior": 625,
+  "selected_branch": 626,
+  "remaining_branch": 398,
+  "ratified_increment": 0,
+  "physical_t5_authorized": false,
+  "historical_primary": {
+    "url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/stagenfun_find-method.html",
+    "companion_url": "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html",
+    "historical_dossier": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+    "historical_proposal_id": "CLOS-01",
+    "dossier_git_blob": "df8ed73011df39f9ec689046ce6936cc00892215"
+  },
+  "owner_constraints": [
+    "D2 alone owns structural/evaluation control",
+    "No D1-D9 rewriting, no T5 changes",
+    "No 10-bit coordinate without owner ratification",
+    "Method lookup is a query, method invocation is a separate authority"
+  ],
+  "abi": {
+    "arguments": [
+      "generic_function",
+      "ordered_qualifiers",
+      "required_specializers",
+      "optional_errorp(default=true)"
+    ],
+    "return": "the exact registered method object, or NIL when absent and errorp=false",
+    "error": "required-specializer arity mismatch always errors; no match errors if errorp=true; control/error dispatch belongs to D2",
+    "effect": "read-only method-registry query; MUST NOT call body or invoke applicable methods"
+  },
+  "independent_semantic_argument": "DEFGENERIC and DEFMETHOD mutate definitions; APPLICABLE-METHODS returns applicable methods for runtime argument evidence; FIND-METHOD retrieves a single identity by an exact signature even if the method is inapplicable to an alternative runtime subclass. It is not a bare alias for either operation.",
+  "positive_witnesses": [
+    "register primary and before method for same specializer; exact qualifier lookup returns distinct method identities without invocation",
+    "with method registered for BASE, query exact CHILD specializer yields NIL with errorp=false although BASE method is applicable to CHILD at runtime",
+    "method registration order permutations preserve returned identity for a fixed exact signature"
+  ],
+  "negative_falsifiers": [
+    "wrong qualifier or reversed ordered qualifier sequence must never retrieve a different method",
+    "wrong required-specializer arity raises error, even when errorp=false",
+    "no matching signature raises error by default, returns NIL only when errorp=false",
+    "read-only lookup must never execute a method body",
+    "returned method ID must be the stored method object, not a synthetic applicable-method plan"
+  ],
+  "dedup": {
+    "d1_d9_exact_name_collision": false,
+    "canonical_d10_exact_name_collision_before": false,
+    "nearest_selected": [
+      "DEFMETHOD",
+      "DEFGENERIC"
+    ],
+    "nearest_pending": [
+      "APPLICABLE-METHODS"
+    ],
+    "historical_dossier_selected_in_inventory_before": false
+  },
+  "admission": {
+    "coordinate": null,
+    "ratified_resident": false,
+    "original_executable_t5_migrations": 0,
+    "reference_oracle": "tests/fixtures/d10-find-method-real-cl-oracle.lisp",
+    "sensation": "NOT_A_SENS_EXECUTION_ORACLE"
+  }
+}
