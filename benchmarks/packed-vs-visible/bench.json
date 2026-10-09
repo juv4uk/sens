@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "packed-vs-visible",
+  "wing": "Binary-first SENS / exact D2 ingestion",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does the current D2 reader ingest pre-bounded dense physical bits faster than visible 0/1 source, and how many payload bytes are saved at equal domain-AST output?",
+  "claim": "Compares in-process release-mode parse and allocation for identical D2 ASTs, across paired repetitions and multiple sizes. Width schedule is caller-supplied and excluded from payload bytes: this is NOT a self-describing wire format, not end-to-end CLI execution, and CI timings cannot establish stable hardware speedups.",
+  "witness": [
+    "crates/sens/examples/packed_vs_visible_bench.rs",
+    "README.md",
+    ".github/workflows/packed-vs-visible-bench.yml"
+  ],
+  "status": "ACTIVE-MEASUREMENT",
+  "generation": "contract-11-8-exact-domain; 2026-10-09",
+  "axis": "binary-first/packed-bytes-vs-visible-bits/ingest",
+  "reproduce": "cargo run --locked --release -p sens --example packed_vs_visible_bench -- --samples 9"
+}
