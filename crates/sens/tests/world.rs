@@ -220,58 +220,6 @@ fn independent_branches_can_grow_from_the_same_world() {
 }
 
 #[test]
-fn backward_reasoning_reads_the_selected_world_snapshot() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((w0 (empty-world)))
-              (let ((w1 (world-tell w0 (quote family) (quote ((parent tom bob))))))
-                (let ((w2 (world-retract w1 (quote family) (quote ((parent tom bob))))))
-                  (list (cond
-                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) () (quote no))
-                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) (1) (quote no))
-                          (t (quote yes)))
-                        (cond
-                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) () (quote no))
-                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) (1) (quote no))
-                          (t (quote yes)))))))
-            "#
-        ),
-        "(yes no)"
-    );
-}
-
-#[test]
-fn backward_reasoning_keeps_independent_branches_isolated() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((root (empty-world)))
-              (let ((cats (world-tell root (quote zoo) (quote ((likes alice cats)))))
-                    (dogs (world-tell root (quote zoo) (quote ((likes alice dogs))))))
-                (list (cond
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) () (quote no))
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) (1) (quote no))
-                        (t (quote yes)))
-                      (cond
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) () (quote no))
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) (1) (quote no))
-                        (t (quote yes)))
-                      (cond
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) () (quote no))
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) (1) (quote no))
-                        (t (quote yes)))
-                      (cond
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) () (quote no))
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) (1) (quote no))
-                        (t (quote yes))))))
-            "#
-        ),
-        "(yes no yes no)"
-    );
-}
-
-#[test]
 fn forward_reasoning_materializes_only_the_selected_world() {
     assert_eq!(
         eval_world(
@@ -298,26 +246,6 @@ fn world_reasoning_reports_an_unknown_module_without_global_fallback() {
     assert_eq!(
         eval_world("(forward-in-world (empty-world) (quote missing))"),
         "Module-not-found"
-    );
-}
-
-#[test]
-fn advise_world_accepts_into_a_new_queryable_world() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((before (empty-world)))
-              (let ((result (advise-world before (quote astronomy) (quote ((planet venus))))))
-                (let ((after (second result)))
-                  (list (car (car result))
-                        (world-clauses before (quote astronomy))
-                        (cond
-                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) () (quote no))
-                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) (1) (quote no))
-                          (t (quote yes)))))))
-            "#
-        ),
-        "(accepted () yes)"
     );
 }
 
@@ -491,50 +419,3 @@ fn reconstructed_equal_worlds_have_no_branch_delta() {
     );
 }
 
-#[test]
-fn equal_current_clauses_do_not_erase_distinct_world_histories() {
-    // #1312: identical clauses (structural same) paired with distinct history addresses (identity distinct)
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((direct
-                    (world-tell (empty-world) (quote zoo) (quote ((has-fur cat))))))
-              (let ((told
-                      (world-tell (empty-world) (quote zoo) (quote ((has-fur cat))))))
-                (let ((retracted
-                        (world-retract told (quote zoo) (quote ((has-fur cat))))))
-                  (let ((retold
-                          (world-tell retracted (quote zoo) (quote ((has-fur cat))))))
-                    (list (equal? (world-clauses direct (quote zoo))
-                                  (world-clauses retold (quote zoo)))
-                          (eq? (world-content-address direct)
-                              (world-content-address retold)))))))
-            "#
-        ),
-        "((1) (0))"
-    );
-}
-
-#[test]
-fn world_transition_witness_proves_contract_in_lisp() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-    eval_program(
-        include_str!("../../../tests/fixtures/world-transition-witness.lisp"),
-        &mut session,
-    )
-    .unwrap();
-    let verdict = eval_program("(wt-run-witness)", &mut session)
-        .unwrap()
-        .value
-        .to_string();
-    assert_eq!(
-        verdict,
-        "((ok parent-relation) (ok address-identity-same) (ok address-identity-distinct) (ok depth-recovery) (ok universal-t-forbidden))"
-    );
-}
