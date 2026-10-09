@@ -41,6 +41,18 @@ fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
     .expect("early SID witness must load");
 
     let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
+    let probe = format!(concat!(
+        "(10011100 ((reg (semantic-registry-read-source {registry_source:?}))) ",
+        "(10011100 ((a (semantic-registry-id-in reg (00000001 atom?))) ",
+        "(b (semantic-registry-id-in reg (00000001 атом?))) ",
+        "(c (semantic-registry-id-in reg (00000001 aṇu))) ",
+        "(d (semantic-registry-id-in reg (00000001 .?)))) ",
+        "(00100111 a b c d (00100010 a a) (00100010 a b) ",
+        "(00100010 b c) (00100010 c d))))"
+    ));
+    eprintln!("D1 SID registry DEBUG: {:?}", eval_program(&probe, &mut session)
+        .map(|v| v.value.to_string()).map_err(|e| format!("{e}")));
+
     let program = format!("(early-sid-lowering-witness {registry_source:?})");
     let rendered = eval_program(&program, &mut session)
         .expect("early SID lowering witness must execute")
