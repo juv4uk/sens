@@ -53,22 +53,38 @@ pub fn parse_canonical_packed_words(
         )
     })?;
 
+    parse_canonical_word_sequence(&words)
+
+}
+
+/// Read an already-decoded sequence of *typed* binary domain words.
+///
+/// Each word carries its width, so reconstructing a second packed bitstream
+/// and then unpacking it is unnecessary. The same D2 CanonicalReader owns all
+/// structural syntax; this adapter adds no host-created language rules.
+///
+/// Spans use virtual dense-payload bytes, rounded outward, like the existing
+/// packed-word adapter. They do NOT denote offsets in the ternary T5 file.
+pub fn parse_canonical_word_sequence(
+    words: &[BinarySourceWord],
+) -> Result<Vec<Expr>, LanguageError> {
     let mut bit_offset = 0usize;
     let mut tokens = Vec::with_capacity(words.len());
-    for word in words {
+    for &word in words {
         let start = bit_offset / 8;
-        // `unpack_binary_source_words` has already checked the complete
-        // schedule for overflow, valid widths and total payload length.
-        bit_offset += word.width();
-        let end = bit_offset / 8 + usize::from(!bit_offset.is_multiple_of(8));
+        bit_offset = bit_offset.checked_add(word.width()).ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::Parse,
+                "exact binary source word length overflow",
+                Span { start, end: start },
+            )
+        })?;
         tokens.push(BinarySourceToken {
             word,
-            span: Span { start, end },
+            span: Span { start, end: bit_offset.div_ceil(8) },
         });
     }
-    debug_assert_eq!(bit_offset, packed.bit_len());
-
-    CanonicalReader::new(&tokens, packed.byte_len()).parse_program()
+    CanonicalReader::new(&tokens, bit_offset.div_ceil(8)).parse_program()
 }
 
 /// Recognize a D2-framed Text7 identifier without changing the canonical D2 AST.
