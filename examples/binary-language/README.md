@@ -1,9 +1,9 @@
 # Physical binary D3 witness
 
-`current-cond-reference.lisp` is an **exact-width binary-word source**, containing only 0/1 tokens and whitespace. It is not historical text Lisp and contains no executable human names.
+The original `current-cond-reference.lisp` is the **current exact-width binary D3 COND reference**, exercised separately by the Rust `current_binary_preflight` test. It is not a historical Lisp program.
 
-`current-cond-reference.sens` is the canonical **physical T5 byte stream** of precisely those words, and `current-cond-reference` (extensionless) is the deterministic ASCII view: one space per word and one final LF.
+The new, standalone `current-cond-t5.lisp` is an exact copy of that binary-word program. It is a **new source cohort**, not a claimed historical migration of the preexisting reference. Its same-stem `current-cond-t5.sens` is canonical 30-byte physical T5; `current-cond-t5` is the canonical extensionless ASCII projection of 47 exact-width words.
 
-The executable two-field D3 COND example is defined by these identical-width words. The `current_binary_preflight` Rust test checks that the canonical binary source runs to structural `()`. The GitHub-hosted `Physical binary SENS CLI smoke` executes physical T5 through both `sens` and `sens-trit` and checks the source/bytes/view relationship. Equality of transports is not an independent semantic oracle.
+The `Physical binary SENS CLI smoke` action executes physical T5 through both `sens` and `sens-trit`, and compares the bytes against precisely these source words; the unchanged source reference is independently checked by the Rust test. Physical transport parity does **not** certify a separate historical/original-source semantic oracle.
 
-Never replace the source with the obsolete commentary-form fragment, never use a three-field COND, and never claim source-to-binary parity from an unchecked `.sens`.
+The proof-carrying migration gate must remain strict: no postdated physical T5 may masquerade as a historical original without a reviewed source-specific oracle.
