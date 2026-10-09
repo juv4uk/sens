@@ -176,6 +176,5 @@ crates/my-lisp/tests/sens_host_registration_admission_1406.rs	host_registration_
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	core3_loader_selects_core3_only_after_the_profile_layer_loads	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	lexical_child_shares_selected_core3_signal	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	later_explicit_core4_load_replaces_core3_signal_without_implicit_fallback	observer	selected-core3-profile-mechanism	contracts/core-profile-contract.lisp	migrated
-crates/sens/tests/semantic_coordinate_law_axis.rs	coordinate_rows_use_current_function_ids_without_minting_new_identity	observer	function8-boundary-noninterference	lib/surface/semantic-registry.lisp	retained
 crates/sens/tests/machine_asm_differential.rs	gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus	mechanism	external-assembler-byte-witness	lib/machine/encoding/x86-64.lisp + GAS/NASM test-only observers	retained
 crates/sens/tests/machine_semantic_effect_lowering.rs	current_foundation_runtime_identity_and_effect_router_agree	observer	semantic-to-machine-effect-boundary	knowledge/d1-d9-foundation.json + lib/machine/lowering/semantic-effects.lisp	retained
