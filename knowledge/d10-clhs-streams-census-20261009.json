@@ -1103,9 +1103,10 @@
       "coordinate": null,
       "ratified": false,
       "selected": false,
-      "oracle_status": "NOT-RUN",
+      "oracle_status": "SBCL-PRIMARY-DONOR-WITNESS-PASS",
       "blocked_source": "NO-MIGRATION-BLOCK-RESEARCH-ONLY",
-      "unblock_fanout": "UNKNOWN"
+      "unblock_fanout": "UNKNOWN",
+      "oracle_evidence": "knowledge/d10-clhs-streams-sbcl-oracle-20261009.json"
     },
     {
       "root_claim": "DRAIN-STRING-OUTPUT-STREAM",
@@ -1124,9 +1125,10 @@
       "coordinate": null,
       "ratified": false,
       "selected": false,
-      "oracle_status": "NOT-RUN",
+      "oracle_status": "SBCL-PRIMARY-DONOR-WITNESS-PASS",
       "blocked_source": "NO-MIGRATION-BLOCK-RESEARCH-ONLY",
-      "unblock_fanout": "UNKNOWN"
+      "unblock_fanout": "UNKNOWN",
+      "oracle_evidence": "knowledge/d10-clhs-streams-sbcl-oracle-20261009.json"
     },
     {
       "root_claim": "ORDERED-CONCATENATED-INPUT",
@@ -1145,9 +1147,11 @@
       "coordinate": null,
       "ratified": false,
       "selected": false,
-      "oracle_status": "NOT-RUN",
+      "oracle_status": "SBCL-PRIMARY-DONOR-WITNESS-PASS",
       "blocked_source": "NO-MIGRATION-BLOCK-RESEARCH-ONLY",
-      "unblock_fanout": "UNKNOWN"
+      "unblock_fanout": "UNKNOWN",
+      "oracle_evidence": "knowledge/d10-clhs-streams-sbcl-oracle-20261009.json"
     }
-  ]
+  ],
+  "oracle_witness_count": 3
 }
