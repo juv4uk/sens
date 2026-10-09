@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "issue": "#3066",
   "domain": "Core.D5",
   "width": 5,
@@ -43,7 +43,9 @@
       "shadow_constraint": "NO_SEMANTIC_BONUS",
       "evidence": [
         "#3044"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "0001",
@@ -65,7 +67,9 @@
         "#2528",
         "#3025",
         "#3027"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "0010",
@@ -84,7 +88,9 @@
       "shadow_constraint": "NO_SEMANTIC_BONUS",
       "evidence": [
         "#3044"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "0011",
@@ -104,7 +110,9 @@
       "evidence": [
         "#3005",
         "#3016"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "0100",
@@ -124,7 +132,9 @@
       "evidence": [
         "#3032",
         "#3035"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "0101",
@@ -143,7 +153,9 @@
       "shadow_constraint": "VALUE_LEVEL_ONLY",
       "evidence": [
         "#3010"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "0110",
@@ -163,7 +175,9 @@
       "evidence": [
         "#3040",
         "#3042"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "0111",
@@ -183,7 +197,9 @@
       "evidence": [
         "#3004",
         "#3008"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "1000",
@@ -203,7 +219,9 @@
       "evidence": [
         "#3052",
         "#3059"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "1001",
@@ -222,7 +240,9 @@
       "shadow_constraint": "VALUE_LEVEL_ONLY",
       "evidence": [
         "#3010"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "1010",
@@ -242,7 +262,9 @@
       "evidence": [
         "#2176",
         "#3019"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "COLLISION-HELD-3209"
     },
     {
       "prefix4": "1011",
@@ -262,7 +284,9 @@
       "evidence": [
         "#2176",
         "#3019"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "COLLISION-HELD-3209"
     },
     {
       "prefix4": "1100",
@@ -282,7 +306,9 @@
       "evidence": [
         "#2176",
         "#3019"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "COLLISION-HELD-3209"
     },
     {
       "prefix4": "1101",
@@ -302,7 +328,9 @@
       "evidence": [
         "#2176",
         "#3019"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "COLLISION-HELD-3209"
     },
     {
       "prefix4": "1110",
@@ -327,7 +355,9 @@
         "#3053",
         "#3059",
         "#3060"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     },
     {
       "prefix4": "1111",
@@ -346,7 +376,15 @@
       "shadow_constraint": "NO_SEMANTIC_BONUS",
       "evidence": [
         "#3054"
-      ]
+      ],
+      "coordinate_status": "CURRENT-PROJECTION",
+      "coordinate_parentage_status": "NOT-INFERRED"
     }
-  ]
+  ],
+  "coordinate_authority": {
+    "current_coordinates": "PRODUCTION-PROJECTION-OD-005",
+    "d4_parentage_from_prefix": "FORBIDDEN",
+    "higher_selector_lineage": "COLLISION-HELD-BY-#3209",
+    "cleanroom_d4_authority": "#3225"
+  }
 }
