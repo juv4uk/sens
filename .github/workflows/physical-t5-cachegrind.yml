@@ -1,0 +1,83 @@
+name: Physical T5 Cachegrind instruction benchmarks
+
+# Measure instruction references, not only pass/fail, on immutable release SHA.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 3 * * 0"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/physical-t5-cachegrind.yml"
+      - "benchmarks/physical-sens-runtime/irefs.py"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+  pull_request:
+    paths:
+      - ".github/workflows/physical-t5-cachegrind.yml"
+      - "benchmarks/physical-sens-runtime/irefs.py"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: physical-t5-irefs-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  cpu-irefs:
+    name: Real physical T5 instructions per CLI and SHA
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sens-physical-t5-irefs
+
+      - name: Install deterministic instruction-counter mechanism
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Build real production SENS binaries (release)
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+
+      - name: Measure Cachegrind I refs on actual packed .sens
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/irefs.py \
+            --sens target/release/sens \
+            --trit target/release/sens-trit \
+            --out "$RUNNER_TEMP/sens-t5-irefs" \
+            --reps 3
+
+      - name: Report numeric evidence even on failure
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/sens-t5-irefs/report.md"; then
+            cat "$RUNNER_TEMP/sens-t5-irefs/report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "BENCHMARK_BLOCKED: no measured I refs. No performance claim." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Retain raw counts, provenance and SHA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-t5-irefs-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sens-t5-irefs/
+          if-no-files-found: warn
+          retention-days: 30
