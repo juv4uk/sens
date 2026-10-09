@@ -45,9 +45,11 @@ jobs:
             --expected-sha "$GITHUB_SHA"
 
       - name: Native CPU vertical mechanism witnesses
+        if: always()
         run: cargo test --locked -p sens-host --test native_lisp_bytes --test native_cond_profile
 
       - name: Exact domain ladder and retired-semantic firewall
+        if: always()
         run: cargo test --locked -p sens --test domain_ladder_only_kernel
 
       - name: Retain real oracle evidence for exact commit
