@@ -1,0 +1,26 @@
+name: D10 interdisciplinary science research admission
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-interdisciplinary-science-proposals-20261009.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'scripts/check_d10_science_interests_v1.py'
+      - 'docs/research/d10-interdisciplinary-science-20261009.uk.md'
+      - '.github/workflows/d10-interdisciplinary-science.yml'
+  workflow_dispatch:
+jobs:
+  research-law-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact rational scientific oracle, sourced identities, anti-forgery negatives
+        run: python3 scripts/check_d10_science_interests_v1.py
+      - name: Canonical selected state and append-only Git SHA history
+        run: |
+          python3 scripts/check-d10-fill-v1-seed.py
+          python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: First historical admission and original 625 unchanged
+        run: python3 scripts/check_d10_historical_admission_batch1.py --self-test
