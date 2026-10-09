@@ -205,11 +205,13 @@ fn tracked_d3_cond_is_a_real_physical_t5_file_with_exact_byte_parity() {
     const PHYSICAL: &[u8] =
         include_bytes!("../../../examples/binary-language/current-cond-reference.sens");
     // A physical .sens file contains 5-trit packed bytes, not printable bit text.
-    let from_source = encode_binary_projection_ternary(D3_COND_PROGRAM)
-        .expect("ratified D2/D3 binary source must encode canonically");
+    let reference = include_str!("../../../examples/binary-language/current-cond-reference.lisp");
+    let from_source = encode_binary_projection_ternary(reference)
+        .expect("the current ratified D3:110 source must encode canonically");
     assert_eq!(PHYSICAL, from_source.as_slice(), "tracked T5 bytes drifted");
 
-    let expected = D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert_eq!(PHYSICAL.len(), 30, "current COND physical size changed");
+    let expected = reference.split_whitespace().collect::<Vec<_>>().join(" ");
     let opened = open_ternary_program(PHYSICAL).expect("real T5 must reopen");
     assert_eq!(opened, expected, "exact-width D3 source must survive T5");
     assert_eq!(encode_binary_projection_ternary(&opened).unwrap(), PHYSICAL);
