@@ -7,6 +7,8 @@ on:
       - "benchmarks/cross-language/external_controls.py"
       - "benchmarks/cross-language/footprint_controls.py"
       - "benchmarks/cross-language/join_current_ratios.py"
+      - "benchmarks/cross-language/pareto_report.py"
+      - "benchmarks/cross-language/test_pareto_report.py"
       - "crates/sens/examples/current_exact_domain_bench.rs"
       - "crates/sens/src/mixed_source.rs"
       - ".github/workflows/same-machine-cross-language.yml"
@@ -22,6 +24,9 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
+
+      - name: Fast Pareto accounting smoke
+        run: python3 benchmarks/cross-language/test_pareto_report.py
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -46,22 +51,27 @@ jobs:
       - name: Run external controls
         run: |
           rm -rf /tmp/cross-language-paired
-          mkdir -p             /tmp/cross-language-paired/external             /tmp/cross-language-paired/sens             /tmp/cross-language-paired/footprint             /tmp/cross-language-paired/join
-          python3 benchmarks/cross-language/external_controls.py             --lua lua5.4             --racket racket             --sbcl sbcl             --rustc rustc             --reps 3             --out /tmp/cross-language-paired/external
+          mkdir -p /tmp/cross-language-paired/external /tmp/cross-language-paired/sens /tmp/cross-language-paired/footprint /tmp/cross-language-paired/join /tmp/cross-language-paired/pareto
+          python3 benchmarks/cross-language/external_controls.py --lua lua5.4 --racket racket --sbcl sbcl --rustc rustc --reps 3 --out /tmp/cross-language-paired/external
 
       - name: Run current exact-domain SENS
         run: |
-          python3 benchmarks/cross-language/current_sens.py             --runner target/release/examples/current_exact_domain_bench             --reps 3             --out /tmp/cross-language-paired/sens
+          python3 benchmarks/cross-language/current_sens.py --runner target/release/examples/current_exact_domain_bench --reps 3 --out /tmp/cross-language-paired/sens
 
       - name: Collect scoped footprint on the same host
         run: |
-          python3 benchmarks/cross-language/footprint_controls.py             --sens-runner target/release/examples/current_exact_domain_bench             --lua lua5.4             --racket racket             --sbcl sbcl             --rustc rustc             --rss-reps 3             --out /tmp/cross-language-paired/footprint
+          python3 benchmarks/cross-language/footprint_controls.py --sens-runner target/release/examples/current_exact_domain_bench --lua lua5.4 --racket racket --sbcl sbcl --rustc rustc --rss-reps 3 --out /tmp/cross-language-paired/footprint
           cat /tmp/cross-language-paired/footprint/report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Join paired ratios
         run: |
-          python3 benchmarks/cross-language/join_current_ratios.py             --external /tmp/cross-language-paired/external/external-full.tsv             --sens /tmp/cross-language-paired/sens/sens-exact-full.tsv             --out /tmp/cross-language-paired/join
+          python3 benchmarks/cross-language/join_current_ratios.py --external /tmp/cross-language-paired/external/external-full.tsv --sens /tmp/cross-language-paired/sens/sens-exact-full.tsv --out /tmp/cross-language-paired/join
           cat /tmp/cross-language-paired/join/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build Pareto tables
+        run: |
+          python3 benchmarks/cross-language/pareto_report.py --external /tmp/cross-language-paired/external/external-full.tsv --sens /tmp/cross-language-paired/sens/sens-exact-full.tsv --footprint /tmp/cross-language-paired/footprint/footprint.tsv --out /tmp/cross-language-paired/pareto
+          cat /tmp/cross-language-paired/pareto/report.md >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         if: always()
