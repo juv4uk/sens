@@ -4,7 +4,7 @@
 
 use sens::{
     decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    parse_canonical_binary, DomainIdentity, Expr, ExprKind,
+    parse_canonical_binary, Expr, ExprKind,
 };
 
 const BINARY_PROGRAM: &str =
@@ -102,7 +102,6 @@ fn exact_width_payloads_remain_distinct_across_d1_d3_d7_and_d9() {
     }
     assert!(encode_binary_projection_ternary("0000000001").is_err(),
         "D10 must not be silently truncated into the D1..D9 T5 carrier");
-    let _ = DomainIdentity::from_source_word;
 }
 
 #[test]
