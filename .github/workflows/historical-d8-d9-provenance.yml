@@ -1,0 +1,21 @@
+name: Historical D8 D9 archival provenance guard
+on:
+  pull_request:
+    paths:
+      - 'knowledge/historical-d8-unassigned-d9-overflow-provenance-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d8-ratified.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check-historical-d8-d9-provenance.py'
+      - '.github/workflows/historical-d8-d9-provenance.yml'
+  workflow_dispatch:
+jobs:
+  archival-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical rows and negative admission controls
+        run: python3 scripts/check-historical-d8-d9-provenance.py --self-test
+      - name: Verify check is read-only
+        run: git diff --exit-code
