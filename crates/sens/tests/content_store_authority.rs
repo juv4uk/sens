@@ -52,6 +52,21 @@ fn content_store_mechanism_keeps_deterministic_images_and_distinct_history_entri
                (fs (car (fs-write (fs-empty) "code" value))))
           (fs-serialize-root fs))
     "#;
+    let fs_expr = r#"(car (fs-write (fs-empty) "code" (quote (lambda (x) x))))"#;
+    for (label, probe) in [
+        ("objects", format!("(fs-objects {fs_expr})")),
+        ("objects-as-list", format!("(map->list (fs-objects {fs_expr}))")),
+        ("object-addresses", format!("(fs-object-addresses (map->list (fs-objects {fs_expr})))")),
+        ("root-package", format!("(fs-root-package {fs_expr})")),
+        ("root-package-string", format!("(write-to-string (fs-root-package {fs_expr}))")),
+        ("root-serialize", format!("(fs-serialize-root {fs_expr})")),
+    ] {
+        let result = eval_program(&probe, &mut session)
+            .map(|value| value.value.to_string())
+            .map_err(|error| format!("{:?}: {}", error.kind, error));
+        eprintln!("CONTENT-STORE-STAGE: {label} => {result:?}");
+    }
+
     eprintln!("CONTENT-STORE-PROBE: root_a BEGIN");
     let root_a = observe(&mut session, root_image);
     eprintln!("CONTENT-STORE-PROBE: root_a END => {root_a}");
