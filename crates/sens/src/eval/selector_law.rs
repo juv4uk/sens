@@ -64,27 +64,6 @@ fn decode(identity: CoreDomainIdentity) -> Option<SelectorProgram> {
     })
 }
 
-pub(crate) fn compiler_execution_role(
-    identity: CoreDomainIdentity,
-) -> Option<crate::compiler_role::CompilerExecutionRole> {
-    // The compiler role is a projection of the same production selector
-    // decoder used by evaluator execution, never a second bits-to-role table.
-    // The first compiler bridge admits only the D3 root itself; D4/D5
-    // descendants have longer selector programs and therefore stay outside
-    // this bounded slice.
-    if identity.width() != 3 {
-        return None;
-    }
-    let program = decode(identity)?;
-    if program.len != 1 {
-        return None;
-    }
-    match program.steps[0] {
-        Step::Car => Some(crate::compiler_role::CompilerExecutionRole::SelectorHead),
-        Step::Cdr => Some(crate::compiler_role::CompilerExecutionRole::SelectorTail),
-    }
-}
-
 pub(super) fn invoke(
     identity: CoreDomainIdentity,
     args: &[Value],
