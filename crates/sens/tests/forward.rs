@@ -427,8 +427,6 @@ fn run_multi_supports_test_conditions() {
     assert_eq!(eval_forward(source), "((big 10) (num 3) (num 10))");
 }
 
-
-
 #[test]
 fn run_jtms_multi_derives_a_multi_condition_grandparent_fact() {
     let source = r#"
