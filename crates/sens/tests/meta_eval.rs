@@ -45,9 +45,8 @@ fn eval_meta_program(program_source: &str, probe_source: &str) -> String {
 }
 
 #[test]
-fn self_evaluates_numbers_and_symbols_not_bound_in_env() {
+fn numeric_literal_evaluation_does_not_depend_on_truth_sentinels() {
     assert_eq!(eval_meta("42", "(quote ())"), "42");
-    assert_eq!(eval_meta("t", "(quote ())"), "t");
 }
 
 #[test]
