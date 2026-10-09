@@ -79,11 +79,9 @@ fn eval_t5_bytes_core4(
 ) -> Result<sens::EvalResult, String> {
     // Physical execution stays on typed words and the packed reader.
     // The visible 0/1 view is reserved for explicit open/explain operations.
-    let words = sens::decode_ternary_program(bytes)
-        .map_err(|e| format!("physical T5/D2 decode rejected: {}", explain_d2_rejection(bytes, e)))?;
-    let widths: Vec<usize> = words.iter().map(|word| word.width()).collect();
-    let packed = sens::pack_binary_source_words(&words);
-    let forms = sens::parse_canonical_packed_words(&packed, &widths)
+    let words = sens::decode_ternary_words(bytes)
+        .map_err(|e| format!("physical T5 decode rejected: {e:?}"))?;
+    let forms = sens::parse_canonical_word_sequence(&words)
         .map_err(|e| format!("canonical packed SENS parser rejected: {e}"))?;
     let mut session = sens::Session::default();
     if bootstrap_core {
