@@ -93,6 +93,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: D2 structural framing witness before independent machine law
+        run: cargo test --locked -p sens --test native_first_exact_domain -- --nocapture
       - name: Exact-domain CPU bridge
         run: |
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
