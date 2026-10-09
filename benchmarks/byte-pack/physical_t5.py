@@ -101,7 +101,7 @@ def main() -> None:
     raw = []
     markdown = [
         "# Measured physical SENS T5 performance", "",
-        f"Commit: \`{git}\`; CPU: {report['cpu']}.", "",
+        f"Commit: `{git}`; CPU: {report['cpu']}.", "",
         f"{args.reps} measured process invocations per mode after {args.warmup} warmups. "
         "Wall time includes startup, I/O, decode and (where applicable) execution.", "",
         "| Program | Mode | Median ms | p95 ms | First observed ms |",
@@ -164,7 +164,7 @@ def main() -> None:
             }
             case["modes"][mode] = vals_summary
             markdown.append(
-                f"| \`{file.name}\` | {mode} | "
+                f"| `{file.name}` | {mode} | "
                 f"{vals_summary['median_ns']/1e6:.3f} | "
                 f"{vals_summary['p95_ns']/1e6:.3f} | "
                 f"{vals_summary['first_ns']/1e6:.3f} |"
@@ -184,7 +184,7 @@ def main() -> None:
     for case in report["cases"]:
         sz = case["sizes"]
         markdown.append(
-            f"| \`{Path(case['fixture']).name}\` | {sz['physical_t5_bytes']} | "
+            f"| `{Path(case['fixture']).name}` | {sz['physical_t5_bytes']} | "
             f"{sz['visible_binary_bytes']} | {sz['human_lisp_bytes']} |"
         )
     markdown.extend([
