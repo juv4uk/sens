@@ -1,80 +1,52 @@
-name: D7 ratified authority
+name: D7 ratified authority and exact W7 carrier
 
 on:
+  push:
+    branches: [main]
   pull_request:
     paths:
       - "knowledge/d7-ratified.json"
-      - "lib/domains/d7.lisp"
       - "knowledge/d7-v2-evidence-ledger.json"
       - "contracts/d7-ratification.lisp"
-      - "contracts/d7-local-ordinal.lock"
       - "lib/domains/d7.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d7-current-authority.py"
-      - "scripts/check-domain-tables.py"
-      - "scripts/domain_tables.py"
       - "benchmarks/d7-ratification-conformance/**"
+      - "crates/sens/src/domain_ladder.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/text7.rs"
-      - "crates/sens/src/text7_projection.rs"
       - "crates/sens/tests/d7_w7_pack.rs"
-      - "crates/sens/tests/text7_canonical_wire.rs"
-      - ".github/workflows/d7-ratified-authority.yml"
-  push:
-    branches: [main]
-    paths:
-      - "knowledge/d7-ratified.json"
-      - "lib/domains/d7.lisp"
-      - "knowledge/d7-v2-evidence-ledger.json"
-      - "contracts/d7-ratification.lisp"
-      - "contracts/d7-local-ordinal.lock"
-      - "lib/domains/d7.lisp"
-      - "language-contract.lisp"
-      - "CURRENT.md"
-      - "scripts/check-d7-current-authority.py"
-      - "scripts/check-domain-tables.py"
-      - "scripts/domain_tables.py"
-      - "benchmarks/d7-ratification-conformance/**"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/src/text7_projection.rs"
-      - "crates/sens/tests/d7_w7_pack.rs"
-      - "crates/sens/tests/text7_canonical_wire.rs"
+      - "crates/sens/tests/domain_ladder.rs"
+      - "crates/sens/tests/d2_text7_frame_role_boundary.rs"
+      - "crates/sens/tests/text7_contextual_binding.rs"
       - ".github/workflows/d7-ratified-authority.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Run on every main SHA: no historical green can replace current evidence.
 jobs:
   authority:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-
-      # Ратифіковані координати D7 первинні; Rust не надає їм значень.
-      - name: D7 owner-ratified 126 of 128, two reserved
+      - name: D7 owner authority and 126-row Lisp surface projection
         run: python3 scripts/check-d7-current-authority.py
-
-      - name: D7 human surfaces agree with canonical coordinates
-        run: python3 scripts/check-domain-tables.py
-
-      - name: D7 Sound and LocalOrdinal remain separate from Number
+      - name: D7 Sound/Text, LocalOrdinal and Number role boundaries
         run: python3 benchmarks/d7-ratification-conformance/validate.py
-
-      - name: D7 canonical source table is parser-readable
-        run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
-
-      # Лише точна механіка W7 і транспорту, жодної Rust-owned семантики.
-      - name: D7 exact W7 packing and Text7 canonical wire
-        run: cargo test --locked -p sens --test d7_w7_pack --test text7_canonical_wire
-
-  exact-w7-transport:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Verify D7 exact-width carrier and packed Text7 transport
-        run: cargo test -p sens --test d7_w7_pack -- --nocapture
+      - name: D7 exact width, W7 packing and contextual D2 framing
+        run: >-
+          cargo test --locked -p sens
+          --test domain_ladder
+          --test d7_w7_pack
+          --test d2_text7_frame_role_boundary
+          --test text7_contextual_binding
+      - name: No semantic ownership in Rust D7 coordinate carrier
+        run: >-
+          cargo test --locked -p sens --lib
+          domain_ladder::tests::every_d7_source_word_has_a_width_preserving_coordinate
