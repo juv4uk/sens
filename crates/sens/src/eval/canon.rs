@@ -6,7 +6,7 @@
 
 use super::{
     arithmetic, builtins, closures, necessary_forms,
-    profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
+    profile_mechanisms_generated::{mechanism_lab_route, MechanismLabRouteKind},
     special_forms,
 };
 use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
@@ -293,25 +293,25 @@ pub(crate) fn invoke_semantic_ref(
         _ => {}
     }
 
-    if let Some(profile) = environment.selected_core_profile() {
-        if matches!(
-            profile_mechanism_route(profile, sid),
-            Some(ProfileMechanismRouteKind::RegisteredHostMechanism)
+    if environment.mechanism_lab_enabled()
+        && matches!(
+            mechanism_lab_route(sid),
+            Some(MechanismLabRouteKind::RegisteredHostMechanism)
+        )
+    {
+        return match super::capabilities::dispatch_sens_capability(
+            sid,
+            args,
+            environment,
+            span,
         ) {
-            return match super::capabilities::dispatch_sens_capability(
-                sid,
-                args,
-                environment,
+            Some(result) => result,
+            None => Err(LanguageError::new(
+                ErrorKind::MechanismUnavailable,
+                format!("admitted host mechanism is unavailable for SENS function: {sid}"),
                 span,
-            ) {
-                Some(result) => result,
-                None => Err(LanguageError::new(
-                    ErrorKind::MechanismUnavailable,
-                    format!("admitted host mechanism is unavailable for SENS function: {sid}"),
-                    span,
-                )),
-            };
-        }
+            )),
+        };
     }
 
     Err(LanguageError::new(

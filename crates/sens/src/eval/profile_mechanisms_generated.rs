@@ -1,31 +1,27 @@
 // GENERATED — DO NOT EDIT BY HAND.
-// Authority: lib/function-table-mechanisms.lisp (profile-routes)
+// Authority: lib/function-table-mechanisms.lisp (lab-routes)
 // Generator: scripts/generate-rust-profile-mechanism-routes.lisp
 
-use crate::{CoreProfile, Sens8};
+use crate::Sens8;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum ProfileMechanismRouteKind {
+pub(crate) enum MechanismLabRouteKind {
     RegisteredHostMechanism,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct ProfileMechanismRoute {
-    profile: CoreProfile,
+struct MechanismLabRoute {
     sens: Sens8,
-    kind: ProfileMechanismRouteKind,
+    kind: MechanismLabRouteKind,
 }
 
-const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[
-    ProfileMechanismRoute { profile: CoreProfile::Core3, sens: crate::sens!(10101000), kind: ProfileMechanismRouteKind::RegisteredHostMechanism },
+const MECHANISM_LAB_ROUTES: &[MechanismLabRoute] = &[
+    MechanismLabRoute { sens: crate::sens!(10101000), kind: MechanismLabRouteKind::RegisteredHostMechanism },
 ];
 
-pub(crate) fn profile_mechanism_route(
-    profile: CoreProfile,
-    sens: Sens8,
-) -> Option<ProfileMechanismRouteKind> {
-    PROFILE_MECHANISM_ROUTES
+pub(crate) fn mechanism_lab_route(sens: Sens8) -> Option<MechanismLabRouteKind> {
+    MECHANISM_LAB_ROUTES
         .iter()
-        .find(|row| row.profile == profile && row.sens == sens)
+        .find(|row| row.sens == sens)
         .map(|row| row.kind)
 }

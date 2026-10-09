@@ -1,6 +1,6 @@
-; #1422 — generate the mechanical Core×SENS mechanism-admission projection.
+; #1422/#2375 — generate the explicit mechanism-lab admission projection.
 ;
-; Authority: lib/function-table-mechanisms.lisp (profile-routes section).
+; Authority: lib/function-table-mechanisms.lisp (lab-routes section).
 ; Rust receives only coordinates + route kind. No law, surface, kernel syntax,
 ; result semantics, or independently editable admission data may live there.
 ;
@@ -29,16 +29,8 @@
          ((00000011 (00000101 (00000101 sections)) name) (#b0)
           (find-section name (00000110 sections))))))))
 
-(00001001 profile-rows
-  (00000110 (find-section (00000001 profile-routes) metadata)))
-
-(00001001 rust-profile
-  (00001000 (profile)
-    (00000111
-      ((00000011 profile (00000001 core3))
-       (#b1)
-       "CoreProfile::Core3")
-      (t (00000101 (00000001 ()))))))
+(00001001 lab-rows
+  (00000110 (find-section (00000001 lab-routes) metadata)))
 
 (00001001 rust-route-kind
   (00001000 (mechanism)
@@ -50,17 +42,13 @@
 
 (00001001 render-row
   (00001000 (row)
-    (10011101 ((profile (rust-profile (00000101 row)))
-           (sid (00101111 row))
-           (kind (rust-route-kind (00110000 row))))
+    (10011101 ((sid (00000101 row))
+           (kind (rust-route-kind (00101111 row))))
       (00000111
-        ((00000010 profile) () "")
         ((00000010 kind) () "")
         (t
          (str+
-           "    ProfileMechanismRoute { profile: "
-           profile
-           ", sens: crate::sens!("
+           "    MechanismLabRoute { sens: crate::sens!("
            (01001100 sid)
            "), kind: "
            kind
@@ -77,36 +65,34 @@
 (00001001 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
-    "// Authority: lib/function-table-mechanisms.lisp (profile-routes)\n"
+    "// Authority: lib/function-table-mechanisms.lisp (lab-routes)\n"
     "// Generator: scripts/generate-rust-profile-mechanism-routes.lisp\n\n"
-    "use crate::{CoreProfile, Sens8};\n\n"
+    "use crate::Sens8;\n\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
-    "pub(crate) enum ProfileMechanismRouteKind {\n"
+    "pub(crate) enum MechanismLabRouteKind {\n"
     "    RegisteredHostMechanism,\n"
     "}\n\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
-    "struct ProfileMechanismRoute {\n"
-    "    profile: CoreProfile,\n"
+    "struct MechanismLabRoute {\n"
     "    sens: Sens8,\n"
-    "    kind: ProfileMechanismRouteKind,\n"
+    "    kind: MechanismLabRouteKind,\n"
     "}\n\n"
-    "const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[\n"))
+    "const MECHANISM_LAB_ROUTES: &[MechanismLabRoute] = &[\n"))
 
 (00001001 footer
   (str+
     "];\n\n"
-    "pub(crate) fn profile_mechanism_route(\n"
-    "    profile: CoreProfile,\n"
+    "pub(crate) fn mechanism_lab_route(\n"
     "    sens: Sens8,\n"
-    ") -> Option<ProfileMechanismRouteKind> {\n"
-    "    PROFILE_MECHANISM_ROUTES\n"
+    ") -> Option<MechanismLabRouteKind> {\n"
+    "    MECHANISM_LAB_ROUTES\n"
     "        .iter()\n"
-    "        .find(|row| row.profile == profile && row.sens == sens)\n"
+    "        .find(|row| row.sens == sens)\n"
     "        .map(|row| row.kind)\n"
     "}\n"))
 
 (00001001 generated
-  (str+ header (render-rows profile-rows) footer))
+  (str+ header (render-rows lab-rows) footer))
 
 (00000111
   ((00000010 *argv*)
@@ -114,23 +100,23 @@
    (00101111
      (00100111
        (10100111 output-path generated)
-       (01001000 "Rust profile mechanism projection written"))))
+       (01001000 "Rust mechanism-lab projection written"))))
   ((00100010 (00000101 *argv*) "--check")
    (#b1)
    (10011100 ((current (10100110 output-path)))
      (00000111
        ((00100010 current generated)
         (#b1)
-        (01001000 "Rust profile mechanism projection is current"))
+        (01001000 "Rust mechanism-lab projection is current"))
        ((00100010 current generated)
         (#b0)
         (00101111
           (00100111
-            (01001000 "Rust profile mechanism projection is stale")
+            (01001000 "Rust mechanism-lab projection is stale")
             (00000101 (00000001 ()))))))))
   ((00000001 write-projection)
    write-projection
    (00101111
      (00100111
        (10100111 output-path generated)
-       (01001000 "Rust profile mechanism projection written")))))
+       (01001000 "Rust mechanism-lab projection written")))))
