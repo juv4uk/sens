@@ -78,6 +78,22 @@ class SafeCondMigration(unittest.TestCase):
         self.assertIn("; keep header", result)
         self.assertEqual(len(mod.inspect(result)[0]), 0)
 
+    def test_sens_literal_pipe_and_pipe_prefix(self):
+        source = "(list | |- (110 ((010 x) (1) yes)))"
+        findings, _ = mod.inspect(source)
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0].status, "AUTO_YES")
+
+    def test_pinned_fragment_requires_exact_bytes(self):
+        import hashlib
+        fragment = "lib/surface/semantic-registry-experiment.lisp"
+        expected = "c5a375605cca330445adda18b9f08a7fb5e17c09"
+        self.assertEqual(mod.PINNED_NON_PROGRAM_FRAGMENTS[fragment], expected)
+        raw = b"  (00000000 (en ()))\n"
+        blob = hashlib.sha1(b"blob " + str(len(raw)).encode("ascii")
+                            + b"\0" + raw).hexdigest()
+        self.assertNotEqual(blob, expected)  # no generic skip by filename
+
     def test_parser_fail_closed(self):
         for source in ('(110 ((010 x) (1) pass)', '"unterminated', '#| unclosed'):
             with self.subTest(source=source):
