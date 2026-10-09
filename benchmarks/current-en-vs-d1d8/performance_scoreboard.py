@@ -104,11 +104,11 @@ def physical_hot_report(path: Path) -> tuple[list[str], dict]:
         "Same physical T5 bytes and D2 grammar per workload. Warm process; "
         "p50/p95 are nanoseconds per packet; process startup is excluded.",
         "",
-        "| D3 QUOTE forms | Physical T5 bytes | Visible T5→D2 p50 ns | Previous direct T5→D2 p50 ns | Typed-word T5→D2 p50 ns | Previous / typed | Visible / typed | Typed p95 ns |",
+        "| D3 QUOTE forms | Physical T5 bytes | T5→text→D2 AST p50 ns | T5→repack→D2 AST p50 ns | T5→typed→D2 AST p50 ns | Repack / typed | Text / typed | Typed p95 ns |",
         "|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for n, phases in sorted(by_count.items()):
-        required = {"t5_open_d2", "t5_direct_d2", "t5_words_d2"}
+        required = {"t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2"}
         if not required.issubset(phases):
             raise ValueError(f"{n} forms lacks required phases: {sorted(required - set(phases))}")
         same_bytes = {r["physical_bytes"] for r in phases.values()}
@@ -116,13 +116,16 @@ def physical_hot_report(path: Path) -> tuple[list[str], dict]:
         observables = {r["observable"] for r in phases.values()}
         if len(same_bytes) != 1 or len(hashes) != 1 or len(observables) != 1:
             raise ValueError(f"{n} forms has mismatched payload or result across phases")
-        visible = phases["t5_open_d2"]["median_ns_op"]
+        counts = {phases[name]["samples"] for name in required}
+        if len(counts) != 1:
+            raise ValueError(f"{n} forms has unpaired sample counts across AST readers")
+        visible = phases["t5_visible_parse_d2"]["median_ns_op"]
         prior = phases["t5_direct_d2"]["median_ns_op"]
         typed = phases["t5_words_d2"]["median_ns_op"]
         p95 = phases["t5_words_d2"]["p95_ns_op"]
         result = {
             "forms": n, "physical_bytes": next(iter(same_bytes)),
-            "visible_median_ns": visible, "previous_direct_median_ns": prior,
+            "visible_ast_median_ns": visible, "previous_direct_median_ns": prior,
             "typed_word_median_ns": typed, "typed_word_p95_ns": p95,
             "previous_over_typed": prior / typed, "visible_over_typed": visible / typed,
             "samples": phases["t5_words_d2"]["samples"],
@@ -135,10 +138,12 @@ def physical_hot_report(path: Path) -> tuple[list[str], dict]:
         )
     out += [
         "",
-        "The previous direct lane performs extra typed-word repacking; the new "
-        "lane sends decoded typed words directly to the same D2 reader. "
-        "These ratios measure one reader task, not overall language execution "
-        "or SENS vs another runtime.",
+        "Each compared lane starts with identical physical T5 bytes and ends "
+        "with a complete D2 AST. Unlike the legacy t5_open_d2 text-only "
+        "view, t5_visible_parse_d2 includes both text rendering and D2 parsing. "
+        "The repack lane reconstructs a dense payload and width schedule; "
+        "the typed lane passes decoded words directly to the SAME D2 reader. "
+        "No ratio here is an overall language-execution or cross-runtime claim.",
         "",
         f"Benchmark commit: {environment.get('commit', 'unknown')}; "
         f"samples per phase: {environment.get('samples', 'unknown')}.",
