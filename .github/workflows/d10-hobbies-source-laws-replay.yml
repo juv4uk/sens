@@ -1,0 +1,31 @@
+name: D10 historical hobby source-law replay
+
+on:
+  pull_request:
+    paths:
+      - "docs/research/d10-hobbies-source-laws-v1.uk.md"
+      - "knowledge/d10-hobbies-source-laws-v1.json"
+      - "tests/test_d10_hobbies_source_laws_v1.py"
+      - ".github/workflows/d10-hobbies-source-laws-replay.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-hobbies-source-laws-v1.json"
+      - "tests/test_d10_hobbies_source_laws_v1.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-hobby-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify preserved source-pinned proposal-only metadata and independent models
+        run: python3 -m unittest discover -s tests -p 'test_d10_hobbies_source_laws_v1.py' -v
+      - name: Evidence boundary
+        run: |
+          echo "## Historical D10 hobby source-law replay" >> "$GITHUB_STEP_SUMMARY"
+          echo "Independent model checks only; no donor-runtime parity, selection, ratification, coordinate or GPU proof." >> "$GITHUB_STEP_SUMMARY"

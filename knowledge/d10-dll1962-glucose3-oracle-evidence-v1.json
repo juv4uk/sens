@@ -1,0 +1,43 @@
+{
+  "schema": "d10-dll1962-unit-fixedpoint-real-sat-oracle/v1",
+  "observed_at": "2026-10-09",
+  "status": "REAL-SAT-DONOR-WITNESSED-NOT-SENS-PARITY",
+  "github_run": "https://github.com/juv4uk/sens/actions/runs/37910713874",
+  "github_job_id": 113754912597,
+  "witnessed_revision": "a92dec8282068893116b9b2d30fef01c5201c61a",
+  "upstream_origin": "Davis/Logemann/Loveland 1962 CACM DOI 10.1145/368273.368557",
+  "frozen_donor_source": "pysathq/pysat@152884a6d1889f56a61049aaa773be23f0a8d8c1:pysat/solvers.py:4330",
+  "observed_compiled_sat_package": "python-sat==1.8.dev30",
+  "observed_compiled_sat_backend": "pysat.solvers.Glucose3",
+  "math_cases": 2304,
+  "math_contradiction": 1856,
+  "math_quiescent": 448,
+  "python_test_groups": 5,
+  "real_donor_cases": 600,
+  "real_donor_conflict": 294,
+  "real_donor_quiescent": 306,
+  "proof_protocol": "SAT solve bootstrap can cache CNF root-level implications and omit them from propagate() output. Therefore independently compare conflict status, require every returned donor literal in exact closure, and refute each forced literal via real Glucose3 propagate(assumptions + opposite literal), rather than incorrectly asserting returned list == complete fixed point.",
+  "observed_stdout": [
+    "Ran 5 tests in 0.056s",
+    "D10-DLL1962: PASS 2304 exact finite cases contradiction=1856 quiescent=448",
+    "SAT donor 1.8.dev30 <class 'pysat.solvers.Glucose3'>",
+    "D10-DLL1962 REAL-PYSAT 1.8.dev30 Glucose3.propagate PASS 600/600 conflict=294 quiescent=306"
+  ],
+  "hostile_ci": {
+    "status": "FAILED-OTHER-RUST-CANONICAL-WITNESS",
+    "run": "https://github.com/juv4uk/sens/actions/runs/37910713699",
+    "failed_test": "crates/sens/tests/canon_laws_v2_contract.rs:101, executable_canon_speaks_layered_answer_semantics, #229 canon-empty-list",
+    "note": "Research PR altered no Rust/D3/COND files. Same previously reported recurrent failure #1663. No bypass or skip justified."
+  },
+  "unresolved": [
+    "Full D1–D9 and current D10 behavioral dedup",
+    "Core vs derived SAT-library operation",
+    "SENS compiler and runtime parity",
+    "Owner ratification and coordinate allocation"
+  ],
+  "authority": {
+    "new_selected": 0,
+    "new_ratified": 0,
+    "new_coordinates": 0
+  }
+}
