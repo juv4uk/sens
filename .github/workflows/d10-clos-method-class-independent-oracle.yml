@@ -1,0 +1,25 @@
+name: D10 independent CLOS method/class donor oracle
+on:
+  pull_request:
+    paths:
+      - 'tests/oracles/d10_clos_method_class.lisp'
+      - 'knowledge/d10-clos-method-class-observation-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'scripts/check_d10_clos_method_class_observation_v1.py'
+      - '.github/workflows/d10-clos-method-class-independent-oracle.yml'
+  workflow_dispatch:
+jobs:
+  clos-method-class-donor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify provenance, test inventory invariants, and forbid false authority
+        run: python3 scripts/check_d10_clos_method_class_observation_v1.py --static-only
+      - name: Install independent Common Lisp donor interpreter
+        run: sudo apt-get update -qq && sudo apt-get install -y sbcl
+      - name: Execute 23 source-pinned CLOS witnesses
+        run: python3 scripts/check_d10_clos_method_class_observation_v1.py --sbcl sbcl
