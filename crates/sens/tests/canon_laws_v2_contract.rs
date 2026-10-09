@@ -98,38 +98,7 @@ fn executable_canon_speaks_layered_answer_semantics() {
             row.source, actual
         );
         let status = eval_program(&program, &mut session)
-            .unwrap_or_else(|error| {
-                // Diagnostic only: the Lisp witness remains the semantic oracle.
-                // Never manufacture a passing answer in the Rust observer.
-                for (label, probe) in [
-                    ("witness-field/expected", format!(
-                        "(witness-field (00000001 expected) (quote {}))", row.source
-                    )),
-                    ("witness-field/error", format!(
-                        "(witness-field (00000001 error) (quote {}))", row.source
-                    )),
-                    ("assoc/expected", format!(
-                        "(00101101 (00000001 expected) (quote {}))", row.source
-                    )),
-                    ("assoc/expr", format!(
-                        "(00101101 (00000001 expr) (quote {}))", row.source
-                    )),
-                    ("core/atom-pair", "(00000010 (00000001 (expr . value)))".to_string()),
-                    ("core/equal-symbols", "(00100010 (00000001 expected) (00000001 expr))".to_string()),
-                    ("core/equal-identical", "(00100010 (00000001 expected) (00000001 expected))".to_string()),
-                    ("expected-outcome", format!(
-                        "(witness-expected-outcome (quote {}))", row.source
-                    )),
-                ] {
-                    eprintln!(
-                        "#229 diagnostic {label}: {:?}",
-                        eval_program(&probe, &mut session)
-                            .map(|value| value.value.to_string())
-                            .map_err(|e| format!("{:?}: {}", e.kind, e))
-                    );
-                }
-                panic!("#229 witness verdict failed for {} (actual={actual}): {error}", row.expr)
-            })
+            .unwrap_or_else(|error| panic!("#229 witness verdict failed for {}: {error}", row.expr))
             .value
             .to_string();
         assert_eq!(
