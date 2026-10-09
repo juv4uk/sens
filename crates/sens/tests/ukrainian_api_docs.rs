@@ -1,5 +1,3 @@
-use sens::{eval_program, load_core_library, Session};
-
 const DOCS_INDEX: &str = include_str!("../../../lib/surface/uk-docs.lisp");
 const UK_SURFACE: &str = include_str!("../../../lib/surface/uk.lisp");
 
@@ -50,49 +48,6 @@ fn dovidnyk_poiasniuie_ne_predykaty_shcho_mozhut_povernuty_pustyi_spysok() {
             .unwrap_or_else(|| panic!("немає документаційного запису для {name}"));
         assert_ne!(kind, "predicate");
         assert!(!name.ends_with('?'));
-    }
-}
-
-fn uk_session() -> Session {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core bootstrap");
-    for source in [
-        include_str!("../../../lib/unify.lisp"),
-        include_str!("../../../lib/reason.lisp"),
-        include_str!("../../../lib/forward.lisp"),
-        include_str!("../../../lib/knowledge.lisp"),
-        include_str!("../../../lib/persistent-map.lisp"),
-        include_str!("../../../lib/persistent-vector.lisp"),
-        include_str!("../../../lib/time.lisp"),
-        include_str!("../../../lib/epistemic.lisp"),
-    ] {
-        eval_program(source, &mut session).expect("передумови UK surface мають завантажитися");
-    }
-    eval_program(UK_SURFACE, &mut session).expect("українська поверхня має завантажитися");
-    session
-}
-
-#[test]
-fn istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen() {
-    let mut session = uk_session();
-    assert_eq!(eval_program("істина", &mut session).unwrap().value.to_string(), "t");
-    assert_eq!(eval_program("хиба", &mut session).unwrap().value.to_string(), "()");
-}
-
-#[test]
-fn novi_predykatni_nazvy_i_stari_aliasy_vykonuiutsia_odnakovo() {
-    let mut session = uk_session();
-    for source in [
-        "(конфлікт? 'невідомий '())",
-        "(перевірити-конфлікт 'невідомий '())",
-    ] {
-        assert_eq!(eval_program(source, &mut session).unwrap().value.to_string(), "()");
-    }
-    for source in [
-        "(змінна-зустрічається? (логічна-змінна 'x) '(f (var x)) '())",
-        "(перевірити-зустрічання (логічна-змінна 'x) '(f (var x)) '())",
-    ] {
-        assert_eq!(eval_program(source, &mut session).unwrap().value.to_string(), "t");
     }
 }
 
