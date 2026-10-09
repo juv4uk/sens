@@ -97,6 +97,26 @@ fn current_foundation_runtime_identity_and_effect_router_agree() {
 }
 
 #[test]
+fn machine_domain_key_is_exact_d1_and_never_structural_empty() {
+    let mut session = lowering_session();
+    for (width, bits, expected_width, expected_bits, expected) in [
+        (5, 10, 5, 10, "1"),
+        (5, 11, 5, 10, "0"),
+        (4, 10, 5, 10, "0"),
+        (6, 10, 5, 10, "0"),
+    ] {
+        let source = format!(
+            "(machine-effect-current-domain-key? {width} {bits} {expected_width} {expected_bits})"
+        );
+        assert_eq!(
+            eval_value(&source, &mut session),
+            expected,
+            "machine effect predicate must be an exact D1 bit, never Lisp t/()"
+        );
+    }
+}
+
+#[test]
 fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
     let mut session = lowering_session();
     let cases = [
