@@ -71,6 +71,14 @@ def verify(inv,src,his,state,low,ledger,doc):
     assert historical_gray["coordinates_added"]==historical_gray["ratified_added"]==0
     assert historical_gray["added_stable_ids"]==[r["stable_id"] for r in inv["rows"][632:634]]
     lower={str(n).upper() for v in low["domains"].values() for n in v["residents"].values()}
+    for candidate in inv["rows"][634:]:
+        assert candidate["coordinate"] is None and candidate["coordinate_basis"]=="UNPLACED"
+        assert candidate["ratified_resident"] is False
+        assert candidate["status"]=="SELECTED-RESEARCH-CANDIDATE"
+        assert candidate["semantic_name"] not in lower
+    for transition in records:
+        for pointer in transition.get("appended_sources", []):
+            assert pointer in inv["sources"], "append event source missing"
     ledgerrows=list(csv.DictReader(io.StringIO(ledger),delimiter="\t"))
     for idx,(r,s) in enumerate(zip(inv["rows"][632:634],src["rows"])):
         assert r["stable_id"]==s["stable_id"]
