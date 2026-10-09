@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""#2958 — generate canonical D3-D7 owner-coordinate projection.
+"""#2958 — generate canonical D3-D9 owner-coordinate projection.
 
 Authority inputs:
 - D3/D4: knowledge/exact-width-admitted-corpus.json (widths 3/4 only)
 - D5: knowledge/d5-historical-full-map.json (OD-005)
 - D6: knowledge/d6-historical-full-map.json (OD-006)
-- D7: knowledge/d7-ratified.json (#3572; 126 residents, 2 pinned reservations)
+- D7: knowledge/d7-ratified.json (#3572; 126 residents, 2 pinned reservations)\n- D8/D9: dense-width occupancy certificates from #3960/#4008 exact resident maps
 
 The generated Rust intentionally excludes human labels, surfaces and legacy
 backend bytes. Those are projections/compatibility metadata, not occupancy
@@ -23,6 +23,8 @@ CORPUS = ROOT / "knowledge" / "exact-width-admitted-corpus.json"
 D5 = ROOT / "knowledge" / "d5-historical-full-map.json"
 D6 = ROOT / "knowledge" / "d6-historical-full-map.json"
 D7 = ROOT / "knowledge" / "d7-ratified.json"
+D8 = ROOT / "knowledge" / "d8-ratified.json"
+D9 = ROOT / "knowledge" / "d9-ratified.json"
 OUT = ROOT / "crates" / "sens" / "src" / "domain_owner_generated.rs"
 
 
@@ -96,6 +98,33 @@ def owner_rows():
     return rows
 
 
+
+def full_owner_widths():
+    """Read dense owner occupancy from ratified sources, not Rust assumptions.
+
+    Residency alone is NOT permission to call a mechanism; D10 is research.
+    """
+    results = []
+    for width, path, authority in ((8, D8, "#3960"), (9, D9, "#4008")):
+        data = load_json(path)
+        capacity = 1 << width
+        positions = data.get("residents", {})
+        if not isinstance(positions, dict) or (
+            data.get("status") != "owner-ratified"
+            or data.get("domain") != f"D{width}"
+            or data.get("width") != width
+            or data.get("authority") != authority
+            or data.get("capacity") != capacity
+            or data.get("occupancy") != capacity
+            or data.get("distinct_residents") != capacity
+            or set(positions) != {f"{n:0{width}b}" for n in range(capacity)}
+            or len(set(positions.values())) != capacity
+        ):
+            raise SystemExit(f"D{width} owner-ratified full-occupancy certificate drift")
+        results.append(width)
+    return tuple(results)
+
+
 def render(rows):
     body = "\n".join(
         f"    DomainOwnerCoordinate {{ width: {width}, bits: 0b{word}, source: {source} }},"
@@ -116,6 +145,11 @@ pub(crate) struct DomainOwnerCoordinate {{
 pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
 {body}
 ];
+
+/// Widths whose *entire* coordinate set is covered by separately owner-ratified
+/// complete maps. Generated from D8 #3960 / D9 #4008 after exhaustive checks.
+/// A full-width residency certificate is never a callable mechanism.
+pub(crate) const DOMAIN_OWNER_FULL_WIDTHS: &[u8] = &{list(full_owner_widths())};
 
 #[cfg(test)]
 mod tests {{
@@ -145,6 +179,12 @@ mod tests {{
                 .any(|row| row.width == 7 && row.bits == word);
             assert_eq!(admitted, word != 0b0100001 && word != 0b0101010);
         }}
+    }}
+
+    #[test]
+    fn generated_dense_owner_widths_are_source_certified_not_function_tables() {{
+        assert_eq!(DOMAIN_OWNER_FULL_WIDTHS, &[8, 9]);
+        assert!(!DOMAIN_OWNER_FULL_WIDTHS.contains(&10));
     }}
 
     #[test]
