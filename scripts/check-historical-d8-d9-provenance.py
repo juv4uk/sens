@@ -3,6 +3,7 @@
 from __future__ import annotations
 import copy, json, re, subprocess, sys
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth, read as read_growth, BASE as GROWTH_BASE
 
 ROOT=Path(__file__).resolve().parents[1]
 ART=ROOT/"knowledge/historical-d8-unassigned-d9-overflow-provenance-v1.json"
@@ -22,7 +23,12 @@ def validate(data,foundation,d8,d10):
     if data.get("status")!="ARCHIVAL-PROVENANCE-ONLY-REQUIRES-CURRENT-BEHAVIORAL-REVIEW": errors.append("not archival-only")
     snap=data.get("current_authority_snapshot",{})
     for k,p in (("d1_d9_foundation_blob_sha",FOUND),("d8_ratified_blob_sha",D8),("d10_inventory_blob_sha",D10)):
-        if snap.get(k)!=sha(p): errors.append(f"stale authority hash: {k}")
+        if k == "d10_inventory_blob_sha":
+            if snap.get(k) != read_growth(GROWTH_BASE)["origin_inventory_git_blob"]:
+                errors.append("historical D10 origin hash drift")
+            try: check_growth(d10)
+            except AssertionError: errors.append("current D10 mutated preserved historical 625 laws")
+        elif snap.get(k)!=sha(p): errors.append(f"stale authority hash: {k}")
     if d8.get("status")!="owner-ratified" or d8.get("occupancy")!=256:
         errors.append("expected current D8 owner-ratified 256/256")
     low={}

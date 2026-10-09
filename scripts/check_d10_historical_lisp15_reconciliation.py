@@ -3,6 +3,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth
 
 ROOT = Path(__file__).resolve().parents[1]
 REVIEW = ROOT / "knowledge/d10-historical-lisp15-reconciliation-20261009.json"
@@ -19,8 +20,9 @@ def verify(review: dict, foundation: dict, inventory: dict) -> dict:
         raise ValueError("expected 30 recovered families plus one MAPATOMS/OBARRAY review lead")
     if review["snapshot"]["selected_added"] or review["snapshot"]["coordinates_added"] or review["snapshot"]["ratifications_added"]:
         raise ValueError("a historical audit must not change semantic authority")
-    if review["snapshot"]["d10_selected"] != inventory["accounting"]["selected_semantic_candidates"]:
+    if inventory["accounting"]["selected_semantic_candidates"] < review["snapshot"]["d10_selected"]:
         raise ValueError("selected candidate count drift")
+    check_growth(inventory)
     if review["snapshot"]["d10_ratified"] != inventory["accounting"]["ratified_d10_residents"]:
         raise ValueError("ratification count drift")
     if review["snapshot"]["foundation_blob"] != review["lineage"].get("expected_foundation_blob", review["snapshot"]["foundation_blob"]):

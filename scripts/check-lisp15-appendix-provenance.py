@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth, read as read_growth, BASE as GROWTH_BASE
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "knowledge/lisp15-appendix-a-provenance-v1.json"
@@ -75,9 +76,15 @@ def validate(data, foundation, d8, inventory):
         ("d8_ratified_blob_sha", D8_PATH),
         ("d10_inventory_blob_sha", D10_PATH),
     ):
-        actual = git_blob_sha(path)
-        if auth.get(key) != actual:
-            errors.append(f"{key} is stale: recorded={auth.get(key)} current={actual}")
+        if key == "d10_inventory_blob_sha":
+            if auth.get(key) != read_growth(GROWTH_BASE)["origin_inventory_git_blob"]:
+                errors.append("historical D10 origin hash drift")
+            try: check_growth(inventory)
+            except AssertionError: errors.append("current D10 mutated preserved historical 625 laws")
+        else:
+            actual = git_blob_sha(path)
+            if auth.get(key) != actual:
+                errors.append(f"{key} is stale: recorded={auth.get(key)} current={actual}")
     if d8.get("status") != "owner-ratified" or d8.get("occupancy") != 256:
         errors.append("current D8 is not the expected owner-ratified 256/256 basis")
     accounting = data.get("current_exact_name_dedup", {})

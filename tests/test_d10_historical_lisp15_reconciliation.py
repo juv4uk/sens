@@ -1,9 +1,13 @@
 import importlib.util
 import json
 from pathlib import Path
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+# The source checker imports a sibling module. importlib-loaded tests do not
+# automatically add scripts/ to Python's import search path.
+sys.path.insert(0, str(ROOT / "scripts"))
 SPEC = importlib.util.spec_from_file_location(
     "d10_historical_lisp15_reconciliation",
     ROOT / "scripts/check_d10_historical_lisp15_reconciliation.py",
