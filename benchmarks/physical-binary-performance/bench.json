@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "physical-binary-performance",
+  "wing": "Physical T5 runtime and transport",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE"
+  ],
+  "question": "How large and fast is current physical .sens T5 transport, read and evaluation on an actual hosted CPU compared with two equivalent CLI entry points?",
+  "claim": "Measures actual physical size and per-process wall startup+execution, p95 and optional Cachegrind I refs. It compares two mechanical execution entrypoints only after exact output parity; this is not an independent semantic oracle and does not establish in-process warm throughput or cross-machine superiority.",
+  "witness": [
+    "README.md",
+    "run.py"
+  ],
+  "status": "ACTIVE-MECHANISM-MEASUREMENT",
+  "generation": "2026-10-09",
+  "axis": "sens/t5-physical-runtime-density",
+  "reproduce": "cargo build --locked --release -p sens-cli --bin sens --bin sens-trit && python3 benchmarks/physical-binary-performance/run.py --sens target/release/sens --sens-trit target/release/sens-trit --reps 21 --warmup 4 --out /tmp/sens-physical-bench"
+}
