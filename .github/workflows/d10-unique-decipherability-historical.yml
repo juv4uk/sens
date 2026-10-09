@@ -1,0 +1,23 @@
+name: D10 historical unique decipherability research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-unique-decipherability-historical-20261009.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check_d10_unique_decipherability_historical.py'
+      - 'tests/test_d10_unique_decipherability_historical.py'
+      - '.github/workflows/d10-unique-decipherability-historical.yml'
+  workflow_dispatch:
+jobs:
+  historical-linguistic-binary-unique-decoding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Historical examples
+        run: python3 scripts/check_d10_unique_decipherability_historical.py --self-test
+      - name: Fail closed against current D1-D9 / D10
+        run: python3 scripts/check_d10_unique_decipherability_historical.py --repo-root .
+      - name: Independent finite residual/falsifier tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_unique_decipherability_historical.py' -v
