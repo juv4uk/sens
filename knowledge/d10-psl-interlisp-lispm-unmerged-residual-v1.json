@@ -70,7 +70,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "обгорнути-функцію",
+      "surface_ukr": "огр-ф",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.02",
@@ -93,7 +97,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "зняти-обгортку",
+      "surface_ukr": "зн-ог",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.03",
@@ -116,7 +124,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "обгорнуто?",
+      "surface_ukr": "ог?",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.04",
@@ -139,7 +151,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "обгортка-типу?",
+      "surface_ukr": "ог-тип?",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.05",
@@ -162,7 +178,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "типи-обгорток",
+      "surface_ukr": "тип-ог",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.06",
@@ -185,7 +205,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "параметри-функції",
+      "surface_ukr": "пар-ф",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.07",
@@ -208,7 +232,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "початкове-визначення",
+      "surface_ukr": "поч-визн",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.08",
@@ -231,7 +259,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "впіймати-все",
+      "surface_ukr": "вп-вс",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.09",
@@ -254,7 +286,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "завершити-все",
+      "surface_ukr": "зав-вс",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.10",
@@ -277,7 +313,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "рамка-відновлення",
+      "surface_ukr": "рм-відн",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.11",
@@ -300,7 +340,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "зберегти-відновлення",
+      "surface_ukr": "зб-відн",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.12",
@@ -324,7 +368,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "тимчасова-змінна",
+      "surface_ukr": "тм-зм",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.13",
@@ -348,7 +396,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "тимчасові-змінні",
+      "surface_ukr": "тм-змн",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.14",
@@ -371,7 +423,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "тимчасове-налаштування",
+      "surface_ukr": "тм-нал",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.15",
@@ -395,7 +451,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "визначити-ресурс",
+      "surface_ukr": "визн-рес",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.16",
@@ -418,7 +478,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "взяти-ресурс",
+      "surface_ukr": "вз-рес",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.17",
@@ -441,7 +505,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "повернути-ресурс",
+      "surface_ukr": "пов-рес",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.18",
@@ -465,7 +533,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "використати-ресурс",
+      "surface_ukr": "вик-рес",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.19",
@@ -488,7 +560,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "очистити-ресурс",
+      "surface_ukr": "оч-рес",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.20",
@@ -511,7 +587,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "обійти-ресурс",
+      "surface_ukr": "обх-рес",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     },
     {
       "id": "d10.hist.residual.20261009.21",
@@ -534,7 +614,11 @@
       "exact_in_selected_D10": false,
       "coordinate": null,
       "selected": false,
-      "ratified": false
+      "ratified": false,
+      "surface_uk": "повернути-весь-ресурс",
+      "surface_ukr": "пов-врес",
+      "source_blocker": "NONE — historical-manual review, not an actual .sens migrator-blocking source",
+      "dedup_basis": "D1-D9 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; D10 selected 73dd518469f972c55411e004b70b054ba8b3ec86"
     }
   ],
   "accounting": {
