@@ -85,6 +85,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             foundation=CONTRACT_FOUNDATION,
             registry=REGISTRY,
             domain_surfaces=CONTRACT_DOMAIN_SURFACES,
+            prefer_current_surface=True,
         )
         authority = mod.build_binary_authority(data, mod.CONTRACT_DOMAINS)
         return (
@@ -133,13 +134,14 @@ class SensCodeMigrationTests(unittest.TestCase):
             all(entry.domain in mod.CONTRACT_CALL_DOMAINS for entry in code_map.values())
         )
         self.assertEqual(mod.CONTRACT_CALL_DOMAINS, ("D3", "D4", "D5", "D6"))
-        self.assertIn((8, "00000101"), authority)
+        self.assertIn((8, "10101000"), authority)
         self.assertIn((9, "100000001"), authority)
         self.assertNotIn("ROUND", code_map)
 
         resolution = resolver.resolve_head("ROUND")
         self.assertTrue(resolution.resolved)
         self.assertEqual(resolution.current.domain, "D8")
+        self.assertEqual(resolution.current.bits, "10101000")
 
         # A reused human label cannot select one domain globally.
         self.assertNotIn("MAP", resolver.current_by_label)

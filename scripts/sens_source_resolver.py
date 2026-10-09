@@ -191,12 +191,15 @@ class SourceResolver:
         domain_surfaces: dict[str, set[CurrentIdentity]],
         registry_sid_fields: dict[str, list[tuple[str, str]]],
         registry_surface_sids: dict[str, set[str]],
+        *,
+        prefer_current_surface: bool = False,
     ):
         self.current_by_label = current_by_label
         self.current_by_word = current_by_word
         self.domain_surfaces = domain_surfaces
         self.registry_sid_fields = registry_sid_fields
         self.registry_surface_sids = registry_surface_sids
+        self.prefer_current_surface = prefer_current_surface
 
         self.hist_by_sid: dict[str, list[HistoricalRow]] = {}
         self.hist_by_my: dict[str, list[HistoricalRow]] = {}
@@ -343,6 +346,19 @@ class SourceResolver:
                     evidence=evidence,
                 )
 
+        # A current admitted surface spelling wins over a historical uppercase
+        # interpretation when the current surface evidence is unique. This matters
+        # for current D8/D9 names such as ROUND that also occur in historical maps.
+        current_surface = set(self.current_surface.get(token, set()))
+        if self.prefer_current_surface and len(current_surface) == 1:
+            return self._choose(
+                "current-admitted-surface",
+                2,
+                token,
+                current_surface,
+                evidence=("current admitted domain surface",),
+            )
+
         # PASS 3: historical Lisp I / Lisp 1.5 UPPERCASE surface.
         rows = self.hist_by_upper.get(token)
         if rows is not None:
@@ -379,6 +395,7 @@ def build_resolver(
     foundation: Path,
     registry: Path,
     domain_surfaces: Iterable[Path],
+    prefer_current_surface: bool = False,
 ) -> SourceResolver:
     historical_rows = load_historical_rows(historical_map)
     current_by_label, current_by_word = load_current_foundation(foundation)
@@ -391,4 +408,5 @@ def build_resolver(
         surfaces,
         sid_fields,
         surface_sids,
+        prefer_current_surface=prefer_current_surface,
     )

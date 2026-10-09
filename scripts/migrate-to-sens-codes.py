@@ -1143,6 +1143,7 @@ def main():
         registry=args.semantic_registry,
         domain_surfaces=selected_surfaces,
         current_domains=current_resolver_domains,
+        prefer_current_surface=args.contract_authority,
     )
     binary_authority = (
         build_binary_authority(
