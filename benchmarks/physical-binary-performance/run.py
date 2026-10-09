@@ -29,9 +29,17 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words, typed_sha256
 
+# Фізичні, вже зафіксовані T5-взірці різних доменних операцій.
+# Паритет stdout є умовою заміру, а НЕ незалежним семантичним законом.
 FIXTURES = (
     "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",
     "tests/fixtures/migration-multiform-cohort-main/two-forms.sens",
+    "tests/fixtures/migration-d1-cond-cohort/branch.sens",
+    "tests/fixtures/migration-pair-cohort-main/pair-cons.sens",
+    "tests/fixtures/migration-pair-cohort-main/pair-car-cdr.sens",
+    "tests/fixtures/migration-d4-selector-cohort/caar.sens",
+    "tests/fixtures/migration-eq-cond-cohort-main/eq-cond-select.sens",
+    "tests/fixtures/migration-eq-cond-cohort-main/eq-cond-skip.sens",
 )
 LANES = ("sens-exec", "sens-trit-eval", "sens-trit-open")
 
