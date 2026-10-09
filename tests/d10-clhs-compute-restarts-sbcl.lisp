@@ -28,23 +28,32 @@
                          "innermost restart precedes outer restart")
         (d10-check (not invoked) "enumeration must not invoke a restart")))))
 
-;; Witness B: same-name and anonymous restarts remain distinct entries.
+;; Witness B: nested shadowed names still denote distinct restart objects.
+;; ANSI orders the nested contour before the outer one, but does not impose a
+;; relative order among multiple restart definitions in the same RESTART-BIND.
 (let ((baseline (compute-restarts))
-      (invoked nil))
-  (restart-bind ((d10-duplicate (lambda () (setf invoked t) :one))
-                 (d10-duplicate (lambda () (setf invoked t) :two))
-                 (nil (lambda () (setf invoked t) :anonymous)))
-    (let* ((all (compute-restarts))
-           (added (d10-new-restarts all baseline))
-           (duplicates (remove-if-not
-                        (lambda (restart) (eq (restart-name restart) 'd10-duplicate))
-                        added)))
-      (d10-check-equal 3 (length added) "all three new restart objects are visible")
-      (d10-check-equal 2 (length duplicates) "duplicate names do not collapse")
-      (d10-check (not (eq (first duplicates) (second duplicates)))
-                 "same-name entries have distinct restart identities")
-      (d10-check-equal 1 (d10-count-name nil added) "anonymous restart is retained")
-      (d10-check (not invoked) "listing must not invoke a restart"))))
+      (invoked nil)
+      (outer nil))
+  (restart-bind ((d10-duplicate (lambda () (setf invoked t) :outer)))
+    (setf outer (find-restart 'd10-duplicate))
+    (restart-bind ((d10-duplicate (lambda () (setf invoked t) :inner))
+                   (nil (lambda () (setf invoked t) :anonymous)))
+      (let* ((all (compute-restarts))
+             (added (d10-new-restarts all baseline))
+             (duplicates (remove-if-not
+                          (lambda (restart) (eq (restart-name restart) 'd10-duplicate))
+                          added))
+             (nearest (find-restart 'd10-duplicate)))
+        (d10-check-equal 3 (length added) "all three new restart objects are visible")
+        (d10-check-equal 2 (length duplicates) "duplicate names do not collapse")
+        (d10-check (not (eq (first duplicates) (second duplicates)))
+                   "same-name entries have distinct restart identities")
+        (d10-check (eq (first duplicates) nearest)
+                   "FIND-RESTART returns the nearest same-name restart")
+        (d10-check (eq (second duplicates) outer)
+                   "COMPUTE-RESTARTS retains the outer shadowed restart")
+        (d10-check-equal 1 (d10-count-name nil added) "anonymous restart is retained")
+        (d10-check (not invoked) "listing must not invoke a restart")))))
 
 ;; Witness C: condition association filters only restarts bound to another condition;
 ;; unassociated restarts remain visible to both condition queries.
