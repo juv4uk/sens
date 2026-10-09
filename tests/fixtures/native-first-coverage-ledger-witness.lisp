@@ -22,8 +22,8 @@
 (00001001 native-first-coverage-check
   (00001000 (left right)
     (00000111
-      ((00100010 left right) (1) (00000001 pass))
-      ((00100010 left right) (0) (00000001 fail)))))
+      ((00100010 left right) (00000001 pass))
+      ((00100010 (00100010 left right) (00100010 (00000001 d1-no-left) (00000001 d1-no-right))) (00000001 fail)))))
 
 (00001001 native-first-coverage-all-pass-state
   (00001000 (states)
@@ -48,8 +48,8 @@
 (00001001 native-first-coverage-present-state
   (00001000 (value)
     (00000111
-      ((00100010 value (00000001 ())) (1) (00000001 fail))
-      ((00100010 value (00000001 ())) (0) (00000001 pass)))))
+      ((00100010 value (00000001 ())) (00000001 fail))
+      ((00100010 (00100010 value (00000001 ())) (00100010 (00000001 d1-no-left) (00000001 d1-no-right))) (00000001 pass)))))
 
 (00001001 native-first-coverage-fallback-plan-state
   (00001000 (expression)
@@ -168,24 +168,19 @@
       ((00000010 row) (0)
        (00000111
          ((00100010 (00000101 row) (00000001 native-coverage))
-          (1)
           (10011100 ((status
                   (native-first-coverage-field
                     (00000001 status)
                     row)))
             (00000111
               ((00100010 status (00000001 native-supported))
-               (1)
                (native-first-coverage-native-row-state row))
               ((00100010 status (00000001 fallback-required))
-               (1)
                (native-first-coverage-fallback-row-state row))
               ((00100010 status (00000001 blocked-runtime-prerequisite))
-               (1)
                (native-first-coverage-blocked-row-state row))
               (t (00000001 fail)))))
-         ((00100010 (00000101 row) (00000001 native-coverage))
-          (0)
+         ((00100010 (00100010 (00000101 row) (00000001 native-coverage)) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
           (00000001 fail)))))))
 
 (00001001 native-first-coverage-all-valid-state
@@ -210,13 +205,10 @@
             (native-first-coverage-field (00000001 expected) row)))
       (00000111
         ((00100010 status (00000001 native-supported))
-         (1)
          (native-first-coverage-present-state expected))
         ((00100010 status (00000001 fallback-required))
-         (1)
          (native-first-coverage-check expected (00000001 ())))
         ((00100010 status (00000001 blocked-runtime-prerequisite))
-         (1)
          (native-first-coverage-check expected (00000001 ())))
         (t (00000001 fail))))))
 
@@ -247,17 +239,15 @@
               (00000001 status)
               (00000101 rows))
             status)
-          (1)
           (native-first-coverage-count-status-onto
             (00000110 rows)
             status
             (00001100 count 1)))
-         ((00100010
+         ((00100010 (00100010
             (native-first-coverage-field
               (00000001 status)
               (00000101 rows))
-            status)
-          (0)
+            status) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
           (native-first-coverage-count-status-onto
             (00000110 rows)
             status
