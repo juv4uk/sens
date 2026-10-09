@@ -65,6 +65,33 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
     })
 }
  
+/// Сумісний SID лише знаходить рядок surface-реєстру; координату D3
+/// встановлює виключно ратифікована доменна таблиця. Немає збігу або
+/// кілька різних координат — fail-closed, жодної таблиці SID→роль у Rust.
+pub(crate) fn compatibility_d3_route_from_ratified_domains(
+    semantic_id: SemanticId,
+) -> Option<CoreDomainIdentity> {
+    let packed = semantic_id.packed_byte();
+    let row = SEMANTIC_ROWS.get(usize::from(packed))?;
+    if row.semantic_id != packed {
+        return None;
+    }
+    let mut admitted = None;
+    for surface in row.surfaces {
+        let Some(identity) = direct_domain_identity_for_surface(surface.name) else {
+            continue;
+        };
+        if !matches!(identity, CoreDomainIdentity::D3(_)) {
+            return None;
+        }
+        if admitted.is_some_and(|previous| previous != identity) {
+            return None;
+        }
+        admitted = Some(identity);
+    }
+    admitted
+}
+
 /// Canonical Ukrainian *source-head* projection, before evaluation.
 ///
 /// Only owner-ratified source-routable uk rows are eligible. This is NOT the
