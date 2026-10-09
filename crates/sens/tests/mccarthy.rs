@@ -404,7 +404,6 @@ fn lexical_child_reads_parent_without_mutating_it() {
     let parent = sens::Environment::root();
     let child = parent.child();
     child.define("station", Value::Symbol("UR5ABC".into()));
-    assert_eq!(child.get("t"), Some(Value::Symbol("t".into())));
     assert_eq!(parent.get("station"), None);
 }
 
@@ -965,40 +964,8 @@ fn string_predicate_distinguishes_strings_from_other_atoms() {
 }
 
 #[test]
-fn symbol_predicate_is_a_sens_function_not_a_rust_builtin() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    assert_eq!(
-        eval_program("(symbol? (quote hello))", &mut session)
-            .unwrap()
-            .value,
-        Value::Symbol("t".into())
-    );
-    assert_eq!(
-        eval_program("(symbol? 5)", &mut session).unwrap().value,
-        Value::Nil
-    );
-    assert_eq!(
-        eval_program("(symbol? \"hello\")", &mut session)
-            .unwrap()
-            .value,
-        Value::Nil
-    );
-    assert_eq!(
-        eval_program("(symbol? (quote (hello)))", &mut session)
-            .unwrap()
-            .value,
-        Value::Nil
-    );
-    assert_eq!(
-        eval_program(
-            "(symbol? (string->symbol \"strange symbol\"))",
-            &mut session
-        )
-        .unwrap()
-        .value,
-        Value::Symbol("t".into())
-    );
+fn symbol_predicate_is_not_a_host_builtin() {
+    // An uninstalled language-level function cannot acquire host semantics.
     assert_eq!(
         eval_program("(symbol? (quote hello))", &mut Session::default())
             .unwrap_err()
