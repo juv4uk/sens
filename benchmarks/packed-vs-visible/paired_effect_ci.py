@@ -160,7 +160,7 @@ def main(argv: list[str] | None = None) -> int:
     table = [
         "# SENS paired performance — exploratory single-run uncertainty",
         "",
-        f"Measured source SHA: \`{args.source_sha}\`. Paired batch bootstrap, seed {args.seed}, {args.resamples} resamples.",
+        f"Measured source SHA: `{args.source_sha}`. Paired batch bootstrap, seed {args.seed}, {args.resamples} resamples.",
         "",
         "| Case | Phase | Visible / packed | Exploratory 95% interval | Verdict |",
         "|---|---|---:|---:|---|",
