@@ -94,7 +94,8 @@ def inspect(source: str, foundation: dict, *, source_era: str = "auto"):
         if name.lower() in RETIRED:
             mark("L5", "BLOCK", "retired semantic executable; remove via separately audited archaeology", head)
             return
-        if name in HELPERS:
+        mapped_helper = name in HELPERS
+        if mapped_helper:
             domain, label = HELPERS[name]
             code = resident_code(foundation, domain, label)
             if code is None:
@@ -104,6 +105,9 @@ def inspect(source: str, foundation: dict, *, source_era: str = "auto"):
             mark("L4", "STAGED", f"ratified {domain} resident {code} for {label}", head)
             name = code
         if name in COND:
+            if name == "00000111":
+                mark("L1", "BLOCK", "historical SID8 COND needs separately proven source-era mapping", head)
+                return
             for clause in node.items[1:]:
                 if not isinstance(clause, engine.ListNode) or clause.tail is not None:
                     mark("L1", "BLOCK", "COND clause must be a proper two-member list", clause)
@@ -127,10 +131,10 @@ def inspect(source: str, foundation: dict, *, source_era: str = "auto"):
             # Source names are *not* coordinates; no unproven callable Text7 fallback.
             mark("L3", "BLOCK", f"unresolved executable head {name!r}; D10 proposal, do not mint coordinate", head)
             return
-        if len(name) == 8 and source_era == "auto":
+        if len(name) == 8 and source_era == "auto" and not mapped_helper:
             mark("L3", "BLOCK", "eight-bit head ambiguous between SID8 and current D8", head)
             return
-        if len(name) == 8 and source_era == "legacy":
+        if len(name) == 8 and source_era == "legacy" and not mapped_helper:
             mark("L3", "BLOCK", "legacy SID8 needs history-aware resolver, not current D8 assertion", head)
             return
         for arg in node.items[1:]:
@@ -170,19 +174,73 @@ def main(argv=None) -> int:
         elif staged is None:
             report["reason"] = "L7 malformed source"
         else:
-            # Use the existing exact-domain emitter; no independent grammar.
-            from_s = ROOT / "scripts"
-            if str(from_s) not in sys.path:
-                sys.path.insert(0, str(from_s))
-            from sens_source_resolver import load_resolver  # noqa: F401
-            report["reason"] = "oracle-pinned admission required"
-            # Digest comparison is performed by the production approved-T5
-            # pipeline, not by this scanner. This gate never publishes bytes.
-            report["status"] = "STAGED-REVIEW"
-            report["staged_source_sha256"] = hashlib.sha256(staged.encode()).hexdigest()
-            if args.out:
+            # Existing three-pass exact-domain emitter and physical T5 codec.
+            # No second source reader/encoder or host-truthiness adaptation.
+            data = foundation
+            legacy, my, upper = engine.build_three_pass_maps(
+                data,
+                ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
+                ROOT / "crates/sens/src/semantic_registry_generated.rs",
+                ROOT / "crates/sens/src/semantic_registry.rs",
+                ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
+                ROOT / "contracts/core1-historical-sid-map.lisp",
+                ROOT / "knowledge/sens8-current-coverage-v1.json",
+            )
+            text7 = engine.build_text7(
+                data, ROOT / "crates/sens/src/text7_projection_generated.rs"
+            )
+            # An explicitly mapped EQUAL? D8 resident has exact current-domain
+            # evidence; unrecognised raw W8 heads still fail during inspect().
+            alias_d8 = any(f.law == "L4" and " D8 " in f.reason for f in findings)
+            effective_era = "current" if alias_d8 else args.source_era
+            resolver = engine.Resolver(
+                legacy, my, upper, effective_era,
+                data["domains"].get("D8", {}).get("residents", {}),
+            )
+            projection = engine.migrate_file(staged, resolver, text7)
+            words = engine.parse_words(projection)
+            payload = engine.encode_projection(projection)
+            if engine.decode_bytes(payload) != words:
+                raise ValueError("L1-L7: physical T5 roundtrip failed")
+            typed_sha = engine.typed_sha256(words)
+            physical_sha = hashlib.sha256(payload).hexdigest()
+            report.update({
+                "status": "STAGED-REVIEW",
+                "reason": "independent oracle digests required; NOT semantic parity",
+                "staged_source_sha256": hashlib.sha256(staged.encode()).hexdigest(),
+                "exact_domain_projection": projection,
+                "typed_word_sha256": typed_sha,
+                "physical_sha256": physical_sha,
+                "source_era_effective": effective_era,
+            })
+            oracle_pair = (args.oracle_typed_sha256, args.oracle_physical_sha256)
+            if all(oracle_pair):
+                if oracle_pair != (typed_sha, physical_sha):
+                    report["status"] = "BLOCK"
+                    report["reason"] = "independent oracle typed/physical digest mismatch"
+                else:
+                    report["status"] = "STAGED-ORACLE-MATCH"
+                    report["reason"] = (
+                        "digest equality confirmed; independent semantic oracle "
+                        "provenance still required by admit-t5-migration.py"
+                    )
+                    if args.out:
+                        # This preview gate must NOT publish physical binaries:
+                        # only the existing transactional admission tool can do that.
+                        report["status"] = "BLOCK"
+                        report["reason"] = (
+                            "no binary publication from preview gate: "
+                            "use admit-t5-migration.py with independent witnesses"
+                        )
+            elif any(oracle_pair):
                 report["status"] = "BLOCK"
-                report["reason"] = "publication requires full independent semantic oracle; use admit-t5-migration.py"
+                report["reason"] = "both independent oracle digests are required"
+            if args.out and report["status"] == "STAGED-REVIEW":
+                report["status"] = "BLOCK"
+                report["reason"] = (
+                    "unverified binary publication prohibited; "
+                    "use admit-t5-migration.py"
+                )
     except (UnicodeError, OSError, ValueError, engine.MigrationError) as exc:
         report["reason"] = f"L7 input/validation BLOCK: {exc}"
         report.setdefault("findings", []).append(vars(Finding("L7", "BLOCK", str(exc), 0)))
@@ -191,7 +249,7 @@ def main(argv=None) -> int:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(rendered, encoding="utf-8")
     print(rendered, end="")
-    return 0 if report["status"] == "STAGED-REVIEW" else 4
+    return 0 if report["status"] == "STAGED-ORACLE-MATCH" else 4
 
 
 if __name__ == "__main__":
