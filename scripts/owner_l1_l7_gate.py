@@ -174,6 +174,9 @@ def _visit(ctx: GateContext, node) -> None:
     if name.lower() in RETIRED:
         ctx.mark("L5", "BLOCK", "retired semantic executable; separately audit archaeology", head)
         return
+    if name in {"0010", "0011", "LAMBDA", "lambda", "DEFINE", "define", "def", "00001001"}:
+        ctx.mark("L3", "BLOCK", "source binding or lexical shadowing: separate scope oracle required", head)
+        return
     name, helper_mapped = _map_helper(ctx, head)
     if name is None:
         return
