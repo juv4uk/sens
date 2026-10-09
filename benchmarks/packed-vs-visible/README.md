@@ -82,3 +82,42 @@ framing, the cost of transmitting/storing the caller-supplied word-width
 schedule, and terminal output. This lane compares physical vs visible input to
 one Rust interpreter, not Python/Chez/LLVM. Microbenchmark results on
 GitHub-hosted CPUs are noisy: never use one run to assert a universal speedup.
+
+## New process / Session / Core4 bootstrap (third performance lane)
+
+The benchmark uses one hosted CPU and one Release-built
+`crates/sens/examples/sens_cold_start_probe.rs` binary. Python launches a
+**fresh OS process** each sample and records two non-interchangeable clocks:
+
+1. `process_wall_ns` — Python wall-clock from process launch through process
+   exit/output capture; includes the OS loader and scheduler;
+2. `inner_ns` — Rust `Instant` around exactly one requested operation inside
+   that process.
+
+Five modes are measured independently: `noop` (executable startup baseline),
+`session` (bare `Session::default`), `d3` (new bare session plus exact D2
+QUOTE of structural EMPTY), `core` (bare session and actual Lisp-owned Core4
+bootstrap), and `core-d3` (Core4 bootstrap plus exact D2/D3 execution).
+Modes rotate across rounds, with two warm-up process launches and eleven
+measured **new processes per mode**.
+
+```bash
+cargo build --locked --release -p sens --example sens_cold_start_probe
+python3 benchmarks/packed-vs-visible/cold_start.py \
+  --probe target/release/examples/sens_cold_start_probe \
+  --samples 11 --warmup 2 \
+  --out /tmp/sens-cold-start.json
+```
+
+The result and `cold-start-summary.md` are published beside the previous raw
+benchmark samples in the GitHub Actions artifact. A Core4 bootstrap error is
+shown as `BLOCKED` with its underlying message, not timed as a successful
+execution; the independent basic no-op/session/D3 benchmark must still pass.
+
+**Limitations:** each process is new, but file-system page cache is *not*
+cleared. This is **not cold disk boot**. Do not subtract the process-wall
+medians from unrelated internal medians and label that delta a precise
+loader cost; scheduling and output capture vary. Bare session cost is distinct
+from Core4 bootstrap, and these measurements do not give permission to
+change the Lisp-owned language laws or assert that a speed result is
+an architecture ratification.
