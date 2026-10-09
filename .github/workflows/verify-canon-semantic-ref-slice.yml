@@ -1,0 +1,46 @@
+name: Verify Canon semantic-ref slice
+
+on:
+  push:
+    branches:
+      - fix/canon-semantic-ref-slice
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/canon-semantic-ref-slice
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Apply semantic-ref slice
+        run: |
+          python3 .github/scripts/apply-canon-semantic-ref-slice.py
+          python3 .github/scripts/update-semantic-presentation-test.py
+          cargo fmt --all
+      - name: Focused semantic identity proofs
+        run: |
+          cargo test -p my-lisp numeric_canon_identity_is_the_runtime_value_identity -- --nocapture
+          cargo test -p my-lisp callable_surfaces_materialize_the_same_semantic_reference -- --nocapture
+          cargo test -p my-lisp semantic_ref_nanbox_payload_is_the_numeric_identity -- --nocapture
+          cargo test -p my-lisp peer_identity_acceptance_program_passes -- --nocapture
+          cargo test -p my-lisp ukrainian_presentation_localizes_semantic_and_function_markers -- --nocapture
+      - name: Full workspace regression
+        run: cargo test --workspace
+      - name: Zero-warning Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Commit verified vertical slice
+        run: |
+          git rm .github/scripts/apply-canon-semantic-ref-slice.py .github/scripts/update-semantic-presentation-test.py .github/workflows/verify-canon-semantic-ref-slice.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add crates/my-lisp/src/value.rs crates/my-lisp/src/eval/canon.rs crates/my-lisp/src/eval/mod.rs crates/my-lisp/src/eval/closures.rs crates/my-lisp/src/layout.rs crates/my-lisp/src/presentation.rs lib/surface/peer-identity-acceptance.my docs/BUILTIN-IDENTITY-MIGRATION-MAP-2026-09-11.md
+          git commit -m "refactor(canon): make semantic ID the callable value identity"
+          git push origin HEAD:fix/canon-semantic-ref-slice
