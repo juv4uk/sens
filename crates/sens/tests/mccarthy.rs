@@ -963,7 +963,6 @@ fn string_predicate_distinguishes_strings_from_other_atoms() {
     assert_eq!(eval("(string? 5)").as_predicate_bit(), Some(false));
 }
 
-
 #[test]
 fn symbol_to_string_rejects_a_non_symbol() {
     let error = eval_program(
@@ -1260,7 +1259,6 @@ fn core_session() -> Session {
     sens::load_core_library(&mut session).expect("core library should load");
     session
 }
-
 
 #[test]
 fn string_less_than_rejects_non_string_arguments() {
