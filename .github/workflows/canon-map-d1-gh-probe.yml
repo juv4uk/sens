@@ -1,0 +1,44 @@
+name: Probe strict map-onto NO for Canon V2
+
+on:
+  push:
+    branches:
+      - fix/canon-let-map-d1-no-20261009
+    paths:
+      - lib/core.lisp
+      - lib/core4.lisp
+      - .github/workflows/canon-map-d1-gh-probe.yml
+
+permissions:
+  contents: write
+
+jobs:
+  map-canon:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/canon-let-map-d1-no-20261009
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Generate authentic FASL from updated core4 source
+        run: cargo run --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Exact source/FASL invariant
+        run: cargo test -p sens --test core_fasl_freshness -- --nocapture
+      - name: Commit tested binary to repair branch (never main)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "FASL unchanged"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test(core): regenerate FASL for verified map-onto candidate'
+          git push origin HEAD:refs/heads/fix/canon-let-map-d1-no-20261009
+      - name: Execute full Canon V2 Lisp-owned witness (no skips)
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
