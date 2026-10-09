@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import tempfile
 import hashlib
 import json
 import os
@@ -71,7 +72,7 @@ def main() -> None:
         raise FileNotFoundError("build release sens and sens-trit first")
 
     sys.path.insert(0, str(ROOT / "scripts"))
-    from sens_t5_codec import decode_bytes
+    from sens_t5_codec import decode_bytes, encode_words
 
     args.out.mkdir(parents=True, exist_ok=True)
     git = os.environ.get("GITHUB_SHA")
@@ -97,6 +98,7 @@ def main() -> None:
             "claim, no warmed in-process interpreter measurement, no uncached disk claim"
         ),
         "cases": [],
+        "decode_scaling": [],
     }
     raw = []
     markdown = [
@@ -177,6 +179,58 @@ def main() -> None:
             flush=True,
         )
 
+    # Scale the same admitted D3 program, never invent a new opcode or grammar.
+    # This deliberately includes process startup, file I/O and text projection:
+    # report "end-to-end physical open", not pure decoder cycles/second.
+    with tempfile.TemporaryDirectory(prefix="sens-t5-scale-") as tmpdir:
+        seed = decode_bytes((ROOT / FIXTURES[0]).read_bytes())
+        markdown.extend([
+            "", "## Physical T5 open scaling — measured, end to end", "",
+            "| Repeated quote programs | Packed bytes | Words | Median ms | p95 ms | Effective MiB/s |",
+            "|---:|---:|---:|---:|---:|---:|",
+        ])
+        for scale in (1, 128, 2048):
+            repeated = seed * scale
+            physical = encode_words(repeated)
+            generated = Path(tmpdir) / f"repeat-{scale}.sens"
+            generated.write_bytes(physical)
+            visible = (" ".join(repeated) + "\n").encode("ascii")
+            command = [trit, "open", str(generated)]
+            first_ns, first_output = measure(command)
+            if first_output != visible:
+                raise RuntimeError(f"scaled T5 decode mismatch: {scale}")
+            values = []
+            for rep in range(args.warmup + args.reps):
+                ns, output = measure(command)
+                if output != visible:
+                    raise RuntimeError(f"scaled T5 output drift: {scale}/{rep}")
+                if rep >= args.warmup:
+                    values.append(ns)
+                    raw.append({
+                        "fixture": f"generated/quote-repeat-{scale}.sens",
+                        "mode": "sens-trit-open-scaled",
+                        "rep": rep - args.warmup,
+                        "wall_ns": ns,
+                        "output_sha256": digest(output),
+                    })
+            median_ns = int(statistics.median(values))
+            throughput = len(physical) * 1e9 / median_ns / (1024 * 1024)
+            sample = {
+                "base_fixture": FIXTURES[0], "copies": scale,
+                "physical_t5_bytes": len(physical),
+                "source_words": len(repeated),
+                "packed_sha256": digest(physical),
+                "output_sha256": digest(visible),
+                "median_ns": median_ns, "p95_ns": p95(values),
+                "first_ns": first_ns,
+                "effective_mib_per_s_including_startup_and_stdout": round(throughput, 4),
+            }
+            report["decode_scaling"].append(sample)
+            markdown.append(
+                f"| {scale} | {len(physical)} | {len(repeated)} | "
+                f"{median_ns/1e6:.3f} | {p95(values)/1e6:.3f} | {throughput:.3f} |"
+            )
+
     markdown.extend([
         "", "| Program | Physical T5 bytes | Visible binary bytes | Human Lisp bytes |",
         "|---|---:|---:|---:|",
@@ -189,6 +243,7 @@ def main() -> None:
         )
     markdown.extend([
         "", "These are paired physical D3 workloads, **not** a whole-language ranking.",
+        "Effective MiB/s includes process startup, file I/O and ASCII stdout projection; it is not the pure T5 codec bandwidth.",
         "Process start and page-cache behavior are included, not separated.", "",
     ])
     with (args.out / "raw.tsv").open("w", newline="", encoding="utf-8") as output:
