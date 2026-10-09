@@ -6,6 +6,8 @@ on:
       - 'tests/fixtures/witness-runner.lisp'
       - 'tests/fixtures/canon-laws-v2-witness.lisp'
       - 'lib/canon.lisp'
+      - 'tests/fixtures/decimal-comma-authority-witness.lisp'
+      - 'crates/sens/tests/decimal_comma_authority.rs'
       - 'lib/core4.lisp'
       - 'lib/core4.lisp.fasl'
       - 'lib/core.lisp'
@@ -29,3 +31,5 @@ jobs:
           echo 'SENS_FASL_END'
       - name: Exact Canon witness regression
         run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+      - name: Decimal comma one-bit witness regression
+        run: cargo test -p sens --test decimal_comma_authority -- --nocapture
