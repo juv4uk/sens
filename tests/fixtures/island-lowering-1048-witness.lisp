@@ -27,7 +27,6 @@
                  (00000001 common-lisp)
                  (00000001 bounded-exact-add)
                  "#q2:10/1 #q2:11/1"))
-         (1)
          (00000111
            ((00100010
               pl
@@ -36,7 +35,6 @@
                     (00000001 prolog)
                     (00000001 bounded-exact-add)
                     "#q2:10/1 #q2:11/1"))
-            (1)
             (00000111
               ((00100010
                  dl
@@ -45,7 +43,6 @@
                        (00000001 datalog)
                        (00000001 bounded-exact-add)
                        "#q2:10/1 #q2:11/1"))
-               (1)
                (00000111
                  ((00100010
                     clips-result
@@ -54,7 +51,6 @@
                           (00000001 clips)
                           (00000001 bounded-exact-add)
                           "#q2:10/1 #q2:11/1"))
-                  (1)
                   (00000001 (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
                  ((00000001 witness-clips-fail) witness-clips-fail
                   (00000101 (00000001 ())))))
