@@ -11,6 +11,8 @@ const DOMAIN: &str = include_str!("../src/domain_identity.rs");
 const REGISTRY: &str = include_str!("../src/semantic_registry.rs");
 const MANIFEST: &str = include_str!("../Cargo.toml");
 const EVALUATOR: &str = include_str!("../src/eval/canon.rs");
+const COMPILER_ROLE: &str = include_str!("../src/compiler_role.rs");
+const SELECTOR_MECHANISM: &str = include_str!("../src/eval/selector_law.rs");
 
 #[test]
 fn exact_domain_route_has_no_retired_cond_or_graded_predicate_engine() {
@@ -104,4 +106,13 @@ fn legacy_host_oracle_schema_is_not_part_of_rust_core() {
     ] {
         assert!(!LIB.contains(forbidden), "retired Rust-owned oracle returned: {forbidden}");
     }
+}
+
+#[test]
+fn compiler_role_is_lisp_owned_and_rust_selector_decoding_cannot_claim_it() {
+    // Only structural carrier and call into the SENS-owned role law remain.
+    assert!(COMPILER_ROLE.contains("compiler_execution_role_from_sens(identity)"));
+    assert!(!COMPILER_ROLE.contains("domain_primitive_kind(identity)"));
+    assert!(!COMPILER_ROLE.contains("selector_law::compiler_execution_role(identity)"));
+    assert!(!SELECTOR_MECHANISM.contains("fn compiler_execution_role("));
 }
