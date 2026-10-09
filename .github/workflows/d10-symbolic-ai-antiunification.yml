@@ -1,0 +1,25 @@
+name: D10 symbolic AI antiunification research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
+      - 'scripts/d10_antiunify_oracle.py'
+      - 'tests/test_d10_symbolic_ai_antiunification.py'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
+      - 'scripts/d10_antiunify_oracle.py'
+      - 'tests/test_d10_symbolic_ai_antiunification.py'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+permissions:
+  contents: read
+jobs:
+  source-only-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify independent recursive/iterative oracles and exhaustive minimality
+        run: python3 -m unittest discover -s tests -p 'test_d10_symbolic_ai_antiunification.py' -v
