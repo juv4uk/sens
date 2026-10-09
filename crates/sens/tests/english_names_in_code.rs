@@ -166,6 +166,17 @@ fn rust_nonsemantic_data_kind(
         return Some("rust-cli-surface");
     }
 
+    // This exact Lisp form is a negative test fixture embedded in a
+    // production module's #[cfg(test)] section. It intentionally checks that
+    // English "car" does NOT mint a current identity; equivalent source text
+    // elsewhere remains executable-name debt.
+    if rel == "crates/sens/src/mixed_source.rs"
+        && literal == "(car x)"
+        && line_text.trim().starts_with("for source in [\"(car x)\"")
+    {
+        return Some("rust-test-instrument");
+    }
+
     None
 }
 
@@ -584,6 +595,36 @@ fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
         );
     }
     assert!(ratchet_enforced_kind("rust"));
+}
+
+#[test]
+fn embedded_mixed_source_negative_fixture_is_test_input_only() {
+    let fixture_line =
+        r#"for source in ["(car x)", "(CONS x y)", "(00000101 x)", "(невідоме x)"] {"#;
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/mixed_source.rs",
+            fixture_line,
+            "(car x)",
+        ),
+        Some("rust-test-instrument"),
+    );
+
+    // No broad path/name exemption: production uses of the same source text
+    // still contribute to the English-name ratchet.
+    for line in [
+        r#"let source = "(car x)";"#,
+        r#"parse_mixed_exact_domain("(car x)")"#,
+    ] {
+        assert_eq!(
+            rust_nonsemantic_data_kind(
+                "crates/sens/src/mixed_source.rs",
+                line,
+                "(car x)",
+            ),
+            None,
+        );
+    }
 }
 
 #[test]
