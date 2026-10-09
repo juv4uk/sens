@@ -19,7 +19,7 @@
     "primary_pdf": "https://bitsavers.org/pdf/mit/ai/aim/AIM-010.pdf",
     "archival_index": "https://softwarepreservation.computerhistory.org/LISP/lisp15_family.html",
     "independent_catalog": "https://archive.computerhistory.org/resources/access/text/finding-aids/102703236-Stoyan/102703236-Stoyan.pdf",
-    "source_limit": "The scan is catalogued as a six-page historical demonstration program. This dossier formalizes a bounded modern test language; it does not claim that its contract is a literal transcription of the 1959 program."
+    "source_limit": "This contract is a modern bounded formalization for review; it does not claim to be a literal transcription of the 1959 program."
   },
   "observable_law": {
     "input": "A finite acyclic expression tree and a target variable name.",
