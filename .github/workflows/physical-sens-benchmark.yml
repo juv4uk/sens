@@ -10,6 +10,7 @@ on:
       - "benchmarks/current-en-vs-d1d8/performance_scoreboard.py"
       - "examples/binary/d5-label-*.bits"
       - "crates/sens/examples/physical_sens_hot_bench.rs"
+      - "crates/sens/examples/physical_sens_d5_hot_bench.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/src/main.rs"
       - "crates/sens/src/ternary_transport.rs"
@@ -79,6 +80,20 @@ jobs:
             --reps 19 --warmups 3 \
             --out "$RUNNER_TEMP/sens-physical-bench"
 
+      - name: Compile hot D5 execution phase probe (no process startup in samples)
+        run: cargo build --locked --release -p sens --example physical_sens_d5_hot_bench
+
+      - name: Measure in-process D5 recursion, copy and MAP from physical T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/d5_hot.py \
+            --helper target/release/examples/physical_sens_d5_hot_bench \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --reps 9 --iterations 64 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
       - name: Score measured T5/D2 routes with p50 p95 and same-byte ratios
         run: |
           python3 benchmarks/current-en-vs-d1d8/performance_scoreboard.py \
@@ -96,6 +111,9 @@ jobs:
             fi
             if test -s "$RUNNER_TEMP/sens-physical-bench/d5-report.md"; then
               cat "$RUNNER_TEMP/sens-physical-bench/d5-report.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if test -s "$RUNNER_TEMP/sens-physical-bench/d5-hot-report.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/d5-hot-report.md" >> "$GITHUB_STEP_SUMMARY"
             fi
             if test -s "$RUNNER_TEMP/sens-physical-bench/scoreboard.md"; then
               cat "$RUNNER_TEMP/sens-physical-bench/scoreboard.md" >> "$GITHUB_STEP_SUMMARY"
