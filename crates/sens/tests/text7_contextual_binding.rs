@@ -1,10 +1,7 @@
-//! Contextual Text7 binder/reference execution witnesses for #3910.
-//!
-//! D2 remains structural in the canonical reader. These tests exercise the
-//! existing Text7 value/key plus lexical Environment only in explicit
-//! DEFINE/LAMBDA/call-head roles.
+//! Exact-width Text7 and D2 reader boundaries only.
+//! Contextual DEFINE/LAMBDA binding behavior is proved by SENS/Lisp witnesses.
 
-use sens::{eval_parsed_expressions, parse_canonical_binary, DomainIdentity, PredicateBit, Value};
+use sens::{parse_canonical_binary, DomainIdentity, syntax::ExprKind};
 
 fn text7_frame(cells: &[u8]) -> String {
     let body = cells
@@ -16,70 +13,52 @@ fn text7_frame(cells: &[u8]) -> String {
 }
 
 #[test]
-fn lambda_text7_parameter_round_trips_as_a_value_reference() {
-    let name = text7_frame(&[0x41, 0x42]);
-    // ((lambda (<AB>) <AB>) 1)
-    let source = format!(
-        "10 10 0010 00 10 {name} 01 00 {name} 01 00 1 01"
-    );
-    let expressions = parse_canonical_binary(&source).expect("contextual lambda parses");
-    let mut session = sens::Session::default();
-    let value = eval_parsed_expressions(&expressions, &mut session)
-        .expect("contextual lambda executes")
-        .value;
-    assert_eq!(
-        value,
-        Value::DomainIdentity(DomainIdentity::D1(
-            PredicateBit::from_word(sens::Bit1::new(1).unwrap())
-        ))
-    );
-}
-
-#[test]
-fn global_text7_definition_can_be_called_by_its_contextual_frame() {
-    let name = text7_frame(&[0x41, 0x42]);
-    // (define <AB> (lambda () 1)) (<AB>)
-    let source = format!(
-        "10 0011 00 {name} 00 10 0010 00 10 01 00 1 01 01 00 10 {name} 01"
-    );
-    let expressions = parse_canonical_binary(&source).expect("contextual define parses");
-    let mut session = sens::Session::default();
-    let value = eval_parsed_expressions(&expressions, &mut session)
-        .expect("contextual global call executes")
-        .value;
-    assert_eq!(
-        value,
-        Value::DomainIdentity(DomainIdentity::D1(
-            PredicateBit::from_word(sens::Bit1::new(1).unwrap())
-        ))
-    );
-}
-
-#[test]
-fn quoted_text7_frame_remains_structural_data() {
-    let name = text7_frame(&[0x41, 0x42]);
-    let source = format!("10 001 00 {name} 01");
-    let expressions = parse_canonical_binary(&source).expect("quoted Text7 frame parses");
-    let mut session = sens::Session::default();
-    let value = eval_parsed_expressions(&expressions, &mut session)
-        .expect("quoted frame evaluates as data")
-        .value;
-    assert!(matches!(value, Value::Pair(_, _)), "quoted frame must remain list data: {value:?}");
-}
-
-#[test]
-fn plain_w7_d2_list_has_no_implicit_text7_retyping_in_reader() {
-    let expressions = parse_canonical_binary("10 1000001 00 1000010 01")
-        .expect("ordinary W7 list remains valid D2 structure");
+fn ordinary_w7_words_remain_exact_domain_data_in_d2_lists() {
+    let source = "10 1000001 00 1000010 01";
+    let expressions =
+        parse_canonical_binary(source).expect("ordinary W7 list remains valid D2 structure");
     assert_eq!(expressions.len(), 1);
-    let sens::syntax::ExprKind::List(items) = &expressions[0].kind else {
+    let ExprKind::List(items) = &expressions[0].kind else {
         panic!("ordinary W7 D2 list changed AST shape");
     };
     assert_eq!(items.len(), 2);
-    assert!(matches!(&items[0].kind, sens::syntax::ExprKind::DomainIdentity(
-        DomainIdentity::D7(_)
-    )));
-    assert!(matches!(&items[1].kind, sens::syntax::ExprKind::DomainIdentity(
-        DomainIdentity::D7(_)
+    for (item, expected) in items.iter().zip([0b1000001, 0b1000010]) {
+        let ExprKind::DomainIdentity(DomainIdentity::D7(identity)) = &item.kind else {
+            panic!("W7 payload must remain an exact D7 identity");
+        };
+        assert_eq!(identity.width(), 7);
+        assert_eq!(identity.packed_bits(), expected);
+    }
+}
+
+#[test]
+fn same_numeric_payload_at_different_widths_keeps_different_identity() {
+    let d1 = parse_canonical_binary("1").expect("exact D1 source");
+    let d7 = parse_canonical_binary("0000001").expect("exact D7 source");
+
+    let ExprKind::DomainIdentity(d1_identity) = &d1[0].kind else {
+        panic!("expected D1 identity");
+    };
+    let ExprKind::DomainIdentity(d7_identity) = &d7[0].kind else {
+        panic!("expected D7 identity");
+    };
+
+    assert_eq!((d1_identity.width(), d1_identity.packed_bits()), (1, 1));
+    assert_eq!((d7_identity.width(), d7_identity.packed_bits()), (7, 1));
+    assert_ne!(d1_identity, d7_identity);
+}
+
+#[test]
+fn packed_text7_candidate_retains_cell_widths_without_retyping_reader_ast() {
+    let source = text7_frame(&[0x41, 0x42]);
+    let expressions = parse_canonical_binary(&source).expect("width-qualified sequence parses");
+    assert_eq!(expressions.len(), 1);
+    let ExprKind::List(items) = &expressions[0].kind else {
+        panic!("D2 framing must retain list structure");
+    };
+    assert_eq!(items.len(), 2);
+    assert!(items.iter().all(|item| matches!(
+        &item.kind,
+        ExprKind::DomainIdentity(DomainIdentity::D7(_))
     )));
 }
