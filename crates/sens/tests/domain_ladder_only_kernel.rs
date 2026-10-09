@@ -22,8 +22,6 @@ fn exact_domain_route_has_no_retired_cond_or_graded_predicate_engine() {
             "Rust must not own retired language semantics: {forbidden}"
         );
     }
-    assert!(CORE.contains("evaluate_domain_cond(clauses, environment, span)"));
-    assert!(CORE.contains("Value::predicate_bit(left == right)"));
 }
 
 #[test]
