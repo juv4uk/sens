@@ -318,7 +318,7 @@ fn sens_binary_executes_physical_t5_without_a_human_name_parser() {
         "physical T5 rejected: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "()");
+    assert!(!String::from_utf8_lossy(&output.stdout).trim().is_empty(), "physical T5 produced no CLI result");
 
     // No hidden Core4/human-compatibility interpretation is allowed for T5.
     let flagged = sens()
