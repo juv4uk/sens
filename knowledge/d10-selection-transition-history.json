@@ -62,6 +62,35 @@
         "scripts/check_d10_clos_roots_selection.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.hist.primary.batch2.20261009",
+      "authority": "#4013 #4463 2nd coordinated historical source selection on merged CLOS/main",
+      "evidence": [
+        "#4839",
+        "#4865",
+        "#4881",
+        "#4872"
+      ],
+      "previous_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+      "resulting_inventory_blob_sha": "5f529d5c09138cf6e41adfc15a89c058296642cd",
+      "added_stable_ids": [
+        "d10.hist.primary.20261009.deposit-field",
+        "d10.hist.primary.20261009.hashtable-entries"
+      ],
+      "appended_sources": [
+        "knowledge/d10-historical-primary-admission-batch2-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 630,
+      "resulting_selected": 632,
+      "decision": "research selection; coordinate=null; owner ratification remains pending",
+      "tests": [
+        "scripts/check_d10_historical_second_tranche.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }
