@@ -1,0 +1,153 @@
+{
+  "schema": "d10-cyclic-binary-word-canon-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "authority": [
+    "#4013",
+    "#4463",
+    "#4301",
+    "#4182"
+  ],
+  "sources": [
+    {
+      "title": "SageMath FiniteWord minimal_conjugate()",
+      "url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+      "role": "external executable specification of lexicographically least cyclic rotation; Sage method returns word but not our smallest-offset witness"
+    },
+    {
+      "title": "Kellogg S Booth (1980), Lexicographically least circular substrings, IPL 10(4–5):240–242",
+      "url": "https://doi.org/10.1016/0020-0190(80)90149-0",
+      "role": "primary historical algorithmic research (Booth least circular shift)"
+    },
+    {
+      "title": "JuV4UK spanda (original analog computer)",
+      "url": "https://github.com/juv4uk/spanda/blob/master/README.md",
+      "repository": "juv4uk/spanda",
+      "blob_sha": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "role": "owner motivation for bit-encoded periodic sampling, NOT proof that this function existed in the project"
+    }
+  ],
+  "historical_boundary": "Sage and Booth specify least circular rotation; our extra choice of lowest original zero-based shift among exactly equal minima and strict nonempty bit validation is an explicit SENS research contract, not attributed to Sage API.",
+  "snapshot": {
+    "d10_inventory_blob_sha": "7683f1e2bfcf67d3a45d412d3b1790b72ad623ad",
+    "d1_d9_foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "selected": 632,
+    "ratified": 0
+  },
+  "candidate": {
+    "semantic_name": "CYCLIC-BINARY-WORD-CANON",
+    "proposal_id": "D10P-4937",
+    "surface_uk": "циклім",
+    "surface_ukr": "канонічний-цикл-двійкового-слова",
+    "width": 10,
+    "coordinate": null,
+    "ratified": false,
+    "selected": false,
+    "proposal_status": "pending-review",
+    "inputs": "one nonempty finite sequence of exact PredicateBit identities 0 and 1, order fixed; an empty sequence is INVALID, bool/float/text input is INVALID",
+    "outputs": "pair (lexicographically least length-N cyclic LEFT rotation as a bit sequence, smallest zero-based original left-rotation index k attaining that minimum)",
+    "law": "For finite nonempty w of length N, define rotate(w,k)[i]=w[(i+k) mod N]. Choose c=min_lex {rotate(w,k) | 0<=k<N}. Return (c, min {k | rotate(w,k)=c}). No reversal, sorting, primitive-root contraction, incomplete-period padding, byte alignment, or physical carrier framing.",
+    "positives": [
+      {
+        "word": "1100",
+        "canonical": "0011",
+        "least_left_shift": 2,
+        "why": "cross-boundary least rotation"
+      },
+      {
+        "word": "1001",
+        "canonical": "0011",
+        "least_left_shift": 1,
+        "why": "same circle with different original phase"
+      },
+      {
+        "word": "1010",
+        "canonical": "0101",
+        "least_left_shift": 1,
+        "why": "two identical least rotations, choose earlier k=1 rather than 3"
+      },
+      {
+        "word": "010010",
+        "canonical": "001001",
+        "least_left_shift": 2,
+        "why": "repeated cyclic minimum at k=2 and k=5; stable source index 2"
+      },
+      {
+        "word": "1111",
+        "canonical": "1111",
+        "least_left_shift": 0,
+        "why": "all rotations identical; earliest shift 0"
+      },
+      {
+        "word": "01010",
+        "canonical": "00101",
+        "least_left_shift": 4,
+        "why": "aperiodic word with prefix period 2, root algorithm is inapplicable"
+      },
+      {
+        "word": "0110",
+        "canonical": "0011",
+        "least_left_shift": 3,
+        "why": "left circular shift, not bit reversal"
+      },
+      {
+        "word": "0",
+        "canonical": "0",
+        "least_left_shift": 0,
+        "why": "one-bit nonempty identity"
+      }
+    ],
+    "falsifiers": [
+      "Returning 0101 shift 3 instead of shift 1 for 1010 violates smallest-offset witness.",
+      "Returning 01 (shortest repeated root) instead of the full 4-bit 0101 for 1010 changes the semantic object length.",
+      "Returning 01010 for 01010 because its prefix period appears to be 2 misses least full cyclic shift 00101.",
+      "Returning reversed 0011 from 1100 without proving a circular shift (or any reverse operation) must reject.",
+      "Returning empty word as a valid canonical cyclic phase erases the precondition N>0.",
+      "Treating Python True as exact bit 1 silently conflates bool with bit identity in the typed oracle.",
+      "Treating physical T5 padding/separators as elements of the cyclic mathematical word is a carrier/semantics violation."
+    ],
+    "existing_behavioral_neighbors": [
+      {
+        "name": "PRIMITIVE-BINARY-WORD-ROOT",
+        "difference": "reduces an exact k-fold repeat to shortest u (length changes), whereas our minimum rotation preserves N and returns original-phase offset"
+      },
+      {
+        "name": "D8 ROTATE",
+        "difference": "rotates by caller-supplied shift; no lexicographic minimization or stable tie provenance"
+      },
+      {
+        "name": "LOWER-MECHANICAL-WORD",
+        "difference": "constructs one balanced cyclic sequence from rational slope; not canonicalization of an arbitrary existing word"
+      },
+      {
+        "name": "GRAY-ENCODE-WORD",
+        "difference": "reversible integer bit coding, not equivalence under cyclic rotation"
+      },
+      {
+        "name": "MERGE-CONGRUENCE-CONSTRAINTS",
+        "difference": "solves integer congruence constraints, not canonical order for circular finite bitstrings"
+      }
+    ],
+    "owner_research_uses": [
+      "Music: source-independent equivalence of round-robin accent patterns (rotation not reversal)",
+      "Sanskrit prosody: circular scanned short/long syllable patterns in a declared binary encoding (not a claim that Panini specified this API)",
+      "SDR/radio: recognize cyclic bit patterns irrespective of sample phase, without touching framing delimiters",
+      "Horology/FPGA: compare identical periodic scheduler patterns with different start ticks",
+      "Astronomy: compare repeated observation masks independent of phase origin",
+      "Spanda analog computation: detect equivalent periodic bit-switch masks without promoting FPGA mechanism to language identity"
+    ],
+    "derivability": "Mathematically constructible from finite enumeration, ROTATE, lex comparison, and reduction; independent primitive status is NOT proven. Owner decides whether usefulness and unified invariant warrant SELECT as a D10 resident.",
+    "no_changes": [
+      "selected D10 inventory/transition, ratification and coordinate unchanged",
+      "D1–D9 (D2 syntax exclusive, D7 text unchanged)",
+      "physical .sens T5 and hardware pin/ABI unchanged",
+      "runtime SENS execution not asserted from Python/SBCL donor tests"
+    ]
+  },
+  "accounting": {
+    "selected_additions": 0,
+    "ratified_additions": 0,
+    "coordinates_allocated": 0,
+    "ledger_append_intent": 1
+  }
+}
