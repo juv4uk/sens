@@ -1,7 +1,7 @@
 {
   "schema": "d10-unify-lexical-harvest-v1/v1",
-  "status": "RESEARCH-UNRATIFIED",
-  "authority": "#4013 / #4162 / #4463",
+  "status": "RESEARCH-UNRATIFIED-NOT-IN-INVENTORY",
+  "authority": "Research evidence for owner review, not selected D10 inventory; see #4013 #4463 #4182",
   "date": "2026-10-09",
   "donors": [
     {
@@ -19,17 +19,19 @@
   ],
   "accounting": {
     "before": 625,
-    "selected": 9,
-    "after": 634,
+    "proposed": 9,
+    "selected": 0,
+    "after": 625,
     "law_forced": 256,
-    "unplaced": 378,
-    "remaining": 390,
+    "unplaced": 369,
+    "remaining": 399,
     "ratified": 0
   },
   "dedup": {
-    "foundation_checked": true,
-    "d10_checked": true,
-    "semantic_equivalence": "pending owner review, no slot for exact aliases or substrate-only mechanisms"
+    "foundation_checked": "exact-name-only",
+    "d10_checked": "exact-name-only",
+    "semantic_equivalence": "HOLD: test derivability against ratified D9 UNIFY and existing D10 proof, conjunction and reflection laws",
+    "source_name_not_authority": true
   },
   "excluded": [
     {
@@ -63,7 +65,7 @@
       "behavior": "Return a bound logic variable value from a substitution alist keyed by possibly structured variable name, or the original variable if unbound",
       "surface_uk": "знайти-підстановку",
       "surface_ukr": "розв'язати-логічну-змінну-за-зв'язками",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-D9-DERIVABILITY",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -75,7 +77,9 @@
         "#4463",
         "lib/unify.lisp:93",
         "blob:8dad35ae22e6a40189b03fe801eae8e7af148261"
-      ]
+      ],
+      "witness_positive": "Bound logic variable retrieves exactly the existing value; unbound variable returns itself",
+      "witness_falsifier": "Distinguish unbound from binding to empty data, and show a behavior not expressible through D9 WALK plus alist lookup"
     },
     {
       "stable_id": "d10.logic.46d89dcb9a281d79",
@@ -90,7 +94,7 @@
       "behavior": "Follow transitive bound-variable references until a nonvariable or an unbound variable is reached, preserving the original unbound variable",
       "surface_uk": "пройти-зв'язки-змінної",
       "surface_ukr": "простежити-ланцюг-зв'язаних-логічних-змінних",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-D9-DERIVABILITY",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -102,7 +106,9 @@
         "#4463",
         "lib/unify.lisp:115",
         "blob:8dad35ae22e6a40189b03fe801eae8e7af148261"
-      ]
+      ],
+      "witness_positive": "Substitution chain x→y→a resolves deterministically to a; unbound x remains x",
+      "witness_falsifier": "D9 WALK/UNIFY or recurrent LOOKUP-SUBST may already express this exact transitive dereference"
     },
     {
       "stable_id": "d10.logic.0c4fb0b02f51d0a3",
@@ -117,7 +123,7 @@
       "behavior": "Recognize explicit unification failure only for the designated failure atom, not for a nonempty substitution alist",
       "surface_uk": "невдала-підстановка?",
       "surface_ukr": "результат-підстановки-є-невдачею?",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-D9-DERIVABILITY",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -129,7 +135,9 @@
         "#4463",
         "lib/unify.lisp:140",
         "blob:8dad35ae22e6a40189b03fe801eae8e7af148261"
-      ]
+      ],
+      "witness_positive": "Only the exact designated failure atom is failure; nonempty association list is not",
+      "witness_falsifier": "An ordinary D3 atom/eq or existing D9 result check can classify identically without introducing a new value"
     },
     {
       "stable_id": "d10.logic.93b3a3feb5371685",
@@ -144,7 +152,7 @@
       "behavior": "Unify two dereferenced logic terms recursively, propagating substitutions or explicit failure across compound pairs",
       "surface_uk": "узгодити-розгорнуті-терми",
       "surface_ukr": "уніфікувати-розв'язані-логічні-терми",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-D9-DERIVABILITY",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -156,7 +164,9 @@
         "#4463",
         "lib/unify.lisp:147",
         "blob:8dad35ae22e6a40189b03fe801eae8e7af148261"
-      ]
+      ],
+      "witness_positive": "Two compatible compound pairs produce substitutions and incompatible atoms return an explicit failure",
+      "witness_falsifier": "The D9 UNIFY contract already calls this helper; no independent observable semantics demonstrated"
     },
     {
       "stable_id": "d10.logic.4bfb69ab90bdcb62",
@@ -171,7 +181,7 @@
       "behavior": "Bind a logic variable to a term when identities differ and occurs-check permits it, otherwise preserve substitution or return failure",
       "surface_uk": "узгодити-змінну",
       "surface_ukr": "уніфікувати-логічну-змінну-з-перевіркою-входження",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-D9-DERIVABILITY",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -183,7 +193,9 @@
         "#4463",
         "lib/unify.lisp:173",
         "blob:8dad35ae22e6a40189b03fe801eae8e7af148261"
-      ]
+      ],
+      "witness_positive": "Binding a fresh logic variable succeeds but occurs-check rejects x within (f x)",
+      "witness_falsifier": "D9 UNIFY plus D9 OCCURS-CHECK? already enforce this behavior; show an independently visible semantic distinction"
     },
     {
       "stable_id": "d10.logic.fa683111cac1d436",
@@ -198,7 +210,7 @@
       "behavior": "Evaluate each conjunction condition through an injected goal strategy, branching across every successful intermediate state and collecting final states",
       "surface_uk": "послідовно-узгодити-умови",
       "surface_ukr": "протягнути-стан-крізь-усі-умови-кон'юнкції",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-CONJUNCTION-DERIVABILITY",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -210,7 +222,9 @@
         "#4463",
         "lib/unify.lisp:249",
         "blob:8dad35ae22e6a40189b03fe801eae8e7af148261"
-      ]
+      ],
+      "witness_positive": "Empty conjunction returns exactly singleton list [state], not state nor empty list",
+      "witness_falsifier": "Compare selected MATCH-CONDITIONS and MAP-GOAL-RESULTS plus D3 COND/D4 LIST/APPEND for full result equivalence"
     },
     {
       "stable_id": "d10.logic.fc63f9f7becefdd5",
@@ -225,7 +239,7 @@
       "behavior": "Continue a conjunction against every intermediate state returned by one condition and concatenate resulting final states in order",
       "surface_uk": "гілки-кон'юнкції",
       "surface_ukr": "продовжити-всі-гілки-кон'юнкції",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-CONJUNCTION-DERIVABILITY",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -237,7 +251,9 @@
         "#4463",
         "lib/unify.lisp:256",
         "blob:8dad35ae22e6a40189b03fe801eae8e7af148261"
-      ]
+      ],
+      "witness_positive": "A first goal yielding A,B and continuation yielding X,X for A and Y for B returns X,X,Y",
+      "witness_falsifier": "If D4 APPEND/ordinary mapped recursion derives same order and multiplicity this is a helper, not an additional semantic identity"
     },
     {
       "stable_id": "d10.logic.cbfeaa36e533c166",
@@ -252,7 +268,7 @@
       "behavior": "Compute free identifiers of sequential let* bindings using each earlier binding only in later initializers and the body",
       "surface_uk": "вільні-змінні-послідовного-зв'язування",
       "surface_ukr": "зібрати-вільні-змінні-послідовного-let*",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-TOOLING-OWNERSHIP",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -264,7 +280,9 @@
         "#4463",
         "lib/linter.lisp:93",
         "blob:ea909686dd0bed7c660c7bb8afeb4df157513506"
-      ]
+      ],
+      "witness_positive": "Sequential let* binders affect later initializers and body but not their own initializer",
+      "witness_falsifier": "Static linter traversal is tooling unless compiler-visible reflection proves an irreducible portable operation"
     },
     {
       "stable_id": "d10.logic.c2f495716891c636",
@@ -279,7 +297,7 @@
       "behavior": "Compute free identifiers of mutually recursive letrec definitions with all names in scope for all initializers and body",
       "surface_uk": "вільні-змінні-взаємного-зв'язування",
       "surface_ukr": "зібрати-вільні-змінні-взаємного-letrec",
-      "decision": "SELECT-D10-CANDIDATE",
+      "decision": "HOLD-TOOLING-OWNERSHIP",
       "proposal_status": "pending-owner-review",
       "coordinate": null,
       "coordinate_basis": "UNPLACED",
@@ -291,7 +309,9 @@
         "#4463",
         "lib/linter.lisp:119",
         "blob:ea909686dd0bed7c660c7bb8afeb4df157513506"
-      ]
+      ],
+      "witness_positive": "All letrec binder names are in scope in all initializers and body",
+      "witness_falsifier": "This is an ordinary scoping analysis under ratified binding semantics unless externally observable as new language law"
     }
   ]
 }
