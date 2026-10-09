@@ -31,3 +31,14 @@
 - `current-rust-tests-after-retirement.yml` окремо запускає збережені Rust-тести та перевіряє, що прибрані тестові цілі не з'явилися в поточному semantic-slice script.
 
 Червоний CI **не** можна «виправляти» додатковим викреслюванням чинних exact-D1/D3 тестів; позитивні нинішні свідки мають бути перевірені окремо.
+
+## Додатковий тріаж після hosted-прогону
+
+[Run #37966767683](https://github.com/juv4uk/sens/actions/runs/37966767683) довів, що Rust-тести **компілюються**, але у старому `mccarthy.rs` виявив вісім семантичних невідповідностей. Вилучено лише ті старі твердження, чий зміст доведено неприйнятним для L1–L7:
+
+- `implements_mccarthys_seven_primitives`: прибрано тільки стару `COND` з `()`-truthiness; перевірки `QUOTE/CAR/CDR/CONS` лишилися.
+- `bootstrap_library_provides_list_utilities`: прибрано лише `FILTER`-assert, що припускав host-truthy `EQ`; незалежні `LENGTH/MAP/REDUCE` лишилися.
+- `list_is_a_sens_function_in_core_my_not_a_rust_builtin`: прибрано застарілий `unwrap_err()` для `LIST` без `core.lisp`; позитивний результат `LIST` збережено.
+- `linter_tests_from_my` та `meta_eval_lambda_witness_env_capture_and_application`: вилучені як Rust-оракули історичного Lisp-свідка, що не має прийнятого exact-domain перестворення; історичні `tests/fixtures/linter.lisp` та бібліотека лишаються в Git.
+
+**Не вилучаємо для «зеленого» CI без окремого доказу:** `bootstrap_library_provides_let_and_let_star`, `symbolic_reasoning_layer_stays_loaded_and_tested`, exact-D1 `string<?` (на початковому hosted-прогоні повертав не-PredicateBit), а також сучасні D1/D3 негативні охоронці. Якщо чинний код повертає `()` або нетипований результат там, де повинен бути D1 `1/0`, це окрема проблема реалізації чи неперенесеного Lisp-корпусу, а не дозвіл вигадати стару семантику.
