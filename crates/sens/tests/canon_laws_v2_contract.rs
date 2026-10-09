@@ -104,6 +104,11 @@ fn executable_canon_speaks_layered_answer_semantics() {
                 ("ATOM-ASSOC", format!("(00000010 (00101101 (quote expected) (quote {})))", row.source)),
                 ("ATOM-PAIR", "(00000010 (00000001 (expected . \"()\")))".to_owned()),
                 ("ATOM-EMPTY", "(00000010 (00000001 ()))".to_owned()),
+                ("FIRST-ENTRY", format!("(00000101 (quote {}))", row.source)),
+                ("FIRST-KEY", format!("(00000101 (00000101 (quote {})))", row.source)),
+                ("EQUAL-WRONG", format!("(00100010 (quote expected) (00000101 (00000101 (quote {}))))", row.source)),
+                ("EQUAL-RIGHT", format!("(00100010 (quote expected) (00000101 (00000101 (00000110 (quote {})))))", row.source)),
+
                 ("FIELD", format!("(witness-field (quote expected) (quote {}))", row.source)),
                 ("SUPERSEDED", format!("(witness-superseded-outcome (quote {}) (witness-field (quote expected) (quote {})))", row.source, row.source)),
                 ("EXPECTED", format!("(witness-expected-outcome (quote {}))", row.source)),
