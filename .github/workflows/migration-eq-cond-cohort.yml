@@ -20,8 +20,7 @@ permissions:
 
 jobs:
   verify:
-    # Runs only portable fixture/oracle tests; no physical GPU result is claimed.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04  # CPU-only Python + Rust witnesses; no local or CUDA runner
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5

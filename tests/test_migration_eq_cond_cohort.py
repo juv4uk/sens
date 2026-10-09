@@ -111,7 +111,7 @@ class EqCondCohort(unittest.TestCase):
                     for item in ("--" + flag, str(ROOT / file))
                 ],
                 "--source-era",
-                "legacy",
+                "legacy",  # Input fixtures intentionally use provenance-pinned SID8 W8 heads.
                 "--report",
                 str(report),
             ]
@@ -138,7 +138,7 @@ class EqCondCohort(unittest.TestCase):
             self.assertEqual(again.returncode, 2)
 
     def test_unknown_sid_and_corrupt_transport_fail_closed(self):
-        resolver = M.Resolver(self.legacy, self.my, self.upper)
+        resolver = M.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
         with self.assertRaises(M.MigrationError):
             M.migrate_file("(11111111 ())\n", resolver, self.text7)
 
