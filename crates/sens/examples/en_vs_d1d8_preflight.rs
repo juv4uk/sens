@@ -55,7 +55,7 @@ fn trace_expr(expression: &Expr, trace: &mut Vec<String>, legacy: &mut bool) {
             trace_expr(first, trace, legacy);
             trace_expr(rest, trace, legacy);
         }
-        _ => trace.push(format!("LEAF:{:?}", &expression.kind)),
+        _ => trace.push(format!("LEAF:{:?}", expression.kind)),
     }
 }
 
