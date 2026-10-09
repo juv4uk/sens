@@ -68,8 +68,8 @@ fn ratified_d4_append_owns_append_while_d5_10000_is_caaar() {
         println!("APPEND-DEDUP case={name} result={exact}");
     }
 
-    let d4_bad = run_exact(d4, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
-    let surface_bad = run_surface("(append (quote (a . b)) (quote (c)))")
+    run_exact(d4, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
+    run_surface("(append (quote (a . b)) (quote (c)))")
         .expect_err("surface must reject improper left spine");
     // Both paths must reject an improper left spine; the retired error kind is not normative.
 
