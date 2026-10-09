@@ -1,0 +1,70 @@
+name: migration-admission-sweep-490
+
+on:
+  push:
+    branches:
+      - migration-admission-sweep-490
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Sweep all original unpaired Lisp sources
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, subprocess, sys, collections
+          root=pathlib.Path(".")
+          lisps=sorted(root.rglob("*.lisp"))
+          pairs={p.with_suffix(".sens") for p in lisps}
+          unpaired=[p for p in lisps if not p.with_suffix(".sens").exists()]
+          rows=[]
+          reasons=collections.Counter()
+          admitted=[]
+          for i,p in enumerate(unpaired,1):
+              proc=subprocess.run(
+                  [sys.executable,"scripts/migrate-one-to-sens.py",str(p),"--dry-run"],
+                  text=True,capture_output=True
+              )
+              try:
+                  payload=json.loads(proc.stdout)
+              except Exception:
+                  payload={"status":"blocked","reason":(proc.stderr or proc.stdout).strip()[:600]}
+              row={"path":str(p),"returncode":proc.returncode,**payload}
+              rows.append(row)
+              if payload.get("status")=="would-write":
+                  admitted.append(row)
+              else:
+                  reasons[payload.get("reason","unknown")]+=1
+              if i % 50 == 0:
+                  print(f"progress {i}/{len(unpaired)} admitted={len(admitted)}")
+          report={
+              "schema":"migration-admission-sweep/v1",
+              "total_lisp":len(lisps),
+              "unpaired":len(unpaired),
+              "admitted":len(admitted),
+              "admitted_rows":admitted,
+              "top_blockers":reasons.most_common(40),
+              "rows":rows,
+          }
+          pathlib.Path("/tmp/migration-admission-sweep.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
+          )
+          print(json.dumps({
+              "total_lisp":len(lisps),"unpaired":len(unpaired),
+              "admitted":len(admitted),
+              "admitted_paths":[r["path"] for r in admitted],
+              "top_blockers":reasons.most_common(20),
+          },ensure_ascii=False,indent=2))
+          PY
+      - name: Upload sweep evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-admission-sweep-490
+          path: /tmp/migration-admission-sweep.json
+          if-no-files-found: error
