@@ -1,0 +1,160 @@
+{
+  "schema": "d10-affine-quantity-point-delta/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "authority": [
+    "#4463",
+    "#4013",
+    "#4301"
+  ],
+  "sources": [
+    {
+      "title": "NIST Special Publication 811, Guide to SI, §8.5 Temperature interval and temperature difference",
+      "url": "https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-8",
+      "attested": "Celsius point uses exact reference 273.15 K while Celsius interval and Kelvin interval have equal numerical magnitude."
+    },
+    {
+      "title": "BIPM SI base unit: kelvin",
+      "url": "https://www.bipm.org/en/si-base-units/kelvin",
+      "attested": "Kelvin is thermodynamic temperature SI base unit; scale independent of host architecture."
+    }
+  ],
+  "source_boundary": "NIST/BIPM attest physical Celsius–Kelvin relation; general exact affine point/delta tag, seven-dimensional descriptor, generic calibrations and provenance are a PROPOSED computational abstraction, not an NIST API.",
+  "snapshot": {
+    "d10_inventory_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "selected": 630,
+    "ratified": 0
+  },
+  "candidate": {
+    "semantic_name": "AFFINE-QUANTITY-TRANSPORT",
+    "stable_proposal_id": "D10P-6101",
+    "surface_uk": "афпв",
+    "surface_ukr": "афінно-перевести-величину",
+    "domain_width": 10,
+    "coordinate": null,
+    "ratified": false,
+    "selected": false,
+    "proposal_status": "pending-review",
+    "domain": "universal exact rational quantities with explicit dimension, source and target unit descriptors",
+    "argument_schema": {
+      "quantity": "(exact_fraction_value, kind) where kind is POINT or DELTA",
+      "source": "(seven rational base-exponents, strictly positive rational scale, exact rational origin)",
+      "target": "(seven rational base-exponents, strictly positive rational scale, exact rational origin)"
+    },
+    "result": "(exact_fraction_value_in_target, same_kind), never host floats",
+    "law": "Reject unless seven dimension exponents match exactly and source/target scale are >0. For POINT, coordinate source base = source_scale*x+source_origin, target result=(source_base-target_origin)/target_scale. For DELTA, source_base=source_scale*x, target result=source_base/target_scale; both origins ignored. Preserve kind, exact rational, and compositional inverse. Errors for invalid kind/dimensions/scale/float, not coercions.",
+    "witnesses": [
+      {
+        "kind": "POINT",
+        "input": "0 Celsius",
+        "result": "27315/100 K",
+        "explanation": "temperature origin offset is exact"
+      },
+      {
+        "kind": "DELTA",
+        "input": "5 Celsius-difference",
+        "result": "5 K-difference",
+        "explanation": "offset never applied"
+      },
+      {
+        "kind": "POINT",
+        "input": "32 Fahrenheit",
+        "result": "27315/100 K",
+        "explanation": "exact scale 5/9 and Fahrenheit origin 45967/180 K"
+      },
+      {
+        "kind": "DELTA",
+        "input": "9 Fahrenheit-difference",
+        "result": "5 K-difference",
+        "explanation": "5/9 times 9"
+      },
+      {
+        "kind": "POINT",
+        "input": "27315/100 Kelvin",
+        "result": "0 Celsius",
+        "explanation": "invertibility"
+      },
+      {
+        "kind": "POINT",
+        "input": "4 source calibrated volts, source origin -1/10 baseV, target origin 1/10 baseV",
+        "result": "19/5 target volts",
+        "explanation": "calibration offsets compose in exact rational arithmetic"
+      }
+    ],
+    "falsifiers": [
+      "A 5 °C DELTA converted to 278.15 K confuses a difference with a point.",
+      "A 0 °C POINT converted to 0 K loses the exact origin translation.",
+      "Converting seconds to metres when seven base dimensions mismatch must reject.",
+      "Applying an origin offset to a DELTA violates composition under instrument zero calibration.",
+      "Treating floats as exact or allowing zero/negative scale silently invalidates the pure law.",
+      "Converting a POINT roundtrip through arbitrary intermediate affine unit must be identity."
+    ],
+    "preselected_neighbors": [
+      {
+        "semantic_name": "SCIENCE-MERGE-DIMENSIONS",
+        "semantic_difference": "adds dimension-exponent collections; does not transport affine coordinate values"
+      },
+      {
+        "semantic_name": "SCIENCE-DIMENSIONS-VALID?",
+        "semantic_difference": "checks exponent schema; does not apply a unit origin"
+      },
+      {
+        "semantic_name": "SCIENCE-NEGATE-DIMENSIONS",
+        "semantic_difference": "negates exponents; point/delta affine offset unrelated"
+      },
+      {
+        "semantic_name": "SCIENCE-ADD-DIMENSION",
+        "semantic_difference": "modifies basis exponent, not calibrated quantity coordinate"
+      }
+    ],
+    "lower_neighbors": [
+      "D8 RATIONAL",
+      "D8 RATIONALIZE",
+      "D6 exact number operations"
+    ],
+    "mathematically_derivable": true,
+    "remaining_owner_question": "The law composes from exact arithmetic, dimensions and records. Owner decides if it warrants a reusable D10 function or remains Core-Math library code; name absence does not prove behavioral independence.",
+    "scope_examples": [
+      "ESP32/AS5600 calibrated sensor point vs measured difference",
+      "analog Spanda bridge voltage offsets",
+      "astronomical origins under constant-offset chart only",
+      "horological exact epoch arithmetic if no discontinuities",
+      "radio SDR calibration offsets",
+      "acoustic absolute level vs difference with explicit reference"
+    ]
+  },
+  "holds": [
+    {
+      "name": "CIVIL-UTC-AFFINE-CONVERT",
+      "status": "HOLD-INVALID-GENERALIZATION",
+      "reason": "UTC leap seconds/discontinuous civil times cannot be represented by one global affine map. No automatic UTC/TAI conversion semantics."
+    },
+    {
+      "name": "LOGARITHMIC-DECIBEL-CONVERT",
+      "status": "HOLD-NONLINEAR",
+      "reason": "dB uses a logarithmic ratio with a reference; cannot be treated as a generic affine physical conversion."
+    },
+    {
+      "name": "POINT-PLUS-POINT",
+      "status": "HOLD-ILL-TYPED",
+      "reason": "Adding two affine points is not generally a valid physical coordinate operation without an origin. Requires separate typed algebra law."
+    },
+    {
+      "name": "ADD-DIMENSION-EXPONENTS",
+      "status": "HOLD-ALREADY-SELECTED",
+      "reason": "D10 existing SCIENCE-MERGE-DIMENSIONS and SCIENCE-ADD-DIMENSION already operate on dimension exponents."
+    }
+  ],
+  "accounting": {
+    "selected_added": 0,
+    "ratified_added": 0,
+    "coordinate_added": 0,
+    "ledger_rows_if_approved": 1
+  },
+  "limitations": [
+    "No canonical D10 selected inventory, transition history, D1–D9, D2, T5, language opcodes or hardware emission changed.",
+    "A Python exact-rational oracle and SBCL donor check prove only this formal model; not SENS interpreter execution.",
+    "The SI defining constants are existing world definitions, not invented D10 semantic slots."
+  ]
+}
