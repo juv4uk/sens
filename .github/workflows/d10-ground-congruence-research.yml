@@ -1,0 +1,30 @@
+name: d10-ground-congruence-symbolic-ai-research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-ground-congruence-closure-research-20261009.json'
+      - 'scripts/check_d10_ground_congruence_research.py'
+      - 'tests/test_d10_ground_congruence_research.py'
+      - 'docs/research/D10-GROUND-CONGRUENCE-20261009.uk.md'
+      - '.github/workflows/d10-ground-congruence-research.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-ground-congruence-closure-research-20261009.json'
+      - 'scripts/check_d10_ground_congruence_research.py'
+      - 'tests/test_d10_ground_congruence_research.py'
+      - '.github/workflows/d10-ground-congruence-research.yml'
+permissions:
+  contents: read
+jobs:
+  independent-ground-equality-oracles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install REQUIRED real EUF donor (no skipping)
+        run: python3 -m pip install --disable-pip-version-check z3-solver==4.13.3.0
+      - name: Run 1024 exhaustive cases and negative semantic admission tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_ground_congruence_research.py' -v
+      - name: Run actual Z3 EUF across 5 proof examples and 12 equality subsets
+        run: python3 scripts/check_d10_ground_congruence_research.py --verify-z3
