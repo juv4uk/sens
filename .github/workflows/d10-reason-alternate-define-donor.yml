@@ -4,6 +4,7 @@ on:
     paths:
       - "knowledge/d10-reason-alternate-define-donor-v1.json"
       - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d9-ratified.json"
       - "knowledge/d10-fill-v1-state.json"
       - "knowledge/d10-library-harvest-v1.json"
       - "knowledge/d10-library-source-symbols-v1.json"
