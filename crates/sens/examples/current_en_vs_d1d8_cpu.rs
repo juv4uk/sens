@@ -1,6 +1,6 @@
 use sens::{
-    eval_lowered_expressions, load_core_library, lower_program, parse_canonical_binary, parse_mixed_exact_domain,
-    Expr, ExprKind, Session, Value,
+    eval_lowered_expressions, load_core_library, lower_program, parse_canonical_binary,
+    parse_mixed_exact_domain, Expr, ExprKind, Session, Value,
 };
 use std::{env, fs, process, time::Instant};
 
