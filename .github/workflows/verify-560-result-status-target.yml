@@ -1,0 +1,14 @@
+name: Verify 560 result-status target
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  target:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run exact result-status target
+        run: cargo test -p my-lisp --test result_status
