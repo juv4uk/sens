@@ -85,7 +85,11 @@ mod tests {
         }
         assert_eq!(admitted, 126);
         // Width or equal payload in another domain must not inherit D7 occupancy.
-        assert_eq!(DomainCoordinate::new(6, 0b0100001), None);
+        assert_ne!(
+            DomainCoordinate::new(6, 0b0100001).unwrap(),
+            DomainCoordinate::new(7, 0b0100001).unwrap(),
+            "same payload in D6 and D7 is not the same coordinate"
+        );
         assert_eq!(
             DomainCoordinate::new(8, 0b0100001).unwrap().owner_residency(),
             None
