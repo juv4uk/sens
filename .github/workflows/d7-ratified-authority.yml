@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "knowledge/d7-ratified.json"
+      - "lib/domains/d7.lisp"
       - "knowledge/d7-v2-evidence-ledger.json"
       - "contracts/d7-ratification.lisp"
       - "contracts/d7-local-ordinal.lock"
@@ -23,6 +24,7 @@ on:
     branches: [main]
     paths:
       - "knowledge/d7-ratified.json"
+      - "lib/domains/d7.lisp"
       - "knowledge/d7-v2-evidence-ledger.json"
       - "contracts/d7-ratification.lisp"
       - "contracts/d7-local-ordinal.lock"
@@ -68,3 +70,11 @@ jobs:
       # Лише точна механіка W7 і транспорту, жодної Rust-owned семантики.
       - name: D7 exact W7 packing and Text7 canonical wire
         run: cargo test --locked -p sens --test d7_w7_pack --test text7_canonical_wire
+
+  exact-w7-transport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify D7 exact-width carrier and packed Text7 transport
+        run: cargo test -p sens --test d7_w7_pack -- --nocapture
