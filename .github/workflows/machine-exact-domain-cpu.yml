@@ -74,6 +74,16 @@ on:
       - ".github/workflows/machine-exact-domain-cpu.yml"
 
 jobs:
+  exact-binary-t5-carrier:
+    name: Exact D1–D9 + physical T5 Rust witness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate exact widths, D2 framing, physical bytes and D3 QUOTE
+        run: cargo test --locked -p sens --test native_first_exact_domain -- --nocapture
+
   real-silicon-harness-build:
     name: Compile real-silicon harness only
     runs-on: ubuntu-latest
