@@ -1,0 +1,32 @@
+name: D10 generalized congruence evidence
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-generalized-congruence-research-v1.json
+      - tests/test_d10_generalized_crt.py
+      - docs/research/D10-GENERALIZED-CRT-PERIODS.uk.md
+      - .github/workflows/d10-generalized-congruence.yml
+  push:
+    branches:
+      - main
+    paths:
+      - knowledge/d10-generalized-congruence-research-v1.json
+      - tests/test_d10_generalized_crt.py
+      - .github/workflows/d10-generalized-congruence.yml
+
+permissions:
+  contents: read
+
+jobs:
+  real-sympy-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact upstream SymPy donor
+        run: |
+          python3 -m pip install --disable-pip-version-check --user 'sympy==1.14.0'
+          python3 -c 'import sympy; print("D10 CRT upstream SymPy", sympy.__version__)'
+      - name: Real donor, exhaustive canonical proof, and HOLD assertions
+        run: python3 -m unittest discover -s tests -p test_d10_generalized_crt.py -v
