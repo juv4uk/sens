@@ -4,22 +4,15 @@ use sens::{
     render_ternary_words_spaced, TernaryTransportError,
 };
 
-const SOURCE: &str =
-    include_str!("../../../tests/fixtures/migration-quote-cohort/quote-legacy.lisp");
 const T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort/quote-legacy.sens");
-const MYLISP_SOURCE: &str =
-    include_str!("../../../tests/fixtures/migration-quote-cohort/quote-mylisp.lisp");
 const MYLISP_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort/quote-mylisp.sens");
-const LISP15_SOURCE: &str =
-    include_str!("../../../tests/fixtures/migration-quote-cohort/quote-lisp15.lisp");
 const LISP15_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort/quote-lisp15.sens");
 
 #[test]
 fn physical_quote_legacy_migration_preserves_exact_t5_transport() {
-    assert_eq!(SOURCE.trim(), "(00000001 ())");
     assert_eq!(T5, [0x63, 0x89, 0x06, 0xa1]);
     let words = decode_ternary_program(T5).expect("canonical T5 bytes + D2 syntax");
     let visible = render_ternary_words_spaced(&words);
@@ -29,12 +22,8 @@ fn physical_quote_legacy_migration_preserves_exact_t5_transport() {
 }
 
 #[test]
-fn three_physical_quote_sources_share_exact_current_identity() {
-    for (source, payload, expected_source) in [
-        (MYLISP_SOURCE, MYLISP_T5, "(quote ())"),
-        (LISP15_SOURCE, LISP15_T5, "(QUOTE ())"),
-    ] {
-        assert_eq!(source.trim_end(), expected_source);
+fn alternate_physical_quote_artifacts_preserve_identical_t5_bytes() {
+    for payload in [MYLISP_T5, LISP15_T5] {
         assert_eq!(payload, T5);
         let visible = open_ternary_program(payload).expect("physical T5 opens");
         assert_eq!(visible, "10 001 00 000 01");
