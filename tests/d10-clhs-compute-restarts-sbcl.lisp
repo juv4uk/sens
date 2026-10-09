@@ -28,6 +28,6 @@
       (assert-equal 2 (count 'duplicate names) "duplicate names retained")
       (assert-equal 1 (count nil names) "anonymous restart retained")
       ;; ANSI requires most recently established restart nearest the head.
-      (assert-equal '(nil duplicate duplicate) names "dynamic establishment order")
+      (assert-equal '(duplicate duplicate nil) names "RESTART-BIND lexical establishment order")
       (setf observed names)))
   (format t "CLHS-COMPUTE-RESTARTS-SBCL: PASS ~S~%" observed))
