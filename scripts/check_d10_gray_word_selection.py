@@ -90,6 +90,8 @@ def verify(inv,src,his,state,low,ledger,doc):
     assert cursor==blob(inv), "latest transition not equal to actual inventory Git blob"
     assert appended_ids==[item["stable_id"] for item in inv["rows"][634:]]
     ledgerrows=list(csv.DictReader(io.StringIO(ledger),delimiter="\t"))
+    proposal_ids=[item["proposal_id"] for item in ledgerrows]
+    assert len(proposal_ids)==len(set(proposal_ids)), "duplicate proposal identifiers"
     for idx,(r,s) in enumerate(zip(inv["rows"][632:634],src["rows"])):
         assert r["stable_id"]==s["stable_id"]
         assert r["semantic_name"]==s["semantic_name"]
@@ -104,7 +106,8 @@ def verify(inv,src,his,state,low,ledger,doc):
         assert r["positive_witnesses"] == s["positive_witnesses"]
         assert r["falsifiers"] == s["falsifiers"]
         assert r["source_path"]==str(SRC.relative_to(ROOT))
-        l=next(x for x in ledgerrows if x["semantic_name"]==r["semantic_name"])
+        l=next((x for x in ledgerrows if x["semantic_name"]==r["semantic_name"]),None)
+        assert l is not None, "missing historical Gray proposal"
         assert l["proposal_id"]=="D10P-"+str(9+idx).zfill(4)
         assert l["semantic_name"]==r["semantic_name"]
         assert l["ratified"]=="0" and l["status"]=="pending-review"
