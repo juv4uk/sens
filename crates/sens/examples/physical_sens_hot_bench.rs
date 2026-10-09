@@ -18,7 +18,7 @@ fn median_ns(mut xs: Vec<u128>) -> (u128, u128, u128) {
     (mid, xs[p95_index], xs[0])
 }
 
-fn measure(mut f: impl FnMut(), count: usize, samples: usize) -> (u128, u128, u128) {
+fn measure(mut f: impl FnMut(), count: usize, samples: usize) -> Vec<u128> {
     for _ in 0..count.min(100) {
         f();
     }
@@ -30,7 +30,7 @@ fn measure(mut f: impl FnMut(), count: usize, samples: usize) -> (u128, u128, u1
         }
         observations.push(started.elapsed().as_nanos() / count as u128);
     }
-    median_ns(observations)
+    observations
 }
 
 fn main() {
@@ -61,7 +61,7 @@ fn main() {
     black_box(&stable);
 
     for &phase in PHASES {
-        let (median, p95, minimum) = match phase {
+        let observations = match phase {
             "t5_open_d2" => measure(
                 || { black_box(open_ternary_program(black_box(&physical)).expect("T5/D2")); },
                 count, samples,
@@ -86,6 +86,13 @@ fn main() {
             ),
             _ => unreachable!(),
         };
+        let (median, p95, minimum) = median_ns(observations.clone());
+        for (rep, elapsed_ns) in observations.iter().enumerate() {
+            println!(
+                "HOT_SAMPLE\\tforms={forms}\\tphase={phase}\\trep={}\\tns_op={elapsed_ns}",
+                rep + 1,
+            );
+        }
         println!(
             "HOT_BENCH\tforms={forms}\tphase={phase}\titerations={count}\tsamples={samples}\tmedian_ns_op={median}\tp95_ns_op={p95}\tmin_ns_op={minimum}\tphysical_bytes={}\tobservable={stable:?}",
             physical.len(),
