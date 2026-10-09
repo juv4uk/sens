@@ -37,3 +37,29 @@ Sound7/Text7/LocalOrdinal **не стає** Lisp-функцією за факт�
 або місця у таблиці. Гліфи, українські та санскритські написання — тільки
 проєкції. Аріфметичні Number-значення, Text7 та локальний порядковий
 індекс не ототожнюються автоматично.
+
+## D7 у чинному виконанні
+
+Вхід — **точні сім бітів та явно названа роль**, а не вільний символ чи
+число. Авторитет резидентів: `knowledge/d7-ratified.json` (рішення #3572);
+`lib/domains/d7.lisp` — лише читабельна проєкція.
+
+```sh
+python3 scripts/d7_source_projection.py --check
+python3 scripts/d7_source_projection.py --coordinate 0000000 --role sound-text --namespace ук
+python3 scripts/d7_source_projection.py --coordinate 0000001 --role local-ordinal
+python3 scripts/d7_source_projection.py --coordinate 0011111 --role sound-text --namespace sym
+```
+
+Два зарезервовані `0100001` та `0101010` ніколи не допускаються як
+Sound/Text. LocalOrdinal — окрема роль: джерело
+`contracts/d7-local-ordinal.lock` і 14 підтверджених порядкових номерів
+Śiva-sūtras; довільна W7-координата не набуває цього статусу автоматично.
+Зокрема гліф `1` у D7 — текст, **не** арифметичне число й **не** функція.
+
+`scripts/d7_source_projection.py` нічого не ратифікує; вона читає
+ратифікований реєстр та відхиляє неоднозначність. Rust зберігає механічну
+координату W7 без мовної семантичної таблиці. Тестові докази:
+`tests/test_d7_source_projection.py`, `scripts/check-d7-current-authority.py`,
+`crates/sens/tests/d7_w7_pack.rs`. Обов'язкова перевірка D7 включена
+у `.github/workflows/triple-projection-gate.yml` для кожного push у main.
