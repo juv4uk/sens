@@ -1,0 +1,22 @@
+name: D10 historical completeness gap audit
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-historical-coverage-gap-audit-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "docs/DIALECT-COMPARISON.md"
+      - "docs/research/d10-historical-gap-audit-20261009.uk.md"
+      - "scripts/check_d10_historical_gap_audit.py"
+      - ".github/workflows/d10-historical-gap-audit.yml"
+  workflow_dispatch:
+jobs:
+  historical-gap-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check source-pinned historical research without inventing residents
+        run: python3 scripts/check_d10_historical_gap_audit.py --self-test
+      - name: Ensure sources remain unchanged by checker
+        run: git diff --exit-code
