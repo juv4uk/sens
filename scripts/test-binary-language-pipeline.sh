@@ -113,8 +113,9 @@ route_start = cli_source.index("fn eval_physical_t5(")
 route_end = cli_source.index("\nfn main()", route_start)
 physical_route = cli_source[route_start:route_end]
 assert "sens::decode_ternary_words(bytes)" in physical_route
-assert "sens::pack_binary_source_words(&words)" in physical_route
-assert "sens::parse_canonical_packed_words(&packed, &widths)" in physical_route
+assert "sens::parse_canonical_word_sequence(&words)" in physical_route
+assert "sens::pack_binary_source_words" not in physical_route
+assert "sens::parse_canonical_packed_words" not in physical_route
 assert "open_ternary_program" not in physical_route
 assert "parse_canonical_binary" not in physical_route
 
@@ -130,14 +131,24 @@ trit_source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding
 trit_start = trit_source.index("fn eval_t5_bytes_core4(")
 trit_end = trit_source.index("\n}\n", trit_start) + 3
 trit_route = trit_source[trit_start:trit_end]
-assert "sens::decode_ternary_program(bytes)" in trit_route
-assert "sens::pack_binary_source_words(&words)" in trit_route
-assert "sens::parse_canonical_packed_words(&packed, &widths)" in trit_route
+assert "sens::decode_ternary_words(bytes)" in trit_route
+assert "sens::parse_canonical_word_sequence(&words)" in trit_route
+assert "sens::decode_ternary_program(bytes)" not in trit_route
+assert "sens::pack_binary_source_words" not in trit_route
+assert "sens::parse_canonical_packed_words" not in trit_route
 assert "sens::open_ternary_program(bytes)" not in trit_route
 assert "sens::parse_canonical_binary(&visible)" not in trit_route
 
-print("SENS-TRIT-DIRECT-PACKED-PATH: PASS")
-print("PHYSICAL-T5-DIRECT-PACKED-PATH: PASS")
+# Transport validation itself must keep D2 grammar on the same direct typed words,
+# rather than serialize and immediately decode a second packed payload.
+transport_start = transport_source.index("pub(crate) fn parse_t5_domain_words(")
+transport_end = transport_source.index("\\n}", transport_start)
+transport_route = transport_source[transport_start:transport_end]
+assert "crate::parse_canonical_word_sequence(words)" in transport_route
+assert "pack_binary_source_words" not in transport_route
+
+print("SENS-TRIT-DIRECT-TYPED-WORDS: PASS")
+print("PHYSICAL-T5-DIRECT-TYPED-WORDS: PASS")
 print("BINARY-LANGUAGE-NEGATIVE-CONTROLS: PASS")
 print("leading-zero collapse: blocked")
 print("width/domain confusion: blocked")
