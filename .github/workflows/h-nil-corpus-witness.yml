@@ -7,6 +7,8 @@ on:
       - "language-contract.lisp"
       - "crates/sens/src/eval/canon.rs"
       - "experiments/research-2019-h-nil-corpus.py"
+      - "knowledge/d1-d9-foundation.json"
+      - "tests/test_h_nil_contract118.py"
       - "docs/research/2019-alt-basis-h-nil.*"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/h-nil-corpus-witness.yml"
@@ -17,6 +19,8 @@ on:
       - "language-contract.lisp"
       - "crates/sens/src/eval/canon.rs"
       - "experiments/research-2019-h-nil-corpus.py"
+      - "knowledge/d1-d9-foundation.json"
+      - "tests/test_h_nil_contract118.py"
       - "docs/research/2019-alt-basis-h-nil.*"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/h-nil-corpus-witness.yml"
@@ -26,5 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Guard current domain separation against regression
+        run: python3 -m unittest discover -s tests -p 'test_h_nil_contract118.py' -v
       - name: H-NIL current-corpus kill test
         run: python3 experiments/research-2019-h-nil-corpus.py
