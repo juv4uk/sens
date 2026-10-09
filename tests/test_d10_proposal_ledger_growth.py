@@ -80,7 +80,10 @@ class SelectionLedgerTrace(unittest.TestCase):
 
     def test_proposal_precedes_selection_without_forged_migration_block(self):
         lines=self.content.splitlines()
-        fields=lines[-1].split("\t")
+        # Negative marker must target a selected historical row, never
+        # the last appended pending-only symbolic AI research proposal.
+        fields=next(line.split("\t") for line in lines[1:]
+                    if line.split("\t")[3] == "DPB")
         fields[0]="D10P-9999"
         fields[1]="окремий-донор"
         fields[2]="незалежний-дослідний-донор"
