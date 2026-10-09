@@ -44,14 +44,15 @@ jobs:
             crates/sens-host/tests/native_lisp_bytes.rs \
             > "$RUNNER_TEMP/vertical-day/inputs.sha256"
 
-      - name: Verify current exact D1/D3 structural boundary
+      - name: Verify exact-domain AST and width-preserving carriers
         shell: bash
         run: |
           set -euo pipefail
-          cargo test -p sens --test d3_empty_control -- --nocapture \
+          cargo test -p sens --test domain_ast_value_identity -- --nocapture \
             2>&1 | tee "$RUNNER_TEMP/vertical-day/domain.log"
 
       - name: Interpreter oracle and native physical CAR/CDR agree
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -61,6 +62,7 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/vertical-day/physical-cpu.log"
 
       - name: Invalid machine form never reaches host
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           set -euo pipefail
