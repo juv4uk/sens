@@ -63,7 +63,7 @@
         ((00000010 mechanism)
          (1)
          (str+
-           "    NecessaryFormDispatchRow { semantic_id: 0b"
+           "    NecessaryFormDispatchRow { legacy_registry_id: 0b"
            (01001100 (00000101 row))
            ", mechanism: "
            mechanism
@@ -92,7 +92,7 @@
     "}\n\n"
     "#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
     "pub(super) struct NecessaryFormDispatchRow {\n"
-    "    pub(super) semantic_id: u8,\n"
+    "    pub(super) legacy_registry_id: u8,\n"
     "    pub(super) mechanism: NecessaryFormMechanism,\n"
     "}\n\n"
     "pub(super) const NECESSARY_FORM_DISPATCH: &[NecessaryFormDispatchRow] = &[\n"))
