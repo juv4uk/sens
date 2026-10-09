@@ -1,4 +1,4 @@
-name: D8 recovery GPU witness
+name: D8 recovery portable witnesses (CPU-only)
 
 on:
   pull_request:
@@ -24,14 +24,12 @@ concurrency:
 
 jobs:
   recovery-witness:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - name: GPU presence
-        run: |
-          nvidia-smi
-          test -e /dev/nvidia0 || test -e /dev/dxg
+      - name: State claim boundary
+        run: echo 'These are value-level recovery tests; this hosted job does not establish GPU hardware parity.'
       - name: Rust toolchain
         run: rustc --version && cargo --version
       - name: ENV recovery
