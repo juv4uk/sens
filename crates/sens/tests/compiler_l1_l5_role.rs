@@ -154,6 +154,46 @@ fn session() -> Session {
 }
 
 #[test]
+fn d3_empty_identity_decomposes_to_exact_shape() {
+    let mut session = session();
+    let expression = list(vec![
+        symbol("compiler-domain-shape"),
+        symbol(MECHANISM_NAME),
+        domain(d3(0)),
+    ]);
+    let result = eval_parsed_expressions(&[expression], &mut session)
+        .expect("D3:000 shape decomposition must remain representational")
+        .value;
+
+    let Value::Pair(width, rest) = &result else {
+        panic!("D3:000 decomposition must be a two-element list, got {result:?}");
+    };
+    assert!(matches!(
+        width.as_ref(),
+        Value::Number(value, Exactness::Exact) if *value == 3.0
+    ));
+    let Value::Pair(bits, tail) = rest.as_ref() else {
+        panic!("D3:000 shape bits missing: {rest:?}");
+    };
+    assert!(matches!(tail.as_ref(), Value::Nil));
+
+    let Value::Pair(bit0, rest) = bits.as_ref() else {
+        panic!("D3:000 first bit missing: {bits:?}");
+    };
+    let Value::Pair(bit1, rest) = rest.as_ref() else {
+        panic!("D3:000 second bit missing: {rest:?}");
+    };
+    let Value::Pair(bit2, tail) = rest.as_ref() else {
+        panic!("D3:000 third bit missing: {rest:?}");
+    };
+    assert!(matches!(tail.as_ref(), Value::Nil));
+    assert_eq!(bit0.as_predicate_bit(), Some(false));
+    assert_eq!(bit1.as_predicate_bit(), Some(false));
+    assert_eq!(bit2.as_predicate_bit(), Some(false));
+}
+
+
+#[test]
 fn sens_l1_l5_derivation_matches_rust_oracle_for_all_d3_identities() {
     let mut session = session();
 
@@ -171,7 +211,8 @@ fn sens_l1_l5_derivation_matches_rust_oracle_for_all_d3_identities() {
         match oracle {
             Some(role) => assert!(
                 matches!(result, Value::Symbol(ref name) if name.as_ref() == role_tag(role)),
-                "D3:{raw:03b} SENS law must match differential Rust oracle"
+                "D3:{raw:03b} SENS law must match differential Rust oracle; result={result:?}; expected={}",
+                role_tag(role)
             ),
             None => assert!(
                 matches!(result, Value::Nil),
