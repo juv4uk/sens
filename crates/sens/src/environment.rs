@@ -100,11 +100,6 @@ impl Environment {
             })),
             Rc::new(RefCell::new(Limits::default())),
         );
-        // `t` is the canonical truth value itself, not a variable that
-        // merely holds one: bound to the symbol `t` (self-referential),
-        // so `t` evaluates to `Symbol("t")` -- the exact value `eq`/`atom`
-        // (Value::truth) already return for true.
-        environment.define("t", Value::Symbol(Rc::from("t")));
         environment
     }
 
