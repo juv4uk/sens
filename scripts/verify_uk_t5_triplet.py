@@ -257,7 +257,7 @@ def verify(lisp: Path, sens: Path, view: Path) -> dict:
     return {
         "schema": SCHEMA,
         "status": "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION",
-        "scope": "D1 predicates / D3 exact-call syntax / D4 CAAR of proved nested nil CONS / D2",
+        "scope": "D1 predicates / D3 exact-call syntax / D4 CAAR of proved nested nil CONS / D2 / sequential proved top-level forms",
         "source": str(lisp),
         "sens": str(sens),
         "view": str(view),
