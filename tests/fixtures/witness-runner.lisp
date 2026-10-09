@@ -74,13 +74,13 @@
            (00000111
              ((00000010 error-entry) (0)
               (00100111 (00000001 malformed) (00000001 expected-and-error)))
-             ((00000010 error-entry) (1)
+             ((00000010 error-entry) ()
               (00100111 (00000001 value) (00000110 expected-entry)))))
-          ((00000010 expected-entry) (1)
+          ((00000010 expected-entry) ()
            (00000111
              ((00000010 error-entry) (0)
               (00100111 (00000001 error) (00000110 error-entry)))
-             ((00000010 error-entry) (1)
+             ((00000010 error-entry) ()
               (00100111 (00000001 malformed) (00000001 missing-outcome))))))))))
 
 ; The normative comparator. Backends provide ACTUAL only. Expected authority is
