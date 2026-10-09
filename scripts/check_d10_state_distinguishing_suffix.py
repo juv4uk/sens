@@ -161,6 +161,45 @@ def validate_dossier() -> dict:
     return data
 
 
+def owner_selector_donor_pairs(data: dict) -> int:
+    """Execute prior user's real #2034 six-state DFA partition oracle, SHA-pinned.
+
+    Compare accepting-language equivalence ONLY; transducer output identities
+    and current SENS execution are independent questions.
+    """
+    import importlib.util
+    import sys
+    donor = data["own_repo_executable_donor"]
+    source = ROOT / donor["source_path"]
+    raw = source.read_bytes()
+    git_sha = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
+    if git_sha != donor["file_git_blob_sha1"]:
+        raise Blocked("DONOR: owner's DFA research Git blob changed without review")
+    spec = importlib.util.spec_from_file_location("original_sens_2034_dfa", source)
+    if spec is None or spec.loader is None:
+        raise Blocked("DONOR: cannot import independently implemented DFA")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    states = sorted(module.STATES)
+    if states != list(range(len(states))):
+        raise Blocked("DONOR: owner DFA state identity changed")
+    delta = [[module.TRANSITIONS[(s, bit)][0] for bit in (0, 1)] for s in states]
+    finals = [int(s in module.ACCEPTING) for s in states]
+    partitions = module.minimize_dfa()
+    examined = 0
+    for p in states:
+        for q in states:
+            same = any(p in block and q in block for block in partitions)
+            witness = product_bfs(delta, finals, p, q)
+            if (witness["status"] == "EQUIVALENT") != same:
+                raise Blocked("DONOR: shortest-word equivalence conflicts with owner's actual minimal DFA")
+            if witness != independent_refinement(delta, finals, p, q):
+                raise Blocked("DONOR: independent dynamic suffix mismatch")
+            examined += 1
+    return examined
+
+
 def evidence() -> dict:
     data = validate_dossier()
     examined = 0
@@ -193,6 +232,7 @@ def evidence() -> dict:
             raise Blocked("ORACLE: 3-state recurrence discrepancy")
         three += 1
 
+    owner_pairs = owner_selector_donor_pairs(data)
     cases = data["witnesses"]
     for test in cases:
         actual = product_bfs(test["transitions"], test["accepting"], test["p"], test["q"])
@@ -205,6 +245,7 @@ def evidence() -> dict:
         "exact_exhaustive_2_state_cases": examined,
         "exact_exhaustive_3_state_seeded_cases": three,
         "named_witness_cases": len(cases),
+        "actual_owner_2034_dfa_state_pairs": owner_pairs,
         "independent_oracles": "product-BFS, dynamic-refinement, tiny-exhaustive",
         "independent_external_runtime_oracle": "NOT_EXECUTED",
         "owner_decision": "HOLD_CORE_VS_DERIVED",
