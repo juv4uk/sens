@@ -214,18 +214,17 @@
 (00001001 x86-admission-wire-denominator-one?
   (00001000 (text)
     (00000111
-      ((00111100 text) (00000001 ()))
+      ((00111100 text) (00011010 1 0))
       ((00000011 (00111111 text) "/")
        (10011100 ((rest (01000000 text)))
          (00000111
-           ((00111100 rest) (00000001 ()))
+           ((00111100 rest) (00011010 1 0))
            ((00000011 (00111111 rest) "1")
             (00000111
-              ((00111100 (01000000 rest)) t)
-              ((00000011 0 0) (00000001 ()))))
-           ((00000011 0 0) (00000001 ())))))
-      ((00000011 0 0)
-       (x86-admission-wire-denominator-one? (01000000 text))))))
+              ((00111100 (01000000 rest)) (00000010 (00000001 ())))
+              ((00000010 (00000001 ())) (00011010 1 0))))
+           ((00000010 (00000001 ())) (00011010 1 0)))))
+      ((00000010 (00000001 ())) (x86-admission-wire-denominator-one? (01000000 text))))))
 
 (00001001 x86-admission-exact-integer?
   (00001000 (value)
@@ -233,7 +232,7 @@
       (00000111
         ((00111101 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
-        ((00000011 0 0) (00000001 ()))))))
+        ((00000010 (00000001 ())) (00011010 1 0))))))
 
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
@@ -255,28 +254,28 @@
     (00000111
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -128 127))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-admission-imm32?
   (00001000 (value)
     (00000111
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-admission-uimm8?
   (00001000 (value)
     (00000111
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value 0 255))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-admission-rel32?
   (00001000 (value)
     (00000111
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 ; `immediate`, `register`, and `disp8` are operand-slot wildcards, not
 ; opcode wildcards. `register` only admits the 16 GPR names x86-reg-code
@@ -287,89 +286,44 @@
 (00001001 x86-admission-pattern-match?
   (00001000 (pattern form)
     (00000111
-      ((00000010 pattern) () (00000111
-         ((00000011 pattern (00000001 immediate)) t)
+      ((00000010 pattern)
+       (00000111
+         ((00000011 pattern (00000001 immediate)) (00000010 (00000001 ())))
          ((00000011 pattern (00000001 register))
           (00000111
-            ((00000010 form) () (00100001 (00000011 (x86-reg-code form) (00000001 ()))))
-            ((00000010 form) (1) (00100001 (00000011 (x86-reg-code form) (00000001 ()))))
-            (t (00000001 ()))))
+            ((00000010 form)
+             (00000111
+               ((00000011 (x86-reg-code form) (00000001 ())) (00011010 1 0))
+               ((00000010 (00000001 ())) (00000010 (00000001 ())))))
+            ((00000010 (00000001 ())) (00011010 1 0))))
          ((00000011 pattern (00000001 xmm-register))
           (00000111
-            ((00000010 form) () (00100001 (00000011 (x86-xmm-reg-code form) (00000001 ()))))
-            ((00000010 form) (1) (00100001 (00000011 (x86-xmm-reg-code form) (00000001 ()))))
-            (t (00000001 ()))))
+            ((00000010 form)
+             (00000111
+               ((00000011 (x86-xmm-reg-code form) (00000001 ())) (00011010 1 0))
+               ((00000010 (00000001 ())) (00000010 (00000001 ())))))
+            ((00000010 (00000001 ())) (00011010 1 0))))
          ((00000011 pattern (00000001 disp8))
-          (00000111
-            ((00000010 form) () (x86-admission-disp8? form))
-            ((00000010 form) (1) (x86-admission-disp8? form))
-            (t (00000001 ()))))
+          (x86-admission-disp8? form))
          ((00000011 pattern (00000001 imm32))
-          (00000111
-            ((00000010 form) () (x86-admission-imm32? form))
-            ((00000010 form) (1) (x86-admission-imm32? form))
-            (t (00000001 ()))))
+          (x86-admission-imm32? form))
          ((00000011 pattern (00000001 uimm8))
-          (00000111
-            ((00000010 form) () (x86-admission-uimm8? form))
-            ((00000010 form) (1) (x86-admission-uimm8? form))
-            (t (00000001 ()))))
+          (x86-admission-uimm8? form))
          ((00000011 pattern (00000001 rel32))
-          (00000111
-            ((00000010 form) () (x86-admission-rel32? form))
-            ((00000010 form) (1) (x86-admission-rel32? form))
-            (t (00000001 ()))))
-         ((00000010 form) () (00000011 pattern form))
-         ((00000010 form) (1) (00000011 pattern form))
-         (t (00000001 ()))))
-      ((00000010 pattern) (1) (00000111
-         ((00000011 pattern (00000001 immediate)) t)
-         ((00000011 pattern (00000001 register))
-          (00000111
-            ((00000010 form) () (00100001 (00000011 (x86-reg-code form) (00000001 ()))))
-            ((00000010 form) (1) (00100001 (00000011 (x86-reg-code form) (00000001 ()))))
-            (t (00000001 ()))))
-         ((00000011 pattern (00000001 xmm-register))
-          (00000111
-            ((00000010 form) () (00100001 (00000011 (x86-xmm-reg-code form) (00000001 ()))))
-            ((00000010 form) (1) (00100001 (00000011 (x86-xmm-reg-code form) (00000001 ()))))
-            (t (00000001 ()))))
-         ((00000011 pattern (00000001 disp8))
-          (00000111
-            ((00000010 form) () (x86-admission-disp8? form))
-            ((00000010 form) (1) (x86-admission-disp8? form))
-            (t (00000001 ()))))
-         ((00000011 pattern (00000001 imm32))
-          (00000111
-            ((00000010 form) () (x86-admission-imm32? form))
-            ((00000010 form) (1) (x86-admission-imm32? form))
-            (t (00000001 ()))))
-         ((00000011 pattern (00000001 uimm8))
-          (00000111
-            ((00000010 form) () (x86-admission-uimm8? form))
-            ((00000010 form) (1) (x86-admission-uimm8? form))
-            (t (00000001 ()))))
-         ((00000011 pattern (00000001 rel32))
-          (00000111
-            ((00000010 form) () (x86-admission-rel32? form))
-            ((00000010 form) (1) (x86-admission-rel32? form))
-            (t (00000001 ()))))
-         ((00000010 form) () (00000011 pattern form))
-         ((00000010 form) (1) (00000011 pattern form))
-         (t (00000001 ()))))
-      ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
+          (x86-admission-rel32? form))
+         ((00000011 pattern form) (00000010 (00000001 ())))
+         ((00000010 (00000001 ())) (00011010 1 0))))
+      ((00000010 form) (00011010 1 0))
       ((x86-admission-pattern-match? (00000101 pattern) (00000101 form))
        (x86-admission-pattern-match? (00000110 pattern) (00000110 form)))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-admitted-instruction-against?
   (00001000 (patterns form)
     (00000111
-      ((00000010 patterns) () (00000001 ()))
-      ((00000010 patterns) (1) (00000001 ()))
-      ((x86-admission-pattern-match? (00000101 patterns) form) t)
-      (t (x86-admitted-instruction-against? (00000110 patterns) form)))))
+      ((00000010 patterns) (00011010 1 0))
+      ((x86-admission-pattern-match? (00000101 patterns) form) (00000010 (00000001 ())))
+      ((00000010 (00000001 ())) (x86-admitted-instruction-against? (00000110 patterns) form)))))
 
 (00001001 x86-admitted-instruction?
   (00001000 (form)
@@ -378,24 +332,24 @@
 (00001001 x86-first-unadmitted-form
   (00001000 (forms)
     (00000111
-      ((00000010 forms) () (00000111
+      ((00000010 forms)
+       (00000111
          ((00000011 forms (00000001 ())) (00000001 ()))
-         (t forms)))
-      ((00000010 forms) (1) (00000111
-         ((00000011 forms (00000001 ())) (00000001 ()))
-         (t forms)))
+         ((00000010 (00000001 ())) forms)))
       ((x86-admitted-instruction? (00000101 forms))
        (x86-first-unadmitted-form (00000110 forms)))
-      (t (00000101 forms)))))
+      ((00000010 (00000001 ())) (00000101 forms)))))
 
 (00001001 x86-admitted-program?
   (00001000 (forms)
     (00000111
-      ((00000010 forms) () (00000011 forms (00000001 ())))
-      ((00000010 forms) (1) (00000011 forms (00000001 ())))
+      ((00000010 forms)
+       (00000111
+         ((00000011 forms (00000001 ())) (00000010 (00000001 ())))
+         ((00000010 (00000001 ())) (00011010 1 0))))
       ((x86-admitted-instruction? (00000101 forms))
        (x86-admitted-program? (00000110 forms)))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-encode-admitted-instruction
   (00001000 (form)
