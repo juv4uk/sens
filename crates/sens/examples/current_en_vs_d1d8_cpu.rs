@@ -1,15 +1,15 @@
 use sens::{
-    eval_lowered_expressions, load_core_library, lower_program, parse, parse_canonical_binary,
-    Expr, ExprKind, Session, Value,
+    eval_lowered_expressions, load_core_library, lower_program, parse_canonical_binary,
+    parse_mixed_exact_domain, Expr, ExprKind, Session, Value,
 };
 use std::{env, fs, process, time::Instant};
 
-const ENGLISH: &str = "english-surface";
+const UKRAINIAN: &str = "ukrainian-surface";
 const BINARY: &str = "canonical-d1d8";
 
 fn parse_source(candidate: &str, source: &str) -> Result<Vec<Expr>, String> {
     match candidate {
-        ENGLISH => parse(source).map_err(|e| format!("{e:?}")),
+        UKRAINIAN => parse_mixed_exact_domain(source).map_err(|e| format!("{e:?}")),
         BINARY => parse_canonical_binary(source).map_err(|e| format!("{e:?}")),
         other => Err(format!("unknown candidate: {other}")),
     }

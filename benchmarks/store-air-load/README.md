@@ -106,7 +106,7 @@ python3 benchmarks/store-air-load/air_adapter.py --self-test
 `current_en_vs_d1d8_cpu` preflight:
 
 ```text
-English surface
+Ukrainian surface
   -> parse -> lower -> exact-domain trace
 
 canonical exact-width source
@@ -210,8 +210,8 @@ Ratchet покриває всі критичні довжини:
 - `eight-bit-mechanical` — рівно 8 біт;
 - `twelve-bit-mechanical` — 9..15-бітний клас;
 - `mixed-28-bit-mechanical` — довга mixed-width послідовність D1..D7;
-- `d3-quote-empty` — English/canonical paired semantic witness;
-- `d3-car-empty` — другий English/canonical paired witness.
+- `d3-quote-empty` — Ukrainian/canonical paired semantic witness;
+- `d3-car-empty` — другий Ukrainian/canonical paired witness.
 
 Для кожної canonical fixture runner незалежно рахує
 `expected_semantic_bits = sum(word_widths)`, звіряє його з production helper,

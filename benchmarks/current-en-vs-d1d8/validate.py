@@ -4,7 +4,7 @@ from collections import defaultdict
 from pathlib import Path
 
 SCHEMA="sens-current-en-vs-d1d8/v1"
-CANDIDATES={"english-surface","canonical-d1d8"}
+CANDIDATES={"ukrainian-surface","canonical-d1d8"}
 SHA40=re.compile(r"^[0-9a-f]{40}$")
 SHA64=re.compile(r"^[0-9a-f]{64}$")
 

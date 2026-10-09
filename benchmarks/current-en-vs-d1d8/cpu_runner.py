@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Paired CPU phase harness for the current English surface vs canonical D1-D8.
+"""Paired CPU phase harness for the current Ukrainian surface vs canonical binary D1-D8.
 
 This runner is deliberately evidence-first:
 - both candidates use the same compiled helper binary;
@@ -25,7 +25,7 @@ from pathlib import Path
 SCHEMA = "sens-current-en-vs-d1d8/v1"
 WORKLOAD_SCHEMA = "sens-current-en-vs-d1d8-workloads/v1"
 BLOCKED_SCHEMA = "sens-current-en-vs-d1d8-blocked/v1"
-CANDIDATES = ("english-surface", "canonical-d1d8")
+CANDIDATES = ("ukrainian-surface", "canonical-d1d8")
 DEFAULT_PHASES = ("session", "ingest", "lower", "execute", "full")
 VALID_PHASES = set(DEFAULT_PHASES) | {"repeated"}
 
@@ -222,13 +222,13 @@ def preflight_pair(
     repeat_n: int,
 ) -> tuple[dict[str, Path], dict[str, object]]:
     workload_id = str(workload["id"])
-    english = workload.get("english_source")
+    ukrainian = workload.get("ukrainian_source")
     binary = workload.get("canonical_source")
-    if not isinstance(english, str) or not isinstance(binary, str):
-        raise ValueError(f"{workload_id}: ready workload needs english_source and canonical_source")
+    if not isinstance(ukrainian, str) or not isinstance(binary, str):
+        raise ValueError(f"{workload_id}: ready workload needs ukrainian_source and canonical_source")
 
     paths = {
-        "english-surface": write_source(tmp, workload_id, "english-surface", english),
+        "ukrainian-surface": write_source(tmp, workload_id, "ukrainian-surface", ukrainian),
         "canonical-d1d8": write_source(tmp, workload_id, "canonical-d1d8", binary),
     }
     observed: dict[str, dict[str, object]] = {}
@@ -236,13 +236,13 @@ def preflight_pair(
         result, _ = run_helper(helper, candidate, "preflight", paths[candidate], repeat_n)
         observed[candidate] = result
 
-    left = observed["english-surface"]
+    left = observed["ukrainian-surface"]
     right = observed["canonical-d1d8"]
     for field in ("trace", "value", "output"):
         if left[field] != right[field]:
             raise ValueError(
                 f"{workload_id}: preflight mismatch for {field}: "
-                f"english={left[field]!r} canonical={right[field]!r}"
+                f"ukrainian={left[field]!r} canonical={right[field]!r}"
             )
 
     expected_value = workload.get("expected_value")
