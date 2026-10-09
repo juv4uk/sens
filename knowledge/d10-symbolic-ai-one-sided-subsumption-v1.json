@@ -1,0 +1,155 @@
+{
+  "schema": "sens-d10-symbolic-one-sided-subsumption/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-HOLD-OWNER-REVIEW-NO-ADMISSION",
+  "baseline": {
+    "selected_at_claim": 634,
+    "inventory_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "ratified_d10": 0
+  },
+  "source": {
+    "primary": "https://www.swi-prolog.org/pldoc/man?predicate=subsumes_term%2F2",
+    "name": "SWI-Prolog built-in subsumes_term/2",
+    "observed": "true iff only variables of Generic can be bound to make Generic structurally equivalent to Specific; neither input is changed; distinct shared-variable constraints matter.",
+    "independent_oracle": "tests/d10_finite_subsumes_swi.pl",
+    "model": "tests/test_d10_finite_subsumes.py",
+    "different_from": "UNIFY symmetric matching; SWI term_subsumer/3 least-general pattern synthesis."
+  },
+  "rows": [
+    {
+      "id": "D10AI-0002",
+      "semantic_name": "FINITE-TERM-SUBSUMES",
+      "surface_uk": "охоплює-терм?",
+      "surface_ukr": "чи-загальний-терм-охоплює-конкретний?",
+      "role": "RESEARCH-HOLD",
+      "kind": "PURE-ONE-SIDED-TERM-INSTANCE-CHECK",
+      "arity": 2,
+      "signature": "(finite acyclic first-order P, finite acyclic first-order S; disjoint namespaces for metavariables) -> (boolean, substitution witness on P only when true)",
+      "contract": "YES iff a substitution σ defined ONLY for metavariables in P makes σ(P) structurally identical to S (including occurrence identity of variables already in S). Never bind or alter metavariables in S, and never modify P. Repeated metavariable occurrences in P demand equal S subtrees. On NO, no partial witness. If YES, return normalized witness as pure data, not a D2 binding.",
+      "scope": "Finite acyclic first-order terms, constants and same-arity functors, disjoint metavariable namespaces. Ground and non-ground S allowed; no cyclic/attributed constraints or higher-order unification.",
+      "witnesses": [
+        {
+          "p": "f(P0,P0)",
+          "s": "f(a,a)",
+          "out": "YES σ[P0]=a",
+          "reason": "repeated pattern var must get same value"
+        },
+        {
+          "p": "f(P0,P0)",
+          "s": "f(a,b)",
+          "out": "NO",
+          "reason": "two different values for same pattern var"
+        },
+        {
+          "p": "f(P0,P0)",
+          "s": "f(S0,S0)",
+          "out": "YES σ[P0]=S0",
+          "reason": "target variable identity is preserved"
+        },
+        {
+          "p": "f(P0,P0)",
+          "s": "f(S0,b)",
+          "out": "NO",
+          "reason": "cannot bind target S0 to b"
+        },
+        {
+          "p": "f(a,P0)",
+          "s": "f(S0,b)",
+          "out": "NO",
+          "reason": "symmetric UNIFY may bind S0=a, but subsumption must not"
+        },
+        {
+          "p": "f(P0,g(P0))",
+          "s": "f(a,g(a))",
+          "out": "YES σ[P0]=a",
+          "reason": "cross-nested equality constraint"
+        },
+        {
+          "p": "f(P0,g(P0))",
+          "s": "f(a,g(b))",
+          "out": "NO",
+          "reason": "repeat mismatch"
+        },
+        {
+          "p": "f(P0,P1)",
+          "s": "f(S0,S0)",
+          "out": "YES σ[P0]=S0,σ[P1]=S0",
+          "reason": "different generic variables may map to same target variable"
+        },
+        {
+          "p": "f(a)",
+          "s": "f(a,b)",
+          "out": "NO",
+          "reason": "functor arity matters"
+        }
+      ],
+      "falsifiers": [
+        "Returning YES for f(a,P0) on f(S0,b) by binding S0=a is ordinary UNIFY, not one-sided SUBSUMES.",
+        "Returning YES for f(P0,P0) on f(a,b) violates variable identity.",
+        "Returning YES for f(P0,P0) on f(S0,b) changes target variable S0 and is forbidden.",
+        "Returning NO for f(P0,P1) on f(S0,S0) incorrectly imposes injectivity on substitution.",
+        "Evaluating term constructors as host code or setting D2 source variables is forbidden.",
+        "Treating f/1 and f/2 as the same symbol neglects arity."
+      ],
+      "neighbors": [
+        "D1-D9 UNIFY",
+        "D10 PROVE-RULE",
+        "D10 KNOWLEDGE-TERM-VALID?",
+        "#4973 FINITE-GROUND-ANTI-UNIFY",
+        "#4965 MINIMAL-ABDUCTIVE-EXPLANATIONS"
+      ],
+      "core_question": "Is read-only one-sided structural subsumption a stable 10-bit language-visible root or a self-hosted library predicate built from term recursion, copies and UNIFY? Behavioral evidence does not by itself prove primitive necessity.",
+      "source_url": "https://www.swi-prolog.org/pldoc/man?predicate=subsumes_term%2F2",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "anti_duplication": [
+    {
+      "name": "FINITE-TERM-ANTI-UNIFY",
+      "owner": "#4973 / #4970",
+      "state": "PEER-OWNED",
+      "reason": "Find least general pattern rather than check if given pattern covers target; do not mint duplicate."
+    },
+    {
+      "name": "ATMS-ASSUMPTION-LABEL",
+      "owner": "#4958",
+      "state": "PEER-OWNED",
+      "reason": "Assumption support sets unrelated to one-sided term matching"
+    },
+    {
+      "name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+      "owner": "#4965",
+      "state": "PEER-OWNED",
+      "reason": "Explanations for goals rather than structural subsumption"
+    },
+    {
+      "name": "BAYESIAN-UPDATE",
+      "owner": "#4963",
+      "state": "PEER-OWNED",
+      "reason": "Numerical belief update unrelated to structural proof"
+    }
+  ],
+  "relevance": [
+    "Advice Taker rule applicability with exact witness",
+    "Prolog and Lisp AST schema checking",
+    "Panini grammatical pattern matching without mutable variable environment",
+    "astronomy instrument observation schemata",
+    "FPGA and SDR structured event protocol validation"
+  ],
+  "admission": {
+    "selected_added": 0,
+    "coordinate_added": 0,
+    "ratified_added": 0,
+    "physical_authority": false,
+    "source_only": true,
+    "owning_issues": [
+      "#4013",
+      "#4463"
+    ],
+    "next": "SWI real donor + independent Python witness oracle and 10 negative controls before any append."
+  }
+}
