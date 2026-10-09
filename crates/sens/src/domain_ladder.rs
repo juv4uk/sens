@@ -51,11 +51,11 @@ impl DomainCoordinate {
         if !(3..=7).contains(&self.width) {
             return None;
         }
-        Some(
-            crate::domain_owner_generated::DOMAIN_OWNER_COORDINATES
-                .iter()
-                .any(|row| row.width == self.width && u16::from(row.bits) == self.bits),
-        )
+        let mask = crate::domain_owner_generated::DOMAIN_OWNER_BITMAPS
+            .iter()
+            .find(|mask| mask.width == self.width)?;
+        let slot = usize::from(self.bits / 64);
+        Some(((mask.slots[slot] >> (self.bits % 64)) & 1) != 0)
     }
 }
 
