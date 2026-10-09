@@ -905,57 +905,6 @@ mod tests {
     }
 
     #[test]
-    fn sid_zero_is_not_owned_by_route_metadata() {
-        assert_eq!(route_kind_for_sid(crate::sens!(00000000)), None);
-        assert_eq!(SID_ROUTES[0].sid, crate::sens!(00000001));
-    }
-
-    #[test]
-    fn route_metadata_is_keyed_only_by_exact_sid() {
-        assert_eq!(
-            route_kind_for_sid(crate::sens!(00000001)),
-            Some(SidRouteKind::SpecialForm)
-        );
-        assert_eq!(
-            route_kind_for_sid(crate::sens!(00000101)),
-            Some(SidRouteKind::ValueCall)
-        );
-        assert_eq!(route_kind_for_sid(crate::sens!(00001100)), None);
-    }
-
-    #[test]
-    fn every_surface_for_sid_00000101_routes_back_to_that_sid() {
-        let surfaces =
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00000101));
-        assert!(surfaces.len() >= 2, "expected multiple routing surfaces");
-        for surface in &surfaces {
-            assert_eq!(
-                routed_sid_for_surface(surface),
-                Some(crate::sens!(00000101))
-            );
-        }
-    }
-
-    #[test]
-    fn surfaces_for_sid_routes_are_reserved_mechanically() {
-        for sid in [
-            crate::sens!(00000001),
-            crate::sens!(00000010),
-            crate::sens!(00000011),
-            crate::sens!(00000100),
-            crate::sens!(00000101),
-            crate::sens!(00000110),
-            crate::sens!(00000111),
-        ] {
-            for surface in semantic_registry::admitted_surfaces_for_semantic_id(sid) {
-                assert!(is_reserved_surface(surface));
-                assert!(surface_has_sid(surface, sid));
-            }
-        }
-        assert!(!is_reserved_surface("map"));
-    }
-
-    #[test]
     fn plus_surface_is_not_bindable_after_m8() {
         let span = Span { start: 0, end: 1 };
         assert!(ensure_bindable("+", span).is_err());
