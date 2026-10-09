@@ -116,8 +116,8 @@ def validate(census: dict, inventory: dict, foundation: dict) -> list[str]:
         errors.append("only the reviewed COMPUTE-RESTARTS observation may be proposed")
     if acc.get("selected_added") != 0 or acc.get("ratified_added") != 0:
         errors.append("Census may not claim selected/ratified additions")
-    if census.get("snapshot", {}).get("d10_inventory_blob") != "a55f307c27f17091795d75ebfcd7d051547d80bc":
-        errors.append("historical 630 census SHA changed")
+    if census.get("snapshot", {}).get("d10_inventory_blob") != "3db40a04c1094c9ea13b0c8d6099ef1d882cf203":
+        errors.append("historical 635 census SHA changed")
     expected_decisions = {"HOLD": 50, "PROPOSE": 1, "DERIVED": 0, "DUPLICATE": 0}
     actual_decisions = {d: sum(r.get("decision") == d for r in rows) for d in expected_decisions}
     if census.get("accounted", {}).get("decision_counts") != actual_decisions or actual_decisions != expected_decisions:
