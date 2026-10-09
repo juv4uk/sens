@@ -1,7 +1,7 @@
 use sens::{
     domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
     expr_to_exact_program_data, load_core_library, lower_program, parse,
-    parse_mixed_exact_domain, Bit4, CoreD4, DomainIdentity, Expr, ExprKind, Sens8, Session, Value,
+    parse_mixed_exact_domain, Bit4, CoreD4, DomainIdentity, ErrorKind, Expr, ExprKind, Sens8, Session, Value,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -81,7 +81,7 @@ fn whole_native_first_source_has_no_legacy_sid_or_call_nodes() {
 }
 
 #[test]
-fn core4_exact_list_is_visible_to_native_first_fallback_by_behavior() {
+fn native_first_fallback_builds_record_with_exact_d3_cons() {
     let mut session = native_session();
     let result = eval_program(
         "(native-first-fallback (quote payload))",
@@ -93,14 +93,17 @@ fn core4_exact_list_is_visible_to_native_first_fallback_by_behavior() {
 }
 
 #[test]
-fn exact_d6_let_uses_only_its_lisp_owned_macro_mechanism() {
+fn exact_d6_let_stays_non_callable_without_an_existing_macro_slot() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core");
     let forms = parse_mixed_exact_domain("(001000 ((x 41)) x)")
         .expect("exact D6 LET identity must parse");
-    let result = eval_parsed_expressions(&forms, &mut session)
-        .expect("ratified D6 LET macro mechanism must execute");
-    assert_eq!(result.value, Value::Number(41.0, sens::Exactness::Exact));
+    let error = match eval_parsed_expressions(&forms, &mut session) {
+        Ok(_) => panic!("D6 LET must not become generically callable"),
+        Err(error) => error,
+    };
+    assert_eq!(error.kind, ErrorKind::Type);
+    assert!(format!("{error:?}").contains("D6 001000"));
 }
 
 #[test]
