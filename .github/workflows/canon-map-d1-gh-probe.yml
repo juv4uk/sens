@@ -44,3 +44,4 @@ jobs:
         run: cargo test -p sens --test canon_let_ephemeral_diagnostic -- --nocapture
       - name: Execute full Canon V2 Lisp-owned witness (no skips)
         run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+# Diagnostic probe pass v2: compare historical ATOM (0) against exact EQUAL transport
