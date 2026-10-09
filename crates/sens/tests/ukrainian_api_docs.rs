@@ -72,7 +72,6 @@ fn uk_session() -> Session {
     session
 }
 
-
 #[test]
 fn novi_predykatni_nazvy_i_stari_aliasy_vykonuiutsia_odnakovo() {
     let mut session = uk_session();
