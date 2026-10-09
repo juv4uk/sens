@@ -304,11 +304,11 @@
     (10011100 ((typed-base (x86-as-gpr64 base)))
       (00000111
         ((x86-machine-rejected? typed-base) typed-base)
-        (t
+        ((00000010 (00000001 ()))
          (10011100 ((typed-displacement (x86-as-disp8 displacement)))
            (00000111
              ((x86-machine-rejected? typed-displacement) typed-displacement)
-             (t
+             ((00000010 (00000001 ()))
               (00100111 (00000001 mem64-disp8)
                     typed-base
                     typed-displacement)))))))))
