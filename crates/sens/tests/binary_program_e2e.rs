@@ -1,15 +1,10 @@
-//! Current pure-binary SENS execution: physical T5 -> canonical D2 reader ->
-//! exact-domain D1/D3/D4/D7 execution. No compatibility parser or Core4 boot.
-//!
-//! This is an executable *mechanical* smoke, not an independent Lisp semantic
-//! oracle or evidence that D10 has a ratified physical runtime representation.
-//! The source contains only exact-width bits and whitespace, never name/SID
-//! spellings. No compatibility parser, host clock, or Core4 boot is involved.
+//! Binary-source structural and T5 transport canary.
+//! Rust checks exact-width domain words, D2 framing, and physical bytes only;
+//! result laws belong to SENS/Lisp-owned witnesses and the physical CLI gate.
 
 use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, eval_parsed_expressions,
-    open_ternary_program, parse_canonical_binary, DomainIdentity, Expr, ExprKind, Session,
-    Value,
+    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
+    parse_canonical_binary, DomainIdentity, Expr, ExprKind,
 };
 
 const BINARY_PROGRAM: &str =
@@ -19,201 +14,107 @@ const D3_COND_PROGRAM: &str =
 const D3_PRIMITIVES_PROGRAM: &str =
     include_str!("../../../examples/binary/d3-primitives-program.bits");
 
-fn assert_exact_binary_ast(expr: &Expr) {
-    match &expr.kind {
-        ExprKind::DomainIdentity(_) => {}
+fn assert_exact_domain_ast(expression: &Expr) {
+    match &expression.kind {
+        ExprKind::DomainIdentity(_) => {},
         ExprKind::List(items) => {
-            for item in items.iter() {
-                assert_exact_binary_ast(item);
-            }
+            for item in items.iter() { assert_exact_domain_ast(item); }
         }
         ExprKind::Pair(head, tail) => {
-            assert_exact_binary_ast(head);
-            assert_exact_binary_ast(tail);
+            assert_exact_domain_ast(head);
+            assert_exact_domain_ast(tail);
         }
-        other => panic!("canonical binary reader invented a name or legacy slot: {other:?}"),
+        other => panic!("canonical binary reader added a non-domain form: {other:?}"),
     }
 }
 
-#[test]
-fn real_packed_t5_runs_binary_d4_d7_definition_and_d1_result() {
-    assert!(
-        BINARY_PROGRAM
-            .bytes()
-            .all(|b| b == b'0' || b == b'1' || b.is_ascii_whitespace()),
-        "the executable source must contain only 0/1 and whitespace"
-    );
+fn assert_bit_projection(source: &str) {
+    assert!(!source.trim().is_empty(), "binary projection must be non-empty");
+    assert!(source.bytes().all(|b| b == b'0' || b == b'1' || b.is_ascii_whitespace()),
+        "projection may contain only 0/1 words and whitespace");
+    let parsed = parse_canonical_binary(source).expect("exact-width binary D2 syntax");
+    for expression in &parsed { assert_exact_domain_ast(expression); }
+}
 
-    // Physical bytes, not a filename or a text-only claim of binary source.
+#[test]
+fn executable_bit_projection_roundtrips_through_physical_t5_without_retyping() {
+    assert_bit_projection(BINARY_PROGRAM);
     let physical = encode_binary_projection_ternary(BINARY_PROGRAM)
-        .expect("exact binary executable program must encode to physical T5");
+        .expect("exact-width binary source encodes to physical T5");
     assert!(!physical.is_empty());
-    let decoded_words = decode_ternary_program(&physical)
-        .expect("canonical packed T5 must decode to exact-width words");
-    let visible = open_ternary_program(&physical)
-        .expect("physical T5 must open as exact binary source");
+    let words = decode_ternary_program(&physical).expect("canonical T5 bytes decode");
+    let visible = open_ternary_program(&physical).expect("T5 opens as a bit projection");
     let normalized = BINARY_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" ");
-    assert_eq!(visible, normalized, "T5 changed an exact-width source word");
-    assert_eq!(
-        visible,
-        sens::render_ternary_words_spaced(&decoded_words),
-        "T5 word boundaries cannot be reconstructed from human names"
-    );
-    assert_eq!(
-        encode_binary_projection_ternary(&visible).unwrap(),
-        physical,
-        "physical bytes must be canonical under re-encoding"
-    );
-
-    let parsed = parse_canonical_binary(&visible)
-        .expect("only the canonical D2 reader may parse executable bits");
-    assert_eq!(parsed.len(), 2, "one D4 definition followed by one D7 call");
-    for expression in &parsed {
-        assert_exact_binary_ast(expression);
-    }
-    let value = eval_parsed_expressions(&parsed, &mut Session::default())
-        .expect("binary definition and its contextual D7 binding must execute")
-        .value;
-    assert_eq!(
-        value,
-        Value::DomainIdentity(DomainIdentity::D1(
-            sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap())
-        )),
-        "current source-level result must retain exact D1:1, not host T"
-    );
+    assert_eq!(visible, normalized, "T5 must preserve each exact-width word");
+    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
 }
 
-
-
 #[test]
-fn physical_t5_executes_d3_primitive_basis_without_core4() {
-    assert!(
-        D3_PRIMITIVES_PROGRAM
-            .bytes()
-            .all(|b| b == b'0' || b == b'1' || b.is_ascii_whitespace()),
-        "the D3 primitive source must contain only bits and whitespace"
-    );
+fn d3_primitive_program_is_only_width_qualified_binary_source() {
+    assert_bit_projection(D3_PRIMITIVES_PROGRAM);
     let physical = encode_binary_projection_ternary(D3_PRIMITIVES_PROGRAM)
-        .expect("D3 primitive program must encode to physical T5");
-    let visible = open_ternary_program(&physical)
-        .expect("physical T5 must decode to exact-width D3 source");
-    let normalized = D3_PRIMITIVES_PROGRAM
-        .split_whitespace()
-        .collect::<Vec<_>>()
-        .join(" ");
-    assert_eq!(visible, normalized);
-    let decoded = decode_ternary_program(&physical).expect("T5 words must decode");
-    assert_eq!(visible, sens::render_ternary_words_spaced(&decoded));
-
-    let parsed = parse_canonical_binary(&visible)
-        .expect("the exact-width D2 reader must parse all six D3 forms");
-    assert_eq!(parsed.len(), 6);
-    for expression in &parsed {
-        assert_exact_binary_ast(expression);
-    }
-
-    // Name-free end-to-end mechanism witnesses: QUOTE, ATOM(empty),
-    // ATOM(CONS 1 0), EQ(CAR(CONS 1 0), 1), EQ(CDR(CONS 1 0), 0),
-    // and EQ(1, 0). Meaning authority remains the ratified D3/D1 law.
-    let expected_bits = [1u8, 1, 0, 1, 1, 0];
-    let mut session = Session::default();
-    for (expression, expected) in parsed.iter().zip(expected_bits) {
-        let value = eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
-            .expect("ratified exact D3 primitive should execute without Core4")
-            .value;
-        assert_eq!(
-            value,
-            Value::DomainIdentity(DomainIdentity::D1(
-                sens::PredicateBit::from_word(sens::Bit1::new(expected).unwrap())
-            )),
-            "binary D3 primitive sequence produced a non-exact D1 result"
-        );
-    }
+        .expect("D3 primitive projection encodes as physical T5");
+    let words = decode_ternary_program(&physical).expect("D3 T5 source decodes");
+    let visible = open_ternary_program(&physical).expect("D3 T5 opens");
+    assert_eq!(visible, D3_PRIMITIVES_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" "));
+    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
 }
 
-
 #[test]
-fn physical_t5_executes_exact_d3_cond_with_d1_skip_and_select() {
-    assert!(
-        D3_COND_PROGRAM
-            .bytes()
-            .all(|b| b == b'0' || b == b'1' || b.is_ascii_whitespace()),
-        "the D3 program must contain only bits and whitespace"
-    );
+fn d3_cond_program_preserves_d1_and_d3_widths_in_structural_ast() {
+    assert_bit_projection(D3_COND_PROGRAM);
     let physical = encode_binary_projection_ternary(D3_COND_PROGRAM)
-        .expect("exact D3 source must encode as physical T5");
-    let visible = open_ternary_program(&physical)
-        .expect("physical T5 must decode to exact-width D3 source");
-    let normalized = D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" ");
-    assert_eq!(visible, normalized);
-    let decoded = decode_ternary_program(&physical).expect("packed T5 must decode");
-    assert_eq!(visible, sens::render_ternary_words_spaced(&decoded));
-
-    let parsed = parse_canonical_binary(&visible)
-        .expect("the canonical reader must preserve D3:110 and D1 control inputs");
-    assert_eq!(parsed.len(), 1);
-    for expression in &parsed {
-        assert_exact_binary_ast(expression);
-    }
-    let value = eval_parsed_expressions(&parsed, &mut Session::default())
-        .expect("exact D3 COND must execute without Core4 compatibility bootstrap")
-        .value;
-    assert_eq!(
-        value.as_predicate_bit(),
-        Some(true),
-        "D1:0 must skip clause one; D1:1 must select clause two"
-    );
+        .expect("exact-width COND projection encodes as physical T5");
+    let visible = open_ternary_program(&physical).expect("COND T5 opens");
+    assert_eq!(visible, D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" "));
+    let parsed = parse_canonical_binary(&visible).expect("D2 frames binary source");
+    assert_eq!(parsed.len(), 1, "the structural source is one D2 form");
+    assert_exact_domain_ast(&parsed[0]);
 }
 
 #[test]
-fn physical_d3_cond_rejects_structural_empty_as_a_predicate() {
-    let physical = encode_binary_projection_ternary("10 110 00 10 10 01 00 10 010 00 10 01 01 01 01")
-        .expect("malformed-control source remains well-formed binary transport");
-    let visible = open_ternary_program(&physical).expect("T5 source must decode");
-    let parsed = parse_canonical_binary(&visible).expect("binary syntax must parse");
-    let error = match eval_parsed_expressions(&parsed, &mut Session::default()) {
-        Err(error) => error,
-        Ok(_) => panic!("structural empty must not control D3:110 COND"),
-    };
-    assert_eq!(
-        error.kind,
-        sens::ErrorKind::Type,
-        "COND accepts only the exact D1 PredicateBit, not structural empty"
-    );
-}
-
-#[test]
-fn human_executable_spelling_never_passes_the_physical_binary_gate() {
-    for bad in ["(CONS x y)", "(define x 1)", "(100 x)", "10 0011 00 name 01"] {
-        assert!(
-            encode_binary_projection_ternary(bad).is_err(),
-            "human spelling passed as executable binary source: {bad}"
-        );
+fn human_language_spellings_never_pass_the_binary_transport_gate() {
+    for source in ["(CONS x y)", "(define x 1)", "(100 x)", "10 0011 00 name 01"] {
+        assert!(encode_binary_projection_ternary(source).is_err(),
+            "human spelling passed as binary source: {source}");
     }
 }
 
 #[test]
-fn d7_words_are_data_not_implicitly_callable_or_number() {
-    // Both words carry W7 identity; the first is an owner-reserved coordinate.
-    // Representation is still possible, but residency does not confer a call law.
-    for head in ["0100001", "0101010", "1000001"] {
-        let source = format!("10 {head} 00 1 01");
-        let physical = encode_binary_projection_ternary(&source)
-            .expect("7-bit words are mechanically representable");
-        let visible = open_ternary_program(&physical).unwrap();
-        let ast = parse_canonical_binary(&visible).unwrap();
-        let error = eval_parsed_expressions(&ast, &mut Session::default());
-        assert!(error.is_err(), "D7 data cannot become an executable domain head");
+fn exact_width_payloads_remain_distinct_across_d1_d3_d7_and_d9() {
+    let sources = ["1", "001", "0000001", "000000001"];
+    let mut coordinates = Vec::new();
+    for source in sources {
+        let parsed = parse_canonical_binary(source).expect("D1..D9 bit word parses");
+        let ExprKind::DomainIdentity(identity) = &parsed[0].kind else {
+            panic!("bit projection must remain a domain identity");
+        };
+        coordinates.push((identity.width(), identity.packed_bits()));
     }
+    assert_eq!(coordinates.iter().map(|(_, bits)| *bits).collect::<Vec<_>>(), vec![1; 4]);
+    assert_eq!(coordinates.iter().map(|(width, _)| *width).collect::<Vec<_>>(), vec![1, 3, 7, 9]);
+    for left in 0..coordinates.len() {
+        for right in (left + 1)..coordinates.len() {
+            assert_ne!(coordinates[left].0, coordinates[right].0);
+        }
+    }
+    assert!(encode_binary_projection_ternary("0000000001").is_err(),
+        "D10 must not be silently truncated into the D1..D9 T5 carrier");
+    let _ = DomainIdentity::from_source_word;
 }
 
 #[test]
-fn d10_width_is_a_coordinate_not_yet_an_admitted_t5_program_word() {
-    let coordinate = sens::domain_ladder::DomainCoordinate::new(10, 1)
-        .expect("D10 exact mechanical coordinate exists");
-    assert_eq!((coordinate.width(), coordinate.bits()), (10, 1));
-    assert!(
-        encode_binary_projection_ternary("0000000001").is_err(),
-        "D10 physical admission is forbidden until a ratified T5/D10 path exists"
-    );
+fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
+    for source in ["01", "11"] {
+        let packed = encode_binary_projection_ternary(source)
+            .expect("physical transport can encode a structurally invalid D2 word");
+        assert!(open_ternary_program(&packed).is_err(),
+            "invalid D2 control word unexpectedly opened: {source}");
+    }
+    assert!(decode_ternary_program(&[243u8]).is_err(), "invalid base-3 byte must fail closed");
+    let mut valid = encode_binary_projection_ternary("10 001 00 000 01").unwrap();
+    valid.push(242u8);
+    assert!(decode_ternary_program(&valid).is_err(), "noncanonical trailer must fail closed");
 }
