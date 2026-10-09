@@ -20,6 +20,7 @@ class StateSuffixTests(unittest.TestCase):
         r = law.evidence()
         self.assertEqual(r["exact_exhaustive_2_state_cases"], 256)
         self.assertEqual(r["exact_exhaustive_3_state_seeded_cases"], 128)
+        self.assertEqual(r["actual_owner_2034_dfa_state_pairs"], 36)
         self.assertEqual(r["ratified"], 0)
         self.assertEqual(r["selected_delta"], 0)
         self.assertEqual(r["original_executable_migrations_admitted"], 0)
