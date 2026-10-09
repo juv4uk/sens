@@ -1,0 +1,102 @@
+{
+  "schema": "d10-historical-symbolic-differentiation/v1",
+  "review_id": "MALING-1959-DIFF-01",
+  "status": "RESEARCH-ONLY-HOLD-CORE-VS-LIBRARY",
+  "selected": false,
+  "ratified": false,
+  "coordinate": null,
+  "coordinate_basis": "UNPLACED-RESEARCH-ONLY",
+  "physical_t5_authorized": false,
+  "proposed_semantic_name": "FINITE-SYMBOLIC-DIFFERENTIATION",
+  "surface_uk": "симв-диф",
+  "surface_ukr": "символьно-диференціювати",
+  "source": {
+    "author": "K. Maling",
+    "title": "The LISP Differentiation Demonstration Program",
+    "institution": "MIT Artificial Intelligence Project / Research Laboratory of Electronics",
+    "source_kind": "HISTORICAL-IMPLEMENTATION-MEMO",
+    "date_claim": "1959 (Computer History Museum archive groups it among the 1959 LISP memos; catalog does not give a day)",
+    "primary_pdf": "https://bitsavers.org/pdf/mit/ai/aim/AIM-010.pdf",
+    "archival_index": "https://softwarepreservation.computerhistory.org/LISP/lisp15_family.html",
+    "independent_catalog": "https://archive.computerhistory.org/resources/access/text/finding-aids/102703236-Stoyan/102703236-Stoyan.pdf",
+    "source_limit": "This contract is a modern bounded formalization for review; it does not claim to be a literal transcription of the 1959 program."
+  },
+  "observable_law": {
+    "input": "A finite acyclic expression tree and a target variable name.",
+    "expression_grammar": "Const(integer) | Var(name) | Add(expr,expr) | Mul(expr,expr)",
+    "output": "A finite symbolic expression tree representing the formal derivative with respect to the named variable.",
+    "rules": [
+      "D(Const(n), x) = Const(0).",
+      "D(Var(y), x) = Const(1) when y=x, otherwise Const(0).",
+      "D(Add(a,b), x) = Add(D(a,x), D(b,x)).",
+      "D(Mul(a,b), x) = Add(Mul(D(a,x), b), Mul(a, D(b,x)))."
+    ],
+    "normalization": "No simplification, term sorting, common-factor collection or canonical-normal-form claim. Output shape is the direct rule expansion.",
+    "failure": "Malformed expressions, non-integer constants, empty variable names, cyclic host objects, or a malformed target name are rejected; no host-language coercion.",
+    "mutation": "Neither input expression nor target variable is mutated."
+  },
+  "witnesses": [
+    {
+      "input": "D(Const(7), x)",
+      "expected": "Const(0)",
+      "purpose": "constant derivative"
+    },
+    {
+      "input": "D(Var(x), x)",
+      "expected": "Const(1)",
+      "purpose": "same variable"
+    },
+    {
+      "input": "D(Var(y), x)",
+      "expected": "Const(0)",
+      "purpose": "distinct variable"
+    },
+    {
+      "input": "D(Add(Var(x), Var(y)), x)",
+      "expected": "Add(Const(1), Const(0))",
+      "purpose": "sum rule"
+    },
+    {
+      "input": "D(Mul(Var(x), Var(x)), x)",
+      "expected": "Add(Mul(Const(1), Var(x)), Mul(Var(x), Const(1)))",
+      "purpose": "repeated variable/product rule"
+    }
+  ],
+  "falsifiers": [
+    "A numerical evaluator that returns only a derivative value at one point does not satisfy symbolic-expression output.",
+    "Treating Var(y) as derivative 1 when differentiating with respect to x is false.",
+    "Returning Mul(D(a),D(b)) for a product violates the product rule.",
+    "Silently simplifying output or reordering Add children violates this dossier's intentionally unsimplified output-shape contract.",
+    "Treating a finite-difference table as the same object as a formal derivative is a category error."
+  ],
+  "dedup": {
+    "exact_name_scan": "Must scan the live D1-D9 foundation and current D10 inventory at review time.",
+    "known_neighbors": [
+      "D10 finite difference / Babbage research is a sequence-to-polynomial reconstruction question, not an expression-tree derivative.",
+      "D10 Quine prime implicants is Boolean minimization, not symbolic calculus.",
+      "D10 Panini DERIVE-VERB-* candidates are staged linguistic derivations, not polynomial differentiation.",
+      "Existing evaluator, list, map and term operations may make this a derived library operation; that is an explicit HOLD, not assumed away."
+    ],
+    "semantic_minimality": "UNPROVEN — owner/peer review must decide whether this has a distinct language-visible Core law or is composition over existing D1-D9/D10 meanings."
+  },
+  "validation_plan": {
+    "python_oracle": "Direct expression rewrite checked against a separate exact integer polynomial coefficient-map derivative.",
+    "independent_runtime_oracle": "A standalone SWI-Prolog oracle implements expression differentiation and independently checks it against coefficient-map polynomial algebra.",
+    "bounded_space": "Exhaust all expression trees of height at most 2 using Const(-1), Const(0), Const(2), Var(x), Var(y); then test seeded deeper trees.",
+    "gates": [
+      "historical source metadata",
+      "live exact-name dedup",
+      "input/output and authority guards",
+      "Python unit tests",
+      "real SWI-Prolog finite cross-check"
+    ],
+    "authority_effect": "0 selected meanings, 0 D10 coordinates, 0 ratifications, 0 runtime/T5 changes"
+  },
+  "coordination": [
+    "#4013",
+    "#4463",
+    "#4977",
+    "#4998"
+  ],
+  "reviewer_state": "PENDING-OWNER-AND-PEER-REVIEW"
+}
