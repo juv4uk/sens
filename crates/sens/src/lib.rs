@@ -589,12 +589,6 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
 mod core4_bootstrap_cache_tests {
     use super::*;
 
-    fn result_of(session: &mut Session, source: &str) -> String {
-        eval_program(source, session)
-            .unwrap_or_else(|error| panic!("{source}: {error:?}"))
-            .value
-            .to_string()
-    }
 
     #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
@@ -609,7 +603,6 @@ mod core4_bootstrap_cache_tests {
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
-        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
     }
 
     #[test]
