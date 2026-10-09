@@ -348,9 +348,9 @@
           (00000111
             ((equal? (00000101 a) (00000101 b))
              (equal? (00000110 a) (00000110 b)))
-            ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))))))
+            ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))))))))
 
-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
+; Exact-Q uses 1 for YES and 0 for NO. Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
 (00001001 truthy?
   (00001000 (value)
