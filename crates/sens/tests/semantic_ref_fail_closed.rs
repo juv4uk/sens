@@ -49,7 +49,7 @@ fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
         "(d (semantic-registry-id-in reg (00000001 .?)))) ",
         "(00100111 a b c d (00100010 a a) (00100010 a b) ",
         "(00100010 b c) (00100010 c d))))"
-    ));
+    ), registry_source = registry_source);
     eprintln!("D1 SID registry DEBUG: {:?}", eval_program(&probe, &mut session)
         .map(|v| v.value.to_string()).map_err(|e| format!("{e}")));
 
