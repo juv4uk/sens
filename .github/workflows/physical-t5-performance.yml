@@ -12,6 +12,7 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/examples/t5_view_ab.rs"
       - "scripts/sens_t5_codec.py"
       - "tests/fixtures/migration-quote-cohort-main/**"
       - "tests/fixtures/migration-multiform-cohort-main/**"
@@ -23,6 +24,7 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/examples/t5_view_ab.rs"
       - "scripts/sens_t5_codec.py"
       - "tests/fixtures/migration-quote-cohort-main/**"
       - "tests/fixtures/migration-multiform-cohort-main/**"
@@ -60,6 +62,14 @@ jobs:
             --out "$RUNNER_TEMP/physical-t5-bench" \
             --warmup 4 \
             --reps 25
+
+      - name: Compare exact-width binary view renderers on the same machine
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --release -p sens --example t5_view_ab
+          target/release/examples/t5_view_ab "$RUNNER_TEMP/physical-t5-bench"
+          cat "$RUNNER_TEMP/physical-t5-bench/view-render-abba.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish measured summary
         if: always()
