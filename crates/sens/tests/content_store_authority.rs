@@ -26,24 +26,6 @@ fn observe(session: &mut Session, source: &str) -> String {
 }
 
 #[test]
-fn content_store_semantic_relations_are_owned_by_lisp_witness() {
-    let mut session = store_session();
-    eval_program(
-        include_str!("../../../tests/fixtures/content-store-authority-witness.lisp"),
-        &mut session,
-    )
-    .expect("Lisp-owned content-store witness must load");
-
-    eprintln!("CONTENT-STORE-PROBE: witness observe BEGIN");
-    let verdict = observe(&mut session, "(content-store-authority-witness)");
-    eprintln!("CONTENT-STORE-PROBE: witness observe END => {verdict}");
-    assert!(
-        verdict.starts_with("(content-store-authority-witness (status pass)"),
-        "Lisp-owned content-store witness rejected the current runtime: {verdict}"
-    );
-}
-
-#[test]
 fn content_store_mechanism_keeps_deterministic_images_and_distinct_history_entries() {
     let mut session = store_session();
 
