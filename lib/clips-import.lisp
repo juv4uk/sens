@@ -122,9 +122,9 @@
   (00001000 (form)
     (00000111
       ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
+      ((00000010 form)  (00000001 ()))
       ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 deftemplate)))
-      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 deftemplate)))
+      ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 deftemplate)))
       (t (00000001 ())))))
 
 ; Real CLIPS files namespace their deftemplate/deffacts names with a
@@ -194,7 +194,7 @@
   (00001000 (slot-forms)
     (00000111
       ((00000010 slot-forms) () (00000001 ()))
-      ((00000010 slot-forms) (1) (00000001 ()))
+      ((00000010 slot-forms)  (00000001 ()))
       (t (00000100 (clips-slot-name (00000101 slot-forms)) (clips-slot-names (00000110 slot-forms)))))))
 
 (00001001 clips-deftemplate-slots
@@ -205,7 +205,7 @@
   (00001000 (forms)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       ((clips-deftemplate-form? (00000101 forms))
        (00000100 (00000100 (clips-deftemplate-name (00000101 forms)) (clips-deftemplate-slots (00000101 forms)))
              (clips-templates-from-forms (00000110 forms))))
@@ -216,7 +216,7 @@
     (10011100 ((entry (00101101 name templates)))
       (00000111
         ((00000010 entry) () (00000001 ()))
-        ((00000010 entry) (1) (00000001 ()))
+        ((00000010 entry)  (00000001 ()))
         (t (00000110 entry))))))
 
 ; A CLIPS condition can name a multislot with no value at all, e.g.
@@ -249,7 +249,7 @@
   (00001000 (slot-form)
     (00000111
       ((00000010 (00000110 slot-form)) () (00000001 ()))
-      ((00000010 (00000110 slot-form)) (1) (00000001 ()))
+      ((00000010 (00000110 slot-form))  (00000001 ()))
       (t (00101111 slot-form)))))
 
 ; Guards with `(atom (car slot-forms))` before comparing: a well-formed
@@ -263,9 +263,9 @@
   (00001000 (slot-name slot-forms)
     (00000111
       ((00000010 slot-forms) () (00000001 ()))
-      ((00000010 slot-forms) (1) (00000001 ()))
+      ((00000010 slot-forms)  (00000001 ()))
       ((00000010 (00000101 slot-forms)) () (clips-lookup-slot-value slot-name (00000110 slot-forms)))
-      ((00000010 (00000101 slot-forms)) (1) (clips-lookup-slot-value slot-name (00000110 slot-forms)))
+      ((00000010 (00000101 slot-forms))  (clips-lookup-slot-value slot-name (00000110 slot-forms)))
       ((00100010 slot-name (00000101 (00000101 slot-forms))) (clips-slot-value-of (00000101 slot-forms)))
       (t (clips-lookup-slot-value slot-name (00000110 slot-forms))))))
 
@@ -273,7 +273,7 @@
   (00001000 (slot-order slot-forms)
     (00000111
       ((00000010 slot-order) () (00000001 ()))
-      ((00000010 slot-order) (1) (00000001 ()))
+      ((00000010 slot-order)  (00000001 ()))
       (t (00000100 (clips-lookup-slot-value (00000101 slot-order) slot-forms)
                 (clips-positional-args (00000110 slot-order) slot-forms))))))
 
@@ -327,7 +327,7 @@
                 ((00000010 slot-order) () term)
                 ((00000010 slot-order) (1) term)
                 (t (00000100 (00000101 term) (clips-positional-args slot-order (00000110 term)))))))))
-      ((00000010 (00000101 term)) (1) (00000111
+      ((00000010 (00000101 term))  (00000111
          ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not?) (clips-convert-template (00101111 term) templates)))
          ((00000011 (00000101 term) (00000001 or)) (00000100 (00000001 or) (clips-convert-template-list (00000110 term) templates)))
          ((00000011 (00000101 term) (00000001 and)) (00000100 (00000001 and) (clips-convert-template-list (00000110 term) templates)))
@@ -344,7 +344,7 @@
   (00001000 (terms templates)
     (00000111
       ((00000010 terms) () (00000001 ()))
-      ((00000010 terms) (1) (00000001 ()))
+      ((00000010 terms)  (00000001 ()))
       (t (00000100 (clips-convert-template (00000101 terms) templates)
                 (clips-convert-template-list (00000110 terms) templates))))))
 
@@ -373,7 +373,7 @@
   (00001000 (facts templates acc)
     (00000111
       ((00000010 facts) () (00101010 acc))
-      ((00000010 facts) (1) (00101010 acc))
+      ((00000010 facts)  (00101010 acc))
       (t (clips-facts->clauses-onto
            (00000110 facts) templates
            (00000100 (clips-fact-clause (clips-convert-template (00000101 facts) templates)) acc))))))
@@ -447,7 +447,7 @@
       ((00000010 term) () (00000111
          ((00100011 term) (clips-symbol-starts-with-? term))
          (t (00000001 ()))))
-      ((00000010 term) (1) (00000111
+      ((00000010 term)  (00000111
          ((00100011 term) (clips-symbol-starts-with-? term))
          (t (00000001 ()))))
       (t (00000001 ())))))
@@ -478,12 +478,12 @@
   (00001000 (body)
     (00000111
       ((00000010 body) () (00100111 (00000001 ()) (00000001 ())))
-      ((00000010 body) (1) (00100111 (00000001 ()) (00000001 ())))
+      ((00000010 body)  (00100111 (00000001 ()) (00000001 ())))
       ((00000010 (00000101 body)) () (00000111
          ((00000011 (00000101 body) (00000001 =>)) (00100111 (00000001 ()) (00000110 body)))
          (t (10011100 ((rest (clips-split-at-arrow (00000110 body))))
               (00100111 (00000100 (00000101 body) (00000101 rest)) (00101111 rest))))))
-      ((00000010 (00000101 body)) (1) (00000111
+      ((00000010 (00000101 body))  (00000111
          ((00000011 (00000101 body) (00000001 =>)) (00100111 (00000001 ()) (00000110 body)))
          (t (10011100 ((rest (clips-split-at-arrow (00000110 body))))
               (00100111 (00000100 (00000101 body) (00000101 rest)) (00101111 rest))))))
@@ -530,9 +530,9 @@
   (00001000 (form)
     (00000111
       ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
+      ((00000010 form)  (00000001 ()))
       ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 assert)))
-      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 assert)))
+      ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 assert)))
       (t (00000001 ())))))
 
 ; Step 9: `printout` alongside `assert` no longer disqualifies a whole
@@ -598,16 +598,16 @@
   (00001000 (form)
     (00000111
       ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
+      ((00000010 form)  (00000001 ()))
       ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 printout)))
-      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 printout)))
+      ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 printout)))
       (t (00000001 ())))))
 
 (00001001 clips-drop-printouts
   (00001000 (forms)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       ((clips-printout-form? (00000101 forms)) (clips-drop-printouts (00000110 forms)))
       (t (00000100 (00000101 forms) (clips-drop-printouts (00000110 forms)))))))
 
@@ -662,14 +662,14 @@
   (00001000 (forms)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       (t (00101001 (00000110 (00000101 forms)) (clips-assert-conclusions (00000110 forms)))))))
 
 (00001001 clips-clauses-for-conclusions
   (00001000 (conclusions conditions)
     (00000111
       ((00000010 conclusions) () (00000001 ()))
-      ((00000010 conclusions) (1) (00000001 ()))
+      ((00000010 conclusions)  (00000001 ()))
       (t (00000100 (00000100 (clips-convert-vars (00000101 conclusions)) conditions)
                 (clips-clauses-for-conclusions (00000110 conclusions) conditions))))))
 
@@ -772,9 +772,9 @@
     (00000111
       ((00100100 form) t)
       ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
+      ((00000010 form)  (00000001 ()))
       ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 declare)))
-      ((00000010 (00000101 form)) (1) (00000011 (00000101 form) (00000001 declare)))
+      ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 declare)))
       (t (00000001 ())))))
 
 (00001001 clips-strip-rule-preamble
@@ -879,7 +879,7 @@
   (00001000 (forms templates acc)
     (00000111
       ((00000010 forms) () (00101010 acc))
-      ((00000010 forms) (1) (00101010 acc))
+      ((00000010 forms)  (00101010 acc))
       (t (clips-import-forms-onto
            (00000110 forms) templates
            (clips-cons-each-onto (clips-form->clauses (00000101 forms) templates) acc))))))
