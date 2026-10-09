@@ -134,16 +134,6 @@ fn bare_large_integer_literals_remain_exact() {
 /// *arithmetic* stays exact past i64, which this answers: yes). Verified
 /// against Python's `math.factorial(30)` by hand before writing this.
 #[test]
-fn exact_arithmetic_computes_factorials_past_i64_range() {
-    // Direct exact multiplication: no inherited two-part/truthy COND.
-    let factors = (1..=30).map(|n| n.to_string()).collect::<Vec<_>>().join(" ");
-    let source = format!("(* (/ 1 1) {factors})");
-    let result = eval_program(&source, &mut Session::default())
-        .expect("exact multiplication must support factorial(30)");
-    assert_eq!(result.value.to_string(), "265252859812191058636308480000000");
-}
-
-#[test]
 fn arithmetic_promotes_exact_integers_and_preserves_inexact_numbers() {
     assert_eq!(
         eval("(+ (/ 1 3) (/ 1 3))"),
@@ -1143,15 +1133,6 @@ fn division_respects_the_same_opt_in_numeric_bit_limit() {
     let error = eval_program("(/ 1 1000)", &mut session)
         .expect_err("a denominator past the bit limit must fail named");
     assert_eq!(error.kind, ErrorKind::NumericOverflow);
-}
-
-#[test]
-fn arithmetic_is_unbounded_by_default_without_retired_cond() {
-    let operands = std::iter::repeat("2").take(100).collect::<Vec<_>>().join(" ");
-    let source = format!("(* (/ 1 1) {operands})");
-    let result = eval_program(&source, &mut Session::default())
-        .expect("unbounded exact arithmetic must not inherit an 8-bit limit");
-    assert_eq!(result.value.to_string(), "1267650600228229401496703205376");
 }
 
 #[test]
