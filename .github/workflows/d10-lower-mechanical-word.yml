@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'knowledge/d10-lower-mechanical-word-research-v1.json'
+      - 'knowledge/d10-user-interests-semantics-triage-v1.json'
       - 'scripts/check_d10_lower_mechanical_word.py'
       - 'tests/test_d10_lower_mechanical_word.py'
       - 'tests/d10_lower_mechanical_word_chez.ss'
@@ -11,6 +12,7 @@ on:
   pull_request:
     paths:
       - 'knowledge/d10-lower-mechanical-word-research-v1.json'
+      - 'knowledge/d10-user-interests-semantics-triage-v1.json'
       - 'scripts/check_d10_lower_mechanical_word.py'
       - 'tests/test_d10_lower_mechanical_word.py'
       - 'tests/d10_lower_mechanical_word_chez.ss'
