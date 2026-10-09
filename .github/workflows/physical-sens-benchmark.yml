@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - "benchmarks/physical-sens-runtime/**"
+      - "crates/sens/examples/physical_sens_hot_bench.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/src/main.rs"
       - "crates/sens/src/ternary_transport.rs"
@@ -42,6 +43,9 @@ jobs:
       - name: Compile actual production release entrypoints
         run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
 
+      - name: Compile hot canonical D2 and evaluation phase probe
+        run: cargo build --locked --release -p sens --example physical_sens_hot_bench
+
       - name: Measure physical binary workloads and identical-byte T5 decoders
         shell: bash
         run: |
@@ -52,12 +56,24 @@ jobs:
             --reps 19 --warmups 3 --sizes 1,16,128,1024 \
             --out "$RUNNER_TEMP/sens-physical-bench"
 
+      - name: Measure hot in-process T5, D2 and execution without startup
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/hot.py \
+            --binary target/release/examples/physical_sens_hot_bench \
+            --sizes 1,16,128,1024 --samples 11 --work-budget 65536 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
       - name: Publish exact measurements (not unit-test tallies)
         if: always()
         shell: bash
         run: |
           if test -s "$RUNNER_TEMP/sens-physical-bench/report.md"; then
             cat "$RUNNER_TEMP/sens-physical-bench/report.md" >> "$GITHUB_STEP_SUMMARY"
+            if test -s "$RUNNER_TEMP/sens-physical-bench/hot-report.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/hot-report.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
           else
             echo 'Benchmark did not finish. No performance claim from this run.' >> "$GITHUB_STEP_SUMMARY"
           fi
