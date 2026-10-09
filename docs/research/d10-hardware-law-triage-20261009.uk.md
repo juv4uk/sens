@@ -115,3 +115,14 @@ Already accounted in `wsm-os-lisp#74`: MMIO-CAPABILITY, MMIO-READ/WRITE, PCI-CON
 - Owner ratifies *after* independent evidence and growth-gate, not after naming these proposals.
 
 **Result of this document:** seven explicit HW research claims, a dedup/ownership roadmap, zero new D10 selected IDs, no edits to ratified core or main.
+## 7. Executable reference witnesses (not SENS parity)
+
+A separate **pure Python / stdlib** mathematical reference is committed on the same research branch at `tests/test_d10_hardware_reference_20261009.py`. It contains 11 `unittest` cases for the seven claims above: expected values, counterexamples, invalid-domain rejections, a bounded GF(2) degree invariant, and a **sequential-only** two-CAS-contenders consistency check.
+
+Reproduction:
+
+```sh
+python3 -m unittest discover -s tests -p 'test_d10_hardware_reference_20261009.py' -v
+```
+
+This reference was locally run with 11/11 tests passing on 2026-10-09; it is **not** a Chez/SWI/Z3 oracle, **not** a concurrent CAS linearizability proof, **not** an actual SENS implementation, and **not** proof of QEMU/GPU/FPGA parity. Those are the independent next evidence gates. No other D10 state or ledger files are changed by this package.
