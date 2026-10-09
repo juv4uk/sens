@@ -1,0 +1,25 @@
+name: Replay D4 APPLY EVAL standalone proof
+
+on:
+  push:
+    branches:
+      - replay/research-d4-apply-eval-current-20261009
+  pull_request:
+    paths:
+      - "crates/sens/tests/d4_eval_apply_probe.rs"
+      - ".github/workflows/d4-eval-apply-probe.yml"
+      - ".github/workflows/replay-d4-apply-eval-standalone.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Reproduce historical independent oracle
+        run: cargo test -p sens --test d4_eval_apply_probe -- --nocapture
