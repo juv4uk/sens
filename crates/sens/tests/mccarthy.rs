@@ -408,7 +408,8 @@ fn lexical_child_reads_parent_without_mutating_it() {
     let parent = sens::Environment::root();
     let child = parent.child();
     child.define("station", Value::Symbol("UR5ABC".into()));
-    assert_eq!(child.get("t"), Some(Value::Symbol("t".into())));
+    parent.define("shared", Value::Symbol("inherited".into()));
+    assert_eq!(child.get("shared"), Some(Value::Symbol("inherited".into())));
     assert_eq!(parent.get("station"), None);
 }
 
@@ -1258,10 +1259,6 @@ fn core_session() -> Session {
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("core library should load");
     session
-}
-
-fn eval_core(source: &str) -> Value {
-    eval_program(source, &mut core_session()).unwrap().value
 }
 
 
