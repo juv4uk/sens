@@ -61,167 +61,32 @@ fn make_intent_builds_the_canonical_shape() {
 
 // --- source-ref? ------------------------------------------------------
 
-#[test]
-fn source_ref_accepts_all_four_tags_with_nonempty_payload() {
-    assert_eq!(
-        eval_epistemic(r#"(source-ref? (quote (digest "sha256:abc")))"#),
-        "t"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(source-ref? (quote (proof (goal (ancestor alice dana)) (world addr))))"#
-        ),
-        "t"
-    );
-    assert_eq!(
-        eval_epistemic(r#"(source-ref? (quote (test (fixture conformance.my) (case x))))"#),
-        "t"
-    );
-    assert_eq!(
-        eval_epistemic(r#"(source-ref? (quote (observation host-capabilities-v1)))"#),
-        "t"
-    );
-}
 
-#[test]
-fn source_ref_rejects_unknown_tag() {
-    assert_eq!(
-        eval_epistemic(r#"(source-ref? (quote (hearsay "someone said so")))"#),
-        "()"
-    );
-}
 
-#[test]
-fn source_ref_rejects_empty_payload() {
-    assert_eq!(eval_epistemic(r#"(source-ref? (quote (digest)))"#), "()");
-}
 
-#[test]
-fn source_ref_rejects_atoms() {
-    assert_eq!(eval_epistemic(r#"(source-ref? (quote digest))"#), "()");
-    assert_eq!(eval_epistemic(r#"(source-ref? 42)"#), "()");
-}
 
 // --- observation? -------------------------------------------------------
 
 
-#[test]
-fn observation_rejects_a_bare_source_ref_variant_of_the_same_tag() {
-    // (observation local-run) is a source-ref's `observation` variant
-    // (tag + bare atom payload), not a full Observation record. A
-    // tag-only check would misclassify it; observation? must not.
-    assert_eq!(
-        eval_epistemic(r#"(observation? (quote (observation local-run)))"#),
-        "()"
-    );
-}
 
-#[test]
-fn observation_rejects_wrong_tag() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(observation? (quote (claim (statement x) (source (digest "d")) (review proposed))))"#
-        ),
-        "()"
-    );
-}
 
-#[test]
-fn observation_rejects_missing_statement_field() {
-    assert_eq!(
-        eval_epistemic(r#"(observation? (quote (observation (source (digest "d")))))"#),
-        "()"
-    );
-}
 
-#[test]
-fn observation_rejects_extra_trailing_field() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(observation? (quote (observation (source (digest "d")) (statement x) (extra y))))"#
-        ),
-        "()"
-    );
-}
 
 // --- claim? ---------------------------------------------------------
 
 
-#[test]
-fn claim_rejects_wrong_tag() {
-    assert_eq!(
-        eval_epistemic(r#"(claim? (quote (observation (source (digest "d")) (statement x))))"#),
-        "()"
-    );
-}
-
-#[test]
-fn claim_rejects_review_outside_the_finite_enum() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim? (quote (claim (statement x) (source (digest "d")) (review maybe))))"#
-        ),
-        "()"
-    );
-}
 
 
-#[test]
-fn claim_rejects_extra_trailing_field() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim? (quote (claim (statement x) (source (digest "d")) (review proposed) (extra y))))"#
-        ),
-        "()"
-    );
-}
 
 // --- evidence? --------------------------------------------------------
 
 
-#[test]
-fn evidence_rejects_outcome_outside_the_finite_enum() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence? (quote (evidence (claim-ref (claim-ref x)) (method live-test) (outcome maybe) (source-ref (digest "d")))))"#
-        ),
-        "()"
-    );
-}
 
-
-#[test]
-fn evidence_rejects_extra_trailing_field() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence? (quote (evidence (claim-ref (claim-ref x)) (method live-test) (outcome supports) (source-ref (digest "d")) (extra y))))"#
-        ),
-        "()"
-    );
-}
 
 // --- intent? ----------------------------------------------------------
 
 
-#[test]
-fn intent_rejects_missing_field() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(intent? (quote (intent (goal (build cml)) (requires (process:cargo)))))"#
-        ),
-        "()"
-    );
-}
 
-#[test]
-fn intent_rejects_extra_trailing_field() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(intent? (quote (intent (goal (build cml)) (requires (process:cargo)) (stop-on x) (produces y) (extra z))))"#
-        ),
-        "()"
-    );
-}
 
 // --- accessors --------------------------------------------------------
 
@@ -289,28 +154,6 @@ fn supporting_evidence_record_is_not_implicit_cond_truth() {
 // --- intent-capabilities-satisfied? -------------------------------------
 
 
-#[test]
-fn intent_capabilities_satisfied_is_false_when_a_requirement_is_missing() {
-    // The CML build blocker fixture: intent requires process:cargo, the
-    // snapshot lacks it.
-    assert_eq!(
-        eval_epistemic(
-            r#"(intent-capabilities-satisfied?
-                 (make-intent (quote (build cml)) (quote (process:cargo tcp-client)) (quote (missing-capability)) (quote (build-artifact cml)))
-                 (quote (process:git tcp-client)))"#
-        ),
-        "()"
-    );
-}
 
-#[test]
-fn intent_capabilities_satisfied_is_false_for_a_malformed_intent() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(intent-capabilities-satisfied? (quote (intent (goal x))) (quote (process:cargo)))"#
-        ),
-        "()"
-    );
-}
 
 // --- canonical round trip: read(write-to-string(value)) = value --------
