@@ -9,6 +9,7 @@ import json
 import hashlib
 from pathlib import Path
 import re
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LEDGER = ROOT / "knowledge" / "d10-proposal-ledger.tsv"
@@ -158,6 +159,90 @@ def selection_trace_errors(content: str, inventory: dict, baseline: dict, histor
 
 
 
+
+def git_file(ref: str, path: str) -> str:
+    """Read a versioned file from the trusted base commit."""
+    run = subprocess.run(
+        ["git", "show", f"{ref}:{path}"],
+        cwd=ROOT, text=True, capture_output=True, check=False,
+    )
+    if run.returncode != 0:
+        raise ValueError(f"cannot read {ref}:{path}: {run.stderr.strip()}")
+    return run.stdout
+
+
+def append_only_errors(before: str, after: str) -> list[str]:
+    """Require byte-for-byte preservation of the existing ledger prefix."""
+    if not after.startswith(before):
+        return ["D10 proposal ledger is not append-only: existing bytes changed"]
+    return []
+
+
+def inventory_transition_errors(before: dict, after: dict) -> list[str]:
+    """An inventory update may append rows, never rewrite any existing identity."""
+    old_rows = before.get("rows", [])
+    new_rows = after.get("rows", [])
+    if not isinstance(old_rows, list) or not isinstance(new_rows, list):
+        return ["D10 inventory rows must be lists"]
+    if len(new_rows) < len(old_rows):
+        return ["D10 selected inventory shrank relative to the base"]
+    protected = (
+        "stable_id", "semantic_name", "source_class", "relation_class",
+        "behavior", "coordinate", "coordinate_basis", "ratified_resident",
+        "surface_uk", "surface_ukr",
+    )
+    for index, old in enumerate(old_rows):
+        new = new_rows[index]
+        for field in protected:
+            if old.get(field) != new.get(field):
+                return [f"existing D10 identity rewritten at row {index}: {field}"]
+    return []
+
+
+def new_selection_contract_errors(before: dict, after: dict, ledger_content: str) -> list[str]:
+    """Bind newly selected rows to exact law/surfaces; preserve already-audited rows.
+
+    Existing post-625 selections predate byte-exact law matching and contain
+    human-language paraphrases. Those rows remain immutable and are covered
+    by selection_trace_errors; exact semantic_law matching starts with newly
+    selected rows in this PR/push.
+    """
+    old_rows = before.get("rows", [])
+    new_rows = after.get("rows", [])
+    if not isinstance(old_rows, list) or not isinstance(new_rows, list):
+        return ["D10 inventory rows must be lists"]
+    if len(new_rows) < len(old_rows):
+        return ["D10 selected inventory shrank relative to the base"]
+
+    ledger = list(csv.DictReader(io.StringIO(ledger_content), delimiter="\t"))
+    proposals: dict[str, dict] = {}
+    for entry in ledger:
+        name = str(entry.get("semantic_name", "")).strip().casefold()
+        if name:
+            proposals[name] = entry
+
+    errors: list[str] = []
+    for selected in new_rows[len(old_rows):]:
+        name = str(selected.get("semantic_name", "")).strip()
+        entry = proposals.get(name.casefold())
+        if entry is None:
+            errors.append(f"{name}: new SELECTED row has no proposal-ledger entry")
+            continue
+        if entry.get("semantic_law") != selected.get("behavior"):
+            errors.append(f"{name}: new semantic_law must exactly match inventory behavior")
+        for field in ("surface_uk", "surface_ukr"):
+            surface = selected.get(field)
+            if surface and entry.get(field) != surface:
+                errors.append(f"{name}: new {field} differs from inventory")
+        if entry.get("status") != "pending-review" or entry.get("ratified") != "0":
+            errors.append(f"{name}: new ledger row must remain pending-review with ratified=0")
+        if (selected.get("coordinate") is not None
+                or selected.get("ratified_resident") is not False
+                or selected.get("status") != "SELECTED-RESEARCH-CANDIDATE"):
+            errors.append(f"{name}: new selection must remain unplaced and research-only")
+    return errors
+
+
 def inventory_projection_errors(inventory: dict, document: str) -> list[str]:
     """Keep Archipelago's human counts in sync with machine D10 authority."""
     accounting = inventory.get("accounting")
@@ -261,6 +346,7 @@ ratified                    0
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ledger", type=Path, default=DEFAULT_LEDGER)
+    parser.add_argument("--base-ref", default="", help="trusted Git ref before this PR/push")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -287,7 +373,21 @@ def main() -> int:
     except (OSError, ValueError) as exc:
         print(f"D10-PROPOSAL-LEDGER: BLOCK missing immutable growth history: {exc}")
         return 1
-    trace_errors = selection_trace_errors(args.ledger.read_text(encoding="utf-8"), inventory, baseline, history)
+    ledger_content = args.ledger.read_text(encoding="utf-8")
+    trace_errors = selection_trace_errors(ledger_content, inventory, baseline, history)
+    if args.base_ref:
+        try:
+            ledger_path = args.ledger.resolve().relative_to(ROOT.resolve()).as_posix()
+            before_ledger = git_file(args.base_ref, ledger_path)
+            before_inventory = json.loads(
+                git_file(args.base_ref, "knowledge/d10-v1-semantic-inventory.json")
+            )
+            trace_errors.extend(append_only_errors(before_ledger, ledger_content))
+            trace_errors.extend(inventory_transition_errors(before_inventory, inventory))
+            trace_errors.extend(new_selection_contract_errors(before_inventory, inventory, ledger_content))
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"D10-PROPOSAL-LEDGER: BLOCK cannot verify base transition: {exc}")
+            return 1
     inventory_bytes = inventory_path.read_bytes()
     actual_blob = hashlib.sha1(b"blob " + str(len(inventory_bytes)).encode("ascii") + b"\0" + inventory_bytes).hexdigest()
     expected_blob = history["transitions"][-1]["resulting_inventory_blob_sha"] if history["transitions"] else baseline["origin_inventory_git_blob"]
