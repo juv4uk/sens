@@ -68,21 +68,37 @@
 ; Convert one authoritative conformance row into the current expected-outcome
 ; envelope. A non-empty supersession record wins over the historical expected
 ; field; otherwise the row is interpreted exactly as committed.
+; A witness field is absent only when the alist lookup returned structural
+; EMPTY. Atom/cons classifications themselves are result data, NOT truth.
+; This helper yields ordinary Lisp-owned presence tags, no new D1 semantics.
+(00001001 witness-field-presence
+  (00001000 (value)
+    (00000111
+      ((00000010 value) () (00000001 absent))
+      ((00000010 value) (1) (00000001 present))
+      ((00000010 value) (0) (00000001 present)))))
+
+; Select exactly one outcome class by explicit data equality. Legacy
+; truthiness OR/NOT, numeric 0/1 wrappers and silent fallback are forbidden.
 (00001001 witness-expected-outcome
   (00001000 (witness)
-    (10011100 ((expected-entry (00101101 (00000001 expected) witness))
-          (error-entry (00101101 (00000001 error) witness)))
+    (10011100 ((expected-entry (witness-field (00000001 expected) witness))
+          (error-entry (witness-field (00000001 error) witness)))
       (10011100 ((superseded (witness-superseded-outcome witness expected-entry)))
         (00000111
-          ((00000010 superseded) (0) superseded)
-          ((10011010 expected-entry error-entry)
-           (00100111 (00000001 malformed) (00000001 expected-and-error)))
-          ((10011010 (00100001 (10110001 (00000010 expected-entry))) (00100001 (10110001 (00000010 error-entry))))
-           (00100111 (00000001 malformed) (00000001 missing-outcome)))
-          (expected-entry
-           (00100111 (00000001 value) (00000110 expected-entry)))
-          (t
-           (00100111 (00000001 error) (00000110 error-entry))))))))
+          ((witness-field-presence superseded) present superseded)
+          ((witness-field-presence expected-entry) present
+           (00000111
+             ((witness-field-presence error-entry) present
+              (00100111 (00000001 malformed) (00000001 expected-and-error)))
+             ((witness-field-presence error-entry) absent
+              (00100111 (00000001 value) expected-entry))))
+          ((witness-field-presence expected-entry) absent
+           (00000111
+             ((witness-field-presence error-entry) present
+              (00100111 (00000001 error) error-entry))
+             ((witness-field-presence error-entry) absent
+              (00100111 (00000001 malformed) (00000001 missing-outcome))))))))))
 
 ; The normative comparator. Backends provide ACTUAL only. Expected authority is
 ; read/derived above in Lisp.
