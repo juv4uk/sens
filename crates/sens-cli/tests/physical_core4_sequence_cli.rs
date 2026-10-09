@@ -1,7 +1,8 @@
 //! CLI-level physical T5 execution of already Lisp-owned Core4 mechanisms.
 //!
-//! Stack on opt-in sens-trit eval-core4. No replacement Rust LIST/APPEND
-//! primitive, no new domain resident, no original binary publication.
+//! D4 LIST/APPEND are already ratified pure exact-domain mechanisms;
+//! compare direct physical eval against the explicitly bootstrapped Core4
+//! mode without claiming a new resident or historical binary migration.
 use std::{
     fs,
     path::PathBuf,
@@ -48,7 +49,7 @@ fn error(output: &Output) -> String {
 }
 
 #[test]
-fn public_core4_bootstrap_enables_ratified_list_but_not_implicit_eval() {
+fn public_ratified_d4_list_runs_from_pure_physical_t5_without_core4_bootstrap() {
     // D4:1110 LIST(D3:001 QUOTE(D3:000 EMPTY)).
     let physical = PhysicalT5::from_exact("10 1110 00 10 001 00 000 01 01");
     let opened = physical.cli("open");
@@ -56,9 +57,11 @@ fn public_core4_bootstrap_enables_ratified_list_but_not_implicit_eval() {
     assert_eq!(observed(&opened).trim(), "10 1110 00 10 001 00 000 01 01");
 
     let bare = physical.cli("eval");
-    assert!(!bare.status.success(), "bare eval must not implicitly bootstrap Core4");
-    assert!(error(&bare).contains("1110"), "unexpected bare LIST error: {}", error(&bare));
+    assert!(bare.status.success(), "ratified D4:1110 LIST is a pure exact-domain mechanism: {}", error(&bare));
+    assert_eq!(observed(&bare).trim(), "(())");
 
+    // Optional Core4 bootstrap may supply additional language closures, but
+    // may not rewrite the already-ratified D4 LIST identity or its result.
     let bootstrapped = physical.cli("eval-core4");
     assert!(bootstrapped.status.success(), "{}", error(&bootstrapped));
     assert_eq!(observed(&bootstrapped).trim(), "(())");
@@ -71,7 +74,8 @@ fn public_core4_append_uses_existing_lisp_owned_sequence_law() {
         "10 1111 00 10 1110 00 10 001 00 000 01 01 00 10 1110 00 10 001 00 000 01 01 01";
     let physical = PhysicalT5::from_exact(exact);
     let bare = physical.cli("eval");
-    assert!(!bare.status.success(), "bare eval must not auto-enable D4 APPEND");
+    assert!(bare.status.success(), "ratified D4:1111 APPEND must execute without host bootstrap: {}", error(&bare));
+    assert_eq!(observed(&bare).trim(), "(() ())");
     let current = physical.cli("eval-core4");
     assert!(current.status.success(), "{}", error(&current));
     assert_eq!(observed(&current).trim(), "(() ())");
