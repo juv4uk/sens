@@ -1,0 +1,317 @@
+{
+  "schema": "d10-clhs-ch19-filenames-census/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-CENSUS-NOT-SELECTED",
+  "authority": [
+    "#4896",
+    "#4897",
+    "#4013",
+    "#4463"
+  ],
+  "source": {
+    "title": "ANSI Common Lisp / CLHS §19.4 Dictionary of Filenames",
+    "dictionary_url": "https://franz.com/support/documentation/10.1/ansicl/section/diction5.htm",
+    "background_url": "https://www.lispworks.com/documentation/HyperSpec/Body/19_ab.htm",
+    "merge_url": "https://franz.com/support/documentation/ansicl.94/dictentr/merge-pa.htm",
+    "match_url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_pn_mat.htm",
+    "enough_url": "https://examples.franz.com/support/documentation/ansicl/dictentr/namestri.htm",
+    "make_url": "https://franz.com/support/documentation/10.0/ansicl/dictentr/make-pat.htm"
+  },
+  "snapshot": {
+    "D10_inventory_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "D1_D9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "selected": 630,
+    "ratified": 0
+  },
+  "counting": {
+    "dictionary_positions": 17,
+    "name_kind_entries": 26,
+    "unique_source_names": 24,
+    "exact_D1_D9_matches": 0,
+    "exact_D10_matches": 0,
+    "selected_additions": 0,
+    "ratified_additions": 0,
+    "assigned_coordinates": 0
+  },
+  "roles": [
+    {
+      "clhs_section": "19.4.1",
+      "source_name": "PATHNAME",
+      "source_kind": "system-class",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "TYPE-NOT-AUTOMATIC-RESIDENT",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.2",
+      "source_name": "LOGICAL-PATHNAME",
+      "source_kind": "system-class",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "TYPE-NOT-AUTOMATIC-RESIDENT",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.3",
+      "source_name": "PATHNAME",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.4",
+      "source_name": "MAKE-PATHNAME",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.5",
+      "source_name": "PATHNAMEP",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.6",
+      "source_name": "PATHNAME-HOST",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.6",
+      "source_name": "PATHNAME-DEVICE",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.6",
+      "source_name": "PATHNAME-DIRECTORY",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.6",
+      "source_name": "PATHNAME-NAME",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.6",
+      "source_name": "PATHNAME-TYPE",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.6",
+      "source_name": "PATHNAME-VERSION",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.7",
+      "source_name": "LOAD-LOGICAL-PATHNAME-TRANSLATIONS",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-EXTERNAL-IO",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.8",
+      "source_name": "LOGICAL-PATHNAME-TRANSLATIONS",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.9",
+      "source_name": "LOGICAL-PATHNAME",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.10",
+      "source_name": "*DEFAULT-PATHNAME-DEFAULTS*",
+      "source_kind": "special-variable",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-DYNAMIC-HOST-STATE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.11",
+      "source_name": "NAMESTRING",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.11",
+      "source_name": "FILE-NAMESTRING",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.11",
+      "source_name": "DIRECTORY-NAMESTRING",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.11",
+      "source_name": "HOST-NAMESTRING",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.11",
+      "source_name": "ENOUGH-NAMESTRING",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.12",
+      "source_name": "PARSE-NAMESTRING",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.13",
+      "source_name": "WILD-PATHNAME-P",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.14",
+      "source_name": "PATHNAME-MATCH-P",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.15",
+      "source_name": "TRANSLATE-LOGICAL-PATHNAME",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.16",
+      "source_name": "TRANSLATE-PATHNAME",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "HOLD-IMPLEMENTATION-DEFINED",
+      "candidate_automatic": false
+    },
+    {
+      "clhs_section": "19.4.17",
+      "source_name": "MERGE-PATHNAMES",
+      "source_kind": "function",
+      "exact_name_in_ratified_D1_D9": false,
+      "exact_name_in_selected_D10": false,
+      "triage": "REVIEW-PURE-VALUE",
+      "candidate_automatic": false
+    }
+  ],
+  "deep_review": [
+    {
+      "name": "MERGE-PATHNAMES",
+      "status": "HOLD-BEHAVIORAL-REVIEW",
+      "pure_scope": "Constructed component-value merge, no file access",
+      "behavior": "Fill unspecified name/type/host/device/version from explicit defaults; relative directory values concatenate with default directory, preserving component semantics.",
+      "tests": [
+        "Explicit (:absolute \"science\") base + (:relative \"trial\") filename gives directory (:absolute \"science\" \"trial\")",
+        "If pathname specifies name but not type, defaults supply type; existing path name takes precedence"
+      ],
+      "falsifier": "Returning default name when input name supplied or dropping relative directory element.",
+      "dedup": "Compare with D10 existing data/path composition, no exact name matched only; NOT proof of independence."
+    },
+    {
+      "name": "PATHNAME-MATCH-P",
+      "status": "HOLD-IMPLEMENTATION-DEFINED",
+      "pure_scope": "Two explicit constructed pathname objects only",
+      "behavior": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined.",
+      "tests": [
+        "Nonwild name 'tone' matches :wild name in second argument",
+        "First argument wild :name does not match a concrete 'tone' in second argument"
+      ],
+      "falsifier": "Treating pathname-match-p as symmetric or assuming cross-host wildcard syntax.",
+      "dedup": "Potential derived component-wise matcher and implementation-defined behavior; cannot SELECT generic host-specific algorithm."
+    },
+    {
+      "name": "ENOUGH-NAMESTRING",
+      "status": "HOLD-IMPLEMENTATION-DEFINED",
+      "pure_scope": "Reconstruction equivalence relative to explicit default path, not any exact rendered string",
+      "behavior": "For any given pathname/defaults, merging enough-namestring representation with defaults must equal merging original pathname with defaults, modulo pathname equality.",
+      "tests": [
+        "Express output for same explicit pathname/default directory without requiring host spelling",
+        "Round-trip through parse-namestring + merge with defaults reconstructs same path"
+      ],
+      "falsifier": "Hard-code Unix slash syntax as a universal semantic law.",
+      "dedup": "Likely projection derived from pathname components; no independent generic resident yet."
+    }
+  ],
+  "limits": [
+    "No D10 selected inventory, proposal ledger, growth gate, historical SHA or ratification changes.",
+    "Type entries, special variables, implementation-defined host parsing, platform filesystem I/O are not core semantic laws by their existence.",
+    "First 17-dictionary-position census is complete for §19.4 only; no claim of full CLHS completion.",
+    "SBCL execution can independently confirm ANSI observable aspects, but does not make host-specific pathname parsing portable.",
+    "D2 solely owns source structure; no new D2 syntax, D7 text, or T5 carrier."
+  ]
+}
