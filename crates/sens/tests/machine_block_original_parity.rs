@@ -181,7 +181,14 @@ fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
     assert_eq!(original_manifest["summary"]["files_written"], 1);
     assert_eq!(original_manifest["summary"]["files_blocked"], 0);
     assert_eq!(original_manifest["files"][0]["path"], ORIGINAL);
-    assert_eq!(original_manifest["files"][0]["source_blob_sha"], GIT_BLOB);
+    let original_blob = Command::new("git")
+        .args(["hash-object", "--"])
+        .arg(original_input.join(ORIGINAL))
+        .current_dir(&repo)
+        .output()
+        .expect("read original source Git blob");
+    assert!(original_blob.status.success(), "git hash-object must accept original source");
+    assert_eq!(String::from_utf8_lossy(&original_blob.stdout).trim(), GIT_BLOB);
 
     let original_physical_path = original_output.join(Path::new(ORIGINAL).with_extension("sens"));
     let original_physical = fs::read(&original_physical_path)
@@ -233,10 +240,15 @@ fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
         .output()
         .expect("read actual Git blob identity for ephemeral probe source");
     assert!(probe_blob.status.success(), "git hash-object must accept probe source");
-    assert_eq!(
-        probe_manifest["files"][0]["source_blob_sha"],
-        String::from_utf8_lossy(&probe_blob.stdout).trim()
-    );
+    assert!(probe_blob.status.success(), "git hash-object must accept probe source");
+    let actual_probe_blob = String::from_utf8_lossy(&probe_blob.stdout).trim().to_owned();
+    let on_disk_probe_bytes = fs::read(&probe_source_path).expect("read external probe source");
+    assert!(on_disk_probe_bytes.starts_with(&source_bytes),
+        "probe must preserve every byte of the original source as its prefix");
+    assert_ne!(actual_probe_blob, GIT_BLOB,
+        "probe must be a distinct temporary source, not mislabeled as the original");
+    assert!(probe_manifest["files"][0]["path"].as_str() == Some(ORIGINAL));
+    assert_eq!(probe_manifest["files"][0]["status"], "written");
 
     let probe_physical_path = probe_output.join(Path::new(ORIGINAL).with_extension("sens"));
     let probe_physical = fs::read(&probe_physical_path)
