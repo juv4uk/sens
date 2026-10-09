@@ -177,6 +177,56 @@ fn assert_clean(label: &str, files: &[(String, PathBuf)], language: bool) {
     }
 }
 
+/// Owner canonical human Ukrainian compiler .lisp: the legacy
+/// sens-to-sens tool is not authorized to rewrite these heads into SID8.
+/// Prove actual 51 D4 DEFINE/LAMBDA AST identities instead. This is neither
+/// physical .sens creation nor independent executable oracle admission.
+fn verify_ukrainian_compiler_heads(source: &str) -> Result<(), String> {
+    if source.matches("(визначити").count() != 51
+        || source.matches("(функція").count() != 51
+        || source.contains("(0011 ")
+        || source.contains("(0010 ")
+    {
+        return Err("expected 51 canonical Ukrainian compiler definitions and lambdas".into());
+    }
+    let forms = sens::parse_mixed_exact_domain(source)
+        .map_err(|error| format!("exact source parser BLOCKED: {error}"))?;
+    if forms.len() != 51 {
+        return Err(format!("expected 51 compiler forms, got {}", forms.len()));
+    }
+    for (i, form) in forms.iter().enumerate() {
+        let sens::ExprKind::List(definition) = &form.kind else {
+            return Err(format!("compiler definition {i}: missing D2 list"));
+        };
+        if definition.len() != 3
+            || !matches!(&definition[0].kind, sens::ExprKind::DomainIdentity(id)
+                if id.width() == 4 && id.packed_bits() == 0b0011)
+        {
+            return Err(format!("compiler definition {i}: not exact D4 DEFINE"));
+        }
+        if matches!(&definition[1].kind, sens::ExprKind::DomainIdentity(_) | sens::ExprKind::Sid(_)) {
+            return Err(format!("compiler definition {i}: binder retyped as callable"));
+        }
+        let sens::ExprKind::List(lambda) = &definition[2].kind else {
+            return Err(format!("compiler definition {i}: missing lambda"));
+        };
+        if lambda.len() < 3
+            || !matches!(&lambda[0].kind, sens::ExprKind::DomainIdentity(id)
+                if id.width() == 4 && id.packed_bits() == 0b0010)
+        {
+            return Err(format!("compiler definition {i}: not exact D4 LAMBDA"));
+        }
+        if let sens::ExprKind::List(parameters) = &lambda[1].kind {
+            if parameters.iter().any(|param|
+                matches!(&param.kind, sens::ExprKind::DomainIdentity(_) | sens::ExprKind::Sid(_)))
+            {
+                return Err(format!("compiler definition {i}: lexical parameter is resident"));
+            }
+        }
+    }
+    Ok(())
+}
+
 #[test]
 fn active_authored_lib_has_no_parser_convertible_surface_heads() {
     let files = active_lisp_files();
@@ -189,8 +239,35 @@ fn active_authored_lib_has_no_parser_convertible_surface_heads() {
     // through those first definitions are not hidden as ordinary shadowing.
     assert_clean("language-definition lib", &language, true);
 
-    // Every other active authored library file uses ordinary lexical rules.
+    // Only this canonical Ukrainian source uses exact AST projection instead of
+    // the obsolete SID8 text rewriter. Keep it in the active files census.
+    let (compiler, ordinary): (Vec<_>, Vec<_>) = ordinary
+        .into_iter()
+        .partition(|(rel, _)| rel == "lib/compiler-nucleus.lisp");
+    assert_eq!(compiler.len(), 1, "exactly one active compiler source");
+    let source = fs::read_to_string(&compiler[0].1).expect("read compiler source");
+    verify_ukrainian_compiler_heads(&source)
+        .expect("Ukrainian compiler must have 51 exact D4 definitions");
+
+    // Every OTHER active source remains under the original strict check.
     assert_clean("ordinary active lib", &ordinary, false);
+}
+
+#[test]
+fn ukrainian_compiler_gate_rejects_english_binary_or_new_forms() {
+    let source = fs::read_to_string(repo_root().join("lib/compiler-nucleus.lisp"))
+        .expect("owner compiler source");
+    verify_ukrainian_compiler_heads(&source).expect("owner source exact AST");
+    for mutated in [
+        source.replacen("(визначити", "(define", 1),
+        source.replacen("(функція", "(lambda", 1),
+        source.replacen("(визначити", "(0011", 1),
+        source.replacen("(функція", "(0010", 1),
+        format!("{source}\n(невідоме-додаткове-тіло 1)\n"),
+    ] {
+        assert!(verify_ukrainian_compiler_heads(&mutated).is_err(),
+            "unproved English/legacy/extra source must not pass");
+    }
 }
 
 #[test]
