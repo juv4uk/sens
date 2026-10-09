@@ -57,12 +57,28 @@ class Word:
 class Coordinate:
     """Доменна координата — ОКРЕМИЙ шар, не властивість бітів.
 
-    Модель НЕ перевіряє правильність координати щодо драбини: це робить
-    авторитет драбини (власник). Тут лише носій для round-trip.
+    Тут перевіряється тільки механічна узгодженість мітки Dn, ширини та
+    меж порядкового номера. Наявність координати в авторитетній таблиці,
+    її значення й виконуваність ця модель не визначає.
     """
     domain: str      # напр. "D5"
     width: int       # ширина щабля, з якою координата узгоджена
     ordinal: int     # порядковий номер у щаблі (0-based)
+
+    def __post_init__(self) -> None:
+        if not self.domain.startswith("D") or not self.domain[1:].isdigit():
+            raise BinaryLanguageError(f"некоректна мітка домену: {self.domain!r}")
+        rung = int(self.domain[1:])
+        if not (1 <= rung <= 10):
+            raise BinaryLanguageError(f"домен {self.domain!r} поза D1..D10")
+        if self.width != rung:
+            raise BinaryLanguageError(
+                f"ширина {self.width} не відповідає домену {self.domain}"
+            )
+        if not (0 <= self.ordinal < (1 << self.width)):
+            raise BinaryLanguageError(
+                f"номер {self.ordinal} не вміщається у ширину {self.width}"
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -70,22 +86,28 @@ class Coordinate:
 # ---------------------------------------------------------------------------
 
 def pack(words: Iterable[Word]) -> Tuple[bytes, int]:
-    """Пакує слова в один неперервний бітопотік.
+    """Пакує слова в неперервний MSB-first бітопотік, як Rust BitPacker.
 
-    Повертає (payload_bytes, valid_bits). Фізичні байти — лише носій;
-    останній байт може мати «хвіст» невикористаних бітів (valid_bits каже скільки).
+    Повертає (payload_bytes, valid_bits). Слова не вирівнюються по байтах;
+    невикористані біти останнього фізичного байта — нулі СПРАВА.
     """
     acc = 0
     nbits = 0
-    for w in words:
-        acc = (acc << w.width) | w.value
-        nbits += w.width
-    payload = acc.to_bytes((nbits + 7) // 8, "big") if nbits else b""
+    for word in words:
+        acc = (acc << word.width) | word.value
+        nbits += word.width
+    tail = (-nbits) % 8
+    padded = acc << tail
+    payload = padded.to_bytes((nbits + 7) // 8, "big") if nbits else b""
     return payload, nbits
 
 
 def unpack(payload: bytes, widths: List[int], valid_bits: int) -> List[Word]:
-    """Обернена до pack(). widths задають межі слів; valid_bits — довжину потоку."""
+    """Обернена до pack(); відхиляє неканонічний хвіст фізичного payload."""
+    if valid_bits < 0:
+        raise BinaryLanguageError("valid_bits не може бути від'ємним")
+    if any(not (1 <= width <= 9) for width in widths):
+        raise BinaryLanguageError("ширина слова поза 1..=9")
     total = sum(widths)
     if total != valid_bits:
         raise BinaryLanguageError(
@@ -93,10 +115,14 @@ def unpack(payload: bytes, widths: List[int], valid_bits: int) -> List[Word]:
         )
     if (valid_bits + 7) // 8 != len(payload):
         raise BinaryLanguageError("довжина payload не відповідає valid_bits")
+
+    tail = (-valid_bits) % 8
+    if tail and payload and payload[-1] & ((1 << tail) - 1):
+        raise BinaryLanguageError("ненульовий хвіст пакування неканонічний")
     acc = int.from_bytes(payload, "big") if payload else 0
-    # to_bytes добиває ЛІВОРУЧ (старші біти) — валідні біти сидять у МОЛОДШИХ.
-    # Тому хвіст знімаємо МАСКОЮ, а не зсувом праворуч.
-    acc &= (1 << valid_bits) - 1
+    if tail:
+        acc >>= tail
+
     out: List[Word] = []
     for width in reversed(widths):
         mask = (1 << width) - 1
@@ -176,7 +202,7 @@ def _self_test() -> int:
     ok("width 10 відкидається", _raises(lambda: Word(10, 0)))
     ok("значення за шириною відкидається", _raises(lambda: Word(3, 8)))
 
-    # 2) пакування без вирівнювання: 3+5 біт = 8 біт, але слово перетинає байт
+    # 2) пакування: слова йдуть суцільно, незалежно від меж фізичного байта
     words = [Word(3, 0b101), Word(5, 0b01101), Word(2, 0b10)]
     payload, nbits = pack(words)
     ok("valid_bits = сума ширин", nbits == 3 + 5 + 2)
@@ -185,6 +211,25 @@ def _self_test() -> int:
     # 3) round-trip зберігає ТОЧНО слова
     back = unpack(payload, [w.width for w in words], nbits)
     ok("round-trip точний", back == words)
+
+    # Rust BitPacker reference examples: exact MSB-first placement and right tail.
+    aligned = [Word(3, 0b101), Word(2, 0b01), Word(3, 0b111)]
+    aligned_payload, aligned_bits = pack(aligned)
+    ok(
+        "MSB-first payload matches Rust BitPacker",
+        aligned_payload == bytes([0b10101111]) and aligned_bits == 8,
+    )
+    crossing = [Word(7, 0b1010101), Word(3, 0b110)]
+    crossing_payload, crossing_bits = pack(crossing)
+    ok(
+        "cross-byte payload matches Rust BitPacker",
+        crossing_payload == bytes([0b10101011, 0b10000000])
+        and crossing_bits == 10,
+    )
+    ok(
+        "nonzero physical tail is rejected",
+        _raises(lambda: unpack(bytes([0b10101011, 0b10000001]), [7, 3], 10)),
+    )
 
     # 4) межа слова перетинає межу байта (11 біт -> 2 байти, 1 слово на межі)
     w2 = [Word(5, 0b11111), Word(6, 0b000001)]
@@ -197,11 +242,11 @@ def _self_test() -> int:
     ok("render↔parse оборотні", parse_source(render_source(words)) == words)
 
     # 6) програма: координати окремо, ширина мусить збігатись
-    coords = [Coordinate("D1", 3, 0), Coordinate("D3", 5, 1), Coordinate("D2", 2, 2)]
+    coords = [Coordinate("D3", 3, 0b101), Coordinate("D5", 5, 0b01101), Coordinate("D2", 2, 0b10)]
     prog = BinaryProgram(words, coords)
     prog.check()
     ok("програма round-trip з координатами", prog.roundtrip().words == words)
-    bad = BinaryProgram(words, [Coordinate("D1", 9, 0)] + coords[1:])
+    bad = BinaryProgram(words, [Coordinate("D9", 9, 0)] + coords[1:])
     ok("розбіжність ширин координат відкидається", _raises(bad.check))
 
     # 7) fail-closed на неузгоджених width/valid_bits
