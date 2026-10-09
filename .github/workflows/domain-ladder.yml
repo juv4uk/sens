@@ -1,0 +1,31 @@
+name: domain-ladder-mechanics
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/bits.rs"
+      - "crates/sens/src/bit9.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/tests/domain_ladder.rs"
+      - ".github/workflows/domain-ladder.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/bits.rs"
+      - "crates/sens/src/bit9.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/tests/domain_ladder.rs"
+      - ".github/workflows/domain-ladder.yml"
+
+jobs:
+  exact-width-ladder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check exact D1-D9 width carriers and round trips
+        run: cargo test -p sens --test domain_ladder
