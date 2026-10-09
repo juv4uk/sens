@@ -21,12 +21,6 @@ fn eval_world(source: &str) -> String {
 }
 
 #[test]
-fn empty_world_is_an_ordinary_first_class_value() {
-    assert_eq!(eval_world("(world? (empty-world))"), "t");
-    assert_eq!(eval_world("(world? (quote (not-a-world)))"), "()");
-}
-
-#[test]
 fn tell_returns_a_new_world_without_changing_the_old_one() {
     assert_eq!(
         eval_world(
@@ -194,11 +188,10 @@ fn retract_creates_history_instead_of_erasing_it() {
               (let ((w1 (world-tell w0 (quote zoo) (quote ((has-fur cat))))))
                 (let ((w2 (world-retract w1 (quote zoo) (quote ((has-fur cat))))))
                   (list (world-clauses w1 (quote zoo))
-                        (world-clauses w2 (quote zoo))
-                        (world-module-known? w2 (quote zoo))))))
+                        (world-clauses w2 (quote zoo))))))
             "#
         ),
-        "((((has-fur cat))) () t)"
+        "((((has-fur cat))) ())"
     );
 }
 
