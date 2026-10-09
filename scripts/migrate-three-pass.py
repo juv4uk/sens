@@ -1121,8 +1121,10 @@ def main():
             # Hash exact source bytes using Git object framing; never hash
             # text after newline normalization.
             source_bytes = path.read_bytes()
+            # Git blob IDs are compatibility identifiers, not security digests.
             source_blob_sha = hashlib.sha1(
-                b"blob " + str(len(source_bytes)).encode("ascii") + b"\0" + source_bytes
+                b"blob " + str(len(source_bytes)).encode("ascii") + b"\0" + source_bytes,
+                usedforsecurity=False,
             ).hexdigest()
             source_sha256 = hashlib.sha256(source_bytes).hexdigest()
             source = source_bytes.decode("utf-8")
