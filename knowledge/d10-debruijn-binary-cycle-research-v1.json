@@ -1,0 +1,145 @@
+{
+  "schema": "d10-debruijn-binary-cycle-source-research/v1",
+  "date": "2026-10-09",
+  "status": "HOLD-OWNER-CORE-VS-LIBRARY-REVIEW-NOT-SELECTED",
+  "baseline": {
+    "d10_inventory_git_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "d10_selected": 634,
+    "d10_ratified": 0,
+    "d1_d9_authority": "knowledge/d1-d9-foundation.json"
+  },
+  "source": [
+    {
+      "kind": "PRIMARY-MATH-DOCUMENTATION",
+      "title": "SageMath De Bruijn sequences, is_debruijn_sequence(seq,k,n)",
+      "url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/debruijn_sequence.html",
+      "section": "DeBruijnSequences, is_debruijn_sequence",
+      "claim": "Cyclic binary word of length 2^n with every possible n-bit substring occurring exactly once"
+    },
+    {
+      "kind": "INDEPENDENT-MATH-REFERENCE",
+      "title": "De Bruijn sequences and universal cycles",
+      "url": "https://debruijnsequence.org/db/home",
+      "claim": "Binary order-n universal cycle covers 2^n windows; LFSR, Eulerian and necklace constructions are alternative algorithms, not distinct observable predicate semantics"
+    }
+  ],
+  "candidate": {
+    "id": "D10-DB-RESEARCH-001",
+    "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+    "surface_uk": "повний-двійковий-цикл?",
+    "surface_ukr": "чи-усі-н-бітові-вікна-рівно-раз?",
+    "arity": 2,
+    "signature": "(finite_D1_bit_word, exact_positive_integer_window_width_n)->D1_bool(1/0)",
+    "law": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+    "witnesses": [
+      {
+        "word": "01",
+        "n": 1,
+        "value": 1,
+        "why": "both 1-bit patterns exactly once"
+      },
+      {
+        "word": "10",
+        "n": 1,
+        "value": 1,
+        "why": "cyclic rotation preserves coverage"
+      },
+      {
+        "word": "0011",
+        "n": 2,
+        "value": 1,
+        "why": "00, 01, 11, 10 each once"
+      },
+      {
+        "word": "00010111",
+        "n": 3,
+        "value": 1,
+        "why": "SageMath example order three"
+      },
+      {
+        "word": "00101110",
+        "n": 3,
+        "value": 1,
+        "why": "rotation of valid SageMath cycle"
+      },
+      {
+        "word": "00010110",
+        "n": 3,
+        "value": 0,
+        "why": "changed bit creates duplicate cyclic n-window"
+      },
+      {
+        "word": "00000000",
+        "n": 3,
+        "value": 0,
+        "why": "repeated zero windows"
+      },
+      {
+        "word": "000101110",
+        "n": 3,
+        "value": 0,
+        "why": "extra delimiter/bit changes required exact length"
+      },
+      {
+        "word": "",
+        "n": 1,
+        "value": 0,
+        "why": "empty word never has required length"
+      },
+      {
+        "word": "0101",
+        "n": 2,
+        "value": 0,
+        "why": "primitive 01 repetition does not cover all 2-bit patterns"
+      }
+    ],
+    "falsifiers": [
+      "Counting only linear substrings without wrap-around rejects valid 0011 at n=2",
+      "Accepting length 2^n with duplicate n-bit windows mistakes length for universal coverage",
+      "Treating a repeated primitive block as sufficient wrongly accepts 0101 at n=2",
+      "Treating word rotations as semantically different wrongly rejects 10001011 at n=3",
+      "Using an LFSR period alone without the all-zero state can miss one n-bit window"
+    ],
+    "observable_independence": "Independent of choice of Eulerian/LFSR/Lyndon algorithm to produce a cycle. Distinct predicate from selected Gray ENCODE/DECODE, PRIMITIVE-BINARY-WORD-ROOT and D8 ROTATE, but is expressible as a library over D1 bits, exact indexing and set membership; owner decides named Core resident versus selfhost library.",
+    "use_cases": [
+      "SDR/radio exhaustive test frames with cyclic boundary",
+      "FPGA/ESP32 bit-window diagnostic sequences",
+      "acoustic/musical finite bit-pattern coverage",
+      "astronomy instrument observation schedule validation",
+      "Sanskrit prosodic binary-pattern completeness",
+      "SENS D1 word corpus and compiler fuzz test"
+    ],
+    "source_semantics": "SOURCE-PROVED-HOLD",
+    "selected_in_d10": false,
+    "coordinate": null,
+    "ratified": false,
+    "physical_t5_authorized": false,
+    "language_control_owner": "D2-ONLY",
+    "owner_decision": "OPEN-RESEARCH",
+    "neighbors": [
+      "D1 YES/NO",
+      "D8 ROTATE",
+      "D8 CANONICALIZE",
+      "D10 PRIMITIVE-BINARY-WORD-ROOT",
+      "D10 GRAY-ENCODE-WORD",
+      "D10 GRAY-DECODE-WORD",
+      "research PR #4941 Lyndon factorization",
+      "research PR #4945 cyclic normalization"
+    ]
+  },
+  "validation": {
+    "donor_runtime": "Chez Scheme R6RS exact bit windows",
+    "reference_1": "Python explicit modulo-window set",
+    "reference_2": "Python rolling binary register bitmask",
+    "reference_3": "independent generated FKM de Bruijn witness, plus adversarial bit flips",
+    "not_sens_runtime": true,
+    "oracle_status": "PENDING-CI"
+  },
+  "admission": {
+    "new_selected": 0,
+    "new_coordinates": 0,
+    "new_ratified": 0,
+    "reason": "Competing serialized selection 634→635; do not race shared inventory, owner core-vs-library and behavioral dedup remain pending",
+    "coordination": "#4013 #4463"
+  }
+}
