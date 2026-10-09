@@ -32,6 +32,7 @@ run bash scripts/sid-binary-identity-guard.sh
 # Explicit negative controls required by #4268.
 run python3 - <<'PY'
 import importlib.util
+import sys
 from pathlib import Path
 
 ROOT = Path.cwd()
@@ -42,7 +43,19 @@ def load(name, path):
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load {path}")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # dataclasses with postponed annotations resolve their defining module
+    # through sys.modules. Register before execution or the binary foundation
+    # gate crashes instead of checking exact-width words (Python 3.12+).
+    previous = sys.modules.get(name)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except BaseException:
+        if previous is None:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = previous
+        raise
     return module
 
 word_law = load(
