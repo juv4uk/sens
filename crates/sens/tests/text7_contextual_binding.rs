@@ -40,7 +40,7 @@ fn global_text7_definition_can_be_called_by_its_contextual_frame() {
     let name = text7_frame(&[0x41, 0x42]);
     // (define <AB> (lambda () 1)) (<AB>)
     let source = format!(
-        "10 0011 00 {name} 00 10 0010 00 10 01 00 1 01 01 00 {name} 01"
+        "10 0011 00 {name} 00 10 0010 00 10 01 00 1 01 01 00 10 {name} 01"
     );
     let expressions = parse_canonical_binary(&source).expect("contextual define parses");
     let mut session = sens::Session::default();
