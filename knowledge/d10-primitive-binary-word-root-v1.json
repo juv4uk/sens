@@ -1,0 +1,119 @@
+{
+  "schema": "d10-binary-word-primitive-root-selection/v1",
+  "status": "SELECTED-RESEARCH-CANDIDATE-PENDING-OWNER-RATIFICATION",
+  "date": "2026-10-09",
+  "source": [
+    {
+      "type": "PRIMARY-MATHEMATICAL-SPEC",
+      "name": "SageMath finite words primitive() and primitive_length()",
+      "url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+      "verified_law": "primitive root is shortest word u whose positive integer repetition forms w; distinguish minimal_period() which permits incomplete final repetition"
+    },
+    {
+      "type": "USER-CROSSDOMAIN-MOTIVATION",
+      "repo": "juv4uk/radio-log",
+      "path": "src/lib/sens-radio/channel-lab.ts",
+      "blob": "7d8c70691dc19f0c3d7121d8945529dd2b2335e7",
+      "claim": "Repeated radio symbol/framing sequences, without any new RF modem or T5 semantics"
+    },
+    {
+      "type": "USER-CROSSDOMAIN-MOTIVATION",
+      "repo": "juv4uk/spanda",
+      "path": "README.md",
+      "blob": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "claim": "Exact p/q oscillator/pulse ratios; library examples, not proven FPGA implementation"
+    }
+  ],
+  "baseline": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "previous_d10_blob": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "previous_count": 630,
+    "proposed_count": 631,
+    "d10_ratified": 0
+  },
+  "selection": [
+    {
+      "stable_id": "d10.words.primitive-binary-root.v1",
+      "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
+      "surface_uk": "первісний-двійковий-блок",
+      "surface_ukr": "найкоротший-повторюваний-блок",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORD-COMBINATORICS-PRIMARY-20261009",
+      "relation_class": "FINITE-WORD-FULL-REPETITION-ROOT",
+      "arity": 1,
+      "argument_shape": "(finite-list-of-D1-bits) -> finite-list-of-D1-bits",
+      "behavior": "For nonempty finite D1 word w of length n, return the shortest nonempty prefix u of w for which w equals u concatenated exactly n/length(u) times, requiring length(u) divides n; if none shorter exists, return w. Define empty input -> empty output. No floating point, no time or transport effect.",
+      "positive_witnesses": [
+        "root(01010101)=01 (4 whole repetitions)",
+        "root(000000)=0 (6 repetitions)",
+        "root(01010)=01010 (not 01: incomplete repetition)",
+        "root(101101101)=101 (3 repetitions)",
+        "root(00100)=00100 (primitive, length 5)",
+        "root(empty)=empty"
+      ],
+      "falsifiers": [
+        "Sage minimal_period(01010) gives 2 by truncated overlap but primitive root is whole word length 5; never use minimal_period naively",
+        "Return a lexicographically minimal cyclic rotation (e.g. 0101 -> 01 is coincidence) rather than prefix root, identity invalid",
+        "An implementation which accepts a nondivisor p or changes bit order is invalid"
+      ],
+      "semantic_neighbors": [
+        "D8 ROTATE",
+        "D8 CANONICALIZE",
+        "D1 YES/NO",
+        "D10 LOWER-MECHANICAL-WORD research #4907",
+        "D10 finite word/sequence constructors"
+      ],
+      "dedup_check": "Against D1-D9 at 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4 and D10 at a55f307c27f17091795d75ebfcd7d051547d80bc: no exact named law; D8 ROTATE is mutation/rotation and CANONICALIZE generic, neither attests the shortest full-repetition root. Formal equivalence review remains pending.",
+      "minimality": "A pure mathematical finite-word factorization invariant. It is implementable from comparison, prefix and divisibility; derivability does not imply exclusion, but the universal named root is distinct from a partial overlap period and from a rotation quotient.",
+      "user_domains": [
+        "acoustics and repeating musical motifs",
+        "SDR bit frames / periodic pilot patterns",
+        "FPGA clock/oscillator patterns",
+        "astronomy periodic observation cadence",
+        "horological sub-cycle rhythms",
+        "Sanskrit prosody metrical repetition",
+        "self-hosted binary SENS data sequences"
+      ],
+      "primary_url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+      "owner_question": "Is the exact shortest full-repetition prefix a D10 semantic identity or a self-hosted sequence library operation? Selection is research-only, never D10 ratification.",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "research_holds": [
+    {
+      "name": "CANONICAL-CYCLIC-ROTATION",
+      "reason": "D8 ROTATE and CANONICALIZE already exist; require behavior dedup before minting new identity",
+      "status": "HOLD-D8-DUPLICATE-ATTACK"
+    },
+    {
+      "name": "MINIMAL-OVERLAP-PERIOD",
+      "reason": "Different source law from full-power primitive; needs separate semantic justification; do not count automatically",
+      "status": "HOLD-LIBRARY"
+    },
+    {
+      "name": "ACTUAL-FPGA-PERIODIC-INTERRUPT",
+      "reason": "Pure word root does not implement time-sensitive hardware state",
+      "status": "SUBSTRATE-ONLY"
+    }
+  ],
+  "oracle": {
+    "reference_model": "Python divisor enumeration vs independent KMP prefix-function",
+    "runtime": "Chez Scheme R6RS independent bounded word model",
+    "not_sens_runtime": true,
+    "not_sagemath_runtime": true,
+    "negative_cases": 7
+  },
+  "admission": {
+    "selected_delta": 1,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "physical_t5_admitted": false,
+    "proposal_id": "D10P-0006",
+    "issue": "#4013 / #4463",
+    "target": "one append and one SHA-linked transition, no overwrite of 625/627/630 history"
+  }
+}
