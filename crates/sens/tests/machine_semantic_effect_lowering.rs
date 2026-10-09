@@ -107,7 +107,20 @@ fn effect_guard_uses_exact_d1_predicates_at_each_stage() {
     ] {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("target-neutral effect stage {source}: {error}"));
-        eprintln!("STAGE {source} => {}", result.value);
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(true),
+            "valid exact integer and bounded carrier checks must answer D1:1"
+        );
+    }
+    for source in [
+        "(machine-effect-within-inclusive-integer-range? -1 0 10)",
+        "(machine-effect-within-inclusive-integer-range? 11 0 10)",
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        assert_eq!(result.value.as_predicate_bit(), Some(false),
+                   "out-of-bounds numbers must produce D1:0, not ()");
     }
 }
 
