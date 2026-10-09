@@ -146,6 +146,35 @@
         "scripts/check-d10-proposal-ledger.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.crosshobby.hysteretic-boolean-step.20261009",
+      "authority": "#4013 #4301 #4463 owner-requested cross-hobby D10 filling, research only",
+      "evidence": [
+        "Texas Instruments SCEA046 Schmitt triggers",
+        "Analog Devices MAX22530/MAX22532 threshold state",
+        "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+        "tests/oracles/d10_hysteresis_chez.ss"
+      ],
+      "previous_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+      "resulting_inventory_blob_sha": "1cfb1451a1fd36c50f946461634de5c9e79a9884",
+      "added_stable_ids": [
+        "d10.crosshobby.hysteretic-boolean-step.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-hysteretic-boolean-source-law-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 634,
+      "resulting_selected": 635,
+      "decision": "SELECTED-RESEARCH; no physical T5/coordinate, owner ratification pending",
+      "tests": [
+        "tests/test_d10_hysteretic_boolean.py",
+        "tests/oracles/d10_hysteresis_chez.ss",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }
