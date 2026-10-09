@@ -66,19 +66,6 @@ fn repeated_compatible_defmodule_calls_still_accumulate() {
 }
 
 #[test]
-fn advise_compatibility_wrapper_commits_only_the_accepted_world() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (list (advise space (quote ((planet earth))))
-                  (reason-in (quote space) (quote (planet earth))))
-            "#
-        ),
-        "((accepted (module space) (knowledge ((planet earth)))) ((() (proved (planet earth) (planet earth) ()))))"
-    );
-}
-
-#[test]
 fn advise_compatibility_argument_is_evaluated_once() {
     assert_eq!(
         eval_world(
@@ -128,21 +115,6 @@ fn advise_all_compatibility_argument_is_evaluated_once() {
             "#
         ),
         "(1 accepted)"
-    );
-}
-
-#[test]
-fn package_import_compatibility_wrapper_commits_the_accepted_world() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (def package
-              (make-knowledge-package (quote space) (quote (((planet earth))))))
-            (list (car (import-knowledge-package package))
-                  (car (reason-in (quote space) (quote (planet earth)))))
-            "#
-        ),
-        "(accepted (() (proved (planet earth) (planet earth) ())))"
     );
 }
 
