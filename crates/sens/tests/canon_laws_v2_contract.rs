@@ -98,7 +98,19 @@ fn executable_canon_speaks_layered_answer_semantics() {
             row.source, actual
         );
         let status = eval_program(&program, &mut session)
-            .unwrap_or_else(|error| panic!("#229 witness verdict failed for {}: {error}", row.expr))
+            .unwrap_or_else(|error| {
+                for (label, probe) in [
+                    ("witness-field/expected", format!("(witness-field (00000001 expected) (quote {}))", row.source)),
+                    ("witness-field/error", format!("(witness-field (00000001 error) (quote {}))", row.source)),
+                    ("witness-superseded", format!("(witness-superseded-outcome (quote {}) (witness-field (00000001 expected) (quote {})))", row.source, row.source)),
+                    ("expected-outcome", format!("(witness-expected-outcome (quote {}))", row.source)),
+                ] {
+                    eprintln!("#229 probe {label}: {:?}", eval_program(&probe, &mut session)
+                        .map(|value| value.value.to_string())
+                        .map_err(|e| format!("{:?}: {}", e.kind, e)));
+                }
+                panic!("#229 witness verdict failed for {}: {error}", row.expr)
+            })
             .value
             .to_string();
         assert_eq!(
