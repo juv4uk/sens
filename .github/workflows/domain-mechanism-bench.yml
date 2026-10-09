@@ -1,0 +1,61 @@
+name: Domain mechanism benchmarks
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/semantic-path-locality/**"
+      - ".github/workflows/domain-mechanism-bench.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/semantic-path-locality/**"
+      - ".github/workflows/domain-mechanism-bench.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sens-domain-mechanism-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  semantic-path-locality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install benchmark tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind gcc
+          gcc --version | head -1
+          valgrind --version
+
+      - name: Run semantic path locality matrix
+        run: |
+          rm -rf /tmp/sens-path-locality
+          python3 benchmarks/semantic-path-locality/run.py \
+            --out-dir /tmp/sens-path-locality \
+            --calls 10000 \
+            --reps 1
+
+      - name: Publish benchmark summary
+        if: always()
+        run: |
+          {
+            echo '## Semantic path locality / entropy'
+            echo
+            echo 'Research-only mechanism evidence; locality is varied while selector semantics stay fixed.'
+            echo
+            if test -f /tmp/sens-path-locality/summary.tsv; then
+              echo '```text'
+              cat /tmp/sens-path-locality/summary.tsv
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sens-semantic-path-locality
+          path: /tmp/sens-path-locality
+          retention-days: 7

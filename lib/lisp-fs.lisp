@@ -108,6 +108,13 @@
       (00000111 ((00000010 entry) () (00000001 ()))
             ((00000010 entry)  (00000001 ())) (t (00000110 entry))))))
 
+; Exact D1 predicate inversion for filesystem guards. The comparison result is
+; already D1; compare it with ATOM of a non-empty quoted pair (D1 NO), avoiding
+; generic truthiness and avoiding a computed expression in COND's data slot.
+(00001001 fs-d1-no?
+  (00001000 (value)
+    (00100010 value (00000010 (00000001 (x))))))
+
 (00001001 fs-object-package-decision
   (00001000 (package)
     (00000111
@@ -115,12 +122,10 @@
       ((00000010 package)  (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-object)))
        (00100111 (00000001 rejected) (00000001 invalid-format)))
-      ((00100010 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*)
-             (00100010 (00000001 fs-version-yes) (00000001 fs-version-no)))
+      ((fs-d1-no? (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
        (00100111 (00000001 rejected) (00000001 unsupported-version)))
-      ((00100010 (00100010 (fs-package-field (00000001 address) package)
-                    (knowledge-content-address (fs-package-field (00000001 value) package)))
-             (00100010 (00000001 fs-address-yes) (00000001 fs-address-no)))
+      ((fs-d1-no? (00100010 (fs-package-field (00000001 address) package)
+                    (knowledge-content-address (fs-package-field (00000001 value) package))))
        (00100111 (00000001 rejected) (00000001 address-mismatch)))
       (t (00100111 (00000001 accepted) (fs-package-field (00000001 value) package))))))
 
@@ -139,8 +144,7 @@
       ((00000010 package)  (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-root)))
        (00100111 (00000001 rejected) (00000001 invalid-format)))
-      ((00100010 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*)
-             (00100010 (00000001 fs-version-yes) (00000001 fs-version-no)))
+      ((fs-d1-no? (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
        (00100111 (00000001 rejected) (00000001 unsupported-version)))
       ((00000011 (fs-package-field (00000001 revision) package) (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-revision)))
@@ -278,8 +282,7 @@
       ((00000010 event)  (00100111 (00000001 rejected) (00000001 invalid-event)))
       ((00100001 (00000011 (fs-package-field (00000001 format) event) (00000001 wsm-fs-event)))
        (00100111 (00000001 rejected) (00000001 invalid-format)))
-      ((00100010 (00100010 (fs-package-field (00000001 version) event) *fs-journal-version*)
-             (00100010 (00000001 fs-journal-yes) (00000001 fs-journal-no)))
+      ((fs-d1-no? (00100010 (fs-package-field (00000001 version) event) *fs-journal-version*))
        (00100111 (00000001 rejected) (00000001 unsupported-version)))
       ((00000011 (fs-package-field (00000001 op) event) (00000001 ()))
        (00100111 (00000001 rejected) (00000001 missing-operation)))

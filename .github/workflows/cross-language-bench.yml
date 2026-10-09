@@ -1,4 +1,4 @@
-name: Cross-language benchmark (SENS vs CPython)
+name: Cross-language benchmark (SENS + external VMs)
 
 on:
   pull_request:
@@ -12,7 +12,8 @@ on:
 jobs:
   cpython:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # #1547: SENS+CPython historical GREEN took 27m38s; Lua adds a third implementation.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -32,7 +33,16 @@ jobs:
           sudo apt-get install -y guix
           guix --version
 
-      - name: Correctness and measurements in pinned Guix environment
+      - name: Correctness in pinned Guix environment
+        run: |
+          guix time-machine -C channels.scm -- shell \
+            -m manifest.scm \
+            -m benchmarks/cross-language/manifest.scm -- \
+            python3 benchmarks/cross-language/run.py \
+              --sens-bench target/release/examples/ci_bench \
+              --check-only
+
+      - name: Measurements in pinned Guix environment
         run: |
           rm -rf /tmp/sens-cross-language
           guix time-machine -C channels.scm -- shell \
@@ -53,5 +63,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: sens-vs-cpython-benchmark
+          name: sens-cross-language-benchmark
           path: /tmp/sens-cross-language

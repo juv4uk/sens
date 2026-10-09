@@ -1,0 +1,34 @@
+name: Context carrier benchmark
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/context-carrier/**"
+      - ".github/workflows/context-carrier-bench.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/context-carrier/**"
+      - ".github/workflows/context-carrier-bench.yml"
+  workflow_dispatch:
+
+jobs:
+  context-carrier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Γ carrier smoke benchmark
+        run: |
+          python3 benchmarks/context-carrier/run.py \
+            --smoke --reps 3 \
+            --out /tmp/context-carrier/results
+      - name: Upload raw evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: context-carrier-benchmark
+          path: |
+            /tmp/context-carrier/results.tsv
+            /tmp/context-carrier/results.json
+          retention-days: 7
