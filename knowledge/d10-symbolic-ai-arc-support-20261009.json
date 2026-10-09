@@ -236,8 +236,10 @@
     "implementation": "tests/test_d10_ai_arc_support.py",
     "real_donor": "tests/oracles/d10_clpfd_arc_support.pl",
     "fixed_comparisons": "canonical 3-value binary domain relation enumeration + Prolog fixture parity",
-    "oracle_status": "NOT-RUN",
-    "release_status": "NONE"
+    "oracle_status": "SWI-PROLOG-REAL-768-OF-768-PASS;PY-32768-OF-32768-PASS",
+    "release_status": "NONE",
+    "oracle_evidence": "knowledge/d10-symbolic-ai-clp-oracle-evidence-v1.json",
+    "observed_runtime": "SWI-Prolog 9.0.4"
   },
   "accounting": {
     "new_selected": 0,
