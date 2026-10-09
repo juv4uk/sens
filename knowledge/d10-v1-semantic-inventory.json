@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 631,
+    "selected_semantic_candidates": 633,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 375,
-    "remaining_semantic_inventory": 393,
+    "unplaced_selected_candidates": 377,
+    "remaining_semantic_inventory": 391,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13421,6 +13421,92 @@
           "result": "p/q=-1; residual=+1/2 (tie chooses smaller signed numerator)"
         }
       ]
+    },
+    {
+      "stable_id": "d10.fpga.gray.encode-word.20261009",
+      "semantic_name": "GRAY-ENCODE-WORD",
+      "surface_uk": "кодувати-відбитим-двійковим",
+      "surface_ukr": "кд-грей",
+      "relation_class": "FINITE-BIT-WORD-REFLECTED-GRAY-BIJECTION",
+      "behavior": "For unsigned w-bit binary rank n (0<=n<2^w), return w-bit binary-reflected Gray codeword n XOR (n shifted right once); preserve declared width including leading zeroes.",
+      "arity": "(width:nonnegative-int, unsigned-rank:0..2^width-1)->unsigned-w-bit-word",
+      "positive_witnesses": [
+        "w=4, rank7=0111 -> 0100",
+        "w=4, rank11=1011 -> 1110",
+        "w=0, n=0 -> empty word",
+        "Adjacent and cyclic ranks have Hamming distance 1 for w>=1"
+      ],
+      "falsifiers": [
+        "w4 rank7 gives 0111 not 0100",
+        "w4 gray 7 vs gray8 changes more than one bit",
+        "drops leading zeroes or permits 16 at width4"
+      ],
+      "minimality": "Derivable using XOR and right shift; a selected named mathematical map but not independently proven primitive.",
+      "unblock_fanout": [
+        "FPGA and sensor bit-symbol transport",
+        "cross-clock binary phase encoders",
+        "radiodata and reversible payload representation"
+      ],
+      "source_path": "knowledge/d10-gray-reflected-binary-research-v1.json",
+      "primary_url": "https://patents.google.com/patent/US2632058A/en",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "Frank Gray US2632058A",
+        "IBM Johnsson/Ho 1995",
+        "knowledge/d10-gray-reflected-binary-research-v1.json"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-REFLECTED-BINARY-GRAY-1953",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.fpga.gray.decode-word.20261009",
+      "semantic_name": "GRAY-DECODE-WORD",
+      "surface_uk": "декодувати-відбитий-двійковий",
+      "surface_ukr": "дк-грей",
+      "relation_class": "FINITE-BIT-WORD-REFLECTED-GRAY-BIJECTION",
+      "behavior": "For a width w reflected Gray codeword g, recover unsigned rank n by XOR prefix from most significant Gray bit to least, preserving width.",
+      "arity": "(width:nonnegative-int, gray-codeword:0..2^width-1)->unsigned-w-bit-rank",
+      "positive_witnesses": [
+        "w4 Gray0100 -> binary0111 (rank7)",
+        "w4 Gray1110 -> binary1011 (rank11)",
+        "decode(encode(n,w),w)=n for all in range",
+        "w0 Gray0 -> rank0"
+      ],
+      "falsifiers": [
+        "Gray1110 decoded to 14 rather than 11",
+        "Gray0100 decoded to 4 rather than 7",
+        "allows out-of-range 16 at w4"
+      ],
+      "minimality": "Prefix XOR expressible using general reductions; owner to decide Core vs derived library.",
+      "unblock_fanout": [
+        "FPGA and sensor bit-symbol transport",
+        "cross-clock binary phase encoders",
+        "radiodata and reversible payload representation"
+      ],
+      "source_path": "knowledge/d10-gray-reflected-binary-research-v1.json",
+      "primary_url": "https://patents.google.com/patent/US2632058A/en",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "Frank Gray US2632058A",
+        "IBM Johnsson/Ho 1995",
+        "knowledge/d10-gray-reflected-binary-research-v1.json"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-REFLECTED-BINARY-GRAY-1953",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
     }
   ],
   "parent_domain": {
@@ -13457,6 +13543,7 @@
     "knowledge/d10-historical-primary-admission-batch1-v1.json",
     "knowledge/d10-clos-slot-state-historical-review-v1.json",
     "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
-    "knowledge/d10-hobby-exact-measurement-intake-v1.json"
+    "knowledge/d10-hobby-exact-measurement-intake-v1.json",
+    "knowledge/d10-gray-reflected-binary-research-v1.json"
   ]
 }
