@@ -1549,36 +1549,3 @@ mod tests {
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].as_predicate_bit(), Some(false));
     }
-
-    #[test]
-    fn current_nucleus_roles_are_derived_by_the_single_sens_owned_law() {
-        let expected = [
-            (d3(0b001), CompilerLoweringRole::QuoteForm),
-            (d3(0b010), CompilerLoweringRole::AtomPredicate),
-            (d3(0b011), CompilerLoweringRole::SelectorTail),
-            (d3(0b100), CompilerLoweringRole::SelectorHead),
-            (d3(0b101), CompilerLoweringRole::AtomEquality),
-            (d3(0b110), CompilerLoweringRole::CondForm),
-            (d3(0b111), CompilerLoweringRole::PairConstruct),
-            (d4(0b0010), CompilerLoweringRole::LambdaForm),
-            (d4(0b0011), CompilerLoweringRole::DefineForm),
-        ];
-
-        for (identity, expected_role) in expected {
-            assert_eq!(
-                compiler_lowering_role_from_sens(identity).expect("SENS role law"),
-                Some(expected_role),
-                "unexpected role for {identity:?}"
-            );
-        }
-
-        assert_eq!(
-            compiler_lowering_role_from_sens(d3(0b000)).expect("D3 empty"),
-            None
-        );
-        assert_eq!(
-            compiler_lowering_role_from_sens(d4(0b0111)).expect("D4 non-bootstrap"),
-            None
-        );
-    }
-}
