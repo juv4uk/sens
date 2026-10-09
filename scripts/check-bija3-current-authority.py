@@ -26,7 +26,7 @@ contract_sentence = (
 )
 assert contract_sentence in contract
 # D3 ratification persists under current Contract 11.8; no return to 11.5.
-assert "(major . 11)" in contract and "(minor . 8)" in contract
+assert "(major . #d11)" in contract and "(minor . 8)" in contract
 assert "#3202" in contract
 
 for line in EXPECTED:
