@@ -1,0 +1,14 @@
+name: Verify 557 536 full package
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  full:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run complete my-lisp package after both subtraction slices
+        run: cargo test -p my-lisp
