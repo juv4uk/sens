@@ -1,15 +1,22 @@
 //! Domain-ladder-only guard. Native-first language laws belong to SENS witnesses.
-use sens::{parse_canonical_binary, syntax::ExprKind};
+use sens::{
+    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
+    parse_binary_source_words, parse_canonical_binary, syntax::ExprKind, DomainIdentity,
+    ErrorKind,
+};
+
+const D3_EMPTY_T5: &[u8] =
+    include_bytes!("../../../tests/fixtures/exact-domain-ladder/empty-d3.sens");
 
 #[test]
 fn exact_domain_ladder_preserves_leading_zeroes_and_widths_d1_through_d9() {
     for width in 1usize..=9 {
         let source = format!("{value:0width$b}", value = 1u16);
-        let forms = parse_canonical_binary(&source).expect("exact-width domain word parses");
-        assert_eq!(forms.len(), 1);
-        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
-            panic!("exact-width source word must remain a domain identity");
-        };
+        // A source word is a width-qualified carrier, not necessarily an
+        // executable root. In particular, bare D2 CLOSE (01) is invalid syntax.
+        let words = parse_binary_source_words(&source).expect("exact-width source word");
+        assert_eq!(words.len(), 1);
+        let identity = DomainIdentity::from_source_word(words[0].word);
         assert_eq!(identity.width(), width);
         assert_eq!(identity.packed_bits(), 1);
     }
@@ -44,4 +51,43 @@ fn nine_bit_payload_is_not_truncated_to_u8() {
     };
     assert_eq!(identity.width(), 9);
     assert_eq!(identity.packed_bits(), 257);
+}
+#[test]
+fn standalone_d2_close_is_a_word_but_not_an_executable_program() {
+    let close = parse_binary_source_words("01").expect("exact-width D2 source");
+    assert_eq!(close.len(), 1);
+    assert_eq!(DomainIdentity::from_source_word(close[0].word).width(), 2);
+
+    let err = parse_canonical_binary("01").expect_err("unmatched D2 CLOSE must fail");
+    assert_eq!(err.kind, ErrorKind::Parse);
+    assert_eq!(
+        parse_canonical_binary("10 01")
+            .expect("paired D2 OPEN/CLOSE is a complete program")
+            .len(),
+        1
+    );
+}
+
+#[test]
+fn physical_d3_empty_is_one_canonical_packed_byte_not_text() {
+    // Source word 000 plus at most four T5 padding trits 2:
+    // 00022 in base 3 = 0x08, exactly one physical byte.
+    assert_eq!(D3_EMPTY_T5, &[0x08]);
+    assert_ne!(D3_EMPTY_T5, b"000");
+    let words = decode_ternary_program(D3_EMPTY_T5).expect("real physical T5 program");
+    assert_eq!(words.len(), 1);
+    assert_eq!(DomainIdentity::from_source_word(words[0]).width(), 3);
+    assert_eq!(
+        open_ternary_program(D3_EMPTY_T5).expect("human binary projection"),
+        "000"
+    );
+    assert_eq!(
+        encode_binary_projection_ternary("000").expect("canonical T5 encoder"),
+        D3_EMPTY_T5
+    );
+
+    // Corrupt padding may not silently fall back to ASCII source.
+    let mut overpadded = D3_EMPTY_T5.to_vec();
+    overpadded.push(0xf2);
+    assert!(decode_ternary_program(&overpadded).is_err());
 }
