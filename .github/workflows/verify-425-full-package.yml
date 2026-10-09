@@ -1,0 +1,19 @@
+name: Verify 425 full package
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-425-full-package.yml'
+
+jobs:
+  full-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: verify-425-full-package
+      - name: Run complete my-lisp package
+        run: cargo test -p my-lisp
