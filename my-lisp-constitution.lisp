@@ -262,5 +262,5 @@
 (fixture (expr . "(max-list (quote (5 2 8 1)))") (expected . "8") (tier . 3) (axioms G5))
 (fixture (expr . "(min-list (quote ()))") (expected . "()") (tier . 3) (axioms G5 G8) (note . "empty list argument is Nil, distinct from min/max's own zero-argument Arity error above"))
 (fixture (expr . "(max-list (quote ()))") (expected . "()") (tier . 3) (axioms G5 G8))
-(fixture (expr . "(cond ((quote radio) antenna (quote wrong)))") (error . "UnsatisfiedConditional") (tier . 1) (since-contract 8 0) (axioms G8 S2) (role . "constitutive") (note . "Contract 8.0: canonical three-part COND exhausts to a named failure; migration-only two-part truthiness remains a bounded compatibility bridge."))
+(fixture (expr . "(cond ((quote radio) antenna (quote wrong)))") (error . "UnsatisfiedConditional") (tier . 1) (since-contract 8 0) (axioms G8 S2) (role . "historical-compatibility") (compatibility . historical-cond-contract-8-0) (note . "Historical Contract 8.0 three-part COND / UnsatisfiedConditional expectation. Current Contract 11.8 uses exact D1 PredicateBit control and the admitted two-field clause form; this row is retained for provenance only."))
 ()
