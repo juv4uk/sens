@@ -6,6 +6,7 @@ import copy
 import json
 import subprocess
 from pathlib import Path
+from d10_historical_snapshot_compat import historic_view, pinned_inventory_git_blob
 
 ROOT = Path(__file__).resolve().parents[1]
 P = ROOT / "knowledge/d10-historical-primary-manual-reconciliation-20261009.json"
@@ -17,9 +18,12 @@ def read(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 def blob(path):
+    if path == HIGH:
+        return pinned_inventory_git_blob(path)
     return subprocess.check_output(["git", "hash-object", str(path)], cwd=ROOT, text=True).strip()
 
 def check(r, low, high, ov, pin=True):
+    high = historic_view(high, r["snapshot"]["d10_git_blob"])
     assert r["status"] == "RESEARCH-ONLY-NO-RESIDENTS"
     assert r["accounting"]["auto_selected_d10"] == 0
     assert r["accounting"]["auto_ratified"] == 0

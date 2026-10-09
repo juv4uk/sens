@@ -3,6 +3,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
+from d10_historical_snapshot_compat import historic_view
 
 ROOT = Path(__file__).resolve().parents[1]
 REVIEW = ROOT / "knowledge/d10-historical-lisp15-reconciliation-20261009.json"
@@ -10,6 +11,10 @@ FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
 INVENTORY = ROOT / "knowledge/d10-v1-semantic-inventory.json"
 
 def verify(review: dict, foundation: dict, inventory: dict) -> dict:
+    try:
+        inventory = historic_view(inventory)
+    except AssertionError as exc:
+        raise ValueError("selected candidate count drift: historical digest mismatch") from exc
     if review.get("schema") != "d10-historical-lisp15-reconciliation/v1":
         raise ValueError("wrong reconciliation schema")
     if review.get("status") != "RESEARCH-ONLY-NO-RESIDENTS":

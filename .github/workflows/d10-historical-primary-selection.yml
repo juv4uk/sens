@@ -1,0 +1,22 @@
+name: D10 historical primary selection four laws
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-historical-primary-selected-20261009.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - 'scripts/check_d10_historical_primary_selection.py'
+      - '.github/workflows/d10-historical-primary-selection.yml'
+  workflow_dispatch:
+jobs:
+  d10-selection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check 629 machine rows and independent bounded bit/array/hash witnesses
+        run: python3 scripts/check_d10_historical_primary_selection.py --self-test
+      - name: Ensure checker has not mutated source
+        run: git diff --exit-code

@@ -2,8 +2,10 @@ import importlib.util
 import json
 from pathlib import Path
 import unittest
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 SPEC = importlib.util.spec_from_file_location(
     "d10_historical_lisp15_reconciliation",
     ROOT / "scripts/check_d10_historical_lisp15_reconciliation.py",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 import copy,json,re,subprocess,sys
 from pathlib import Path
+from d10_historical_snapshot_compat import pinned_inventory_git_blob
 ROOT=Path(__file__).resolve().parents[1]
 ART=ROOT/"knowledge/early-lisp-graph-historical-evidence-v1.json"
 FOUND=ROOT/"knowledge/d1-d9-foundation.json"
@@ -10,8 +11,10 @@ D10=ROOT/"knowledge/d10-v1-semantic-inventory.json"
 D3=ROOT/"lib/domains/d3.lisp"
 def load(p): return json.loads(p.read_text(encoding="utf-8"))
 def sha(p):
- rel=str(p.relative_to(ROOT))
- return subprocess.run(["git","rev-parse",f"HEAD:{rel}"],cwd=ROOT,check=True,capture_output=True,text=True).stdout.strip()
+    if p == D10:
+        return pinned_inventory_git_blob(p)
+    rel=str(p.relative_to(ROOT))
+    return subprocess.run(["git","rev-parse",f"HEAD:{rel}"],cwd=ROOT,check=True,capture_output=True,text=True).stdout.strip()
 def norm(v):
  s=str(v).strip().upper().replace("()","EMPTY-LIST")
  return re.sub(r"[^A-Z0-9?!+*/<>=.-]","",s)
