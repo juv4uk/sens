@@ -6,6 +6,7 @@ import argparse
 import csv
 import io
 import json
+import hashlib
 from pathlib import Path
 import re
 
@@ -95,8 +96,14 @@ def selection_trace_errors(content: str, inventory: dict, baseline: dict, histor
         errors.append("неунікальні імена в журналі")
     transitions = history.get("transitions", [])
     prior = initial
+    expected_previous_sha = baseline.get("origin_inventory_git_blob")
     selected_now: set[str] = set()
     for t in transitions:
+        if t.get("previous_inventory_blob_sha") != expected_previous_sha:
+            errors.append("SHA-ланцюг: попередня подія не збігається з історичним результатом")
+        next_sha = t.get("resulting_inventory_blob_sha")
+        if not isinstance(next_sha, str) or not re.fullmatch(r"[0-9a-f]{40}", next_sha):
+            errors.append("SHA-ланцюг: недопустимий resulting_inventory_blob_sha")
         next_count = t.get("resulting_selected", -1)
         if t.get("previous_selected") != prior or not isinstance(next_count, int) or next_count <= prior or next_count > len(rows):
             errors.append("перерваний або недопустимий ланцюг append D10")
@@ -131,6 +138,7 @@ def selection_trace_errors(content: str, inventory: dict, baseline: dict, histor
             if row.get("status") != "SELECTED-RESEARCH-CANDIDATE":
                 errors.append(f"{name}: D10 append має research-only статус")
         prior = next_count
+        expected_previous_sha = next_sha
     if prior != len(rows):
         errors.append(f"виявлено {len(rows)-prior} неврахованих selection-рядків у D10")
     for ent in ledger:
@@ -271,6 +279,11 @@ def main() -> int:
         print(f"D10-PROPOSAL-LEDGER: BLOCK missing immutable growth history: {exc}")
         return 1
     trace_errors = selection_trace_errors(args.ledger.read_text(encoding="utf-8"), inventory, baseline, history)
+    inventory_bytes = inventory_path.read_bytes()
+    actual_blob = hashlib.sha1(b"blob " + str(len(inventory_bytes)).encode("ascii") + b"\0" + inventory_bytes).hexdigest()
+    expected_blob = history["transitions"][-1]["resulting_inventory_blob_sha"] if history["transitions"] else baseline["origin_inventory_git_blob"]
+    if actual_blob != expected_blob:
+        trace_errors.append("SHA-ланцюг: реальний Git blob canonical inventory не дорівнює останньому підтвердженому результату")
     if trace_errors:
         for error in trace_errors:
             print(f"D10-PROPOSAL-LEDGER: BLOCK {error}")
