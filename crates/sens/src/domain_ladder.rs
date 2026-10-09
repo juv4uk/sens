@@ -20,6 +20,16 @@ impl DomainCoordinate {
         Some(Self { width, bits })
     }
 
+    /// Mechanically project any already-validated D1-D9 source identity.
+    /// D7 is an exact W7 coordinate; this grants neither a sound role nor
+    /// generic callability. D10 remains representable via `new` only.
+    pub const fn from_domain_identity(identity: crate::DomainIdentity) -> Self {
+        Self {
+            width: identity.width() as u8,
+            bits: identity.packed_bits(),
+        }
+    }
+
     pub const fn width(self) -> u8 {
         self.width
     }
@@ -53,4 +63,19 @@ mod tests {
         assert_eq!(DomainCoordinate::new(0, 0), None);
         assert_eq!(DomainCoordinate::new(11, 0), None);
     }
+    #[test]
+    fn every_d7_source_word_has_a_width_preserving_coordinate() {
+        use crate::{BinarySourceWord, Bit7, DomainIdentity};
+
+        for bits in 0u8..=127 {
+            let word = BinarySourceWord::W7(Bit7::new(bits).unwrap());
+            let identity = DomainIdentity::from_source_word(word);
+            let coordinate = DomainCoordinate::from_domain_identity(identity);
+
+            assert!(matches!(identity, DomainIdentity::D7(_)));
+            assert_eq!(coordinate, DomainCoordinate::new(7, u16::from(bits)).unwrap());
+            assert_ne!(coordinate, DomainCoordinate::new(8, u16::from(bits)).unwrap());
+        }
+    }
+
 }
