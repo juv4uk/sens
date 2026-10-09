@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 SCHEMA = "sens-cold-process-bootstrap/v1"
-MODES = ("noop", "bare-session", "session", "bare-d3", "d3", "bare-core", "core", "core-d3")
+MODES = ("noop", "bare-session", "session", "bare-d3", "d3", "bare-core", "bare-core-reuse", "core", "core-d3")
 EXPECTED = {
     "noop": "NONE",
     "bare-session": "BARE_SESSION",
@@ -26,6 +26,7 @@ EXPECTED = {
     "bare-d3": "BARE_D3_EMPTY",
     "d3": "D3_EMPTY",
     "bare-core": "BARE_CORE_LOADED",
+    "bare-core-reuse": "BARE_CORE_REUSED",
     "core": "CORE_LOADED",
     "core-d3": "CORE_AND_D3_EMPTY",
 }
@@ -184,6 +185,14 @@ def main() -> int:
                 f"Observed Core4 bootstrap ratio default-session/bare-session: "
                 f"{raw_default / raw_bare:.2f}× (both load the same Lisp-owned Core4)."
             )
+    lines.extend([
+        "",
+        "The `bare-core-reuse` inner timer covers **only the second** fresh "
+        "Core4 Session within its process after a successful first bootstrap. "
+        "Its process-wall metric includes BOTH loads and is not comparable "
+        "as a one-load process startup time. Both sessions execute Lisp Core4 "
+        "independently; only verified binary decode/lowering may be cached.",
+    ])
     lines.extend([
         "",
         "Each process was freshly launched, but **Linux page cache was not cleared**. "
