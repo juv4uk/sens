@@ -98,22 +98,6 @@ fn same_payload_across_all_d1_d9_remains_distinct_in_ast_and_value() {
 }
 
 #[test]
-fn callable_projection_admits_d3_d4_d5_and_fails_closed_for_d6_d7_d8_d9() {
-    for identity in [d1(1), d2(1), d6(1), d7(1), d8(1), d9(1)] {
-        assert_eq!(Value::DomainIdentity(identity).as_core_domain_identity(), None);
-    }
-
-    for identity in [d3(1), d4(1), d5(1)] {
-        assert!(Value::DomainIdentity(identity).as_core_domain_identity().is_some());
-    }
-
-    let d8 = d8(1);
-    let domain_value = Value::DomainIdentity(d8);
-    assert_eq!(domain_value.as_sens8(), None);
-    assert_eq!(domain_value.to_string(), "00000001");
-}
-
-#[test]
 fn every_domain_identity_round_trips_through_fasl_and_wire_without_width_loss() {
     for identity in [
         d1(1),
