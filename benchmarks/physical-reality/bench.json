@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "physical-reality",
+  "wing": "Current SENS / real T5 execution",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE"
+  ],
+  "question": "What are cold-process release execution times and physical byte sizes of actual packed T5 SENS programs?",
+  "claim": "Measures only two parity-verified committed T5 fixtures on one recorded host; text/Core4 is a distinct profile and cannot establish a language speedup. No steady-state or GPU claim.",
+  "witness": [
+    "run.py",
+    ".github/workflows/sens-reality-bench.yml"
+  ],
+  "status": "MEASURED-BOUNDED",
+  "generation": "Contract 11.8 / exact D1-D9; physical T5 corpus, 2026-10-09",
+  "axis": "physical-t5/bytes-and-cold-subprocess-latency",
+  "reproduce": "cargo build --release -p sens-cli --bin sens --bin sens-trit && python3 benchmarks/physical-reality/run.py --sens target/release/sens --sens-trit target/release/sens-trit --out /tmp/sens-reality"
+}
