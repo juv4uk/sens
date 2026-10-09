@@ -1,4 +1,5 @@
 ; #505 — Lisp-owned native-first execution-plan classifier.
+; baseline control-only edit for #4242 diagnosis.
 ;
 ; This file decides only whether an already-proven machine lowering applies to
 ; expression *data*. It does not define language meaning, encode bytes, or call
