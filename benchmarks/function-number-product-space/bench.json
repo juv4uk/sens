@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "function-number-product-space",
+  "wing": "Exact binary coordinate algebra",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Do W6 = W3×W3 and W8 = W4×W4 preserve exact bit laws, and where does addition require a carry between halves?",
+  "claim": "Exhaustive bit-coordinate product laws and D6 selector slab; this evidence does not ratify any D6/D8 semantic resident.",
+  "witness": [
+    "probe.py",
+    "selector_slab.py"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "historical donor #3371 replayed 2026-10-09",
+  "axis": "width/product-vs-semantic-residency",
+  "reproduce": "python3 benchmarks/function-number-product-space/probe.py && python3 benchmarks/function-number-product-space/selector_slab.py"
+}
