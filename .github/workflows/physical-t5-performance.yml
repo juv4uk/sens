@@ -1,0 +1,79 @@
+name: Physical T5 performance benchmarks
+
+# Record real numbers from release binaries, not pass/fail-only smoke.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/physical-t5-performance.yml"
+      - "benchmarks/byte-pack/physical_t5.py"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+  pull_request:
+    paths:
+      - ".github/workflows/physical-t5-performance.yml"
+      - "benchmarks/byte-pack/physical_t5.py"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: physical-t5-performance-${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  physical-t5-measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sens-t5-benchmark
+
+      - name: Build production physical SENS executables (release)
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+
+      - name: Measure packed T5 execution, decode and code size
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/byte-pack/physical_t5.py \
+            --sens target/release/sens \
+            --trit target/release/sens-trit \
+            --out "$RUNNER_TEMP/physical-t5-bench" \
+            --warmup 4 \
+            --reps 25
+
+      - name: Publish measured summary
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/physical-t5-bench/report.md"; then
+            cat "$RUNNER_TEMP/physical-t5-bench/report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No measurements: build or parity blocked; no speed claim." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload raw timings, SHA and statistics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-t5-bench-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/physical-t5-bench/
+          if-no-files-found: warn
+          retention-days: 14
