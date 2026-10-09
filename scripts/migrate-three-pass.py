@@ -597,6 +597,17 @@ class Resolver:
             self.counts["pass1-sens8"]+=1
             return [ident[0]],"pass1-sens8"
 
+        # L4: legacy helper names may take only an admitted D8 coordinate.
+        # Otherwise a separately proven D3-law expansion is required; this
+        # pass cannot invent one. Direct exact D4 NULL remains a distinct word.
+        if self.strict_decisions and t.lower() in {"equal?", "null"}:
+            item = self.my.get(t)
+            if item is None or item[1] != "D8" or item[0] not in self.admitted_d8:
+                raise MigrationError(
+                    f"L4 BLOCK: helper {t!r} lacks a verified callable D8 resident; "
+                    "requires generator-backed D3 law expansion, not an ad-hoc rewrite",
+                    tok,
+                )
         # Pass 2: known my-lisp/current admitted surfaces. A surface known to
         # the old registry but lacking a current resident is a blocker.
         if t in self.my:
