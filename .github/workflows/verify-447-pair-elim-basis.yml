@@ -1,0 +1,131 @@
+name: Verify 447 pair eliminator basis
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-447-pair-elim-basis.yml'
+      - 'docs/research/447/**'
+
+jobs:
+  pair-elim-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Current CAR non-pair boundary is named Type failure
+        shell: bash
+        run: |
+          printf '%s\n' '(car (quote ()))' > /tmp/car-nonpair.lisp
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- /tmp/car-nonpair.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$status" -ne 0
+          printf '%s\n' "$output" | grep -Eqi 'Type|expects a non-empty list|ochikuie neporozhnii spysok'
+
+      - name: Current CDR non-pair boundary is named Type failure
+        shell: bash
+        run: |
+          printf '%s\n' '(cdr (quote atom-value))' > /tmp/cdr-nonpair.lisp
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- /tmp/cdr-nonpair.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          test "$status" -ne 0
+          printf '%s\n' "$output" | grep -Eqi 'Type|expects a non-empty list|ochikuie neporozhnii spysok'
+
+      - name: Execute bidirectional pair-eliminator model
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          TYPE = ('error', 'Type')
+
+          def pair(left, right):
+              return ('pair', left, right)
+
+          def is_pair(value):
+              return isinstance(value, tuple) and len(value) == 3 and value[0] == 'pair'
+
+          def car(value):
+              return value[1] if is_pair(value) else TYPE
+
+          def cdr(value):
+              return value[2] if is_pair(value) else TYPE
+
+          # Candidate primitive model: the one new structural law exposes the
+          # two coordinates to already-existing ordinary two-argument application.
+          def pair_elim(value, selector):
+              if not is_pair(value):
+                  return TYPE
+              return selector(value[1], value[2])
+
+          def car_derived(value):
+              return pair_elim(value, lambda left, right: left)
+
+          def cdr_derived(value):
+              return pair_elim(value, lambda left, right: right)
+
+          # Reverse definability over the current projector basis.
+          def pair_elim_derived(value, selector):
+              left = car(value)
+              if left == TYPE:
+                  return TYPE
+              right = cdr(value)
+              if right == TYPE:
+                  return TYPE
+              return selector(left, right)
+
+          fresh_left = ('fresh', 'left', 1)
+          fresh_right = ('fresh', 'right', 2)
+          admitted = [
+              pair('a', 'b'),
+              pair('a', pair('b', ('nil',))),
+              pair(pair('a', 'b'), pair('c', 'd')),
+              pair(fresh_left, 'stable-right'),
+              pair('stable-left', fresh_right),
+          ]
+          rejected = [('nil',), 'atom-value', 'string-value', 42]
+
+          for value in admitted:
+              assert car_derived(value) == car(value), ('car mismatch', value)
+              assert cdr_derived(value) == cdr(value), ('cdr mismatch', value)
+
+          for value in rejected:
+              assert car_derived(value) == car(value) == TYPE, ('car error mismatch', value)
+              assert cdr_derived(value) == cdr(value) == TYPE, ('cdr error mismatch', value)
+
+          selectors = {
+              'left': lambda left, right: left,
+              'right': lambda left, right: right,
+              're-pair': lambda left, right: pair(left, right),
+              'swap': lambda left, right: pair(right, left),
+              'constant': lambda left, right: 'constant',
+              'nested': lambda left, right: pair(pair(left, right), left),
+          }
+
+          for value in admitted + rejected:
+              for name, selector in selectors.items():
+                  direct = pair_elim(value, selector)
+                  reverse = pair_elim_derived(value, selector)
+                  assert direct == reverse, (value, name, direct, reverse)
+
+          assert car_derived(pair(fresh_left, 'r')) == fresh_left
+          assert cdr_derived(pair('l', fresh_right)) == fresh_right
+
+          print('(candidate-to-current pass)')
+          print('(current-to-candidate pass)')
+          print('(fresh-payload pass)')
+          print('(non-pair-boundary pass)')
+          print('(primitive-entry-count 2-to-1)')
+          print('(expressive-closure observed-bidirectional)')
+          print('(classification basis-exchange-only)')
+          PY
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
