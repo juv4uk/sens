@@ -10,7 +10,6 @@ crates/my-lisp/tests/content_store_authority.rs	content_store_mechanism_keeps_de
 crates/my-lisp/tests/mccarthy.rs	division_is_an_exact_reduced_rational	semantic-authority	exact-arithmetic	tests/fixtures/conformance.lisp	pending
 crates/my-lisp/tests/mccarthy.rs	division_by_zero_has_the_contract_3_named_error	semantic-authority	named-error	tests/fixtures/conformance.lisp	pending
 crates/my-lisp/tests/mccarthy.rs	comparison_with_no_arguments_is_an_arity_error	semantic-authority	named-error	tests/fixtures/conformance.lisp	pending
-crates/sens/tests/mccarthy.rs	bare_large_integer_literals_remain_exact	observer	exact-literal-roundtrip	current exact-number witness; no t/NIL equality expectation	retained
 crates/my-lisp/tests/mccarthy.rs	read_parses_text_into_data_without_evaluating_it	semantic-authority	reader-semantics	future Lisp witness row	pending
 crates/my-lisp/tests/mccarthy.rs	read_rejects_non_string_arguments_and_multi_expression_input	semantic-authority	reader-errors	future Lisp witness rows	pending
 crates/my-lisp/tests/mccarthy.rs	print_appends_to_output_and_returns_its_argument	mixed	value+output semantics	split semantic witness from transcript mechanism	pending
@@ -169,6 +168,5 @@ crates/my-lisp/tests/sens_host_registration_admission_1406.rs	host_registration_
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	core3_loader_selects_core3_only_after_the_profile_layer_loads	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	lexical_child_shares_selected_core3_signal	observer	selected-core3-profile-mechanism	contracts/core3-profile-contract.lisp	migrated
 crates/my-lisp/tests/core3_profile_runtime_1414.rs	later_explicit_core4_load_replaces_core3_signal_without_implicit_fallback	observer	selected-core3-profile-mechanism	contracts/core-profile-contract.lisp	migrated
-crates/sens/tests/semantic_coordinate_law_axis.rs	coordinate_rows_use_current_function_ids_without_minting_new_identity	observer	function8-boundary-noninterference	lib/surface/semantic-registry.lisp	retained
 crates/sens/tests/machine_asm_differential.rs	gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus	mechanism	external-assembler-byte-witness	lib/machine/encoding/x86-64.lisp + GAS/NASM test-only observers	retained
 crates/sens/tests/machine_semantic_effect_lowering.rs	current_foundation_runtime_identity_and_effect_router_agree	observer	semantic-to-machine-effect-boundary	knowledge/d1-d9-foundation.json + lib/machine/lowering/semantic-effects.lisp	retained
