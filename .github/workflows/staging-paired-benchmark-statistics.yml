@@ -1,0 +1,33 @@
+name: STAGED paired statistics self-test (no performance verdict)
+
+# PR-only evidence. Does not change immutable L0 or claim a performance win.
+# Merge this tooling only AFTER #5224's same-SHA L0 exit conditions pass.
+on:
+  pull_request:
+    paths:
+      - "benchmarks/packed-vs-visible/paired_effect_ci.py"
+      - "tests/test_paired_effect_ci.py"
+      - "docs/benchmark-measurement-standard.uk.md"
+      - ".github/workflows/staging-paired-benchmark-statistics.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-statistics-not-performance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify deterministic paired inference and reject fake evidence
+        run: python3 -m unittest discover -s tests -p 'test_paired_effect_ci.py' -v
+      - name: Summarize limits, not a fake green L0
+        run: |
+          {
+            echo "## Paired statistics staging"
+            echo
+            echo "This job validates only the timing-sample reporter."
+            echo "It does not measure SENS performance or certify language semantics."
+            echo "It cannot replace immutable L0, Hosted CI or native UD2 fail-closed."
+          } >> "$GITHUB_STEP_SUMMARY"
