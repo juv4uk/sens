@@ -71,7 +71,9 @@
               (00000001 translation-symbol-boundary-witness)
               (00100111 (00000001 case) (00000101 row))
               (00100111 (00000001 actual) (00101111 row))
-              (00100111 (00000001 expected) (00110000 row)))))))))))(00001001 translation-symbol-boundary-witness
+              (00100111 (00000001 expected) (00110000 row))))))))))
+
+(00001001 translation-symbol-boundary-witness
   (00001000 ()
     (translation-symbol-boundary-check
       (translation-symbol-boundary-rows))))
