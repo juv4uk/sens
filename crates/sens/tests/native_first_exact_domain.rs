@@ -102,7 +102,7 @@ fn physical_d3_quote_executes_as_packed_bytes_with_exact_word_boundaries() {
     let words = decode_ternary_program(D3_QUOTE_T5)
         .expect("committed physical D3 QUOTE must pass strict D2 grammar");
     let exact = words.iter().map(ToString::to_string).collect::<Vec<_>>();
-    assert_eq!(exact, ["10", "001", "00", "000", "01"]);
+    assert_eq!(exact.join(" "), "10 001 00 000 01");
     assert_eq!(
         encode_binary_projection_ternary("10 001 00 000 01")
             .expect("canonical physical encoder"),
