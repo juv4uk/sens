@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value, PredicateBit, Bit1, DomainIdentity};
+use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -18,32 +18,19 @@ pub(crate) enum SidRouteKind {
     SpecialForm,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) struct SidRoute {
-    pub sid: Sens8,
-    pub kind: SidRouteKind,
-}
-
-/// Mechanical route metadata for the historical seven slots that currently
-/// need special evaluator handling. The rows are keyed only by Sens8.
-pub(crate) const SID_ROUTES: [SidRoute; 7] = [
-    SidRoute { sid: crate::sens!(00000001), kind: SidRouteKind::SpecialForm },
-    SidRoute { sid: crate::sens!(00000010), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000011), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000100), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000101), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000110), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000111), kind: SidRouteKind::SpecialForm },
-];
-
+/// Сумісний transport не містить власної таблиці семантичних ролей.
+/// Координата береться лише з чинної ратифікованої драбини D3.
 pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
-    let index = sid.packed_byte().checked_sub(1)? as usize;
-    let row = SID_ROUTES.get(index)?;
-    debug_assert_eq!(
-        row.sid, sid,
-        "SID route rows must stay aligned with 00000001..00000111"
-    );
-    Some(row.kind)
+    let CoreDomainIdentity::D3(word) =
+        semantic_registry::compatibility_d3_route_from_ratified_domains(sid)?
+    else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b001 | 0b110 => Some(SidRouteKind::SpecialForm),
+        0b010 | 0b011 | 0b100 | 0b101 | 0b111 => Some(SidRouteKind::ValueCall),
+        _ => None,
+    }
 }
 
 /// Optional source/UI routing only. The returned value is the function SID;
@@ -289,19 +276,6 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
-fn prim_equal(
-    args: &[Value],
-    _env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00100010), args, 2, span)?;
-    let bit = Bit1::new(u8::from(args[0] == args[1])).expect("boolean fits D1");
-    Ok(Value::DomainIdentity(DomainIdentity::D1(
-        PredicateBit::from_word(bit),
-    )))
-}
-
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum DomainPrimitiveKind {
     Equal,
@@ -334,13 +308,46 @@ pub(crate) fn domain_primitive_kind(
     }
 }
 
-fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
-    match domain_primitive_kind(identity)? {
-        DomainPrimitiveKind::AtomPredicate => Some(prim_00000010),
-        DomainPrimitiveKind::AtomEquality => Some(prim_00000011),
-        DomainPrimitiveKind::PairConstruct => Some(prim_00000100),
-        DomainPrimitiveKind::Equal => Some(prim_equal),
-    }
+/// Exact-domain primitive execution never reconstructs an historical SID8.
+/// The domain and its exact binary word select the already-admitted mechanism;
+/// historical byte dispatch is confined to invoke_semantic_ref below.
+fn invoke_domain_primitive(
+    identity: CoreDomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let kind = domain_primitive_kind(identity)?;
+    Some((|| {
+        let expected = match kind {
+            DomainPrimitiveKind::AtomPredicate => 1,
+            DomainPrimitiveKind::AtomEquality => 2,
+            DomainPrimitiveKind::PairConstruct => 2,
+            DomainPrimitiveKind::Equal => 2,
+        };
+        if args.len() != expected {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!(
+                    "{identity}: expected {expected} arguments; received {}",
+                    args.len()
+                ),
+                span,
+            ));
+        }
+        match kind {
+            DomainPrimitiveKind::AtomPredicate => {
+                Ok(special_forms::atom_value(&args[0], environment))
+            }
+            DomainPrimitiveKind::AtomEquality => {
+                special_forms::eq_values(args[0].clone(), args[1].clone(), span)
+            }
+            DomainPrimitiveKind::PairConstruct => {
+                special_forms::cons_values(args[0].clone(), args[1].clone(), environment, span)
+            }
+            DomainPrimitiveKind::Equal => Ok(Value::predicate_bit(args[0] == args[1])),
+        }
+    })())
 }
 
 /// Canonical value-call mechanism bridge for migrated exact-domain identities.
@@ -364,95 +371,17 @@ fn canonicalize_domain_result(
     value: Value,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    if !has_language_result_boundary(identity) {
+    if !has_language_result_boundary(identity) || value.as_predicate_bit().is_some() {
         return Ok(value);
     }
 
-    // Already-canonical D1 passes through.  Transitional compatibility
-    // carriers are accepted only at the exact operation boundary that owns
-    // their migration; no generic Number/list/NIL -> D1 coercion exists.
-    if value.as_predicate_bit().is_some() {
-        return Ok(value);
-    }
-
-    match identity {
-        CoreDomainIdentity::D3(word) => {
-            let bits = word.word().packed_bits();
-
-            // The historical D3 primitive mechanism still returns the old
-            // one-element exact-number answer carrier.  Exact-domain callers
-            // receive only D1.  Legacy SID callers never pass this boundary.
-            let legacy_bit = match &value {
-                Value::Pair(head, tail) if matches!(tail.as_ref(), Value::Nil) => {
-                    match head.as_ref() {
-                        Value::Number(number, crate::Exactness::Exact) if *number == 0.0 => {
-                            Some(false)
-                        }
-                        Value::Number(number, crate::Exactness::Exact) if *number == 1.0 => {
-                            Some(true)
-                        }
-                        _ => None,
-                    }
-                }
-                _ => None,
-            };
-            if let Some(bit) = legacy_bit {
-                return Ok(Value::predicate_bit(bit));
-            }
-
-            // Exact D3:010 ATOM classifies structural empty as an atom.  The
-            // old active mechanism represented that case as NIL/unknown.
-            if bits == 0b010 && matches!(value, Value::Nil) {
-                return Ok(Value::predicate_bit(true));
-            }
-
-            Err(LanguageError::new(
-                ErrorKind::Type,
-                format!(
-                    "exact D3 predicate must return D1 PredicateBit at the domain boundary, got {value}"
-                ),
-                span,
-            ))
-        }
-        CoreDomainIdentity::D5(word) => {
-            let bits = word.word().packed_bits();
-
-            if bits == 0b11101 {
-                // #3060: MEMBER search/equality remains Lisp-owned. This boundary
-                // upgrades only its transitional t/() carrier into exact D1.
-                if matches!(&value, Value::Symbol(symbol) if symbol.as_ref() == "t") {
-                    return Ok(Value::predicate_bit(true));
-                }
-                if matches!(&value, Value::Nil) {
-                    return Ok(Value::predicate_bit(false));
-                }
-
-                return Err(LanguageError::new(
-                    ErrorKind::Type,
-                    format!(
-                        "D5 MEMBER must return exact D1 PredicateBit (legacy t/() accepted only at migration boundary), got {value}"
-                    ),
-                    span,
-                ));
-            }
-
-            if matches!(bits, 0b11010 | 0b11011) {
-                // #1716/#1826: LESSP/GREATERP producers now emit D1 directly.
-                // Any non-D1 result is a regression; numeric 0/1 is no longer
-                // an admitted migration carrier at this exact-domain boundary.
-                return Err(LanguageError::new(
-                    ErrorKind::Type,
-                    format!(
-                        "D5 order predicate must return exact D1 PredicateBit at the domain boundary, got {value}"
-                    ),
-                    span,
-                ));
-            }
-
-            Ok(value)
-        }
-        _ => Ok(value),
-    }
+    // Контракт 11.8: Rust перевіряє тільки тип межі D1.
+    // Старі t/(), числові й спискові відповіді не перетворюються на предикат.
+    Err(LanguageError::new(
+        ErrorKind::Type,
+        format!("exact domain predicate must return D1 PredicateBit; got {value}"),
+        span,
+    ))
 }
 
 /// Compact-derived bootstrap law ratified at D4:1110 LIST / D4:1111 APPEND.
@@ -522,18 +451,12 @@ pub(crate) fn invoke_domain_identity(
         return canonicalize_domain_result(identity, value, span);
     }
 
-    if let Some(result) = super::d5_predicates::invoke(identity, args, span) {
-        let value = result?;
-        return canonicalize_domain_result(identity, value, span);
-    }
-
     if let Some(result) = super::d6_arithmetic::invoke(identity, args, environment, span) {
         return result;
     }
 
-    if let Some(primitive) = domain_primitive(identity) {
-        let value = primitive(args, environment, span)?;
-        return canonicalize_domain_result(identity, value, span);
+    if let Some(result) = invoke_domain_primitive(identity, args, environment, span) {
+        return canonicalize_domain_result(identity, result?, span);
     }
 
     if let Some(bound) = environment.domain_code_slot(identity) {
@@ -572,18 +495,6 @@ pub(crate) fn invoke_semantic_ref(
         Some(Value::Closure(closure)) => return closures::apply_values(closure.clone(), args, span),
         Some(Value::Builtin(builtin)) => return (builtin.func)(args, environment, span),
         _ => {}
-    }
-
-    // Explicit compatibility adapter: once a historical byte has a proven
-    // exact-domain successor, the old spelling delegates to that one
-    // canonical mechanism. We do not dual-bind the language definition into
-    // both legacy and domain slots.
-    if let Some(identity) =
-        semantic_registry::legacy_domain_identity_from_registry_byte(sid.packed_byte())
-    {
-        if environment.domain_code_slot(identity).is_some() || domain_primitive(identity).is_some() {
-            return invoke_domain_identity(identity, args, environment, span);
-        }
     }
 
     if let Some(profile) = environment.selected_core_profile() {
@@ -632,7 +543,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let direct_d5_binding = semantic_registry::d5_binding_identity_for_definition(name);
     if let Some(identity) = direct_d5_binding {
         if super::necessary_forms::identity_for_domain_identity(identity).is_none()
-            && domain_primitive(identity).is_none()
+            && domain_primitive_kind(identity).is_none()
             && !super::d5_arithmetic::has_mechanism(identity)
         {
             environment.bind_domain_code_slot_once(identity, value.clone());
@@ -640,7 +551,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     }
 
     if let Some(identity) = semantic_registry::domain_identity_for_surface(name) {
-        if domain_primitive(identity).is_some()
+        if domain_primitive_kind(identity).is_some()
             || super::necessary_forms::identity_for_domain_identity(identity).is_some()
         {
             return;
@@ -661,33 +572,13 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
-    // #3070 transitional bootstrap.
-    //
-    // Canonical storage/routing is the exact D5 slot. The historical code slot
-    // is only a mechanism alias to the SAME Value/Rc so recursive legacy Core
-    // bodies keep their old shallow dispatch path while source migration is
-    // incomplete. It does not mint a second semantic identity, and #3062
-    // removes this alias when exact-domain source/registry routing is complete.
-    if let Some(identity) =
-        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
-    {
+    // No byte-to-domain lookup is permitted here. The only D5 identity
+    // originates in the generated, domain-qualified Lisp definition bindings
+    // above; the SID slot is merely a temporary alias for unmigrated callers.
+    if let Some(identity) = direct_d5_binding {
         if super::necessary_forms::identity_for_domain_identity(identity).is_some() {
             return;
         }
-
-        if let Some(direct_identity) = direct_d5_binding {
-            assert_eq!(
-                direct_identity, identity,
-                "D5 definition binding projection disagrees with compatibility binding for {name}"
-            );
-        } else if domain_primitive(identity).is_none()
-            && !super::d5_arithmetic::has_mechanism(identity)
-        {
-            environment.bind_domain_code_slot_once(identity, value.clone());
-        }
-
-        // Temporary compatibility alias for still-unmigrated callers.
-        // It supplies no semantic identity and may disappear independently.
         environment.bind_code_slot_once(sid, value.clone());
         return;
     }
@@ -698,267 +589,27 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     environment.bind_code_slot_once(sid, value.clone());
 }
 
+
 #[cfg(test)]
-mod tests {
+mod exact_domain_primitive_tests {
     use super::*;
 
+    fn d3(bits: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(bits).expect("D3 word"),
+        ))
+    }
+
     #[test]
-    fn d5_member_result_boundary_accepts_only_predicate_semantics() {
-        let member = CoreDomainIdentity::D5(crate::CoreD5::from_word(
-            crate::Bit5::new(0b11101).unwrap(),
-        ));
-        let assoc = CoreDomainIdentity::D5(crate::CoreD5::from_word(
-            crate::Bit5::new(0b11100).unwrap(),
-        ));
+    fn domain_primitive_arity_diagnostic_carries_domain_not_historical_sid() {
+        let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
-
-        let yes = canonicalize_domain_result(
-            member,
-            Value::Symbol(std::rc::Rc::from("t")),
-            span,
-        )
-        .expect("legacy YES carrier should normalize");
-        let no = canonicalize_domain_result(member, Value::Nil, span)
-            .expect("legacy NO carrier should normalize");
-        assert_eq!(yes.as_predicate_bit(), Some(true));
-        assert_eq!(no.as_predicate_bit(), Some(false));
-
-        let already_exact = Value::predicate_bit(true);
-        assert_eq!(
-            canonicalize_domain_result(member, already_exact.clone(), span).unwrap(),
-            already_exact
-        );
-
-        let numeric_truth = Value::Number(1.0, crate::Exactness::Exact);
-        let error = canonicalize_domain_result(member, numeric_truth, span)
-            .expect_err("Number 1 must never collapse into D1 YES");
-        assert_eq!(error.kind, ErrorKind::Type);
-
-        let assoc_pair = Value::list([
-            Value::Symbol(std::rc::Rc::from("key")),
-            Value::Symbol(std::rc::Rc::from("value")),
-        ]);
-        assert_eq!(
-            canonicalize_domain_result(assoc, assoc_pair.clone(), span).unwrap(),
-            assoc_pair,
-            "non-MEMBER D5 results must pass through unchanged"
-        );
-    }
-
-    #[test]
-    fn exact_d5_order_predicates_cross_only_as_d1() {
-        let d5 = |bits| {
-            CoreDomainIdentity::D5(crate::CoreD5::from_word(crate::Bit5::new(bits).unwrap()))
-        };
-        let span = Span { start: 0, end: 0 };
-        let env = Environment::root();
-
-        let less_yes = invoke_domain_identity(
-            d5(0b11010),
-            &[
-                Value::Number(2.0, crate::Exactness::Exact),
-                Value::Number(3.0, crate::Exactness::Exact),
-            ],
-            &env,
-            span,
-        )
-        .expect("D5 LESSP exact-rational path");
-        let less_no = invoke_domain_identity(
-            d5(0b11010),
-            &[
-                Value::Number(3.0, crate::Exactness::Exact),
-                Value::Number(2.0, crate::Exactness::Exact),
-            ],
-            &env,
-            span,
-        )
-        .expect("D5 LESSP false path");
-        let greater_yes = invoke_domain_identity(
-            d5(0b11011),
-            &[
-                Value::Number(3.0, crate::Exactness::Exact),
-                Value::Number(2.0, crate::Exactness::Exact),
-            ],
-            &env,
-            span,
-        )
-        .expect("D5 GREATERP exact-rational path");
-
-        assert_eq!(less_yes.as_predicate_bit(), Some(true));
-        assert_eq!(less_no.as_predicate_bit(), Some(false));
-        assert_eq!(greater_yes.as_predicate_bit(), Some(true));
-
-        let inexact = invoke_domain_identity(
-            d5(0b11010),
-            &[
-                Value::Number(2.0, crate::Exactness::Inexact),
-                Value::Number(3.0, crate::Exactness::Inexact),
-            ],
-            &env,
-            span,
-        )
-        .expect_err("inexact/unknown order must not silently collapse into D1 NO");
-        assert_eq!(inexact.kind, ErrorKind::Type);
-
-        let numeric_truth = canonicalize_domain_result(
-            d5(0b11101),
-            Value::Number(1.0, crate::Exactness::Exact),
-            span,
-        )
-        .expect_err("MEMBER must not accept numeric 1 as predicate truth");
-        assert_eq!(numeric_truth.kind, ErrorKind::Type);
-    }
-
-    #[test]
-    fn canonical_d3_primitive_route_is_role_aware_not_numeric_projection() {
-        let d3 = |bits| {
-            CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(bits).unwrap()))
-        };
-
-        assert_eq!(
-            domain_primitive_kind(d3(0b010)),
-            Some(DomainPrimitiveKind::AtomPredicate)
-        );
-        assert_eq!(
-            domain_primitive_kind(d3(0b101)),
-            Some(DomainPrimitiveKind::AtomEquality)
-        );
-        assert_eq!(
-            domain_primitive_kind(d3(0b111)),
-            Some(DomainPrimitiveKind::PairConstruct)
-        );
-
-        assert!(domain_primitive(d3(0b010)).is_some()); // ATOM
-        assert!(domain_primitive(d3(0b101)).is_some()); // EQ
-        assert!(domain_primitive(d3(0b111)).is_some()); // CONS
-        assert!(domain_primitive(d3(0b100)).is_none()); // CAR -> selector law
-        assert!(domain_primitive(d3(0b011)).is_none()); // CDR -> selector law
-        assert!(domain_primitive(d3(0b001)).is_none()); // QUOTE syntax
-        assert!(domain_primitive(d3(0b110)).is_none()); // COND syntax
-
-        let d4_same_payload = CoreDomainIdentity::D4(crate::CoreD4::from_word(
-            crate::Bit4::new(0b0010).unwrap(),
-        ));
-        assert_eq!(domain_primitive_kind(d4_same_payload), None);
-        assert!(domain_primitive(d4_same_payload).is_none());
-    }
-
-    #[test]
-    fn exact_d3_predicate_results_cross_only_as_d1() {
-        let d3 = |bits| {
-            CoreDomainIdentity::D3(crate::Bija3::from_word(crate::Bit3::new(bits).unwrap()))
-        };
-        let span = Span { start: 0, end: 0 };
-        let env = Environment::root();
-
-        let atom_yes = invoke_domain_identity(d3(0b010), &[Value::Nil], &env, span)
-            .expect("D3:010 must classify structural empty");
-        assert_eq!(atom_yes.as_predicate_bit(), Some(true));
-
-        let atom_no = invoke_domain_identity(
-            d3(0b010),
-            &[Value::list([Value::Number(1.0, crate::Exactness::Exact)])],
-            &env,
-            span,
-        )
-        .expect("D3:010 must classify pairs");
-        assert_eq!(atom_no.as_predicate_bit(), Some(false));
-
-        let left = Value::Symbol(std::rc::Rc::from("x"));
-        let same = Value::Symbol(std::rc::Rc::from("x"));
-        let other = Value::Symbol(std::rc::Rc::from("y"));
-
-        let equal = invoke_domain_identity(d3(0b101), &[left.clone(), same], &env, span)
-            .expect("D3:101 equal atoms");
-        let different = invoke_domain_identity(d3(0b101), &[left, other], &env, span)
-            .expect("D3:101 distinct atoms");
-        assert_eq!(equal.as_predicate_bit(), Some(true));
-        assert_eq!(different.as_predicate_bit(), Some(false));
-
-        assert!(has_language_result_boundary(d3(0b010)));
-        assert!(has_language_result_boundary(d3(0b101)));
-        assert!(!has_language_result_boundary(d3(0b100)));
-
-        let number = Value::Number(1.0, crate::Exactness::Exact);
-        let error = canonicalize_domain_result(d3(0b101), number, span)
-            .expect_err("bare Number 1 must not collapse into D1");
-        assert_eq!(error.kind, ErrorKind::Type);
-    }
-
-    #[test]
-    fn d8_non_selector_without_mechanism_fails_closed() {
-        let identity = CoreDomainIdentity::D8(crate::CoreD8::from_word(
-            crate::Bit8::new(0b00000000).unwrap(),
-        ));
-        let error = invoke_domain_identity(
-            identity,
-            &[],
-            &Environment::root(),
-            Span { start: 0, end: 0 },
-        )
-        .expect_err("D8 width alone must not grant a value-call mechanism");
-
-        assert_eq!(error.kind, ErrorKind::Type);
-        assert!(error
-            .message
-            .contains("domain identity has no admitted value-call mechanism"));
-    }
-
-    #[test]
-    fn sid_zero_is_not_owned_by_route_metadata() {
-        assert_eq!(route_kind_for_sid(crate::sens!(00000000)), None);
-        assert_eq!(SID_ROUTES[0].sid, crate::sens!(00000001));
-    }
-
-    #[test]
-    fn route_metadata_is_keyed_only_by_exact_sid() {
-        assert_eq!(
-            route_kind_for_sid(crate::sens!(00000001)),
-            Some(SidRouteKind::SpecialForm)
-        );
-        assert_eq!(
-            route_kind_for_sid(crate::sens!(00000101)),
-            Some(SidRouteKind::ValueCall)
-        );
-        assert_eq!(route_kind_for_sid(crate::sens!(00001100)), None);
-    }
-
-    #[test]
-    fn every_surface_for_sid_00000101_routes_back_to_that_sid() {
-        let surfaces =
-            semantic_registry::admitted_surfaces_for_semantic_id(crate::sens!(00000101));
-        assert!(surfaces.len() >= 2, "expected multiple routing surfaces");
-        for surface in &surfaces {
-            assert_eq!(
-                routed_sid_for_surface(surface),
-                Some(crate::sens!(00000101))
-            );
-        }
-    }
-
-    #[test]
-    fn surfaces_for_sid_routes_are_reserved_mechanically() {
-        for sid in [
-            crate::sens!(00000001),
-            crate::sens!(00000010),
-            crate::sens!(00000011),
-            crate::sens!(00000100),
-            crate::sens!(00000101),
-            crate::sens!(00000110),
-            crate::sens!(00000111),
-        ] {
-            for surface in semantic_registry::admitted_surfaces_for_semantic_id(sid) {
-                assert!(is_reserved_surface(surface));
-                assert!(surface_has_sid(surface, sid));
-            }
-        }
-        assert!(!is_reserved_surface("map"));
-    }
-
-    #[test]
-    fn plus_surface_is_not_bindable_after_m8() {
-        let span = Span { start: 0, end: 1 };
-        assert!(ensure_bindable("+", span).is_err());
-        assert!(ensure_bindable("-", span).is_err());
+        let identity = d3(0b010);
+        let error = invoke_domain_primitive(identity, &[], &environment, span)
+            .expect("D3 ATOM admitted")
+            .expect_err("arity mismatch must fail");
+        assert_eq!(error.kind, ErrorKind::Arity);
+        assert!(error.message.contains(&identity.to_string()));
+        assert!(!error.message.contains("00000010"));
     }
 }

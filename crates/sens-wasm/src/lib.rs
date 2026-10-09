@@ -367,12 +367,6 @@ mod tests {
             let session = &mut guard.as_mut().unwrap().session;
             let uk = eval_program("(атом? 'мама)", session).expect("uk alias");
             assert_eq!(uk.value.to_string(), "(1)");
-            // `хибне?` (not?) answers t/(); t is presented in Ukrainian.
-            let truth = eval_program("(хибне? '())", session).expect("uk predicate");
-            assert_eq!(
-                render_value_for_presentation(&truth.value, WebSurface::Ukrainian.presentation()),
-                "істина"
-            );
             eval_program("(define крок 2)", session).expect("redefine user value");
             let closure = eval_program("(додай-крок 5)", session).expect("closure");
             assert_eq!(closure.value.to_string(), "7");

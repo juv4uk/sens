@@ -5,22 +5,14 @@ set -euo pipefail
 # expectations through host observers. It deliberately does not run legacy
 # host-authored Canon truth assertions; deep/current-contract lanes retain
 # broader mechanism and integration evidence.
+# Rust verifies the physical domain ladder and exact-domain separation only.
+# Semantic laws and application logic are owned by Lisp witnesses below.
 cargo test -p sens \
-  --test d1_canonical_source_value \
-  --test witness_authority \
-  --test structural_observation_contract \
-  --test exact_q_binary_contract \
-  --test mathematical_result_taxonomy \
-  --test canon_laws_v2_contract \
-  --test reason_honesty_contract \
-  --test unification_outcome_contract \
-  --test knowledge_clause_kind_contract \
-  --test content_store_authority \
-  --test decimal_comma_authority \
-  --test epistemic \
-  --test authority_guard_contract \
-  --test semantic_ref_fail_closed \
-  --test semantic_coordinate_matrix_845
+  --test domain_ladder \
+  --test domain_ladder_only_kernel \
+  --test domain_width_authority_test \
+  --test domain_ast_value_identity \
+  --test d7_w7_pack
 
 
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,

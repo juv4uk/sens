@@ -10,12 +10,6 @@ path = "src/lib.rs"
 
 [features]
 default = []
-# Historical Rust-side evidence schemas are opt-in adapters, not part of the
-# zero-runtime-dependency semantic core.
-legacy-evidence-schemas = ["dep:serde"]
-
-[dependencies]
-serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
 # Tests may opt into the explicit host capability crate, while the shipped

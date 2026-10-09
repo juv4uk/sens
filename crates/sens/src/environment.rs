@@ -66,17 +66,9 @@ pub enum CoreProfile {
     Core4,
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub(crate) enum CondClauseMode {
-    #[default]
-    CurrentMigration,
-    Core2LegacyTwoPart,
-}
-
 #[derive(Debug, Default)]
 struct Limits {
     selected_core_profile: Option<CoreProfile>,
-    cond_clause_mode: CondClauseMode,
     cons_limit: Option<usize>,
     cons_count: usize,
     numeric_bit_limit: Option<usize>,
@@ -108,11 +100,6 @@ impl Environment {
             })),
             Rc::new(RefCell::new(Limits::default())),
         );
-        // `t` is the canonical truth value itself, not a variable that
-        // merely holds one: bound to the symbol `t` (self-referential),
-        // so `t` evaluates to `Symbol("t")` -- the exact value `eq`/`atom`
-        // (Value::truth) already return for true.
-        environment.define("t", Value::Symbol(Rc::from("t")));
         environment
     }
 
@@ -217,14 +204,6 @@ impl Environment {
     /// Mechanism-only selector. Core meaning remains owned by SENS contracts.
     pub(crate) fn select_core_profile(&self, profile: CoreProfile) {
         self.2.borrow_mut().selected_core_profile = Some(profile);
-    }
-
-    pub(crate) fn set_cond_clause_mode(&self, mode: CondClauseMode) {
-        self.2.borrow_mut().cond_clause_mode = mode;
-    }
-
-    pub(crate) fn cond_clause_mode(&self) -> CondClauseMode {
-        self.2.borrow().cond_clause_mode
     }
 
     /// Native root sessions are unrestricted (`None`). An embedding can set
@@ -533,12 +512,6 @@ mod tests {
             env.domain_code_slot(d4),
             Some(Value::Symbol(Rc::from("d4-one")))
         );
-    }
-
-    #[test]
-    fn root_predefines_t_as_the_self_evaluating_truth_symbol() {
-        let root = Environment::root();
-        assert_eq!(root.get("t"), Some(Value::Symbol(Rc::from("t"))));
     }
 
     #[test]

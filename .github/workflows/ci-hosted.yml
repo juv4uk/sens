@@ -79,6 +79,14 @@ jobs:
         run: cargo build -p sens-cli --bin sens
       - name: D7 domain table is canonical-parser re-readable
         run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
+      - name: D7 ratified coordinate and W7 admission
+        run: |
+          python3 scripts/check-d7-current-authority.py
+          python3 scripts/check-domain-tables.py
+          python3 benchmarks/d7-ratification-conformance/validate.py
+          python3 scripts/d7_source_projection.py --check
+          python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
+          cargo test --locked -p sens --test d7_w7_pack --test text7_canonical_wire
       - name: Current Core4 FASL freshness
         run: cargo test -p sens --test core_fasl_freshness -- --nocapture
       - name: Current semantic slice

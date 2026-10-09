@@ -3,12 +3,12 @@
 //! Structural law input comes from the provenance-bound generated projection
 //! merged by #3814.  Host code below only parses/transports that projection
 //! into ordinary SENS values.  SENS code performs the role derivation.
-//! Rust compiler_execution_role remains differential oracle only.
+//! No Rust-authored role oracle is permitted; the role law lives in SENS.
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    compiler_execution_role, domain_identity_shape_mechanism, eval_parsed_expressions,
-    load_core_library, parse_mixed_exact_domain, Bija3, Bit3, Bit4, CompilerExecutionRole, CoreD4,
+    domain_identity_shape_mechanism, eval_parsed_expressions,
+    load_core_library, parse_mixed_exact_domain, Bija3, Bit3, Bit4, CoreD4,
     DomainIdentity, Exactness, Session, Value,
 };
 use std::rc::Rc;
@@ -46,14 +46,6 @@ fn list(items: Vec<Expr>) -> Expr {
 
 fn d3(raw: u8) -> DomainIdentity {
     DomainIdentity::D3(Bija3::from_word(Bit3::new(raw).expect("D3 word")))
-}
-
-fn role_tag(role: CompilerExecutionRole) -> &'static str {
-    match role {
-        CompilerExecutionRole::SelectorHead => "selector-head",
-        CompilerExecutionRole::SelectorTail => "selector-tail",
-        CompilerExecutionRole::PairConstruct => "pair-construct",
-    }
 }
 
 fn quoted_json_string(key: &str) -> String {
@@ -192,35 +184,6 @@ fn d3_empty_identity_decomposes_to_exact_shape() {
     assert_eq!(bit2.as_predicate_bit(), Some(false));
 }
 
-
-#[test]
-fn sens_l1_l5_derivation_matches_rust_oracle_for_all_d3_identities() {
-    let mut session = session();
-
-    for raw in 0u8..=0b111 {
-        let identity = d3(raw);
-        let result = eval_parsed_expressions(&[call_role(identity)], &mut session)
-            .unwrap_or_else(|error| panic!("D3:{raw:03b} law derivation failed: {error:?}"))
-            .value;
-        let oracle = compiler_execution_role(
-            identity
-                .core_operation()
-                .expect("D3 identity has Core operation carrier"),
-        );
-
-        match oracle {
-            Some(role) => assert!(
-                matches!(result, Value::Symbol(ref name) if name.as_ref() == role_tag(role)),
-                "D3:{raw:03b} SENS law must match differential Rust oracle; result={result:?}; expected={}",
-                role_tag(role)
-            ),
-            None => assert!(
-                matches!(result, Value::Nil),
-                "D3:{raw:03b} outside bounded compiler roles must fail closed"
-            ),
-        }
-    }
-}
 
 #[test]
 fn equal_payload_in_d4_does_not_inherit_d3_compiler_role() {

@@ -7,6 +7,9 @@ on:
       - "knowledge/domain-width-authority.generated.json"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
+      - "scripts/check-d7-runtime-projection.py"
+      - "crates/sens/src/d7_display_registry_generated.rs"
+      - "crates/sens/tests/d7_runtime_presentation.rs"
       - "knowledge/d8-ratified.json"
       - "knowledge/d9-ratified.json"
       - "lib/domains/d1.lisp"
@@ -39,6 +42,9 @@ on:
       - "knowledge/domain-width-authority.generated.json"
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
+      - "scripts/check-d7-runtime-projection.py"
+      - "crates/sens/src/d7_display_registry_generated.rs"
+      - "crates/sens/tests/d7_runtime_presentation.rs"
       - "knowledge/d8-ratified.json"
       - "knowledge/d9-ratified.json"
       - "lib/domains/d1.lisp"
@@ -78,6 +84,10 @@ jobs:
         run: cargo test -p sens --test domain_width_authority_test
       - name: Check D1-D5 runtime projection
         run: python3 scripts/check-domain-surfaces-d1-d4.py
+      - name: Check D7 ratified human display projection
+        run: python3 scripts/check-d7-runtime-projection.py
+      - name: Test D7 width and non-callable human presentation
+        run: cargo test --locked -p sens --test d7_runtime_presentation --test d7_w7_pack --test canonical_w7_frame_invariance
       - name: Check D5 authority
         run: python3 scripts/check-domain-surfaces-d5.py
       - name: Check human-surface translation

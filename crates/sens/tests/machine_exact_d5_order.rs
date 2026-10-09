@@ -1,6 +1,5 @@
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, lower_program, parse, Bit5, CoreD5,
-    DomainIdentity, Expr, ExprKind, Session, Span,
+    eval_program, load_core_library, lower_program, parse, Bit5, CoreD5, ExprKind, Session,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -27,24 +26,6 @@ fn machine_session() -> Session {
     session
 }
 
-fn exact_d5_value(bits: u8, args: &str, session: &mut Session) -> sens::Value {
-    let mut parsed = parse(&format!("(__d5_probe__ {args})")).expect("probe payload");
-    let mut form = parsed.remove(0);
-    let ExprKind::List(items) = form.kind else {
-        panic!("probe list");
-    };
-    let mut items = items.to_vec();
-    items[0] = Expr {
-        kind: ExprKind::DomainIdentity(DomainIdentity::D5(CoreD5::from_word(
-            Bit5::new(bits).expect("D5 bits"),
-        ))),
-        span: Span::default(),
-    };
-    form.kind = ExprKind::List(items.into());
-    eval_parsed_expressions(&[form], session)
-        .expect("exact D5 call")
-        .value
-}
 
 fn parse_bytes(rendered: &str) -> Vec<u8> {
     rendered
@@ -114,30 +95,6 @@ fn current_order_surfaces_lower_to_exact_d5_identities() {
         assert_eq!(identity.width(), 5);
         assert_eq!(identity.packed_bits(), expected_bits);
         assert_eq!(args.len(), 2);
-    }
-}
-
-#[test]
-fn exact_d5_order_predicates_cross_the_language_boundary_only_as_d1() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core");
-
-    for (bits, args, expected) in [
-        (0b11010, "2 3", true),
-        (0b11010, "3 2", false),
-        (0b11011, "3 2", true),
-        (0b11011, "2 3", false),
-    ] {
-        let value = exact_d5_value(bits, args, &mut session);
-        assert_eq!(
-            value.as_predicate_bit(),
-            Some(expected),
-            "D5:{bits:05b} must cross as exact D1 PredicateBit"
-        );
-        assert!(
-            !matches!(value, sens::Value::Number(_, _) | sens::Value::Rational(_)),
-            "language-visible order result must not remain numeric 0/1"
-        );
     }
 }
 

@@ -101,7 +101,10 @@ fn preflight(candidate: &str, source: &str) -> Result<(), String> {
     let parsed = parse_source(candidate, source)?;
     let lowered = lower_program(&parsed);
     let semantic_trace = trace_program(&lowered)?;
-    let mut session = prepared_session()?;
+    // This preflight is the bounded D3 domain-ladder smoke (QUOTE/CAR only).
+    // Keep it independent of the full Lisp application library: those language
+    // laws are owned and tested by Lisp witnesses, not by Rust bootstrap here.
+    let mut session = Session::default();
     let result = eval_lowered_expressions(&lowered, &mut session).map_err(|e| format!("{e:?}"))?;
     emit(
         0,

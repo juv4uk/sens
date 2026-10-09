@@ -374,14 +374,6 @@ mod tests {
 
         state.switch_surface(ReplSurface::Ukrainian).expect("uk");
         assert_eq!(value(&mut state, "(атом? 'мама)"), "(1)");
-        // `хибне?` (not?) answers t/(); t is presented in Ukrainian.
-        let truth = eval_program("(хибне? '())", &mut state.session)
-            .expect("immutable Ukrainian Canon predicate")
-            .value;
-        assert_eq!(
-            render_value_for_presentation(&truth, state.surface.presentation()),
-            "істина"
-        );
         // Contract 6.0: canonical spelling is resolver-owned, never a mutable
         // surface-frame alias. Derived Ukrainian vocabulary remains a binding.
         assert!(state.session.environment.get("атом?").is_none());
@@ -389,8 +381,6 @@ mod tests {
         // its code; `вектор-додати` is derived vocabulary bound by uk.lisp.
         assert!(state.session.environment.get("додати").is_none());
         assert!(state.session.environment.get("вектор-додати").is_some());
-        assert_eq!(value(&mut state, "істина"), "t");
-        assert_eq!(value(&mut state, "хиба"), "()");
 
         state.switch_surface(ReplSurface::Core).expect("core");
         assert!(state.session.environment.get("атом?").is_none());

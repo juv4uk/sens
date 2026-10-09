@@ -95,31 +95,33 @@ fn text7_inside_pair_and_vector_round_trips_via_canonical_wire() {
 
 #[test]
 fn canonical_transport_is_layout_independent_while_human_render_is_not() {
-    // One exact cell stream; several human layouts may spell it, but the
-    // canonical transport never depends on a layout.
-    let text = cells(&[0x41, 0x42]);
+    // Use one ratified D7 sound cell whose human projection exists in every
+    // pinned layout: k / क. Equal source spelling "AB" in different alphabets
+    // is NOT an identity law, and must never be treated as such.
+    let text = cells(&[0x00]);
     let token = text.to_canonical_wire_token();
+    assert_eq!(token, "#t7:00");
 
+    let mut spellings = Vec::new();
     for layout in LAYOUTS {
-        if let Ok(spelling) = render_text7(&text, layout) {
-            assert_ne!(
-                spelling, token,
-                "a human layout spelling must not equal canonical transport"
-            );
-            assert!(
-                Text7::from_canonical_wire_token(&spelling).is_err(),
-                "a human layout spelling must not be admitted as canonical transport"
-            );
-        }
-    }
+        let spelling = render_text7(&text, layout)
+            .expect("D7:0000000 has a ratified rendering in every pinned layout");
+        assert_ne!(spelling, token, "human layout must not equal canonical wire");
+        assert!(
+            Text7::from_canonical_wire_token(&spelling).is_err(),
+            "human projection cannot be reinterpreted as canonical transport"
+        );
 
-    // The same exact cells re-encoded through any layout that can spell them
-    // keep one and the same canonical transport.
-    for layout in LAYOUTS {
-        if let Ok(reencoded) = encode_text7("AB", layout) {
-            assert_eq!(reencoded.to_canonical_wire_token(), token);
-        }
+        let reencoded = encode_text7(&spelling, layout)
+            .expect("layout's own ratified rendering must re-encode");
+        assert_eq!(reencoded, text, "exact D7 identity drift in {layout:?}");
+        assert_eq!(reencoded.to_canonical_wire_token(), token);
+        spellings.push(spelling);
     }
+    assert!(
+        spellings.iter().any(|spelling| spelling != &spellings[0]),
+        "distinct human alphabets must remain projections, not encoded identity"
+    );
 }
 
 #[test]

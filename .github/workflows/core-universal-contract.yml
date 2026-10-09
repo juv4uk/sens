@@ -1,17 +1,14 @@
-name: Core universal contract
+name: Canonical D1/D3 contract
 
-# #1664. The Core1–4 shared ATOM/EQ/COND foundation is Lisp-owned law
-# (contracts/core-universal-contract.lisp) and Lisp-owned data
-# (tests/fixtures/semantic/*-v1.lisp, #1709). This lane only refuses to let
-# either drift silently: the structural checker names every missing law value
-# or malformed corpus row, and the corpus is exercised under the profiles it
-# can run under today.
+# Перевірка поточного точного D1/D3 без історичного Function8.
 on:
   pull_request:
     paths:
       - "contracts/core-universal-contract.lisp"
       - "scripts/check-core-universal-contract.py"
       - "tests/fixtures/semantic/*"
+      - "crates/sens/tests/d3_empty_control.rs"
+      - "crates/sens/tests/migration_eq_cond_cohort.rs"
       - "crates/sens/tests/semantic_authority.rs"
       - ".github/workflows/core-universal-contract.yml"
   push:
@@ -20,6 +17,8 @@ on:
       - "contracts/core-universal-contract.lisp"
       - "scripts/check-core-universal-contract.py"
       - "tests/fixtures/semantic/*"
+      - "crates/sens/tests/d3_empty_control.rs"
+      - "crates/sens/tests/migration_eq_cond_cohort.rs"
       - "crates/sens/tests/semantic_authority.rs"
       - ".github/workflows/core-universal-contract.yml"
   workflow_dispatch:
@@ -29,7 +28,7 @@ permissions:
 
 jobs:
   core-universal-contract:
-    name: Core1–4 universal foundation
+    name: D1/D3 exact canonical control
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -39,17 +38,11 @@ jobs:
         with:
           shared-key: core-universal-contract
 
-      - name: Contract states the universal law and the corpus carries it
-        run: python3 scripts/check-core-universal-contract.py
+      - name: Current D1/D3 exact control
+        run: cargo test -p sens --test d3_empty_control -- --nocapture
 
-      - name: Native profile agrees with the Lisp corpus
-        run: cargo test -p sens --test semantic_authority native_semantic_witnesses_agree_with_the_lisp_corpus -- --nocapture
-
-      - name: Core3 profile agrees with the Lisp corpus
-        run: cargo test -p sens --test semantic_authority core3_semantic_witnesses_agree_with_the_lisp_corpus -- --nocapture
-
-      - name: Core2 blocker stays measured, not assumed
-        run: cargo test -p sens --test semantic_authority core2_blocker_is_measured_not_assumed -- --nocapture
+      - name: Current D3 EQ and COND physical T5 witnesses
+        run: cargo test -p sens --test migration_eq_cond_cohort -- --nocapture
 
       - name: Diff hygiene
         run: git diff --check

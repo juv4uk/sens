@@ -156,8 +156,8 @@ fn execute() -> Result<(), String> {
             println!("{}", explain_t5_bytes(&bytes)?);
             Ok(())
         }
-        "eval" | "eval-core" => {
-            // Both require explicit execution. Only eval-core additionally
+        "eval" | "eval-core4" => {
+            // Both require explicit execution. Only eval-core4 additionally
             // loads the existing language-owned Core4 module on request.
             // Neither open nor bare eval may silently acquire mechanisms.
             let bytes = read_sens(path)?;
@@ -192,6 +192,14 @@ fn main() {
 #[cfg(test)]
 mod eval_tests {
     use super::*;
+
+    #[test]
+    fn public_binary_eval_commands_are_explicit_and_stay_separate_from_open() {
+        // The dispatch must admit exactly the documented opt-in Core4 name.
+        // Bare 'eval' never silently inherits bootstrap semantics.
+        assert_eq!(USAGE.contains("eval-core4 path.sens"), true);
+        assert!(!USAGE.contains("eval-core path.sens"));
+    }
 
     #[test]
     fn canonical_quote_legacy_fixture_runs_on_current_pure_oracle() {
