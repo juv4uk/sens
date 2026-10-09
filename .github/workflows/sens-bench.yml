@@ -1,8 +1,8 @@
-name: Contract 11.8 W1-W8 carrier benchmark (D9 blocked)
+name: Contract 11.8 W1-W9 carrier benchmark
 
-# Exact-width carrier/runtime benchmark across the implemented W1..W8 ladder.
-# Contract 11.8 authority is D1-D9 current. D9 is explicitly BLOCKED-CARRIER
-# here because BinarySourceWord/DomainIdentity do not yet materialize W9.
+# Exact-width carrier benchmark across the implemented W1..W9 ladder.
+# Contract 11.8 authority is D1-D9 current. W9 is measured mechanically
+# through the exact u16 carrier; domain-law execution remains separate.
 # Measuring a carrier never grants callability or replaces semantic authority.
 
 on:
@@ -49,10 +49,10 @@ jobs:
           valgrind --version
           rustc --version
 
-      - name: Build W1-W8 carrier benchmark
+      - name: Build W1-W9 carrier benchmark
         run: cargo build --release -p sens --example domain12345678_bench
 
-      - name: Measure Contract 11.8 W1-W8 carrier/runtime (D9 blocked)
+      - name: Measure Contract 11.8 W1-W9 mechanical carrier cost
         run: |
           rm -rf /tmp/domain12345678
           python3 benchmarks/domain12345678/run.py \
