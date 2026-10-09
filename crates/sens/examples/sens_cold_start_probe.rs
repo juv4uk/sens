@@ -49,6 +49,23 @@ fn probe(mode: &str) -> Result<(&'static str, u128), String> {
             black_box(result);
             "BARE_CORE_LOADED"
         }
+        "bare-core-reuse" => {
+            // First load verifies/initializes the immutable thread-local
+            // decode+lowering cache. It also legitimately evaluates Core4 in
+            // an independent fresh Session. The clock below measures a SECOND
+            // fresh Session; no environment or Lisp Value is reused.
+            let mut first = Session::bare();
+            black_box(
+                load_core_library(&mut first)
+                    .map_err(|e| format!("first Core4 bootstrap: {e:?}"))?,
+            );
+            let mut second = Session::bare();
+            let repeated_started = Instant::now();
+            let result = load_core_library(&mut second)
+                .map_err(|e| format!("second Core4 bootstrap: {e:?}"))?;
+            black_box(result);
+            return Ok(("BARE_CORE_REUSED", repeated_started.elapsed().as_nanos()));
+        }
         "core" => {
             let mut session = Session::default();
             let result = load_core_library(&mut session)
@@ -80,7 +97,7 @@ fn main() {
     let mut args = env::args().skip(1);
     let mode = args.next().unwrap_or_default();
     if args.next().is_some() {
-        eprintln!("usage: sens_cold_start_probe <noop|bare-session|session|bare-d3|d3|bare-core|core|core-d3>");
+        eprintln!("usage: sens_cold_start_probe <noop|bare-session|session|bare-d3|d3|bare-core|bare-core-reuse|core|core-d3>");
         process::exit(2);
     }
     match probe(&mode) {
