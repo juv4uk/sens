@@ -20,7 +20,10 @@
     (10011101
       ((value
           (00000001
-            (lambda (x) x)
+            (lambda
+              (x)
+              x
+            )
           )
         )
         (written
@@ -100,13 +103,10 @@
       )
       (00000111
         (root-relation
-          1
           (00000111
             (object-relation
-              1
               (00000111
                 (projection-relation
-                  1
                   (00000001
                     (content-store-authority-witness
                       (status pass)
@@ -119,7 +119,6 @@
                   )
                 )
                 ((content-store-no? projection-relation)
-                  1
                   (00000001
                     (content-store-authority-witness
                       (status fail)
@@ -130,7 +129,6 @@
               )
             )
             ((content-store-no? object-relation)
-              1
               (00000001
                 (content-store-authority-witness
                   (status fail)
@@ -141,7 +139,6 @@
           )
         )
         ((content-store-no? root-relation)
-          1
           (00000001
             (content-store-authority-witness
               (status fail)
