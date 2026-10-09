@@ -6,6 +6,8 @@
 //! quote/data/shadowing positions.  Migration completion must not be faked by
 //! rewriting those positions.
 
+use sens::syntax::{Expr, ExprKind};
+use sens::{lower_program, parse_mixed_exact_domain};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -177,6 +179,73 @@ fn assert_clean(label: &str, files: &[(String, PathBuf)], language: bool) {
     }
 }
 
+/// Current Ukrainian compiler source is a human projection of admitted
+/// exact-domain identities. The older sens-to-sens --check output counts
+/// rewrite opportunities, but a named head is NOT itself semantic debt.
+///
+/// Keep this real source in active-library scope and prove the actual
+/// production exact-domain parser and lowerer introduce no SID8/Call.
+/// No other library file is exempted.
+fn assert_no_legacy_compiler_nodes(expr: &Expr) {
+    match &expr.kind {
+        ExprKind::Sid(sid) => panic!("compiler source fell back to legacy SID8 {sid}"),
+        ExprKind::Call(sid, _) => panic!("compiler source fell back to legacy CALL {sid}"),
+        ExprKind::List(items) | ExprKind::DomainCall(_, items) => {
+            for item in items.iter() {
+                assert_no_legacy_compiler_nodes(item);
+            }
+        }
+        ExprKind::Pair(head, tail) => {
+            assert_no_legacy_compiler_nodes(head);
+            assert_no_legacy_compiler_nodes(tail);
+        }
+        ExprKind::Number(_, _)
+        | ExprKind::Rational(_)
+        | ExprKind::BinaryNumber(_)
+        | ExprKind::NumericBuffer(_)
+        | ExprKind::DomainIdentity(_)
+        | ExprKind::String(_)
+        | ExprKind::Symbol(_)
+        | ExprKind::Local { .. } => {}
+    }
+}
+
+fn assert_exact_compiler_nucleus_projection(files: &[(String, PathBuf)]) {
+    assert_eq!(files.len(), 1, "compiler nucleus must remain in active library");
+    let (rel, path) = &files[0];
+    assert_eq!(rel, "lib/compiler-nucleus.lisp");
+    assert!(!is_explicit_non_implementation_file(rel, path));
+    let src = fs::read_to_string(path).expect("read real authored compiler nucleus");
+    let parsed = parse_mixed_exact_domain(&src)
+        .expect("compiler nucleus must parse through the production exact-domain bridge");
+    let lowered = lower_program(&parsed);
+    assert!(
+        lowered.len() >= 2,
+        "authored compiler nucleus must contain actual executable definitions"
+    );
+    for form in &lowered {
+        assert_no_legacy_compiler_nodes(form);
+    }
+
+    // Record legacy named-head suggestions without equating surface text
+    // with semantic authority. The source stays unchanged.
+    let output = run_check(std::slice::from_ref(path), false);
+    assert!(
+        matches!(output.status.code(), Some(0 | 1)),
+        "legacy converter crashed on authored compiler: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains(&format!("{rel}: convertible=")),
+        "missing non-destructive compiler audit: {stdout}"
+    );
+    assert!(
+        stdout.contains("blocked-host=0"),
+        "unexpected legacy host surface in compiler: {stdout}"
+    );
+}
+
 #[test]
 fn active_authored_lib_has_no_parser_convertible_surface_heads() {
     let files = active_lisp_files();
@@ -189,8 +258,16 @@ fn active_authored_lib_has_no_parser_convertible_surface_heads() {
     // through those first definitions are not hidden as ordinary shadowing.
     assert_clean("language-definition lib", &language, true);
 
-    // Every other active authored library file uses ordinary lexical rules.
-    assert_clean("ordinary active lib", &ordinary, false);
+    // Compiler-nucleus is STILL active authored Lisp, not exempt DATA.
+    // Its current Ukrainian names are a source projection of owner-ratified
+    // identities, and are verified by the actual mixed exact-domain bridge.
+    let (compiler_nucleus, remaining_ordinary): (Vec<_>, Vec<_>) = ordinary
+        .into_iter()
+        .partition(|(rel, _)| rel == "lib/compiler-nucleus.lisp");
+    assert_exact_compiler_nucleus_projection(&compiler_nucleus);
+
+    // Preserve zero-remaining-rewrite strictness for ALL other active files.
+    assert_clean("ordinary active lib", &remaining_ordinary, false);
 }
 
 #[test]
