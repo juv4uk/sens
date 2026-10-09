@@ -27,6 +27,7 @@ bash scripts/test-binary-language-pipeline.sh
 Скрипт свідомо не запускає нову семантичну генерацію. Він лише:
 
 - перевіряє нейтральні властивості двійкового carrier;
+- звіряє безперервне MSB-first pack/unpack з канонічним Rust BitPacker, включно з нульовим правим хвостом і fail-closed перевірками;
 - перевіряє exact width + exact bits;
 - перевіряє актуальний D3/bīja3 authority;
 - перевіряє D1–D9 canonical domain tables;
