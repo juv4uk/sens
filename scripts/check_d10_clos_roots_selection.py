@@ -91,14 +91,19 @@ def audit(inv, state, foundation, evidence):
 
 def self_test(inv, state, foundation, evidence):
     audit(inv, state, foundation, evidence)
+    # A CLOS-specific negative control must target a CLOS row by immutable ID,
+    # not the final D10 row: other agents append other selected candidates later.
+    def clos_row(current):
+        return next(row for row in current["rows"]
+                    if row["stable_id"] == IDS["REMOVE-METHOD"])
     mutations = [
         ("duplicate name", lambda i, s: i["rows"].append(copy.deepcopy(i["rows"][-1]))),
-        ("fake coordinate", lambda i, s: i["rows"][-1].update({"coordinate":"1111111111"})),
-        ("fake ratification", lambda i, s: i["rows"][-1].update({"ratified_resident":True})),
-        ("missing falsifier", lambda i, s: i["rows"][-1].update({"falsifiers":[]})),
+        ("fake coordinate", lambda i, s: clos_row(i).update({"coordinate":"1111111111"})),
+        ("fake ratification", lambda i, s: clos_row(i).update({"ratified_resident":True})),
+        ("missing falsifier", lambda i, s: clos_row(i).update({"falsifiers":[]})),
         ("wrong remaining", lambda i, s: s["target"].update({"remaining_semantic_candidates":-1})),
-        ("forged source", lambda i, s: i["rows"][-1].update({"primary_url":"https://example.invalid"})),
-        ("owner gate bypass", lambda i, s: i["rows"][-1].update({"proposal_status":"ratified"})),
+        ("forged source", lambda i, s: clos_row(i).update({"primary_url":"https://example.invalid"})),
+        ("owner gate bypass", lambda i, s: clos_row(i).update({"proposal_status":"ratified"})),
     ]
     for title, change in mutations:
         i, s = copy.deepcopy(inv), copy.deepcopy(state)
