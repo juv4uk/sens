@@ -74,7 +74,7 @@ def canonical_probe(root: Path, era: str) -> dict:
             or rows[0].get("output") != SOURCE.with_suffix(".sens").name
             or rows[0].get("status") not in {"blocked", "would-write"}
             or summary.get("files_blocked") + summary.get("files_would_write") != 1
-            or any(out.rglob("*")) if out.exists() else False
+            or (out.exists() and any(out.rglob("*")))
         ):
             raise FrontierBlocked(f"CANONICAL: {era}: inconsistent/no-write receipt")
         row = rows[0]
