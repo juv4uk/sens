@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 50
-- top-level функцій: 944
+- top-level функцій: 945
 - top-level макросів: 34
-- усього визначень: 978
+- усього визначень: 979
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -897,6 +897,7 @@
 | `lib/world.lisp` | function | `world-remove-first` | unreviewed |
 | `lib/world.lisp` | function | `world-apply-event` | unreviewed |
 | `lib/world.lisp` | function | `world-module-known?` | unreviewed |
+| `lib/world.lisp` | function | `world-module-missing?` | unreviewed |
 | `lib/world.lisp` | function | `world-clauses` | unreviewed |
 | `lib/world.lisp` | function | `reason-in-world` | unreviewed |
 | `lib/world.lisp` | function | `forward-in-world` | unreviewed |
