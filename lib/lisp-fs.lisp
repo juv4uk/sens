@@ -114,7 +114,6 @@
 (00001001 fs-object-package-decision
   (00001000 (package)
     (00000111
-      ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-object)))
        (1)
@@ -145,7 +144,6 @@
 (00001001 fs-root-package-decision
   (00001000 (package)
     (00000111
-      ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-root)))
        (1)
