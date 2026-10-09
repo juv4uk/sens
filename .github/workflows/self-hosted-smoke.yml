@@ -1,4 +1,4 @@
-name: Self-hosted smoke
+name: GitHub-hosted smoke
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Self-hosted runner evidence
+      - name: GitHub-hosted runner evidence
         shell: bash
         run: |
           set -euo pipefail
@@ -24,7 +24,10 @@ jobs:
           nproc
           grep -m1 'model name' /proc/cpuinfo
           printf 'runner=%s os=%s arch=%s environment=%s\n' "$RUNNER_NAME" "$RUNNER_OS" "$RUNNER_ARCH" "${RUNNER_ENVIRONMENT:-}"
-          test "${RUNNER_ENVIRONMENT:-}" = "self-hosted"
+          if [[ "${RUNNER_ENVIRONMENT:-}" != "github-hosted" ]]; then
+            echo "::error::Expected GitHub-hosted runner, got ${RUNNER_ENVIRONMENT:-unset}"
+            exit 1
+          fi
 
       - name: Checkout witness
         shell: bash
@@ -32,4 +35,4 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse --is-inside-work-tree)" = "true"
           test -n "$(git rev-parse HEAD)"
-          echo "SELF_HOSTED_SMOKE_GREEN repo=$GITHUB_REPOSITORY sha=$(git rev-parse --short HEAD)"
+          echo "GITHUB_HOSTED_SMOKE_GREEN repo=$GITHUB_REPOSITORY sha=$(git rev-parse --short HEAD)"
