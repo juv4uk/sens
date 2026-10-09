@@ -24,6 +24,7 @@ jobs:
           from pathlib import Path
           import collections
           import re
+          import json
           root = Path(".github/workflows")
           substitutions = {
               r"actions/upload-artifact@v4(?:\.\d+)*": "actions/upload-artifact@v6",
@@ -46,6 +47,7 @@ jobs:
               if updated != original:
                   path.write_bytes(updated.encode("utf-8"))
                   changed.append(str(path))
+                  print("SENS_MIGRATION_FILE:"+json.dumps({"path":str(path),"content":updated}, ensure_ascii=True, separators=(",",":")))
           if len(changed) < 200:
               raise SystemExit(f"Expected broad workflow migration; changed only {len(changed)}")
           for path in files:
@@ -58,11 +60,3 @@ jobs:
           for action, n in sorted(counts.items()):
               print(f"  {action}: {n}")
           PY
-          rm -f .github/node24-upgrade-paths.json .github/workflows/node24-one-shot-migration.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -u -- .github
-          git diff --cached --check
-          git diff --cached --stat | tail -n 6
-          git commit -m "ci: upgrade all legacy Node20 actions in SENS workflows"
-          git push origin HEAD:refs/heads/chore/sens-actions-node24-bulk-staging
