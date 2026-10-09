@@ -256,6 +256,22 @@ pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
     DomainOwnerCoordinate { width: 7, bits: 0b1111111, source: 3 },
 ];
 
+/// Bitset derived mechanically from exactly the above D3-D7 owner rows.
+/// No language names, callable laws, or backend/SID8 lookup are encoded.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct DomainOwnerBitmap {
+    pub(crate) width: u8,
+    pub(crate) slots: [u64; 2],
+}
+
+pub(crate) const DOMAIN_OWNER_BITMAPS: &[DomainOwnerBitmap] = &[
+    DomainOwnerBitmap { width: 3, slots: [0x00000000000000fe, 0x0000000000000000] },
+    DomainOwnerBitmap { width: 4, slots: [0x000000000000fddf, 0x0000000000000000] },
+    DomainOwnerBitmap { width: 5, slots: [0x00000000ffffffff, 0x0000000000000000] },
+    DomainOwnerBitmap { width: 6, slots: [0xffffffffffffffff, 0x0000000000000000] },
+    DomainOwnerBitmap { width: 7, slots: [0xfffffbfdffffffff, 0xffffffffffffffff] },
+];
+
 /// Widths whose *entire* coordinate set is covered by separately owner-ratified
 /// complete maps. Generated from D8 #3960 / D9 #4008 after exhaustive checks.
 /// A full-width residency certificate is never a callable mechanism.
@@ -288,6 +304,18 @@ mod tests {
                 .iter()
                 .any(|row| row.width == 7 && row.bits == word);
             assert_eq!(admitted, word != 0b0100001 && word != 0b0101010);
+        }
+    }
+
+    #[test]
+    fn generated_occupancy_masks_equal_every_explicit_owner_coordinate() {
+        for mask in DOMAIN_OWNER_BITMAPS {
+            for bits in 0u16..(1u16 << mask.width) {
+                let explicit = DOMAIN_OWNER_COORDINATES
+                    .iter().any(|row| row.width == mask.width && u16::from(row.bits) == bits);
+                let occupied = ((mask.slots[usize::from(bits / 64)] >> (bits % 64)) & 1) != 0;
+                assert_eq!(occupied, explicit, "D{}:{} owner bitmap drift", mask.width, bits);
+            }
         }
     }
 
