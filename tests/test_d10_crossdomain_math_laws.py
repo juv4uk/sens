@@ -111,7 +111,7 @@ class D10ExactSignalLawTests(unittest.TestCase):
             ([0,-6],4,[0,-2]),
             ([0,12],4,[0,0]),
             ([],4,[]),
-            ([F(1,3),F(5,6)],1,[F(1,3),-F(1,6)])
+            ([F(1,3),F(11,12)],1,[F(1,3),-F(1,12)])
         ]:
             with self.subTest(data=input,period=period):
                 self.assertEqual(phase_unwrap(input,period),list(map(F,out)))
