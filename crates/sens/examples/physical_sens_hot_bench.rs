@@ -28,7 +28,7 @@ fn two_pass_t5_allocation_control(words: &[sens::BinarySourceWord]) -> Vec<u8> {
     while trits.len() % 5 != 0 {
         trits.push(2);
     }
-    trits.chunks_exact(5).map(|five| {
+    trits.as_chunks::<5>().0.iter().map(|five| {
         five.iter().fold(0u16, |acc, &digit| acc * 3 + u16::from(digit)) as u8
     }).collect()
 }

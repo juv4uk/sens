@@ -155,6 +155,26 @@ fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
 }
 
 #[test]
+fn current_machine_domain_coordinate_guard_produces_exact_d1() {
+    let mut session = lowering_session();
+    for (width, bits, expected) in [
+        (5, 10, true),
+        (4, 10, false),
+        (6, 10, false),
+        (5, 11, false),
+    ] {
+        let source = format!("(machine-effect-current-domain-key? {width} {bits} 5 10)");
+        let result = eval_program(&source, &mut session)
+            .unwrap_or_else(|err| panic!("{source}: {err}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "a domain coordinate guard must return typed D1, never structural empty"
+        );
+    }
+}
+
+#[test]
 fn wrong_domain_and_unmapped_current_identity_fail_closed() {
     let (_, plus_bits) = current_d5_coordinate("PLUS");
     let mut session = lowering_session();

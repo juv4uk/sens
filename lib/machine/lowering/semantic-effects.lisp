@@ -15,7 +15,7 @@
     (00000111
       ((00000011 width expected-width)
        (00000011 bits expected-bits))
-      ((00000010 (00000001 ())) (00000001 ())))))
+      ((00000010 (00000001 ())) (00000010 (00000001 (())))))))
 
 ; Current bounded arithmetic mappings. Exact D5 identity remains upstream
 ; semantic authority; this seam only selects already-defined target-neutral
