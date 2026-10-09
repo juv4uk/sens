@@ -296,6 +296,10 @@ guix shell -m manifest.scm
 
 `manifest.scm` pins the toolchain versions this repo expects; don't rely on whatever happens to be on `$PATH` outside the shell.
 
+### Журнал відкриттів (2026-09-28)
+
+Правило координації рої: відкриття, що змінює критичний шлях або спростовує робоче припущення, фіксується коментарем у журналі відкриттів того ж дня — sens#1598 (дзеркало cml#370; крос-репо відкриття пишуться в обидва). Формат — у тілі задачі. Журнал не є семантичною владою: рішення залишаються у своїх задачах з доказами.
+
 ## Live coordination context
 
 A separate, parallel coordination effort (Codex as primary agent, OpenCode as reviewer) runs through `C:\Users\user\Documents\GitHub\docs` — read `docs/AGENT_MEMORY.md` there before assuming an area is untouched.
