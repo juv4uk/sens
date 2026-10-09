@@ -1,0 +1,41 @@
+{
+  "schema": "d10-selection-transition-history/v1",
+  "status": "RESEARCH-ONLY-NO-RATIFICATION",
+  "baseline": {
+    "inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "selected_count": 625,
+    "selector_coordinates": 256,
+    "ratified_d10_residents": 0
+  },
+  "transitions": [
+    {
+      "id": "d10.clos.roots.20261009",
+      "authority": "#4013 #4463 owner-directed research filling",
+      "evidence": [
+        "#4842",
+        "#4843"
+      ],
+      "previous_inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+      "resulting_inventory_blob_sha": "93911f6f2001fbab7dec0aa9742de810555e6b73",
+      "added_stable_ids": [
+        "d10.clos.slot-boundp.v1",
+        "d10.clos.slot-makunbound.v1",
+        "d10.clos.remove-method.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 625,
+      "resulting_selected": 628,
+      "decision": "research selection; coordinate=null; owner ratification remains pending",
+      "tests": [
+        "scripts/check_d10_clos_roots_selection.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
+    }
+  ]
+}
