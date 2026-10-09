@@ -110,6 +110,25 @@ class TestArcSupport(unittest.TestCase):
         assert d["primary_sources"][1]["source_pointer"].endswith(
             "library/clp/clpfd.pl:4074-4145")
 
+    def test_real_donor_evidence_does_not_ratify(self):
+        proof = json.loads((ROOT / "knowledge/d10-symbolic-ai-clp-oracle-evidence-v1.json")
+                           .read_text(encoding="utf-8"))
+        self.assertEqual(proof["schema"], "d10-symbolic-ai-clp-oracle-evidence/v1")
+        self.assertEqual(proof["status"], "DONOR-OBSERVED-RESEARCH-NOT-SENS-EXECUTION")
+        self.assertEqual(proof["observed_runtime"], "SWI-Prolog 9.0.4 for x86_64-linux")
+        self.assertEqual(proof["real_swi_prolog"]["shared_cases"], 768)
+        self.assertEqual(proof["real_swi_prolog"]["matched"], 768)
+        self.assertEqual(proof["mathematical_python"],
+                         {"cases": 32768, "supported": 19759,
+                          "conflicts": 13009, "groups_passed": 5})
+        self.assertEqual(proof["authority"],
+                         {"new_selected": 0, "new_ratified": 0, "new_coordinates": 0})
+        self.assertGreaterEqual(len(proof["constraints_unproven"]), 4)
+        dossier = json.loads(DOSSIER.read_text(encoding="utf-8"))
+        self.assertEqual(dossier["experiments"]["oracle_evidence"],
+                         "knowledge/d10-symbolic-ai-clp-oracle-evidence-v1.json")
+        self.assertIn("CORE", dossier["candidate"]["ownership"])
+
     def test_examples(self):
         d = json.loads(DOSSIER.read_text(encoding="utf-8"))
         for c in d["candidate"]["witnesses"]:
