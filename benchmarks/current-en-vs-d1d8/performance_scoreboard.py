@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -86,7 +87,9 @@ def pack_report(path: Path) -> tuple[list[str], dict]:
         "",
         "I-refs are instruction references, NOT elapsed nanoseconds. "
         "The byte ratio compares packed payload against one-byte-per-word proxy; "
-        "it excludes separate word-boundary framing.",
+        "it excludes separate word-boundary framing. "
+        "For W9 the physical payload legitimately exceeds one byte per word; "
+        "ratios above 1 are expansion evidence, not corruption.",
         "",
         "| Domain workload | Words | Mode | Packed / byte proxy | I-refs / word |",
         "|---|---:|---|---:|---:|",
@@ -95,7 +98,10 @@ def pack_report(path: Path) -> tuple[list[str], dict]:
     for row in sorted(rows, key=lambda r: (r["workload"], int(r["n"]), r["mode"])):
         density = float(row["packed_to_unpacked_ratio"])
         instructions = float(row["net_i_refs_per_word"])
-        if instructions < 0 or not 0 < density <= 1:
+        # W9 needs at least 9 bits/word: 9/8 > 1 compared to a one-byte
+        # proxy. Reject only nonfinite, zero or negative observations, never
+        # falsify honest expansion by demanding every width compresses.
+        if not math.isfinite(density) or not math.isfinite(instructions) or density <= 0 or instructions < 0:
             raise ValueError("invalid pack metric")
         lines.append(f"| {row['workload']} | {row['n']} | {row['mode']} | {density:.4f} | {instructions:.1f} |")
         cases.append({
