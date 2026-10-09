@@ -22,3 +22,12 @@
 ## Повернення матеріалу до канону
 
 Якщо частина історичного випробування потрібна в новій машині, створюється **окремий** тест із доказом відповідності L1–L7, точними D1/D3 координатами, актуальним Rust-оракулом і зеленим GitHub-hosted CI. Просте повернення старої назви або очікування `t`, `Nil` чи truthiness — заборонено.
+
+## CI та реєстри
+
+- Видалено лише застарілий workflow `.github/workflows/834-semantic-coordinate-targeted.yml`, який виконував виключно вилучений `semantic_coordinate_law_axis`. Оригінальний blob зберігається в Git: `a9699d8da7cb2c7cd4ad1ade67a152756715f090`.
+- Із чинного `scripts/test-current-semantic-slice.sh` вилучено виклик відсутнього `semantic_coordinate_matrix_845`. Решта актуальних цілей, зокрема `d3_empty_control`, залишаються.
+- З активного `tests/authority-inventory.lisp` та `.tsv` вилучено лише посилання на retired `semantic_coordinate_law_axis`; записи про давні `my-lisp` paths — історична provenance.
+- `current-rust-tests-after-retirement.yml` окремо запускає збережені Rust-тести та перевіряє, що прибрані тестові цілі не з'явилися в поточному semantic-slice script.
+
+Червоний CI **не** можна «виправляти» додатковим викреслюванням чинних exact-D1/D3 тестів; позитивні нинішні свідки мають бути перевірені окремо.
