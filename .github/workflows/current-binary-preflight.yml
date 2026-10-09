@@ -4,13 +4,37 @@ on:
   pull_request:
     paths:
       - 'crates/sens/tests/current_binary_preflight.rs'
+      - 'crates/sens/src/canonical_reader.rs'
+      - 'crates/sens/src/eval/lower.rs'
+      - 'crates/sens/src/domain_identity.rs'
+      - 'lib/domains/d3.lisp'
+      - 'crates/sens/src/domain_surface_registry_generated.rs'
       - '.github/workflows/current-binary-preflight.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens/tests/current_binary_preflight.rs'
+      - 'crates/sens/src/canonical_reader.rs'
+      - 'crates/sens/src/eval/lower.rs'
+      - 'crates/sens/src/domain_identity.rs'
+      - 'lib/domains/d3.lisp'
+      - 'crates/sens/src/domain_surface_registry_generated.rs'
+      - '.github/workflows/current-binary-preflight.yml'
+
+permissions:
+  contents: read
+
+# Keep evidence for the exact SHA, even while the swarm advances main.
+concurrency:
+  group: current-binary-preflight-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   preflight:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: English surface and canonical D1-D8 trace parity
-        run: cargo test -p sens --test current_binary_preflight -- --nocapture
+      - name: Human surface versus exact canonical D3 identities
+        run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture
