@@ -1,0 +1,33 @@
+name: D10 Maling 1959 symbolic differentiation research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-maling-symbolic-differentiation-1959-v1.json'
+      - 'docs/research/d10-maling-symbolic-differentiation-1959.uk.md'
+      - 'scripts/check_d10_maling_symbolic_differentiation.py'
+      - 'tests/test_d10_maling_symbolic_differentiation.py'
+      - 'tests/oracles/d10_maling_symbolic_differentiation.pl'
+      - '.github/workflows/d10-maling-symbolic-differentiation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-symbolic-differentiation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check historical metadata, current exact-name dedup and authority boundary
+        run: python3 scripts/check_d10_maling_symbolic_differentiation.py --self-test
+      - name: Python regression tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_maling_symbolic_differentiation.py' -v
+      - name: Install independent SWI-Prolog runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y swi-prolog-nox
+      - name: Independent Prolog coefficient-algebra oracle
+        run: swipl -q -s tests/oracles/d10_maling_symbolic_differentiation.pl -g run -t halt
+      - name: Diff hygiene
+        run: git diff --check
