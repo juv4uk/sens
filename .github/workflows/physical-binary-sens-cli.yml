@@ -29,7 +29,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/sens-binary"
           for file in \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
-            tests/fixtures/migration-multiform-cohort-main/two-forms.sens; do
+            tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
+            examples/binary/d3-cond-program.sens; do
             stem="${file##*/}"
             target/debug/sens "$file" > "$RUNNER_TEMP/sens-binary/${stem}.sens-exec"
             target/debug/sens-trit eval "$file" > "$RUNNER_TEMP/sens-binary/${stem}.trit-exec"
@@ -48,6 +49,24 @@ jobs:
           print("PHYSICAL=T5, TEXT=PROJECTION, PURE_EXEC=PARITY")
           PY
           done
+
+      - name: Prove committed D3 COND is exact physical T5 with no legacy route
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import encode_projection, decode_bytes
+          source = " ".join(Path("examples/binary/d3-cond-program.bits").read_text().split())
+          physical = Path("examples/binary/d3-cond-program.sens").read_bytes()
+          assert len(physical) == 31
+          assert physical == encode_projection(source)
+          assert decode_bytes(physical) == source.split()
+          PY
+          test "$(target/debug/sens examples/binary/d3-cond-program.sens)" = "1"
+          test "$(target/debug/sens-trit eval examples/binary/d3-cond-program.sens)" = "1"
 
       - name: Execute pure-binary D3 primitives through both CLI entrypoints
         shell: bash
