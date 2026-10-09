@@ -6,7 +6,7 @@ use sens::{
 };
 
 const RETIRED_COND: &[u8] =
-    include_bytes!("../../../examples/binary/d3-cond-three-field-rejected.sens");
+    include_bytes!("data/d3-cond-three-field-rejected.t5-negative");
 
 #[test]
 fn physical_t5_has_exact_typed_words_and_no_textual_semantic_authority() {
