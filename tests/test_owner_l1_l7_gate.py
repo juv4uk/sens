@@ -110,5 +110,36 @@ class OwnerLaws(unittest.TestCase):
             self.assertFalse(out.exists())
 
 
+    def test_staged_t5_projection_requires_independent_oracle(self):
+        with tempfile.TemporaryDirectory() as dirname:
+            base = Path(dirname)
+            src = base / "candidate.lisp"
+            target = base / "forbidden.sens"
+            src.write_text("(110 (t (001 ())))", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(PATH), str(src), "--out", str(target)],
+                capture_output=True, text=True, cwd=ROOT,
+            )
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            self.assertFalse(target.exists())
+            self.assertEqual(src.read_text(encoding="utf-8"), "(110 (t (001 ())))")
+            data = __import__("json").loads(result.stdout)
+            self.assertIn(data["status"], {"BLOCK", "STAGED-REVIEW"})
+            if "typed_word_sha256" in data:
+                self.assertEqual(len(data["typed_word_sha256"]), 64)
+                self.assertEqual(len(data["physical_sha256"]), 64)
+
+    def test_digests_cannot_override_semantic_block(self):
+        with tempfile.TemporaryDirectory() as dirname:
+            src = Path(dirname) / "unknown.lisp"
+            src.write_text("(ghost 1)", encoding="utf-8")
+            args = [sys.executable, str(PATH), str(src),
+                    "--oracle-typed-sha256", "0" * 64,
+                    "--oracle-physical-sha256", "0" * 64]
+            result = subprocess.run(args, capture_output=True, text=True, cwd=ROOT)
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            self.assertIn('"law": "L3"', result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()
