@@ -65,7 +65,10 @@
       ((00000010 values) () (00000001 ()))
       ((00000010 values) (1) (00000001 ()))
       ((00100010 value (00000101 values)) (00000110 values))
-      (t (00000100 (00000101 values) (world-remove-first value (00000110 values)))))))
+      ((00100010
+        (00100010 value (00000101 values))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       (00000100 (00000101 values) (world-remove-first value (00000110 values)))))))
 
 (00001001 world-apply-event
   (00001000 (clauses event)
@@ -73,7 +76,10 @@
       ((00000011 (00000101 event) (00000001 tell)) (00000100 (00110000 event) clauses))
       ((00000011 (00000101 event) (00000001 retract))
        (world-remove-first (00110000 event) clauses))
-      (t clauses))))
+      ((00100010
+        (00000011 (00000101 event) (00000001 retract))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       clauses))))
 
 (00001001 world-module-known?
   (00001000 (world module-name)
