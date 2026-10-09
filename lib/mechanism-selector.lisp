@@ -16,11 +16,11 @@
   (00001000 (name sections)
     (00000111
       ((00000010 sections) () (00000001 ()))
-      ((00000010 sections) (0)
+      ((00000010 sections) 
        (00000111
-         ((00000011 (00000101 (00000101 sections)) name) (1)
+         ((00000011 (00000101 (00000101 sections)) name) 
           (00000101 sections))
-         ((00000011 (00000101 (00000101 sections)) name) (0)
+         ((00000011 (00000101 (00000101 sections)) name) 
           (mechanism-selector-find-section name (00000110 sections))))))))
 
 (00001001 mechanism-selector-routes
@@ -32,25 +32,25 @@
   (00001000 (sid rows)
     (00000111
       ((00000010 rows) () (00000001 no))
-      ((00000010 rows) (0)
+      ((00000010 rows) 
        (00000111
-         ((00000011 sid (00000101 (00000101 rows))) (1) (00000001 yes))
-         ((00000011 sid (00000101 (00000101 rows))) (0)
+         ((00000011 sid (00000101 (00000101 rows)))  (00000001 yes))
+         ((00000011 sid (00000101 (00000101 rows))) 
           (mechanism-selector-registry-has-sid? sid (00000110 rows))))))))
 
 (00001001 mechanism-selector-find-route
   (00001000 (sid executor rows)
     (00000111
       ((00000010 rows) () (00000001 ()))
-      ((00000010 rows) (0)
+      ((00000010 rows) 
        (10011100 ((row (00000101 rows)))
          (00000111
-           ((00000011 sid (00000101 row)) (1)
+           ((00000011 sid (00000101 row)) 
             (00000111
               ((00000011 executor (00101111 row)) (1) row)
-              ((00000011 executor (00101111 row)) (0)
+              ((00000011 executor (00101111 row)) 
                (mechanism-selector-find-route sid executor (00000110 rows)))))
-           ((00000011 sid (00000101 row)) (0)
+           ((00000011 sid (00000101 row)) 
             (mechanism-selector-find-route sid executor (00000110 rows)))))))))
 
 (00001001 mechanism-select
@@ -60,7 +60,7 @@
          (mechanism-selector-registry-has-sid?
            sid mechanism-selector-registry-rows)
          (00000001 no))
-       (1)
+       
        (00100111
          (00000001 mechanism-selection-failure)
          (00000001 sid-not-in-function-table)
@@ -72,7 +72,7 @@
          (00000111
            ((00000010 route) ()
             (00100111 (00000001 mechanism-unavailable) sid executor))
-           ((00000010 route) (0)
+           ((00000010 route) 
             (00100111
               (00000001 mechanism-selected)
               sid

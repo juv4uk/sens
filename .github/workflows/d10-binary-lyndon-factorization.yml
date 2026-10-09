@@ -1,0 +1,36 @@
+name: D10 binary Lyndon factorization donor oracle
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-binary-lyndon-factorization-v1.json'
+      - 'scripts/check_d10_binary_lyndon_factorization.py'
+      - 'tests/test_d10_binary_lyndon_factorization.py'
+      - 'tests/d10_binary_lyndon_factorization_chez.ss'
+      - 'docs/research/d10-binary-lyndon-factorization.uk.md'
+      - '.github/workflows/d10-binary-lyndon-factorization.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+  push:
+    paths:
+      - 'knowledge/d10-binary-lyndon-factorization-v1.json'
+      - 'scripts/check_d10_binary_lyndon_factorization.py'
+      - 'tests/test_d10_binary_lyndon_factorization.py'
+      - 'tests/d10_binary_lyndon_factorization_chez.ss'
+      - '.github/workflows/d10-binary-lyndon-factorization.yml'
+jobs:
+  prove-donor-law:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check donor status, present D1-D10 dedup, ten negative controls
+        run: python3 scripts/check_d10_binary_lyndon_factorization.py --self-test
+      - name: Exhaustive Python Duval vs independent partition oracle
+        run: python3 -m unittest discover -s tests -p test_d10_binary_lyndon_factorization.py -v
+      - name: Install independent Chez Scheme R6RS implementation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chezscheme
+      - name: Execute real R6RS Lyndon oracle
+        run: scheme --script tests/d10_binary_lyndon_factorization_chez.ss

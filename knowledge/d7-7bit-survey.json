@@ -1,0 +1,122 @@
+{
+  "H": {
+    "name": "hand-placed UPC-7 table",
+    "of_42_sounds": 42,
+    "distinct": 42,
+    "extra_cells_named": [
+      "\t",
+      "!",
+      "#",
+      "&",
+      "'",
+      "(",
+      ")",
+      "*",
+      "+",
+      ",",
+      "-",
+      ".",
+      "/",
+      ":",
+      ";",
+      "<",
+      "=",
+      ">",
+      "?",
+      "@",
+      "\\\\",
+      "\\x09",
+      "\\x0a",
+      "\\x20",
+      "_",
+      "`",
+      "|",
+      "ā",
+      "ī",
+      "ū",
+      "।",
+      "॥",
+      "ḥ",
+      "ḹ",
+      "ṃ",
+      "ṝ",
+      "’"
+    ],
+    "max_cell": 89,
+    "pratyaharas_contiguous": "0/43",
+    "savarna_from_bits_mismatches_of_1764": 6
+  },
+  "D": {
+    "name": "UPC-7 derived from the UPC-14 graph",
+    "of_42_sounds": 42,
+    "distinct": 42,
+    "extra_cells_named": [
+      "ā",
+      "ī",
+      "ū",
+      "ṝ"
+    ],
+    "max_cell": 89,
+    "pratyaharas_contiguous": "0/43",
+    "savarna_from_bits_mismatches_of_1764": 4
+  },
+  "V": {
+    "name": "varṇa7",
+    "of_42_sounds": 42,
+    "distinct": 42,
+    "extra_cells_named": [
+      "ā",
+      "ī",
+      "ū",
+      "ḹ",
+      "ṝ"
+    ],
+    "max_cell": 89,
+    "pratyaharas_contiguous": "0/43",
+    "savarna_from_bits_mismatches_of_1764": 4
+  },
+  "A": {
+    "name": "akṣara7",
+    "of_42_sounds": 42,
+    "distinct": 42,
+    "extra_cells_named": [],
+    "max_cell": 41,
+    "pratyaharas_contiguous": "25/43",
+    "savarna_from_bits_mismatches_of_1764": null
+  },
+  "T": {
+    "name": "tantu7",
+    "of_42_sounds": 42,
+    "distinct": 42,
+    "extra_cells_named": [],
+    "max_cell": 41,
+    "pratyaharas_contiguous": "25/43",
+    "savarna_from_bits_mismatches_of_1764": null
+  },
+  "L": {
+    "name": "legacy UPC-7 (sutra order)",
+    "of_42_sounds": 42,
+    "distinct": 42,
+    "extra_cells_named": [],
+    "max_cell": 41,
+    "pratyaharas_contiguous": "39/43",
+    "savarna_from_bits_mismatches_of_1764": null
+  },
+  "pairwise_equal_cells_of_42": {
+    "H-D": 39,
+    "H-V": 40,
+    "H-A": 1,
+    "H-T": 1,
+    "H-L": 1,
+    "D-V": 41,
+    "D-A": 1,
+    "D-T": 1,
+    "D-L": 1,
+    "V-A": 1,
+    "V-T": 1,
+    "V-L": 1,
+    "A-T": 42,
+    "A-L": 22,
+    "T-L": 22
+  }
+}
