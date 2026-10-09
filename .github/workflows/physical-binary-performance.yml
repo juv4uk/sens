@@ -7,10 +7,12 @@ on:
     branches: [main]
     paths:
       - "benchmarks/physical-binary-performance/**"
+      - "examples/binary/d3-cond-program.sens"
       - ".github/workflows/physical-binary-performance.yml"
   pull_request:
     paths:
       - "benchmarks/physical-binary-performance/**"
+      - "examples/binary/d3-cond-program.sens"
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/eval/**"
@@ -58,6 +60,7 @@ jobs:
             benchmarks/physical-binary-performance/run.py \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
+            examples/binary/d3-cond-program.sens \
             > /tmp/sens-physical-performance/inputs.sha256
       - name: Build release binaries that actually run the language
         run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
