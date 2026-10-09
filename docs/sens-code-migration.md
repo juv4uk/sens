@@ -1,5 +1,14 @@
 # SENS code migration tools
 
+Ці скрипти мігрують код до поточних точних SENS-кодів без хардкоду семантичних
+координат. Authority завжди завантажується з `knowledge/d1-d7-foundation.json`;
+згенерований звіт фіксує authority та SHA-256, тож результати можна відтворити
+після зміни геометрії домену. Типово — dry-run; exit code 1 означає переписувані
+символьні call-heads, exit code 2 — заблокований файл через однозначну семантичну
+неоднозначність (напр. перевизначення канонічного імені поверхні SENS).
+Переписуються лише executable S-expression list heads; рядки, коментарі, quoted
+дані, пакетно-кваліфіковані імена та не-head-символи зберігаються.
+
 These scripts migrate source toward current exact-width SENS codes without hard-coding semantic coordinates.
 
 Authority is always loaded from:
