@@ -34,6 +34,26 @@ fn content_store_semantic_relations_are_owned_by_lisp_witness() {
     )
     .expect("Lisp-owned content-store witness must load");
 
+    // Temporary current-head diagnosis for the root package that is rendering as ().
+    let root_probe_prefix = r#"(let* ((value (quote (lambda (x) x)))
+                                      (written (fs-write (fs-empty) "code" value))
+                                      (fs (00000101 written))) "#;
+    for (label, expression) in [
+        ("fs-objects", "(fs-objects fs)"),
+        ("objects-map->list", "(map->list (fs-objects fs))"),
+        ("fs-bindings", "(fs-bindings fs)"),
+        ("bindings-map->list", "(map->list (fs-bindings fs))"),
+        ("object-addresses", "(fs-object-addresses (map->list (fs-objects fs)))"),
+        ("root-package", "(fs-root-package fs)"),
+        ("serialize-root", "(fs-serialize-root fs)"),
+    ] {
+        let probe = format!("{root_probe_prefix}{expression})");
+        match eval_program(&probe, &mut session) {
+            Ok(result) => eprintln!("CONTENT-STORE-ROOT-DIAG: {label} => {:?} / {}", result.value, result.value),
+            Err(error) => eprintln!("CONTENT-STORE-ROOT-DIAG: {label} ERROR {:?}: {}", error.kind, error),
+        }
+    }
+
     eprintln!("CONTENT-STORE-PROBE: witness observe BEGIN");
     let verdict = observe(&mut session, "(content-store-authority-witness)");
     eprintln!("CONTENT-STORE-PROBE: witness observe END => {verdict}");
