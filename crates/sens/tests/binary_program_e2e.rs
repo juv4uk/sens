@@ -1,5 +1,5 @@
-//! Current pure-binary SENS execution: physical T5 -> canonical D2/W7
-//! reader -> contextual lexical binding -> exact D1 result.
+//! Current pure-binary SENS execution: physical T5 -> canonical D2 reader ->
+//! exact-domain D1/D3/D4/D7 execution. No compatibility parser or Core4 boot.
 //!
 //! This is an executable *mechanical* smoke, not an independent Lisp semantic
 //! oracle or evidence that D10 has a ratified physical runtime representation.
@@ -14,6 +14,8 @@ use sens::{
 
 const BINARY_PROGRAM: &str =
     include_str!("../../../examples/binary/d7-first-program.lisp");
+const D3_COND_PROGRAM: &str =
+    include_str!("../../../examples/binary/d3-cond-program.sens");
 
 fn assert_exact_binary_ast(expr: &Expr) {
     match &expr.kind {
@@ -76,6 +78,57 @@ fn real_packed_t5_runs_binary_d4_d7_definition_and_d1_result() {
             sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap())
         )),
         "current source-level result must retain exact D1:1, not host T"
+    );
+}
+
+
+#[test]
+fn physical_t5_executes_exact_d3_cond_with_d1_skip_and_select() {
+    assert!(
+        D3_COND_PROGRAM
+            .bytes()
+            .all(|b| b == b'0' || b == b'1' || b.is_ascii_whitespace()),
+        "the D3 program must contain only bits and whitespace"
+    );
+    let physical = encode_binary_projection_ternary(D3_COND_PROGRAM)
+        .expect("exact D3 source must encode as physical T5");
+    let visible = open_ternary_program(&physical)
+        .expect("physical T5 must decode to exact-width D3 source");
+    let normalized = D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert_eq!(visible, normalized);
+    let decoded = decode_ternary_program(&physical).expect("packed T5 must decode");
+    assert_eq!(visible, sens::render_ternary_words_spaced(&decoded));
+
+    let parsed = parse_canonical_binary(&visible)
+        .expect("the canonical reader must preserve D3:110 and D1 control inputs");
+    assert_eq!(parsed.len(), 1);
+    for expression in &parsed {
+        assert_exact_binary_ast(expression);
+    }
+    let value = eval_parsed_expressions(&parsed, &mut Session::default())
+        .expect("exact D3 COND must execute without Core4 compatibility bootstrap")
+        .value;
+    assert_eq!(
+        value.as_predicate_bit(),
+        Some(true),
+        "D1:0 must skip clause one; D1:1 must select clause two"
+    );
+}
+
+#[test]
+fn physical_d3_cond_rejects_structural_empty_as_a_predicate() {
+    let physical = encode_binary_projection_ternary("10 110 00 10 10 10 01 00 10 010 00 10 01 01 01 01 01")
+        .expect("malformed-control source remains well-formed binary transport");
+    let visible = open_ternary_program(&physical).expect("T5 source must decode");
+    let parsed = parse_canonical_binary(&visible).expect("binary syntax must parse");
+    let error = match eval_parsed_expressions(&parsed, &mut Session::default()) {
+        Err(error) => error,
+        Ok(_) => panic!("structural empty must not control D3:110 COND"),
+    };
+    assert_eq!(
+        error.kind,
+        sens::ErrorKind::Type,
+        "COND accepts only the exact D1 PredicateBit, not structural empty"
     );
 }
 

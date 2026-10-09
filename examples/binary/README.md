@@ -1,13 +1,15 @@
-# Pure-binary runnable SENS specimen — D1/D2/D4/D7
+# Pure-binary runnable SENS specimens — D1/D2/D3/D4/D7
 
-The file `d7-first-program.lisp` is **not human Lisp syntax**. Every payload
+The files in this directory are **not human Lisp syntax**. `d7-first-program.lisp` and `d3-cond-program.sens` contain only exact-width bit words separated by whitespace. Every payload
 word in that source consists of only `0` and `1`, with ASCII whitespace
 separating **exact-width** domain words. It contains a D4 definition,
 a D2-framed D7 Text7 binding, a D4 lambda, an exact D1 return value, and a
 subsequent invocation of the binding through its D7 frame.
 
-A test in `crates/sens/tests/binary_program_e2e.rs` executes the complete
-physical transport path:
+Tests in `crates/sens/tests/binary_program_e2e.rs` execute the complete
+physical transport path for both programs. The D3 specimen uses exact `110` COND, a first clause whose ATOM test is D1:0 (must skip), then an ATOM test returning D1:1 (must select). A negative case proves structural empty is not accepted as a predicate.
+
+For the D7 specimen, the physical transport path is:
 
 ```text
 source exact binary words
@@ -16,6 +18,13 @@ source exact binary words
     -> parse via canonical D2 reader (no compatibility Lisp reader)
     -> evaluate D4/D7 lexical definition and call
     -> observe exact D1:1 (not host t)
+
+D3 control specimen:
+    -> physical T5 bytes
+    -> exact-width D2 reader
+    -> D3:110 COND + D3:010 ATOM
+    -> exact D1 skip/select
+    -> observe D1:1
 ```
 
 It also proves fail-closed behavior for human executable spellings, noncallable

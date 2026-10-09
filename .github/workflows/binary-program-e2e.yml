@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   exact-binary-executable:
-    name: physical T5 to D2 D4 D7 runtime
+    name: physical T5 to D2 D3 D4 D7 runtime
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
