@@ -85,7 +85,8 @@ def _verify_appended_rows(rows, transition):
 def _compatibility_historical_view(current, expected_blob):
     """Accept one exact, independently checked known-batch compatibility witness."""
     helper = ROOT / "scripts/d10_historical_snapshot_compat.py"
-    if not helper.exists():
+    batch = ROOT / "knowledge/d10-historical-primary-selected-20261009.json"
+    if not helper.exists() or not batch.exists():
         raise ValueError("D10 differs from pinned archival snapshot without explicit transition history")
     spec = importlib.util.spec_from_file_location("d10_historical_snapshot_compat", helper)
     fail(spec is not None and spec.loader is not None, "cannot import D10 historical compatibility witness")
@@ -328,16 +329,43 @@ def main():
             print("FAIL: negative controls accepted: " + ", ".join(failures), file=sys.stderr)
             return 1
 
-        synthetic, synthetic_history = _synthetic_transition(d10)
         try:
-            reconstructed = historical_d10_view(synthetic, git_blob(d10), synthetic_history)
-            if git_blob(reconstructed) != git_blob(d10):
+            baseline_for_test = historical_d10_view(
+                d10, d["current_authority_snapshot"]["d10_inventory_blob_sha"], history
+            )
+            synthetic, synthetic_history = _synthetic_transition(baseline_for_test)
+            reconstructed = historical_d10_view(
+                synthetic, d["current_authority_snapshot"]["d10_inventory_blob_sha"], synthetic_history
+            )
+            if git_blob(reconstructed) != git_blob(baseline_for_test):
                 failures.append("append-history-reconstruction")
         except (ValueError, KeyError, IndexError, TypeError, AssertionError):
             failures.append("append-history-reconstruction")
-        no_history_errors = validate(d, f, synthetic, d3, None) if not TRANSITIONS.exists() else []
-        if no_history_errors and not any("append-only history invalid" in e for e in no_history_errors):
-            failures.append("unrecorded-growth-control")
+
+        # An empty explicit ledger must never turn synthetic growth into a pass,
+        # even if another compatibility helper exists for a different exact batch.
+        empty_history = {
+            "schema": "d10-selection-transition-history/v1",
+            "status": "RESEARCH-ONLY-NO-RATIFICATION",
+            "baseline": {
+                "inventory_blob_sha": d["current_authority_snapshot"]["d10_inventory_blob_sha"],
+                "selected_count": d["current_authority_snapshot"]["d10_selected"],
+                "selector_coordinates": LAW_FORCED_COORDINATES,
+                "ratified_d10_residents": 0,
+            },
+            "transitions": [],
+        }
+        try:
+            baseline_for_test = historical_d10_view(
+                d10, d["current_authority_snapshot"]["d10_inventory_blob_sha"], history
+            )
+            unrecorded, _ = _synthetic_transition(baseline_for_test)
+            errs = validate(d, f, unrecorded, d3, empty_history)
+            if not any("D10 append-only history invalid" in e for e in errs):
+                failures.append("unrecorded-growth-control")
+        except (ValueError, KeyError, IndexError, TypeError, AssertionError):
+            # Rejection is the expected result for unrecorded growth.
+            pass
         mutated, mutant_history = _synthetic_transition(d10)
         mutated["rows"][0]["behavior"] = "mutated historical law"
         mutant_history["transitions"][0]["resulting_inventory_blob_sha"] = git_blob(mutated)
