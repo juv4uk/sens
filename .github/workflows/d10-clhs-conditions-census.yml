@@ -1,0 +1,50 @@
+name: D10 CLHS Conditions census
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-clhs-conditions-census-20261009.json
+      - knowledge/d10-proposal-ledger.tsv
+      - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-selection-transition-history.json
+      - scripts/check-d10-clhs-conditions-census.py
+      - scripts/check-d10-proposal-ledger.py
+      - tests/test_d10_proposal_ledger_growth.py
+      - tests/d10-clhs-compute-restarts-sbcl.lisp
+      - .github/workflows/d10-clhs-conditions-census.yml
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-clhs-conditions-census-20261009.json
+      - knowledge/d10-proposal-ledger.tsv
+      - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-selection-transition-history.json
+      - scripts/check-d10-clhs-conditions-census.py
+      - scripts/check-d10-proposal-ledger.py
+      - tests/test_d10_proposal_ledger_growth.py
+      - tests/d10-clhs-compute-restarts-sbcl.lisp
+      - .github/workflows/d10-clhs-conditions-census.yml
+
+permissions:
+  contents: read
+
+jobs:
+  conditions-census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate all 51 source-pinned symbols and decision map
+        run: python3 scripts/check-d10-clhs-conditions-census.py
+      - name: Install independent ANSI Common Lisp runtime
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sbcl
+      - name: Execute real SBCL COMPUTE-RESTARTS witnesses
+        run: sbcl --noinform --script tests/d10-clhs-compute-restarts-sbcl.lisp
+      - name: Verify proposal ledger schema, source trace, append-only history
+        run: |
+          python3 scripts/check-d10-proposal-ledger.py --self-test
+          python3 scripts/check-d10-proposal-ledger.py
+          python3 scripts/check_d10_selection_transition_history.py --self-test
+          python3 -m unittest discover -s tests -p test_d10_proposal_ledger_growth.py -v
