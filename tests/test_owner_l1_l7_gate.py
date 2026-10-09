@@ -73,6 +73,17 @@ class OwnerLaws(unittest.TestCase):
         self.assertIn(("L3", "STAGED"), verdicts(found))
 
 
+    def test_l3_source_defined_function_shadowing_requires_scope_oracle(self):
+        staged, found = apply("(0010 (CAR) (CAR 000))")
+        self.assertEqual(staged, "(0010 (CAR) (CAR 000))")
+        self.assertIn(("L3", "BLOCK"), verdicts(found))
+        self.assertIn("shadowing", found[0].reason)
+
+    def test_l3_define_shadowing_requires_scope_oracle(self):
+        _, found = apply("(DEFINE (CAR x) (001 ()))")
+        self.assertIn(("L3", "BLOCK"), verdicts(found))
+
+
     def test_l3_unproven_w8_blocks(self):
         _, found = apply("(11110111 (001 ()))")
         self.assertIn(("L3", "BLOCK"), verdicts(found))
