@@ -543,7 +543,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let direct_d5_binding = semantic_registry::d5_binding_identity_for_definition(name);
     if let Some(identity) = direct_d5_binding {
         if super::necessary_forms::identity_for_domain_identity(identity).is_none()
-            && domain_primitive(identity).is_none()
+            && domain_primitive_kind(identity).is_none()
             && !super::d5_arithmetic::has_mechanism(identity)
         {
             environment.bind_domain_code_slot_once(identity, value.clone());
