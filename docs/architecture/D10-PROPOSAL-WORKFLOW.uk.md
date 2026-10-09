@@ -40,6 +40,28 @@ python3 scripts/check-d10-proposal-ledger.py
 python3 scripts/check-d10-proposal-ledger.py --self-test
 ```
 
+## Машинний зв'язок selection ↔ proposal (правило зростання, 2026-10-09)
+
+**Історична база 625** зберігається як недоторканний снимок у `knowledge/d10-growth-baseline-v1.json`. Починаючи з шістсот двадцять шостого відібраного значення, **кожен** `SELECTED-RESEARCH-CANDIDATE` в канонічному `knowledge/d10-v1-semantic-inventory.json` вимагає:
+
+- запис `proposal_id` і точної `semantic_name` в `knowledge/d10-proposal-ledger.tsv`, з українськими поверхнями; `pending-review` і `ratified=0`;
+- попередню D10 SHA з **перед** відбором (не хибну перевірку на вже оновленому інвентарі);
+- append-only подію в `knowledge/d10-selection-transition-history.json`, що містить точні `stable_id` і приріст;
+- `coordinate=null`, `ratified_resident=false` до окремої ухвали власника.
+
+Перші п'ять записів `D10P-0001…0005` — **ретроспективний бекфілл** уже відібраних, але ще не ратифікованих `DPB`, `ARRAY-DISPLACEMENT`, `SLOT-BOUNDP`, `SLOT-MAKUNBOUND`, `REMOVE-METHOD`. Їхня provenance посилається на реальні оригінальні JSON-досьє й SHA коміту. Вони **не виникли з міграційного BLOCK**, тому поле `blocked_source=NOT-A-MIGRATION-BLOCK` допустиме **виключно якщо такий semantic_name справді існує в одному з підтверджених transition-append**. Для заявок, які походять від `.lisp→.sens` блокувань, потрібно реальне `owner/repo@COMMIT:path:line`; фіктивне джерело заборонено.
+
+Наявний валідатор і регресійний тест запускають:
+
+```sh
+python3 scripts/check-d10-proposal-ledger.py --self-test
+python3 -m unittest discover -s tests -p test_d10_proposal_ledger_growth.py -v
+```
+
+**Правило для всіх fail-closed гвардій:** кожна гвардія, що захищає зростаючий реєстр, мусить мати явний тестований `append/extend`-шлях, який зберігає давні докази й блокує непідтверджене зростання. Старий snapshot ніколи не стає стелею місткості.
+
+Це **gate для обліку й provenance**, не автоматичне семантичне виправдання, не дозвіл T5, не ratification. За реальну оракульну незалежність, source dedup, власника Core та виконуваність відповідають інші перевірки.
+
 ## Реальний перший BLOCK (не вигаданий кандидат)
 
 [SENS #4458](https://github.com/juv4uk/sens/issues/4458) фіксує 75 блокувань історичного `print` у прогоні [37810152645](https://github.com/juv4uk/sens/actions/runs/37810152645). Це **доказ проблеми міграції, але ще не доказ універсального D10-закону**: можливо, це host I/O, допоміжний benchmark або nonprogram. Поки агент #4458 не встановив точне джерело/рядок, ефект і ownership, `print` **не отримує** рядок `pending-review`. Файл `.sens` лишається BLOCK. Це перший реальний triage case, а не синтетичний resident.
