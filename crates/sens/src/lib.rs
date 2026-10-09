@@ -13,21 +13,30 @@ mod bit9;
 mod binary_number;
 mod bits;
 mod canonical_reader;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod compilation_artifact;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod compilation_artifact_producer;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod conformance_oracle;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod fixpoint_checkpoint;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod gpu_admission;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod gpu_oracle;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod program_compiler;
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod selfhost_lineage;
 mod domain_words;
 mod domain_identity;
 mod packed_bits;
+mod outer_envelope;
 mod binary_framing;
 mod gpu_execution_packet;
 mod environment;
@@ -169,10 +178,12 @@ pub use compiler_language::{
     verify_compiler_program_artifact_from_sens, CompilerProgramBootstrapBundle,
     CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
+#[cfg(feature = "legacy-evidence-schemas")]
 pub use gpu_admission::{GpuAdmission, GpuAdmissionInventory};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, CoreD9, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
+pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     BinaryFrame, BinaryFrameError,

@@ -1,17 +1,27 @@
-//! Exact eight-bit function sense (СЕНС).
+//! Legacy exact-eight SENS compatibility carrier.
 //!
-//! #1344 / #1386: Renames the technical acronym `SID` to the ontological term `sens` (СЕНС).
-//! In `sens` / `sens`, exactly 256 functions exist in the `00000000..11111111` space.
-//! Each eight-bit value is the direct `sens` (meaning, sense, вектор, сутність)
-//! of the function itself, not an arbitrary database identifier.
+//! Historical #1344/#1386 replaced the technical acronym `SID` with `sens`
+//! while the language still used one universal eight-bit function space.
+//! That ontology is superseded by the exact-domain model (#2490/#2817):
+//! canonical semantic identity is a binary object together with its exact
+//! domain. `Sens8` remains only for compatibility, transport/backend seams,
+//! and staged migration of still-eight-bit consumers.
+//!
+//! An eight-bit payload by itself MUST NOT be interpreted as a Core.D3/D4/D5/D6
+//! identity, and no implicit projection from `Sens8` into
+//! `CoreDomainIdentity` is provided here.
 
 use std::fmt;
 
-/// Exact eight-bit function sense (СЕНС).
+/// Legacy exact-eight compatibility carrier.
 ///
-/// The function identity is exactly the eight bits themselves (`00000000..11111111`).
-/// The packed byte is a private runtime/transport mechanism and is never the
-/// alternate identity of the sens.
+/// The eight bits are preserved exactly for historical/compatibility users.
+/// They are not sufficient to determine canonical SENS semantic identity:
+/// the new ontology also requires the exact domain. This type therefore
+/// carries no implicit Core.D3/D4/D5/D6 meaning.
+///
+/// The packed byte remains a runtime/transport mechanism for this legacy
+/// carrier and is never a substitute for a domain-qualified identity.
 ///
 /// Deliberately NOT `Ord`/`PartialOrd` (wsm-lazarus owner, 2026-09-23:
 /// "треба заборонити математичні операції над нашим сідом" -- mathematical
@@ -20,6 +30,10 @@ use std::fmt;
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Sens8(pub(crate) u8);
 
+/// Historical compatibility alias for the exact-eight carrier.
+///
+/// New semantic code should carry an exact domain identity instead of treating
+/// this alias as the language-wide identity type.
 pub type Sens = Sens8;
 
 impl Sens8 {
@@ -52,7 +66,9 @@ impl Sens8 {
         Self(packed)
     }
 
-    /// Reader-side construction of Sens8 from exactly eight 0/1 source characters.
+    /// Legacy reader-side construction from exactly eight 0/1 source characters.
+    ///
+    /// This constructor does not infer or recover a semantic domain.
     pub(crate) const fn from_exact_bits(bits: &str) -> Option<Self> {
         let bytes = bits.as_bytes();
         if bytes.len() != 8 {
@@ -102,7 +118,10 @@ impl fmt::Debug for Sens8 {
     }
 }
 
-/// Canonical constructor macro for eight-bit function sense (СЕНС).
+/// Compatibility constructor for an exact-eight historical SENS value.
+///
+/// New domain-qualified semantic code should construct the exact domain carrier
+/// directly; this macro intentionally performs no domain inference.
 ///
 /// ```
 /// let s = sens::sens!(00000011);
@@ -122,14 +141,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn exact_eight_bits_round_trip() {
+    fn exact_eight_bits_compatibility_round_trip() {
         let s = crate::sens!(00001100);
         assert_eq!(s.to_string(), "00001100");
         assert_eq!(format!("{s:?}"), "Sens8(00001100)");
     }
 
     #[test]
-    fn reader_constructor_accepts_only_exact_eight_bits() {
+    fn legacy_reader_constructor_accepts_only_exact_eight_bits() {
         assert_eq!(
             Sens8::from_exact_bits("00001100"),
             Some(crate::sens!(00001100))
@@ -142,14 +161,14 @@ mod tests {
     }
 
     #[test]
-    fn packed_byte_round_trips() {
+    fn compatibility_packed_byte_round_trips() {
         let s = crate::sens!(11111111);
         assert_eq!(Sens8::from_packed_byte(s.packed_byte()), s);
         assert_eq!(s.to_string(), "11111111");
     }
 
     #[test]
-    fn every_possible_byte_round_trips_without_loss() {
+    fn every_legacy_byte_round_trips_without_loss() {
         let mut seen = std::collections::HashSet::new();
 
         for byte in 0u16..=255 {

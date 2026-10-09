@@ -1,0 +1,16 @@
+name: Current binary semantic preflight
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/tests/current_binary_preflight.rs'
+      - '.github/workflows/current-binary-preflight.yml'
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: English surface and canonical D1-D8 trace parity
+        run: cargo test -p sens --test current_binary_preflight -- --nocapture

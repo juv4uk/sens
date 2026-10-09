@@ -1,0 +1,195 @@
+{
+  "system": "rust",
+  "sens": {
+    "commit": "9714e8cb714cff7ffc27f37d8a03447d8df094e2",
+    "contract": "11.6",
+    "ratified_domains": "D1-D7"
+  },
+  "competitor": {
+    "name": "Rust",
+    "version": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "commit": null
+  },
+  "environment": {
+    "os": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "arch": "x86_64",
+    "cpu": "x86_64",
+    "load_context": "high",
+    "evidence_mode": "performance",
+    "rss_measurement": "withheld-until-dedicated-per-process-owner",
+    "toolchain": {
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    }
+  },
+  "workloads": [
+    {
+      "id": "d3-quote-empty",
+      "parity": "pass",
+      "params": {
+        "outer_reps": 10,
+        "inner_repeats": 10000,
+        "scope": "D3 smoke only",
+        "evidence_mode": "performance"
+      },
+      "measurements": [
+        {
+          "axis": "warm_ready_execution_ns_per_op",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            99.6663,
+            107.9891,
+            98.5166,
+            100.5212,
+            98.6936,
+            101.6807,
+            102.4668,
+            101.5136,
+            99.9611,
+            98.0942
+          ],
+          "competitor_samples": [
+            2.5548,
+            2.5646,
+            4.9426,
+            2.5646,
+            2.486,
+            2.486,
+            2.5744,
+            2.5646,
+            2.5646,
+            2.5548
+          ],
+          "sens_median": 100.24115,
+          "competitor_median": 2.5646,
+          "sens_p95": 107.9891,
+          "competitor_p95": 4.9426,
+          "notes": "SENS eval of already-lowered exact-domain expression vs direct native Rust mechanism control."
+        },
+        {
+          "axis": "process_maxrss_kb",
+          "status": "inconclusive",
+          "unit": "KiB",
+          "sens_samples": [],
+          "competitor_samples": [],
+          "sens_median": null,
+          "competitor_median": null,
+          "sens_p95": null,
+          "competitor_p95": null,
+          "notes": "Not measured in this lane. The first smoke used os.wait4().ru_maxrss, which is a cumulative child-process maximum and can falsely report identical RSS for sequential commands. A dedicated per-process RSS owner is required."
+        }
+      ]
+    },
+    {
+      "id": "d3-car-empty",
+      "parity": "pass",
+      "params": {
+        "outer_reps": 10,
+        "inner_repeats": 10000,
+        "scope": "D3 smoke only",
+        "evidence_mode": "performance"
+      },
+      "measurements": [
+        {
+          "axis": "warm_ready_execution_ns_per_op",
+          "status": "measured",
+          "unit": "ns/op",
+          "sens_samples": [
+            473.1571,
+            467.3695,
+            480.0648,
+            470.6317,
+            462.1911,
+            478.3453,
+            565.3752,
+            702.6559,
+            492.3082,
+            502.2523
+          ],
+          "competitor_samples": [
+            2.5548,
+            2.5646,
+            3.2918,
+            2.604,
+            2.5647,
+            3.7831,
+            2.5646,
+            2.5646,
+            2.5646,
+            2.5646
+          ],
+          "sens_median": 479.20505,
+          "competitor_median": 2.5646,
+          "sens_p95": 702.6559,
+          "competitor_p95": 3.7831,
+          "notes": "SENS eval of already-lowered exact-domain expression vs direct native Rust mechanism control."
+        },
+        {
+          "axis": "process_maxrss_kb",
+          "status": "inconclusive",
+          "unit": "KiB",
+          "sens_samples": [],
+          "competitor_samples": [],
+          "sens_median": null,
+          "competitor_median": null,
+          "sens_p95": null,
+          "competitor_p95": null,
+          "notes": "Not measured in this lane. The first smoke used os.wait4().ru_maxrss, which is a cumulative child-process maximum and can falsely report identical RSS for sequential commands. A dedicated per-process RSS owner is required."
+        }
+      ]
+    },
+    {
+      "id": "runtime-artifact-control",
+      "parity": "pass",
+      "params": {
+        "scope": "binary file only; dependency closure not included"
+      },
+      "measurements": [
+        {
+          "axis": "binary_artifact_bytes",
+          "status": "measured",
+          "unit": "bytes",
+          "sens_samples": [
+            1042552.0
+          ],
+          "competitor_samples": [
+            368104.0
+          ],
+          "sens_median": 1042552.0,
+          "competitor_median": 368104.0,
+          "sens_p95": 1042552.0,
+          "competitor_p95": 368104.0,
+          "notes": "SENS benchmark helper vs standalone optimized Rust control binary."
+        }
+      ]
+    }
+  ],
+  "semantic_density": null,
+  "verdicts": [
+    {
+      "axis": "d3-quote-empty:warm_ready_execution_ns_per_op",
+      "verdict": "competitor",
+      "evidence": "median SENS=100.241 ns/op; Rust=2.565 ns/op"
+    },
+    {
+      "axis": "d3-quote-empty:process_maxrss_kb",
+      "verdict": "inconclusive",
+      "evidence": "RSS withheld: cumulative wait4 child-max is not a valid per-process comparison"
+    },
+    {
+      "axis": "d3-car-empty:warm_ready_execution_ns_per_op",
+      "verdict": "competitor",
+      "evidence": "median SENS=479.205 ns/op; Rust=2.565 ns/op"
+    },
+    {
+      "axis": "d3-car-empty:process_maxrss_kb",
+      "verdict": "inconclusive",
+      "evidence": "RSS withheld: cumulative wait4 child-max is not a valid per-process comparison"
+    },
+    {
+      "axis": "binary_artifact_bytes",
+      "verdict": "inconclusive",
+      "evidence": "observed SENS=1042552 bytes; Rust=368104 bytes; not ranked because the SENS benchmark helper and direct Rust control do not have a matched dependency/runtime closure"
+    }
+  ]
+}

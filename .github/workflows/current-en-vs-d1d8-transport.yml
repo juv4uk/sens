@@ -1,0 +1,68 @@
+name: Current English vs D1-D8 transport accounting
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/examples/current_en_vs_d1d8_transport.rs'
+      - 'benchmarks/current-en-vs-d1d8/**'
+      - '.github/workflows/current-en-vs-d1d8-transport.yml'
+
+jobs:
+  transport-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Unit tests by discovery
+        run: python3 -m unittest discover -s benchmarks/current-en-vs-d1d8/tests -p 'test_transport_runner.py'
+
+      - name: Build one current transport helper
+        run: cargo build --release -p sens --example current_en_vs_d1d8_transport
+
+      - name: Emit bounded D3 paired representation rows
+        run: |
+          python3 benchmarks/current-en-vs-d1d8/transport_runner.py \
+            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-transport-smoke.json \
+            --helper target/release/examples/current_en_vs_d1d8_transport \
+            --out /tmp/current-en-vs-d1d8.transport.jsonl
+
+          python3 benchmarks/current-en-vs-d1d8/validate.py \
+            /tmp/current-en-vs-d1d8.transport.jsonl
+
+      - name: Assert framing remains unresolved and canonical accounting is mechanical
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows=[
+              json.loads(line)
+              for line in Path('/tmp/current-en-vs-d1d8.transport.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          assert len(rows)==4
+          assert {row['candidate'] for row in rows}=={'english-surface','canonical-d1d8'}
+
+          for row in rows:
+              assert row['lane']=='transport'
+              assert row['phase']=='representation'
+              metrics=row['metrics']
+              assert metrics['framing_bits'] is None
+              assert metrics['total_wire_bits'] is None
+              if row['candidate']=='english-surface':
+                  assert metrics['semantic_payload_bits'] is None
+                  assert metrics['packed_bytes'] is None
+              else:
+                  assert metrics['semantic_payload_bits'] > 0
+                  assert metrics['packed_bytes'] > 0
+                  assert 0 < metrics['packing_efficiency'] <= 1
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: current-en-vs-d1d8-transport-preflight
+          path: /tmp/current-en-vs-d1d8.transport.jsonl

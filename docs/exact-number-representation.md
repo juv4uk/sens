@@ -105,7 +105,7 @@ Number     Rational
 
 ### Порівняння та identity
 
-Magnitude comparisons `<`, `=`, `>` порівнюють усі exact inputs як Rational values. Якщо бере участь inexact operand, порівняння використовує f64 magnitudes.
+Magnitude predicates `<`, `=`, `>` порівнюють усі exact inputs як Rational values і повертають exact `D1 PredicateBit`. Якщо бере участь inexact operand, поточна exact-comparison операція завершується названою `Type` помилкою: вона не виробляє numeric 0/1, `()`, host Bool чи наближену f64-істину. Окрему approximate-comparison операцію можна ратифікувати пізніше, але вона не підміняє exact predicate.
 
 `eq` лишається відношенням equality/identity, визначеним `Value::PartialEq`, і не є заміною numeric magnitude `=`. Не можна зливати ці дві операції лише для спрощення представлення.
 

@@ -1,10 +1,10 @@
-use wsm_clips_kernel::{ClipsExecutionResult, SemanticId as ClipsSemanticId};
-use wsm_common_lisp_kernel::{CommonLispResult, SemanticId as CommonLispSemanticId};
+use wsm_clips_kernel::{ClipsExecutionResult, LegacyAbiSemanticId as ClipsLegacyAbiSemanticId};
+use wsm_common_lisp_kernel::{CommonLispResult, LegacyAbiSemanticId as CommonLispLegacyAbiSemanticId};
 use wsm_datalog_kernel::{Database, Value};
 use wsm_native_result_types::{
     FourKernelObservation, ObservationCapability, ObservationCapabilityError, ProducerSlot,
 };
-use wsm_prolog_kernel::{PrologExecutionResult, SemanticId as PrologSemanticId};
+use wsm_prolog_kernel::{PrologExecutionResult, LegacyAbiSemanticId as PrologLegacyAbiSemanticId};
 
 fn observation() -> FourKernelObservation {
     let mut datalog = Database::new();
@@ -13,16 +13,16 @@ fn observation() -> FourKernelObservation {
 
     FourKernelObservation::new(
         CommonLispResult {
-            semantic_id: CommonLispSemanticId(5),
+            semantic_id: CommonLispLegacyAbiSemanticId(5),
             stdout: b"LEFT\n".to_vec(),
             stderr: Vec::new(),
         },
         PrologExecutionResult {
-            semantic_id: PrologSemanticId(0b1000_0111),
+            semantic_id: PrologLegacyAbiSemanticId(0b1000_0111),
             stdout: b"[bob,dave,carol]\n".to_vec(),
             stderr: Vec::new(),
         },
-        ClipsExecutionResult::new(Some(ClipsSemanticId(0b0111_1011)), 2, 1, 3),
+        ClipsExecutionResult::new(Some(ClipsLegacyAbiSemanticId(0b0111_1011)), 2, 1, 3),
         datalog,
     )
 }

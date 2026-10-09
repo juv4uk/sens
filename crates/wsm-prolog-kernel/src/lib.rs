@@ -16,7 +16,7 @@ use wsm_kernel_c_abi::{
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct SemanticId(pub u8);
+pub struct LegacyAbiSemanticId(pub u8);
 
 const SID_ADD: u8 = 0b0000_1100;
 
@@ -42,7 +42,7 @@ impl PrologQuery {
     }
 }
 
-fn semantic_query_for_request(
+fn legacy_abi_query_for_request(
     semantic_id: u8,
     payload: &str,
     template: &str,
@@ -130,14 +130,14 @@ pub fn decode_canonical_atom_list(
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PrologRequest {
-    pub semantic_id: SemanticId,
+    pub semantic_id: LegacyAbiSemanticId,
     pub query: PrologQuery,
 }
 
 impl PrologRequest {
-    pub fn new(semantic_id: u8, query: PrologQuery) -> Self {
+    pub fn new(semantic_id: LegacyAbiSemanticId, query: PrologQuery) -> Self {
         Self {
-            semantic_id: SemanticId(semantic_id),
+            semantic_id,
             query,
         }
     }
@@ -145,7 +145,7 @@ impl PrologRequest {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PrologExecutionResult {
-    pub semantic_id: SemanticId,
+    pub semantic_id: LegacyAbiSemanticId,
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
 }
@@ -154,7 +154,7 @@ pub struct PrologExecutionResult {
 pub enum PrologKernelError {
     Spawn(std::io::Error),
     ProcessFailed {
-        semantic_id: Option<SemanticId>,
+        semantic_id: Option<LegacyAbiSemanticId>,
         status: Option<i32>,
         stdout: Vec<u8>,
         stderr: Vec<u8>,
@@ -255,7 +255,7 @@ impl PrologKernel {
     fn run_command(
         &self,
         command: &mut Command,
-        semantic_id: Option<SemanticId>,
+        semantic_id: Option<LegacyAbiSemanticId>,
     ) -> Result<PrologResult, PrologKernelError> {
         let output = command.output().map_err(PrologKernelError::Spawn)?;
         if !output.status.success() {
@@ -279,7 +279,7 @@ struct PrologAbiContext {
     program: PathBuf,
     template: String,
     running: bool,
-    last_semantic_id: Option<SemanticId>,
+    last_legacy_abi_id: Option<LegacyAbiSemanticId>,
 }
 
 pub struct PrologAbiAdapter {
@@ -298,7 +298,7 @@ impl PrologAbiAdapter {
             program: program.into(),
             template: template.into(),
             running: false,
-            last_semantic_id: None,
+            last_legacy_abi_id: None,
         });
         let context_ptr = (&mut *context) as *mut PrologAbiContext as *mut c_void;
 
@@ -319,8 +319,8 @@ impl PrologAbiAdapter {
         self.vtable
     }
 
-    pub fn last_semantic_id(&self) -> Option<SemanticId> {
-        self.context.last_semantic_id
+    pub fn last_legacy_abi_id(&self) -> Option<LegacyAbiSemanticId> {
+        self.context.last_legacy_abi_id
     }
 }
 
@@ -390,21 +390,21 @@ unsafe extern "C" fn prolog_exchange(
         return WsmStatus::InvalidArgument;
     };
     let Ok(query) =
-        semantic_query_for_request(request.semantic_id, payload_text, &context.template)
+        legacy_abi_query_for_request(request.semantic_id, payload_text, &context.template)
     else {
         return WsmStatus::InvalidArgument;
     };
 
-    let kernel_request = PrologRequest::new(request.semantic_id, query);
+    let kernel_request = PrologRequest::new(LegacyAbiSemanticId(request.semantic_id), query);
     let result = match context.kernel.execute(&context.program, &kernel_request) {
         Ok(result) => result,
         Err(_) => return WsmStatus::KernelFailure,
     };
 
-    if result.semantic_id != SemanticId(request.semantic_id) {
+    if result.semantic_id != LegacyAbiSemanticId(request.semantic_id) {
         return WsmStatus::KernelFailure;
     }
-    context.last_semantic_id = Some(result.semantic_id);
+    context.last_legacy_abi_id = Some(result.semantic_id);
 
     if response.len < result.stdout.len() {
         unsafe {
@@ -499,6 +499,6 @@ mod tests {
         assert_eq!(vtable.abi_version, WSM_KERNEL_ABI_VERSION);
         assert_eq!(vtable.kernel, WsmKernelKind::Prolog);
         assert!(vtable.is_mechanically_complete());
-        assert_eq!(adapter.last_semantic_id(), None);
+        assert_eq!(adapter.last_legacy_abi_id(), None);
     }
 }
