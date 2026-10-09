@@ -13195,7 +13195,8 @@
         "#4463",
         "knowledge/d10-loops-active-values-intake-v1.json",
         "The LOOPS Manual (1983) §5.1, 5.2, 5.5"
-      ]
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE"
     },
     {
       "stable_id": "d10.loops.1983.put",
@@ -13224,7 +13225,8 @@
         "#4463",
         "knowledge/d10-loops-active-values-intake-v1.json",
         "The LOOPS Manual (1983) §5.1, 5.2, 5.5"
-      ]
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE"
     }
   ],
   "parent_domain": {
