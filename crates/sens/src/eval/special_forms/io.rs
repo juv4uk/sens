@@ -35,7 +35,7 @@ pub(crate) fn princ_values(
 
 fn contains_predicate_bit(value: &Value) -> bool {
     match value {
-        Value::PredicateBit(_) => true,
+        Value::DomainIdentity(crate::DomainIdentity::D1(_)) => true,
         Value::Pair(head, tail) => contains_predicate_bit(head) || contains_predicate_bit(tail),
         Value::Vector(values) => values.borrow().iter().any(contains_predicate_bit),
         _ => false,
