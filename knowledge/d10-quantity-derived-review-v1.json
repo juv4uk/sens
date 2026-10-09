@@ -16,7 +16,7 @@
   "donors": [
     {
       "path": "lib/quantity.lisp",
-      "git_blob_sha1": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+      "git_blob_sha1": "30c8e5fd403eb0103165083b0f535ac94f68fbb1",
       "role": "Lisp-owned finite quantity and dimension algebra"
     },
     {
@@ -41,7 +41,7 @@
     {
       "candidate": "UNIT-PRODUCT",
       "source_path": "lib/quantity.lisp",
-      "line": 169,
+      "line": 165,
       "surface_uk": "добуток-одиниць",
       "status": "HOLD-DERIVED-COMPOSITION",
       "semantic_law": "construct new immutable unit by adding the exponent collections from two valid unit records",
@@ -54,7 +54,7 @@
     {
       "candidate": "UNIT-QUOTIENT",
       "source_path": "lib/quantity.lisp",
-      "line": 176,
+      "line": 172,
       "surface_uk": "частка-одиниць",
       "status": "HOLD-DERIVED-COMPOSITION",
       "semantic_law": "construct a unit by merging left exponents with sign-negated right exponents",
@@ -68,7 +68,7 @@
     {
       "candidate": "QUANTITY-PRODUCT",
       "source_path": "lib/quantity.lisp",
-      "line": 183,
+      "line": 179,
       "surface_uk": "добуток-величин",
       "status": "HOLD-DERIVED-COMPOSITION",
       "semantic_law": "multiply exact numeric values then compose associated dimensions; preserve typed quantity result rather than bare scalar",
@@ -82,7 +82,7 @@
     {
       "candidate": "QUANTITY-QUOTIENT",
       "source_path": "lib/quantity.lisp",
-      "line": 189,
+      "line": 185,
       "surface_uk": "частка-величин",
       "status": "HOLD-DERIVED-COMPOSITION",
       "semantic_law": "divide exact numeric values then compose left unit with reciprocal right unit, preserving quantity type",
