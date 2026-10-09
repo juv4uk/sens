@@ -283,6 +283,32 @@ fn load_life_1_contract_witness(session: &mut Session) {
     eval_program(&source, session).expect("life-1-contract-witness.lisp must load");
 }
 
+fn transport_life_substrate_parity_document(session: &mut Session) {
+    let source = fs::read_to_string(repo_file("contracts/life-substrate-parity-809.lisp"))
+        .expect("#809 requires the Lisp-owned substrate parity contract");
+    let forms = parse(&source).expect("life-substrate-parity-809.lisp must be readable Lisp data");
+    assert_eq!(
+        forms.len(),
+        1,
+        "#809 substrate parity contract must remain one self-contained Lisp data document"
+    );
+    let form = &forms[0];
+    let exact_form_source = &source[form.span.start..form.span.end];
+    let transport = format!(
+        "(def life-substrate-parity-document (quote {exact_form_source}))"
+    );
+    eval_program(&transport, session)
+        .expect("host observer must transport #809 contract bytes into Lisp data");
+}
+
+fn load_life_substrate_parity_witness(session: &mut Session) {
+    let source = fs::read_to_string(repo_file(
+        "tests/fixtures/life-substrate-parity-809-witness.lisp",
+    ))
+    .expect("#809 requires its Lisp-owned substrate parity witness");
+    eval_program(&source, session).expect("life-substrate-parity-809-witness.lisp must load");
+}
+
 fn escape_lisp_string(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
 }
@@ -597,6 +623,35 @@ fn life_1_liveness_semantics_are_owned_by_lisp_data() {
     assert!(
         verdict.starts_with("(life-1-contract-witness (status pass)"),
         "Lisp-owned #785 LIFE-1 witness rejected the contract: {verdict}"
+    );
+}
+
+#[test]
+fn life_orchestration_parity_stays_fail_closed_without_real_graal_evidence() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core library");
+    transport_life_substrate_parity_document(&mut session);
+    load_life_substrate_parity_witness(&mut session);
+
+    let verdict = eval_program("(life-substrate-parity-witness)", &mut session)
+        .expect("Lisp-owned #809 witness must execute")
+        .value
+        .to_string();
+
+    assert!(
+        verdict.starts_with("(life-substrate-parity-witness (status pass)"),
+        "Lisp-owned #809 substrate parity witness rejected its fail-closed contract: {verdict}"
+    );
+
+    let contract = fs::read_to_string(repo_file("contracts/life-substrate-parity-809.lisp"))
+        .expect("#809 contract");
+    let rows = contract
+        .split("(rows")
+        .nth(1)
+        .expect("#809 contract must expose rows section");
+    assert!(
+        !rows.contains("(row "),
+        "#809 must not claim GREEN substrate parity before wsm-graalvm#93 supplies real evidence"
     );
 }
 
