@@ -34,7 +34,7 @@ fn inspect_each_lexical_d1_relation_without_changing_runtime() {
         "(content-store-no? projection-relation)",
         "(00000111 (root-relation (00000001 pass)) ((content-store-no? root-relation) (00000001 fail)))",
     ] {
-        let redefined = format!("{head}{probe}\n))");
+        let redefined = format!("{head}{probe}\n)))");
         let loaded = eval_program(&redefined, &mut session);
         match loaded {
             Ok(_) => match eval_program("(content-store-authority-witness)", &mut session) {
