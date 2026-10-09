@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_open_d2", "t5_direct_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
+PHASES = {"t5_open_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -159,6 +159,24 @@ def main() -> int:
         "t5_open_d2 перевіряє структуру D2 й повертає видимі слова; "
         "t5_direct_d2 декодує трити, упаковує payload і розбирає D2 без тексту.",
         "Це порівняння читання/проєкції, а не швидкості повного eval або завантаження файлу.",
+        "",
+    ])
+    lines.extend([
+        "", "## Direct typed T5 words vs legacy pack/unpack adapter", "",
+        "| Форми | Старий T5→dense→D2, p50 ns | Новий T5→word→D2, p50 ns | Old / new |",
+        "|---:|---:|---:|---:|",
+    ])
+    for count in sizes:
+        by_phase = {row["phase"]: row for row in measures if row["forms"] == count}
+        old_ns = by_phase["t5_direct_d2"]["median_ns_op"]
+        new_ns = by_phase["t5_words_d2"]["median_ns_op"]
+        ratio = f"{old_ns / new_ns:.3f}x" if new_ns else "undefined"
+        lines.append(f"| {count} | {old_ns:,} | {new_ns:,} | {ratio} |")
+    lines.extend([
+        "",
+        "Same T5 bytes, same D2 reader and identical observable. The new "
+        "adapter skips re-packing and un-packing already typed W1..W9 words.",
+        "Measured in one process, with warm caches; this is NOT a cross-language speedup.",
         "",
     ])
     lines.extend(["", "## Dense payload vs visible 0/1 D2 parser (same forms)", "",
