@@ -160,7 +160,6 @@ crates/my-lisp/tests/world.rs	advise_world_accepts_into_a_new_queryable_world	ob
 crates/my-lisp/tests/sens_foundation.rs	sens_macro_produces_identical_bit_representation_as_sid	observer	sens-vocabulary-foundation	crates/my-lisp/src/sens.rs	migrated
 crates/my-lisp-cli/tests/cli.rs	sens_and_my_lisp_binaries_execute_the_same_direct_8_bit_program	observer	cli-product-name-parity	#1365	migrated
 crates/sens/tests/sens_smoke.rs	sens_crate_evaluates_basic_expressions	observer	canonical-sens-crate-import	#1368	migrated
-crates/sens/tests/sens_smoke.rs	sens_macro_constructs_sens8_identity	observer	canonical-sens-crate-import	#1368	migrated
 crates/my-lisp/tests/semantic_form_identity.rs	macro_library_uses_admitted_source_spellings_for_necessary_forms	observer	admitted-source-spellings	#1368	migrated
 crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_needs_no_latin_keyboard_layout	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
 crates/my-lisp/tests/ukr_acceptance.rs	ukr_acceptance_program_executes_through_real_runtime	observer	ukr-acceptance-surface	lib/surface/uk.lisp	migrated
