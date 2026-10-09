@@ -1,0 +1,18 @@
+name: tmp-264-unification-red
+
+on:
+  push:
+    branches:
+      - feat/219-consume-unification-outcomes
+
+permissions:
+  contents: read
+
+jobs:
+  unification-outcome-consumers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run #219 outcome consumer contract
+        run: cargo test -p my-lisp --test unification_outcome_contract -- --nocapture
