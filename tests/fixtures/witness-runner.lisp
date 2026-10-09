@@ -107,19 +107,15 @@
           ((witness-d1-no? expected-present)
            (за-умовою
              (error-present
-              (00100111 (00000001 witness-result)
-                    (00100111 (00000001 status) (00000001 error))
-                    (00100111 (00000001 actual) error-entry)))
+              (00100111 (00000001 error) error-entry))
              ((witness-d1-no? error-present)
-              (witness-malformed-result (00000001 missing-outcome) witness))))
+              (00000100 (00000001 malformed) (00000001 missing-outcome)))))
           (expected-present
            (за-умовою
              (error-present
-              (witness-malformed-result (00000001 expected-and-error) witness))
+              (00000100 (00000001 malformed) (00000001 expected-and-error)))
              ((witness-d1-no? error-present)
-              (00100111 (00000001 witness-result)
-                    (00100111 (00000001 status) (00000001 value))
-                    (00100111 (00000001 actual) expected-entry))))))))))
+              (00100111 (00000001 value) expected-entry)))))))))
 
 (00001001 witness-verdict
   (00001000 (witness actual)
