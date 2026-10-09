@@ -136,15 +136,10 @@ pub(crate) fn transitional_d5_binding_identity_from_registry_byte(
         _ => None,
     }
 }
-/// Current staged surface lookup.
-///
-/// Ukrainian and Sanskrit D3/D4/D5 spellings resolve directly through the
-/// exact-domain projection. The byte-backed lookup remains only as a bounded
-/// compatibility fallback for still-unmigrated spellings.
+/// Канонічний surface → domain маршрут читає тільки ратифіковану
+/// exact-width проєкцію. Історичний SID/байт не визначає домен.
 pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> {
-    direct_domain_identity_for_surface(name).or_else(|| {
-        registry_byte_for_surface(name).and_then(legacy_domain_identity_from_registry_byte)
-    })
+    direct_domain_identity_for_surface(name)
 }
 
 pub(crate) fn surface_for_domain_identity(
@@ -391,6 +386,22 @@ mod tests {
                 !matches!(identity.packed_bits(), 0b10001 | 0b10011),
                 "REVERSE/QUOTIENT compatibility binding must not target D5 selector coordinates"
             );
+        }
+    }
+
+    #[test]
+    fn historical_registry_bytes_cannot_create_domain_identity() {
+        // Контроль усіх старих поверхонь: лише exact-domain таблиця може
+        // надати callable domain identity, незалежно від SID-проєкції.
+        for row in SEMANTIC_ROWS {
+            for surface in row.surfaces {
+                assert_eq!(
+                    domain_identity_for_surface(surface.name),
+                    direct_domain_identity_for_surface(surface.name),
+                    "historical SID must not invent a domain for {}",
+                    surface.name
+                );
+            }
         }
     }
 
