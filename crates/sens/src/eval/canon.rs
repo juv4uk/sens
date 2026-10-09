@@ -612,3 +612,4 @@ mod exact_domain_primitive_tests {
         assert!(error.message.contains(&identity.to_string()));
         assert!(!error.message.contains("00000010"));
     }
+}
