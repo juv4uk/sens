@@ -77,45 +77,79 @@ fn owned_workspace_crates_point_directly_to_the_single_root_license_file() {
     }
 }
 
-fn require_authority_row(contents: &str, path: &str, test: &str, class: &str) {
+fn require_authority_row_status(
+    contents: &str,
+    path: &str,
+    test: &str,
+    class: &str,
+    status: &str,
+) {
     let found = contents.lines().skip(1).any(|line| {
         let fields: Vec<_> = line.split('\t').collect();
-        fields.len() >= 3 && fields[0] == path && fields[1] == test && fields[2] == class
+        fields.len() >= 6
+            && fields[0] == path
+            && fields[1] == test
+            && fields[2] == class
+            && fields[5] == status
     });
     assert!(
         found,
-        "#231 requires {path}::{test} to be classified as {class} before legacy semantics can be removed from canonical hard gates"
+        "retired test inventory must record {path}::{test} as {class}/{status}"
     );
 }
 
 #[test]
-fn superseded_truthiness_assertions_are_explicitly_classified_before_test_transition() {
-    let contents = fs::read_to_string(workspace_root().join("tests/authority-inventory.tsv"))
+fn retired_legacy_semantics_are_absent_from_active_rust_tests() {
+    let root = workspace_root();
+    let contents = fs::read_to_string(root.join("tests/authority-inventory.tsv"))
         .expect("tests/authority-inventory.tsv must exist");
 
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/mccarthy.rs",
-        "comparisons_chain_and_promote_exact_inexact_like_arithmetic",
-        "legacy-semantic",
+    for (path, test) in [
+        (
+            "crates/sens/tests/mccarthy.rs",
+            "comparisons_chain_and_promote_exact_inexact_like_arithmetic",
+        ),
+        (
+            "crates/sens/tests/forward.rs",
+            "match_test_condition_succeeds_when_the_expression_is_truthy",
+        ),
+        (
+            "crates/sens/tests/ukrainian_api_docs.rs",
+            "istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen",
+        ),
+    ] {
+        require_authority_row_status(&contents, path, test, "legacy-semantic", "retired");
+        let source = fs::read_to_string(root.join(path))
+            .unwrap_or_else(|err| panic!("failed to read {path}: {err}"));
+        assert!(
+            !source.contains(&format!("fn {test}(")),
+            "retired legacy-semantic assertion still exists: {path}::{test}"
+        );
+    }
+
+    let forward = fs::read_to_string(root.join("crates/sens/tests/forward.rs"))
+        .expect("forward.rs must exist");
+    assert!(
+        !forward.contains("fn match_test_condition_fails_when_the_expression_is_falsy("),
+        "the paired generic-truthiness failure assertion must also be retired"
     );
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/forward.rs",
-        "match_test_condition_succeeds_when_the_expression_is_truthy",
-        "legacy-semantic",
+
+    let uk = fs::read_to_string(root.join("crates/sens/tests/ukrainian_api_docs.rs"))
+        .expect("ukrainian_api_docs.rs must exist");
+    assert!(
+        uk.contains("fn novi_predykatni_nazvy_i_stari_aliasy_vykonuiutsia_odnakovo("),
+        "keep the surface-alias equivalence check"
     );
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/ukrainian_api_docs.rs",
-        "istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen",
-        "legacy-semantic",
+
+    let mccarthy = fs::read_to_string(root.join("crates/sens/tests/mccarthy.rs"))
+        .expect("mccarthy.rs must exist");
+    assert!(
+        mccarthy.contains("fn numeric_comparisons_return_exact_predicate_bits("),
+        "retain current exact PredicateBit comparison coverage"
     );
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/mccarthy.rs",
-        "bare_large_integer_literals_remain_exact",
-        "mixed",
+    assert!(
+        !mccarthy.contains("fn comparisons_chain_and_promote_exact_inexact_like_arithmetic("),
+        "superseded comparison-to-t/() assertion must not return"
     );
 }
 
