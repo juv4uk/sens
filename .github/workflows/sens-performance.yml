@@ -11,6 +11,12 @@ on:
       - "benchmarks/current-en-vs-d1d8/**"
       - "crates/sens/examples/byte_pack_bench.rs"
       - "crates/sens/examples/domain12345678_bench.rs"
+      - "crates/sens/examples/domain_occupancy_bench.rs"
+      - "crates/sens/src/domain_ladder.rs"
+      - "crates/sens/src/domain_owner_generated.rs"
+      - "scripts/generate-domain-owner-registry.py"
+      - "knowledge/d8-ratified.json"
+      - "knowledge/d9-ratified.json"
       - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/source_words.rs"
@@ -25,6 +31,12 @@ on:
       - "benchmarks/current-en-vs-d1d8/**"
       - "crates/sens/examples/byte_pack_bench.rs"
       - "crates/sens/examples/domain12345678_bench.rs"
+      - "crates/sens/examples/domain_occupancy_bench.rs"
+      - "crates/sens/src/domain_ladder.rs"
+      - "crates/sens/src/domain_owner_generated.rs"
+      - "scripts/generate-domain-owner-registry.py"
+      - "knowledge/d8-ratified.json"
+      - "knowledge/d9-ratified.json"
       - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
   workflow_dispatch:
   schedule:
@@ -77,13 +89,37 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y valgrind
       - name: Build production API benchmark in release mode
-        run: cargo build --locked --release -p sens --example domain12345678_bench
+        run: cargo build --locked --release -p sens --example domain12345678_bench --example domain_occupancy_bench
       - name: Measure domain-coordinate carrier with paired empty-loop baseline
         run: |
           python3 benchmarks/domain12345678/run.py \
             --binary "$(pwd)/target/release/examples/domain12345678_bench" \
             --out-dir "$RUNNER_TEMP/sens-domain-carrier" \
             --iterations 100000 --reps 3
+      - name: Benchmark D3/D7/D8/D9 occupancy projection without language semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-domain-carrier"
+          {
+            echo "SHA=$GITHUB_SHA"
+            rustc --version
+            grep -m1 'model name' /proc/cpuinfo || true
+          } > "$RUNNER_TEMP/sens-domain-carrier/occupancy-environment.txt"
+          SENS_OCCUPANCY_ITERATIONS=100000 SENS_OCCUPANCY_SAMPLES=9 \
+            target/release/examples/domain_occupancy_bench \
+            | tee "$RUNNER_TEMP/sens-domain-carrier/occupancy.tsv"
+          {
+            echo "## Exact-domain occupancy lookup latency"
+            echo
+            echo "Measured p50/p95 include coordinate construction and owner lookup, not evaluation or dispatch."
+            echo
+            echo '~~~text'
+            cat "$RUNNER_TEMP/sens-domain-carrier/occupancy.tsv"
+            echo '~~~'
+            echo
+            echo "Source SHA: $GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Keep raw I refs, report and toolchain provenance
         if: always()
         uses: actions/upload-artifact@v4
