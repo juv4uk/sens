@@ -92,15 +92,14 @@ struct Limits {
 
 impl Environment {
     pub fn root() -> Self {
-        let environment = Self(
+        Self(
             Rc::new(RefCell::new(Frame::empty(None))),
             Rc::new(RefCell::new(Transcript {
                 lines: Vec::new(),
                 taken: 0,
             })),
             Rc::new(RefCell::new(Limits::default())),
-        );
-        environment
+        )
     }
 
     /// Opts this session into a maximum `cons` allocation count — past it,

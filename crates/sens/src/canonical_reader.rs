@@ -28,6 +28,32 @@ pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> 
     CanonicalReader::new(&tokens, source.len()).parse_program()
 }
 
+/// Parse already-decoded exact binary words without a visible-text detour.
+///
+/// Physical T5 decoders and other domain-word producers use this entry point.
+/// Token spans here are offsets in *semantic payload bits* rather than byte
+/// offsets in a human-readable source file. The D2 grammar and domain lifting
+/// remain exactly the same as for `parse_canonical_binary`.
+pub fn parse_canonical_words(words: &[BinarySourceWord]) -> Result<Vec<Expr>, LanguageError> {
+    let mut bit_offset = 0usize;
+    let mut tokens = Vec::with_capacity(words.len());
+    for word in words.iter().copied() {
+        let end = bit_offset.checked_add(word.width()).ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::Parse,
+                "canonical word stream exceeds addressable bit offsets",
+                Span { start: bit_offset, end: bit_offset },
+            )
+        })?;
+        tokens.push(BinarySourceToken {
+            word,
+            span: Span { start: bit_offset, end },
+        });
+        bit_offset = end;
+    }
+    CanonicalReader::new(&tokens, bit_offset).parse_program()
+}
+
 /// Recognize a D2-framed Text7 identifier without changing the canonical D2 AST.
 ///
 /// This helper is consumed only by contextual binding/call-head code. Ordinary

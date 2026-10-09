@@ -37,6 +37,7 @@ mod semantic_registry;
 mod source_words;
 mod source_packing;
 mod ternary_transport;
+mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -150,7 +151,7 @@ mod value;
 pub use binary_number::{BinaryNumber, BinaryNumberError};
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
-pub use canonical_reader::parse_canonical_binary;
+pub use canonical_reader::{parse_canonical_binary, parse_canonical_words};
 pub use mixed_source::parse_mixed_exact_domain;
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
@@ -200,6 +201,8 @@ pub use text7_projection::{
     encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
     TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
 };
+
+pub use binary_execution::{eval_t5_program, T5ExecutionError};
 
 pub use eval::exact_arity;
 pub use eval::parse_json;

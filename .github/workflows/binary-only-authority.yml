@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/**"
+      - "crates/sens/tests/physical_t5_execution.rs"
       - "scripts/check_binary_only_authority.py"
       - "evidence/binary-only-authority-baseline.tsv"
       - ".github/workflows/binary-only-authority.yml"
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - "crates/sens/src/**"
+      - "crates/sens/tests/physical_t5_execution.rs"
       - "scripts/check_binary_only_authority.py"
       - "evidence/binary-only-authority-baseline.tsv"
       - ".github/workflows/binary-only-authority.yml"
@@ -43,6 +45,10 @@ jobs:
             base="$(git rev-parse HEAD^)"
           fi
           python3 scripts/check_binary_only_authority.py --base "$base"
+
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Execute physical T5 bytes without text detours
+        run: cargo test --locked -p sens --test physical_t5_execution
 
       - name: Diff hygiene
         run: git diff --check

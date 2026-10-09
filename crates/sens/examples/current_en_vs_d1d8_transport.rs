@@ -143,7 +143,7 @@ fn run(candidate: &str, source: &str) -> Result<(), String> {
     println!("TRACE_HEX={}", encode_hex(&semantic_trace));
     println!("VALUE_HEX={}", encode_hex(&value_fingerprint(&result.value)));
     println!("OUTPUT_HEX={}", encode_hex(&result.output.join("\n")));
-    println!("SOURCE_BYTES={}", source.as_bytes().len());
+    println!("SOURCE_BYTES={}", source.len());
     println!("LOWERED_AST_NODES={lowered_nodes}");
     emit_optional("SEMANTIC_PAYLOAD_BITS", semantic_payload_bits);
     println!("FRAMING_BITS=NA");

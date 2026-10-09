@@ -7,6 +7,9 @@ on:
       - "crates/sens/src/bit9.rs"
       - "crates/sens/src/source_words.rs"
       - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/tests/physical_t5_execution.rs"
       - "crates/sens/src/mixed_source.rs"
       - "crates/sens/src/domain_words.rs"
       - "crates/sens/src/domain_identity.rs"
@@ -31,6 +34,9 @@ on:
       - "crates/sens/src/bit9.rs"
       - "crates/sens/src/source_words.rs"
       - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/tests/physical_t5_execution.rs"
       - "crates/sens/src/mixed_source.rs"
       - "crates/sens/src/domain_words.rs"
       - "crates/sens/src/domain_identity.rs"
@@ -57,6 +63,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Check exact-width D1-D9 ladder and W7 mechanical round trips
         run: cargo test --locked -p sens --test domain_ladder --test d7_w7_pack --test d2_text7_frame_role_boundary --test text7_canonical_wire --test current_binary_preflight
+      - name: Physical .sens execution from exact words (no text detour)
+        run: cargo test --locked -p sens --test physical_t5_execution -- --nocapture
       - name: Verify owner-ratified D7 coordinates and two reserved cells
         run: python3 scripts/check-d7-current-authority.py
       - name: Verify D7 table surfaces agree with ratified coordinates
