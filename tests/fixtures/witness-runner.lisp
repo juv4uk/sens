@@ -11,13 +11,32 @@
 ; `(value "...")` / `(error "Kind")` envelope, but it must not invent the
 ; expected answer.
 
+(00001001 witness-d1-no
+  (00001000 ()
+    (00100010 (00000001 witness-no-left) (00000001 witness-no-right))))
+
+; Invert only exact D1 predicate values. No generic truthiness.
+(00001001 witness-d1-no?
+  (00001000 (value)
+    (00100010 value (witness-d1-no))))
+
+; Witness-local list walk avoids the historical ASSOC result-tag mismatch.
+(00001001 witness-find-entry
+  (00001000 (key alist)
+    (00000111
+      ((00000010 alist) (00000001 ()))
+      ((00100010 key (00000101 (00000101 alist))) (00000101 alist))
+      ((witness-d1-no? (00100010 key (00000101 (00000101 alist))))
+       (witness-find-entry key (00000110 alist))))))
+
 (00001001 witness-field
   (00001000 (key witness)
-    (10011100 ((entry (00101101 key witness)))
+    (10011100 ((entry (witness-find-entry key witness)))
       (00000111
-        ((00000010 entry) () (00000001 ()))
-        ((00000010 entry) (1) (00000001 ()))
-        ((00000010 entry) (0) (00000110 entry))))))
+        ((00100010 entry (00000001 ()))
+         (00000001 ()))
+        ((witness-d1-no? (00100010 entry (00000001 ())))
+         (00000110 entry))))))
 
 (00001001 witness-malformed-result
   (00001000 (reason actual)
