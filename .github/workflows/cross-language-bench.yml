@@ -12,7 +12,8 @@ on:
 jobs:
   cpython:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # #1547: SENS+CPython historical GREEN took 27m38s; Lua adds a third implementation.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable

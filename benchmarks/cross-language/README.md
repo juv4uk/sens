@@ -22,8 +22,9 @@ The sections below preserve older harness documentation unless explicitly
 marked otherwise.
 
 Цей каталог вимірює **конкретні реалізації**, а не абстрактні "мови".
-Перший зовнішній орієнтир — CPython (#1546). Lua (#1547), Racket CS
-(#1548) і стандартний binary-trees (#1549) додаються окремими slices.
+Перший зовнішній орієнтир — CPython (#1546); Lua 5.4 (#1547) використовує
+той самий корпус і той самий machine-readable формат. Racket CS (#1548)
+і standard binary-trees (#1549) лишаються окремими slices.
 
 ## Historical D1-D4 boundary
 
@@ -47,7 +48,8 @@ Raw repetitions and binary/runtime provenance are emitted next to the summary.
 3. У першому корпусі немає workload, де Python list міг би нечесно
    замінити Lisp pair/cons: лише fib, loop, ackermann, closures, evenodd.
 4. SENS виконується з FASL, де функція SENS — один байт. CPython виконує
-   звичайний source/bytecode шлях своєї реалізації.
+   звичайний source/bytecode шлях своєї реалізації. Lua 5.4 читає source
+   через `loadfile`; benchmark fail-fast перевіряє саме major/minor 5.4.
 5. Фази не змішуються:
    - startup — порожній процес/сесія;
    - load — прочитати й декодувати/скомпілювати програму без виконання;
@@ -83,6 +85,24 @@ Raw repetitions and binary/runtime provenance are emitted next to the summary.
       --check-only
 
 Результат містить instructions.tsv, runtime.tsv, environment.json і report.md.
+
+## Lua 5.4 (#1547)
+
+Lua не має окремої «вигідної» версії workload. Ті самі `fib`, `loop`,
+`ackermann`, `closures`, `evenodd` генеруються з тими самими параметрами
+і expected answers.
+
+Matched driver `lua_driver.lua` має ті самі фази, що SENS/CPython:
+
+- `load` — `loadfile`, chunk не виконується;
+- `ready` — chunk виконується й повертає `{ bench = ... }`, але `bench`
+  не викликається;
+- `repeat N` — той самий ready path + N викликів `bench`;
+- `full` — ready + один `bench` із друком відповіді.
+
+Raw `instructions.tsv` і `runtime.tsv` не отримали нової схеми: Lua просто
+є третім значенням колонки `implementation`. Це дозволяє порівнювати всі
+три реалізації одним downstream-аналізом без паралельного формату.
 
 Steady execution навмисно не рахується як `full - load`: на коротких
 програмах це різниця двох великих process-level чисел і вона може потонути
