@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from d10_historical_snapshot_compat import pinned_inventory_git_blob
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "knowledge/lisp15-appendix-a-provenance-v1.json"
@@ -33,6 +34,8 @@ def normalize(name: object) -> str:
 
 
 def git_blob_sha(path: Path) -> str:
+    if path == D10_PATH:
+        return pinned_inventory_git_blob(path)
     rel = str(path.relative_to(ROOT))
     try:
         result = subprocess.run(
