@@ -1,0 +1,165 @@
+{
+  "schema": "d10-finite-binary-string-critical-pair-confluence/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-HOLD-CORE-VS-LIBRARY-NOT-SELECTED",
+  "authority": [
+    "#4013",
+    "#4977",
+    "#4463",
+    "#4867"
+  ],
+  "owner_interest_motivation": [
+    "SENS binary-first exact finite words",
+    "Lisp symbolic rewriting and compiler correctness",
+    "Pāṇini grammar as formal derivation system",
+    "McCarthy Advice Taker theorem evidence",
+    "FPGA deterministic symbolic execution and reproducibility"
+  ],
+  "baseline": {
+    "main_d10_inventory_blob": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "selected": 635,
+    "ratified": 0,
+    "d1_d9_foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "candidate": {
+    "stable_id": "d10.rewrite.binary-length-decreasing-confluence.20261009",
+    "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+    "surface_uk": "узгодженість-переписувань",
+    "surface_ukr": "свідок-конфлікту-критичних-пар-двійкових-правил",
+    "relation_class": "LENGTH-DECREASING-GROUND-STRING-REWRITING-CRITICAL-PAIR-CONFLUENCE",
+    "profile": "Finite rules (lhs,rhs) over exact D1 bit-words {0,1}, lhs nonempty, |rhs|<|lhs|. Rewriting replaces any contiguous occurrence (including overlaps) of lhs by rhs, no ordered-rule priority and no strategy. Full rewriting is nondeterministic. rhs may be empty. Rules treated as a set, duplicate rules harmless. Empty starting word has no rewrites.",
+    "law": "Compute all same-source one-step peaks arising from overlapping (including nested) occurrences of any pair of left sides. Each critical pair is joinable iff its two descendants share at least one reachable normal form under the same rules. Because every rule strictly shortens finite words, termination is proved by exact length. Then all critical pairs joinable is equivalent to confluence of the entire finite string rewrite relation (critical pair criterion + Newman's lemma). Return CONFLUENT or a concrete NONCONFLUENT witness: source, two branches, and separately reachable normal-form sets with empty intersection. Wording does not imply that a nonconfluent ruleset lacks individual common normal forms for other starting words.",
+    "signature": "(ordered finite list of (nonempty-binary-lhs, strictly-shorter-binary-rhs))->CONFLUENT or NONCONFLUENT(witness)",
+    "witnesses": [
+      {
+        "rules": [
+          [
+            "00",
+            "0"
+          ]
+        ],
+        "verdict": "CONFLUENT",
+        "reason": "00→0 is length-decreasing; overlapping runs of zeros converge"
+      },
+      {
+        "rules": [
+          [
+            "01",
+            "0"
+          ],
+          [
+            "10",
+            "0"
+          ]
+        ],
+        "verdict": "CONFLUENT",
+        "reason": "critical peak 010 reduces to 00 by either branch"
+      },
+      {
+        "rules": [
+          [
+            "01",
+            "0"
+          ],
+          [
+            "10",
+            "1"
+          ]
+        ],
+        "verdict": "NONCONFLUENT",
+        "reason": "010 can yield 00 or 01 and subsequently 0; direct normal-form witness may vary, compute oracle, don't assert exact branches blindly"
+      },
+      {
+        "rules": [
+          [
+            "00",
+            "0"
+          ],
+          [
+            "00",
+            "1"
+          ]
+        ],
+        "verdict": "NONCONFLUENT",
+        "reason": "00 rewrites to both irreducible 0 and 1"
+      },
+      {
+        "rules": [],
+        "verdict": "CONFLUENT",
+        "reason": "no redex, reflexive closure is confluent"
+      }
+    ],
+    "falsifiers": [
+      "Never count disjoint non-overlapping redex occurrences as unjoinable critical conflicts; the two orders commute.",
+      "Two peaks may differ immediately yet be joinable later; comparing only first descendants is unsound.",
+      "Identical left sides with distinct right sides yield a critical peak; omitting containment or same-position overlaps misses a real conflict.",
+      "Do not invoke termination/Newman's lemma for length-preserving, length-growing, cyclic or unrestricted higher-order rewrite systems.",
+      "Do not return a nonconfluence witness without two reachable branches whose normal-form sets are disjoint."
+    ],
+    "coordinate": null,
+    "ratified": false,
+    "selected": false,
+    "physical_t5_authorized": false,
+    "owner_review_required": true
+  },
+  "historical_sources": [
+    {
+      "kind": "ORIGINAL-DONOR",
+      "author": "M. H. A. Newman",
+      "year": 1942,
+      "title": "On Theories with a Combinatorial Definition of Equivalence",
+      "link": "https://www.jstor.org/stable/1968867",
+      "claim": "Termination with local confluence implies confluence; the general rewrite theorem is not a SENS invention."
+    },
+    {
+      "kind": "ORIGINAL-DONOR",
+      "author": "Donald E. Knuth and Peter B. Bendix",
+      "year": 1970,
+      "title": "Simple Word Problems in Universal Algebras",
+      "link": "https://www.sciencedirect.com/science/article/abs/pii/B978008012975450028X",
+      "doi": "10.1016/B978-0-08-012975-4.50028-X",
+      "claim": "Completion and critical overlap analysis for equational word problems. This prototype restricts to length-decreasing ground binary strings."
+    },
+    {
+      "kind": "ACADEMIC-STATEMENT",
+      "publisher": "Springer",
+      "link": "https://link.springer.com/chapter/10.1007/978-3-319-63046-5_26",
+      "claim": "States the critical-pair lemma and Newman's lemma under appropriate rewriting assumptions."
+    },
+    {
+      "kind": "FORMAL-STRING-REWRITE-TREATMENT",
+      "link": "https://www.uni-kassel.de/upress/online/frei/978-3-89958-002-0.volltext.frei.pdf",
+      "claim": "Finite length-reducing string rewriting and critical overlaps, including inclusion cases."
+    }
+  ],
+  "behavioral_neighbors": [
+    "D9 UNIFY, EXPLAIN-PROOF, JTMS reasoning and D10 PROVE-GOAL-STATE are NOT by name confluence decisions",
+    "D8 bitword operations can express symbolic rewriting as library implementation",
+    "PR #4989 handles ground-term congruence closure, not this nonconfluence witness",
+    "PR #4986 handles STRIPS planning, not rewrite-rule confluence",
+    "PR #4983 prime implicants solves Boolean cube family, not rewriting"
+  ],
+  "dedup": {
+    "foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "result": "PRELIMINARY-NO-EXACT-NAME; FULL BEHAVIORAL REVIEW PENDING",
+    "selection": "NO SELECTION BEFORE OWNER CORE-VS-LIBRARY REVIEW",
+    "reason": "Mathematical predicate is computable as a library from finite-word operations and exhaustive search; semantic independence from existing residents must be proven rather than asserted."
+  },
+  "oracle_plan": {
+    "algorithm_a": "Critical overlaps across two lhs occurrences, including containment and same-source duplicate lhs; exact normal-form reachability",
+    "algorithm_b": "Independent exhaustive enumeration of all binary words up to length 5, generating all one-step peaks and checking their normal-form intersection",
+    "census": "All unordered pairs of binary length-decreasing 1/2-bit rules, plus diverse explicit 3-bit overlap / containment examples",
+    "test_path": "tests/test_d10_critical_pairs_confluence.py",
+    "status": "SOURCE-PINNED-REFERENCE-ONLY"
+  },
+  "guards": [
+    "D1–D9 ratified unchanged",
+    "D2 syntax/control unchanged",
+    "one domain D10 research only, 0 coordinate",
+    "No executable physical .sens or D10 T5",
+    "No mutation of canonical inventory, ledger or append history",
+    "No proposal claiming all rewrite systems are terminating",
+    "Human function names only research surfaces, not binary language identity"
+  ]
+}
