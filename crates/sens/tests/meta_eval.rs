@@ -60,7 +60,6 @@ fn arithmetic_dispatches_to_the_real_primitives() {
     assert_eq!(eval_meta("(* 3 4)", "(quote ())"), "12");
 }
 
-
 #[test]
 fn list_primitives_dispatch_to_the_real_primitives() {
     assert_eq!(
@@ -159,7 +158,6 @@ fn def_can_bind_a_lambda_callable_from_a_later_top_level_form() {
         "36"
     );
 }
-
 
 #[test]
 fn loads_a_real_verbatim_slice_of_lib_core_my_and_runs_it_through_my_eval() {
