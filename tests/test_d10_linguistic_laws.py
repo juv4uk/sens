@@ -117,7 +117,7 @@ def main():
         try: check_dossier(changed)
         except AssertionError: pass
         else: raise AssertionError("mutation guard failed")
-    print(f"D10-LINGUISTIC: PASS stress_grid={n} + 9 explicit witnesses; negative_mutations={len(mutations)}; selected=0 ratified=0")
+    print(f"D10-LINGUISTIC: PASS stress_grid={n} + 12 explicit checks; negative_mutations={len(mutations)}; selected=0 ratified=0")
     print("Native donor/SENS equality has not been established.")
 
 if __name__ == "__main__":
