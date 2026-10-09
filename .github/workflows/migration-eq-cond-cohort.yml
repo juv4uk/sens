@@ -26,5 +26,5 @@ jobs:
       - uses: actions/checkout@v5
       - name: Three-pass exact migration and physical T5 parity
         run: python3 -m unittest discover -s tests -p 'test_migration_eq_cond_cohort.py' -v
-      - name: Current exact D1 EQ -> D3 COND oracle on physical T5
+      - name: Historical EQ/COND physical T5 transport (no semantic oracle)
         run: cargo test -p sens --test migration_eq_cond_cohort
