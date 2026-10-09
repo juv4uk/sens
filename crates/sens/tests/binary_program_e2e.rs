@@ -117,7 +117,7 @@ fn physical_t5_executes_exact_d3_cond_with_d1_skip_and_select() {
 
 #[test]
 fn physical_d3_cond_rejects_structural_empty_as_a_predicate() {
-    let physical = encode_binary_projection_ternary("10 110 00 10 10 10 01 00 10 010 00 10 01 01 01 01 01")
+    let physical = encode_binary_projection_ternary("10 110 00 10 10 01 00 10 010 00 10 01 01 01 01")
         .expect("malformed-control source remains well-formed binary transport");
     let visible = open_ternary_program(&physical).expect("T5 source must decode");
     let parsed = parse_canonical_binary(&visible).expect("binary syntax must parse");
