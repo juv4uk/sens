@@ -437,21 +437,9 @@ fn canonicalize_domain_result(
             }
 
             if matches!(bits, 0b11010 | 0b11011) {
-                // #3004/#3008: LESSP/GREATERP are strict D5 predicates whose
-                // observable result domain is D1.  The old exact-rational
-                // arithmetic backend still emits numeric 0/1; accept only that
-                // bounded migration carrier at these exact owning identities.
-                let legacy_bit = match &value {
-                    Value::Number(number, crate::Exactness::Exact) if *number == 0.0 => Some(false),
-                    Value::Number(number, crate::Exactness::Exact) if *number == 1.0 => Some(true),
-                    Value::Rational(number) if number == &crate::Rational::integer(0) => Some(false),
-                    Value::Rational(number) if number == &crate::Rational::integer(1) => Some(true),
-                    _ => None,
-                };
-                if let Some(bit) = legacy_bit {
-                    return Ok(Value::predicate_bit(bit));
-                }
-
+                // #1716/#1826: LESSP/GREATERP producers now emit D1 directly.
+                // Any non-D1 result is a regression; numeric 0/1 is no longer
+                // an admitted migration carrier at this exact-domain boundary.
                 return Err(LanguageError::new(
                     ErrorKind::Type,
                     format!(
