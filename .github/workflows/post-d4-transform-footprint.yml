@@ -3,7 +3,7 @@ name: Post-D4 transformation footprint
 on:
   pull_request:
     paths:
-      - "crates/sens/tests/post_d4_control_derivation.rs"
+      - "docs/archive/historical/retired-rust-tests/post_d4_control_derivation.rs.txt"
       - "crates/sens/tests/post_d4_setq_state_passing.rs"
       - "scripts/research-2472-transform-footprint.py"
       - "crates/sens/tests/post_d4_transform_boundary.rs"
@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "crates/sens/tests/post_d4_control_derivation.rs"
+      - "docs/archive/historical/retired-rust-tests/post_d4_control_derivation.rs.txt"
       - "crates/sens/tests/post_d4_setq_state_passing.rs"
       - "scripts/research-2472-transform-footprint.py"
       - "crates/sens/tests/post_d4_transform_boundary.rs"
@@ -38,5 +38,5 @@ jobs:
             echo "- GO: LOCAL-REGION-REWRITE"
             echo "- RETURN: CALLCHAIN-PROTOCOL-REWRITE"
             echo "- SETQ: OBSERVER-PROTOCOL-REWRITE"
-            echo "- Research only: no DERIVED/NEW verdict and no address allocation."
+            echo "- GO/RETURN historical evidence only; SETQ live witness retained; no DERIVED/NEW verdict."
           } >> "$GITHUB_STEP_SUMMARY"
