@@ -171,6 +171,10 @@ class BinaryProgram:
                 raise BinaryLanguageError(
                     f"ширина слова {w.width} != ширина координати {c.width} ({c.domain})"
                 )
+            if w.value != c.ordinal:
+                raise BinaryLanguageError(
+                    f"біти слова {w.bits()} != біти координати {c.domain}:{c.ordinal:0{c.width}b}"
+                )
 
     def pack(self) -> Tuple[bytes, int]:
         self.check()
@@ -248,6 +252,10 @@ def _self_test() -> int:
     ok("програма round-trip з координатами", prog.roundtrip().words == words)
     bad = BinaryProgram(words, [Coordinate("D9", 9, 0)] + coords[1:])
     ok("розбіжність ширин координат відкидається", _raises(bad.check))
+    bad_payload = BinaryProgram(
+        words, [Coordinate("D3", 3, 0b100)] + coords[1:]
+    )
+    ok("розбіжність payload із координатою відкидається", _raises(bad_payload.check))
 
     # 7) fail-closed на неузгоджених width/valid_bits
     ok("невідповідність valid_bits відкидається",
