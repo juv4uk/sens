@@ -77,17 +77,21 @@ fn eval_t5_bytes_core4(
     bytes: &[u8],
     bootstrap_core: bool,
 ) -> Result<sens::EvalResult, String> {
-    let visible = sens::open_ternary_program(bytes)
+    // Physical execution stays on typed words and the packed reader.
+    // The visible 0/1 view is reserved for explicit open/explain operations.
+    let words = sens::decode_ternary_program(bytes)
         .map_err(|e| format!("physical T5/D2 decode rejected: {}", explain_d2_rejection(bytes, e)))?;
-    let forms = sens::parse_canonical_binary(&visible)
-        .map_err(|e| format!("canonical SENS parser rejected: {}", e.render(&visible)))?;
+    let widths: Vec<usize> = words.iter().map(|word| word.width()).collect();
+    let packed = sens::pack_binary_source_words(&words);
+    let forms = sens::parse_canonical_packed_words(&packed, &widths)
+        .map_err(|e| format!("canonical packed SENS parser rejected: {e}"))?;
     let mut session = sens::Session::default();
     if bootstrap_core {
         sens::load_core_library(&mut session)
             .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
     }
     sens::eval_parsed_expressions(&forms, &mut session)
-        .map_err(|e| format!("current SENS oracle rejected: {}", e.render(&visible)))
+        .map_err(|e| format!("current SENS evaluator rejected: {e}"))
 }
 
 /// Diagnose why a physical packed T5 file fails the existing canonical D2
