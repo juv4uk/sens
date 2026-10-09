@@ -1,0 +1,85 @@
+name: Verify #549 Trilingual Surface Lisp Migration
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_trilingual_surface.py'
+      - 'scripts/check-trilingual-surface.lisp'
+      - 'lib/surface/semantic-registry.lisp'
+      - '.github/workflows/verify-549-trilingual-surface-parity.yml'
+  push:
+    paths:
+      - 'scripts/check_trilingual_surface.py'
+      - 'scripts/check-trilingual-surface.lisp'
+      - 'lib/surface/semantic-registry.lisp'
+      - '.github/workflows/verify-549-trilingual-surface-parity.yml'
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release my-lisp
+        run: cargo build --release -p my-lisp-cli --bin my-lisp
+
+      - name: Positive Python and Lisp reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_trilingual_surface.py > /tmp/tri-python.txt
+          ./target/release/my-lisp scripts/check-trilingual-surface.lisp > /tmp/tri-lisp.txt
+          cat /tmp/tri-python.txt
+          cat /tmp/tri-lisp.txt
+
+          public="$(awk -F': ' '/^public semantic identities:/ {print $2}' /tmp/tri-python.txt)"
+          symbolic="$(awk -F': ' '/^shared symbolic identities:/ {print $2}' /tmp/tri-python.txt)"
+          common="$(awk -F'[:/]' '/^trilingual stable identities:/ {gsub(/ /, "", $2); print $2}' /tmp/tri-python.txt)"
+          release="$(awk -F': ' '/^release parity:/ {print tolower($2)}' /tmp/tri-python.txt)"
+
+          grep -Fq "(public-semantic-identities $public)" /tmp/tri-lisp.txt
+          grep -Fq "(shared-symbolic-identities $symbolic)" /tmp/tri-lisp.txt
+          grep -Fq "(trilingual-stable-identities $common $public)" /tmp/tri-lisp.txt
+          grep -Fq "(release-parity $release)" /tmp/tri-lisp.txt
+
+          for lang in UK EN SA; do
+            read -r stable candidate missing compatibility < <(
+              awk -v wanted="$lang" '$1 == wanted {print $2, $3, $4, $5}' /tmp/tri-python.txt
+            )
+            lower="$(printf '%s' "$lang" | tr '[:upper:]' '[:lower:]')"
+            grep -Fq "($lower (stable $stable) (candidate $candidate) (missing $missing) (compatibility-only $compatibility))" /tmp/tri-lisp.txt
+          done
+
+      - name: Require-complete parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python3 scripts/check_trilingual_surface.py --require-complete > /tmp/tri-python-complete.txt 2>&1
+          py_rc=$?
+          ./target/release/my-lisp scripts/check-trilingual-surface.lisp --require-complete > /tmp/tri-lisp-complete.txt 2>&1
+          lisp_rc=$?
+          set -e
+          test "$py_rc" -ne 0
+          test "$lisp_rc" -ne 0
+          grep -Fq "(release-parity open)" /tmp/tri-lisp-complete.txt
+
+      - name: Missing-SA mutation fails closed in both
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp lib/surface/semantic-registry.lisp /tmp/semantic-registry.lisp
+          sed -i '0,/(sa svarūpa stable)/s// /' lib/surface/semantic-registry.lisp
+
+          set +e
+          python3 scripts/check_trilingual_surface.py > /tmp/tri-python-negative.txt 2>&1
+          py_rc=$?
+          ./target/release/my-lisp scripts/check-trilingual-surface.lisp > /tmp/tri-lisp-negative.txt 2>&1
+          lisp_rc=$?
+          set -e
+
+          mv /tmp/semantic-registry.lisp lib/surface/semantic-registry.lisp
+          test "$py_rc" -ne 0
+          test "$lisp_rc" -ne 0
+          grep -Fq "missing-human-surface" /tmp/tri-lisp-negative.txt
