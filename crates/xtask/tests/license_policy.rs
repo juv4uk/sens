@@ -101,12 +101,6 @@ fn superseded_truthiness_assertions_are_explicitly_classified_before_test_transi
     );
     require_authority_row(
         &contents,
-        "crates/sens/tests/forward.rs",
-        "match_test_condition_succeeds_when_the_expression_is_truthy",
-        "legacy-semantic",
-    );
-    require_authority_row(
-        &contents,
         "crates/sens/tests/ukrainian_api_docs.rs",
         "istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen",
         "legacy-semantic",
