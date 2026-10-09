@@ -1,12 +1,14 @@
 //! Domain-ladder-only guard. Native-first language laws belong to SENS witnesses.
 use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
+    decode_ternary_program, encode_binary_projection_ternary, eval_t5_program, open_ternary_program,
     parse_binary_source_words, parse_canonical_binary, syntax::ExprKind, DomainIdentity,
-    ErrorKind,
+    ErrorKind, Session, Value,
 };
 
 const D3_EMPTY_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/exact-domain-ladder/empty-d3.sens");
+const D3_QUOTE_T5: &[u8] =
+    include_bytes!("../../../tests/fixtures/exact-domain-ladder/d3-quote.sens");
 
 #[test]
 fn exact_domain_ladder_preserves_leading_zeroes_and_widths_d1_through_d9() {
@@ -90,4 +92,28 @@ fn physical_d3_empty_is_one_canonical_packed_byte_not_text() {
     let mut overpadded = D3_EMPTY_T5.to_vec();
     overpadded.push(0xf2);
     assert!(decode_ternary_program(&overpadded).is_err());
+}
+
+#[test]
+fn physical_d3_quote_executes_as_packed_bytes_with_exact_word_boundaries() {
+    // Canonical T5: 10 001 00 000 01; not UTF-8 text and not old Function8.
+    assert_eq!(D3_QUOTE_T5, &[0x63, 0x89, 0x06, 0xa1]);
+    assert_ne!(D3_QUOTE_T5, b"10 001 00 000 01");
+    let words = decode_ternary_program(D3_QUOTE_T5)
+        .expect("committed physical D3 QUOTE must pass strict D2 grammar");
+    let exact = words.iter().map(ToString::to_string).collect::<Vec<_>>();
+    assert_eq!(exact, ["10", "001", "00", "000", "01"]);
+    assert_eq!(
+        encode_binary_projection_ternary("10 001 00 000 01")
+            .expect("canonical physical encoder"),
+        D3_QUOTE_T5
+    );
+    let result = eval_t5_program(D3_QUOTE_T5, &mut Session::default())
+        .expect("physical QUOTE executes in a fresh binary session");
+    assert!(matches!(result.value, Value::Nil));
+    assert!(result.output.is_empty());
+
+    let mut damaged = D3_QUOTE_T5.to_vec();
+    damaged.push(0xf2);
+    assert!(decode_ternary_program(&damaged).is_err());
 }
