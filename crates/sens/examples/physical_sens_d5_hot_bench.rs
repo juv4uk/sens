@@ -79,26 +79,42 @@ fn main() {
                 iterations,
                 samples,
             ),
-            "eval_parsed" => measure(
-                || {
-                    let answer = eval_parsed_expressions(black_box(&ast), &mut session)
-                        .expect("repeated D5 AST evaluation");
-                    assert_eq!(answer, expected, "repeated D5 observable drift");
-                    black_box(answer);
-                },
-                iterations,
-                samples,
-            ),
-            "eval_lowered" => measure(
-                || {
-                    let answer = eval_lowered_expressions(black_box(&lowered), &mut session)
-                        .expect("repeated D5 lowered evaluation");
-                    assert_eq!(answer, expected, "repeated lowered D5 observable drift");
-                    black_box(answer);
-                },
-                iterations,
-                samples,
-            ),
+            "eval_parsed" => {
+                let first = eval_parsed_expressions(&ast, &mut session)
+                    .expect("pre-measure D5 AST execution");
+                assert_eq!(first, expected, "D5 observable changed before timing");
+                let observations = measure(
+                    || {
+                        let answer = eval_parsed_expressions(black_box(&ast), &mut session)
+                            .expect("repeated D5 AST evaluation");
+                        black_box(answer);
+                    },
+                    iterations,
+                    samples,
+                );
+                let last = eval_parsed_expressions(&ast, &mut session)
+                    .expect("post-measure D5 AST execution");
+                assert_eq!(last, expected, "D5 observable drift after timing");
+                observations
+            }
+            "eval_lowered" => {
+                let first = eval_lowered_expressions(&lowered, &mut session)
+                    .expect("pre-measure lowered D5 execution");
+                assert_eq!(first, expected, "lowered D5 observable changed before timing");
+                let observations = measure(
+                    || {
+                        let answer = eval_lowered_expressions(black_box(&lowered), &mut session)
+                            .expect("repeated lowered D5 evaluation");
+                        black_box(answer);
+                    },
+                    iterations,
+                    samples,
+                );
+                let last = eval_lowered_expressions(&lowered, &mut session)
+                    .expect("post-measure lowered D5 execution");
+                assert_eq!(last, expected, "lowered D5 observable drift after timing");
+                observations
+            }
             _ => unreachable!(),
         };
         let mut sorted = observed.clone();
