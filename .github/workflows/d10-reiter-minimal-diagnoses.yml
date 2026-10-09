@@ -1,0 +1,33 @@
+name: D10 Reiter 1987 finite minimal diagnoses evidence
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-reiter-minimal-diagnoses-20261009.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'scripts/check_d10_reiter_minimal_diagnoses.py'
+      - 'tests/oracles/d10_reiter_minimal_diagnoses_sbcl.lisp'
+      - 'docs/research/d10-reiter-minimal-diagnoses.uk.md'
+      - '.github/workflows/d10-reiter-minimal-diagnoses.yml'
+  push:
+    branches:
+      - research/d10-reiter-finite-minimal-diagnoses-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-conflict-to-diagnosis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check syntax of source-bound D10 arithmetic model
+        run: python3 -m py_compile scripts/check_d10_reiter_minimal_diagnoses.py
+      - name: Verify all finite hitting-set diagnoses against independent powerset
+        run: python3 scripts/check_d10_reiter_minimal_diagnoses.py --self-test
+      - name: Install independent historical AI Lisp donor runtime
+        run: sudo apt-get install -y -qq sbcl
+      - name: Execute actual SBCL finite diagnosis oracle
+        run: sbcl --noinform --script tests/oracles/d10_reiter_minimal_diagnoses_sbcl.lisp
