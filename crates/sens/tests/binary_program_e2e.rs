@@ -13,6 +13,8 @@ const D3_COND_PROGRAM: &str =
     include_str!("../../../examples/binary/d3-cond-program.bits");
 const D3_PRIMITIVES_PROGRAM: &str =
     include_str!("../../../examples/binary/d3-primitives-program.bits");
+const D5_LABEL_RECURSION_PROGRAM: &str =
+    include_str!("../../../examples/binary/d5-label-recursion.bits");
 
 fn assert_exact_domain_ast(expression: &Expr) {
     match &expression.kind {
@@ -61,6 +63,29 @@ fn d3_primitive_program_is_only_width_qualified_binary_source() {
     assert_eq!(visible, sens::render_ternary_words_spaced(&words));
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
 }
+
+
+#[test]
+fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
+    assert_bit_projection(D5_LABEL_RECURSION_PROGRAM);
+    let physical = encode_binary_projection_ternary(D5_LABEL_RECURSION_PROGRAM)
+        .expect("D5 LABEL source encodes as physical T5");
+    let words = decode_ternary_program(&physical).expect("D5 T5 words decode");
+    let visible = open_ternary_program(&physical).expect("D5 T5 opens as exact-width words");
+    let normalized = D5_LABEL_RECURSION_PROGRAM
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    assert_eq!(visible, normalized);
+    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), physical);
+
+    let parsed = parse_canonical_binary(&visible)
+        .expect("D2 reader preserves D5 LABEL and D7 binding heads");
+    assert_eq!(parsed.len(), 1, "LABEL and its recursive application form one D2 call");
+    assert_exact_domain_ast(&parsed[0]);
+}
+
 
 #[test]
 fn d3_cond_program_preserves_d1_and_d3_widths_in_structural_ast() {
