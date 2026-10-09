@@ -1204,7 +1204,7 @@
     (00000111
       ; Stop precisely on empty structure. ATOM would also match any
       ; non-list datum and is not a valid instruction-stream terminator.
-      ((00000011 instructions (00000001 ()))
+      ((equal? instructions (00000001 ()))
        (00000001 ()))
       ((00000010 (00000001 ()))
        (00101001
