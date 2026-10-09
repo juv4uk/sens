@@ -7,7 +7,7 @@
 
 Bootstrap rule: existing unregistered stands remain explicit backfill debt tracked by #4172. Any newly created benchmark stand must carry `bench.json`; #4171 guards that ratchet.
 
-**Registered stands:** 31
+**Registered stands:** 32
 
 | Stand | Wing | Role | Question | Claim boundary | Witness | Status | Generation | Axis | Reproduce |
 |---|---|---|---|---|---|---|---|---|---|
@@ -42,6 +42,7 @@ Bootstrap rule: existing unregistered stands remain explicit backfill debt track
 | `gc-stress-oracle` | GC | `RESEARCH`<br>`CONFORMANCE`<br>`FALSIFIER` | Can collector-independent adversarial graphs establish reachability, reclamation, relabeling, and stale-handle oracle behavior before a runtime heap exists? | RED/oracle layer only; it proves falsifier sensitivity on representation-neutral fixtures while runtime-dependent checks remain pending. | `run.py` | PENDING-RUNTIME-HEAP | unknown | `gc/adversarial-oracle` | `python3 benchmarks/gc-stress-oracle/run.py --out /tmp/gc-stress-oracle` |
 | `human-wire` | Transport / human wire | `MEASUREMENT`<br>`FALSIFIER` | For the same complete binary frame, what timing cost and error behavior arise under several direct human transport encodings? | MECHANISM/human-factors benchmark only; it creates no SENS semantic domain and keeps payload, framing, timing, and error classes separate. | `README.md`<br>`model.py`<br>`timing.py`<br>`receiver.py`<br>`trial.py` | MECHANISM | unknown | `transport/human-wire` | `python3 benchmarks/human-wire/model.py --hex 00ff --payload-bits 8 --json` |
 | `store-air-load` | STORE → AIR → LOAD | `MEASUREMENT`<br>`CONFORMANCE`<br>`FALSIFIER` | Can canonical exact-width payload identity be preserved while storage, transport, and load costs are measured as separate physical axes? | Measures STORE/AIR/LOAD accounting and validates exact-width recovery for declared fixtures; transport overhead does not become language semantics. | `README.md`<br>`run.py`<br>`validate.py`<br>`fixtures.json`<br>`schema.json` | ACTIVE | unknown | `store-air-load/physical-separation` | `python3 benchmarks/store-air-load/run.py --out /tmp/store-air-load.jsonl --bitrate-bps 2 && python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl` |
+| `unbounded-width` | Exact-width carrier mechanisms | `MEASUREMENT`<br>`CONFORMANCE`<br>`FALSIFIER` | Do dynamic exact-width carriers preserve bit identity and avoid a semantic width ceiling through the measured 4096-bit sample? | Bounded Cachegrind and exact-width identity evidence only; no production carrier selection, universal performance law, or D1-D10 ratification. | `README.md`<br>`run.py`<br>`width_scale.c` | HISTORICAL-RESEARCH-ONLY | historical source PR #2005 replayed 2026-10-09 | `carrier/dynamic-unbounded-width` | `python3 benchmarks/unbounded-width/run.py --smoke` |
 
 ## Rules
 
