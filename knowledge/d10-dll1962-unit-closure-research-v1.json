@@ -136,7 +136,8 @@
   "tests": {
     "math": "tests/test_d10_dll1962_unit_closure.py",
     "real": "tests/oracles/d10_real_pysat_unit.py",
-    "state": "NOT-RUN"
+    "state": "REAL-PYSAT-GLUCOSE3-600-PASS;EXACT-MATH-2304-PASS;HOSTED-RUST-CANON-FAIL",
+    "observed_evidence": "knowledge/d10-dll1962-glucose3-oracle-evidence-v1.json"
   },
   "accounting": {
     "selected_delta": 0,
