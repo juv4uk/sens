@@ -1,0 +1,77 @@
+name: Byte-pack efficiency benchmark
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/byte-pack-bench.yml"
+      - "crates/sens/src/bits.rs"
+      - "crates/sens/src/packed_bits.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/examples/byte_pack_bench.rs"
+      - "benchmarks/byte-pack/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/byte-pack-bench.yml"
+      - "crates/sens/src/bits.rs"
+      - "crates/sens/src/packed_bits.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/examples/byte_pack_bench.rs"
+      - "benchmarks/byte-pack/**"
+
+concurrency:
+  group: byte-pack-bench-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: byte-pack-bench
+
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+
+      - name: Build production-API packing benchmark
+        run: cargo build --release -p sens --example byte_pack_bench
+
+      - name: Verify parity and measure density versus instruction cost
+        run: |
+          rm -rf /tmp/sens-byte-pack
+          python3 benchmarks/byte-pack/run.py \
+            --binary target/release/examples/byte_pack_bench \
+            --out /tmp/sens-byte-pack \
+            --sizes 64,1024 \
+            --reps 16
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Byte-pack efficiency #2190"
+            echo
+            echo "Exact parity is checked before Cachegrind. Packed bytes are mechanism evidence, not semantic identity."
+            if test -s /tmp/sens-byte-pack/results.tsv; then
+              echo '~~~text'
+              cat /tmp/sens-byte-pack/results.tsv
+              echo '~~~'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: byte-pack-efficiency
+          path: /tmp/sens-byte-pack/
+          retention-days: 7
