@@ -310,7 +310,7 @@ fn sens_binary_executes_physical_t5_without_a_human_name_parser() {
     assert!(!bytes.is_empty());
     // The physical carrier is a sequence of packed bytes, never the
     // displayed zero/one source with spaces.
-    assert_ne!(bytes, b"10 001 00 10 01 01");
+    assert_ne!(bytes.as_slice(), &b"10 001 00 10 01 01"[..]);
 
     let output = sens().arg(path).output().expect("canonical SENS CLI");
     assert!(
