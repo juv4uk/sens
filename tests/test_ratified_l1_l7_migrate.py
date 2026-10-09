@@ -93,5 +93,27 @@ class Ratification(unittest.TestCase):
             self.assertFalse((Path(tmp) / "out").exists())
 
 
+    def test_forged_equal_semantic_digests_cannot_approve_apply(self):
+        """An executable printing constant matching SHA strings is not an oracle."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "source.lisp"
+            source.write_text("(110 (t (001 1)))", encoding="utf-8")
+            candidate = root / "candidate.sens"
+            candidate.write_bytes(m.encode_projection("1\\n".replace("\\n", "\n")))
+            fake = root / "fake-oracle"
+            fake.write_text(
+                "#!/usr/bin/env python3\n"
+                "import json\n"
+                "print(json.dumps({'source_semantic_sha256': 'a'*64, "
+                "'candidate_semantic_sha256': 'a'*64}))\n",
+                encoding="utf-8",
+            )
+            fake.chmod(0o755)
+            with self.assertRaises(m.Block) as caught:
+                m.run_oracle(fake, source, candidate)
+            self.assertEqual(caught.exception.rule, "ORACLE")
+            self.assertIn("content-pinned", caught.exception.detail)
+
 if __name__ == "__main__":
     unittest.main()
