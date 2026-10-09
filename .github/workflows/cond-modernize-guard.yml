@@ -1,0 +1,17 @@
+name: COND legacy rewrite fail-closed
+
+on:
+  pull_request:
+    paths:
+      - "scripts/cond-modernize.py"
+      - "tests/test_cond_modernize_guard.py"
+      - ".github/workflows/cond-modernize-guard.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-no-unsafe-rewrite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Guard against old YES/NO rewrite and in-place writes
+        run: python3 -m unittest discover -s tests -p 'test_cond_modernize_guard.py' -v
