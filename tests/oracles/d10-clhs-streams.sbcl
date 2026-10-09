@@ -1,0 +1,70 @@
+;;;; Незалежний донорський оракул ANSI Common Lisp / SBCL.
+;;;; Не є програмою SENS, не створює D10 коди та не ратифікує значення.
+(in-package :cl-user)
+(defvar *d10-oracle-input* nil)
+
+(defun ensure-equal (actual expected label)
+  (unless (equal actual expected)
+    (error "D10 STREAMS ORACLE BLOCK ~A: observed=~S expected=~S" label actual expected)))
+
+(defun witness-synonym-stream ()
+  (let* ((*d10-oracle-input* (make-string-input-stream "a"))
+         (alias (make-synonym-stream '*d10-oracle-input*)))
+    (unwind-protect
+         (progn
+           (ensure-equal (read-char alias nil :eof) #\a "synonym first binding")
+           (let ((*d10-oracle-input* (make-string-input-stream "b")))
+             (unwind-protect
+                  (ensure-equal (read-char alias nil :eof) #\b
+                                "synonym rebound binding")
+               (close *d10-oracle-input*)))
+           (ensure-equal (read-char alias nil :eof) :eof
+                         "synonym original stream consumed"))
+      (close alias)
+      (close *d10-oracle-input*)))
+  (format t "PASS DYNAMIC-SYNONYM-STREAM-TARGET~%"))
+
+(defun witness-output-drain ()
+  (let ((buffer (make-string-output-stream)))
+    (unwind-protect
+         (progn
+           (write-string "ab" buffer)
+           (ensure-equal (get-output-stream-string buffer) "ab" "first drain")
+           (ensure-equal (get-output-stream-string buffer) "" "second drain")
+           (write-string "c" buffer)
+           (ensure-equal (get-output-stream-string buffer) "c" "drain after write")
+           (format t "PASS DRAIN-STRING-OUTPUT-STREAM~%"))
+      (close buffer))))
+
+(defun witness-concatenation ()
+  (let ((a (make-string-input-stream "ab"))
+        (b (make-string-input-stream "cd")))
+    (let ((stream (make-concatenated-stream a b)))
+      (unwind-protect
+           (progn
+             (ensure-equal (loop repeat 4 collect (read-char stream nil :eof))
+                           (list #\a #\b #\c #\d)
+                           "ordered four reads")
+             (ensure-equal (read-char stream nil :eof) :eof
+                           "only final EOF"))
+        (close stream)
+        (close a)
+        (close b))))
+  (let ((a (make-string-input-stream ""))
+        (b (make-string-input-stream "x")))
+    (let ((stream (make-concatenated-stream a b)))
+      (unwind-protect
+           (progn
+             (ensure-equal (read-char stream nil :eof) #\x
+                           "empty first child skips EOF")
+             (ensure-equal (read-char stream nil :eof) :eof "true EOF"))
+        (close stream)
+        (close a)
+        (close b))))
+  (format t "PASS ORDERED-CONCATENATED-INPUT~%"))
+
+(format t "SBCL-ORACLE: ~A~%" (lisp-implementation-version))
+(witness-synonym-stream)
+(witness-output-drain)
+(witness-concatenation)
+(format t "D10-CLHS-STREAMS-DONOR: PASS 3/3~%")

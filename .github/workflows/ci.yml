@@ -285,9 +285,15 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: git diff --check "$BASE_SHA" "$HEAD_SHA"
 
+      - name: Prepare writable Ruby tool cache
+        if: steps.changes.outputs.workflow == 'true'
+        run: mkdir -p "$RUNNER_TEMP/ruby-toolcache"
+
       - name: Set up Ruby for workflow YAML validation
         if: steps.changes.outputs.workflow == 'true'
         uses: ruby/setup-ruby@v1
+        env:
+          RUNNER_TOOL_CACHE: ${{ runner.temp }}/ruby-toolcache
         with:
           ruby-version: '3.3'
 
@@ -320,6 +326,9 @@ jobs:
         run: |
           cargo test --workspace
           cargo build --workspace
+
+      - name: Check generated domain owner projection
+        run: python3 scripts/generate-domain-owner-registry.py --check
 
       - name: Check generated semantic registry
         if: (steps.changes.outputs.surface == 'true' || steps.changes.outputs.semantic == 'true') && steps.changes.outputs.workspace != 'true'

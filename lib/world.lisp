@@ -65,7 +65,10 @@
       ((00000010 values) () (00000001 ()))
       ((00000010 values) (1) (00000001 ()))
       ((00100010 value (00000101 values)) (00000110 values))
-      (t (00000100 (00000101 values) (world-remove-first value (00000110 values)))))))
+      ((00100010
+        (00100010 value (00000101 values))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       (00000100 (00000101 values) (world-remove-first value (00000110 values)))))))
 
 (00001001 world-apply-event
   (00001000 (clauses event)
@@ -73,14 +76,26 @@
       ((00000011 (00000101 event) (00000001 tell)) (00000100 (00110000 event) clauses))
       ((00000011 (00000101 event) (00000001 retract))
        (world-remove-first (00110000 event) clauses))
-      (t clauses))))
+      ((00100010
+        (00000011 (00000101 event) (00000001 retract))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       clauses))))
 
 (00001001 world-module-known?
   (00001000 (world module-name)
     (00000111
-      ((00000010 (world-module-events world module-name)) () (00000001 ()))
-      ((00000010 (world-module-events world module-name)) (1) (00000001 ()))
-      (t t))))
+      ((00000010 (world-module-events world module-name)) () (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+      ((00000010 (world-module-events world module-name)) (1) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+      ((00000010 (world-module-events world module-name)) (0) (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left))))))
+
+
+
+(00001001 world-module-missing?
+  (00001000 (world module-name)
+    (00000111
+      ((00000010 (world-module-events world module-name)) () (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left)))
+      ((00000010 (world-module-events world module-name)) (1) (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left)))
+      ((00000010 (world-module-events world module-name)) (0) (00100010 (00000001 d1-no-left) (00000001 d1-no-right))))))
 
 (00001001 world-clauses
   (00001000 (world module-name)
@@ -98,31 +113,17 @@
     (00000111
       ((world-module-known? world module-name)
        (10000101 goal (world-clauses world module-name)))
-      (t (00000001 Module-not-found)))))
+      ((world-module-missing? world module-name)
+       (00000001 Module-not-found)))))
 
 (00001001 forward-in-world
   (00001000 (world module-name)
     (00000111
       ((world-module-known? world module-name)
        (run-multi (world-clauses world module-name) (00000001 ())))
-      (t (00000001 Module-not-found)))))
+      ((world-module-missing? world module-name)
+       (00000001 Module-not-found)))))
 
-;; `advise-world` keeps the established Advice Taker decision vocabulary but
-;; makes the state transition explicit. Its result is always `(decision world)`:
-;; accepted input carries a newly extended world; rejected or conflicting input
-;; carries the exact original world. Validation helpers are shared with
-;; `lib/knowledge.lisp`, so the global convenience API and this pure API cannot
-;; silently develop different clause languages.
-;;
-;; `advise-world` зберігає чинний словник рішень Advice Taker, але робить
-;; перехід стану явним. Результат завжди `(рішення світ)`: прийнятий ввід несе
-;; новий розширений світ, відхилений або конфліктний — точно початковий світ.
-;; Валідатори спільні з `lib/knowledge.lisp`, тому обидва API не розійдуться.
-;;
-;; `advise-world` behält das bestehende Entscheidungsvokabular des Advice
-;; Takers bei, macht den Zustandsübergang jedoch explizit. Das Ergebnis ist
-;; immer `(entscheidung welt)`: Akzeptierte Eingabe enthält eine neue Welt,
-;; abgelehnte oder widersprüchliche Eingabe exakt die ursprüngliche Welt.
 (00001001 advice-decision-in-world
   (00001000 (world module-name clause)
     (00000111
@@ -334,8 +335,9 @@
     (00000111
       ((00000011 (00100011 module-name) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) module-name)))
-      ((00000011 (world-module-known? world module-name) (00000001 ())) (00000001 Module-not-found))
-      (t
+      ((world-module-missing? world module-name)
+       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 Module-not-found)) (00100111 (00000001 input) module-name)))
+      ((world-module-known? world module-name)
        (10011100 ((clauses (world-clauses world module-name)))
          (00000111
            ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))

@@ -1,0 +1,33 @@
+name: Ratified D4 LIST/APPEND reference execution
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/src/eval/canon.rs'
+      - 'crates/sens/tests/d4_compact_derived_runtime.rs'
+      - '.github/workflows/d4-compact-derived-runtime.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens/src/eval/canon.rs'
+      - 'crates/sens/tests/d4_compact_derived_runtime.rs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  d4-proper-list-value-law:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Actual Rust D2 and packed T5 LIST/APPEND proper-value law
+        run: cargo test -q -p sens --test d4_compact_derived_runtime -- --nocapture
+      - name: Exact D4 original source provenance and no physical publication
+        run: |
+          git hash-object lib/machine/block.lisp | grep -qx '200201b741787c4e144ad4194848acf51d7b439e'
+          test ! -e lib/machine/block.sens
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo 'D4 LIST/APPEND are existing compact-derived residents; reference execution is not old-original migration certification.' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,40 @@
+name: D8 recovery portable witnesses (CPU-only)
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/d8_*_recovery.rs"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "docs/research/d8-recovery-candidate-map.uk.md"
+      - ".github/workflows/d8-recovery-gpu.yml"
+      - ".github/workflows/d8-env-reflection-recovery.yml"
+      - ".github/workflows/d8-read-write-recovery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/d8_*_recovery.rs"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "docs/research/d8-recovery-candidate-map.uk.md"
+      - ".github/workflows/d8-recovery-gpu.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: d8-recovery-gpu-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  recovery-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: State claim boundary
+        run: echo 'These are value-level recovery tests; this hosted job does not establish GPU hardware parity.'
+      - name: Rust toolchain
+        run: rustc --version && cargo --version
+      - name: ENV recovery
+        run: cargo test -p sens --test d8_env_reflection_recovery
+      - name: READ/WRITE recovery
+        run: cargo test -p sens --test d8_read_write_recovery
+      - name: SYMBOL/TEXT recovery
+        run: cargo test -p sens --test d8_symbol_text_recovery

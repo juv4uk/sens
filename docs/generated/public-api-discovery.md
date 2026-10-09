@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 50
-- top-level функцій: 894
+- top-level функцій: 946
 - top-level макросів: 34
-- усього визначень: 928
+- усього визначень: 980
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -72,6 +72,57 @@
 | `lib/clips-import.lisp` | function | `clips-import-forms` | unreviewed |
 | `lib/clips-import.lisp` | function | `clips-import` | unreviewed |
 | `lib/clips-import.lisp` | function | `clips-import-file` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-authority-find` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-nucleus` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-domain-shape` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-true` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-false` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-bits-equal` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-bit-xor` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-xor-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-shape-width` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-shape-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-law-width` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-law-empty-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-law-xor-mask` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-law-l5-spine` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-law-l5-atom-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-law-l5-head-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-law-l5-cond-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-role-from-l1-l5-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-lowering-role-from-l1-l5-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-role-from-l1-l5` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-d4-law-width` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-d4-law-children` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-d4-law-first-child` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-d4-law-second-child` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-role-from-d4-bootstrap-bits` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-role-from-d4-bootstrap` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-lowering-role-from-l1-l5` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-lowering-role-from-laws` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-request-from-role` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-request-from-l1-l5` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-request-from-laws` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-result-ok` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-result-fail` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-result-success` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-result-requests` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-append` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-merge-results` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-request-role` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-exactly-one` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-exactly-two` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-at-least-two` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-cond-clauses-valid` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-role-shape-valid` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-domain-children` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-domain-result` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-program-list` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-program-node` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-compile-program` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-artifact-field` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-artifact-from-result` | unreviewed |
+| `lib/compiler-nucleus.lisp` | function | `compiler-compile-program-artifact` | unreviewed |
 | `lib/content-store.lisp` | function | `empty-content-store` | unreviewed |
 | `lib/content-store.lisp` | function | `content-store-put` | unreviewed |
 | `lib/content-store.lisp` | function | `content-store-get` | unreviewed |
@@ -376,8 +427,8 @@
 | `lib/lisp-fs.lisp` | function | `fs-object-package` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-root-package` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-object-addresses` | unreviewed |
-| `lib/lisp-fs.lisp` | function | `fs-package-field` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-d1-no?` | unreviewed |
+| `lib/lisp-fs.lisp` | function | `fs-package-field` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-object-package-decision` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-serialize-object` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-deserialize-object` | unreviewed |
@@ -847,6 +898,7 @@
 | `lib/world.lisp` | function | `world-remove-first` | unreviewed |
 | `lib/world.lisp` | function | `world-apply-event` | unreviewed |
 | `lib/world.lisp` | function | `world-module-known?` | unreviewed |
+| `lib/world.lisp` | function | `world-module-missing?` | unreviewed |
 | `lib/world.lisp` | function | `world-clauses` | unreviewed |
 | `lib/world.lisp` | function | `reason-in-world` | unreviewed |
 | `lib/world.lisp` | function | `forward-in-world` | unreviewed |

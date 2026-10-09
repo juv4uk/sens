@@ -7,7 +7,7 @@
 
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
-    Span,
+    Span, Text7,
 };
 use crate::syntax::ExprKind;
 use std::rc::Rc;
@@ -26,6 +26,34 @@ const D2_DOT: u8 = 0b11;
 pub fn parse_canonical_binary(source: &str) -> Result<Vec<Expr>, LanguageError> {
     let tokens = parse_binary_source_words(source)?;
     CanonicalReader::new(&tokens, source.len()).parse_program()
+}
+
+/// Recognize a D2-framed Text7 identifier without changing the canonical D2 AST.
+///
+/// This helper is consumed only by contextual binding/call-head code. Ordinary
+/// D2/W7 lists remain structural lists in the canonical reader itself.
+pub(crate) fn text7_atom(expression: &Expr) -> Option<crate::Text7> {
+    let ExprKind::List(items) = &expression.kind else {
+        return None;
+    };
+    if items.is_empty() {
+        return None;
+    }
+    let cells = items
+        .iter()
+        .map(|item| match &item.kind {
+            ExprKind::DomainIdentity(crate::DomainIdentity::D7(word)) => {
+                Some(word.word().packed_bits())
+            }
+            _ => None,
+        })
+        .collect::<Option<Vec<u8>>>()?;
+    crate::Text7::from_cells(cells).ok()
+}
+
+/// Canonical internal binding key for a contextual Text7 identifier.
+pub(crate) fn text7_binding_key(expression: &Expr) -> Option<Rc<str>> {
+    text7_atom(expression).map(|text| Rc::from(text.to_canonical_wire_token()))
 }
 
 struct CanonicalReader<'a> {
@@ -125,12 +153,30 @@ impl<'a> CanonicalReader<'a> {
                 match word.packed_bits() {
                     D2_CLOSE => {
                         self.cursor += 1;
+                        let span = Span {
+                            start: open.span.start,
+                            end: token.span.end,
+                        };
+
+                        // A D2-framed sequence containing only exact W7 leaves is
+                        // the canonical Text7 identifier/binder/reference frame
+                        // from #3910. D2 still owns only OPEN/SEP/CLOSE; D7 owns
+                        // the exact text cells. The resulting token is an ordinary
+                        // Symbol carrying the canonical Text7 wire identity
+                        // (#t7: + lowercase hex cells), never a human spelling
+                        // and never a callable domain identity.
+                        if let Some(text7) = framed_text7(&items) {
+                            return Ok(Expr {
+                                kind: ExprKind::Symbol(Rc::from(
+                                    text7.to_canonical_wire_token(),
+                                )),
+                                span,
+                            });
+                        }
+
                         return Ok(Expr {
                             kind: ExprKind::List(Rc::from(items.into_boxed_slice())),
-                            span: Span {
-                                start: open.span.start,
-                                end: token.span.end,
-                            },
+                            span,
                         });
                     }
                     D2_DOT => {
@@ -229,6 +275,25 @@ impl<'a> CanonicalReader<'a> {
 
 fn is_d2(word: BinarySourceWord, value: u8) -> bool {
     matches!(word, BinarySourceWord::W2(bits) if bits.packed_bits() == value)
+}
+
+fn framed_text7(items: &[Expr]) -> Option<Text7> {
+    if items.is_empty() {
+        return None;
+    }
+
+    let mut words = Vec::with_capacity(items.len());
+    for item in items {
+        let ExprKind::DomainIdentity(identity) = &item.kind else {
+            return None;
+        };
+        if identity.width() != 7 {
+            return None;
+        }
+        words.push(identity.source_word());
+    }
+
+    Text7::from_source_words(&words).ok()
 }
 
 #[cfg(test)]
@@ -413,6 +478,56 @@ mod tests {
             matches!(empty.kind, ExprKind::List(ref items) if items.is_empty()),
             "D3:000 must remain structural empty, not D1:0"
         );
+    }
+
+    #[test]
+    fn d2_framed_w7_sequence_becomes_one_canonical_text7_symbol() {
+        let expression = only("10 1000001 00 1000010 01");
+        let ExprKind::Symbol(symbol) = expression.kind else {
+            panic!("expected framed Text7 symbol");
+        };
+        assert_eq!(&*symbol, "#t7:4142");
+    }
+
+    #[test]
+    fn one_w7_cell_can_be_explicitly_framed_as_text7() {
+        let expression = only("10 1101010 01");
+        let ExprKind::Symbol(symbol) = expression.kind else {
+            panic!("expected one-cell Text7 symbol");
+        };
+        assert_eq!(&*symbol, "#t7:6a");
+    }
+
+    #[test]
+    fn mixed_w7_and_non_w7_items_remain_structural_data() {
+        let expression = only("10 1000001 00 001 01");
+        let ExprKind::List(items) = expression.kind else {
+            panic!("mixed frame must remain an ordinary list");
+        };
+        assert_eq!(items.len(), 2);
+        assert!(matches!(
+            items[0].kind,
+            ExprKind::DomainIdentity(crate::DomainIdentity::D7(_))
+        ));
+        assert!(matches!(
+            items[1].kind,
+            ExprKind::DomainIdentity(crate::DomainIdentity::D3(_))
+        ));
+    }
+
+    #[test]
+    fn empty_d2_frame_is_not_a_text7_identifier() {
+        let expression = only("10 01");
+        assert!(matches!(expression.kind, ExprKind::List(ref items) if items.is_empty()));
+    }
+
+    #[test]
+    fn framed_text7_is_symbol_data_not_core_callability() {
+        let expression = only("10 1000001 00 1000010 01");
+        let ExprKind::Symbol(symbol) = expression.kind else {
+            panic!("expected framed Text7 symbol");
+        };
+        assert!(symbol.starts_with("#t7:"));
     }
 
     #[test]

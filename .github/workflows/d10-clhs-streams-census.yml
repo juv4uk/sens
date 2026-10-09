@@ -1,0 +1,40 @@
+name: D10 CLHS Streams census
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-clhs-streams-census-20261009.json
+      - knowledge/d10-clhs-streams-sbcl-oracle-20261009.json
+      - tests/oracles/d10-clhs-streams.sbcl
+      - docs/research/D10-CLHS-STREAMS-CENSUS.uk.md
+      - scripts/check_d10_clhs_streams_census.py
+      - .github/workflows/d10-clhs-streams-census.yml
+  push:
+    branches:
+      - main
+    paths:
+      - knowledge/d10-clhs-streams-census-20261009.json
+      - knowledge/d10-clhs-streams-sbcl-oracle-20261009.json
+      - tests/oracles/d10-clhs-streams.sbcl
+      - scripts/check_d10_clhs_streams_census.py
+      - .github/workflows/d10-clhs-streams-census.yml
+
+permissions:
+  contents: read
+
+jobs:
+  research-only-census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Довести перепис Streams без підміни D10
+        run: python3 scripts/check_d10_clhs_streams_census.py
+      - name: Установити справжній CL-оракул SBCL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sbcl
+      - name: Перевірити донорські закони на реальному SBCL
+        run: |
+          sbcl --version
+          sbcl --script tests/oracles/d10-clhs-streams.sbcl

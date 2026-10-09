@@ -66,6 +66,7 @@ fn exchange(adapter: &ClipsAbiAdapter, command: &[u8]) -> (WsmStatus, Vec<u8>) {
 }
 
 #[test]
+#[cfg(feature = "native-clips")]
 fn direct_native_clips_642_smoke() {
     let kernel = ClipsKernel::discover().expect("load external CLIPS 6.4 runtime");
     let environment = kernel

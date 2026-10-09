@@ -1,0 +1,91 @@
+name: Verify #528 semantic registry parity
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_semantic_registry.py'
+      - 'scripts/check-semantic-registry.lisp'
+      - '.github/workflows/verify-528-semantic-registry-parity.yml'
+      - 'lib/surface/semantic-registry.lisp'
+  workflow_dispatch:
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build my-lisp
+        run: cargo build --release -p my-lisp-cli --bin my-lisp
+
+      - name: Require Lisp replacement
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f scripts/check-semantic-registry.lisp
+
+      - name: Positive parity on live registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_semantic_registry.py > /tmp/python-positive.out
+          ./target/release/my-lisp scripts/check-semantic-registry.lisp > /tmp/lisp-positive.raw
+          grep -v '^$' /tmp/lisp-positive.raw | grep -v '^semantic-registry-ok$' > /tmp/lisp-positive.out
+          diff -u /tmp/python-positive.out /tmp/lisp-positive.out
+          cat /tmp/python-positive.out
+
+      - name: Negative parity matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp lib/surface/semantic-registry.lisp /tmp/semantic-registry.original
+
+          run_case() {
+            local case_name="$1"
+            local needle="$2"
+            cp /tmp/semantic-registry.original lib/surface/semantic-registry.lisp
+            CASE_NAME="$case_name" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path("lib/surface/semantic-registry.lisp")
+          text = path.read_text(encoding="utf-8")
+          case = os.environ["CASE_NAME"]
+
+          if case == "bad-id":
+              text = text.replace("(0001 ", "(bad-id ", 1)
+          elif case == "duplicate-id":
+              text = text.replace("(0002 ", "(0001 ", 1)
+          elif case == "unknown-status":
+              text = text.replace("(en quote stable)", "(en quote bogus-status)", 1)
+          elif case == "missing-first-wave":
+              text = text.replace(" (sa svarūpa stable)", "", 1)
+          elif case == "human-punctuation":
+              text = text.replace("(uk як-є stable)", "(uk + stable)", 1)
+          else:
+              raise SystemExit(f"unknown parity case: {case}")
+
+          path.write_text(text, encoding="utf-8")
+          PY
+
+            set +e
+            python3 scripts/check_semantic_registry.py > "/tmp/python-$case_name.out" 2>&1
+            python_status=$?
+            ./target/release/my-lisp scripts/check-semantic-registry.lisp > "/tmp/lisp-$case_name.out" 2>&1
+            lisp_status=$?
+            set -e
+
+            test "$python_status" -ne 0
+            test "$lisp_status" -ne 0
+            grep -Fq "$needle" "/tmp/python-$case_name.out"
+            grep -Fq "$needle" "/tmp/lisp-$case_name.out"
+            echo "parity-negative=$case_name python=$python_status lisp=$lisp_status"
+          }
+
+          run_case bad-id bad-id
+          run_case duplicate-id 0001
+          run_case unknown-status bogus-status
+          run_case missing-first-wave 0001
+          run_case human-punctuation '+'
+
+          cp /tmp/semantic-registry.original lib/surface/semantic-registry.lisp

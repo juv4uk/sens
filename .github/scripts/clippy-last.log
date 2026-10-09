@@ -1,0 +1,42 @@
+[1m[92m    Checking[0m my-lisp v0.38.0 (/home/runner/work/my-lisp/my-lisp/crates/my-lisp)
+[1m[92m    Checking[0m cfg-if v1.0.4
+[1m[92m    Checking[0m bitflags v2.13.1
+[1m[92m    Checking[0m memchr v2.8.3
+[1m[92m   Compiling[0m cfg_aliases v0.1.1
+[1m[92m   Compiling[0m libc v0.2.189
+[1m[92m   Compiling[0m rustix v1.1.4
+[1m[92m   Compiling[0m nix v0.28.0
+[1m[91merror[0m[1m: very complex type used. Consider factoring parts into `type` definitions[0m
+   [1m[94m--> [0mcrates/my-lisp/src/value.rs:421:15
+    [1m[94m|[0m
+[1m[94m421[0m [1m[94m|[0m           func: std::rc::Rc<
+    [1m[94m|[0m [1m[91m _______________^[0m
+[1m[94m422[0m [1m[94m|[0m [1m[91m|[0m             dyn Fn(
+[1m[94m423[0m [1m[94m|[0m [1m[91m|[0m                 &[Value],
+[1m[94m424[0m [1m[94m|[0m [1m[91m|[0m                 &crate::Environment,
+[1m[94m425[0m [1m[94m|[0m [1m[91m|[0m                 crate::Span,
+[1m[94m426[0m [1m[94m|[0m [1m[91m|[0m             ) -> Result<Value, crate::LanguageError>,
+[1m[94m427[0m [1m[94m|[0m [1m[91m|[0m         >,
+    [1m[94m|[0m [1m[91m|_________^[0m
+    [1m[94m|[0m
+    [1m[94m= [0m[1mhelp[0m: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#type_complexity
+    [1m[94m= [0m[1mnote[0m: `-D clippy::type-complexity` implied by `-D warnings`
+    [1m[94m= [0m[1mhelp[0m: to override `-D warnings` add `#[allow(clippy::type_complexity)]`
+
+[1m[91merror[0m[1m: very complex type used. Consider factoring parts into `type` definitions[0m
+   [1m[94m--> [0mcrates/my-lisp/src/value.rs:439:15
+    [1m[94m|[0m
+[1m[94m439[0m [1m[94m|[0m           func: std::rc::Rc<
+    [1m[94m|[0m [1m[91m _______________^[0m
+[1m[94m440[0m [1m[94m|[0m [1m[91m|[0m             dyn Fn(
+[1m[94m441[0m [1m[94m|[0m [1m[91m|[0m                 &[Value],
+[1m[94m442[0m [1m[94m|[0m [1m[91m|[0m                 &crate::Environment,
+[1m[94m443[0m [1m[94m|[0m [1m[91m|[0m                 crate::Span,
+[1m[94m444[0m [1m[94m|[0m [1m[91m|[0m             ) -> Result<Value, crate::LanguageError>,
+[1m[94m445[0m [1m[94m|[0m [1m[91m|[0m         >,
+    [1m[94m|[0m [1m[91m|_________^[0m
+    [1m[94m|[0m
+    [1m[94m= [0m[1mhelp[0m: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#type_complexity
+
+[1m[91merror[0m: could not compile `my-lisp` (lib) due to 2 previous errors
+[1m[33mwarning[0m: build failed, waiting for other jobs to finish...

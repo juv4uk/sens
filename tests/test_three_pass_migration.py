@@ -434,5 +434,85 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
 
+    def test_global_text7_call_head_uses_same_frame_as_define_target(self):
+        source="""\\
+(00001001 foo
+  (00001000 ()
+    1))
+(foo)
+"""
+        projection,resolver=self.migrate(source)
+        frame=mod.frame_text7(
+            mod.text7_encode("foo",self.text7,mod.Tok("ATOM","foo",0)),
+            mod.Tok("ATOM","foo",0),
+        )
+        frame_text=" ".join(frame)
+        self.assertGreaterEqual(projection.count(frame_text),2)
+        self.assertEqual(resolver.counts["pass4-text7-global"],1)
+        self.assertTrue(all(set(word) <= {"0","1"} for word in projection.split()))
+        payload=mod.encode_projection(projection)
+        self.assertEqual(mod.decode_bytes(payload),projection.split())
+
+
+    def test_real_machine_block_closes_all_global_and_local_symbolic_words(self):
+        source=(ROOT/"lib"/"machine"/"block.lisp").read_text(encoding="utf-8")
+        projection,resolver=self.migrate(source)
+        words=projection.split()
+        self.assertTrue(words)
+        self.assertTrue(
+            all(set(word) <= {"0","1"} for word in words),
+            "the real machine-block source must reach an all-binary candidate",
+        )
+        self.assertEqual(resolver.counts["pass1-sens8"],17)
+
+        for name in (
+            "machine-block",
+            "machine-block-empty",
+            "machine-block-one",
+            "machine-block-append",
+            "machine-block-concat",
+            "machine-block-forms",
+        ):
+            frame=mod.frame_text7(
+                mod.text7_encode(name,self.text7,mod.Tok("ATOM",name,0)),
+                mod.Tok("ATOM",name,0),
+            )
+            self.assertIn(
+                " ".join(frame),
+                projection,
+                f"missing canonical global Text7 frame for {name}",
+            )
+
+        forms_frame=mod.frame_text7(
+            mod.text7_encode("forms",self.text7,mod.Tok("ATOM","forms",0)),
+            mod.Tok("ATOM","forms",0),
+        )
+        self.assertGreaterEqual(
+            projection.count(" ".join(forms_frame)),
+            2,
+            "lambda binder and local reference must share one Text7 binding frame",
+        )
+
+        payload=mod.encode_projection(projection)
+        self.assertEqual(mod.decode_bytes(payload),words)
+        self.assertTrue(payload, "physical T5 candidate must contain bytes")
+
+
+    def test_machine_block_local_callable_shadows_builtin_surface(self):
+        source="""\\
+(00001001 first
+  (00001000 (first)
+    (first)))
+"""
+        projection,resolver=self.migrate(source)
+        words=projection.split()
+        self.assertTrue(all(set(word) <= {"0","1"} for word in words))
+        first_frame=mod.frame_text7(
+            mod.text7_encode("first",self.text7,mod.Tok("ATOM","first",0)),
+            mod.Tok("ATOM","first",0),
+        )
+        self.assertGreaterEqual(projection.count(" ".join(first_frame)),2)
+
+
 if __name__=="__main__":
     unittest.main()

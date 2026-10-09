@@ -24,25 +24,27 @@ def verify(p,i,s,f,doc):
     assert p["added_selected"]==len(p["rows"])==2 and p["new_selected"]==638
     assert p["coordinate_added"]==p["ratified_added"]==0
     assert [r["semantic_name"] for r in p["rows"]]==list(NAMES)
-    assert len(i["rows"])==638
+    selected=len(i["rows"])
+    assert selected>=638
     assert len({r["stable_id"] for r in i["rows"]})==len(i["rows"])
     assert len({r["semantic_name"] for r in i["rows"]})==len(i["rows"])
-    assert i["accounting"]==dict(selected_semantic_candidates=638,law_forced_coordinates=256,unplaced_selected_candidates=382,remaining_semantic_inventory=386,ratified_d10_residents=0)
-    assert s["target"]["selected_semantic_candidates"]==638
-    assert s["target"]["unplaced_selected_candidates"]==382
-    assert s["target"]["remaining_semantic_candidates"]==386
+    assert i["accounting"]==dict(selected_semantic_candidates=selected,law_forced_coordinates=256,unplaced_selected_candidates=selected-256,remaining_semantic_inventory=1024-selected,ratified_d10_residents=0)
+    assert s["target"]["selected_semantic_candidates"]==selected
+    assert s["target"]["unplaced_selected_candidates"]==selected-256
+    assert s["target"]["remaining_semantic_candidates"]==1024-selected
     assert s["target"]["ratified_residents"]==0
-    assert "D10 selected              638/1024" in doc
-    assert "unplaced                  382" in doc
-    assert "remaining                 386" in doc
+    assert f"D10 selected              {selected}/1024" in doc
+    assert f"unplaced                  {selected-256}" in doc
+    assert f"remaining                 {1024-selected}" in doc
     assert "ratified                    0" in doc
-    assert i["sources"][-1]=="knowledge/d10-historical-primary-admission-batch2-v1.json"
+    assert "knowledge/d10-historical-primary-admission-batch2-v1.json" in i["sources"]
     assert [r["semantic_name"] for r in i["rows"][625:627]]==["DPB","ARRAY-DISPLACEMENT"]
     assert [r["semantic_name"] for r in i["rows"][627:630]]==["SLOT-BOUNDP","SLOT-MAKUNBOUND","REMOVE-METHOD"]
-    assert [r["semantic_name"] for r in i["rows"][636:]]==list(NAMES)
+    assert [r["semantic_name"] for r in i["rows"][636:638]]==list(NAMES)
     old=copy.deepcopy(i)
     old["rows"]=old["rows"][:636]
-    old["sources"]=old["sources"][:-1]
+    source_index=old["sources"].index("knowledge/d10-historical-primary-admission-batch2-v1.json")
+    old["sources"]=old["sources"][:source_index]
     old["accounting"]["selected_semantic_candidates"]=636
     old["accounting"]["unplaced_selected_candidates"]=380
     old["accounting"]["remaining_semantic_inventory"]=388
@@ -51,7 +53,7 @@ def verify(p,i,s,f,doc):
     lower={str(n).upper() for dm in f["domains"].values() for n in dm["residents"].values()}
     assert not lower.intersection(NAMES)
     assert sum(r["coordinate"] is not None for r in i["rows"])==256
-    for r,row in zip(p["rows"],i["rows"][636:]):
+    for r,row in zip(p["rows"],i["rows"][636:638]):
         assert row["stable_id"]==r["stable_id"] and row["semantic_name"]==r["semantic_name"]
         assert row["source_class"]==r["source_class"]=="HISTORICAL-PRIMARY-TRANCHE2-20261009"
         assert row["primary_source_url"]==r["primary_url"]

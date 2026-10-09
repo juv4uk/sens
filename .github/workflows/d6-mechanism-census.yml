@@ -1,0 +1,22 @@
+name: D6 mechanism census
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-mechanism-census.json"
+      - "knowledge/d6-ratified.json"
+      - "scripts/check-d6-mechanism-census.py"
+      - ".github/workflows/d6-mechanism-census.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d6-mechanism-census.json"
+      - "knowledge/d6-ratified.json"
+      - "scripts/check-d6-mechanism-census.py"
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d6-mechanism-census.py

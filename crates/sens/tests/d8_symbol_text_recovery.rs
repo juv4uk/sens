@@ -15,7 +15,7 @@ fn eval(source: &str) -> Value {
 #[test]
 fn symbol_and_string_name_bridges_are_inverse_on_current_carriers() {
     assert_eq!(
-        eval(r#"(symbol->string (string->symbol \"strange symbol\"))"#),
+        eval(r#"(symbol->string (string->symbol "strange symbol"))"#),
         Value::String(Rc::from("strange symbol"))
     );
     assert_eq!(
@@ -27,11 +27,11 @@ fn symbol_and_string_name_bridges_are_inverse_on_current_carriers() {
 #[test]
 fn string_to_symbol_is_not_derivable_as_plain_read_tokenization() {
     assert_eq!(
-        eval(r#"(string->symbol \"strange symbol\")"#),
+        eval(r#"(string->symbol "strange symbol")"#),
         Value::Symbol(Rc::from("strange symbol"))
     );
 
-    let error = eval_program(r#"(read \"strange symbol\")"#, &mut Session::default())
+    let error = eval_program(r#"(read "strange symbol")"#, &mut Session::default())
         .expect_err("READ must reject two top-level forms");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }
