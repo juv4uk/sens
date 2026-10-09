@@ -1,0 +1,22 @@
+name: D10 CLOS selected research roots
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-fill-v1-state.json
+      - knowledge/d10-clos-slot-state-historical-review-v1.json
+      - knowledge/d10-historical-clos-interlisp-residual-review-v1.json
+      - scripts/check_d10_clos_roots_selection.py
+      - scripts/check-d10-fill-v1-seed.py
+      - .github/workflows/d10-clos-selected-roots.yml
+  workflow_dispatch:
+jobs:
+  proof-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR state
+        uses: actions/checkout@v4
+      - name: D10 selector and accounting authority
+        run: python3 scripts/check-d10-fill-v1-seed.py
+      - name: CLOS research root fail-closed gate
+        run: python3 scripts/check_d10_clos_roots_selection.py --self-test
