@@ -14,6 +14,7 @@ run() {
 # F−1/F0: нейтральний binary carrier та exact bounded word identity.
 run python3 scripts/research-2106-binary-substrate.py
 run python3 scripts/research-2077-binary-word-law.py
+run python3 scripts/sens_binary_language_model.py --self-test
 
 # Ratified D3/bīja3: authority -> checked structural projection.
 run python3 scripts/check-bija3-current-authority.py
