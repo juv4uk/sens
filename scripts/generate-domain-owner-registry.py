@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""#2958 — generate canonical D3-D6 owner-coordinate projection.
+"""#2958 — generate canonical D3-D7 owner-coordinate projection.
 
 Authority inputs:
 - D3/D4: knowledge/exact-width-admitted-corpus.json (widths 3/4 only)
 - D5: knowledge/d5-historical-full-map.json (OD-005)
 - D6: knowledge/d6-historical-full-map.json (OD-006)
+- D7: knowledge/d7-ratified.json (#3572; 126 residents, 2 pinned reservations)
 
 The generated Rust intentionally excludes human labels, surfaces and legacy
 backend bytes. Those are projections/compatibility metadata, not occupancy
@@ -21,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "knowledge" / "exact-width-admitted-corpus.json"
 D5 = ROOT / "knowledge" / "d5-historical-full-map.json"
 D6 = ROOT / "knowledge" / "d6-historical-full-map.json"
+D7 = ROOT / "knowledge" / "d7-ratified.json"
 OUT = ROOT / "crates" / "sens" / "src" / "domain_owner_generated.rs"
 
 
@@ -32,6 +34,7 @@ def owner_rows():
     corpus = load_json(CORPUS)
     d5 = load_json(D5)
     d6 = load_json(D6)
+    d7 = load_json(D7)
     rows = []
 
     for row in corpus["rows"]:
@@ -50,15 +53,40 @@ def owner_rows():
 
     rows.extend((5, row["coordinate"], 1) for row in d5["coordinates"])
     rows.extend((6, row["coordinate"], 2) for row in d6["coordinates"])
+
+    # The D7 authority describes occupancy, not executable primitives.
+    # Include only owner-ratified residents; never infer a role from width
+    # and never fill the two pinned/reserved cells.
+    reserved = {"0100001", "0101010"}
+    if (
+        d7.get("domain") != "D7"
+        or d7.get("authority") != "#3572"
+        or d7.get("status") != "owner-ratified"
+        or d7.get("width") != 7
+        or d7.get("capacity") != 128
+        or d7.get("occupancy") != 126
+        or set(d7.get("reserved_coordinates", [])) != reserved
+        or d7.get("owner_reserved_pinned") != 2
+    ):
+        raise SystemExit("D7 owner authority or reservations drift")
+    d7_words = list(d7.get("residents", {}))
+    if (
+        len(d7_words) != 126
+        or any(len(word) != 7 or set(word) - {"0", "1"} for word in d7_words)
+        or set(d7_words) & reserved
+        or set(d7_words) | reserved != {f"{n:07b}" for n in range(128)}
+    ):
+        raise SystemExit("D7 admitted coordinate set drift")
+    rows.extend((7, word, 3) for word in d7_words)
     rows.sort(key=lambda row: (row[0], int(row[1], 2)))
 
-    if len(rows) != 117:
-        raise SystemExit(f"expected 117 owner coordinates, got {len(rows)}")
+    if len(rows) != 243:
+        raise SystemExit(f"expected 243 owner coordinates, got {len(rows)}")
     if len({(width, word) for width, word, _ in rows}) != len(rows):
         raise SystemExit("duplicate exact-domain coordinate")
 
-    counts = {width: sum(1 for row in rows if row[0] == width) for width in (3, 4, 5, 6)}
-    if counts != {3: 7, 4: 14, 5: 32, 6: 64}:
+    counts = {width: sum(1 for row in rows if row[0] == width) for width in (3, 4, 5, 6, 7)}
+    if counts != {3: 7, 4: 14, 5: 32, 6: 64, 7: 126}:
         raise SystemExit(f"owner count mismatch: {counts}")
 
     for control in [(4, "1100"), (5, "01010"), (6, "001111")]:
@@ -95,16 +123,27 @@ mod tests {{
 
     #[test]
     fn generated_projection_has_owner_counts_and_controls() {{
-        assert_eq!(DOMAIN_OWNER_COORDINATES.len(), 117);
+        assert_eq!(DOMAIN_OWNER_COORDINATES.len(), 243);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 3).count(), 7);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 4).count(), 14);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 5).count(), 32);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 6).count(), 64);
+        assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 7).count(), 126);
 
         for (width, bits) in [(4, 0b1100), (5, 0b01010), (6, 0b001111)] {{
             assert!(DOMAIN_OWNER_COORDINATES
                 .iter()
                 .any(|row| row.width == width && row.bits == bits));
+        }}
+    }}
+
+    #[test]
+    fn generated_d7_occupancy_excludes_two_pinned_reservations() {{
+        for word in 0..128u8 {{
+            let admitted = DOMAIN_OWNER_COORDINATES
+                .iter()
+                .any(|row| row.width == 7 && row.bits == word);
+            assert_eq!(admitted, word != 0b0100001 && word != 0b0101010);
         }}
     }}
 
