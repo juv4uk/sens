@@ -77,17 +77,17 @@
                  (reason-index-linear recursive-rules)
                  0))))
       (00000111
-        (parity-relation (1)
+        (parity-relation
           (00000111
-            (snapshot-relation (1)
+            (snapshot-relation
               (00000111
-                (prepared-later-empty (1)
+                (prepared-later-empty
                   (00000111
-                    (rebuilt-later-count (1)
+                    (rebuilt-later-count
                       (00000111
-                        (recursive-relation (1)
+                        (recursive-relation
                           (00000111
-                            (negation-relation (1)
+                            (negation-relation
                               (00000001
                                 (reason-index-authority-witness
                                   (status pass)
@@ -95,32 +95,32 @@
                                     indexed-linear-parity
                                     immutable-prepared-snapshot
                                     recursion-negation-parity))))
-                            (negation-relation (0)
+                            ((00100010 negation-relation (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
                               (00000001
                                 (reason-index-authority-witness
                                   (status fail)
                                   (law recursion-negation-parity))))))
-                        (recursive-relation (0)
+                        ((00100010 recursive-relation (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
                           (00000001
                             (reason-index-authority-witness
                               (status fail)
                               (law recursion-parity))))))
-                    (rebuilt-later-count (0)
+                    ((00100010 rebuilt-later-count (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
                       (00000001
                         (reason-index-authority-witness
                           (status fail)
                           (law rebuilt-snapshot-sees-new-rule))))))
-                (prepared-later-empty (0)
+                ((00100010 prepared-later-empty (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
                   (00000001
                     (reason-index-authority-witness
                       (status fail)
                       (law prepared-snapshot-is-immutable))))))
-            (snapshot-relation (0)
+            ((00100010 snapshot-relation (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
               (00000001
                 (reason-index-authority-witness
                   (status fail)
                   (law prepared-snapshot-preserves-old-result))))))
-        (parity-relation (0)
+        ((00100010 parity-relation (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
           (00000001
             (reason-index-authority-witness
               (status fail)

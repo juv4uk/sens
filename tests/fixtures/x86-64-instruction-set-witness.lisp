@@ -815,9 +815,10 @@
           (expected (00110000 row)))
       (10011100 ((actual (01001101 expr)))
         (00000111
-          ((00100010 actual expected) (1)
+          ((00100010 actual expected)
            (00000001 pass))
-          (t
+          ((00100010 (00100010 actual expected)
+                       (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
            (00100111 (00000001 fail) name expected actual)))))))
 
 (00001001 x86-instruction-run-all
@@ -830,7 +831,8 @@
          (00000111
            ((00100010 result (00000001 pass))
             (x86-instruction-run-all (00000110 rows)))
-           (t
+           ((00100010 (00100010 result (00000001 pass))
+                        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
             (00100111
               (00000001 x86-64-instruction-set-witness)
               (00000001 (status fail))
