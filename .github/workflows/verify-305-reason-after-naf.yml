@@ -1,0 +1,14 @@
+name: Verification-only #305 reason after NAF retirement
+
+on:
+  pull_request:
+
+jobs:
+  reason-file:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Focused reason test
+        run: cargo test -p my-lisp --test reason
