@@ -120,6 +120,42 @@ jobs:
           print("PHYSICAL=T5, D5_LABEL=D7_RECURSION, PURE_EXEC=PARITY")
           PY
 
+      - name: Execute D5 recursive list copy without host names
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-binary"
+          python3 - "$RUNNER_TEMP/sens-binary/d5-label-copy.sens" <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import encode_projection
+
+          source_path = Path("examples/binary/d5-label-copy.bits")
+          source = " ".join(source_path.read_text(encoding="ascii").split())
+          assert source and set(source) <= {"0", "1", " "}
+          Path(sys.argv[1]).write_bytes(encode_projection(source))
+          PY
+          target/debug/sens "$RUNNER_TEMP/sens-binary/d5-label-copy.sens" \
+            > "$RUNNER_TEMP/sens-binary/d5-label-copy.sens-exec"
+          target/debug/sens-trit eval "$RUNNER_TEMP/sens-binary/d5-label-copy.sens" \
+            > "$RUNNER_TEMP/sens-binary/d5-label-copy.trit-exec"
+          cmp "$RUNNER_TEMP/sens-binary/d5-label-copy.sens-exec" \
+              "$RUNNER_TEMP/sens-binary/d5-label-copy.trit-exec"
+          test -s "$RUNNER_TEMP/sens-binary/d5-label-copy.sens-exec"
+          target/debug/sens-trit open "$RUNNER_TEMP/sens-binary/d5-label-copy.sens" \
+            > "$RUNNER_TEMP/sens-binary/d5-label-copy.words"
+          python3 - "$RUNNER_TEMP/sens-binary/d5-label-copy.words" <<'PY'
+          import sys
+          from pathlib import Path
+
+          source = " ".join(Path("examples/binary/d5-label-copy.bits").read_text(encoding="ascii").split())
+          visible = Path(sys.argv[1]).read_text(encoding="ascii")
+          assert visible == source + chr(10), "physical T5 changed D5 list-copy source words"
+          assert set(visible) <= {"0", "1", " ", chr(10)}
+          print("PHYSICAL=T5, D5_LABEL_COPY=D1_AND_EMPTY_DISTINCT, PURE_EXEC=PARITY")
+          PY
+
       - name: Corrupted transport and D2 grammar fail closed before execution
         shell: bash
         run: |
@@ -196,6 +232,7 @@ jobs:
             examples/binary/d3-primitives-program.bits \
             examples/binary/d3-cond-program.bits \
             examples/binary/d5-label-recursion.bits \
+            examples/binary/d5-label-copy.bits \
             > "$RUNNER_TEMP/sens-binary/sources.sha256"
           find "$RUNNER_TEMP/sens-binary" -maxdepth 1 -name '*.words' -o -name '*.sens-exec' -o -name '*.trit-exec' \
             | sort | xargs -r sha256sum > "$RUNNER_TEMP/sens-binary/observations.sha256"
