@@ -13,30 +13,40 @@
 
 (00001001 witness-d1-no
   (00001000 ()
-    (00100010 (00000001 witness-no-left) (00000001 witness-no-right))))
+    (тотожне? (00000001 witness-no-left) (00000001 witness-no-right))))
 
 ; Invert only exact D1 predicate values. No generic truthiness.
 (00001001 witness-d1-no?
   (00001000 (value)
-    (00100010 value (witness-d1-no))))
+    (тотожне? value (witness-d1-no))))
 
-; Witness-local list walk avoids the historical ASSOC result-tag mismatch.
+; Witness-local lookup uses current exact-domain predicates: ATOM returns a
+; D1 bit for both empty-list and pair inputs; field presence is independent of
+; the value stored under a key (the string "()" is still a present value).
 (00001001 witness-find-entry
   (00001000 (key alist)
-    (00000111
-      ((00100010 alist (00000001 ())) (00000001 ()))
-      ((00100010 key (00000101 (00000101 alist))) (00000101 alist))
-      ((witness-d1-no? (00100010 key (00000101 (00000101 alist))))
-       (witness-find-entry key (00000110 alist))))))
+    (за-умовою
+      ((атом? alist)
+       (00000001 ()))
+      ((witness-d1-no? (атом? alist))
+       (за-умовою
+         ((тотожне? key (перше (перше alist)))
+          (перше alist))
+         ((witness-d1-no? (тотожне? key (перше (перше alist))))
+          (witness-find-entry key (решта alist))))))))
 
 (00001001 witness-field
   (00001000 (key witness)
     (10011100 ((entry (witness-find-entry key witness)))
-      (00000111
-        ((00100010 entry (00000001 ()))
+      (за-умовою
+        ((атом? entry)
          (00000001 ()))
-        ((witness-d1-no? (00100010 entry (00000001 ())))
-         (00000110 entry))))))
+        ((witness-d1-no? (атом? entry))
+         (решта entry))))))
+
+(00001001 witness-field-present?
+  (00001000 (key witness)
+    (witness-d1-no? (атом? (witness-find-entry key witness)))))
 
 (00001001 witness-malformed-result
   (00001000 (reason actual)
@@ -58,10 +68,10 @@
 ; structural result data. No unrelated predicate is rewritten here.
 (00001001 witness-superseded-outcome
   (00001000 (witness expected-entry)
-    (00000111
-      ((00100010 expected-entry (00000001 ()))
+    (за-умовою
+      ((witness-d1-no? (witness-field-present? (00000001 expected) witness))
        (00000001 ()))
-      ((witness-d1-no? (00100010 expected-entry (00000001 ())))
+      ((witness-field-present? (00000001 expected) witness)
        (10011100 ((expr (witness-field (00000001 expr) witness)))
          (00000111
            ((00100010 expr "(00000010 (quote radio))")
@@ -87,27 +97,31 @@
 (00001001 witness-expected-outcome
   (00001000 (witness)
     (10011100 ((expected-entry (witness-field (00000001 expected) witness))
-          (error-entry (witness-field (00000001 error) witness)))
+          (error-entry (witness-field (00000001 error) witness))
+          (expected-present (witness-field-present? (00000001 expected) witness))
+          (error-present (witness-field-present? (00000001 error) witness)))
       (10011100 ((superseded (witness-superseded-outcome witness expected-entry)))
-        (00000111
-          ((witness-d1-no? (00100010 superseded (00000001 ())))
+        (за-умовою
+          ((witness-d1-no? (атом? superseded))
            superseded)
-          ((00100010 expected-entry (00000001 ()))
-           (00000111
-             ((00100010 error-entry (00000001 ()))
-              (witness-malformed-result (00000001 missing-outcome) witness))
-             ((witness-d1-no? (00100010 error-entry (00000001 ())))
+          ((witness-d1-no? expected-present)
+           (за-умовою
+             (error-present
               (00100111 (00000001 witness-result)
                     (00100111 (00000001 status) (00000001 error))
-                    (00100111 (00000001 actual) error-entry))))
-          ((witness-d1-no? (00100010 expected-entry (00000001 ())))
-           (00000111
-             ((00100010 error-entry (00000001 ()))
+                    (00100111 (00000001 actual) error-entry)))
+             ((witness-d1-no? error-present)
+              (witness-malformed-result (00000001 missing-outcome) witness))))
+          (expected-present
+           (за-умовою
+             (error-present
+              (witness-malformed-result (00000001 expected-and-error) witness))
+             ((witness-d1-no? error-present)
               (00100111 (00000001 witness-result)
                     (00100111 (00000001 status) (00000001 value))
-                    (00100111 (00000001 actual) expected-entry)))
-             ((witness-d1-no? (00100010 error-entry (00000001 ())))
-              (witness-malformed-result (00000001 expected-and-error) witness))))))))))(00001001 witness-verdict
+                    (00100111 (00000001 actual) expected-entry))))))))))
+
+(00001001 witness-verdict
   (00001000 (witness actual)
     (10011100 ((expected (witness-expected-outcome witness)))
       (00000111
