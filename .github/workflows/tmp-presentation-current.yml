@@ -1,0 +1,36 @@
+name: Temporary presentation repair current
+
+on:
+  push:
+    branches:
+      - fix/presentation-bool-boundary-current
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/presentation-bool-boundary-current
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Repair presentation test boundary
+        run: |
+          python3 -c 'from pathlib import Path; p=Path("crates/my-lisp/src/presentation.rs"); s=p.read_text(); old="        let mut session = Session::default();\n        let truth = eval_program(\"(atom '\''мама)\", &mut session)\n            .expect(\"predicate\")\n            .value;\n"; new="        // Presentation owns only the human-facing rendering of a value. Do not\n        // manufacture a boolean through a Lisp semantic operation such as `atom`:\n        // #218 correctly returns a structural result there now.\n        let truth = Value::Bool(true);\n"; assert old in s; p.write_text(s.replace(old,new,1))'
+          cargo fmt --check
+          cargo test -p my-lisp presentation::tests::ukrainian_value_presentation_changes_only_the_human_view
+      - name: Commit focused repair
+        run: |
+          set -euo pipefail
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add crates/my-lisp/src/presentation.rs
+          git commit -m "test(presentation): decouple bool rendering from atom semantics"
+          git push origin HEAD:fix/presentation-bool-boundary-current
