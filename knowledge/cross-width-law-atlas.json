@@ -1,0 +1,197 @@
+{
+  "schema": "cross-width-law-atlas/v1",
+  "issue": "#3508",
+  "parent_theorem": "#3499",
+  "axes": [
+    "exact_width",
+    "semantic_family"
+  ],
+  "allowed_statuses": [
+    "coordinate-automorphism",
+    "family-semantic-law",
+    "cross-width-lift",
+    "domain-global-law",
+    "unknown",
+    "falsified"
+  ],
+  "families": [
+    {
+      "family_id": "core-selector-path",
+      "declared_domain": "Core.SelectorPath",
+      "generator_law_id": "CAR-CDR-SELECTOR-GENERATOR",
+      "semantic_law_id": "SELECTOR-COMPLEMENT",
+      "semantic_involution": "swap every CAR/CDR step",
+      "coordinate_action": "xor all ones at exact width",
+      "status": "family-semantic-law",
+      "evidence": [
+        "#3202",
+        "#2055",
+        "#3499",
+        "#3506",
+        "PR #3509"
+      ],
+      "levels": [
+        {
+          "width": 3,
+          "members": [
+            {
+              "bits": "100",
+              "path": "A"
+            },
+            {
+              "bits": "011",
+              "path": "D"
+            }
+          ],
+          "complement_pairs": [
+            [
+              "100",
+              "011"
+            ]
+          ]
+        },
+        {
+          "width": 4,
+          "members": [
+            {
+              "bits": "1000",
+              "path": "AA"
+            },
+            {
+              "bits": "1001",
+              "path": "AD"
+            },
+            {
+              "bits": "0110",
+              "path": "DA"
+            },
+            {
+              "bits": "0111",
+              "path": "DD"
+            }
+          ],
+          "complement_pairs": [
+            [
+              "1000",
+              "0111"
+            ],
+            [
+              "1001",
+              "0110"
+            ]
+          ]
+        },
+        {
+          "width": 5,
+          "members": [
+            {
+              "bits": "10000",
+              "path": "AAA"
+            },
+            {
+              "bits": "10001",
+              "path": "AAD"
+            },
+            {
+              "bits": "10010",
+              "path": "ADA"
+            },
+            {
+              "bits": "10011",
+              "path": "ADD"
+            },
+            {
+              "bits": "01100",
+              "path": "DAA"
+            },
+            {
+              "bits": "01101",
+              "path": "DAD"
+            },
+            {
+              "bits": "01110",
+              "path": "DDA"
+            },
+            {
+              "bits": "01111",
+              "path": "DDD"
+            }
+          ],
+          "complement_pairs": [
+            [
+              "10000",
+              "01111"
+            ],
+            [
+              "10001",
+              "01110"
+            ],
+            [
+              "10010",
+              "01101"
+            ],
+            [
+              "10011",
+              "01100"
+            ]
+          ]
+        }
+      ],
+      "lifts": [
+        {
+          "source_width": 3,
+          "target_width": 4,
+          "equation": "C_{n+1}(G_b(p)) = G_{1-b}(C_n(p))",
+          "status": "cross-width-lift",
+          "executable_witness": "PR #3509"
+        },
+        {
+          "source_width": 4,
+          "target_width": 5,
+          "equation": "C_{n+1}(G_b(p)) = G_{1-b}(C_n(p))",
+          "status": "cross-width-lift",
+          "executable_witness": "PR #3509"
+        }
+      ],
+      "automatic_next_width": false
+    }
+  ],
+  "global_hypotheses": [
+    {
+      "hypothesis_id": "GLOBAL-D4-COMPLEMENT",
+      "domain": "Core.D4",
+      "coordinate_action": "xor 1111",
+      "semantic_law_id": null,
+      "status": "unknown",
+      "reason": "no independently stated domain-global semantic involution J is currently admitted",
+      "falsifier_issue": "#3507"
+    }
+  ],
+  "domain_firewall_controls": [
+    {
+      "control_id": "SELECTORPATH-VS-QGROUPFACTOR",
+      "left_domain": "Core.SelectorPath",
+      "right_domain": "Core-Math.QGroupFactor",
+      "shared_mechanism": "append-bit / child = 2*parent + bit",
+      "shared_semantic_authority": false,
+      "authority": "#2508"
+    }
+  ],
+  "non_conclusions": [
+    "coordinate complement does not imply a semantic law outside a proved family",
+    "a cross-width lift does not imply a domain-global law",
+    "the same bit mechanism in another declared domain does not transfer semantic authority",
+    "D5 selector evidence does not automatically admit D6 runtime semantics"
+  ],
+  "law_set_id": "sens-cross-width-lawset-2026-10-05-a",
+  "positive_witness_ids": [
+    "SELECTOR-COMPLEMENT-D3",
+    "SELECTOR-LIFT-D3-D4",
+    "SELECTOR-LIFT-D4-D5"
+  ],
+  "negative_or_boundary_witness_ids": [
+    "GLOBAL-D4-COMPLEMENT:NO-SEMANTIC-J",
+    "DOMAIN-FIREWALL:SELECTORPATH-VS-QGROUPFACTOR",
+    "AUTOMATIC-D6:FALSE"
+  ]
+}
