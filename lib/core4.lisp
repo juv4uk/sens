@@ -180,7 +180,7 @@
   (00001000 (values acc)
     (00000111
       ((00000010 values) acc)
-      (((00000010 (00000001 ()))) (length-onto (00000110 values) (00001100 acc 1))))))
+      ((00000010 (00000001 ())) (length-onto (00000110 values) (00001100 acc 1))))))
 
 
 (00001001 length
@@ -193,7 +193,7 @@
   (00001000 (values acc)
     (00000111
       ((00000010 values) acc)
-      (((00000010 (00000001 ()))) (зворот-до (00000110 values) (00000100 (00000101 values) acc))))))
+      ((00000010 (00000001 ())) (зворот-до (00000110 values) (00000100 (00000101 values) acc))))))
 
 (00001001 reverse-onto зворот-до)
 
@@ -223,7 +223,7 @@
   (00001000 (f values acc)
     (00000111
       ((00000010 values) (00101010 acc))
-      (((00000010 (00000001 ()))) (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
+      ((00000010 (00000001 ())) (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
 (00001001 map
   (00001000 (f values)
@@ -233,12 +233,12 @@
   (00001000 (predicate values acc)
     (00000111
       ((00000010 values) (00101010 acc))
-      (((00000010 (00000001 ())))
+      ((00000010 (00000001 ()))
        (10011100 ((decision (predicate (00000101 values))))
          (00000111
            (decision
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           (((00000010 (00000001 ())))
+           ((00000010 (00000001 ()))
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
@@ -249,7 +249,7 @@
   (00001000 (f acc values)
     (00000111
       ((00000010 values) acc)
-      (((00000010 (00000001 ()))) (00111001 f (f acc (00000101 values)) (00000110 values))))))
+      ((00000010 (00000001 ())) (00111001 f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
