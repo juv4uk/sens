@@ -1,0 +1,232 @@
+{
+  "schema": "d10-reiter-finite-minimal-diagnoses-research/v1",
+  "date": "2026-10-09",
+  "authority": [
+    "#4013",
+    "#4463",
+    "#4182",
+    "#4301"
+  ],
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "history": [
+    {
+      "author": "Raymond Reiter",
+      "year": 1987,
+      "title": "A Theory of Diagnosis from First Principles",
+      "venue": "Artificial Intelligence 32(1), 57–95",
+      "doi": "10.1016/0004-3702(87)90062-2",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/0004370287900622",
+      "scope": "Conflicts of normal component assumptions generate minimal hitting set diagnoses; original theory also requires underlying system model and observations, which this proposal intentionally does NOT implement."
+    },
+    {
+      "author": "Johan de Kleer and Brian C Williams",
+      "year": 1987,
+      "title": "Diagnosing Multiple Faults",
+      "venue": "Artificial Intelligence 32(1), 97–130",
+      "doi": "10.1016/0004-3702(87)90063-4",
+      "url": "https://www.sciencedirect.com/science/article/pii/0004370287900634",
+      "scope": "Early General Diagnostic Engine and minimal sets of violated assumptions applied to digital circuits; source does not promise our output ordering or certificate serialization."
+    }
+  ],
+  "original_vs_ours": "Reiter supplies the correspondence minimal conflicts ↔ subset-minimal hitting sets; returning deterministic canonical order, original-index private conflict certificates, input type errors, and explicit empty-family/empty-conflict distinctions are additional SENS research contracts, not historical APIs.",
+  "snapshot": {
+    "inventory_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "selected": 635,
+    "ratified": 0
+  },
+  "candidate": {
+    "semantic_name": "FINITE-MINIMAL-DIAGNOSES",
+    "proposal_id": "D10P-REITER-1987",
+    "surface_uk": "міндіаг",
+    "surface_ukr": "мінімальні-діагнози-за-конфліктами",
+    "width": 10,
+    "coordinate": null,
+    "ratified": false,
+    "selected": false,
+    "proposal_status": "pending-review",
+    "arguments": "(finite ordered tuple of distinct, nonempty exact component IDs; finite ordered tuple of finite component-set conflicts, all IDs from universe). Components are abstract exact identities, NOT English runtime identifiers or hardware coordinates.",
+    "result": "If any conflict is empty: NO-DIAGNOSIS with earliest empty-conflict index. Else: DIAGNOSES of ALL inclusion-minimal hitting sets, each ordered by input-universe position, result tuples lexicographically ordered by input positions. For every chosen component c return earliest original conflict whose intersection with that hitting set is exactly {c}, proving subset-minimality.",
+    "law": "H subset U hits every conflict C_i when H ∩ C_i != ∅. H is inclusion-minimal iff each h∈H has a private original conflict C_i with H ∩ C_i={h}. Do NOT substitute smallest cardinality, probability rankings or one arbitrary diagnosis. No conflicts => exactly one empty diagnosis. Any empty conflict => NO-DIAGNOSIS even for nonempty U. Superset/repeated conflicts preserve semantic result and original witness indices.",
+    "sample_cases": [
+      {
+        "universe": [
+          "a",
+          "b",
+          "c"
+        ],
+        "conflicts": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "b",
+            "c"
+          ]
+        ],
+        "diagnoses": [
+          [
+            "a",
+            "c"
+          ],
+          [
+            "b"
+          ]
+        ],
+        "explanation": "{b} and {a,c} both inclusion-minimal; a single cardinality-optimal {b} is insufficient"
+      },
+      {
+        "universe": [
+          "a",
+          "b"
+        ],
+        "conflicts": [],
+        "diagnoses": [
+          []
+        ],
+        "explanation": "no conflict: empty hitting set is unique subset-minimal diagnosis"
+      },
+      {
+        "universe": [
+          "a",
+          "b"
+        ],
+        "conflicts": [
+          []
+        ],
+        "result": "NO-DIAGNOSIS, conflict index 0",
+        "explanation": "empty conflict cannot be hit"
+      },
+      {
+        "universe": [
+          "a",
+          "b",
+          "c"
+        ],
+        "conflicts": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "a",
+            "b",
+            "c"
+          ],
+          [
+            "b",
+            "c"
+          ]
+        ],
+        "diagnoses": [
+          [
+            "a",
+            "c"
+          ],
+          [
+            "b"
+          ]
+        ],
+        "explanation": "redundant superset conflict doesn't add diagnoses"
+      },
+      {
+        "universe": [
+          "a",
+          "b"
+        ],
+        "conflicts": [
+          [
+            "a"
+          ],
+          [
+            "b"
+          ]
+        ],
+        "diagnoses": [
+          [
+            "a",
+            "b"
+          ]
+        ],
+        "explanation": "both components are independently required"
+      }
+    ],
+    "falsifiers": [
+      "Returning only {b} for conflicts {a,b},{b,c} misses valid subset-minimal {a,c}.",
+      "Returning {a,b} when {b} hits all conflicts is not subset-minimal.",
+      "Returning NO-DIAGNOSES for zero conflicts is wrong: exactly one empty diagnosis exists.",
+      "Ignoring a single empty conflict and returning diagnoses is unsound.",
+      "A certificate citing a conflict also hit by another selected component is not a private-conflict proof.",
+      "Using diagnosis cardinality as the tie criterion instead of inclusion-minimality drops incomparable diagnoses.",
+      "Hard-wiring English component names rather than using ordered opaque input IDs would violate binary-first identity.",
+      "Accepting conflict components outside universe or repeated universe identifiers without error invents assumptions."
+    ],
+    "nonduplicate_neighbors": [
+      {
+        "name": "D10 ADVICE-CONFLICT-PROOF / CHECK-CONFLICT",
+        "difference": "detect/report logical contradictions; do not enumerate every minimal repair set hitting GIVEN conflict hyperedges"
+      },
+      {
+        "name": "D10 JTMS-* / de Kleer ATMS proposal",
+        "difference": "truth-maintenance support labels and nogood generation differ from the downstream complete conflict-to-diagnosis hitting set dualization"
+      },
+      {
+        "name": "D10 MINIMAL-ABDUCTIVE-EXPLANATIONS research PR #4965",
+        "difference": "find supporting hypotheses that ENTAIL a goal rather than removing assumptions to hit each observed conflict"
+      },
+      {
+        "name": "D10 EXACT-INTERVAL-CONFLICT-WITNESS research PR #4922",
+        "difference": "produce earliest incompatible numerical interval pair, not all minimal cross-conflict repair sets"
+      },
+      {
+        "name": "D10 FINITE-PREDICATE-CIRCUMSCRIPTION PR #4990",
+        "difference": "minimal models of selected predicates under theory/order, not diagnoses computed from a given finite conflict hypergraph"
+      }
+    ],
+    "precise_scope": "The caller must supply a complete relevant conflict family. This operation does NOT infer conflict sets from a system model, prove real-world component failure, propose a measurement, or choose a repair. Output candidates are algebraic diagnoses conditional on input conflicts.",
+    "owner_hobby_fanout": [
+      "Radio/TV/electronics repair: competing minimal fault combinations in digital or analog circuits",
+      "FPGA and ESP32: violated device-assumption sets in gate and sensor validation",
+      "SDR/horology: contradictions among clock/signal diagnostic assumptions",
+      "WSM-OS-Lisp/SENS: minimal dependency changes after proof/CI failures",
+      "Advice Taker, Prolog, Panini: logical assumptions behind mutually contradictory derived conclusions",
+      "Astronomy/physics: candidate instrument/model assumptions explaining incompatible observations"
+    ],
+    "derivability": "Finite hypergraph transversal enumeration is constructible from finite lists, subset/intersection, recursion and comparison; no proof that this must be irreducible D10 core; owner must review whether an explicit useful reusable function warrants research selection."
+  },
+  "holds": [
+    {
+      "name": "EXTRACT-MINIMAL-CONFLICTS-FROM-KNOWLEDGE",
+      "status": "HOLD-REQUIRES-ORACLE",
+      "reason": "Full model-based conflict generation requires knowledge representation and a sound solver, separate from this given-conflict algebra."
+    },
+    {
+      "name": "RANK-DIAGNOSES-BY-BAYES",
+      "status": "HOLD-DERIVED-AND-DEPENDENT",
+      "reason": "Probability/priors/observation likelihood assumptions cannot be invented by this exact symbolic law."
+    },
+    {
+      "name": "REPAIR-ELECTRONIC-CIRCUIT",
+      "status": "HOLD-PHYSICAL-MECHANISM",
+      "reason": "Physical side-effects and device access are substrate/agent acts, not source-free D10 pure value semantics."
+    },
+    {
+      "name": "ATMS-LABEL-UPDATE",
+      "status": "HOLD-PEER-OWNED",
+      "reason": "ATMS research already claimed under #4958; this intake enumerates hitting sets of supplied conflicts only."
+    }
+  ],
+  "ledger_effect": {
+    "pending_rows": 1,
+    "selected_additions": 0,
+    "ratified_additions": 0,
+    "allocated_coordinates": 0
+  },
+  "compatibility": [
+    "D1-D9 ratified unchanged; D2 source structure exclusive",
+    "No T5 bit carrier, migration, backend or runtime SENS opcode",
+    "Human labels only in research surface/certificates, not canonical machine code",
+    "No original Reiter runtime claimed; Python and SBCL check mathematical finite model only."
+  ]
+}
