@@ -1,10 +1,16 @@
 ; #114/#220/#275 — Lisp owns the semantic relation verdicts used by the
-; content-store regression evidence.  Rust may observe serialization bytes and
+; content-store regression evidence. Rust may observe serialization bytes and
 ; store cardinality, but it must not freeze `equal?` as historical t/().
 ;
-; This witness deliberately says nothing about host mechanics.  It only asks
+; This witness deliberately says nothing about host mechanics. It only asks
 ; the language whether the two deterministic images are structurally the same
 ; and whether two Worlds with equal current clauses have the same projection.
+; The negative-result adapter constructs an exact D1:0 by comparing against
+; ATOM of a non-empty quoted list. No three-part expected-result COND remains.
+
+(00001001 content-store-no?
+  (00001000 (value)
+    (00100010 value (00000010 (00000001 (x))))))
 
 (00001001 content-store-authority-witness
   (00001000 ()
@@ -30,11 +36,11 @@
                (world-clauses direct (00000001 zoo))
                (world-clauses retold (00000001 zoo)))))
       (00000111
-        (root-relation (1)
+        (root-relation
           (00000111
-            (object-relation (1)
+            (object-relation
               (00000111
-                (projection-relation (1)
+                (projection-relation
                   (00000001
                     (content-store-authority-witness
                       (status pass)
@@ -42,18 +48,19 @@
                         root-image-deterministic
                         object-image-deterministic
                         equal-current-projection))))
-                (projection-relation (0)
+                ((content-store-no? projection-relation)
                   (00000001
                     (content-store-authority-witness
                       (status fail)
-                      (law equal-current-projection))))))
-            (object-relation (0)
+                      (law equal-current-projection)))))
+            ((content-store-no? object-relation)
               (00000001
                 (content-store-authority-witness
                   (status fail)
-                  (law object-image-deterministic))))))
-        (root-relation (0)
+                  (law object-image-deterministic)))))
+        ((content-store-no? root-relation)
           (00000001
             (content-store-authority-witness
               (status fail)
               (law root-image-deterministic))))))))
+))

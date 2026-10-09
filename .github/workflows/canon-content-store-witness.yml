@@ -1,0 +1,40 @@
+name: Canon and content-store exact D1 witnesses
+on:
+  pull_request:
+    paths:
+      - "tests/fixtures/witness-runner.lisp"
+      - "tests/fixtures/content-store-authority-witness.lisp"
+      - ".github/workflows/canon-content-store-witness.yml"
+      - "crates/sens/tests/canon_laws_v2_contract.rs"
+      - "crates/sens/tests/content_store_authority.rs"
+  push:
+    branches: [main]
+    paths:
+      - "tests/fixtures/witness-runner.lisp"
+      - "tests/fixtures/content-store-authority-witness.lisp"
+      - ".github/workflows/canon-content-store-witness.yml"
+      - "crates/sens/tests/canon_laws_v2_contract.rs"
+      - "crates/sens/tests/content_store_authority.rs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canon-content-store-witness-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  canon-and-content-store:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Execute Canon V2 Lisp-owned witness contract
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+      - name: Execute content-store Lisp-owned witness and mechanisms
+        run: cargo test -p sens --test content_store_authority -- --nocapture
