@@ -88,6 +88,35 @@
         "scripts/check_d10_hobby_bounded_rational.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.crosshobby.hysteretic-boolean-step.20261009",
+      "authority": "#4013 #4301 #4463 owner-directed hobby-based research selection",
+      "evidence": [
+        "TI SCEA046 non-inverting Schmitt threshold state law",
+        "TI SNOA997A inverted comparator contrast",
+        "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+        "tests/oracles/d10_hysteresis_chez.ss"
+      ],
+      "previous_inventory_blob_sha": "34efd273000e3de8510441764cb59acbb5ab284b",
+      "resulting_inventory_blob_sha": "edb82e6ca9186e92396feb99d87c4eaec5af82e8",
+      "added_stable_ids": [
+        "d10.crosshobby.hysteretic-boolean-step.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-hysteretic-boolean-source-law-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 631,
+      "resulting_selected": 632,
+      "decision": "SELECTED-RESEARCH only; no physical T5/coordinate; owner ratification pending",
+      "tests": [
+        "tests/test_d10_hysteretic_boolean.py",
+        "tests/oracles/d10_hysteresis_chez.ss",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }
