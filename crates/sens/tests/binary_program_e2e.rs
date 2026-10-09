@@ -198,3 +198,23 @@ fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
     valid.push(242u8);
     assert!(decode_ternary_program(&valid).is_err(), "noncanonical trailer must fail closed");
 }
+
+#[test]
+fn committed_physical_d3_cond_file_executes_exact_predicate_without_legacy_names() {
+    // Physical bytes, not a text .lisp renamed to .sens.
+    const PHYSICAL: &[u8] = include_bytes!("../../../examples/binary/d3-cond-program.sens");
+    let words = decode_ternary_program(PHYSICAL)
+        .expect("checked-in T5 must pass physical and exact D2 admission");
+    let expected = encode_binary_projection_ternary(D3_COND_PROGRAM)
+        .expect("existing D3 COND projection must pass exact D2 admission");
+    assert_eq!(PHYSICAL, expected, "committed physical bytes must be canonical");
+    assert_eq!(PHYSICAL.len(), 31, "no one-byte-per-bit pseudo-binary transport");
+    let visible = open_ternary_program(PHYSICAL).unwrap();
+    assert_eq!(visible, D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" "));
+    let forms = sens::parse_canonical_word_sequence(&words)
+        .expect("execute from typed binary words, never legacy Lisp text");
+    let result = sens::eval_parsed_expressions(&forms, &mut sens::Session::default())
+        .expect("strict two-field D3 COND with exact D1 controls must execute");
+    assert_eq!(result.value.as_predicate_bit(), Some(true));
+    assert!(result.output.is_empty());
+}
