@@ -63,11 +63,19 @@ def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
 
     evidence, table = load_current_d7()
     if role == "local-ordinal":
-        # Separate role, including W7 payloads pinned in the Sound/Text map.
-        # This is a typed coordinate view, not a claimed Sound/Text resident.
+        # LocalOrdinal uses ONLY the 14 donor-locked Shiva-sutra ordinals.
+        # Equal W7 bits do not mint Sound/Text residency or arithmetic Number.
+        corpus = json.loads((ROOT / "benchmarks/d7-local-ordinal-corpus/fixtures/projection.json").read_text(encoding="utf-8"))
+        ordinals = {row["bits"]: row for row in corpus["rows"]}
+        if len(ordinals) != 14 or set(ordinals) != {f"{i:07b}" for i in range(1, 15)}:
+            raise D7ProjectionError("D7 LocalOrdinal donor-locked corpus drift")
+        if bits not in ordinals:
+            raise D7ProjectionError(f"D7:{bits} has no donor-ratified LocalOrdinal provenance")
+        ordinal = ordinals[bits]
         return {
             "domain": "D7", "coordinate": bits, "width": 7,
-            "role": "local-ordinal", "status": "ROLE-TAG-ONLY",
+            "role": "local-ordinal", "status": "D7-VALID-PROVENANCE",
+            "donor_ref": ordinal["donor_ref"], "source_order": ordinal["source_order"],
             "surface": None, "callable": False, "arithmetic_number": False,
         }
 
