@@ -362,11 +362,15 @@ jobs:
         run: |
           cargo test -p xtask --test external_oracle_cli
           cargo test -p xtask --test xed_import_cli
-          cargo test -p xtask --test encoder_coverage_cli
           cargo test -p xtask --test license_policy
           cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
           cargo run -p xtask -- import-xed-evidence --check
-          cargo run -p xtask -- generate-encoder-coverage --check
+          python3 scripts/generate-encoder-coverage-input.py --check
+          coverage_status="$(cargo run --quiet -p sens-cli --bin sens -- scripts/check-encoder-coverage.lisp)"
+          if [[ "$coverage_status" != "(encoder-coverage-check (status pass))" ]]; then
+            printf 'Lisp encoder coverage check failed: %s\n' "$coverage_status" >&2
+            exit 1
+          fi
 
       - name: Focused Advice Taker witness
         if: steps.changes.outputs.meta == 'true' && steps.changes.outputs.workspace != 'true'
@@ -446,7 +450,12 @@ jobs:
           ./target/debug/sens scripts/generate-meta-semantic-registry.lisp --check
           python3 scripts/public_api_inventory.py --check
           cargo run -p xtask -- import-xed-evidence --check
-          cargo run -p xtask -- generate-encoder-coverage --check
+          python3 scripts/generate-encoder-coverage-input.py --check
+          coverage_status="$(cargo run --quiet -p sens-cli --bin sens -- scripts/check-encoder-coverage.lisp)"
+          if [[ "$coverage_status" != "(encoder-coverage-check (status pass))" ]]; then
+            printf 'Lisp encoder coverage check failed: %s\n' "$coverage_status" >&2
+            exit 1
+          fi
       - name: Machine non-interference guard
         shell: bash
         run: |
