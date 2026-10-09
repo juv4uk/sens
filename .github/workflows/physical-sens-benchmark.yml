@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - "benchmarks/physical-sens-runtime/**"
+      - "benchmarks/current-en-vs-d1d8/performance_scoreboard.py"
       - "examples/binary/d5-label-*.bits"
       - "crates/sens/examples/physical_sens_hot_bench.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
@@ -18,6 +19,7 @@ on:
   pull_request:
     paths:
       - "benchmarks/physical-sens-runtime/**"
+      - "benchmarks/current-en-vs-d1d8/performance_scoreboard.py"
       - "examples/binary/d5-label-*.bits"
       - "crates/sens-cli/src/**"
       - "crates/sens/src/ternary_transport.rs"
@@ -77,6 +79,12 @@ jobs:
             --reps 19 --warmups 3 \
             --out "$RUNNER_TEMP/sens-physical-bench"
 
+      - name: Score measured T5/D2 routes with p50 p95 and same-byte ratios
+        run: |
+          python3 benchmarks/current-en-vs-d1d8/performance_scoreboard.py \
+            --physical-hot-json "$RUNNER_TEMP/sens-physical-bench/hot-results.json" \
+            --out "$RUNNER_TEMP/sens-physical-bench/scoreboard.md"
+
       - name: Publish exact measurements (not unit-test tallies)
         if: always()
         shell: bash
@@ -88,6 +96,9 @@ jobs:
             fi
             if test -s "$RUNNER_TEMP/sens-physical-bench/d5-report.md"; then
               cat "$RUNNER_TEMP/sens-physical-bench/d5-report.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if test -s "$RUNNER_TEMP/sens-physical-bench/scoreboard.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/scoreboard.md" >> "$GITHUB_STEP_SUMMARY"
             fi
           else
             echo 'Benchmark did not finish. No performance claim from this run.' >> "$GITHUB_STEP_SUMMARY"
