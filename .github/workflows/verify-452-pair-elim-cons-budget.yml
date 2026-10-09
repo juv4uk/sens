@@ -1,0 +1,81 @@
+name: Verify 452 pair-elim cons budget
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-452-pair-elim-cons-budget.yml'
+      - 'docs/research/452/**'
+
+jobs:
+  cons-budget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install temporary resource observer
+        shell: bash
+        run: |
+          cat > crates/my-lisp/tests/verify_452_cons_budget.rs <<'RS'
+          use my_lisp::{eval_program, Environment, ErrorKind, Session};
+
+          fn zero_cons_session() -> Session {
+              Session {
+                  environment: Environment::root().with_cons_limit(0),
+              }
+          }
+
+          #[test]
+          fn reverse_derivation_consumes_no_language_visible_cons_budget() {
+              let source = r#"
+                  ((lambda (p selector)
+                     (selector (car p) (cdr p)))
+                   (quote (fresh-left . fresh-right))
+                   (lambda (left right) left))
+              "#;
+              let mut session = zero_cons_session();
+              let result = eval_program(source, &mut session)
+                  .expect("reverse derivation should not require CONS budget");
+              assert_eq!(result.value.to_string(), "fresh-left");
+          }
+
+          #[test]
+          fn reverse_derivation_nonpair_fails_type_before_any_cons_budget_failure() {
+              let source = r#"
+                  ((lambda (p selector)
+                     (selector (car p) (cdr p)))
+                   (quote atom-value)
+                   (lambda (left right) left))
+              "#;
+              let mut session = zero_cons_session();
+              let error = eval_program(source, &mut session)
+                  .expect_err("CAR must reject non-pair");
+              assert_eq!(error.kind, ErrorKind::Type);
+          }
+
+          #[test]
+          fn selector_cons_allocation_remains_observable_under_zero_budget() {
+              let source = r#"
+                  ((lambda (p selector)
+                     (selector (car p) (cdr p)))
+                   (quote (fresh-left . fresh-right))
+                   (lambda (left right) (cons left right)))
+              "#;
+              let mut session = zero_cons_session();
+              let error = eval_program(source, &mut session)
+                  .expect_err("selector CONS should hit the explicit zero budget");
+              assert_eq!(error.kind, ErrorKind::OutOfMemory);
+          }
+          RS
+
+      - name: Execute language-visible cons-budget probes
+        run: cargo test -p my-lisp --test verify_452_cons_budget -- --nocapture
+
+      - name: Remove temporary observer
+        run: rm crates/my-lisp/tests/verify_452_cons_budget.rs
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
