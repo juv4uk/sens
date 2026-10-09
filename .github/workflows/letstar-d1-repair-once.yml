@@ -1,0 +1,48 @@
+name: Repair letstar D1 and verify Core4 FASL
+
+on:
+  push:
+    branches:
+      - fix/letstar-exact-d1-after-io-20261009
+    paths:
+      - lib/core.lisp
+      - lib/core4.lisp
+      - ".github/workflows/letstar-d1-repair-once.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: letstar-repair-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/letstar-exact-d1-after-io-20261009
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rebuild canonical Core4 FASL from exact staged source
+        run: cargo run --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Verify canonical source-FASL relationship
+        run: cargo test -p sens --test core_fasl_freshness -- --nocapture
+      - name: Verify Lisp-owned content-store authority unmodified
+        run: cargo test -p sens --test content_store_authority -- --nocapture
+      - name: Verify Canon V2 unmodified
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+      - name: Commit verified generated FASL to repair branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- lib/core4.lisp.fasl
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(core): regenerate canonical Core4 FASL after D1 letstar repair'
+          git push origin HEAD:refs/heads/fix/letstar-exact-d1-after-io-20261009
