@@ -100,6 +100,24 @@ def _map_helper(ctx: GateContext, head):
     return code, True
 
 
+def _map_ratified_surface(ctx: GateContext, head, name: str):
+    """Resolve a human label ONLY if one current domain-table resident exists."""
+    if name in ctx.admitted or name == "00000111":
+        return name, False
+    matches = [
+        (domain, bits)
+        for domain in ("D3", "D4", "D5", "D6", "D7", "D8", "D9")
+        for bits, label in ctx.foundation["domains"][domain]["residents"].items()
+        if label != "EMPTY" and label.upper() == name.upper()
+    ]
+    if len(matches) != 1:
+        return name, False  # _check_callable reports L3 BLOCK; no guess.
+    domain, bits = matches[0]
+    ctx.change(head, bits)
+    ctx.mark("L3", "STAGED", f"unique ratified {domain} surface -> {bits}", head)
+    return bits, True
+
+
 def _check_callable(ctx: GateContext, name: str, head, mapped: bool) -> bool:
     if name not in ctx.admitted:
         ctx.mark("L3", "BLOCK", f"unresolved executable head {name!r}; D10 proposal, do not mint coordinate", head)
@@ -156,13 +174,14 @@ def _visit(ctx: GateContext, node) -> None:
     if name.lower() in RETIRED:
         ctx.mark("L5", "BLOCK", "retired semantic executable; separately audit archaeology", head)
         return
-    name, mapped = _map_helper(ctx, head)
+    name, helper_mapped = _map_helper(ctx, head)
     if name is None:
         return
+    name, surface_mapped = _map_ratified_surface(ctx, head, name)
     if name in COND:
         _visit_cond(ctx, node, name, head)
         return
-    if _check_callable(ctx, name, head, mapped):
+    if _check_callable(ctx, name, head, helper_mapped or surface_mapped):
         for arg in node.items[1:]:
             _visit(ctx, arg)
 
@@ -228,7 +247,7 @@ def main(argv=None) -> int:
             )
             # An explicitly mapped EQUAL? D8 resident has exact current-domain
             # evidence; unrecognised raw W8 heads still fail during inspect().
-            alias_d8 = any(f.law == "L4" and " D8 " in f.reason for f in findings)
+            alias_d8 = any(f.law in {"L3", "L4"} and " D8 " in f.reason for f in findings)
             effective_era = "current" if alias_d8 else args.source_era
             resolver = engine.Resolver(
                 legacy, my, upper, effective_era,
