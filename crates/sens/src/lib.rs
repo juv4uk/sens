@@ -400,6 +400,27 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// This is the canonical bootstrap order for embedders that start from a bare
 /// `Environment::root()`: the root itself stays smaller, while the bootstrap
 /// explicitly gains `make-macro` before evaluating `lib/macro.lisp`.
+/// Per-thread cache of the *mechanical* Core4 binary decode and lowering.
+/// This is not a shared Environment, evaluated Value, macro, or Lisp semantic
+/// snapshot. Every caller still performs the full language-owned bootstrap.
+fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
+    thread_local! {
+        static LOWERED: std::cell::OnceCell<Option<std::rc::Rc<[Expr]>>> =
+            const { std::cell::OnceCell::new() };
+    }
+    LOWERED.with(|slot| {
+        slot.get_or_init(|| {
+            let (expressions, source_hash) = fasl_decode_program(CORE_LIBRARY_FASL)?;
+            if source_hash != sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) {
+                return None;
+            }
+            let lowered = eval::lower::lower_program(&expressions);
+            Some(std::rc::Rc::<[Expr]>::from(lowered))
+        })
+        .clone()
+    })
+}
+
 fn load_core_library_with_fasl(
     session: &mut Session,
     core_fasl: &[u8],
@@ -407,13 +428,25 @@ fn load_core_library_with_fasl(
     session.environment.select_core_profile(CoreProfile::Core4);
     load_macro_library(session)?;
 
-    let result = match fasl_decode_program(core_fasl) {
-        Some((expressions, source_hash))
-            if source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) =>
-        {
-            eval_parsed_expressions(&expressions, session)?
+    // Cache only the exact embedded FASL. Arbitrary caller-supplied FASL
+    // (including invalid/stale fixtures) retains the original decode/fallback
+    // behavior and can never borrow this cached program by matching bytes.
+    let exact_embedded = core_fasl.len() == CORE_LIBRARY_FASL.len()
+        && std::ptr::eq(core_fasl.as_ptr(), CORE_LIBRARY_FASL.as_ptr());
+    let result = if exact_embedded {
+        match current_core_verified_lowered() {
+            Some(lowered) => eval_lowered_expressions(&lowered, session)?,
+            None => eval_program(CORE_LIBRARY_SOURCE, session)?,
         }
-        _ => eval_program(CORE_LIBRARY_SOURCE, session)?,
+    } else {
+        match fasl_decode_program(core_fasl) {
+            Some((expressions, source_hash))
+                if source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) =>
+            {
+                eval_parsed_expressions(&expressions, session)?
+            }
+            _ => eval_program(CORE_LIBRARY_SOURCE, session)?,
+        }
     };
 
     bind_missing_stable_surface_peers(&session.environment);
@@ -591,6 +624,27 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
 mod core4_bootstrap_cache_tests {
     use super::*;
 
+
+    #[test]
+    fn cached_embedded_core_preserves_independent_sessions_and_domain_result() {
+        let program = parse_canonical_binary("10 001 00 000 01").unwrap();
+        let mut first = Session::bare();
+        let mut second = Session::bare();
+        load_core_library(&mut first).expect("first cached Core4 bootstrap");
+        load_core_library(&mut second).expect("second cached Core4 bootstrap");
+        assert_eq!(
+            first.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+        assert_eq!(
+            second.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+        let left = eval_parsed_expressions(&program, &mut first).unwrap();
+        let right = eval_parsed_expressions(&program, &mut second).unwrap();
+        assert!(matches!(left.value, Value::Nil));
+        assert_eq!(left, right);
+    }
 
     #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
