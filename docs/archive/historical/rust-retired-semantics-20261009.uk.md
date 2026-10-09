@@ -10,6 +10,8 @@
 
 | `crates/sens/tests/decimal_comma_authority.rs` | `decimal_comma_semantics_are_owned_by_lisp_witness` | Ненормалізована Lisp-фікстура застосовує застарілий тричленний COND та падає з `UnsatisfiedConditional` | Нові поточні parser-only перевірки `decimal_comma_reader_preserves_exact_rational_identity` і `comma_inside_non_numeric_tokens_remains_symbol_data` зберігають граматику без старого control oracle |
 
+| `crates/sens/tests/epistemic.rs` | 11 позитивних/аксесорних тестів `observation/claim/evidence/intent`, включно з `intent_capabilities_satisfied_is_true_when_all_requirements_present` | Спиралися на старі `t`/`()` та тричленні/неявні `COND` у реалізації Lisp; 11 із 35 падали у Hosted CI | **24** решта перевірок залишено, включно з `supporting_evidence_record_is_not_implicit_cond_truth`. Позитивна канонічна semantics/accessor parity — **BLOCK до L1–L7 та незалежного оракула** |
+
 ## Межа змін
 
 - **Не** вилучено runtime-код, `language-contract.lisp`, чинні D1/D2/D3/D4–D10 закони, правила fail-closed, тести правильної логіки.
