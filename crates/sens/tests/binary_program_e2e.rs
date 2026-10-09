@@ -203,7 +203,7 @@ fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
 #[test]
 fn tracked_d3_cond_is_a_real_physical_t5_file_with_exact_byte_parity() {
     const PHYSICAL: &[u8] =
-        include_bytes!("../../../examples/binary/d3-cond-program.sens");
+        include_bytes!("../../../examples/binary-language/current-cond-reference.sens");
     // A physical .sens file contains 5-trit packed bytes, not printable bit text.
     let from_source = encode_binary_projection_ternary(D3_COND_PROGRAM)
         .expect("ratified D2/D3 binary source must encode canonically");
