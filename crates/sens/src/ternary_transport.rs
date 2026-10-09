@@ -180,21 +180,21 @@ pub fn decode_ternary_words(
             }
             seen += 1;
             match digit {
-            0 | 1 => {
-                current_value = (current_value << 1) | u16::from(digit);
-                current_width += 1;
-                if current_width > 9 {
-                    return Err(TernaryTransportError::UnsupportedDomainWidth);
+                0 | 1 => {
+                    current_value = (current_value << 1) | u16::from(digit);
+                    current_width += 1;
+                    if current_width > 9 {
+                        return Err(TernaryTransportError::UnsupportedDomainWidth);
+                    }
                 }
-            }
-            2 => {
-                if current_width == 0 {
-                    return Err(TernaryTransportError::EmptyDomainWord);
+                2 => {
+                    if current_width == 0 {
+                        return Err(TernaryTransportError::EmptyDomainWord);
+                    }
+                    words.push(typed_binary_word(current_width, current_value)?);
+                    current_value = 0;
+                    current_width = 0;
                 }
-                words.push(typed_binary_word(current_width, current_value)?);
-                current_value = 0;
-                current_width = 0;
-            }
                 _ => unreachable!(),
             }
         }
