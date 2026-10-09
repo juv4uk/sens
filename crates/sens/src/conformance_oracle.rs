@@ -6,7 +6,7 @@
 //! Machine-readable evidence of semantic conformance with explicit bounds.
 //! Never claim exhaustiveness without declaring the bound that was exhausted.
 
-use serde::{Deserialize, Serialize};
+// Serde is deliberately test-only in this capability-free core.
 
 /// Semantic versioning for oracle schema.
 pub const ORACLE_VERSION_MAJOR: u32 = 1;
@@ -16,7 +16,8 @@ pub const ORACLE_VERSION_MINOR: u32 = 0;
 ///
 /// No host object/debug/string representation is semantic authority.
 /// Every field is deterministic, stable across substrates, and reproducible.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct CanonicalObservable {
     /// Unique case identifier, stable independent of host language.
     pub case_id: String,
@@ -56,7 +57,8 @@ pub struct CanonicalObservable {
 ///
 /// Principle: **finite exhaustive evidence is powerful only when its
 /// boundary is part of the evidence.**
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct ExhaustiveBound {
     /// Domains included: "D1-D3", "D1-D4", "D1-D7", etc.
     pub domain_set: String,
@@ -84,7 +86,8 @@ pub struct ExhaustiveBound {
 }
 
 /// Complete conformance corpus artifact.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct ConformanceCorpus {
     /// Schema version (major.minor).
     pub version: (u32, u32),
@@ -109,7 +112,8 @@ pub struct ConformanceCorpus {
 }
 
 /// Authority facts for the corpus.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthorityInfo {
     /// Language-contract.lisp version (e.g., "11.8").
     pub contract_version: String,
@@ -128,7 +132,8 @@ pub struct AuthorityInfo {
 ///
 /// Used to validate that the oracle correctly rejects wrong-domain,
 /// malformed, or research-only identities.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct NegativeControl {
     /// What this negative control tests.
     /// e.g., "wrong-domain-equal-payload", "d8-missing-mechanism",
@@ -149,7 +154,8 @@ pub struct NegativeControl {
 }
 
 /// Corpus statistics and audit trail.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct CorpusStatistics {
     /// Success cases.
     pub success_count: u32,
