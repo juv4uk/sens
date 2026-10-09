@@ -56,7 +56,7 @@ jobs:
             {"left":f("pair",a("a"),a("a")), "right":f("pair",a("b"),a("b"))},
             {"left":f("pair",a("a"),a("b")), "right":f("pair",a("b"),a("a"))},
             {"left":f("observation",a("star"),f("band",a("radio"))),
-             "right":f("observation",a("star"),f("band",a("optical"))}
+             "right":f("observation",a("star"),f("band",a("optical")))}
           ]
           with open(sys.argv[1],"w",encoding="utf-8") as out:
             json.dump(rows,out,ensure_ascii=False)
