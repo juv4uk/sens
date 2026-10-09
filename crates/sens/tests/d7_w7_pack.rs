@@ -70,3 +70,16 @@ fn w7_is_a_mechanical_width_not_sound_admission() {
     assert_eq!(word.packed_bits(), u16::from(text.cells()[0]));
     assert_eq!(text.to_canonical_wire_token(), "#t7:01");
 }
+
+#[test]
+fn exact_d7_carrier_never_mints_a_callable_operation() {
+    use sens::DomainIdentity;
+    for raw in 0u8..=127 {
+        let source = BinarySourceWord::W7(Bit7::new(raw).unwrap());
+        let identity = DomainIdentity::from_source_word(source);
+        assert_eq!(identity.width(), 7);
+        assert_eq!(identity.packed_bits(), raw as u16);
+        assert_eq!(identity.source_word(), source);
+        assert_eq!(identity.core_operation(), None);
+    }
+}
