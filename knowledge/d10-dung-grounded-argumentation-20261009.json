@@ -1,0 +1,349 @@
+{
+  "schema": "d10-symbolic-ai-grounded-argumentation-v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "authority": [
+    "#4013",
+    "#4463",
+    "#4182",
+    "#4301"
+  ],
+  "source": {
+    "author": "Phan Minh Dung",
+    "year": 1995,
+    "title": "On the acceptability of arguments and its fundamental role in nonmonotonic reasoning, logic programming and n-person games",
+    "journal": "Artificial Intelligence 77(2), 321–357",
+    "doi": "10.1016/0004-3702(94)00041-X",
+    "url": "https://doi.org/10.1016/0004-3702(94)00041-X",
+    "supporting_exposition": "https://www.mdpi.com/2076-3417/14/15/6428",
+    "law_origin": "finite abstract argumentation characteristic operator and unique grounded least fixed point",
+    "boundary": "Three data labels and deterministic input-order projection are an explicit computational API for SENS research, not Dung's original source code."
+  },
+  "owner_donors": [
+    {
+      "name": "SENS Advice Taker backward chaining",
+      "repo": "juv4uk/sens",
+      "path": "lib/reason.lisp",
+      "blob_sha": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "semantics": "goal-proof returns (substitution,proof) pairs or empty; not attack-network grounded labeling"
+    },
+    {
+      "name": "Prolog / CLIPS",
+      "semantics": "logic rules and proof/failure need a declarative nonmonotonic conflict resolution layer"
+    },
+    {
+      "name": "Pāṇini grammatical constraint reasoning",
+      "semantics": "competing rules can remain unresolved with explicit provenance, without altering phonemic D7"
+    },
+    {
+      "name": "Knowledge graphs / Advice Taker",
+      "semantics": "explicit directed ATTACK relations among independent claims, not automatically rewriting facts"
+    },
+    {
+      "name": "Chess symbolic strategy and expert systems",
+      "semantics": "contradictory recommendations represented without arbitrary selection"
+    },
+    {
+      "name": "Astronomy/experimental observation",
+      "semantics": "claims about observations require grounded evidence or remain unresolved"
+    }
+  ],
+  "snapshot": {
+    "inventory_sha": "0a675284a7838e5f6e9ba4702655e120ac92f122",
+    "selected": 638,
+    "ratified": 0,
+    "lower_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "candidate": {
+    "semantic_name": "GROUNDED-ARGUMENT-LABELING",
+    "proposal_id": "D10P-4971",
+    "surface_uk": "опраб",
+    "surface_ukr": "обґрунтовано-розмітити-аргументи",
+    "width": 10,
+    "proposal_status": "pending-review",
+    "selected": false,
+    "ratified": false,
+    "coordinate": null,
+    "inputs": "finite ordered list of DISTINCT opaque argument identities A, finite set of directed attacks (attacker, target), all endpoints must be in A; no inferred edges or probabilistic weights",
+    "result": "triple (IN, OUT, UNDEC), each a disjoint list of argument IDs in ORIGINAL input order and a total partition of A, with no argument unclassified",
+    "law": "Grounded Dung characteristic F(S) = {a | every attacker b of a is attacked by some c in S}. Iterate from empty S to least fixed point G. IN=G, OUT={b | exists a in G with attack(a,b)}, UNDEC=A\\(IN∪OUT). Edges are directed. A self-attacking or unbroken mutual attack remains UNDEC in the absence of externally grounded attackers. Empty A returns three empty lists.",
+    "witnesses": [
+      {
+        "nodes": [
+          "a"
+        ],
+        "attacks": [],
+        "result": {
+          "IN": [
+            "a"
+          ],
+          "OUT": [],
+          "UNDEC": []
+        },
+        "why": "unattacked argument is grounded"
+      },
+      {
+        "nodes": [
+          "a",
+          "b"
+        ],
+        "attacks": [
+          [
+            "a",
+            "b"
+          ]
+        ],
+        "result": {
+          "IN": [
+            "a"
+          ],
+          "OUT": [
+            "b"
+          ],
+          "UNDEC": []
+        },
+        "why": "root defeats one target"
+      },
+      {
+        "nodes": [
+          "a",
+          "b",
+          "c"
+        ],
+        "attacks": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "b",
+            "c"
+          ]
+        ],
+        "result": {
+          "IN": [
+            "a",
+            "c"
+          ],
+          "OUT": [
+            "b"
+          ],
+          "UNDEC": []
+        },
+        "why": "defence reinstates c"
+      },
+      {
+        "nodes": [
+          "a",
+          "b"
+        ],
+        "attacks": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "b",
+            "a"
+          ]
+        ],
+        "result": {
+          "IN": [],
+          "OUT": [],
+          "UNDEC": [
+            "a",
+            "b"
+          ]
+        },
+        "why": "unbroken two-cycle stays undecided"
+      },
+      {
+        "nodes": [
+          "a"
+        ],
+        "attacks": [
+          [
+            "a",
+            "a"
+          ]
+        ],
+        "result": {
+          "IN": [],
+          "OUT": [],
+          "UNDEC": [
+            "a"
+          ]
+        },
+        "why": "self-attack is undecided"
+      },
+      {
+        "nodes": [
+          "a",
+          "b",
+          "c"
+        ],
+        "attacks": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "b",
+            "c"
+          ],
+          [
+            "c",
+            "a"
+          ]
+        ],
+        "result": {
+          "IN": [],
+          "OUT": [],
+          "UNDEC": [
+            "a",
+            "b",
+            "c"
+          ]
+        },
+        "why": "odd pure cycle remains undecided"
+      },
+      {
+        "nodes": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ],
+        "attacks": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "b",
+            "c"
+          ],
+          [
+            "c",
+            "a"
+          ],
+          [
+            "d",
+            "a"
+          ]
+        ],
+        "result": {
+          "IN": [
+            "b",
+            "d"
+          ],
+          "OUT": [
+            "a",
+            "c"
+          ],
+          "UNDEC": []
+        },
+        "why": "external grounded d defeats a; then b reinstated"
+      },
+      {
+        "nodes": [
+          "x",
+          "a",
+          "b"
+        ],
+        "attacks": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "b",
+            "a"
+          ]
+        ],
+        "result": {
+          "IN": [
+            "x"
+          ],
+          "OUT": [],
+          "UNDEC": [
+            "a",
+            "b"
+          ]
+        },
+        "why": "unrelated accepted argument cannot resolve mutual attack"
+      },
+      {
+        "nodes": [],
+        "attacks": [],
+        "result": {
+          "IN": [],
+          "OUT": [],
+          "UNDEC": []
+        },
+        "why": "finite empty domain has empty fixed point"
+      }
+    ],
+    "falsifiers": [
+      "A↔B with no outside attackers cannot arbitrarily accept A or B; both UNDEC.",
+      "Under a→b→c, returning c=UNDEC instead of IN violates defended iteration.",
+      "Treating edges as undirected reverses attack/defence and violates the witness for one-way chains.",
+      "IN/OUT/UNDEC overlap or omit an argument violates total-partition invariant.",
+      "Returning every proposition not proved true as OUT violates grounded undecidability.",
+      "Using a third truth bit or changing D1 YES/NO or D2 source structure violates binary-language architecture.",
+      "Duplicated node identities, unknown attack endpoints and malformed edges must reject instead of silently inventing nodes.",
+      "Calling model output a truthful fact about the world without validated attack/evidence sources violates observation boundary."
+    ],
+    "neighbors": [
+      {
+        "name": "D9 REASON",
+        "difference": "backward proof/goal evidence; no Dung attack graph least fixed point"
+      },
+      {
+        "name": "D10 PROVE-RULE",
+        "difference": "Horn proof does not automatically assign undecided mutual attacks"
+      },
+      {
+        "name": "D10 JTMS-STATE-SUBST",
+        "difference": "dependency state substitution is not Dung grounded acceptability of attacks"
+      },
+      {
+        "name": "D10 ADVICE-CONFLICT-PROOF",
+        "difference": "conflict evidence alone does not calculate all IN/OUT/UNDEC argument partitions"
+      },
+      {
+        "name": "ATMS-CONSISTENT-LABEL-JOIN (#4958)",
+        "difference": "minimal support environments under assumptions versus finite attack graph grounded partition"
+      },
+      {
+        "name": "MINIMAL-ABDUCTIVE-EXPLANATIONS (#4965)",
+        "difference": "hypotheses that explain observations under integrity constraints vs grounded argument evaluation"
+      },
+      {
+        "name": "FINITE-BAYES-UPDATE-EXACT",
+        "difference": "posterior probability update vs exact nonprobabilistic attack acceptability"
+      }
+    ],
+    "upper_boundary": "Three output partitions are ordinary finite list data, not a new three-valued predicate domain or a replacement for D1 one-bit truth.",
+    "derivability": "Finite characteristic F and repeated set operations already express the semantics as a library; new irreducible primitive status UNPROVEN. Owner decides selection separately from research.",
+    "use_cases": [
+      "Advice Taker dispute handling",
+      "Prolog nonmonotonic meta-reasoning",
+      "knowledge graph contradictory claims",
+      "Pāṇini conflicting rule evidence",
+      "chess/expert system recommendation disagreements",
+      "astronomical claims before credible observation"
+    ]
+  },
+  "accounting": {
+    "selected_additions": 0,
+    "ratification_additions": 0,
+    "coordinate_additions": 0,
+    "pending_ledger_rows": 1
+  },
+  "no_changes": [
+    "D1–D9 ratified domains, especially D1 truth and D2 structure",
+    "physical T5 .sens and migration or runtime opcode tables",
+    "current D10 selected inventory/history and l0.42.0 release scope"
+  ]
+}

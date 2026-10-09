@@ -1,0 +1,33 @@
+name: D10 Dung grounded symbolic AI evidence
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-dung-grounded-argumentation-20261009.json'
+      - 'scripts/check_d10_dung_grounded.py'
+      - 'tests/oracles/d10_dung_grounded_sbcl.lisp'
+      - 'docs/research/d10-dung-grounded-ai.uk.md'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - '.github/workflows/d10-dung-grounded-ai.yml'
+  push:
+    branches:
+      - research/d10-dung-grounded-argumentation-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  grounded-finite-argumentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile strict finite-graph model
+        run: python3 -m py_compile scripts/check_d10_dung_grounded.py
+      - name: Prove grounding and 13 provenance mutants over finite directed graphs
+        run: python3 scripts/check_d10_dung_grounded.py --self-test
+      - name: Install independent Common Lisp witness
+        run: sudo apt-get install -y -qq sbcl
+      - name: Execute original Dung least fixed-point donor in real SBCL
+        run: sbcl --noinform --script tests/oracles/d10_dung_grounded_sbcl.lisp
