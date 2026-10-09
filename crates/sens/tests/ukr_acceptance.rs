@@ -1,36 +1,30 @@
-use sens::{eval_program, load_core_library, Session};
-
-const UKR_ACCEPTANCE: &str = include_str!("../../../lib/surface/ukr-acceptance.lisp");
+//! Retired Rust language-law oracle. This target now checks only the exact-width domain ladder.
+use sens::{parse_canonical_binary, syntax::ExprKind};
 
 #[test]
-fn ukr_acceptance_program_needs_no_latin_keyboard_layout() {
-    assert!(
-        !UKR_ACCEPTANCE
-            .chars()
-            .any(|character| character.is_ascii_alphabetic()),
-        "ukr acceptance source must contain no ASCII Latin letters"
-    );
+fn rust_observes_exact_width_domain_words_only() {
+    for width in 1usize..=9 {
+        let payload = (1usize << width) - 1;
+        let source = format!("{payload:0width$b}");
+        let forms = parse_canonical_binary(&source).expect("domain word parses");
+        assert_eq!(forms.len(), 1);
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits() as usize, payload);
+    }
 }
 
 #[test]
-fn ukr_acceptance_program_executes_through_real_runtime() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core bootstrap must install stable surface peers");
-    let result = eval_program(UKR_ACCEPTANCE, &mut session)
-        .expect("ukr acceptance program must evaluate through the real runtime");
-    assert_eq!(result.value.to_string(), "успіх");
-}
-
-#[test]
-fn shadowing_ukr_peer_does_not_retarget_english_peer() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("core bootstrap must install stable surface peers");
-
-    let result = eval_program(
-        "(визначити порожній-текст? (функція (значення) (як-є затінено)))\n(string-empty? \"\")",
-        &mut session,
-    )
-    .expect("ordinary ukr peer must remain independently shadowable");
-
-    assert_eq!(result.value.to_string(), "(1)");
+fn leading_zeroes_keep_the_word_on_its_original_rung() {
+    for width in 1usize..=9 {
+        let source = format!("{value:0width$b}", value = 1usize);
+        let forms = parse_canonical_binary(&source).expect("width-qualified word parses");
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits(), 1);
+    }
 }

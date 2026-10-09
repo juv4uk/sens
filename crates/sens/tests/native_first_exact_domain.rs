@@ -20,15 +20,20 @@ fn same_payload_in_different_rungs_remains_a_different_identity() {
     let d1 = parse_canonical_binary("1").expect("D1 word parses");
     let d3 = parse_canonical_binary("001").expect("D3 word parses");
     let d9 = parse_canonical_binary("000000001").expect("D9 word parses");
-    let identity = |forms: &[sens::syntax::Expr]| match &forms[0].kind {
-        ExprKind::DomainIdentity(value) => value,
-        _ => panic!("expected exact domain identity"),
+    let ExprKind::DomainIdentity(d1_identity) = &d1[0].kind else {
+        panic!("expected D1 identity");
     };
-    assert_eq!(identity(&d1).packed_bits(), 1);
-    assert_eq!(identity(&d3).packed_bits(), 1);
-    assert_eq!(identity(&d9).packed_bits(), 1);
-    assert_ne!(identity(&d1), identity(&d3));
-    assert_ne!(identity(&d3), identity(&d9));
+    let ExprKind::DomainIdentity(d3_identity) = &d3[0].kind else {
+        panic!("expected D3 identity");
+    };
+    let ExprKind::DomainIdentity(d9_identity) = &d9[0].kind else {
+        panic!("expected D9 identity");
+    };
+    assert_eq!(d1_identity.packed_bits(), 1);
+    assert_eq!(d3_identity.packed_bits(), 1);
+    assert_eq!(d9_identity.packed_bits(), 1);
+    assert_ne!(d1_identity, d3_identity);
+    assert_ne!(d3_identity, d9_identity);
 }
 
 #[test]

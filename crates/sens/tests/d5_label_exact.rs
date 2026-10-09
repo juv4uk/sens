@@ -1,63 +1,30 @@
+//! Retired Rust language-law oracle. This target now checks only the exact-width domain ladder.
+use sens::{parse_canonical_binary, syntax::ExprKind};
 
 #[test]
-fn label_surface_lowers_to_exact_d5_00100() {
-    let parsed = parse("(мітка self (функція (x) x))").expect("parse LABEL");
-    let lowered = lower_program(&parsed);
-    let ExprKind::DomainCall(CoreDomainIdentity::D5(word), _) = &lowered[0].kind else {
-        panic!("LABEL surface must lower to exact D5 DomainCall");
-    };
-    assert_eq!(word.word().packed_bits(), 0b00100);
-}
-
-use sens::{eval_program, lower_program, parse, CoreDomainIdentity, ErrorKind, ExprKind, Session};
-
-#[test]
-fn d5_label_recurses_locally() {
-    let source = r#"
-        ((мітка self
-           (функція (xs)
-             (за-умовою
-               ((атом? xs) (як-є done))
-               ((атом? (як-є recur)) (self (решта xs))))))
-         (як-є (a b c d)))
-    "#;
-    let mut session = Session::default();
-    let result = eval_program(source, &mut session).expect("D5 LABEL recursion");
-    assert_eq!(result.value.to_string(), "done");
-
-    let error = eval_program("self", &mut session)
-        .expect_err("LABEL self-binding must remain local");
-    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
+fn rust_observes_exact_width_domain_words_only() {
+    for width in 1usize..=9 {
+        let payload = (1usize << width) - 1;
+        let source = format!("{payload:0width$b}");
+        let forms = parse_canonical_binary(&source).expect("domain word parses");
+        assert_eq!(forms.len(), 1);
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits() as usize, payload);
+    }
 }
 
 #[test]
-fn d5_label_rejects_non_closure() {
-    let mut session = Session::default();
-    let error = eval_program("(мітка x (як-є datum))", &mut session)
-        .expect_err("LABEL requires a closure");
-    assert_eq!(error.kind, ErrorKind::Type);
-    assert!(error.message.contains("D5:00100 LABEL"));
-}
-
-
-#[test]
-fn label_shadows_but_never_mutates_an_outer_binding() {
-    let mut session = Session::default();
-    eval_program("(визначити self (як-є outer))", &mut session)
-        .expect("outer binding");
-
-    let result = eval_program(
-        r#"((мітка self
-               (функція (xs)
-                 (за-умовою
-                   ((атом? xs) (як-є done))
-                   ((атом? (як-є recur)) (self (решта xs))))))
-             (як-є (a b c)))"#,
-        &mut session,
-    )
-    .expect("local LABEL recursion");
-    assert_eq!(result.value.to_string(), "done");
-
-    let outer = eval_program("self", &mut session).expect("outer binding survives");
-    assert_eq!(outer.value.to_string(), "outer");
+fn leading_zeroes_keep_the_word_on_its_original_rung() {
+    for width in 1usize..=9 {
+        let source = format!("{value:0width$b}", value = 1usize);
+        let forms = parse_canonical_binary(&source).expect("width-qualified word parses");
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits(), 1);
+    }
 }

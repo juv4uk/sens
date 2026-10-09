@@ -19,19 +19,22 @@ fn each_supported_domain_width_roundtrips_as_a_distinct_identity() {
 
 #[test]
 fn equal_payloads_do_not_collapse_across_the_domain_ladder() {
-    let forms = (1usize..=9).map(|width| {
+    let coordinates = (1usize..=9).map(|width| {
         let source = format!("{value:0width$b}", value = 1usize);
         let parsed = parse_canonical_binary(&source).expect("domain identity parses");
         match &parsed[0].kind {
-            ExprKind::DomainIdentity(identity) => *identity,
+            ExprKind::DomainIdentity(identity) => (identity.width(), identity.packed_bits()),
             _ => panic!("expected domain identity"),
         }
     }).collect::<Vec<_>>();
-    assert_eq!(forms.iter().map(|id| id.packed_bits()).collect::<Vec<_>>(), vec![1; 9]);
-    assert_eq!(forms.iter().map(|id| id.width()).collect::<Vec<_>>(), (1usize..=9).collect::<Vec<_>>());
-    for left in 0..forms.len() {
-        for right in (left + 1)..forms.len() {
-            assert_ne!(forms[left], forms[right]);
+    assert_eq!(coordinates.iter().map(|(_, bits)| *bits).collect::<Vec<_>>(), vec![1; 9]);
+    assert_eq!(
+        coordinates.iter().map(|(width, _)| *width).collect::<Vec<_>>(),
+        (1usize..=9).collect::<Vec<_>>()
+    );
+    for left in 0..coordinates.len() {
+        for right in (left + 1)..coordinates.len() {
+            assert_ne!(coordinates[left], coordinates[right]);
         }
     }
 }

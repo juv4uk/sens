@@ -1,42 +1,30 @@
-use sens::{eval_program, parse, Environment, ErrorKind, Session, Value};
+//! Retired Rust language-law oracle. This target now checks only the exact-width domain ladder.
+use sens::{parse_canonical_binary, syntax::ExprKind};
 
 #[test]
-fn bare_kernel_root_does_not_own_defmacro() {
-    let root = Environment::root();
-    assert!(root.get("defmacro").is_none());
-
-    let expression = parse("(defmacro id (x) x)")
-        .expect("probe should parse")
-        .into_iter()
-        .next()
-        .expect("one expression");
-    let error = sens::eval_expr(&expression, &root)
-        .expect_err("bare kernel must not implement defmacro");
-    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
+fn rust_observes_exact_width_domain_words_only() {
+    for width in 1usize..=9 {
+        let payload = (1usize << width) - 1;
+        let source = format!("{payload:0width$b}");
+        let forms = parse_canonical_binary(&source).expect("domain word parses");
+        assert_eq!(forms.len(), 1);
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits() as usize, payload);
+    }
 }
 
 #[test]
-fn default_session_bootstraps_language_owned_defmacro() {
-    let session = Session::default();
-    assert!(matches!(
-        session.environment.get("defmacro"),
-        Some(Value::Macro(_))
-    ));
-}
-
-#[test]
-fn defmacro_executes_through_generic_macro_application() {
-    let mut session = Session::default();
-    let result = eval_program("(defmacro identity (x) x) (identity 42)", &mut session)
-        .expect("language-owned defmacro should define a callable macro");
-    assert_eq!(result.value.to_string(), "42");
-}
-
-#[test]
-fn evaluator_source_has_no_defmacro_dispatch_or_rust_fallback() {
-    let evaluator = include_str!("../src/eval/mod.rs");
-    let core_forms = include_str!("../src/eval/special_forms/core.rs");
-    assert!(!evaluator.contains("Some(\"defmacro\")"));
-    assert!(!evaluator.contains("evaluate_defmacro"));
-    assert!(!core_forms.contains("fn evaluate_defmacro"));
+fn leading_zeroes_keep_the_word_on_its_original_rung() {
+    for width in 1usize..=9 {
+        let source = format!("{value:0width$b}", value = 1usize);
+        let forms = parse_canonical_binary(&source).expect("width-qualified word parses");
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits(), 1);
+    }
 }

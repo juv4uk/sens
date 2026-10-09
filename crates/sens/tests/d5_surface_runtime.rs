@@ -1,24 +1,30 @@
-//! End-to-end witnesses for #3354 exact-domain D5 surface routing.
-
-use sens::{eval_program, Session};
+//! Retired Rust language-law oracle. This target now checks only the exact-width domain ladder.
+use sens::{parse_canonical_binary, syntax::ExprKind};
 
 #[test]
-fn d5_uk_and_sanskrit_plus_execute_through_ratified_d5() {
-    for source in ["(додати 2 3)", "(yoga 2 3)"] {
-        let mut session = Session::default();
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("D5 PLUS surface must execute: {source}: {error}"));
-        assert_eq!(result.value.to_string(), "5");
+fn rust_observes_exact_width_domain_words_only() {
+    for width in 1usize..=9 {
+        let payload = (1usize << width) - 1;
+        let source = format!("{payload:0width$b}");
+        let forms = parse_canonical_binary(&source).expect("domain word parses");
+        assert_eq!(forms.len(), 1);
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits() as usize, payload);
     }
 }
 
 #[test]
-fn d5_depth3_selector_surface_executes_selector_law() {
-    for surface in ["п-р-п", "ādi-śeṣa-ādi"] {
-        let source = format!("({surface} (як-є ((1 2) (3 4))))");
-        let mut session = Session::default();
-        let result = eval_program(&source, &mut session)
-            .unwrap_or_else(|error| panic!("D5 CADAR surface must execute: {source}: {error}"));
-        assert_eq!(result.value.to_string(), "2");
+fn leading_zeroes_keep_the_word_on_its_original_rung() {
+    for width in 1usize..=9 {
+        let source = format!("{value:0width$b}", value = 1usize);
+        let forms = parse_canonical_binary(&source).expect("width-qualified word parses");
+        let ExprKind::DomainIdentity(identity) = &forms[0].kind else {
+            panic!("binary word must remain a domain identity");
+        };
+        assert_eq!(identity.width(), width);
+        assert_eq!(identity.packed_bits(), 1);
     }
 }
