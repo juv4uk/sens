@@ -5,6 +5,9 @@ on:
       - 'knowledge/d10-clhs-pathnames-census-20261009.json'
       - 'scripts/check_d10_clhs_pathnames_census.py'
       - '.github/workflows/d10-clhs-pathnames-census.yml'
+  push:
+    branches:
+      - research/d10-clhs-pathnames-dictionary-20261009
   workflow_dispatch:
 permissions:
   contents: read
