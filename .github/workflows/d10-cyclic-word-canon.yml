@@ -1,0 +1,33 @@
+name: D10 cyclic binary canonical phase research
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-cyclic-word-canon-20261009.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'scripts/check_d10_cyclic_word_canon.py'
+      - 'tests/oracles/d10_cyclic_word_canon_sbcl.lisp'
+      - 'docs/research/d10-cyclic-word-canon.uk.md'
+      - '.github/workflows/d10-cyclic-word-canon.yml'
+  push:
+    branches:
+      - research/d10-cyclic-binary-word-canon-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-cyclic-words:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax-check linear Booth KMP reference and fail-closed gates
+        run: python3 -m py_compile scripts/check_d10_cyclic_word_canon.py
+      - name: Exhaustive binary orbit proof and 12 negative controls
+        run: python3 scripts/check_d10_cyclic_word_canon.py --self-test
+      - name: Install independent Common Lisp oracle
+        run: sudo apt-get install -y -qq sbcl
+      - name: Run real SBCL source mathematical witness
+        run: sbcl --noinform --script tests/oracles/d10_cyclic_word_canon_sbcl.lisp
