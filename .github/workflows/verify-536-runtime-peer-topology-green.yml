@@ -1,0 +1,16 @@
+name: Verify 536 runtime peer topology GREEN
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  green:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run Lisp-owned comparison peer topology witness
+        run: |
+          output="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp)"
+          printf 'actual: %s\\n' "$output"\n          test "$output" = "(runtime-peer-comparison-topology-witness (status pass))"
