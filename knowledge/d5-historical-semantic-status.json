@@ -1,0 +1,544 @@
+{
+  "counts": {
+    "historical_rows": 32,
+    "semantic_resident_no": 9,
+    "semantic_resident_unknown": 15,
+    "semantic_resident_yes": 8
+  },
+  "issue": "#2758",
+  "principle": "historical occupancy is not automatically semantic residency",
+  "rows": [
+    {
+      "coordinate": "00000",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "evaluation",
+      "historical_name": "EVALQUOTE",
+      "historical_parent_d4": "0000",
+      "historical_provenance": "McCarthy 1960 / Lisp 1.5",
+      "law_ref": "0001:EVAL",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Ordinary EVALQUOTE is composition of EVAL and APPLY over an already-valued argument list; later FEXPR staging is a separate protocol.",
+      "semantic_resident": "NO",
+      "status": "derived",
+      "witness_refs": [
+        "#2279",
+        "#2282",
+        "163c30d96d66ea0098304a6b341f257d1ee86278"
+      ]
+    },
+    {
+      "coordinate": "00001",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "abstraction",
+      "historical_name": "FUNCTION",
+      "historical_parent_d4": "0000",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "0010:LAMBDA",
+      "phase": "STRUCTURAL-DISCOVERY",
+      "semantic_note": "FUNCTION is the Lisp 1.5 closure wrapper/representation mechanism; D4 LAMBDA owns the observable closure capability.",
+      "semantic_resident": "NO",
+      "status": "historical-adapter",
+      "witness_refs": [
+        "#2235",
+        "#2259",
+        "6a7ee0099066cf9469151813be04d456b037cb00"
+      ]
+    },
+    {
+      "coordinate": "00010",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "evaluation",
+      "historical_name": "FEXPR",
+      "historical_parent_d4": "0001",
+      "historical_provenance": "Lisp 1.5 (§4.1)",
+      "law_ref": "carrier:raw-form-input",
+      "phase": "STRUCTURAL-DISCOVERY",
+      "semantic_note": "FEXPR combines independently observed special-call carriers; factor count and historical naming do not select a binary resident.",
+      "semantic_resident": "UNKNOWN",
+      "status": "unresolved-domain",
+      "witness_refs": [
+        "#2343",
+        "#2522",
+        "#2530",
+        "#2591",
+        "#2617"
+      ]
+    },
+    {
+      "coordinate": "00011",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "evaluation",
+      "historical_name": "MACRO",
+      "historical_parent_d4": "0001",
+      "historical_provenance": "Hart 1963 / Lisp 1.5",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "00100",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "binding",
+      "historical_name": "LABEL",
+      "historical_parent_d4": "0010",
+      "historical_provenance": "McCarthy 1960",
+      "law_ref": "0010:LAMBDA",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Fixed-point/self-application recursion is reproducible from D4 closure semantics; LABEL keeps historical provenance only.",
+      "semantic_resident": "NO",
+      "status": "derived",
+      "witness_refs": [
+        "#2234",
+        "a104f9d7ca23a84df48e5f35329fb34c347314e1"
+      ]
+    },
+    {
+      "coordinate": "00101",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "control",
+      "historical_name": "PROG",
+      "historical_parent_d4": "0010",
+      "historical_provenance": "Lisp 1.5 (§4.3)",
+      "law_ref": "composite:GO+RETURN",
+      "phase": "STRUCTURAL-DISCOVERY",
+      "semantic_note": "PROG is a historical control container; GO derives locally while RETURN carries the surviving non-local-exit pressure.",
+      "semantic_resident": "NO",
+      "status": "composite",
+      "witness_refs": [
+        "#2315",
+        "#2438",
+        "#2439",
+        "#2617"
+      ]
+    },
+    {
+      "coordinate": "00110",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "state",
+      "historical_name": "SET",
+      "historical_parent_d4": "0011",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "0011:DEFINE-lineage",
+      "phase": "STRUCTURAL-DISCOVERY",
+      "semantic_note": "Shared-location update survives, but root minimization classifies it as a carrier premise; D5 placement is ineligible and exact residency needs separate authority.",
+      "semantic_resident": "UNKNOWN",
+      "status": "unresolved-domain",
+      "witness_refs": [
+        "#2442",
+        "#2589",
+        "#2617"
+      ]
+    },
+    {
+      "coordinate": "00111",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "state",
+      "historical_name": "SETQ",
+      "historical_parent_d4": "0011",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "0011:DEFINE-lineage",
+      "phase": "STRUCTURAL-DISCOVERY",
+      "semantic_note": "SETQ shares the location-update carrier with SET plus target policy; its D6 candidate is explicitly not ratified by this placement ledger.",
+      "semantic_resident": "UNKNOWN",
+      "status": "unresolved-domain",
+      "witness_refs": [
+        "#2441",
+        "#2442",
+        "#2518",
+        "#2538:OD-001",
+        "#2617"
+      ]
+    },
+    {
+      "coordinate": "01000",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "predicate",
+      "historical_name": "ZEROP",
+      "historical_parent_d4": "0100",
+      "historical_provenance": "Lisp 1.5 (§4.2)",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "01001",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "predicate",
+      "historical_name": "NUMBERP",
+      "historical_parent_d4": "0100",
+      "historical_provenance": "Lisp 1.5 (§4.2)",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "01010",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "arithmetic",
+      "historical_name": "PLUS",
+      "historical_parent_d4": "0101",
+      "historical_provenance": "McCarthy 1960 / Lisp 1.5",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "01011",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "arithmetic",
+      "historical_name": "DIFFERENCE",
+      "historical_parent_d4": "0101",
+      "historical_provenance": "McCarthy 1960 / Lisp 1.5",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "01100",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "control",
+      "historical_name": "GO",
+      "historical_parent_d4": "0110",
+      "historical_provenance": "Lisp 1.5 (§4.3)",
+      "law_ref": "basis:D1-D4-FSM+TAIL-RECURSION",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Intra-PROG transfer rewrites to finite-state dispatch plus tail recursion; no non-local authority is required.",
+      "semantic_resident": "NO",
+      "status": "derived",
+      "witness_refs": [
+        "#2438",
+        "786921915b70d3bfe89611ad239345adeb365890"
+      ]
+    },
+    {
+      "coordinate": "01101",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "control",
+      "historical_name": "RETURN",
+      "historical_parent_d4": "0110",
+      "historical_provenance": "Lisp 1.5 (§4.3)",
+      "law_ref": "root:non-local-exit",
+      "phase": "STRUCTURAL-DISCOVERY",
+      "semantic_note": "Non-local exit is the sole proven post-D4 semantic root in the bounded corpus, but roothood does not determine width or coordinate.",
+      "semantic_resident": "UNKNOWN",
+      "status": "unresolved-domain",
+      "witness_refs": [
+        "#2488",
+        "#2504",
+        "#2590",
+        "#2617",
+        "#2662"
+      ]
+    },
+    {
+      "coordinate": "01110",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "predicate",
+      "historical_name": "LESSP",
+      "historical_parent_d4": "0111",
+      "historical_provenance": "Lisp 1.5 (§4.2)",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "01111",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "predicate",
+      "historical_name": "GREATERP",
+      "historical_parent_d4": "0111",
+      "historical_provenance": "Lisp 1.5 (§4.2)",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "10000",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "list-structure",
+      "historical_name": "APPEND",
+      "historical_parent_d4": "1000",
+      "historical_provenance": "McCarthy 1960",
+      "law_ref": "basis:D3-STRUCTURAL-RECURSION",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "List concatenation is ordinary structural recursion; no CONS-family resident is earned by the historical name.",
+      "semantic_resident": "NO",
+      "status": "derived",
+      "witness_refs": [
+        "#2347",
+        "#2371",
+        "e2bd9b84650820fe84acd127c2588f034a54ad3a"
+      ]
+    },
+    {
+      "coordinate": "10001",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "list-structure",
+      "historical_name": "REVERSE",
+      "historical_parent_d4": "1000",
+      "historical_provenance": "McCarthy 1960 / Lisp 1.5",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "10010",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "arithmetic",
+      "historical_name": "TIMES",
+      "historical_parent_d4": "1001",
+      "historical_provenance": "McCarthy 1960 / Lisp 1.5",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "10011",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "arithmetic",
+      "historical_name": "QUOTIENT",
+      "historical_parent_d4": "1001",
+      "historical_provenance": "McCarthy 1960 / Lisp 1.5",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "10100",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CAAAR",
+      "historical_parent_d4": "1010",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "10101",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CAADR",
+      "historical_parent_d4": "1010",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "10110",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CADAR",
+      "historical_parent_d4": "1011",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "10111",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CADDR",
+      "historical_parent_d4": "1011",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "11000",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CDAAR",
+      "historical_parent_d4": "1100",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "11001",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CDADR",
+      "historical_parent_d4": "1100",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "11010",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CDDAR",
+      "historical_parent_d4": "1101",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "11011",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "selector",
+      "historical_name": "CDDDR",
+      "historical_parent_d4": "1101",
+      "historical_provenance": "Lisp 1.5",
+      "law_ref": "#2158",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Existing selector law independently generates this exact D5 resident. Historical name/provenance is retained but is not the source of residency.",
+      "semantic_resident": "YES",
+      "status": "generated",
+      "witness_refs": [
+        "#2323/#2345",
+        "#2329/#2366"
+      ]
+    },
+    {
+      "coordinate": "11100",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "lookup",
+      "historical_name": "ASSOC",
+      "historical_parent_d4": "1110",
+      "historical_provenance": "McCarthy 1960",
+      "law_ref": "basis:D3-STRUCTURAL-RECURSION",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Generic alist search derives directly from structure/equality recursion; broader domain than D4 LOOKUP does not make ASSOC a LOOKUP child.",
+      "semantic_resident": "NO",
+      "status": "derived",
+      "witness_refs": [
+        "#2285",
+        "#2296",
+        "81b50d3331e19bc79c310987c75b6d36175b9f8f"
+      ]
+    },
+    {
+      "coordinate": "11101",
+      "falsifier_ref": "#2508/#2749",
+      "historical_category": "lookup",
+      "historical_name": "MEMBER",
+      "historical_parent_d4": "1110",
+      "historical_provenance": "McCarthy 1960 / Lisp 1.5",
+      "law_ref": "UNRESOLVED",
+      "phase": "HISTORICAL-INGEST",
+      "semantic_note": "OD-005 supplies historical coordinate/provenance only; no merged same-domain semantic-residency theorem is encoded for this row.",
+      "semantic_resident": "UNKNOWN",
+      "status": "historical-observed",
+      "witness_refs": []
+    },
+    {
+      "coordinate": "11110",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "binding",
+      "historical_name": "PAIRLIS",
+      "historical_parent_d4": "1111",
+      "historical_provenance": "McCarthy 1960",
+      "law_ref": "basis:D3-STRUCTURAL-RECURSION",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "Historical PAIRLIS ordering differs from current BIND, but the recurrence remains structural; it is explicitly not a BIND child.",
+      "semantic_resident": "NO",
+      "status": "derived",
+      "witness_refs": [
+        "#2286",
+        "#2300",
+        "2bf549d1693f678de6d1ce0e85444fccca00c569"
+      ]
+    },
+    {
+      "coordinate": "11111",
+      "falsifier_ref": "#2236/#2508/#2749",
+      "historical_category": "tree-structure",
+      "historical_name": "SUBST",
+      "historical_parent_d4": "1111",
+      "historical_provenance": "McCarthy 1960",
+      "law_ref": "basis:D3-STRUCTURAL-RECURSION",
+      "phase": "SENS-DERIVATION",
+      "semantic_note": "SUBST is recursive structural substitution over existing D3 observations and constructors.",
+      "semantic_resident": "NO",
+      "status": "derived",
+      "witness_refs": [
+        "#2348",
+        "#2386",
+        "9b5841ad7beffda412d77942f81d83018a9b3f25"
+      ]
+    }
+  ],
+  "schema": "d5-historical-semantic-status/v1",
+  "source_historical_map": "knowledge/d5-historical-full-map.json",
+  "source_semantic_placement": "benchmarks/post-d4-semantic-placement/placement.json"
+}
