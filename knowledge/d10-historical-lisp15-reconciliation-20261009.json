@@ -1,0 +1,1194 @@
+{
+  "schema": "d10-historical-lisp15-reconciliation/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-ONLY-NO-RESIDENTS",
+  "purpose": "Reconcile the still-open historical Lisp 1.5 Appendix A branch against the currently ratified D1-D9 and selected D10 names; retain provenance without reviving pre-ratification D8 coordinate maps.",
+  "lineage": {
+    "superseded_branch": "research/d8-lisp15-appendix-ledger",
+    "branch_head": "06bfd805cffb14948765bedb4ff7c050e618e02d",
+    "imported_ledger_blob": "912bc99c41f6552aaa4d9a67b8698344b3815264",
+    "prior_pull_request": 3947,
+    "main_status_at_reconciliation": "D1-D9 owner-ratified; D10 research/unratified"
+  },
+  "snapshot": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "d10_selected": 625,
+    "d10_capacity": 1024,
+    "d10_unplaced": 369,
+    "d10_remaining": 399,
+    "d10_ratified": 0,
+    "rows_reconciled": 31,
+    "selected_added": 0,
+    "coordinates_added": 0,
+    "ratifications_added": 0
+  },
+  "rules": [
+    "Exact-name match is only a triage signal; absence is not proof of new semantics.",
+    "All former D8 coordinates are intentionally omitted; the canonical D8 map remains owner-ratified and authoritative.",
+    "Every row remains selected_d10=false, coordinate=null, ratified=false.",
+    "Old implementation helpers, host effects, compile-time translations, and D2-owned control remain non-residents unless separately proven as universal language-visible laws.",
+    "OBLIST/MAPATOMS is a review lead, not yet admitted: callback result, error/early-exit rules, and iteration-order guarantees need a primary-source oracle before promotion."
+  ],
+  "rows": [
+    {
+      "review_id": "L15-01",
+      "historical_family": "mutable-cons",
+      "historical_names": [
+        "RPLACA",
+        "RPLACD"
+      ],
+      "primary_or_historical_source": "LISP 1.5 Programmer's Manual, 1962, §7.4",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "mutate CAR/CDR field of an existing pair; aliases observe mutation",
+      "former_lower_domain_relation": "absent from D1-D7; current Pair is persistent",
+      "law_hypothesis": "same-pair identity + one field mutation; CAR/CDR sibling axis",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "RPLACA",
+          "name": "RPLACA",
+          "domain": "D8",
+          "bits": "11101011"
+        },
+        {
+          "query_name": "RPLACD",
+          "name": "RPLACD",
+          "domain": "D8",
+          "bits": "11101100"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3943",
+        "#3944"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-02",
+      "historical_family": "destructive-list-derived",
+      "historical_names": [
+        "CONC",
+        "NCONC",
+        "EFFACE",
+        "MAPCON"
+      ],
+      "primary_or_historical_source": "LISP 1.5 Programmer's Manual, 1962, list-structure functions",
+      "original_research_classification": "DERIVATION-REVIEW-NO-SLOT",
+      "source_behavior_summary": "destructive concatenation/deletion/mapping over mutable list structure",
+      "former_lower_domain_relation": "requires mutable-cons roots; algorithms otherwise recursive/list-level",
+      "law_hypothesis": "derive from RPLACA/RPLACD + traversal/recursion",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "MAPCON",
+          "name": "MAPCON",
+          "domain": "D8",
+          "bits": "10111000"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "CONC",
+        "NCONC",
+        "EFFACE"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3934",
+        "#3943"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-03",
+      "historical_family": "local-error-boundary",
+      "historical_names": [
+        "ERRORSET"
+      ],
+      "primary_or_historical_source": "Memo 26 Errorset; LISP 1.5 Programmer's Manual §6.4",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "convert evaluation failure into recoverable NIL while wrapping successful value in singleton list",
+      "former_lower_domain_relation": "no D1-D7 local error boundary",
+      "law_hypothesis": "success -> LIST(value); error -> EMPTY",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "ERRORSET",
+          "name": "ERRORSET",
+          "domain": "D8",
+          "bits": "11101001"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3929",
+        "#3930"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-04",
+      "historical_family": "explicit-error-signal",
+      "historical_names": [
+        "ERROR"
+      ],
+      "primary_or_historical_source": "LISP 1.5 Programmer's Manual, 1961/1962 lineage",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "intentional language failure with diagnostic/payload",
+      "former_lower_domain_relation": "runtime errors exist but no language operation intentionally signals one",
+      "law_hypothesis": "explicit signal is distinct from accidental partial-operation failure",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "ERROR",
+          "name": "ERROR",
+          "domain": "D8",
+          "bits": "11101000"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3931",
+        "#3932"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-05",
+      "historical_family": "reader-error-marker",
+      "historical_names": [
+        "ERROR1"
+      ],
+      "primary_or_historical_source": "LISP 1.5 Programmer's Manual Appendix F, 1962",
+      "original_research_classification": "TOOLING/DEBUGGING",
+      "source_behavior_summary": "marks/prints character-reader error position",
+      "former_lower_domain_relation": "reader/debug mechanism, not general failure signal",
+      "law_hypothesis": "reader-local diagnostic effect",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "ERROR1"
+      ],
+      "current_disposition": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+      "source_evidence_refs": [
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-06",
+      "historical_family": "environment-carrier",
+      "historical_names": [
+        "A-LIST",
+        "association list"
+      ],
+      "primary_or_historical_source": "McCarthy evaluator lineage 1960; LISP 1.5 manual",
+      "original_research_classification": "LOWER-DOMAIN-COVERED-NO-SLOT",
+      "source_behavior_summary": "binding environment representation/context",
+      "former_lower_domain_relation": "already internal to EVAL/closures and ASSOC/PAIRLIS family",
+      "law_hypothesis": "lookup/binding carrier, not reflection by itself",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "A-LIST",
+        "association list"
+      ],
+      "current_disposition": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+      "source_evidence_refs": [
+        "D4 LOOKUP/BIND",
+        "D5 ASSOC/PAIRLIS",
+        "#3924"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-07",
+      "historical_family": "environment-reflection",
+      "historical_names": [
+        "ENV",
+        "ENV-REFLECTION"
+      ],
+      "primary_or_historical_source": "current SENS capability; historical environment concept is older but reflection spelling is not backdated",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "enumerate visible lexical bindings with shadow resolution",
+      "former_lower_domain_relation": "live runtime builtin, absent D1-D7 residency",
+      "law_hypothesis": "snapshot visible bindings; innermost shadow wins; deterministic ordering",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "ENV-REFLECTION",
+          "name": "ENV-REFLECTION",
+          "domain": "D8",
+          "bits": "11100111"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "ENV"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3924",
+        "#3926"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-08",
+      "historical_family": "structure-to-text-reader",
+      "historical_names": [
+        "READ"
+      ],
+      "primary_or_historical_source": "early LISP read lineage; LISP 1.5 manual 1962",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "one-argument current SENS path parses one textual form to structural datum without evaluating it",
+      "former_lower_domain_relation": "not derivable from structural D1-D7 operations",
+      "law_hypothesis": "READ(WRITE(x)) = x on admitted readable carrier",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "READ",
+          "name": "READ",
+          "domain": "D8",
+          "bits": "11101010"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3937",
+        "#3938"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-09",
+      "historical_family": "text-to-structure-writer",
+      "historical_names": [
+        "WRITE-TO-STRING"
+      ],
+      "primary_or_historical_source": "current SENS canonical serializer; historical print/read lineage",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "canonical structural serialization to text",
+      "former_lower_domain_relation": "not derivable from D1-D7 without text bridge",
+      "law_hypothesis": "WRITE(READ(t)) = canonicalize(t)",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "WRITE-TO-STRING",
+          "name": "WRITE-TO-STRING",
+          "domain": "D8",
+          "bits": "11110100"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3937",
+        "#3938"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-10",
+      "historical_family": "symbol-name-out",
+      "historical_names": [
+        "SYMBOL->STRING",
+        "PNAME-view"
+      ],
+      "primary_or_historical_source": "historical PNAME lineage; current SENS surface is modern",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "observe exact symbol name as text",
+      "former_lower_domain_relation": "distinct from general serialization",
+      "law_hypothesis": "SYMBOL->STRING(STRING->SYMBOL(s)) = s",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "SYMBOL->STRING",
+          "name": "SYMBOL->STRING",
+          "domain": "D8",
+          "bits": "11101110"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "PNAME-view"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3939",
+        "#3940"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-11",
+      "historical_family": "symbol-name-in",
+      "historical_names": [
+        "STRING->SYMBOL"
+      ],
+      "primary_or_historical_source": "historical PNAME/INTERN lineage; current SENS surface is modern",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "materialize a symbol carrying exact supplied name",
+      "former_lower_domain_relation": "not equivalent to READ tokenization; not asserted identical to historical INTERN",
+      "law_hypothesis": "STRING->SYMBOL(SYMBOL->STRING(sym)) = sym",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "STRING->SYMBOL",
+          "name": "STRING->SYMBOL",
+          "domain": "D8",
+          "bits": "11101101"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3939",
+        "#3940"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-12",
+      "historical_family": "indexed-aggregate-construct",
+      "historical_names": [
+        "ARRAY",
+        "VECTOR"
+      ],
+      "primary_or_historical_source": "LISP 1.5 ARRAY; current SENS VECTOR",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "construct finite indexed aggregate",
+      "former_lower_domain_relation": "opaque indexed carrier not represented by pair structure",
+      "law_hypothesis": "VECTOR(x0..xn) establishes ordered indexed cells",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "VECTOR",
+          "name": "VECTOR",
+          "domain": "D8",
+          "bits": "11101111"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "ARRAY"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3933",
+        "#3942"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-13",
+      "historical_family": "indexed-aggregate-observe",
+      "historical_names": [
+        "VECTOR-REF"
+      ],
+      "primary_or_historical_source": "historical ARRAY indexed access; current SENS surface",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "observe cell by numeric index",
+      "former_lower_domain_relation": "CAR/CDR do not observe vector cells",
+      "law_hypothesis": "REF(VECTOR(xs),i)=xs[i]",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "VECTOR-REF",
+          "name": "VECTOR-REF",
+          "domain": "D8",
+          "bits": "11110000"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3933",
+        "#3942"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-14",
+      "historical_family": "indexed-aggregate-update",
+      "historical_names": [
+        "VECTOR-SET!"
+      ],
+      "primary_or_historical_source": "historical mutable ARRAY; current SENS surface",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "alias-visible in-place indexed update",
+      "former_lower_domain_relation": "not locally derivable by persistent list rewrite",
+      "law_hypothesis": "all aliases observe changed selected cell; other cells preserved",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "VECTOR-SET!",
+          "name": "VECTOR-SET!",
+          "domain": "D8",
+          "bits": "11110010"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3933",
+        "#3942"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-15",
+      "historical_family": "indexed-aggregate-convenience",
+      "historical_names": [
+        "MAKE-VECTOR",
+        "VECTOR-LENGTH"
+      ],
+      "primary_or_historical_source": "current SENS vector API",
+      "original_research_classification": "DERIVED-NO-SLOT",
+      "source_behavior_summary": "size constructor and extent observation",
+      "former_lower_domain_relation": "reducible to minimal vector basis; length conditional derivation uses ERRORSET + REF failure boundary",
+      "law_hypothesis": "no independent root established",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "MAKE-VECTOR",
+          "name": "MAKE-VECTOR",
+          "domain": "D8",
+          "bits": "11111001"
+        },
+        {
+          "query_name": "VECTOR-LENGTH",
+          "name": "VECTOR-LENGTH",
+          "domain": "D8",
+          "bits": "11111111"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3933",
+        "#3942"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-16",
+      "historical_family": "structural-equality",
+      "historical_names": [
+        "EQUAL"
+      ],
+      "primary_or_historical_source": "Memo 24 / LISP 1.5 lineage",
+      "original_research_classification": "DERIVED-NO-SLOT",
+      "source_behavior_summary": "recursive structural equality",
+      "former_lower_domain_relation": "derivable from lower pair/equality basis",
+      "law_hypothesis": "recursive ATOM/EQ/CAR/CDR equality",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "EQUAL",
+          "name": "EQUAL",
+          "domain": "D8",
+          "bits": "11110111"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3923",
+        "lib/core.lisp"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-17",
+      "historical_family": "list-convenience",
+      "historical_names": [
+        "PAIR",
+        "AND",
+        "OR",
+        "ONEP",
+        "MINUSP",
+        "PROG2",
+        "SELECT"
+      ],
+      "primary_or_historical_source": "LISP I / LISP 1.5 manual lineage",
+      "original_research_classification": "DERIVED-NO-SLOT",
+      "source_behavior_summary": "historical list/logical/numeric/control conveniences",
+      "former_lower_domain_relation": "simple compositions over admitted lower operations",
+      "law_hypothesis": "PAIR=list2; AND/OR=COND macros; ONEP=ZEROP(DIFFERENCE(x,1)); MINUSP=LESSP(x,0); PROG2=eager two-arg second; SELECT=ordered equality/COND selection",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "PAIR",
+          "name": "PAIR",
+          "domain": "D8",
+          "bits": "11111101"
+        },
+        {
+          "query_name": "AND",
+          "name": "AND",
+          "domain": "D8",
+          "bits": "11110101"
+        },
+        {
+          "query_name": "OR",
+          "name": "OR",
+          "domain": "D8",
+          "bits": "11111100"
+        },
+        {
+          "query_name": "ONEP",
+          "name": "ONEP",
+          "domain": "D8",
+          "bits": "11111011"
+        },
+        {
+          "query_name": "MINUSP",
+          "name": "MINUSP",
+          "domain": "D8",
+          "bits": "11111010"
+        },
+        {
+          "query_name": "PROG2",
+          "name": "PROG2",
+          "domain": "D8",
+          "bits": "11001001"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "SELECT"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3927",
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-18",
+      "historical_family": "special-call-implementation",
+      "historical_names": [
+        "FSUBR"
+      ],
+      "primary_or_historical_source": "LISP 1.5",
+      "original_research_classification": "HISTORICAL-PROVENANCE-ONLY",
+      "source_behavior_summary": "compiled/subroutine implementation of special-call protocol",
+      "former_lower_domain_relation": "raw-operands + caller-env protocol already captured by FEXPR family evidence",
+      "law_hypothesis": "implementation class does not create new user-visible identity",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "FSUBR",
+          "name": "FSUBR",
+          "domain": "D8",
+          "bits": "11111000"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "#3923",
+        "#3927"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-19",
+      "historical_family": "macro-transformer-protocol",
+      "historical_names": [
+        "TRANSFORMER",
+        "Hart MACRO"
+      ],
+      "primary_or_historical_source": "Hart AIM-057, October 1963",
+      "original_research_classification": "LOWER-DOMAIN-COVERED-NO-SLOT",
+      "source_behavior_summary": "source-form transformation with re-evaluation protocol",
+      "former_lower_domain_relation": "protocol axes preserved; D5 MACRO owns current family",
+      "law_hypothesis": "historical protocol evidence, no duplicate slot",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "TRANSFORMER",
+        "Hart MACRO"
+      ],
+      "current_disposition": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+      "source_evidence_refs": [
+        "#2567",
+        "#2588",
+        "#2591",
+        "#3927"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-20",
+      "historical_family": "machine-numeric-carrier",
+      "historical_names": [
+        "FIXP",
+        "FLOATP",
+        "LOGAND",
+        "LOGOR",
+        "LOGXOR",
+        "LEFTSHIFT"
+      ],
+      "primary_or_historical_source": "Memo 24, 1961; LISP 1.5 manual",
+      "original_research_classification": "CORE-MATH-CANDIDATE",
+      "source_behavior_summary": "fixed/floating and logical-word observations tied to machine carrier",
+      "former_lower_domain_relation": "exact-Q Core must not inherit IBM 704 carrier ontology automatically",
+      "law_hypothesis": "typed bitvector/word laws require separate carrier theorem",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "LOGAND",
+          "name": "LOGAND",
+          "domain": "D8",
+          "bits": "10111010"
+        },
+        {
+          "query_name": "LOGXOR",
+          "name": "LOGXOR",
+          "domain": "D8",
+          "bits": "11011001"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "FIXP",
+        "FLOATP",
+        "LOGOR",
+        "LEFTSHIFT"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3928"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-21",
+      "historical_family": "fresh-symbol",
+      "historical_names": [
+        "GENSYM"
+      ],
+      "primary_or_historical_source": "LISP 1.5 manual 1962",
+      "original_research_classification": "DERIVED-NO-SLOT",
+      "source_behavior_summary": "fresh distinct symbol generation",
+      "former_lower_domain_relation": "current SENS defines gensym in language over existing mono counter + text/symbol bridge",
+      "law_hypothesis": "freshness derived from existing counter mechanism + construction",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "GENSYM",
+          "name": "GENSYM",
+          "domain": "D9",
+          "bits": "110111000"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [],
+      "current_disposition": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
+      "source_evidence_refs": [
+        "lib/core.lisp",
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-22",
+      "historical_family": "symbol-intern-table",
+      "historical_names": [
+        "INTERN",
+        "OBLIST",
+        "REMOB"
+      ],
+      "primary_or_historical_source": "LISP 1.5 manual 1962",
+      "original_research_classification": "UNRESOLVED",
+      "source_behavior_summary": "find/create interned atom by print name; enumerate/remove global object-list membership",
+      "former_lower_domain_relation": "current Symbol equality is name-based and no historical OBLIST identity contract is admitted",
+      "law_hypothesis": "global symbol registry state is separate from simple STRING->SYMBOL name bridge",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [
+        {
+          "name": "INTERN",
+          "behavior": "canonicalize a symbol by print-name in the current intern table, inserting it when absent"
+        },
+        {
+          "name": "REMOB",
+          "behavior": "remove an interned symbol from the current intern table so future reads no longer reach it through that table"
+        }
+      ],
+      "exact_name_residuals": [
+        "OBLIST"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-23",
+      "historical_family": "symbol-metadata-store",
+      "historical_names": [
+        "APVAL",
+        "CSET",
+        "CSETQ",
+        "ATTRIB",
+        "PROP",
+        "GET",
+        "REMPROP",
+        "FLAG",
+        "REMFLAG",
+        "PRINTPROP",
+        "DEFLIST"
+      ],
+      "primary_or_historical_source": "LISP 1.5 manual 1962 property-list system",
+      "original_research_classification": "UNRESOLVED",
+      "source_behavior_summary": "implicit mutable metadata attached to atomic symbols",
+      "former_lower_domain_relation": "not current SET; explicit-list algorithms are derivable, hidden symbol-attached state is separate",
+      "law_hypothesis": "CSETQ is quoted-target surface over CSET; reduce whole family to minimal GET/PUT/REMOVE or data-domain root",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "GET",
+          "name": "GET",
+          "domain": "D8",
+          "bits": "00011001"
+        }
+      ],
+      "exact_selected_d10_name_matches": [
+        {
+          "name": "REMPROP",
+          "behavior": "remove a named property from a symbol or property-list object and expose whether it existed"
+        }
+      ],
+      "exact_name_residuals": [
+        "APVAL",
+        "CSET",
+        "CSETQ",
+        "ATTRIB",
+        "PROP",
+        "FLAG",
+        "REMFLAG",
+        "PRINTPROP",
+        "DEFLIST"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3941",
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-24",
+      "historical_family": "dynamic-special-binding",
+      "historical_names": [
+        "SPECIAL",
+        "UNSPECIAL",
+        "SPECIAL-BINDING"
+      ],
+      "primary_or_historical_source": "LISP 1.5 compiler/manual 1962",
+      "original_research_classification": "D8-RECOVERY-CANDIDATE",
+      "source_behavior_summary": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
+      "former_lower_domain_relation": "current SENS lexical closure semantics do not provide this local observable",
+      "law_hypothesis": "dynamic bind/save -> free refs read current special cell -> scope exit restores previous value",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "SPECIAL",
+          "name": "SPECIAL",
+          "domain": "D8",
+          "bits": "11000000"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "UNSPECIAL",
+        "SPECIAL-BINDING"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3945",
+        "LISP 1.5 Programmer's Manual compiler appendix",
+        "current lexical-capture tests/docs"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-25",
+      "historical_family": "compiled-common-binding",
+      "historical_names": [
+        "COMMON",
+        "UNCOMMON"
+      ],
+      "primary_or_historical_source": "LISP 1.5 compiler/manual 1962",
+      "original_research_classification": "HISTORICAL-COMPILER-BRIDGE-NO-SLOT",
+      "source_behavior_summary": "a-list based communication between compiled and interpreted functions",
+      "former_lower_domain_relation": "historical compiled↔interpreted a-list bridge; no independent source semantic root beyond context communication established",
+      "law_hypothesis": "compiler/interpreter communication via explicit a-list",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "COMMON",
+        "UNCOMMON"
+      ],
+      "current_disposition": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+      "source_evidence_refs": [
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-26",
+      "historical_family": "host-input-output",
+      "historical_names": [
+        "PRINT",
+        "PRIN1",
+        "PRINC",
+        "TERPRI",
+        "PUNCH",
+        "PUNCHDEF",
+        "PUNCHLAP",
+        "READLAP"
+      ],
+      "primary_or_historical_source": "LISP 1.5 manual 1962",
+      "original_research_classification": "HOST-CAPABILITY",
+      "source_behavior_summary": "console/card/punch/assembly I/O and transcript effects",
+      "former_lower_domain_relation": "host/transcript boundary; not same as pure READ(string)/WRITE-TO-STRING(value)",
+      "law_hypothesis": "external effect",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "PRINT",
+          "name": "PRINT",
+          "domain": "D8",
+          "bits": "11011011"
+        },
+        {
+          "query_name": "PRIN1",
+          "name": "PRIN1",
+          "domain": "D8",
+          "bits": "10101101"
+        },
+        {
+          "query_name": "PRINC",
+          "name": "PRINC",
+          "domain": "D8",
+          "bits": "11010110"
+        },
+        {
+          "query_name": "TERPRI",
+          "name": "TERPRI",
+          "domain": "D8",
+          "bits": "00000010"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "PUNCH",
+        "PUNCHDEF",
+        "PUNCHLAP",
+        "READLAP"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3934",
+        "contracts/primitive-budget-audit-734.lisp"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-27",
+      "historical_family": "character-reader-mechanism",
+      "historical_names": [
+        "READCH",
+        "STARTREAD",
+        "ADVANCE",
+        "ENDREAD",
+        "CLEARBUFF",
+        "CURCHAR",
+        "OPCHAR",
+        "PACK",
+        "UNPACK",
+        "MKNAM",
+        "NUMOB",
+        "CHARCOUNT"
+      ],
+      "primary_or_historical_source": "character handling / LISP 1.5 Appendix F",
+      "original_research_classification": "D7-BRIDGE-REVIEW",
+      "source_behavior_summary": "character-level reader/buffer/print-name machinery",
+      "former_lower_domain_relation": "part reader mechanism and part D7 text bridge; no independent Core roots established",
+      "law_hypothesis": "must be projected onto D7 before any Core claim",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "READCH",
+        "STARTREAD",
+        "ADVANCE",
+        "ENDREAD",
+        "CLEARBUFF",
+        "CURCHAR",
+        "OPCHAR",
+        "PACK",
+        "UNPACK",
+        "MKNAM",
+        "NUMOB",
+        "CHARCOUNT"
+      ],
+      "current_disposition": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+      "source_evidence_refs": [
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-28",
+      "historical_family": "debug-trace",
+      "historical_names": [
+        "TRACE",
+        "UNTRACE",
+        "TRACESET",
+        "UNTRACESET",
+        "COUNT",
+        "UNCOUNT",
+        "SPEAK"
+      ],
+      "primary_or_historical_source": "LISP 1.5 system/manual",
+      "original_research_classification": "TOOLING/DEBUGGING",
+      "source_behavior_summary": "debugging/tracing/counting output and system observation",
+      "former_lower_domain_relation": "tooling observer, not ordinary program semantics",
+      "law_hypothesis": "debug observation only unless later exposed as data",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "TRACE",
+        "UNTRACE",
+        "TRACESET",
+        "UNTRACESET",
+        "COUNT",
+        "UNCOUNT",
+        "SPEAK"
+      ],
+      "current_disposition": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+      "source_evidence_refs": [
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-29",
+      "historical_family": "system-memory-control",
+      "historical_names": [
+        "DUMP",
+        "EXCISE",
+        "RECLAIM",
+        "TEMPUS-FUGIT",
+        "LOAD",
+        "LAP",
+        "COMPILE",
+        "OPDEFINE"
+      ],
+      "primary_or_historical_source": "LISP 1.5 system/manual",
+      "original_research_classification": "MACHINE-MECHANISM",
+      "source_behavior_summary": "machine/system/compiler/storage control",
+      "former_lower_domain_relation": "substrate/host mechanism",
+      "law_hypothesis": "not Core semantic identity",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "COMPILE",
+          "name": "COMPILE",
+          "domain": "D8",
+          "bits": "00111100"
+        }
+      ],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "DUMP",
+        "EXCISE",
+        "RECLAIM",
+        "TEMPUS-FUGIT",
+        "LOAD",
+        "LAP",
+        "OPDEFINE"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-30",
+      "historical_family": "copy-search-algorithms",
+      "historical_names": [
+        "COPY",
+        "SASSOC",
+        "SEARCH",
+        "REVERSE",
+        "MEMBER",
+        "LENGTH",
+        "MAP",
+        "MAPLIST"
+      ],
+      "primary_or_historical_source": "LISP 1.5 manual",
+      "original_research_classification": "LOWER-DOMAIN-COVERED-NO-SLOT",
+      "source_behavior_summary": "recursive algorithms over list/function basis",
+      "former_lower_domain_relation": "already present or derivable in D4-D6/library",
+      "law_hypothesis": "ordinary recursion/composition",
+      "exact_d1_d9_name_matches": [
+        {
+          "query_name": "REVERSE",
+          "name": "REVERSE",
+          "domain": "D5",
+          "bits": "10100"
+        },
+        {
+          "query_name": "MEMBER",
+          "name": "MEMBER",
+          "domain": "D5",
+          "bits": "11101"
+        },
+        {
+          "query_name": "LENGTH",
+          "name": "LENGTH",
+          "domain": "D6",
+          "bits": "000000"
+        },
+        {
+          "query_name": "MAP",
+          "name": "MAP",
+          "domain": "D6",
+          "bits": "101000"
+        },
+        {
+          "query_name": "MAP",
+          "name": "MAP",
+          "domain": "D8",
+          "bits": "11000101"
+        },
+        {
+          "query_name": "MAPLIST",
+          "name": "MAPLIST",
+          "domain": "D6",
+          "bits": "000101"
+        }
+      ],
+      "exact_selected_d10_name_matches": [
+        {
+          "name": "SASSOC",
+          "behavior": "association-list lookup using EQUAL with an explicit zero-argument fallback function on miss"
+        },
+        {
+          "name": "SEARCH",
+          "behavior": "return the first index at which one sequence occurs as a subsequence of another or the no-match result"
+        }
+      ],
+      "exact_name_residuals": [
+        "COPY"
+      ],
+      "current_disposition": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+      "source_evidence_refs": [
+        "D4-D6",
+        "#3934"
+      ],
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "L15-31",
+      "historical_family": "obarray-symbol-enumeration",
+      "historical_names": [
+        "MAPATOMS",
+        "OBARRAY"
+      ],
+      "primary_or_historical_source": "MacLisp Reference Manual, 17 Dec 1975, §5.4 pp. 2-53–2-54 (interning/multiple obarrays) and §9 mapping functions p. 2-95 (MAPATOMS); https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "original_research_classification": "NEW-SOURCE-GROUNDED-REVIEW-LEAD",
+      "source_behavior_summary": "MAPATOMS applies a callback to each symbol in a supplied/current obarray without requiring client code to know the hash-bucket representation. The manual describes multiple obarrays, identical print-names on distinct symbols in different obarrays, and uninterned symbols.",
+      "former_lower_domain_relation": "No exact MAPATOMS or OBLIST name found in current D1-D9. D10 already has INTERN and REMOB, but enumeration over the chosen intern table is not proven derivable merely by those operations.",
+      "law_hypothesis": "Enumerate symbols registered in one specified/current symbol table independently of that table's internal layout. Do not promise iteration order until the donor specifies it; do not include uninterned symbols merely because their print-name matches.",
+      "exact_d1_d9_name_matches": [],
+      "exact_selected_d10_name_matches": [],
+      "exact_name_residuals": [
+        "MAPATOMS",
+        "OBARRAY"
+      ],
+      "current_disposition": "HOLD-UNIVERSAL-CORE-BOUNDARY-AND-BEHAVIORAL-DEDUP",
+      "oracle_witnesses": [
+        "Positive A: intern a fresh symbol into table A; a table-A enumeration observes that same symbol exactly once.",
+        "Positive B: a symbol can be interned in distinct tables; a same-print-name but non-EQ symbol in table B is not silently conflated with the table-A symbol.",
+        "Falsifier: an uninterned symbol is emitted by table-A enumeration, or semantics depend on exposing the historical hash-bucket layout."
+      ],
+      "dedup_targets": [
+        "D10 INTERN",
+        "D10 REMOB",
+        "D10 COPYSYMBOL",
+        "D10 NEW-SYMBOL",
+        "D10 SYMBOL?",
+        "D10 READTABLE",
+        "D2 reader/control authority"
+      ],
+      "owner_review": "PENDING",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false
+    }
+  ]
+}
