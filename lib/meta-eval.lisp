@@ -641,7 +641,8 @@
        (00000001 ()))
       (t
        (00000111
-         ((00000011 (00101000 (00000101 clauses)) 2) (1) t)
+         ((00000011 (00101000 (00000101 clauses)) 2)
+          t)
          (t (my-cond-has-migration-clause? (00000110 clauses))))))))
 
 (00001001 my-eval-cond-result-mode
@@ -656,10 +657,9 @@
       (t
        (10011100 ((clause (00000101 clauses)))
          (00000111
-           ; Canonical three-part clauses compare actual data structurally.
-           ; EQUAL itself returns exact D1, so test it with a two-part predicate
-           ; clause rather than comparing that D1 to Number/list carriers.
-           ((00000011 (00101000 clause) 3) (1)
+           ; The length and EQUAL predicates return exact D1; use their
+           ; predicate bit directly rather than comparing it to legacy carriers.
+           ((00000011 (00101000 clause) 3)
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
                 ((my-result-fail? test-result) test-result)
@@ -670,7 +670,7 @@
                    (00000110 clauses) env-ref migration-compatibility?)))))
            ; Historical two-part clauses remain migration-only and preserve
            ; classic Lisp truthiness for their test expression.
-           ((00000011 (00101000 clause) 2) (1)
+           ((00000011 (00101000 clause) 2)
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
                 ((my-result-fail? test-result) test-result)
