@@ -26,6 +26,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+from sens_t5_codec import decode_bytes, encode_words, typed_sha256
+
 FIXTURES = (
     "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",
     "tests/fixtures/migration-multiform-cohort-main/two-forms.sens",
@@ -115,8 +118,12 @@ def main() -> None:
         if not physical.is_file():
             raise RuntimeError(f"fixture missing: {fixture}")
         payload = physical.read_bytes()
-        if not payload:
-            raise RuntimeError(f"fixture empty: {fixture}")
+        # A benchmark is not allowed to time malformed or noncanonical bytes.
+        # The independent Python codec checks T5 before either SENS binary runs.
+        words = decode_bytes(payload)
+        if encode_words(words) != payload:
+            raise RuntimeError(f"{fixture}: canonical T5 transport identity failed")
+        canonical_view = (" ".join(words) + "\n").encode("ascii")
 
         commands = {
             "sens-exec": [sens, str(physical)],
@@ -128,16 +135,19 @@ def main() -> None:
         baseline = {lane: invoke(cmd)[1] for lane, cmd in commands.items()}
         if baseline["sens-exec"] != baseline["sens-trit-eval"]:
             raise RuntimeError(f"{fixture}: two execution lanes disagree")
-        visible = baseline["sens-trit-open"].decode("ascii").strip()
-        if not visible or any(word and set(word) - {"0", "1"} for word in visible.split()):
-            raise RuntimeError(f"{fixture}: decoded view is not exact binary")
-        visible_bytes = len(visible.encode("ascii"))
+        if baseline["sens-trit-open"] != canonical_view:
+            raise RuntimeError(f"{fixture}: SENS open disagrees with independent T5 decoder")
+        visible_bytes = len(canonical_view) - 1  # Exclude canonical terminal LF
         dimensions = {
             "fixture": fixture,
             "physical_bytes": len(payload),
             "visible_binary_bytes": visible_bytes,
             "visible_to_physical_ratio": round(visible_bytes / len(payload), 5),
             "physical_sha256": sha256(payload),
+            "typed_word_sha256": typed_sha256(words),
+            "exact_word_count": len(words),
+            "semantic_payload_bits": sum(map(len, words)),
+            "independent_t5_roundtrip": "PASS",
             "execution_stdout_sha256": sha256(baseline["sens-exec"]),
             "visible_sha256": sha256(baseline["sens-trit-open"]),
             "mechanism_parity": "PASS",
