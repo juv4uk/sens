@@ -134,8 +134,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test -p sens --test core_fasl_freshness -- --nocapture
+          # Regenerate before checking freshness so a stale committed snapshot
+          # produces a recoverable artifact instead of stopping before build.
           cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo test -p sens --test core_fasl_freshness -- --nocapture
+          git diff --check
           git diff --exit-code -- lib/core4.lisp.fasl
           cargo build -p sens-cli --bin sens
           : > tests/semantic-authority-changes.lisp
@@ -163,6 +166,7 @@ jobs:
           ./target/debug/sens scripts/semantic-authority-guard-enforce.lisp
 
       - name: Upload regenerated active Core4 FASL for #3658
+        if: always()
         uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
