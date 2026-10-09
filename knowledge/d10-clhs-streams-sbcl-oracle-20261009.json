@@ -1,0 +1,42 @@
+{
+  "schema": "d10-clhs-streams-sbcl-donor-oracle/v1",
+  "date": "2026-10-09",
+  "status": "EXECUTED-DONOR-PARITY-WITNESSES-NO-SENS-PARITY",
+  "source_primary": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+  "source_program": "tests/oracles/d10-clhs-streams.sbcl",
+  "runner": "GitHub-hosted Ubuntu (apt SBCL)",
+  "observed_implementation": "SBCL 2.2.9.debian",
+  "github_workflow_run": "https://github.com/juv4uk/sens/actions/runs/37898108554",
+  "github_job": "https://github.com/juv4uk/sens/actions/runs/37898108554/job/113714045451",
+  "executed_commit_sha": "653f7696b02fb6ea51162c562355ff6518220e3b",
+  "steps_success": [
+    "Довести перепис Streams без підміни D10",
+    "Установити справжній CL-оракул SBCL",
+    "Перевірити донорські закони на реальному SBCL"
+  ],
+  "stdout_witnesses": [
+    {
+      "root": "DYNAMIC-SYNONYM-STREAM-TARGET",
+      "stdout": "PASS DYNAMIC-SYNONYM-STREAM-TARGET"
+    },
+    {
+      "root": "DRAIN-STRING-OUTPUT-STREAM",
+      "stdout": "PASS DRAIN-STRING-OUTPUT-STREAM"
+    },
+    {
+      "root": "ORDERED-CONCATENATED-INPUT",
+      "stdout": "PASS ORDERED-CONCATENATED-INPUT"
+    }
+  ],
+  "summary_stdout": "D10-CLHS-STREAMS-DONOR: PASS 3/3",
+  "not_proven": [
+    "behavioral uniqueness against D1–D9",
+    "behavioral uniqueness within D10",
+    "SENS runtime/T5 parity",
+    "irreducible core root",
+    "owner ratification"
+  ],
+  "new_selected": 0,
+  "ratified": 0,
+  "new_coordinates": 0
+}
