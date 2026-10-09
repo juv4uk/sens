@@ -1,0 +1,141 @@
+{
+  "schema": "d10-brzozowski-1964-symbolic-ai-source/v1",
+  "status": "HOLD-COMPLETENESS-ORACLE-AND-OWNER-CORE-REVIEW",
+  "date": "2026-10-09",
+  "baseline": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_blob": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "selected": 635,
+    "ratified": 0
+  },
+  "historical_sources": [
+    {
+      "year": 1964,
+      "authors": [
+        "Janusz A. Brzozowski"
+      ],
+      "title": "Derivatives of Regular Expressions",
+      "publisher": "Journal of the ACM 11(4):481–494",
+      "doi": "10.1145/321239.321249",
+      "url": "https://dl.acm.org/doi/10.1145/321239.321249",
+      "role": "HISTORICAL-PRIMARY-PUBLICATION"
+    },
+    {
+      "year": 2023,
+      "title": "Regular Languages, Axiomatically",
+      "author": "CMU 15-414 lecture notes",
+      "url": "https://www.cs.cmu.edu/~15414/s23/lectures/06-regexp.pdf",
+      "role": "DERIVATIVE-EQUATIONS-FOR-IMPLEMENTATION-EXPLANATION"
+    },
+    {
+      "title": "Brzozowski derivative",
+      "url": "https://www.funcp.org/wiki/brzozowski-derivative",
+      "role": "SECONDARY-HISTORICAL-AND-OPERATORS"
+    }
+  ],
+  "semantic": {
+    "stable_id": "d10.ai.brzozowski.regular-bit-language-derivative.20261009",
+    "semantic_name": "REGULAR-LANGUAGE-DERIVATIVE",
+    "surface_uk": "похідна-двійкової-мови",
+    "surface_ukr": "залишкова-мова-після-біта",
+    "source_class": "EARLY-SYMBOLIC-AI-REGEX-DERIVATIVE-1964",
+    "relation_class": "FINITE-AUTOMATA-REGULAR-LANGUAGE-LEFT-QUOTIENT",
+    "arity": "(regular_expression, D1_bit) -> regular_expression",
+    "behavior": "For a regular language L represented by a finite regex AST over alphabet {0,1} and a D1 input bit a, produce a regular expression denoting exactly D_a(L)={w in {0,1}* | a concatenated with w belongs to L}. Regex constructors: empty language ZERO, epsilon EPS, literal bit, union ALT, concatenation CAT, Kleene STAR. Syntactic AST equivalence not required: denoted languages must be identical. No implicit I/O, parsing control, actual SDR timing or regex-engine backtracking.",
+    "equality": "EXTENSIONAL-LANGUAGE-EQUALITY-NOT-RAW-TREE-EQUALITY",
+    "witnesses": [
+      {
+        "input": "D_0(CAT(0,1))",
+        "expected_language": "{1}",
+        "reason": "After reading first 0, only suffix 1 remains"
+      },
+      {
+        "input": "D_1(CAT(0,1))",
+        "expected_language": "empty",
+        "reason": "No word beginning with 1 matched original 01"
+      },
+      {
+        "input": "D_0(CAT(STAR(0),1))",
+        "expected_language": "{0^n 1 | n>=0}",
+        "reason": "Zero can be consumed by star"
+      },
+      {
+        "input": "D_1(CAT(STAR(0),1))",
+        "expected_language": "{epsilon}",
+        "reason": "Nullable star allows bit 1 to belong to right factor"
+      },
+      {
+        "input": "D_0(ALT(0,1))",
+        "expected_language": "{epsilon}",
+        "reason": "Union derivative keeps only branch matching 0"
+      },
+      {
+        "input": "D_0(EPS)",
+        "expected_language": "empty",
+        "reason": "EPS has no nonempty strings"
+      }
+    ],
+    "falsifiers": [
+      "Taking derivative of concatenation but omitting nullable(left) branch incorrectly rejects 1 in CAT(STAR(0),1).",
+      "Using character matching instead of residual language discards all possible suffixes.",
+      "Confusing AST tree identity with language equality rejects legitimate different derivative normal forms.",
+      "Declaring empty-language AST nullable makes D_a(CAT(ZERO,X)) accept any word."
+    ],
+    "equations": [
+      "D_a(ZERO)=ZERO; D_a(EPS)=ZERO; D_a(LIT(b))=EPS iff a=b else ZERO",
+      "D_a(ALT(r,s))=ALT(D_a(r),D_a(s))",
+      "D_a(CAT(r,s))=ALT(CAT(D_a(r),s), CAT(N(r),D_a(s))) where N(r)=EPS if nullable(r) else ZERO",
+      "D_a(STAR(r))=CAT(D_a(r),STAR(r))",
+      "nullable(ZERO)=0; nullable(EPS)=1; nullable(LIT(_))=0; nullable(ALT)=OR; nullable(CAT)=AND; nullable(STAR)=1"
+    ],
+    "known_neighbors": [
+      "D9 UNIFY",
+      "D10 MATCH-CONDITIONS",
+      "D10 finite-state-transducer proposal #4912",
+      "D10 symbolic AI #4970 Plotkin",
+      "D7 sound/phoneme programming",
+      "D8 parser/sequence operators"
+    ],
+    "non_equivalence_argument": "Existing MATCH-CONDITIONS implements predicate/rule matching against facts, not an operator returning the full residual regular language under one input bit. UNIFY produces substitutions for term equations, not a residual automaton language. Demonstrate via exact source and executable witnesses; owner still decides primitive-vs-library.",
+    "core_library_boundary": "The operator is composable using existing exact data constructors, booleans and folds; not a new control symbol (D2 only) and not proof a distinct 10-bit resident is necessary. Strong reusable library candidate, owner semantic review required before selection.",
+    "applications": [
+      "Symbolic AI: incremental rule/pattern constraint evaluation",
+      "Lisp SENS selfhost lexer and bitstream structural parser",
+      "Panini phoneme-sequence constraints",
+      "FPGA DFA hardware word recognition",
+      "SDR packet prefix validation",
+      "astronomical sequence and event grammar observations",
+      "musical beat/phoneme pattern recognition"
+    ],
+    "source_path": "knowledge/d10-brzozowski-1964-ai-donor-v1.json",
+    "proposal_status": "pending-owner-review",
+    "status": "HOLD-RESEARCH-NO-ADMISSION",
+    "coordinate": null,
+    "coordinate_basis": "UNPLACED",
+    "ratified_resident": false,
+    "physical_t5_authorized": false
+  },
+  "proof_plan": {
+    "real_reference_interpreter": "Chez Scheme R6RS",
+    "python_differential": "Independent finite regex direct membership evaluator vs recursive Brzozowski derivative",
+    "finite_bound": "binary words length 0..4; structural regex sample families and all one-bit prefixes",
+    "semantic_oracle_not_sens_runtime": true,
+    "algebraic_identity": "forall suffix s, s ∈ L(D_a(r)) iff a·s ∈ L(r)",
+    "owners": [
+      "#4013",
+      "#4463"
+    ],
+    "required_for_selection": [
+      "real green donor oracle",
+      "behavioral dedup / owner decision",
+      "one proposal TSV ledger record",
+      "SHA-linked append-only transition after current live main"
+    ]
+  },
+  "admission": {
+    "selected_added": 0,
+    "coordinate_added": 0,
+    "ratified_added": 0,
+    "actor": "source-only lane, no SENS executable code"
+  }
+}
