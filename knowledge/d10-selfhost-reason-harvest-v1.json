@@ -7,7 +7,7 @@
     {
       "repository": "juv4uk/sens",
       "path": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "definition_form": "00001001"
     },
     {
@@ -69,7 +69,7 @@
       "source_name": "my-error",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 27,
       "definition_form": "00001001",
       "relation_class": "STRUCTURED-ERROR",
@@ -87,7 +87,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:27",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -96,7 +96,7 @@
       "source_name": "env-lookup",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 265,
       "definition_form": "00001001",
       "relation_class": "LEXICAL-LOOKUP",
@@ -114,7 +114,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:265",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -123,7 +123,7 @@
       "source_name": "my-unresolved-name?",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 307,
       "definition_form": "00001001",
       "relation_class": "LEXICAL-LOOKUP",
@@ -141,7 +141,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:307",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -150,7 +150,7 @@
       "source_name": "my-lambda-form?",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 359,
       "definition_form": "00001001",
       "relation_class": "SOURCE-FORM",
@@ -168,7 +168,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:359",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -177,7 +177,7 @@
       "source_name": "my-lambda-def-form?",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 368,
       "definition_form": "00001001",
       "relation_class": "SOURCE-FORM",
@@ -195,7 +195,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:368",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -204,7 +204,7 @@
       "source_name": "my-compare-chain",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 405,
       "definition_form": "00001001",
       "relation_class": "COMPARISON-LAW",
@@ -222,7 +222,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:405",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -231,7 +231,7 @@
       "source_name": "my-fixed-param-count",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 441,
       "definition_form": "00001001",
       "relation_class": "PARAMETER-LAW",
@@ -249,7 +249,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:441",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -258,7 +258,7 @@
       "source_name": "my-rest-param?",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 448,
       "definition_form": "00001001",
       "relation_class": "PARAMETER-LAW",
@@ -276,7 +276,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:448",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -285,7 +285,7 @@
       "source_name": "bind-params",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 587,
       "definition_form": "00001001",
       "relation_class": "PARAMETER-LAW",
@@ -303,7 +303,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:587",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -312,7 +312,7 @@
       "source_name": "my-eval-list-result",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 599,
       "definition_form": "00001001",
       "relation_class": "RESULT-EVALUATION",
@@ -330,7 +330,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:599",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -339,7 +339,7 @@
       "source_name": "my-eval-body-result",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
       "source_line": 622,
       "definition_form": "00001001",
       "relation_class": "RESULT-EVALUATION",
@@ -357,7 +357,7 @@
         "#4162",
         "#4463",
         "lib/meta-eval.lisp:622",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -366,8 +366,8 @@
       "source_name": "my-params-bind-name?",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
-      "source_line": 1033,
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
+      "source_line": 1032,
       "definition_form": "00001001",
       "relation_class": "LEXICAL-SHADOWING",
       "behavior": "Check whether a formal parameter list binds a candidate name including dotted rest position",
@@ -383,8 +383,8 @@
         "#4013",
         "#4162",
         "#4463",
-        "lib/meta-eval.lisp:1033",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "lib/meta-eval.lisp:1032",
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -393,8 +393,8 @@
       "source_name": "my-form-references-name?",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
-      "source_line": 1055,
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
+      "source_line": 1054,
       "definition_form": "00001001",
       "relation_class": "LEXICAL-SHADOWING",
       "behavior": "Detect a reference to an identifier in a Lisp source form while excluding quoted data and nested lambda shadows",
@@ -410,8 +410,8 @@
         "#4013",
         "#4162",
         "#4463",
-        "lib/meta-eval.lisp:1055",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "lib/meta-eval.lisp:1054",
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -420,8 +420,8 @@
       "source_name": "my-select-defs-by-names",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
-      "source_line": 1180,
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
+      "source_line": 1179,
       "definition_form": "00001001",
       "relation_class": "DEFINITION-GRAPH",
       "behavior": "Retain a source-ordered subset of lambda definitions named by a finite group of identifiers",
@@ -437,8 +437,8 @@
         "#4013",
         "#4162",
         "#4463",
-        "lib/meta-eval.lisp:1180",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "lib/meta-eval.lisp:1179",
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -447,8 +447,8 @@
       "source_name": "my-remove-defs-by-names",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
-      "source_line": 1190,
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
+      "source_line": 1189,
       "definition_form": "00001001",
       "relation_class": "DEFINITION-GRAPH",
       "behavior": "Return remaining lambda-definition forms after excluding all forms whose defined name belongs to a chosen component",
@@ -464,8 +464,8 @@
         "#4013",
         "#4162",
         "#4463",
-        "lib/meta-eval.lisp:1190",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "lib/meta-eval.lisp:1189",
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -474,8 +474,8 @@
       "source_name": "my-group-closure-from-def",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
-      "source_line": 724,
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
+      "source_line": 723,
       "definition_form": "00001001",
       "relation_class": "CLOSURE-GROUP",
       "behavior": "Construct a finite group-recursive closure from one definition, member group and captured lexical environment",
@@ -491,8 +491,8 @@
         "#4013",
         "#4162",
         "#4463",
-        "lib/meta-eval.lisp:724",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "lib/meta-eval.lisp:723",
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
@@ -501,8 +501,8 @@
       "source_name": "my-build-group-env",
       "donor_repo": "juv4uk/sens",
       "source_file": "lib/meta-eval.lisp",
-      "source_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
-      "source_line": 752,
+      "source_sha": "2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7",
+      "source_line": 751,
       "definition_form": "00001001",
       "relation_class": "CLOSURE-GROUP",
       "behavior": "Reconstruct group member closure bindings around the captured environment at application time without relying on cyclic host references",
@@ -518,8 +518,8 @@
         "#4013",
         "#4162",
         "#4463",
-        "lib/meta-eval.lisp:752",
-        "blob:7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6"
+        "lib/meta-eval.lisp:751",
+        "blob:2cfb58b4c289bda4bfeadd2ba138304b4f0b2ac7"
       ]
     },
     {
