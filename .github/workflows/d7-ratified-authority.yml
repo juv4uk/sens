@@ -1,37 +1,10 @@
 name: D7 ratified authority and W7 transport
 
 on:
-  pull_request:
-    paths:
-      - "knowledge/d7-ratified.json"
-      - "knowledge/d7-v2-evidence-ledger.json"
-      - "contracts/d7-ratification.lisp"
-      - "lib/domains/d7.lisp"
-      - "language-contract.lisp"
-      - "CURRENT.md"
-      - "scripts/check-d7-current-authority.py"
-      - "scripts/domain_tables.py"
-      - "benchmarks/d7-ratification-conformance/**"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/tests/d7_w7_pack.rs"
-      - "crates/sens/tests/text7_contextual_binding.rs"
-      - ".github/workflows/d7-ratified-authority.yml"
   push:
     branches: [main]
-    paths:
-      - "knowledge/d7-ratified.json"
-      - "knowledge/d7-v2-evidence-ledger.json"
-      - "contracts/d7-ratification.lisp"
-      - "lib/domains/d7.lisp"
-      - "language-contract.lisp"
-      - "CURRENT.md"
-      - "scripts/check-d7-current-authority.py"
-      - "scripts/domain_tables.py"
-      - "benchmarks/d7-ratification-conformance/**"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/tests/d7_w7_pack.rs"
-      - "crates/sens/tests/text7_contextual_binding.rs"
-      - ".github/workflows/d7-ratified-authority.yml"
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -46,6 +19,12 @@ jobs:
         run: python3 scripts/check-d7-current-authority.py
       - name: Check D7 Sound/Text versus LocalOrdinal and arithmetic boundary
         run: python3 benchmarks/d7-ratification-conformance/validate.py
+      - name: Admit only owner-ratified D7 projection and distinguish W7 roles
+        run: |
+          python3 scripts/d7_source_projection.py --check
+          python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
       - uses: dtolnay/rust-toolchain@stable
       - name: Prove mechanical dense W7 and contextual D2/Text7 identities
         run: cargo test --locked -p sens --test d7_w7_pack --test text7_contextual_binding
+      - name: Confirm D7 coordinates remain only width-qualified Rust carriers
+        run: cargo test --locked -p sens --lib domain_ladder::tests::every_d7_source_word_has_a_width_preserving_coordinate -- --exact
