@@ -1,0 +1,315 @@
+{
+  "schema": "sens-migration-nonprogram-manifest/1",
+  "generated_from_main": "bc1f50374196139f3f59555030cb42838c101fa5",
+  "issue": 4458,
+  "classification": "benchmark-recording-nonprogram",
+  "reason": "historical sens-surface benchmark program recordings; print hit is measurement/evidence output, not release executable source",
+  "automatic_sens_companion": false,
+  "evidence": {
+    "path_prefix": "benchmarks/sens-surface/results/**/programs/*.lisp",
+    "source_inventory": "crates/sens/tests/data/english-names-baseline.tsv",
+    "match_field": "print"
+  },
+  "entries": [
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-en.lisp",
+      "git_blob_sha1": "8ea0bcc6ab237d34a0a28a70b548f61c07bfa52d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-sens.lisp",
+      "git_blob_sha1": "ce01642d52cbfb5f8a468e4cbe8cf50aacf6ed6d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-uk.lisp",
+      "git_blob_sha1": "ba86098cd2734be6ca6c434a76a9f9c9ba4c1b97"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-wrap.lisp",
+      "git_blob_sha1": "fb71e00d84e30bb169e7a636bc31b5482348061b"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-en.lisp",
+      "git_blob_sha1": "10f0bd9df07c2b7564bfdb5ef57c243133f8796a"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-sens.lisp",
+      "git_blob_sha1": "cdb21e95ecdc1f6c9e43283226f3a2598f519e4c"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-uk.lisp",
+      "git_blob_sha1": "83b630eef0563aebc3b3ddbee9951e84261b9c98"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/fib-wrap.lisp",
+      "git_blob_sha1": "80feb5796c8e42fcd8bfd1a008bec4f6898f903a"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-en.lisp",
+      "git_blob_sha1": "d5153e93eee64747947077eb69fcf2578d6d485f"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-sens.lisp",
+      "git_blob_sha1": "bfa7f6d1261a3caac98b9267bcdc73d93db3270f"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-uk.lisp",
+      "git_blob_sha1": "e81591ac389e907ad551d22c23cc88439ee087f9"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/lists-wrap.lisp",
+      "git_blob_sha1": "bfb046572a6d55502df37545106ed524c930271a"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-en.lisp",
+      "git_blob_sha1": "d4fcdeada6bff739e85f6b6d97202b2f6cd11789"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-sens.lisp",
+      "git_blob_sha1": "cf200b6cb3cfb97a4e47a03780c2987c9dfa02d7"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-uk.lisp",
+      "git_blob_sha1": "cf4377d51c436463db3e5833c0f98675191475fe"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/loop-wrap.lisp",
+      "git_blob_sha1": "6f3bade2add64259f4484a9f8b494c39c0e89837"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-en.lisp",
+      "git_blob_sha1": "c2f1a7ef2a76ebbb670459fa98bbc5aec7323fe6"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-sens.lisp",
+      "git_blob_sha1": "0118fcf03ceec2749eea367cac0bdbc1864df31d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-uk.lisp",
+      "git_blob_sha1": "a530cf596819cf2b32bbb62ff3f63fdb89eed7e1"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/member-wrap.lisp",
+      "git_blob_sha1": "633a443e244672052958dbd988d5573e1e8e8371"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/closures-en.lisp",
+      "git_blob_sha1": "8ea0bcc6ab237d34a0a28a70b548f61c07bfa52d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/closures-sens.lisp",
+      "git_blob_sha1": "ce01642d52cbfb5f8a468e4cbe8cf50aacf6ed6d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/fib-en.lisp",
+      "git_blob_sha1": "10f0bd9df07c2b7564bfdb5ef57c243133f8796a"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/fib-sens.lisp",
+      "git_blob_sha1": "cdb21e95ecdc1f6c9e43283226f3a2598f519e4c"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/lists-en.lisp",
+      "git_blob_sha1": "d5153e93eee64747947077eb69fcf2578d6d485f"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/lists-sens.lisp",
+      "git_blob_sha1": "bfa7f6d1261a3caac98b9267bcdc73d93db3270f"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/loop-en.lisp",
+      "git_blob_sha1": "d4fcdeada6bff739e85f6b6d97202b2f6cd11789"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/loop-sens.lisp",
+      "git_blob_sha1": "cf200b6cb3cfb97a4e47a03780c2987c9dfa02d7"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/member-en.lisp",
+      "git_blob_sha1": "c2f1a7ef2a76ebbb670459fa98bbc5aec7323fe6"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/member-sens.lisp",
+      "git_blob_sha1": "0118fcf03ceec2749eea367cac0bdbc1864df31d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/ackermann-en.lisp",
+      "git_blob_sha1": "c0845e68f5e2bce5d94dedb1b3250c5128cecd81"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/ackermann-sens.lisp",
+      "git_blob_sha1": "2ef283cdfc8fe017032066289a5ca7868f39759e"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/assoc-en.lisp",
+      "git_blob_sha1": "0a25fc9f51fbff45a6a20f08201ad08d1ae30979"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/assoc-sens.lisp",
+      "git_blob_sha1": "ba8a6b629e95a931383cfbdfe4737396a5cf84b6"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/closures-en.lisp",
+      "git_blob_sha1": "8ea0bcc6ab237d34a0a28a70b548f61c07bfa52d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/closures-sens.lisp",
+      "git_blob_sha1": "ce01642d52cbfb5f8a468e4cbe8cf50aacf6ed6d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/evenodd-en.lisp",
+      "git_blob_sha1": "e1b8e2cb04135085e2a60956eb6ba8ec3823653d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/evenodd-sens.lisp",
+      "git_blob_sha1": "6bf4911f6de6f34849396011696f1545275196c0"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/fib-en.lisp",
+      "git_blob_sha1": "10f0bd9df07c2b7564bfdb5ef57c243133f8796a"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/fib-sens.lisp",
+      "git_blob_sha1": "cdb21e95ecdc1f6c9e43283226f3a2598f519e4c"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/flatten-en.lisp",
+      "git_blob_sha1": "b1e54977c0a2954a5ba0b98d7f5e4a885caf585a"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/flatten-sens.lisp",
+      "git_blob_sha1": "f1006532832918137e38133cc4a8bad46fb8a312"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/lists-en.lisp",
+      "git_blob_sha1": "22cbff3c061831e9bfd0abcb1ad121cd14ac673e"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/lists-sens.lisp",
+      "git_blob_sha1": "946b983c2af309fd8349274a127713216d2452c0"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/loop-en.lisp",
+      "git_blob_sha1": "d4fcdeada6bff739e85f6b6d97202b2f6cd11789"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/loop-sens.lisp",
+      "git_blob_sha1": "cf200b6cb3cfb97a4e47a03780c2987c9dfa02d7"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/mapfold-en.lisp",
+      "git_blob_sha1": "ef4353ea052fa8388b7304c12a2f9f4e9eac7b46"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/mapfold-sens.lisp",
+      "git_blob_sha1": "cfcb8ea29d0c72f6be26b9c842aa833e12d67e88"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/member-en.lisp",
+      "git_blob_sha1": "c2f1a7ef2a76ebbb670459fa98bbc5aec7323fe6"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/member-sens.lisp",
+      "git_blob_sha1": "0118fcf03ceec2749eea367cac0bdbc1864df31d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/tree-en.lisp",
+      "git_blob_sha1": "4c0fbada997cfbb0632a9f7a57e31518e0830083"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/tree-sens.lisp",
+      "git_blob_sha1": "2d8f04b937a311af3fbcd5d561e1b71337949318"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/ackermann-en.lisp",
+      "git_blob_sha1": "a68301c58c6e7b0fb4d52c4e227b7b5fc2e07544"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/ackermann-sens.lisp",
+      "git_blob_sha1": "c09a6fb6b58d65c4c3bbfae460ca0ff17394d760"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/assoc-en.lisp",
+      "git_blob_sha1": "df96af5c92665750415a7c921f55edf88a42c692"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/assoc-sens.lisp",
+      "git_blob_sha1": "323dc35d82cd365f233e576c0480391fe471b9c1"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/closures-en.lisp",
+      "git_blob_sha1": "7f0168c8bdae8a419da3a9573fd05107c48b64c0"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/closures-sens.lisp",
+      "git_blob_sha1": "d56a1db853e12f44577552b135a7aefdf2e7c532"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/empty-en.lisp",
+      "git_blob_sha1": "6e30e07f9a44391fb341f5e0ff21ba1e682b5d0f"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/evenodd-en.lisp",
+      "git_blob_sha1": "555e133c44a4003bc559d7d943bd2604804cc39f"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/evenodd-sens.lisp",
+      "git_blob_sha1": "887c3e2fafaf9bca7aca9074fde7fc0686be1692"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/fib-en.lisp",
+      "git_blob_sha1": "7c218fbb135edea2ce6c94037ce0aa67add219b6"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/fib-sens.lisp",
+      "git_blob_sha1": "2919f67d8f6c8bcbaf7fc07f994c9a710f3a8bc5"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/flatten-en.lisp",
+      "git_blob_sha1": "cb3f93a0cd6bd8feaae7d1edefe5b08d17663433"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/flatten-sens.lisp",
+      "git_blob_sha1": "97df9f5f2f92ddcfa047ab0b21bcfe27677f3f0d"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/lists-en.lisp",
+      "git_blob_sha1": "b8a217a939a66a2d3006202273c4e96466303661"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/lists-sens.lisp",
+      "git_blob_sha1": "df9482ea3db946b3ba9ae13a7ae702d9f31cf9bb"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/loop-en.lisp",
+      "git_blob_sha1": "31e21619c98ff5b9a5b6f491a40e5f07227aa73a"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/loop-sens.lisp",
+      "git_blob_sha1": "0d9ad6a1b196b5fc5d6c5c71927a7b2161197dcd"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/mapfold-en.lisp",
+      "git_blob_sha1": "30154ac8621d3ef1099ec7fa819aba04d5e4ae25"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/mapfold-sens.lisp",
+      "git_blob_sha1": "58652ae74fc5c4228e681646e301adb76298d5a4"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/member-en.lisp",
+      "git_blob_sha1": "2e38ae2e42e892d6fa1e2d160eef4217f10bb182"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/member-sens.lisp",
+      "git_blob_sha1": "430096a210456c32e2a5e39af8c67d073091fc6e"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/tree-en.lisp",
+      "git_blob_sha1": "dc0c152f79106c45730453519018772189d5db2e"
+    },
+    {
+      "path": "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/tree-sens.lisp",
+      "git_blob_sha1": "d2564b1c13eaa9089a0346faa22ac718e93c260e"
+    }
+  ]
+}
