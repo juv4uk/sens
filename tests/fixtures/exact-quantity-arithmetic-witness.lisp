@@ -124,27 +124,32 @@
 (00001001 exact-quantity-arithmetic-check
   (00001000 (rows)
     (00000111
-      ((00000010 rows) ()
-       (00000001 (exact-quantity-arithmetic-witness (status pass))))
-      ((00000010 rows) (1)
-       (00100111
-         (00000001 exact-quantity-arithmetic-witness)
-         (00100111 (00000001 status) (00000001 fail))
-         (00100111 (00000001 case) (00000001 malformed-row-tail))
-         (00100111 (00000001 actual) rows)))
-      ((00000010 rows) (0)
+      ; ATOM is an exact D1 answer for either () or an atom. Only in that
+      ; already-proved atom branch may exact EQ distinguish empty from malformed.
+      ((00000010 rows)
+       (00000111
+         ((00000011 rows (00000001 ()))
+          (00000001 (exact-quantity-arithmetic-witness (status pass))))
+         ((00000010 (00000001 ()))
+          (00100111
+            (00000001 exact-quantity-arithmetic-witness)
+            (00100111 (00000001 status) (00000001 fail))
+            (00100111 (00000001 case) (00000001 malformed-row-tail))
+            (00100111 (00000001 actual) rows)))))
+      ; Non-ATOM is the pair branch: use explicit D1:1, never structural ()
+      ; or legacy three-part COND control.
+      ((00000010 (00000001 ()))
        (10011100 ((row (00000101 rows)))
          (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
+           ((00100010 (00101111 row) (00110000 row))
             (exact-quantity-arithmetic-check (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
+           ((00000010 (00000001 ()))
             (00100111
               (00000001 exact-quantity-arithmetic-witness)
               (00100111 (00000001 status) (00000001 fail))
               (00100111 (00000001 case) (00000101 row))
               (00100111 (00000001 actual) (00101111 row))
               (00100111 (00000001 expected) (00110000 row))))))))))
-
 (00001001 exact-quantity-arithmetic-witness
   (00001000 ()
     (exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))))
