@@ -116,6 +116,9 @@ fn executable_canon_speaks_layered_answer_semantics() {
                     ("assoc/simple", "(00101101 (00000001 b) (00000001 ((a . 1) (b . 2))))".to_string()),
                     ("assoc/witness", format!("(00101101 (00000001 expected) (quote {}))", row.source)),
                     ("witness-field/expected", format!("(witness-field (00000001 expected) (quote {}))", row.source)),
+                    ("witness-field/error", format!("(witness-field (00000001 error) (quote {}))", row.source)),
+                    ("witness-superseded/outcome", format!("(witness-superseded-outcome (quote {}) (witness-field (00000001 expected) (quote {})))", row.source, row.source)),
+                    ("witness-expected/outcome", format!("(witness-expected-outcome (quote {}))", row.source)),
                 ] {
                     eprintln!(
                         "#229 probe {label}: {:?}",
@@ -128,6 +131,23 @@ fn executable_canon_speaks_layered_answer_semantics() {
             })
             .value
             .to_string();
+        if status != "pass" && row.expr == "canon-empty-list" {
+            for (label, probe) in [
+                ("expected-outcome/final", format!("(witness-expected-outcome (quote {}))", row.source)),
+                ("expected-field/final", format!("(witness-field (00000001 expected) (quote {}))", row.source)),
+                ("expected-present/final", format!("(witness-field-present? (00000001 expected) (quote {}))", row.source)),
+                ("error-present/final", format!("(witness-field-present? (00000001 error) (quote {}))", row.source)),
+                ("superseded/final", format!("(witness-superseded-outcome (quote {}) (witness-field (00000001 expected) (quote {})))", row.source, row.source)),
+                ("verdict/final", format!("(witness-verdict (quote {}) (quote {}))", row.source, actual)),
+            ] {
+                eprintln!(
+                    "#229 final probe {label}: {:?}",
+                    eval_program(&probe, &mut session)
+                        .map(|value| format!("value={:?}, display={}", value.value, value.value))
+                        .map_err(|e| format!("{:?}: {}", e.kind, e))
+                );
+            }
+        }
         assert_eq!(
             status, "pass",
             "#229 Lisp-owned Canon witness rejected {} (actual={actual})",
