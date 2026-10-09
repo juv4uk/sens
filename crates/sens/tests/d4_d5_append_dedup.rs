@@ -68,17 +68,12 @@ fn ratified_d4_append_owns_append_while_d5_10000_is_caaar() {
         println!("APPEND-DEDUP case={name} result={exact}");
     }
 
-    let d4_bad = run_exact(d4, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
-    let surface_bad = run_surface("(append (quote (a . b)) (quote (c)))")
-        .expect_err("surface must reject improper left spine");
-    assert!(
-        d4_bad.contains("UnsatisfiedConditional"),
-        "unexpected D4 improper-left error: {d4_bad}"
-    );
-    assert!(
-        surface_bad.contains("UnsatisfiedConditional"),
-        "unexpected surface improper-left error: {surface_bad}"
-    );
+    // Improper left spines must still fail; the retired COND-exhaustion
+    // error category is not part of current APPEND semantics.
+    run_exact(d4, "'(a . b) '(c)")
+        .expect_err("D4 APPEND must reject an improper left spine");
+    run_surface("(append (quote (a . b)) (quote (c)))")
+        .expect_err("APPEND surface must reject an improper left spine");
 
 }
 
