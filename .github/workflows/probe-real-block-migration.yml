@@ -1,0 +1,76 @@
+name: probe real block canonical migration
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block.lisp"
+      - "lib/machine/block.sens"
+      - "scripts/migrate.py"
+      - "scripts/migrate-t5-batch.py"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+      - ".github/workflows/probe-real-block-migration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build current Rust D2 reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Canonical front-door preview of the real source
+        run: |
+          set +e
+          python3 scripts/migrate.py preview \
+            lib/machine/block.lisp \
+            --mirror "$RUNNER_TEMP/block-preview" \
+            --report "$RUNNER_TEMP/block-preview.json"
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/block-preview.json"
+          echo "PREVIEW_RC=$rc"
+          exit "$rc"
+      - name: Canonical batch physical write after successful preview
+        if: success()
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate-t5-batch.py \
+            lib/machine/block.lisp \
+            --root . \
+            --out "$RUNNER_TEMP/block-written" \
+            --report "$RUNNER_TEMP/block-written.json" \
+            --write
+          target="$RUNNER_TEMP/block-written/lib/machine/block.sens"
+          test -f "$target"
+          target/debug/sens-trit open "$target"
+          cp "$target" "$RUNNER_TEMP/block-candidate.sens"
+          python3 - "$target" <<'PY'
+          from pathlib import Path
+          import hashlib
+          import sys
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import decode_bytes, typed_sha256
+          p=Path(sys.argv[1])
+          payload=p.read_bytes()
+          words=decode_bytes(payload)
+          print("PHYSICAL_BYTES", len(payload))
+          print("PHYSICAL_SHA256", hashlib.sha256(payload).hexdigest())
+          print("TYPED_WORD_SHA256", typed_sha256(words))
+          print("WORD_COUNT", len(words))
+          PY
+      - name: Upload canonical report and candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-block-canonical-probe
+          path: |
+            \${{ runner.temp }}/block-preview.json
+            \${{ runner.temp }}/block-written.json
+            \${{ runner.temp }}/block-candidate.sens
+          if-no-files-found: warn
