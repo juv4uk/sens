@@ -57,9 +57,9 @@
       "falsifier": "Any implementation that collapses same-name restart objects, drops the anonymous restart, reverses nested restart order, includes a restart associated only with another condition, or invokes a restart while merely listing it.",
       "behavioral_dedup": {
         "D1-D9": "Current foundation exact-name audit: no COMPUTE-RESTARTS name collision. Existing condition signaling and D2 control laws are not treated as a duplicate; the list-valued observation and ordering still require an explicit owner check.",
-        "D10": "Live 636-row main inventory has FIND-RESTART but not COMPUTE-RESTARTS. FIND-RESTART returns one restart by name or object and cannot yield the full ordered list of active restart objects with anonymous and same-name distinct entries. This is a result-shape and observable-order distinction, not automatic Core admission."
+        "D10": "No exact-name match exists in the live 636-row selected inventory. FIND-RESTART is the direct behavioral comparator (also recorded as a pending research lead in the existing #4800 restart dossier): it returns one restart by name or restart object, while COMPUTE-RESTARTS returns the full ordered active list with anonymous and duplicate-name objects. This result-shape distinction is evidence for review, not automatic Core admission."
       },
-      "owner_gate": "PENDING: the list-valued observation appears distinct from FIND-RESTART lookup, but available restarts depend on the D2 dynamic-control context. Owner must decide Core observation vs D2/library boundary.",
+      "owner_gate": "PENDING: no exact-name overlap is present in D10, but the observable list depends on D2 dynamic-control context. Owner must decide Core observation vs D2/library boundary; compare FIND-RESTART behavior and the existing #4800 proposal before selecting.",
       "donor_revision": "ANSI Common Lisp HyperSpec (X3.226-1994), §9.2 Dictionary entry COMPUTE-RESTARTS; exact direct CLHS entry URL is pinned above."
     },
     {
