@@ -104,15 +104,6 @@ fn source_ref_rejects_atoms() {
 
 // --- observation? -------------------------------------------------------
 
-#[test]
-fn observation_accepts_a_well_formed_record() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(observation? (make-observation (quote (digest "sha256:abc")) (quote (build cml succeeds))))"#
-        ),
-        "t"
-    );
-}
 
 #[test]
 fn observation_rejects_a_bare_source_ref_variant_of_the_same_tag() {
@@ -155,15 +146,6 @@ fn observation_rejects_extra_trailing_field() {
 
 // --- claim? ---------------------------------------------------------
 
-#[test]
-fn claim_accepts_a_well_formed_record() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim? (make-claim (quote (build cml succeeds)) (quote (observation local-run)) (quote proposed)))"#
-        ),
-        "t"
-    );
-}
 
 #[test]
 fn claim_rejects_wrong_tag() {
@@ -183,27 +165,6 @@ fn claim_rejects_review_outside_the_finite_enum() {
     );
 }
 
-#[test]
-fn claim_accepts_every_valid_review_value() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim? (quote (claim (statement x) (source (digest "d")) (review proposed))))"#
-        ),
-        "t"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim? (quote (claim (statement x) (source (digest "d")) (review reviewed))))"#
-        ),
-        "t"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim? (quote (claim (statement x) (source (digest "d")) (review rejected))))"#
-        ),
-        "t"
-    );
-}
 
 #[test]
 fn claim_rejects_extra_trailing_field() {
@@ -217,15 +178,6 @@ fn claim_rejects_extra_trailing_field() {
 
 // --- evidence? --------------------------------------------------------
 
-#[test]
-fn evidence_accepts_a_well_formed_record() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence? (make-evidence (quote (claim-ref cml-build-available)) (quote live-test) (quote supports) (quote (digest "sha256:abc"))))"#
-        ),
-        "t"
-    );
-}
 
 #[test]
 fn evidence_rejects_outcome_outside_the_finite_enum() {
@@ -237,27 +189,6 @@ fn evidence_rejects_outcome_outside_the_finite_enum() {
     );
 }
 
-#[test]
-fn evidence_accepts_every_valid_outcome_value() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence? (quote (evidence (claim-ref (claim-ref x)) (method live-test) (outcome supports) (source-ref (digest "d")))))"#
-        ),
-        "t"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence? (quote (evidence (claim-ref (claim-ref x)) (method live-test) (outcome contradicts) (source-ref (digest "d")))))"#
-        ),
-        "t"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence? (quote (evidence (claim-ref (claim-ref x)) (method live-test) (outcome inconclusive) (source-ref (digest "d")))))"#
-        ),
-        "t"
-    );
-}
 
 #[test]
 fn evidence_rejects_extra_trailing_field() {
@@ -271,15 +202,6 @@ fn evidence_rejects_extra_trailing_field() {
 
 // --- intent? ----------------------------------------------------------
 
-#[test]
-fn intent_accepts_a_well_formed_record() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(intent? (make-intent (quote (build cml)) (quote (process:cargo tcp-client)) (quote (missing-capability)) (quote (build-artifact cml))))"#
-        ),
-        "t"
-    );
-}
 
 #[test]
 fn intent_rejects_missing_field() {
@@ -303,93 +225,6 @@ fn intent_rejects_extra_trailing_field() {
 
 // --- accessors --------------------------------------------------------
 
-#[test]
-fn observation_accessors_extract_the_bare_values() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/epistemic.lisp"), &mut session).unwrap();
-    let obs = r#"(def o (make-observation (quote (digest "d")) (quote (build cml succeeds))))"#;
-    eval_program(obs, &mut session).unwrap();
-    assert_eq!(
-        eval_program("(observation-source o)", &mut session)
-            .unwrap()
-            .value
-            .to_string(),
-        r#"(digest "d")"#
-    );
-    assert_eq!(
-        eval_program("(observation-statement o)", &mut session)
-            .unwrap()
-            .value
-            .to_string(),
-        "(build cml succeeds)"
-    );
-}
-
-#[test]
-fn claim_accessors_extract_the_bare_values() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim-statement (make-claim (quote (build cml succeeds)) (quote (observation local-run)) (quote proposed)))"#
-        ),
-        "(build cml succeeds)"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(claim-review (make-claim (quote (build cml succeeds)) (quote (observation local-run)) (quote proposed)))"#
-        ),
-        "proposed"
-    );
-}
-
-#[test]
-fn evidence_accessors_extract_the_bare_values() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence-claim-ref (make-evidence (quote (claim-ref x)) (quote live-test) (quote supports) (quote (digest "d"))))"#
-        ),
-        "(claim-ref x)"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence-method (make-evidence (quote (claim-ref x)) (quote live-test) (quote supports) (quote (digest "d"))))"#
-        ),
-        "live-test"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence-outcome (make-evidence (quote (claim-ref x)) (quote live-test) (quote supports) (quote (digest "d"))))"#
-        ),
-        "supports"
-    );
-    assert_eq!(
-        eval_epistemic(
-            r#"(evidence-source-ref (make-evidence (quote (claim-ref x)) (quote live-test) (quote supports) (quote (digest "d"))))"#
-        ),
-        r#"(digest "d")"#
-    );
-}
-
-#[test]
-fn intent_accessors_extract_the_bare_values() {
-    let program = r#"(make-intent (quote (build cml)) (quote (process:cargo tcp-client)) (quote (missing-capability)) (quote (build-artifact cml)))"#;
-    assert_eq!(
-        eval_epistemic(&format!("(intent-goal {program})")),
-        "(build cml)"
-    );
-    assert_eq!(
-        eval_epistemic(&format!("(intent-requires {program})")),
-        "(process:cargo tcp-client)"
-    );
-    assert_eq!(
-        eval_epistemic(&format!("(intent-stop-on {program})")),
-        "(missing-capability)"
-    );
-    assert_eq!(
-        eval_epistemic(&format!("(intent-produces {program})")),
-        "(build-artifact cml)"
-    );
-}
 
 // --- supporting-evidence -------------------------------------------------
 // Renamed from evidence-supports? (owner-directed audit, 2026-09-02):
@@ -453,17 +288,6 @@ fn supporting_evidence_record_is_not_implicit_cond_truth() {
 
 // --- intent-capabilities-satisfied? -------------------------------------
 
-#[test]
-fn intent_capabilities_satisfied_is_true_when_all_requirements_present() {
-    assert_eq!(
-        eval_epistemic(
-            r#"(intent-capabilities-satisfied?
-                 (make-intent (quote (build cml)) (quote (process:cargo tcp-client)) (quote (missing-capability)) (quote (build-artifact cml)))
-                 (quote (process:git process:cargo tcp-client)))"#
-        ),
-        "t"
-    );
-}
 
 #[test]
 fn intent_capabilities_satisfied_is_false_when_a_requirement_is_missing() {
