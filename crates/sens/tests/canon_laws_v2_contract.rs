@@ -108,3 +108,27 @@ fn executable_canon_speaks_layered_answer_semantics() {
         );
     }
 }
+
+
+#[test]
+fn temporary_cdr_proper_diagnostics() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core");
+    let canon = fs::read_to_string(repo_file("lib/canon.lisp")).unwrap();
+    eval_program(&canon, &mut session).expect("canon");
+    for (tag, query) in [
+        ("car-cdr", "(00000101 (00000110 (00000001 (1 2 3))))"),
+        ("first-eq", "(00000011 (00000101 (00000110 (00000001 (1 2 3)))) 2)"),
+        ("car-cdr-cdr", "(00000101 (00000110 (00000110 (00000001 (1 2 3)))))"),
+        ("second-eq", "(00000011 (00000101 (00000110 (00000110 (00000001 (1 2 3))))) 3)"),
+        ("three-cdr", "(00000110 (00000110 (00000110 (00000001 (1 2 3)))))"),
+        ("three-cdr-atom", "(00000010 (00000110 (00000110 (00000110 (00000001 (1 2 3))))))"),
+        ("law", "(canon-law-cdr-proper)")
+    ] {
+        let val = eval_program(query, &mut session);
+        eprintln!("CANON_DIAG {tag} => {}", match val {
+            Ok(x) => format!("{}", x.value),
+            Err(e) => format!("ERR {e}"),
+        });
+    }
+}
