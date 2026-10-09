@@ -6,9 +6,12 @@ on:
       - AGENTS.md
       - docs/architecture/ARCHIPELAGO-V1.uk.md
       - docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md
+      - docs/architecture/D10-GUARD-GROWTH-DOCTRINE.uk.md
       - knowledge/d10-proposal-ledger.tsv
       - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-selection-transition-history.json
       - scripts/check-d10-proposal-ledger.py
+      - scripts/check_d10_proposal_growth_gate.py
       - .github/workflows/d10-proposal-intake.yml
   push:
     branches:
@@ -16,8 +19,9 @@ on:
     paths:
       - knowledge/d10-proposal-ledger.tsv
       - knowledge/d10-v1-semantic-inventory.json
-      - docs/architecture/ARCHIPELAGO-V1.uk.md
+      - knowledge/d10-selection-transition-history.json
       - scripts/check-d10-proposal-ledger.py
+      - scripts/check_d10_proposal_growth_gate.py
       - .github/workflows/d10-proposal-intake.yml
 
 permissions:
@@ -26,8 +30,26 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Перевірити D10 intake та негативні контролі
+        with:
+          fetch-depth: 0
+      - name: Перевірити синтаксис журналу і негативні контролі
         run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - name: Перевірити proof-preserving історію доповнень
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Негативні тести зв'язку D10 selection з ledger
+        run: python3 scripts/check_d10_proposal_growth_gate.py --self-test
+      - name: Зіставити PR із фактичним main-base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: python3 scripts/check_d10_proposal_growth_gate.py --base "$BASE_SHA" --head "$HEAD_SHA"
+      - name: Зіставити push до main з попереднім станом
+        if: github.event_name == 'push'
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: python3 scripts/check_d10_proposal_growth_gate.py --base "$BASE_SHA" --head "$HEAD_SHA"
