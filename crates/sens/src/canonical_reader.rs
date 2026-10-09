@@ -414,7 +414,7 @@ mod tests {
     }
 
     #[test]
-        fn canonical_open_quote_close_builds_list_without_legacy_identity() {
+    fn canonical_open_quote_close_builds_list_without_legacy_identity() {
         let expression = only("10 001 01");
         let ExprKind::List(items) = expression.kind else {
             panic!("expected list");
