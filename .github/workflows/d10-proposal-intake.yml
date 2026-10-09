@@ -8,6 +8,9 @@ on:
       - docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md
       - knowledge/d10-proposal-ledger.tsv
       - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-selection-transition-history.json
+      - knowledge/d10-growth-baseline-v1.json
+      - tests/test_d10_proposal_ledger_growth.py
       - scripts/check-d10-proposal-ledger.py
       - .github/workflows/d10-proposal-intake.yml
   push:
@@ -16,8 +19,11 @@ on:
     paths:
       - knowledge/d10-proposal-ledger.tsv
       - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-selection-transition-history.json
+      - knowledge/d10-growth-baseline-v1.json
       - docs/architecture/ARCHIPELAGO-V1.uk.md
       - scripts/check-d10-proposal-ledger.py
+      - tests/test_d10_proposal_ledger_growth.py
       - .github/workflows/d10-proposal-intake.yml
 
 permissions:
@@ -31,3 +37,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Перевірити D10 intake та негативні контролі
         run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - name: Перевірити контракти зростання й 10 негативних випадків
+        run: python3 -m unittest discover -s tests -p test_d10_proposal_ledger_growth.py -v
