@@ -121,6 +121,16 @@ premise three repos downstream with no traceable evidence chain.
    to `knowledge/agent-discoveries.lisp` and/or issue #1599. Read the
    board before claiming work. Handoff points to evidence, not opinion.
 
+19. **Кожна fail-closed гвардія має мати перевірюваний шлях append-only зростання.**
+    Відмова без задокументованого evidence-bearing переходу не повинна
+    перетворювати історичний snapshot на вічну заборону зростання.
+    Новий запис допускається лише як append-only запис із provenance,
+    семантичним дедупом, позитивним свідком і негативними тестами проти
+    переписування попередніх законів. Для D10 CI звіряє леджер із trusted
+    base: історичні байти не переписуються, кожний новий selected отримує
+    рядок із точним законом, поверхнями, \`pending-review\` та \`ratified=0\`.
+    Якщо шлях зростання не визначено — зберегти BLOCK, не вимикати гвардію.
+
 ## Rule 0 for coordination specifically
 
 **Verify the swarm protocol before joining it.** Don't trust a cached
