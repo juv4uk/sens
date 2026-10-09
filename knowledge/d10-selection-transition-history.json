@@ -88,6 +88,36 @@
         "scripts/check_d10_hobby_bounded_rational.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.hobby.gray.reflected-word.20261009",
+      "authority": "#4013 #4463 owner's FPGA/SDR/mathematics/horology research intake",
+      "evidence": [
+        "Frank Gray US2632058A 1953 https://patents.google.com/patent/US2632058A/en",
+        "IBM Johnsson/Ho 1995 conversion on binary cubes",
+        "juv4uk/sens@0cf23c95660aa7ae199e6f683bc76f14eabbf958:knowledge/d10-gray-reflected-binary-research-v1.json:36-76"
+      ],
+      "previous_inventory_blob_sha": "34efd273000e3de8510441764cb59acbb5ab284b",
+      "resulting_inventory_blob_sha": "2ef73a8fb2d1e5aa1e0133c725a2d712286a4ecf",
+      "added_stable_ids": [
+        "d10.fpga.gray.encode-word.20261009",
+        "d10.fpga.gray.decode-word.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-gray-reflected-binary-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 631,
+      "resulting_selected": 633,
+      "decision": "SELECTED-RESEARCH-CANDIDATE with no owner ratification; Core/library derivability deferred",
+      "tests": [
+        "scripts/check_d10_gray_word_selection.py",
+        "tests/d10_gray_word_r6rs.ss",
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }
