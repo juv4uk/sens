@@ -1,0 +1,1044 @@
+{
+  "schema": "d6-v2-cleanroom-shadow/v1",
+  "issue": "#3280",
+  "status": "research-shadow-not-authority",
+  "date": "2026-10-04",
+  "lower_authority": {
+    "d5": "#3305 / Contract 11.3",
+    "rule": "D1-D5 current authority; D6 unratified under #3278"
+  },
+  "invariants": [
+    "old D6 coordinates and 64/64 occupancy have zero authority",
+    "history donates capabilities, never coordinates",
+    "D5 prefix is not a D6 parent law unless independently proved",
+    "no lower-domain duplicate may consume D6 identity",
+    "destructive mutation is excluded from clean Core candidate unless separately admitted"
+  ],
+  "metrics": {
+    "capacity": 64,
+    "generated_selectors": 16,
+    "unknown_coordinates": 48,
+    "donor_candidates_unplaced": 43,
+    "mutation_donors_excluded": 5,
+    "lower_domain_duplicates": 0
+  },
+  "selectors": [
+    {
+      "coordinate": "011000",
+      "name": "CDAAAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110000"
+    },
+    {
+      "coordinate": "011001",
+      "name": "CDAADR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110001"
+    },
+    {
+      "coordinate": "011010",
+      "name": "CDADAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110010"
+    },
+    {
+      "coordinate": "011011",
+      "name": "CDADDR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110011"
+    },
+    {
+      "coordinate": "011100",
+      "name": "CDDAAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110100"
+    },
+    {
+      "coordinate": "011101",
+      "name": "CDDADR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110101"
+    },
+    {
+      "coordinate": "011110",
+      "name": "CDDDAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110110"
+    },
+    {
+      "coordinate": "011111",
+      "name": "CDDDDR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "110111"
+    },
+    {
+      "coordinate": "100000",
+      "name": "CAAAAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101000"
+    },
+    {
+      "coordinate": "100001",
+      "name": "CAAADR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101001"
+    },
+    {
+      "coordinate": "100010",
+      "name": "CAADAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101010"
+    },
+    {
+      "coordinate": "100011",
+      "name": "CAADDR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101011"
+    },
+    {
+      "coordinate": "100100",
+      "name": "CADAAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101100"
+    },
+    {
+      "coordinate": "100101",
+      "name": "CADADR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101101"
+    },
+    {
+      "coordinate": "100110",
+      "name": "CADDAR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101110"
+    },
+    {
+      "coordinate": "100111",
+      "name": "CADDDR",
+      "status": "GENERATED",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector",
+      "evidence": [
+        "#2158",
+        "#2329",
+        "#2345",
+        "#3280"
+      ],
+      "donor_coordinate": "101111"
+    }
+  ],
+  "known_coordinate_independent_laws": [
+    {
+      "family": "parity",
+      "members": [
+        "EVENP",
+        "ODDP"
+      ],
+      "relation": "complement/duality",
+      "evidence": "#3078/#3079",
+      "geometry": "candidate only"
+    },
+    {
+      "family": "binding-order",
+      "members": [
+        "LET",
+        "LET*"
+      ],
+      "relation": "parallel vs sequential binding policy",
+      "evidence": "#3081/#3091",
+      "geometry": "product-axis candidate"
+    },
+    {
+      "family": "macro-expansion",
+      "members": [
+        "MACROEXPAND-1",
+        "MACROEXPAND"
+      ],
+      "relation": "one-step to fixed-point closure",
+      "evidence": "#3083/#3094",
+      "geometry": "relation-only"
+    },
+    {
+      "family": "numeric-order-lattice",
+      "members": [
+        "LEQ",
+        "GEQ",
+        "MIN",
+        "MAX"
+      ],
+      "relation": "duality + lattice/entailment",
+      "evidence": "#3084/#3095/#3106",
+      "geometry": "relation-only"
+    },
+    {
+      "family": "set-lattice",
+      "members": [
+        "INTERSECTION",
+        "UNION"
+      ],
+      "relation": "meet/join lattice",
+      "evidence": "#3085/#3089",
+      "geometry": "relation-only"
+    },
+    {
+      "family": "selector",
+      "members": [
+        "CAAAAR",
+        "CAAADR",
+        "CAADAR",
+        "CAADDR",
+        "CADAAR",
+        "CADADR",
+        "CADDAR",
+        "CADDDR",
+        "CDAAAR",
+        "CDAADR",
+        "CDADAR",
+        "CDADDR",
+        "CDDAAR",
+        "CDDADR",
+        "CDDDAR",
+        "CDDDDR"
+      ],
+      "relation": "prefix generator",
+      "evidence": "#2158/#2329/#2345",
+      "geometry": "proved"
+    }
+  ],
+  "excluded_mutation_donors": [
+    {
+      "name": "RPLACA",
+      "donor_coordinate": "001100",
+      "category": "physical-mutation",
+      "behavior": "in-place destructive replacement of pair CAR",
+      "status": "EXCLUDED-FROM-CLEAN-CORE-CANDIDATE",
+      "reason": "requires destructive/generalized mutation not admitted by current SENS core"
+    },
+    {
+      "name": "RPLACD",
+      "donor_coordinate": "001101",
+      "category": "physical-mutation",
+      "behavior": "in-place destructive replacement of pair CDR",
+      "status": "EXCLUDED-FROM-CLEAN-CORE-CANDIDATE",
+      "reason": "requires destructive/generalized mutation not admitted by current SENS core"
+    },
+    {
+      "name": "SETF",
+      "donor_coordinate": "001110",
+      "category": "generalized-place",
+      "behavior": "generalized variable/accessor in-place update",
+      "status": "EXCLUDED-FROM-CLEAN-CORE-CANDIDATE",
+      "reason": "requires destructive/generalized mutation not admitted by current SENS core"
+    },
+    {
+      "name": "NCONC",
+      "donor_coordinate": "100000",
+      "category": "list-structure",
+      "behavior": "destructive in-place list concatenation",
+      "status": "EXCLUDED-FROM-CLEAN-CORE-CANDIDATE",
+      "reason": "requires destructive/generalized mutation not admitted by current SENS core"
+    },
+    {
+      "name": "NREVERSE",
+      "donor_coordinate": "100010",
+      "category": "list-structure",
+      "behavior": "destructive in-place list reversal",
+      "status": "EXCLUDED-FROM-CLEAN-CORE-CANDIDATE",
+      "reason": "requires destructive/generalized mutation not admitted by current SENS core"
+    }
+  ],
+  "donor_candidates_unplaced": [
+    {
+      "name": "REPL",
+      "donor_coordinate": "000000",
+      "category": "system",
+      "behavior": "read-eval-print interactive top-level driver",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "LOAD",
+      "donor_coordinate": "000001",
+      "category": "system",
+      "behavior": "sequential file-stream expression ingestion",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "CLOSURE",
+      "donor_coordinate": "000010",
+      "category": "abstraction",
+      "behavior": "heap-bound lexical closure object",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "CURRY",
+      "donor_coordinate": "000011",
+      "category": "abstraction",
+      "behavior": "partial function application with prefix bindings",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "FSUBR",
+      "donor_coordinate": "000100",
+      "category": "special-form",
+      "behavior": "built-in special form with un-evaluated arguments",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "LEXPR",
+      "donor_coordinate": "000101",
+      "category": "special-form",
+      "behavior": "variadic evaluated argument list receiver",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "MACROEXPAND-1",
+      "donor_coordinate": "000110",
+      "category": "macro",
+      "behavior": "single step macro expansion",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "MACROEXPAND",
+      "donor_coordinate": "000111",
+      "category": "macro",
+      "behavior": "full recursive macro expansion",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "LET",
+      "donor_coordinate": "001000",
+      "category": "binding",
+      "behavior": "parallel local lexical binding",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "LET*",
+      "donor_coordinate": "001001",
+      "category": "binding",
+      "behavior": "sequential local lexical binding",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "DO",
+      "donor_coordinate": "001010",
+      "category": "control",
+      "behavior": "generalized stepped iterative loop",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "WHILE",
+      "donor_coordinate": "001011",
+      "category": "control",
+      "behavior": "conditional repetition loop primitive",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "DEFVAR",
+      "donor_coordinate": "001111",
+      "category": "state",
+      "behavior": "global variable declaration and root binding (OD-001)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "EVENP",
+      "donor_coordinate": "010000",
+      "category": "predicate",
+      "behavior": "parity test: integer is even",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "ODDP",
+      "donor_coordinate": "010001",
+      "category": "predicate",
+      "behavior": "parity test: integer is odd",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "INTEGERP",
+      "donor_coordinate": "010010",
+      "category": "predicate",
+      "behavior": "type predicate: atom is an exact integer",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "RATIONALP",
+      "donor_coordinate": "010011",
+      "category": "predicate",
+      "behavior": "type predicate: atom is an exact rational fraction",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "ADD1",
+      "donor_coordinate": "010100",
+      "category": "arithmetic",
+      "behavior": "increment number by 1",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "ABS",
+      "donor_coordinate": "010101",
+      "category": "arithmetic",
+      "behavior": "absolute value of number",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "SUB1",
+      "donor_coordinate": "010110",
+      "category": "arithmetic",
+      "behavior": "decrement number by 1",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "NEG",
+      "donor_coordinate": "010111",
+      "category": "arithmetic",
+      "behavior": "additive inverse negation (-x)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "TAGBODY",
+      "donor_coordinate": "011000",
+      "category": "control",
+      "behavior": "tagged branch target statement body",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "BLOCK",
+      "donor_coordinate": "011001",
+      "category": "control",
+      "behavior": "named lexical exit frame",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "RETURN-FROM",
+      "donor_coordinate": "011010",
+      "category": "control",
+      "behavior": "targeted non-local exit from named block",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "CATCH",
+      "donor_coordinate": "011011",
+      "category": "control",
+      "behavior": "dynamic non-local stack unwind handler (catch/throw)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "LEQ",
+      "donor_coordinate": "011100",
+      "category": "predicate",
+      "behavior": "non-strict less-than-or-equal (<=)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "MIN",
+      "donor_coordinate": "011101",
+      "category": "arithmetic",
+      "behavior": "extremum minimum of numbers",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "GEQ",
+      "donor_coordinate": "011110",
+      "category": "predicate",
+      "behavior": "non-strict greater-than-or-equal (>=)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "MAX",
+      "donor_coordinate": "011111",
+      "category": "arithmetic",
+      "behavior": "extremum maximum of numbers",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "LENGTH",
+      "donor_coordinate": "100001",
+      "category": "list-structure",
+      "behavior": "exact count of elements in proper list",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "NTH",
+      "donor_coordinate": "100011",
+      "category": "list-structure",
+      "behavior": "zero-indexed element retrieval from list",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "EXPT",
+      "donor_coordinate": "100100",
+      "category": "arithmetic",
+      "behavior": "power exponentiation (x^y)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "GCD",
+      "donor_coordinate": "100101",
+      "category": "arithmetic",
+      "behavior": "greatest common divisor for rational reduction",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "REMAINDER",
+      "donor_coordinate": "100110",
+      "category": "arithmetic",
+      "behavior": "exact integer division remainder (modulo)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "RECIP",
+      "donor_coordinate": "100111",
+      "category": "arithmetic",
+      "behavior": "multiplicative inverse (1/x)",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "RASSOC",
+      "donor_coordinate": "111000",
+      "category": "lookup",
+      "behavior": "lookup in association list by value",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "ACONS",
+      "donor_coordinate": "111001",
+      "category": "lookup",
+      "behavior": "construct new pair onto association list",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "INTERSECTION",
+      "donor_coordinate": "111010",
+      "category": "set-operation",
+      "behavior": "list set intersection",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "UNION",
+      "donor_coordinate": "111011",
+      "category": "set-operation",
+      "behavior": "list set union",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "MAPCAR",
+      "donor_coordinate": "111100",
+      "category": "higher-order",
+      "behavior": "element-wise mapping with result collection",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "MAPLIST",
+      "donor_coordinate": "111101",
+      "category": "higher-order",
+      "behavior": "sublist mapping with result collection",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "SUBLIS",
+      "donor_coordinate": "111110",
+      "category": "tree-structure",
+      "behavior": "simultaneous multi-pair substitution in tree",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    },
+    {
+      "name": "COPY-TREE",
+      "donor_coordinate": "111111",
+      "category": "tree-structure",
+      "behavior": "full structural recursive copy of S-expression",
+      "status": "DONOR-CANDIDATE-UNPLACED"
+    }
+  ],
+  "coordinates": [
+    {
+      "coordinate": "000000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "000001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "000010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "000011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "000100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "000101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "000110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "000111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "001111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "010111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "011000",
+      "status": "GENERATED",
+      "name": "CDAAAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "011001",
+      "status": "GENERATED",
+      "name": "CDAADR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "011010",
+      "status": "GENERATED",
+      "name": "CDADAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "011011",
+      "status": "GENERATED",
+      "name": "CDADDR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "011100",
+      "status": "GENERATED",
+      "name": "CDDAAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "011101",
+      "status": "GENERATED",
+      "name": "CDDADR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "011110",
+      "status": "GENERATED",
+      "name": "CDDDAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "011111",
+      "status": "GENERATED",
+      "name": "CDDDDR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100000",
+      "status": "GENERATED",
+      "name": "CAAAAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100001",
+      "status": "GENERATED",
+      "name": "CAAADR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100010",
+      "status": "GENERATED",
+      "name": "CAADAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100011",
+      "status": "GENERATED",
+      "name": "CAADDR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100100",
+      "status": "GENERATED",
+      "name": "CADAAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100101",
+      "status": "GENERATED",
+      "name": "CADADR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100110",
+      "status": "GENERATED",
+      "name": "CADDAR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "100111",
+      "status": "GENERATED",
+      "name": "CADDDR",
+      "law": "selector composition: append CAR/CDR choice to current D5 selector"
+    },
+    {
+      "coordinate": "101000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "101001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "101010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "101011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "101100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "101101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "101110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "101111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "110111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111000",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111001",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111010",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111011",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111100",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111101",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111110",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    },
+    {
+      "coordinate": "111111",
+      "status": "UNKNOWN",
+      "name": null,
+      "law": null
+    }
+  ]
+}
