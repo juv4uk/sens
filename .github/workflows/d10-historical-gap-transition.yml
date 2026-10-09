@@ -1,0 +1,20 @@
+name: D10 historical gap monotonic selection
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_d10_historical_gap_audit.py'
+      - 'tests/test_d10_historical_gap_transition.py'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-historical-coverage-gap-audit-v1.json'
+      - '.github/workflows/d10-historical-gap-transition.yml'
+  workflow_dispatch:
+jobs:
+  historical-gap-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Historical 15 HOLD snapshot and negative tests
+        run: |
+          python3 scripts/check_d10_historical_gap_audit.py --self-test
+          python3 -m unittest discover -s tests -p 'test_d10_historical_gap_transition.py' -v

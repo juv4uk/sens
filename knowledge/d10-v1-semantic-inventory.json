@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 625,
+    "selected_semantic_candidates": 636,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 369,
-    "remaining_semantic_inventory": 399,
+    "unplaced_selected_candidates": 380,
+    "remaining_semantic_inventory": 388,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13167,6 +13167,553 @@
       ],
       "status": "SELECTED-RESEARCH-CANDIDATE",
       "source_class": "SELFHOST-REASON-SEMANTIC-HARVEST"
+    },
+    {
+      "stable_id": "d10.hist.primary.dpb.20261009",
+      "semantic_name": "DPB",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-PRIMARY-LAW-TRANCHE-20261009",
+      "relation_class": "EXACT-INTEGER-BIT-FIELD-REPLACEMENT",
+      "behavior": "Given integer newbyte and a bit-field (width,offset) and an integer target, replace only the specified target bits with the low width bits of newbyte; width zero preserves target.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4841",
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json:HIST-20261009-03",
+        "https://tumbleweed.nu/r/lm-3/uv/chinual.html"
+      ],
+      "surface_uk": "вкласти-біти",
+      "surface_ukr": "замінити-бітове-поле-цілого",
+      "arity": 3,
+      "argument_shape": "(integer,byte-specifier,integer) -> integer",
+      "positive_witnesses": [
+        "DPB(1,BYTE(1,10),0)=1024",
+        "DPB(-2,BYTE(2,10),0)=2048"
+      ],
+      "falsifier_spec": "A zero-width byte always leaves the target unchanged; bit positions outside field may never change.",
+      "dedup_check": "No currently selected DPB; LDB/MASK-FIELD extract/observe rather than replace target fields.",
+      "nearby_existing": [
+        "D10 LDB",
+        "D10 MASK-FIELD",
+        "D8 LOGBITP",
+        "D8 ARITHMETIC-SHIFT"
+      ],
+      "source_section": "7.9 Byte Manipulation Functions — DPB",
+      "primary_url": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+      "owner_question": "CORE-TYPED-BIT-FIELD-REVIEW",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hist.primary.array-displacement.20261009",
+      "semantic_name": "ARRAY-DISPLACEMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-PRIMARY-LAW-TRANCHE-20261009",
+      "relation_class": "ARRAY-VIEW-ALIAS-INTROSPECTION",
+      "behavior": "Return exactly two values (direct backing-array, offset) for explicitly displaced array; for ordinary non-displaced array return (NIL,0), and view shares actual element storage.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4841",
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json:HIST-20261009-01",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html"
+      ],
+      "surface_uk": "основа-зсув-масиву",
+      "surface_ukr": "отримати-масив-основу-й-зсув",
+      "arity": 1,
+      "argument_shape": "(array) -> two values (array-or-NIL,nonnegative-offset)",
+      "positive_witnesses": [
+        "Displace B onto A at offset 1: ARRAY-DISPLACEMENT(B)=(A,1)",
+        "Write B[0]=7 then read A[1]=7"
+      ],
+      "falsifier_spec": "Copying rather than aliasing, or returning transitive root rather than immediate backing array, violates the law.",
+      "dedup_check": "Distinct from MAKE-ARRAY/REARRAY/AREF and VALUES: no selected name returns view origin and offset.",
+      "nearby_existing": [
+        "D10 MAKE-ARRAY",
+        "D10 REARRAY",
+        "D8 AREF",
+        "D8 VALUES"
+      ],
+      "source_section": "Function ARRAY-DISPLACEMENT",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html",
+      "owner_question": "CORE-VIEW-ALIASING-REVIEW",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.clos.slot-boundp.v1",
+      "semantic_name": "SLOT-BOUNDP",
+      "surface_uk": "зв’язана-комірка?",
+      "surface_ukr": "має-значення-комірка?",
+      "relation_class": "CLOS-SLOT-STATE-OBSERVATION",
+      "behavior": "Return D1 YES iff an existing named instance slot is bound, including when its stored value is EMPTY/NIL; a declared-but-unbound slot is NO. A nonexistent slot is a distinct SLOT-MISSING case, not an ordinary NO.",
+      "arity": "(instance,slot-name)->D1 predicate or declared missing-slot condition",
+      "positive_witnesses": [
+        "Declared slot a without an initform: SLOT-BOUNDP(obj,a)=NO while SLOT-EXISTS-P(obj,a)=YES.",
+        "After assigning NIL to slot a, SLOT-BOUNDP(obj,a)=YES; slot a still exists."
+      ],
+      "falsifiers": [
+        "Treating bound NIL as unbound.",
+        "Conflating nonexistent slot with a declared unbound slot."
+      ],
+      "minimality": "Distinct from ratified D8 BOUNDP (symbol value binding), and from selected D10 SLOT-VALUE (may invoke unbound condition); slot-boundness is observable independently of slot-value read.",
+      "unblock_fanout": [
+        "CLOS slot initialization",
+        "class migration witness"
+      ],
+      "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-boundp.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4843",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "ANSI CLHS SLOT-BOUNDP"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-ROOT-REVIEW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clos.slot-makunbound.v1",
+      "semantic_name": "SLOT-MAKUNBOUND",
+      "surface_uk": "розв’язати-комірку",
+      "surface_ukr": "зняти-значення-комірки",
+      "relation_class": "CLOS-SLOT-STATE-TRANSITION",
+      "behavior": "Change a named existing instance slot into the unbound state and return the SAME instance while retaining the slot's existence, class identity and all unrelated slots; setting it to NIL is not equivalent.",
+      "arity": "(instance,slot-name)->same instance or declared missing-slot condition",
+      "positive_witnesses": [
+        "For slots a=3 and b=4, unbind a; SLOT-BOUNDP(a)=NO and SLOT-VALUE(b)=4.",
+        "The returned instance is EQ-identical to the input and slot a still exists; binding a to NIL afterwards makes SLOT-BOUNDP(a)=YES."
+      ],
+      "falsifiers": [
+        "Implement as writing NIL, so slot is still bound.",
+        "Delete slot a, allocate a replacement instance or modify unrelated slot b."
+      ],
+      "minimality": "No D8 RPLACA/RPLACD/VECTOR-SET! operation creates a distinguishable declared-unbound slot; D10 selected MAKUNBOUND concerns symbol bindings, not instance slots.",
+      "unblock_fanout": [
+        "CLOS object lifecycle",
+        "schema migration"
+      ],
+      "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-makunbound.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4843",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "ANSI CLHS SLOT-MAKUNBOUND"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-ROOT-REVIEW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clos.remove-method.v1",
+      "semantic_name": "REMOVE-METHOD",
+      "surface_uk": "вилучити-метод",
+      "surface_ukr": "прибрати-метод-з-узагальненої-функції",
+      "relation_class": "CLOS-GENERIC-METHOD-STATE-TRANSITION",
+      "behavior": "Remove one identified method object from one generic function, keeping the generic function and all other methods intact; removing an absent method MUST NOT signal an error and returns the generic function.",
+      "arity": "(generic-function,method-object)->generic-function",
+      "positive_witnesses": [
+        "With methods A and B in generic G, removing A leaves B applicable in G.",
+        "Removing A again returns G with no error and no loss of B."
+      ],
+      "falsifiers": [
+        "Delete the whole generic function or remove B while removing A.",
+        "Error on an absent method or select method only by a print-name string."
+      ],
+      "minimality": "Different from selected D10 DEFMETHOD (definition) and ratified D9 REMD/FS-UNBIND (named definition unlink); exact method membership update is a separate observable state law.",
+      "unblock_fanout": [
+        "runtime generic method mutation",
+        "Lisp-machine method inspection"
+      ],
+      "source_path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+      "primary_url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_rm_met.htm",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4842",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+        "ANSI CLHS REMOVE-METHOD"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-ROOT-REVIEW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.spanda.bounded-rational-approx.v1",
+      "semantic_name": "BOUNDED-RATIONAL-APPROX",
+      "surface_uk": "наблизити-дробом",
+      "surface_ukr": "найближчий-дріб-із-межею-знаменника",
+      "source_class": "CROSSREPO-SPANDA-EXACT-RECOVERY",
+      "relation_class": "EXACT-NUMERIC-APPROXIMATION",
+      "arity": "(x: exact rational, maximum_denominator: positive integer)->(closest exact rational, signed exact residual)",
+      "behavior": "For exact x and Q>=1, return reduced p/q with 1<=q<=Q minimizing exact |x-p/q| over all rationals. Break ties by smallest reduced denominator, then smallest signed numerator. Return residual r=x-p/q exactly; no float, no ADC uncertainty inference, no machine or physical T5 authority.",
+      "falsifiers": [
+        "RATIONALIZE returns an arbitrary exact rational without enforcing Q, so it is not equivalent to a bounded recovery.",
+        "Returning a float or silently discarding signed residual violates exact representation.",
+        "Returning q>Q or any fraction with larger exact error violates best-approximation law.",
+        "Breaking Q=1 halfway ties differently from the declared denominator/numerator order.",
+        "ADC measurement uncertainty must not be inferred from the approximation residual."
+      ],
+      "dedup": {
+        "exact_in_d1_d9": false,
+        "exact_in_prior_d10": false,
+        "neighbors": [
+          "D8 RATIONAL",
+          "D8 RATIONALIZE",
+          "D9 DIVMOD",
+          "D10 numeric/accuracy families"
+        ],
+        "derivable": "A higher-order library program can enumerate candidate rationals using D8/D9 exact arithmetic; derivability does not establish duplicate semantic identity, but Core versus Core-Math ownership remains owner-review.",
+        "independence_test": "Universal denominator-constrained closest-rational relation with explicit residual/tie is not the same observable contract as unconstrained RATIONALIZE; requires proof whether it deserves a 10-bit Core resident."
+      },
+      "language_visible": true,
+      "mechanism_only": false,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "proposal_status": "pending-owner-review",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-hobby-exact-measurement-intake-v1.json",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "juv4uk/spanda:README.md@d339363e03798941280d7394fb6b24a76ff43dd3",
+        "https://docs.python.org/3/library/fractions.html#fractions.Fraction.limit_denominator"
+      ],
+      "positive_witnesses": [
+        {
+          "input": "x=355/113, Q=100",
+          "result": "p/q=311/99; residual=355/113-311/99"
+        },
+        {
+          "input": "x=2/3, Q=3",
+          "result": "p/q=2/3; residual=0"
+        },
+        {
+          "input": "x=-1/2, Q=1",
+          "result": "p/q=-1; residual=+1/2 (tie chooses smaller signed numerator)"
+        }
+      ]
+    },
+    {
+      "stable_id": "d10.words.primitive-binary-root.v1",
+      "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
+      "surface_uk": "первісний-двійковий-блок",
+      "surface_ukr": "найкоротший-повторюваний-блок",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "WORD-COMBINATORICS-PRIMARY-20261009",
+      "relation_class": "FINITE-WORD-FULL-REPETITION-ROOT",
+      "arity": 1,
+      "argument_shape": "(finite-list-of-D1-bits) -> finite-list-of-D1-bits",
+      "behavior": "For nonempty finite D1 word w of length n, return the shortest nonempty prefix u of w for which w equals u concatenated exactly n/length(u) times, requiring length(u) divides n; if none shorter exists, return w. Define empty input -> empty output. No floating point, no time or transport effect.",
+      "positive_witnesses": [
+        "root(01010101)=01 (4 whole repetitions)",
+        "root(000000)=0 (6 repetitions)",
+        "root(01010)=01010 (not 01: incomplete repetition)",
+        "root(101101101)=101 (3 repetitions)",
+        "root(00100)=00100 (primitive, length 5)",
+        "root(empty)=empty"
+      ],
+      "falsifiers": [
+        "Sage minimal_period(01010) gives 2 by truncated overlap but primitive root is whole word length 5; never use minimal_period naively",
+        "Return a lexicographically minimal cyclic rotation (e.g. 0101 -> 01 is coincidence) rather than prefix root, identity invalid",
+        "An implementation which accepts a nondivisor p or changes bit order is invalid"
+      ],
+      "semantic_neighbors": [
+        "D8 ROTATE",
+        "D8 CANONICALIZE",
+        "D1 YES/NO",
+        "D10 LOWER-MECHANICAL-WORD research #4907",
+        "D10 finite word/sequence constructors"
+      ],
+      "dedup_check": "Against D1-D9 at 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4 and D10 at a55f307c27f17091795d75ebfcd7d051547d80bc: no exact named law; D8 ROTATE is mutation/rotation and CANONICALIZE generic, neither attests the shortest full-repetition root. Formal equivalence review remains pending.",
+      "minimality": "A pure mathematical finite-word factorization invariant. It is implementable from comparison, prefix and divisibility; derivability does not imply exclusion, but the universal named root is distinct from a partial overlap period and from a rotation quotient.",
+      "user_domains": [
+        "acoustics and repeating musical motifs",
+        "SDR bit frames / periodic pilot patterns",
+        "FPGA clock/oscillator patterns",
+        "astronomy periodic observation cadence",
+        "horological sub-cycle rhythms",
+        "Sanskrit prosody metrical repetition",
+        "self-hosted binary SENS data sequences"
+      ],
+      "primary_url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+      "owner_question": "Is the exact shortest full-repetition prefix a D10 semantic identity or a self-hosted sequence library operation? Selection is research-only, never D10 ratification.",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.fpga.gray.encode-word.20261009",
+      "semantic_name": "GRAY-ENCODE-WORD",
+      "surface_uk": "кодувати-відбитим-двійковим",
+      "surface_ukr": "кд-грей",
+      "relation_class": "FINITE-BIT-WORD-REFLECTED-GRAY-BIJECTION",
+      "behavior": "For unsigned w-bit binary rank n (0<=n<2^w), return w-bit binary-reflected Gray codeword n XOR (n shifted right once); preserve declared width including leading zeroes.",
+      "arity": "(width:nonnegative-int, unsigned-rank:0..2^width-1)->unsigned-w-bit-word",
+      "positive_witnesses": [
+        "w=4, rank7=0111 -> 0100",
+        "w=4, rank11=1011 -> 1110",
+        "w=0, n=0 -> empty word",
+        "Adjacent and cyclic ranks have Hamming distance 1 for w>=1"
+      ],
+      "falsifiers": [
+        "w4 rank7 gives 0111 not 0100",
+        "w4 gray 7 vs gray8 changes more than one bit",
+        "drops leading zeroes or permits 16 at width4"
+      ],
+      "minimality": "Derivable using XOR and right shift; a selected named mathematical map but not independently proven primitive.",
+      "unblock_fanout": [
+        "FPGA and sensor bit-symbol transport",
+        "cross-clock binary phase encoders",
+        "radiodata and reversible payload representation"
+      ],
+      "source_path": "knowledge/d10-gray-reflected-binary-research-v1.json",
+      "primary_url": "https://patents.google.com/patent/US2632058A/en",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "Frank Gray US2632058A",
+        "IBM Johnsson/Ho 1995",
+        "knowledge/d10-gray-reflected-binary-research-v1.json"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-REFLECTED-BINARY-GRAY-1953",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.fpga.gray.decode-word.20261009",
+      "semantic_name": "GRAY-DECODE-WORD",
+      "surface_uk": "декодувати-відбитий-двійковий",
+      "surface_ukr": "дк-грей",
+      "relation_class": "FINITE-BIT-WORD-REFLECTED-GRAY-BIJECTION",
+      "behavior": "For a width w reflected Gray codeword g, recover unsigned rank n by XOR prefix from most significant Gray bit to least, preserving width.",
+      "arity": "(width:nonnegative-int, gray-codeword:0..2^width-1)->unsigned-w-bit-rank",
+      "positive_witnesses": [
+        "w4 Gray0100 -> binary0111 (rank7)",
+        "w4 Gray1110 -> binary1011 (rank11)",
+        "decode(encode(n,w),w)=n for all in range",
+        "w0 Gray0 -> rank0"
+      ],
+      "falsifiers": [
+        "Gray1110 decoded to 14 rather than 11",
+        "Gray0100 decoded to 4 rather than 7",
+        "allows out-of-range 16 at w4"
+      ],
+      "minimality": "Prefix XOR expressible using general reductions; owner to decide Core vs derived library.",
+      "unblock_fanout": [
+        "FPGA and sensor bit-symbol transport",
+        "cross-clock binary phase encoders",
+        "radiodata and reversible payload representation"
+      ],
+      "source_path": "knowledge/d10-gray-reflected-binary-research-v1.json",
+      "primary_url": "https://patents.google.com/patent/US2632058A/en",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "Frank Gray US2632058A",
+        "IBM Johnsson/Ho 1995",
+        "knowledge/d10-gray-reflected-binary-research-v1.json"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-REFLECTED-BINARY-GRAY-1953",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.finite-bayes-update-exact.20261009",
+      "semantic_name": "FINITE-BAYES-UPDATE-EXACT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSS-DOMAIN-EXACT-BAYESIAN-UPDATE-20261009",
+      "relation_class": "FINITE-HYPOTHESIS-POSTERIOR-UPDATE",
+      "surface_uk": "оновити-ймовірності",
+      "surface_ukr": "байєсівське-оновлення-скінченних-гіпотез",
+      "arity": "(prior-vector, likelihood-vector) -> (posterior-vector, evidence-normalizer)",
+      "argument_shape": "Two nonempty equal-length ordered vectors of exact rational probabilities in [0,1]; prior entries sum exactly to 1.",
+      "behavior": "For a finite ordered hypothesis set with prior p_i and likelihood l_i, compute Z = sum_i(p_i*l_i). If Z>0 return the original-order exact posterior vector (p_i*l_i/Z) and exact evidence normalizer Z. If Z=0, or inputs are malformed/inexact/out of range, signal an explicit invalid/undefined-update condition; do not silently renormalize the prior or coerce floats.",
+      "positive_witnesses": [
+        {
+          "p": [
+            "1/2",
+            "1/2"
+          ],
+          "l": [
+            "3/4",
+            "1/4"
+          ],
+          "posterior": [
+            "3/4",
+            "1/4"
+          ],
+          "z": "1/2"
+        },
+        {
+          "p": [
+            "1/3",
+            "2/3"
+          ],
+          "l": [
+            "1/2",
+            "1/4"
+          ],
+          "posterior": [
+            "1/2",
+            "1/2"
+          ],
+          "z": "1/3"
+        },
+        {
+          "p": [
+            "1/4",
+            "1/4",
+            "1/2"
+          ],
+          "l": [
+            "1",
+            "0",
+            "1/2"
+          ],
+          "posterior": [
+            "1/2",
+            "0",
+            "1/2"
+          ],
+          "z": "1/2"
+        }
+      ],
+      "falsifiers": [
+        "zero evidence cannot be normalized",
+        "prior cannot be silently renormalized",
+        "no float or boolean coercion",
+        "index order and zero entries persist",
+        "posterior sum is exactly one"
+      ],
+      "minimality": "The source law is exact and independently tested. An implementation can be composed from exact multiply/sum/normalize operations, so this selection does not claim irreducible Core minimality; owner review must decide whether the named finite update plus evidence-normalizer result is a D10 resident or a derived exact-math library operation.",
+      "derivability_review": "PENDING-OWNER-REVIEW: likely expressible as map/multiply + sum + divide; exact behavior and explicit zero-evidence failure are retained for semantic review.",
+      "source_path": "knowledge/d10-finite-bayes-update-research-v1.json",
+      "primary_url": "https://plato.stanford.edu/entries/epistemology-bayesian/",
+      "source_section": "Finite Bayes theorem for a finite hypothesis set; posterior_i = prior_i * likelihood_i / sum_j(prior_j * likelihood_j), with nonzero evidence denominator.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4956",
+        "https://plato.stanford.edu/entries/epistemology-bayesian/",
+        "knowledge/d10-finite-bayes-update-research-v1.json",
+        "independent integer-weight/common-denominator oracle"
+      ],
+      "motivation": [
+        "astronomy and astrophysics",
+        "SDR and radio model identification",
+        "exact rational analog computation",
+        "Prolog and Advice Taker epistemology",
+        "chess and symbolic decision modeling"
+      ],
+      "dedup": {
+        "exact_D1_D9_duplicate": false,
+        "exact_existing_D10_duplicate": false,
+        "D1_D9_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_D10_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+        "prior_D10_selected": 634,
+        "verified_exact_name_scan": true,
+        "behavior_level_dedup": "Distinct named law candidate; compositional derivation remains a review question, not hidden."
+      },
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.fpga.gf2.minimum-recurrence.20261009",
+      "semantic_name": "BINARY-LFSR-MINIMAL-RECURRENCE",
+      "surface_uk": "найкоротша-двійкова-рекуренція",
+      "surface_ukr": "мін-лін-рекур",
+      "source_class": "GF2-FINITE-RECURRENCE-HOBBY-20261009",
+      "relation_class": "FINITE-GF2-WORD-EXACT-MINIMAL-RECURRENCE",
+      "signature": "(finite ordered list of D1 bits)->(minimal nonnegative order L, lex-first binary tap vector a1..aL)",
+      "behavior": "Among all binary homogeneous GF(2) linear recurrences matching every observed position t>=L in the finite input, return the least possible order L and lexicographically least (a1..aL) taps for s[t] = XOR_j(a_j AND s[t-j]); all-zero or empty words return (0,()). No unseen-future prediction guarantee.",
+      "positive_witnesses": [
+        "input 00000 -> (L=0, taps empty)",
+        "input 11111 -> (L=1, taps=1)",
+        "input 010101 -> (L=2, taps=01), despite primitive word root 01",
+        "input 101001 -> (L=3, taps=101)",
+        "Sage 20-bit LFSR example 11010110010001111010 -> (L=4, taps=1001)"
+      ],
+      "falsifiers": [
+        "Treat primitive period length 2 as order-1 GF2 linear recurrence for 010101",
+        "Choose greater L than necessary or nonminimal lex taps",
+        "Claim unobserved future is guaranteed or that radio noise has been removed",
+        "Silently accept non-bits, booleans, or floating-point input"
+      ],
+      "minimality": "Direct name absent from ratified D1-D9 and 634 selected D10; differs from primitive exact word repetition and reflected Gray binary bijection. It is mathematically derivable by finite GF(2) linear algebra, so owner review must still decide Core versus mathematical library. Behavior-level dedup: the scalar GF2-LINEAR-COMPLEXITY result is only the L projection of this richer (L,taps) result; do not create a second row for that scalar.",
+      "unblock_fanout": [
+        "FPGA LFSR and binary stream model checks",
+        "SDR symbol sequence analysis without claiming noise correction",
+        "sensor clock traces, mathematical finite-word semantics",
+        "rhythmic patterns in abstract binary symbol form"
+      ],
+      "source_path": "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+      "primary_url": "https://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lfsr.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4952",
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+        "SageMath LFSR and Berlekamp–Massey manuals",
+        "#4950 scalar projection dedup",
+        "knowledge/d10-finite-bayes-update-research-v1.json already selected as D10P-0011"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -13199,6 +13746,14 @@
     "knowledge/d10-clips-library-harvest-v1.json",
     "knowledge/d10-lisp-machine-evaluator-harvest-v1.json",
     "knowledge/d10-interlisp-psl-history-harvest-v1.json",
-    "knowledge/d10-selfhost-reason-harvest-v1.json"
+    "knowledge/d10-selfhost-reason-harvest-v1.json",
+    "knowledge/d10-historical-primary-admission-batch1-v1.json",
+    "knowledge/d10-clos-slot-state-historical-review-v1.json",
+    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+    "knowledge/d10-hobby-exact-measurement-intake-v1.json",
+    "knowledge/d10-primitive-binary-word-root-v1.json",
+    "knowledge/d10-gray-reflected-binary-research-v1.json",
+    "knowledge/d10-finite-bayes-update-research-v1.json",
+    "knowledge/d10-gf2-minimal-recurrence-research-v1.json"
   ]
 }

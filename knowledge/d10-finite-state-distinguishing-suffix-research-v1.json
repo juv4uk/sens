@@ -1,0 +1,242 @@
+{
+  "schema": "d10-state-distinguishing-suffix-research/v1",
+  "status": "RESEARCH-HOLD-NOT-SELECTED",
+  "candidate": {
+    "semantic_name": "FINITE-STATE-SHORTEST-DISTINGUISHER",
+    "surface_uk": "різне-продовження",
+    "surface_ukr": "найкоротший-бітовий-свідок-розрізнення-станів",
+    "width": "D10",
+    "selected": false,
+    "coordinate": null,
+    "ratified": false,
+    "law": "Shortest, then 0-first lexicographically least suffix distinguishing acceptance of p and q in a total deterministic D1-binary automaton; empty witness differs from no witness",
+    "owner_review": "HOLD: Core vs derived graph search",
+    "hobby_applications": [
+      "Lisp reader",
+      "FPGA finite-state control",
+      "SDR binary symbol decoder",
+      "Sanskrit phoneme automaton",
+      "finite chess-state abstraction"
+    ],
+    "ownership_test": "Universal observable suffix result independent of backend; may be derived via product-graph BFS, so no Core D10 resident without review",
+    "blocked_source": "NOT-A-MIGRATION-BLOCK",
+    "name_duplicated_with_selected_D10": false
+  },
+  "witnesses": [
+    {
+      "transitions": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "accepting": [
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": ""
+      }
+    },
+    {
+      "transitions": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "accepting": [
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 0,
+      "expected": {
+        "status": "EQUIVALENT",
+        "word": null
+      }
+    },
+    {
+      "transitions": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "accepting": [
+        0,
+        0
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "EQUIVALENT",
+        "word": null
+      }
+    },
+    {
+      "transitions": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "accepting": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": "0"
+      }
+    },
+    {
+      "transitions": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "accepting": [
+        0,
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": "1"
+      }
+    },
+    {
+      "transitions": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ]
+      ],
+      "accepting": [
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": "01"
+      }
+    }
+  ],
+  "independent_external_runtime_oracle": "NOT_EXECUTED",
+  "D1_D9_behavioral_dedup": "REVIEW_REQUIRED",
+  "physical_sens_files_created": 0,
+  "original_executable_migrations_admitted": 0,
+  "source_evidence": [
+    {
+      "kind": "primary",
+      "author": "John E. Hopcroft",
+      "year": 1971,
+      "title": "An n log n algorithm for minimizing states in a finite automaton",
+      "url": "https://doi.org/10.1016/B978-0-12-417750-5.50022-1"
+    },
+    {
+      "kind": "primary",
+      "author": "John E. Hopcroft and Richard M. Karp",
+      "year": 1971,
+      "title": "A Linear Algorithm for Testing Equivalence of Finite Automata",
+      "url": "https://hdl.handle.net/1813/5958"
+    },
+    {
+      "kind": "owner research",
+      "repository": "juv4uk/sens",
+      "issue": 2034,
+      "url": "https://github.com/juv4uk/sens/issues/2034"
+    }
+  ],
+  "falsifiers": [
+    "epsilon is not no witness",
+    "shortest 0 must win tie against 1",
+    "different state ids can accept identical future language",
+    "invalid or missing branch is not silently filled",
+    "longer suffix cannot replace shorter valid one"
+  ],
+  "neighbors": [
+    "D3 EQ",
+    "D10 EXECUTION-WITNESS",
+    "D10 primitive binary word root",
+    "OTHER-AGENT finite-code unique decipherability"
+  ],
+  "canonical_inventory_modified": false,
+  "selected_delta": 0,
+  "coordinates_assigned": 0,
+  "ratified": 0,
+  "own_repo_executable_donor": {
+    "repository": "juv4uk/sens",
+    "commit": "1c23e77fa3ce1857529b03106f96c0ed8e19a1c9",
+    "source_path": "scripts/research-2034-selector-transducer.py",
+    "file_git_blob_sha1": "ed6dbaaa1aabaa575d3b378e3f3631c288c9008e",
+    "source_lines": "23-53,93-125",
+    "donor_oracle": "minimize_dfa (partition refinement on 6 real selector machine states)",
+    "proposed_cross_check": "all 36 ordered real donor state-pairs; equality by owner partition iff no distinguishing suffix",
+    "limitations": "Recognizes acceptance language only, does not prove emitted transducer outputs or typed-graph semantic identity."
+  }
+}

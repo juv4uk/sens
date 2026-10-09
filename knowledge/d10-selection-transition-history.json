@@ -1,0 +1,210 @@
+{
+  "schema": "d10-selection-transition-history/v1",
+  "status": "RESEARCH-ONLY-NO-RATIFICATION",
+  "baseline": {
+    "inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "selected_count": 625,
+    "selector_coordinates": 256,
+    "ratified_d10_residents": 0
+  },
+  "transitions": [
+    {
+      "id": "d10.hist.primary.batch1.20261009",
+      "authority": "#4013 #4463 #4878 research first admission, owner-directed",
+      "evidence": [
+        "#4841",
+        "#4878"
+      ],
+      "previous_inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+      "resulting_inventory_blob_sha": "5a8cf8e81edecf9ffdeb313152c0e146f4df80bb",
+      "added_stable_ids": [
+        "d10.hist.primary.dpb.20261009",
+        "d10.hist.primary.array-displacement.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-historical-primary-admission-batch1-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 625,
+      "resulting_selected": 627,
+      "decision": "research selection; coordinate=null; owner ratification remains pending",
+      "tests": [
+        "scripts/check_d10_historical_admission_batch1.py"
+      ]
+    },
+    {
+      "id": "d10.clos.roots.20261009",
+      "authority": "#4013 #4463 owner-directed research filling",
+      "evidence": [
+        "#4842",
+        "#4843"
+      ],
+      "previous_inventory_blob_sha": "5a8cf8e81edecf9ffdeb313152c0e146f4df80bb",
+      "resulting_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+      "added_stable_ids": [
+        "d10.clos.slot-boundp.v1",
+        "d10.clos.slot-makunbound.v1",
+        "d10.clos.remove-method.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 627,
+      "resulting_selected": 630,
+      "decision": "research selection; coordinate=null; owner ratification remains pending",
+      "tests": [
+        "scripts/check_d10_clos_roots_selection.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
+    },
+    {
+      "id": "d10.hobby.spanda.bounded-rational-approx.20261009",
+      "authority": "#4013 #4463 hobby-based research selection",
+      "evidence": [
+        "juv4uk/spanda README blob d339363e03798941280d7394fb6b24a76ff43dd3",
+        "Python Fraction.limit_denominator documented reference"
+      ],
+      "previous_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+      "resulting_inventory_blob_sha": "34efd273000e3de8510441764cb59acbb5ab284b",
+      "added_stable_ids": [
+        "d10.hobby.spanda.bounded-rational-approx.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-hobby-exact-measurement-intake-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 630,
+      "resulting_selected": 631,
+      "decision": "SELECTED-RESEARCH only, pending owner, no executable T5",
+      "tests": [
+        "scripts/check_d10_hobby_bounded_rational.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
+    },
+    {
+      "id": "d10.word-primitive-full-repeat.20261009",
+      "authority": "#4013 owner-directed D10 filling; #4463 semantic review pending",
+      "evidence": [
+        "#4013",
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+        "knowledge/d10-primitive-binary-word-root-v1.json"
+      ],
+      "previous_inventory_blob_sha": "34efd273000e3de8510441764cb59acbb5ab284b",
+      "resulting_inventory_blob_sha": "7683f1e2bfcf67d3a45d412d3b1790b72ad623ad",
+      "added_stable_ids": [
+        "d10.words.primitive-binary-root.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-primitive-binary-word-root-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 631,
+      "resulting_selected": 632,
+      "decision": "research-only semantic selection, unplaced, owner ratification pending; not T5 executable",
+      "tests": [
+        "scripts/check_d10_primitive_binary_word_root.py",
+        "tests/test_d10_primitive_binary_word_root.py",
+        "tests/d10_primitive_binary_root_chez.ss"
+      ]
+    },
+    {
+      "id": "d10.hobby.gray.reflected-word.after-primitive-root.20261009",
+      "authority": "#4013 #4463 owner FPGA-SDR-electronics-horology domain growth",
+      "evidence": [
+        "Frank Gray US2632058A 1953",
+        "IBM Johnsson/Ho 1995 binary reflected code",
+        "juv4uk/sens@0cf23c95660aa7ae199e6f683bc76f14eabbf958:knowledge/d10-gray-reflected-binary-research-v1.json:36-76"
+      ],
+      "previous_inventory_blob_sha": "7683f1e2bfcf67d3a45d412d3b1790b72ad623ad",
+      "resulting_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+      "added_stable_ids": [
+        "d10.fpga.gray.encode-word.20261009",
+        "d10.fpga.gray.decode-word.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-gray-reflected-binary-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 632,
+      "resulting_selected": 634,
+      "decision": "RESEARCH SELECTED / owner ratification and Core-library minimality pending",
+      "tests": [
+        "scripts/check_d10_gray_word_selection.py",
+        "tests/d10_gray_word_r6rs.ss",
+        "scripts/check-d10-proposal-ledger.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
+    },
+    {
+      "id": "d10.hobby.finite-bayes-update-exact.20261009",
+      "authority": "#4013 #4463 owner-directed hobby-based D10 research filling",
+      "evidence": [
+        "#4956",
+        "knowledge/d10-finite-bayes-update-research-v1.json",
+        "Stanford Encyclopedia of Philosophy: Bayesian Epistemology, finite Bayes theorem"
+      ],
+      "previous_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+      "resulting_inventory_blob_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+      "added_stable_ids": [
+        "d10.math.finite-bayes-update-exact.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-finite-bayes-update-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 634,
+      "resulting_selected": 635,
+      "decision": "research selection only; exact-math library derivability remains pending owner review; coordinate=null and ratification pending",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check_d10_finite_bayes_selection.py",
+        "tests/test_d10_finite_bayes_selection.py",
+        "tests/test_d10_finite_bayes_update.py"
+      ]
+    },
+    {
+      "id": "d10.hobby.gf2.minimal-recurrence.after-bayes.20261009",
+      "authority": "#4013 #4463 owner-directed hobby-based D10 research filling",
+      "evidence": [
+        "#4950",
+        "#4952",
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+        "SageMath LFSR and Berlekamp–Massey manuals"
+      ],
+      "previous_inventory_blob_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+      "resulting_inventory_blob_sha": "292ef3086114ad0dfe71776c831c2a31b39352a8",
+      "added_stable_ids": [
+        "d10.fpga.gf2.minimum-recurrence.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 635,
+      "resulting_selected": 636,
+      "decision": "research selection only; Core-vs-library derivability pending owner review; coordinate=null and ratification pending",
+      "tests": [
+        "scripts/check_d10_gf2_minimal_recurrence.py",
+        "tests/d10_gf2_minimal_recurrence_r6rs.ss",
+        "scripts/check_d10_gf2_selection_transition.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
+    }
+  ]
+}

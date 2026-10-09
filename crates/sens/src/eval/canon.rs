@@ -9,7 +9,7 @@ use super::{
     profile_mechanisms_generated::{profile_mechanism_route, ProfileMechanismRouteKind},
     special_forms,
 };
-use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value};
+use crate::{semantic_registry, Environment, ErrorKind, LanguageError, Sens8, Span, Value, PredicateBit, Bit1, DomainIdentity};
 use crate::CoreDomainIdentity;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -289,8 +289,22 @@ fn prim_01001101(
     special_forms::eval_values(args, env, span)
 }
 
+fn prim_equal(
+    args: &[Value],
+    _env: &Environment,
+    span: Span,
+) -> Result<Value, LanguageError> {
+    exact_args(crate::sens!(00100010), args, 2, span)?;
+    let bit = Bit1::new(u8::from(args[0] == args[1])).expect("boolean fits D1");
+    Ok(Value::DomainIdentity(DomainIdentity::D1(
+        PredicateBit::from_word(bit),
+    )))
+}
+
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum DomainPrimitiveKind {
+    Equal,
     AtomPredicate,
     AtomEquality,
     PairConstruct,
@@ -304,16 +318,19 @@ pub(crate) enum DomainPrimitiveKind {
 pub(crate) fn domain_primitive_kind(
     identity: CoreDomainIdentity,
 ) -> Option<DomainPrimitiveKind> {
-    let CoreDomainIdentity::D3(word) = identity else {
-        return None;
-    };
-    match word.word().packed_bits() {
-        0b010 => Some(DomainPrimitiveKind::AtomPredicate),
-        0b101 => Some(DomainPrimitiveKind::AtomEquality),
-        0b111 => Some(DomainPrimitiveKind::PairConstruct),
-        // CAR/CDR and their proved D4 descendants are executed by selector_law.
-        0b100 | 0b011 => None,
-        _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
+    match identity {
+        CoreDomainIdentity::D3(word) => match word.word().packed_bits() {
+            0b010 => Some(DomainPrimitiveKind::AtomPredicate),
+            0b101 => Some(DomainPrimitiveKind::AtomEquality),
+            0b111 => Some(DomainPrimitiveKind::PairConstruct),
+            0b100 | 0b011 => None,
+            _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
+        },
+        CoreDomainIdentity::D8(word) => match word.word().packed_bits() {
+            0b11110111 => Some(DomainPrimitiveKind::Equal),
+            _ => None,
+        },
+        _ => None,
     }
 }
 
@@ -322,6 +339,7 @@ fn domain_primitive(identity: CoreDomainIdentity) -> Option<PrimitiveFn> {
         DomainPrimitiveKind::AtomPredicate => Some(prim_00000010),
         DomainPrimitiveKind::AtomEquality => Some(prim_00000011),
         DomainPrimitiveKind::PairConstruct => Some(prim_00000100),
+        DomainPrimitiveKind::Equal => Some(prim_equal),
     }
 }
 
@@ -336,6 +354,7 @@ pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool
             word.word().packed_bits(),
             0b01000 | 0b01001 | 0b11010 | 0b11011 | 0b11101
         ),
+        CoreDomainIdentity::D8(word) => matches!(word.word().packed_bits(), 0b11110111),
         _ => false,
     }
 }

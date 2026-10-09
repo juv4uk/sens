@@ -1,0 +1,118 @@
+{
+  "schema": "d10-symbolic-ai-antiunification-research/v1",
+  "decision": "PENDING-OWNER-REVIEW-NOT-SELECTED",
+  "authority": [
+    "juv4uk/sens#4013",
+    "juv4uk/sens#4463",
+    "juv4uk/sens#4162",
+    "juv4uk/sens#4908"
+  ],
+  "source_inventory": {
+    "ratified_D1_D9_foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "D10_selected_research_git_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "at_inspection_selected": 634,
+    "at_inspection_ratified": 0
+  },
+  "candidate": {
+    "stable_id": "d10.symbolic-ai.ground-term-lgg.research.20261009",
+    "semantic_name": "GROUND-TERM-LEAST-GENERAL-GENERALIZATION",
+    "surface_uk": "узір",
+    "surface_ukr": "найменше-узагальнення-двох-символьних-термів",
+    "surface_en": "ground-term-least-general-generalization",
+    "relation_class": "FINITE-PURE-INDUCTIVE-ABSTRACTION",
+    "coordinate": null,
+    "ratified_resident": false,
+    "input": "two finite GROUND first-order term trees: atom={atom:symbol}; constructor={fun:symbol,args:[term,...]}",
+    "output": "canonical least general common term with new var indices ordered first DFS disagreement, plus two finite reconstructing substitutions",
+    "behavior": "preserve equal subtrees; recurse over equal constructor/arity; otherwise replace each ordered disagreement pair with a fresh variable, reusing variables for repeated equal disagreement pairs",
+    "witness": "p(a,a),p(b,b) -> p(V0,V0); left {V0:a}, right {V0:b}",
+    "falsifier": "p(V0,V1) for p(a,a) and p(b,b) is common generalization but NOT least; differing occurrences should share V0",
+    "reconstruction": "instantiate(pattern, left_substitution)==left AND instantiate(pattern,right_substitution)==right",
+    "effects": "NONE",
+    "status": "SOURCE-ONLY-D10-UNSELECTED"
+  },
+  "donors": [
+    {
+      "kind": "HISTORICAL-PRIMARY",
+      "citation": "G. D. Plotkin, A Note on Inductive Generalization, Machine Intelligence vol.5, pp.153–163, 1970",
+      "url": "https://aitopics.org/download/aiclassics%3AB44C2B23",
+      "law": "least general generalization; dual to Robinson unification"
+    },
+    {
+      "kind": "HISTORICAL-PRIMARY",
+      "citation": "G. D. Plotkin, A Further Note on Inductive Generalization, Machine Intelligence vol.6, 1971",
+      "url": "https://homepages.inf.ed.ac.uk/gdp/publications/MI6_further_note.pdf",
+      "law": "inductive generalization; current profile restricted to ground first-order trees"
+    },
+    {
+      "kind": "REVIEW",
+      "citation": "Anti-unification and Generalization: A Survey (2023)",
+      "url": "https://arxiv.org/abs/2302.00277",
+      "law": "distinguish first-order syntactic LGG from equational and binder variants"
+    },
+    {
+      "kind": "INDEPENDENT-EXECUTABLE-REFERENCE",
+      "citation": "SWI-Prolog library(terms):term_subsumer/3, most specific generalization of two terms",
+      "url": "https://www.swi-prolog.org/pldoc/man?predicate=term_subsumer%2F3",
+      "law": "For the restricted finite ground first-order profile, canonical LGG has same functor/arity retention and repeated-disagreement pair sharing. SWI donor itself admits cyclic terms, which are OUT OF SCOPE of our D10 research contract.",
+      "runtime_witness": "tests/d10_symbolic_anti_unify_donor.pl",
+      "workflow": ".github/workflows/d10-symbolic-ai-antiunification.yml",
+      "provenance_note": "Source manual live; actual runtime version printed by dedicated GitHub Actions. 14 plunit cases are cross-runtime witnesses, not a SENS execution claim."
+    }
+  ],
+  "dedup": {
+    "lower_D1_D9": [
+      "D9 UNIFY",
+      "D9 PROVE-GOALS",
+      "D9 FIRE-RULES-ON-FACTS"
+    ],
+    "selected_D10_observed": [
+      "PROVE-RULE",
+      "PROVE-GOAL-STATE",
+      "ADVICE-CONFLICT-PROOF"
+    ],
+    "distinguishing_behavior": "D9 UNIFY seeks substitutions making given terms EQUAL. Proposed LGG produces MOST SPECIFIC common abstraction of two (possibly distinct) observations plus two reconstructing substitutions; D9 PROVE-GOALS is deductive query solving, not inductive abstraction.",
+    "name_collision_at_pinned_selected_inventory": false,
+    "behavioral_equivalence_D1_D9": "PENDING-REVIEW",
+    "behavioral_equivalence_D10": "PENDING-REVIEW",
+    "selection_rule": "Owner must prove behavioral non-duplication/minimality against current D1-D9 and selected D10, beyond name check; no automatic selected append."
+  },
+  "limits": {
+    "ground_input_only": true,
+    "tree_nodes_max": 4096,
+    "depth_max": 64,
+    "constructor_arity_max": 32,
+    "no_lambda_binders": true,
+    "no_equality_modulo_AC": true,
+    "no_prolog_world_mutation": true,
+    "no_float_or_physical_unit_inference": true
+  },
+  "application_motivations": [
+    "symbolic program template inference over concrete Lisp expression trees",
+    "Panini/shiva-sutra language pattern analogy without replacing established phonemic D7 identity",
+    "astronomy observation record template generalization without claiming physical parameter estimation",
+    "repeatable FPGA/SDR symbol trace pattern mining without minting hardware operations"
+  ],
+  "verification": {
+    "recursive_oracle": "scripts/d10_antiunify_oracle.py:lgg",
+    "independent_iterative_oracle": "scripts/d10_antiunify_oracle.py:lgg_independent",
+    "test_file": "tests/test_d10_symbolic_ai_antiunification.py",
+    "checks": [
+      "witness reconstruction both inputs",
+      "no spurious var on identical terms",
+      "repeated disagreement variable sharing",
+      "exhaustive finite depth-one leastness vs all bounded competing patterns",
+      "reject malformed nonground or excessive inputs"
+    ],
+    "real_swi_prolog_oracle": "SWI-Prolog library(terms):term_subsumer/3; tests/d10_symbolic_anti_unify_donor.pl (14 direct runtime plunit assertions)",
+    "oracle_convergence": "Original Plotkin recursive/iterative Python tests remain authoritative in #4971; SWI runtime adds a THIRD, independent implementation. No second LGG identity or selected resident is created."
+  },
+  "forbidden_effects": [
+    "D10 10-bit code placement",
+    "D10 resident ratification",
+    "any D1-D9 modification",
+    "D2/T5 transport change",
+    "executable .sens publication",
+    "migration/unification replacement"
+  ]
+}

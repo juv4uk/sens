@@ -1,0 +1,30 @@
+name: D10 historical CLOS promotion integrity
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_d10_clos_slot_state_history.py'
+      - 'scripts/check_d10_historical_clos_interlisp_review.py'
+      - 'scripts/check_d10_clos_slot_observation_v1.py'
+      - 'tests/test_d10_clos_research_selection_transition.py'
+      - 'tests/test_d10_library_source_symbols_v1.py'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - '.github/workflows/d10-clos-promotion-guard.yml'
+  workflow_dispatch:
+jobs:
+  historical-snapshot-to-selected-transition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm historical CLOS proposals remain source pinned
+        run: |
+          python3 scripts/check_d10_clos_slot_state_history.py --self-test
+          python3 scripts/check_d10_historical_clos_interlisp_review.py
+          python3 scripts/check_d10_clos_slot_observation_v1.py --static-only
+      - name: Exercise lawful transition and reject unsafe promotion
+        run: python3 -m unittest discover -s tests -p 'test_d10_clos_research_selection_transition.py' -v
+      - name: Confirm current D10 counts and library donor isolation
+        run: |
+          python3 scripts/check-d10-v1-semantic-inventory.py
+          python3 -m unittest discover -s tests -p 'test_d10_library_source_symbols_v1.py' -v

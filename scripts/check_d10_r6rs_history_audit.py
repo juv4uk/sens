@@ -5,6 +5,7 @@ import copy
 import json
 import subprocess
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json"
@@ -17,12 +18,13 @@ def blob(path):
 def check(payload, low, high, verify_pin=True):
     assert payload["status"] == "RESEARCH-ONLY-UNSELECTED-UNRATIFIED"
     assert payload["snapshot"]["ratified_d10"] == 0
-    assert payload["snapshot"]["d10_selected"] == high["accounting"]["selected_semantic_candidates"]
+    assert high["accounting"]["selected_semantic_candidates"] >= payload["snapshot"]["d10_selected"]
+    check_growth(high)
     assert payload["snapshot"]["d10_capacity"] == high["capacity"] == 1024
     assert high["accounting"]["ratified_d10_residents"] == 0
     if verify_pin:
         assert blob(LOW) == payload["snapshot"]["foundation_blob"], "D1-D9 foundation changed: redo review"
-        assert blob(HIGH) == payload["snapshot"]["d10_inventory_blob"], "D10 selected changed: redo review"
+        assert payload["snapshot"]["d10_inventory_blob"] == "73dd518469f972c55411e004b70b054ba8b3ec86", "historical inventory pin changed"
     lower = {str(n).upper() for d in low["domains"].values() for n in d["residents"].values()}
     high_names = {r["semantic_name"].upper() for r in high["rows"]}
     rows = payload["rows"]

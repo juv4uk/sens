@@ -1,0 +1,195 @@
+{
+  "schema": "d10-systematic-donor-map/v1",
+  "status": "RESEARCH-QUEUE-ONLY",
+  "date": "2026-10-09",
+  "authority": {
+    "selection": "knowledge/d10-v1-semantic-inventory.json",
+    "proposal": "knowledge/d10-proposal-ledger.tsv",
+    "transition": "knowledge/d10-selection-transition-history.json",
+    "source_pinned_baseline": 625,
+    "ratified_d10": 0
+  },
+  "policy": {
+    "pipeline": [
+      "source dictionary section census",
+      "identify distinct observable law",
+      "behavioral D1-D9 and current D10 duplicate/derivability attack",
+      "two positive witnesses plus falsifier",
+      "real donor oracle (SBCL, Chez, Emacs, Clojure, Forth or Prolog as applicable)",
+      "candidate proposal ledger pending review",
+      "serialized selected research append and transition history",
+      "owner ratification only"
+    ],
+    "guard_rule": "Any fail-closed invariant protecting a growing registry must have an explicit, tested append/extend path that preserves old evidence, rejects unrecorded growth and never grants execution/ratification.",
+    "source_name_count_not_semantic_count": true,
+    "source_count_estimates_verified": false
+  },
+  "donors": [
+    {
+      "id": "CLHS-CONDITIONS",
+      "family": "ANSI Common Lisp HyperSpec",
+      "priority": 1,
+      "section": "Conditions, handlers, restarts",
+      "index": "https://www.lispworks.com/documentation/HyperSpec/Front/X_AllSym.htm",
+      "subsection": "https://www.lispworks.com/documentation/HyperSpec/Body/09_.htm",
+      "leads": [
+        "COMPUTE-RESTARTS",
+        "FIND-RESTART",
+        "RESTART-NAME",
+        "CONDITION-TYPE"
+      ],
+      "law_question": "condition object and restart set observation vs handler/control transfer; D2 owns control",
+      "oracle": "SBCL",
+      "possible_destination": "CORE-SEMANTIC-REVIEW-OR-D2-BOUNDARY",
+      "selected": 0
+    },
+    {
+      "id": "CLHS-STREAMS",
+      "family": "ANSI Common Lisp HyperSpec",
+      "priority": 2,
+      "section": "21.2 Streams Dictionary",
+      "index": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+      "leads": [
+        "STREAM-ELEMENT-TYPE",
+        "OPEN-STREAM-P",
+        "INPUT-STREAM-P",
+        "FILE-POSITION"
+      ],
+      "law_question": "observable stream capabilities vs OS host I/O and file handles; do not infer new semantics from READ-BYTE alone",
+      "oracle": "SBCL",
+      "possible_destination": "SUBSTRATE-IO-ISLAND-OR-UNIVERSAL-BORDER",
+      "selected": 0
+    },
+    {
+      "id": "CLHS-PATHNAMES-FORMAT",
+      "family": "ANSI Common Lisp HyperSpec",
+      "priority": 3,
+      "section": "Pathnames, PRINT/FORMAT",
+      "index": "https://www.lispworks.com/documentation/HyperSpec/Body/19_ab.htm",
+      "leads": [
+        "PATHNAME-MATCH-P",
+        "MERGE-PATHNAMES",
+        "FORMAT",
+        "DIRECTORY"
+      ],
+      "law_question": "path abstraction may be structured pure data, but filesystem traversal and formatted stream output are application/substrate",
+      "oracle": "SBCL",
+      "possible_destination": "FILE-SYSTEM-ISLAND-OR-DERIVED-LIB",
+      "selected": 0
+    },
+    {
+      "id": "CLOS-MOP",
+      "family": "Art of the Metaobject Protocol",
+      "priority": 1,
+      "section": "Concepts, Classes, Generic Functions and Methods",
+      "index": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+      "leads": [
+        "CLASS-DIRECT-SLOTS",
+        "CLASS-FINALIZED-P",
+        "COMPUTE-EFFECTIVE-SLOT-DEFINITION",
+        "COMPUTE-APPLICABLE-METHODS-USING-CLASSES",
+        "METHOD-SPECIALIZERS"
+      ],
+      "law_question": "metaobject observation, class finalization, method applicability and slot inheritance; no duplicate SLOT-BOUNDP/METHOD roots",
+      "oracle": "SBCL + MOP implementation; implementation portability must be tagged",
+      "possible_destination": "CORE-OBJECT-PROTOCOL-REVIEW",
+      "selected": 0
+    },
+    {
+      "id": "SRFI",
+      "family": "Scheme Requests for Implementation",
+      "priority": 2,
+      "section": "Final SRFI individually, proposals not names",
+      "index": "https://srfi.schemers.org/",
+      "leads": [
+        "SRFI-1 list laws",
+        "SRFI-19 time values",
+        "SRFI-69 hashtables",
+        "SRFI-117 list queues",
+        "SRFI-125 intermediate hashtables",
+        "SRFI-269 test definitions"
+      ],
+      "law_question": "test-bearing small specifications; separate pure value law from port/input and control macros; check existing R6RS/R7RS",
+      "oracle": "Chez/Racket/Gauche or specified reference implementation",
+      "possible_destination": "CORE-PURE-LAW-OR-LIBRARY-REVIEW",
+      "selected": 0
+    },
+    {
+      "id": "CLOJURE-CORE",
+      "family": "Clojure core API",
+      "priority": 3,
+      "section": "Persistent collection and transient contracts",
+      "index": "https://clojure.github.io/clojure/branch-master/clojure.core-api.html",
+      "leads": [
+        "PERSISTENT!",
+        "TRANSIENT",
+        "ASSOC!",
+        "CONJ!",
+        "SUBVEC"
+      ],
+      "law_question": "retained old values, transient lifecycle invalidation; do not mistake implementation data structures for new universal primitives",
+      "oracle": "Clojure JVM",
+      "possible_destination": "CORE-STATE-OR-DERIVED-LIB",
+      "selected": 0
+    },
+    {
+      "id": "EMACS-LISP",
+      "family": "GNU Emacs Lisp Reference Manual",
+      "priority": 3,
+      "section": "Sequence, overlays, markers, buffer text, syntax tables",
+      "index": "https://www.gnu.org/software/emacs/manual/html_node/elisp/",
+      "leads": [
+        "COPY-MARKER",
+        "MARKER-POSITION",
+        "BUFFER-SUBSTRING",
+        "CHAR-PROPERTY-ALIASES"
+      ],
+      "law_question": "text positions and update invariants may be general; buffer/window/process IO belongs editor/OS island",
+      "oracle": "Emacs --batch",
+      "possible_destination": "TEXT-ISLAND-OR-CORE-OBSERVATION-REVIEW",
+      "selected": 0
+    },
+    {
+      "id": "FORTH-2012",
+      "family": "Forth 2012 Standard",
+      "priority": 4,
+      "section": "Core word set plus optional word sets",
+      "index": "https://forth-standard.org/standard/intro",
+      "leads": [
+        "PICK",
+        "ROLL",
+        "2OVER",
+        "FM/MOD",
+        "MOVE"
+      ],
+      "law_question": "stack effects and exact operation laws as donor; interpreter return stack and parser control not D10 opcodes",
+      "oracle": "gforth + normative standard comparison",
+      "possible_destination": "CORE-ALGEBRA-OR-STACK-IMPLEMENTATION",
+      "selected": 0
+    },
+    {
+      "id": "ISO-PROLOG",
+      "family": "ISO/IEC 13211-1 Prolog built-ins via implementation conformance",
+      "priority": 4,
+      "section": "Unification, term comparison, clause inspection, backtracking",
+      "index": "https://www.swi-prolog.org/pldoc/man?section=examineprog",
+      "leads": [
+        "COPY-TERM",
+        "COMPARE",
+        "UNIFY-WITH-OCCURS-CHECK",
+        "TERM-VARIABLES"
+      ],
+      "law_question": "already-ratified UNIFY and existing reasoner functions; separate term inspection from search/control and database effects",
+      "oracle": "SWI-Prolog with ISO-conformance conditions recorded",
+      "possible_destination": "LOGIC-LIBRARY-OR-CORE-TERM-OBSERVATION",
+      "selected": 0
+    }
+  ],
+  "admission": {
+    "proposal_rows_added_by_this_map": 0,
+    "selected_rows_added_by_this_map": 0,
+    "ratified_added": 0,
+    "coordinates_added": 0,
+    "d11_planning": "Do not assume D11 and D12 occupancy from total donor name counts; determine only after distinct proof-gated semantics are measured."
+  }
+}

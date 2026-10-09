@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth, read as read_growth, BASE as GROWTH_BASE
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "knowledge/early-lisp-post-d4-history-provenance-v1.json"
@@ -39,7 +40,12 @@ def validate(data, foundation, inventory):
         errors.append("artifact must remain provenance-only")
     snapshot = data.get("current_authority_snapshot", {})
     for key, path in (("d1_d9_foundation_blob_sha", FOUNDATION), ("d10_inventory_blob_sha", INVENTORY)):
-        if snapshot.get(key) != blob_sha(path):
+        if key == "d10_inventory_blob_sha":
+            if snapshot.get(key) != read_growth(GROWTH_BASE)["origin_inventory_git_blob"]:
+                errors.append("historical D10 origin hash drift")
+            try: check_growth(inventory)
+            except AssertionError: errors.append("current D10 mutated protected historical 625 laws")
+        elif snapshot.get(key) != blob_sha(path):
             errors.append(f"stale authority hash: {key}")
     lower = {}
     for domain, spec in foundation["domains"].items():

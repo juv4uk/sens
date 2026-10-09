@@ -26,6 +26,7 @@ def verify(proposals: dict, foundation: dict, inventory: dict) -> dict:
     lower = {str(name).upper() for domain in foundation["domains"].values()
              for name in domain.get("residents", {}).values()}
     selected = {str(row["semantic_name"]).upper() for row in inventory["rows"]}
+    by_name = {str(row["semantic_name"]).upper(): row for row in inventory["rows"]}
     if len(selected) != len(inventory["rows"]):
         raise ValueError("duplicate canonical D10 names")
     valid_status = {
@@ -38,8 +39,25 @@ def verify(proposals: dict, foundation: dict, inventory: dict) -> dict:
     for row in rows:
         name = row["historical_name"].upper()
         rid = row["proposal_id"]
-        if not rid or rid in ids or name in names or name in lower or name in selected:
+        if not rid or rid in ids or name in names or name in lower:
             raise ValueError("name/id collision: " + name)
+        live = by_name.get(name)
+        if live is not None:
+            # Historical proposal is immutable; only a distinct current D10
+            # selection traced to exactly this donor law may supersede its HOLD.
+            if (row["triage_status"] != "REVIEW-SEMANTIC-CANDIDATE"
+                    or live.get("source_path") != PROPOSALS
+                    or live.get("primary_url") != row["historical_source"]
+                    or live.get("source_class") != "HISTORICAL-CLOS-ROOT-REVIEW"
+                    or live.get("status") != "SELECTED-RESEARCH-CANDIDATE"
+                    or live.get("proposal_status") != "pending-owner-review"
+                    or live.get("coordinate") is not None
+                    or live.get("coordinate_basis") != "UNPLACED"
+                    or live.get("ratified_resident") is not False
+                    or not live.get("behavior")
+                    or not live.get("positive_witnesses")
+                    or not live.get("falsifiers")):
+                raise ValueError("untraced or unauthorized historical promotion: " + name)
         ids.add(rid)
         names.add(name)
         if row["triage_status"] not in valid_status:

@@ -1,0 +1,70 @@
+name: D10 finite temporal difference-constraint research
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-finite-temporal-constraint-closure-v1.json'
+      - 'scripts/research_d10_finite_temporal_closure.py'
+      - 'tests/test_research_d10_finite_temporal_closure.py'
+      - 'docs/research/d10-finite-temporal-closure.uk.md'
+      - '.github/workflows/d10-finite-temporal-closure.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-finite-temporal-constraint-closure-v1.json'
+      - 'scripts/research_d10_finite_temporal_closure.py'
+      - 'tests/test_research_d10_finite_temporal_closure.py'
+      - 'docs/research/d10-finite-temporal-closure.uk.md'
+      - '.github/workflows/d10-finite-temporal-closure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-temporal-oracle:
+    name: Two graph solvers and real independent Z3 Int Optimize
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install REAL external SMT Z3 (never simulated)
+        run: python3 -m pip install 'z3-solver==4.13.4.0'
+      - name: Exact graph, contradiction witness and independent real SMT oracle
+        env:
+          D10_REQUIRE_Z3: '1'
+        run: python3 -m unittest discover -s tests -p 'test_research_d10_finite_temporal_closure.py' -v
+      - name: Reproducible 384-case source-only research report
+        run: |
+          set -euo pipefail
+          python3 scripts/research_d10_finite_temporal_closure.py --report "$RUNNER_TEMP/d10-temporal-closure.json"
+          python3 - "$RUNNER_TEMP/d10-temporal-closure.json" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert x['schema']=='sens-d10-research-finite-simple-temporal-closure/v1'
+          assert x['status']=='RESEARCH_HOLD_NOT_SELECTED'
+          assert x['cases']==384
+          assert x['d10_selected_delta']==0 and x['ratified_delta']==0
+          assert x['original_sens_migrations']==0 and not x['d1_d9_changed']
+          PY
+      - name: Recheck source/semantic authority is research-only
+        run: |
+          python3 - <<'PY'
+          import json
+          doc=json.load(open('knowledge/d10-finite-temporal-constraint-closure-v1.json'))
+          a=doc['authority']
+          assert not a['selected'] and not a['ratified']
+          assert a['coordinate'] is None and not a['physical_sens_published']
+          assert a['selected_delta']==0 and not a['release_admitted']
+          assert doc['tests']['external_oracle'].startswith('Real independently')
+          PY
+      - name: Retain immutable research-only report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d10-exact-temporal-stp-z3-evidence
+          path: ${{ runner.temp }}/d10-temporal-closure.json
+          if-no-files-found: warn

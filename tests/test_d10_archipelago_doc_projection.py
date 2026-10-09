@@ -24,8 +24,8 @@ class D10ArchipelagoProjectionTests(unittest.TestCase):
 
     def test_real_document_matches_single_stream_625_selection(self):
         result = guard.validate(self.doc, self.inventory, self.matrix)
-        self.assertEqual(result["selected"], 625)
-        self.assertEqual(result["remaining"], 399)
+        self.assertEqual(result["selected"], self.inventory["accounting"]["selected_semantic_candidates"])
+        self.assertEqual(result["remaining"], self.inventory["accounting"]["remaining_semantic_inventory"])
         self.assertEqual(result["ratified"], 0)
         self.assertEqual(result["donor_repositories"], 87)
 
@@ -40,7 +40,7 @@ class D10ArchipelagoProjectionTests(unittest.TestCase):
 
     def test_stale_434_pretended_current_must_fail(self):
         with self.assertRaisesRegex(ValueError, "stale"):
-            guard.validate(self.doc.replace("625/1024", "434/1024"), self.inventory, self.matrix)
+            guard.validate(self.doc.replace(f'{self.inventory["accounting"]["selected_semantic_candidates"]}/1024', "434/1024"), self.inventory, self.matrix)
 
     def test_duplicated_or_reversed_marker_must_fail(self):
         with self.assertRaisesRegex(ValueError, "exactly one"):

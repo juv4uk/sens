@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth, read as read_growth, BASE as GROWTH_BASE
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "knowledge/lisp15-arithmetic-history-provenance-v1.json"
@@ -40,9 +41,15 @@ def validate(data, foundation, inventory):
         ("d1_d9_foundation_blob_sha", FOUNDATION),
         ("d10_inventory_blob_sha", INVENTORY),
     ):
-        actual = sha(path)
-        if snap.get(field) != actual:
-            errors.append(f"stale authority hash: {field}")
+        if field == "d10_inventory_blob_sha":
+            if snap.get(field) != read_growth(GROWTH_BASE)["origin_inventory_git_blob"]:
+                errors.append("historical D10 origin hash drift")
+            try: check_growth(inventory)
+            except AssertionError: errors.append("current D10 mutated protected historical 625 laws")
+        else:
+            actual = sha(path)
+            if snap.get(field) != actual:
+                errors.append(f"stale authority hash: {field}")
     if data.get("status") != "HISTORICAL-NUMERIC-PROVENANCE-ONLY":
         errors.append("status must remain archival-only")
     low = {}

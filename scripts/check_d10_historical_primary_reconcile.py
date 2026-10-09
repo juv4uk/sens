@@ -6,6 +6,7 @@ import copy
 import json
 import subprocess
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth
 
 ROOT = Path(__file__).resolve().parents[1]
 P = ROOT / "knowledge/d10-historical-primary-manual-reconciliation-20261009.json"
@@ -25,11 +26,12 @@ def check(r, low, high, ov, pin=True):
     assert r["accounting"]["auto_ratified"] == 0
     assert r["accounting"]["auto_coordinates"] == 0
     assert high["accounting"]["ratified_d10_residents"] == r["snapshot"]["d10_ratified"] == 0
-    assert high["accounting"]["selected_semantic_candidates"] == r["snapshot"]["d10_selected"]
+    assert high["accounting"]["selected_semantic_candidates"] >= r["snapshot"]["d10_selected"]
+    check_growth(high)
     assert high["capacity"] == 1024
     if pin:
         assert blob(LOW) == r["snapshot"]["lower_git_blob"], "D1–D9 changed: rerun semantics"
-        assert blob(HIGH) == r["snapshot"]["d10_git_blob"], "D10 changed: rerun dedup"
+        assert r["snapshot"]["d10_git_blob"] == "73dd518469f972c55411e004b70b054ba8b3ec86", "historical pin changed"
     lower = {str(s).upper(): domain + ":" + bits for domain, v in low["domains"].items() for bits,s in v["residents"].items()}
     sel = {x["semantic_name"].upper() for x in high["rows"]}
     historic = r["historical_ledger_2344"]
@@ -45,6 +47,8 @@ def check(r, low, high, ov, pin=True):
     assert len(remains) == r["accounting"]["history_d8_overflow_unrepresented"] == 6
     for name in r["already_selected_d10_do_not_readd"]:
         assert name in sel, f"no longer in D10: {name}"
+    promoted = {x["semantic_name"] for x in high["rows"] if x.get("source_class") == "HISTORICAL-PRIMARY-LAW-TRANCHE-20261009"}
+    assert promoted == {"DPB", "ARRAY-DISPLACEMENT"}, "unexpected primary-source promotion"
     props = r["proposals"]
     assert len(props) == r["accounting"]["proposals"] == 13
     assert len({z["historical_name"] for z in props}) == 13
@@ -52,7 +56,12 @@ def check(r, low, high, ov, pin=True):
     assert sum(z["primary_name_attested"] is False for z in props) == r["accounting"]["unverified_historical_labels"] == 5
     for z in props:
         assert z["historical_name"].upper() not in lower
-        assert z["historical_name"].upper() not in sel
+        assert z["historical_name"].upper() not in (sel - promoted), "unreviewed historical promotion"
+        if z["historical_name"].upper() in promoted:
+            assert z["triage"] == "D10-PROPOSAL-REVIEW" and z["primary_name_attested"] is True
+            current = next(x for x in high["rows"] if x["semantic_name"] == z["historical_name"].upper())
+            assert current["primary_url"] == z["source_url"] and current["coordinate"] is None
+            assert current["ratified_resident"] is False
         assert z["coordinate"] is None and z["selected_d10"] is False and z["ratified"] is False
         assert z["exact_in_lower"] is False and z["exact_in_d10_selected"] is False
         assert z["triage"].startswith(("HOLD-", "D10-PROPOSAL-REVIEW"))

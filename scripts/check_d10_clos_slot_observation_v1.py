@@ -45,13 +45,23 @@ def verify_static():
         for domain in foundation["domains"].values()
         for name in domain["residents"].values()
     }
-    selected_upper = {r["semantic_name"].upper() for r in inventory["rows"]}
+    by_name = {r["semantic_name"].upper(): r for r in inventory["rows"]}
     assert not NAMES.intersection(ratified_lower), "D1-D9 already has donor spelling"
-    assert not NAMES.intersection(selected_upper), "Already selected: owner review must update oracle"
+    assert len(by_name) == len(inventory["rows"]), "Duplicate current D10 name"
     old_rows = {r["historical_name"]: r for r in history["rows"]}
     assert NAMES <= set(old_rows), "Every donor law must have merged historical provenance"
     for function in manifest["historical_functions"]:
         assert function["intake"] == "PENDING-OWNER-REVIEW"
+        live = by_name.get(function["name"])
+        if live is not None:
+            assert live.get("source_path") == str(HISTORY.relative_to(ROOT)), "Untraced slot admission"
+            assert live.get("primary_url") == function["source_url"], "Source mismatch"
+            assert live.get("source_class") == "HISTORICAL-CLOS-ROOT-REVIEW"
+            assert live.get("status") == "SELECTED-RESEARCH-CANDIDATE"
+            assert live.get("proposal_status") == "pending-owner-review"
+            assert live.get("coordinate") is None and live.get("coordinate_basis") == "UNPLACED"
+            assert live.get("ratified_resident") is False
+            assert live.get("behavior") and live.get("positive_witnesses") and live.get("falsifiers")
         assert function["source_url"] == old_rows[function["name"]]["primary_url"]
         assert function["surface_uk"] == old_rows[function["name"]]["surface_uk"]
         assert function["surface_ukr"] == old_rows[function["name"]]["surface_ukr"]

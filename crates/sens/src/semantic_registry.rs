@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, DomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, Bit8, CoreD4, CoreD5, CoreD8, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -53,7 +53,7 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
             && row
                 .surfaces
                 .iter()
-                .any(|surface| matches!(surface.namespace, "uk" | "sa") && surface.name == name);
+                .any(|surface| matches!(surface.namespace, "uk" | "sa" | "en") && surface.name == name);
         matches_human_surface
             .then(|| exact_domain_identity_from_projection(row.width, row.bits))
             .flatten()
@@ -100,6 +100,7 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0011_0011 => Some(d4(0b1000)), // CAAR
         0b0011_0100 => Some(d4(0b1001)), // CADR
         0b0011_0101 => Some(d4(0b0111)), // CDDR
+        0b0010_0010 => Some(CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b11110111).unwrap()))), // EQUAL (equal?)
         _ => None,
     }
 }
@@ -212,6 +213,7 @@ fn surface_index() -> &'static HashMap<&'static str, SemanticId> {
 }
 
 pub(crate) fn admitted_semantic_id_for_surface(name: &str) -> Option<SemanticId> {
+    eprintln!("DEBUG admitted_semantic_id_for_surface: name={:?} -> {:?}", name, surface_index().get(name).copied());
     surface_index().get(name).copied()
 }
 

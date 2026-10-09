@@ -1,0 +1,25 @@
+name: D10 exact barycentric numerical donor
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-exact-barycentric-interpolation-research-v1.json'
+      - 'scripts/check_d10_exact_barycentric_interpolation.py'
+      - 'tests/test_d10_exact_barycentric_interpolation.py'
+      - 'tests/oracles/d10_exact_barycentric_chez.ss'
+      - 'docs/research/d10-exact-barycentric-interpolation.uk.md'
+      - '.github/workflows/d10-exact-barycentric-interpolation.yml'
+  workflow_dispatch:
+jobs:
+  exact-independent-donors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source-grade semantic and ten anti-forgery negative controls
+        run: python3 scripts/check_d10_exact_barycentric_interpolation.py
+      - name: Exact rational Lagrange versus barycentric differential
+        run: python3 -m unittest discover -s tests -p 'test_d10_exact_barycentric_interpolation.py' -v
+      - name: Install real R6RS Chez
+        run: sudo apt-get update -qq && sudo apt-get install -y chezscheme
+      - name: Run independent 15-case Chez exact arithmetic donor
+        run: python3 scripts/check_d10_exact_barycentric_interpolation.py --real-chez --scheme scheme

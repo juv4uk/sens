@@ -1,4 +1,6 @@
 ;;;; D10 source-donor oracle; Common Lisp names are historical reference only.
+;;;; (role research-only)
+;;;; (semantic-authority-change none)
 ;;;; Never SENS source, never executable .sens; no D10 bit coordinates.
 (in-package :cl-user)
 

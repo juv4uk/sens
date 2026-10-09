@@ -1,0 +1,28 @@
+name: D10 crossdomain exact-math research witnesses
+on:
+  push:
+    paths:
+      - 'knowledge/d10-crossdomain-math-signal-research-v1.json'
+      - 'tests/test_d10_crossdomain_math_laws.py'
+      - 'scripts/check_d10_crossdomain_math_signal.py'
+      - 'docs/research/d10-crossdomain-user-interests-math-laws.uk.md'
+      - '.github/workflows/d10-crossdomain-math-signal-research.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-crossdomain-math-signal-research-v1.json'
+      - 'tests/test_d10_crossdomain_math_laws.py'
+      - 'scripts/check_d10_crossdomain_math_signal.py'
+      - 'docs/research/d10-crossdomain-user-interests-math-laws.uk.md'
+      - '.github/workflows/d10-crossdomain-math-signal-research.yml'
+jobs:
+  mathematical-source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check exact D1-D10 names, source and HOLD-only disposition
+        run: python3 scripts/check_d10_crossdomain_math_signal.py
+      - name: Verify finite convolution and phase unwrap exact arithmetic
+        run: python3 -m unittest discover -s tests -p test_d10_crossdomain_math_laws.py -v

@@ -1,0 +1,28 @@
+name: D10 Gray historical ledger append regression
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_d10_gray_word_selection.py'
+      - 'tests/test_d10_gray_ledger_append.py'
+      - '.github/workflows/d10-gray-ledger-append.yml'
+  push:
+    branches:
+      - fix/d10-gray-ledger-append-id-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-historical-id-and-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Original Gray source guard (immutable SHA and bit witnesses)
+        run: python3 scripts/check_d10_gray_word_selection.py --self-test
+      - name: Append-only positive and negative ledger regressions
+        run: python3 -m unittest discover -s tests -p test_d10_gray_ledger_append.py -v

@@ -1,0 +1,258 @@
+{
+  "schema": "d10-symbolic-ai-strips-goal-regression-research/v1",
+  "authority": {
+    "scope": "RESEARCH-ONLY",
+    "issue_refs": [
+      "juv4uk/sens#4013",
+      "juv4uk/sens#4463",
+      "juv4uk/sens#4977",
+      "juv4uk/sens#4162"
+    ],
+    "foundation": "Ratified D1–D9 are unchanged; D10 research selection needs independent owner-reviewed NO-MATCH",
+    "selected_inventory_changed": false,
+    "source_programs_written": false,
+    "physical_sens_written": false
+  },
+  "candidate": {
+    "stable_id": "d10.symbolic-ai.strips-weakest-positive-predecessor.research.20261009",
+    "semantic_name": "FINITE-STRIPS-GOAL-REGRESSION",
+    "surface_uk": "відціл",
+    "surface_ukr": "відкотити-ціль-через-дію",
+    "surface_en": "finite-strips-goal-regression",
+    "status": "HOLD-CORE-VS-DERIVED-LIBRARY-REVIEW",
+    "selected": false,
+    "coordinate": null,
+    "ratified": false,
+    "kind": "FINITE-PURE-SYMBOLIC-PREDECESSOR",
+    "historical_scope": "Finite ground positive propositional STRIPS specialization, not full first-order STRIPS or 1959 Advice Taker",
+    "signature": "(finite Pre, finite Add, finite Delete, finite Goal) -> POSSIBLE(required_before sorted atoms) | IMPOSSIBLE_BY_DELETE",
+    "preconditions": [
+      "all elements are distinct lowercase ground atom IDs",
+      "Add and Delete disjoint",
+      "finite combined symbol universe max 16",
+      "no negative literals, quantifiers, hidden world state, effects or environmental assumptions"
+    ],
+    "mathematical_law": {
+      "action_applicable": "Pre subset_of S",
+      "forward_result": "post(S)=(S \\ Delete) union Add",
+      "goal_after": "Goal subset_of post(S)",
+      "impossible": "Goal intersects Delete",
+      "possible": "RequiredBefore = Pre union (Goal \\ Add)",
+      "theorem": "for all S subset_of the finite universe: possible && RequiredBefore subset_of S iff action_applicable(S) && goal_after(S)",
+      "impossible_convention": "No S can achieve Goal by this action. This is NOT the same as POSSIBLE(required_before=[]).",
+      "duplicate_and_overflow": "all duplicated inputs, ambiguous Add∩Delete, or >16 atom universe reject (no guess)"
+    },
+    "source_hobby_connections": [
+      "Advice Taker / symbolic plans: select lawful prerequisites of proposed actions, not try a blind search",
+      "Astronomy: prove prerequisites of acquiring an observation after mount alignment or exposure",
+      "ESP32-S3 / FPGA: model pure effects as an isolated mathematical data law, NOT GPIO/driver instructions",
+      "Chess or state-space search: backwards goal specification distinct from APPLY/UNDO engine",
+      "Panini formal rules: reason backwards about a transformation's required input without claiming grammar as Core opcode"
+    ],
+    "positive_witnesses": [
+      {
+        "pre": [
+          "ready"
+        ],
+        "add": [
+          "observed"
+        ],
+        "delete": [],
+        "goal": [
+          "observed"
+        ],
+        "status": "POSSIBLE",
+        "required_before": [
+          "ready"
+        ]
+      },
+      {
+        "pre": [],
+        "add": [
+          "observed"
+        ],
+        "delete": [],
+        "goal": [
+          "observed"
+        ],
+        "status": "POSSIBLE",
+        "required_before": []
+      },
+      {
+        "pre": [
+          "ready"
+        ],
+        "add": [
+          "observed"
+        ],
+        "delete": [
+          "obsolete"
+        ],
+        "goal": [
+          "observed",
+          "retained"
+        ],
+        "status": "POSSIBLE",
+        "required_before": [
+          "ready",
+          "retained"
+        ]
+      },
+      {
+        "pre": [
+          "ready"
+        ],
+        "add": [
+          "observed"
+        ],
+        "delete": [
+          "ready"
+        ],
+        "goal": [
+          "observed"
+        ],
+        "status": "POSSIBLE",
+        "required_before": [
+          "ready"
+        ]
+      }
+    ],
+    "falsifiers": [
+      {
+        "pre": [],
+        "add": [],
+        "delete": [
+          "observed"
+        ],
+        "goal": [
+          "observed"
+        ],
+        "must": "IMPOSSIBLE_BY_DELETE, NOT POSSIBLE([])"
+      },
+      {
+        "pre": [
+          "ready"
+        ],
+        "add": [
+          "observed"
+        ],
+        "delete": [],
+        "goal": [
+          "observed"
+        ],
+        "must": "cannot forget ready, otherwise empty state would falsely pass"
+      },
+      {
+        "pre": [],
+        "add": [
+          "observed"
+        ],
+        "delete": [
+          "ready"
+        ],
+        "goal": [
+          "observed",
+          "ready"
+        ],
+        "must": "cannot ignore deleted goal ready"
+      },
+      {
+        "pre": [],
+        "add": [
+          "observed"
+        ],
+        "delete": [
+          "observed"
+        ],
+        "goal": [],
+        "must": "BLOCKED ambiguous Add/Delete, do not invent effect priority"
+      },
+      {
+        "pre": [
+          "ready",
+          "ready"
+        ],
+        "add": [],
+        "delete": [],
+        "goal": [],
+        "must": "BLOCKED duplicate IDs rather than count them as multiset"
+      },
+      {
+        "pre": [],
+        "add": [
+          "observed"
+        ],
+        "delete": [],
+        "goal": [
+          "observed"
+        ],
+        "must": "MUST allow POSSIBLE([]) and keep it distinct from impossible"
+      }
+    ],
+    "behavioral_dedup": {
+      "D9.UNIFY": "Term substitutions vs goal-state predecessor condition; disjoint observed result for unifiable terms that cannot survive Delete.",
+      "D9.PROVE-GOALS": "Theorem entailment from present facts vs regression of a future goal through explicit state-changing action.",
+      "D9.FIRE-RULES-JTMS-MULTI": "Truth maintenance among justifications vs weakest prior-state condition of one Add/Delete action.",
+      "D10 ground-term LGG #4971": "Generalization of syntax trees vs weakest precondition of finite state transitions.",
+      "D10 abductive explanations #4965": "Hypothesize minimal assumptions to derive observations vs deterministic backward action effect preimage.",
+      "D10 CLPFD #4976": "Arc support for finite constraints vs delete-conflict in action goal preimage.",
+      "D10 APPLY-JOURNAL-EVENT": "Action forward effects vs backwards goal-preimage (may be derived, investigate with owner).",
+      "core_vs_derived": "HOLD until concrete witness that library composition of finite set operations and forward apply is insufficient as a language-visible root"
+    }
+  },
+  "donor_sources": [
+    {
+      "kind": "HISTORICAL-PRIMARY",
+      "authors": [
+        "Richard E. Fikes",
+        "Nils J. Nilsson"
+      ],
+      "year": 1971,
+      "title": "STRIPS: A New Approach to the Application of Theorem Proving to Problem Solving",
+      "journal": "Artificial Intelligence 2(3–4),189–208",
+      "doi": "10.1016/0004-3702(71)90010-5",
+      "url": "https://www.sciencedirect.com/science/article/pii/0004370271900105",
+      "evidence": "action preconditions, add/delete effects; this dossier derives finite weakest-predecessor theorem instead of pretending full STRIPS was a 1-op Lisp builtin"
+    },
+    {
+      "kind": "HISTORICAL-PRIMARY",
+      "authors": [
+        "John McCarthy"
+      ],
+      "year": 1959,
+      "title": "Programs with Common Sense",
+      "url": "https://www-formal.stanford.edu/jmc/mcc59/mcc59.html",
+      "evidence": "Advice Taker motivating backward/forward symbolic plan questions, NOT the formal derivation of this finite STRIPS equation"
+    },
+    {
+      "kind": "OWNER-PINNED-SOURCE",
+      "repository": "juv4uk/sens",
+      "path": "PLAN.md",
+      "git_blob_sha": "b6ff161f2beac63f8bd0c7ab008b480ba498800e",
+      "evidence": "Advice Taker is explicit main project goal"
+    },
+    {
+      "kind": "OWNER-PINNED-SOURCE",
+      "repository": "juv4uk/sens",
+      "path": "lib/reason.lisp",
+      "git_blob_sha": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "evidence": "existing backward-chaining rule evaluation, useful negative source-grade dedup donor"
+    }
+  ],
+  "evidence": {
+    "primary_python": "scripts/check_d10_strips_goal_regression.py",
+    "independent_python": "tests/test_d10_strips_goal_regression.py",
+    "independent_prolog": "tests/oracles/d10_strips_goal_regression.pl",
+    "exhaustive_3_atom_action_goal_configurations": 1728,
+    "seed_repetition_cases": 640,
+    "prolog_runtime": "SWI-Prolog plunit; recompute weakest goal prerequisite from enumerated initial state intersections",
+    "no_compile_required": true,
+    "oracle_status": "EVIDENCE-PENDING-CI"
+  },
+  "migration": {
+    "original_executable_files_migrated": 0,
+    "source_to_physical_T5": "NOT_ATTEMPTED",
+    "semantic_oracle": "NOT-A-SENS-EXECUTABLE",
+    "reason": "Research language-visible candidate only; not proof of 490 unpaired original Lisp translations"
+  }
+}

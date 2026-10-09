@@ -1,0 +1,299 @@
+{
+  "schema": "sens-d10-crossdomain-math-source-intake/v1",
+  "status": "RESEARCH-HOLD-CORE-VS-LIBRARY-OWNER-REVIEW",
+  "date": "2026-10-09",
+  "motivation": "Derive universal mathematical semantics from user's long-term astronomy/astrophysics, radio/SDR, FPGA/analog-computing, acoustics, music, horology, Panini grammar, and symbolic Lisp interests; domain-specific instruments should not become Core opcodes.",
+  "origin": {
+    "repo": "juv4uk/sens",
+    "foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "current_d10_snapshot_blob": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "selected_at_snapshot": 630,
+    "ratified": 0
+  },
+  "boundary": {
+    "D2": "sole language structure/control owner",
+    "D10": "research-only semantic candidates subject to uniqueness and universal necessity",
+    "substrare": "FPGA/SDR ADC/FFTs CORDIC are implementations, not SENS function codes",
+    "coordinates": null,
+    "physical_t5": false
+  },
+  "candidates": [
+    {
+      "id": "D10X-SIGNAL-001",
+      "semantic_name": "FINITE-CONVOLUTION",
+      "uk": "скінченна-згортка",
+      "ukr": "згорнути-послідовності",
+      "priority": "P0",
+      "role": "RESEARCH-UNSELECTED",
+      "form": "(finite-sequence a, finite-sequence b) -> finite-sequence c",
+      "type_contract": "Finite sequences over an exact commutative ring with 0 and 1; no floating rounding law is asserted.",
+      "law": "For nonempty length n,m produce n+m-1 coefficients c[k]=Σ_i a[i]*b[k−i], treating out-of-bounds as zero; if either input empty the result is empty.",
+      "witnesses": [
+        {
+          "in": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "out": [
+            1,
+            3,
+            5,
+            3
+          ]
+        },
+        {
+          "in": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "out": [
+            0,
+            1,
+            -1
+          ]
+        },
+        {
+          "in": [
+            [
+              2
+            ],
+            [
+              -3
+            ]
+          ],
+          "out": [
+            -6
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Cyclic convolution wraps the final coefficient into the first sample.",
+        "Cross-correlation fails reversing kernel where required by convolution.",
+        "Output shape differs from n+m-1 for nonempty inputs."
+      ],
+      "law_neighbors": [
+        "D8 LIST",
+        "D8 REDUCE",
+        "D8 MAP",
+        "D10 VECTOR-SLICE",
+        "D1-D9 exact rational arithmetic"
+      ],
+      "relationship": "Convolution is the same coefficient law used for polynomial multiplication and FIR filtering; no FFT or DSP hardware algorithm is essential.",
+      "user_inspiration": [
+        "SDR radio and demodulation",
+        "acoustics/music",
+        "astronomy image processing",
+        "analogue computing and polynomial algebra",
+        "GPU/FPGA implementation"
+      ],
+      "reference": "https://numpy.org/doc/stable/reference/generated/numpy.convolve.html",
+      "proposed_owner": "CORE-MATH-LIBRARY-REVIEW",
+      "core_question": "Is this a stable named library law (preferred), or a non-derivable distinct D10 semantic root? No Core selection without evidence.",
+      "selection": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "id": "D10X-SIGNAL-002",
+      "semantic_name": "PHASE-UNWRAP",
+      "uk": "розгорнути-фазу",
+      "ukr": "усунути-періодичні-стрибки",
+      "priority": "P0",
+      "role": "RESEARCH-UNSELECTED",
+      "form": "(finite-rational-sequence p, positive-rational period) -> finite-rational-sequence q",
+      "type_contract": "Rational samples and an exact positive rational period. Other numeric types require explicit separate accuracy law.",
+      "law": "q[0]=p[0]; for each next i choose Δ congruent to (p[i]-p[i-1]) modulo period minimizing |Δ|; for exact half-period ties preserve the sign of the original raw difference; q[i]=q[i-1]+Δ. Empty input yields empty. This is local minimal-jump phase reconstruction, not a proof of physical phase trajectory.",
+      "witnesses": [
+        {
+          "in": [
+            [
+              0,
+              1,
+              2,
+              -1,
+              0
+            ],
+            4
+          ],
+          "out": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "in": [
+            [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              1,
+              2
+            ],
+            6
+          ],
+          "out": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        {
+          "in": [
+            [
+              0,
+              180,
+              -180
+            ],
+            360
+          ],
+          "out": [
+            0,
+            180,
+            180
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Replacing the entire sequence with input modulo period loses accumulated revolutions.",
+        "For adjacent raw differences inside half period, altering values violates continuity law.",
+        "Half-period ties picked without stated rule make result nondeterministic."
+      ],
+      "law_neighbors": [
+        "D10 MODULO",
+        "D1-D9 rational arithmetic",
+        "D1-D9 folds/map"
+      ],
+      "relationship": "Adjacent differences modulo period plus cumulative sum distinguish signal phase unwrapping from independent per-element MODULO; operation is still expressible in a library, not a new control primitive.",
+      "user_inspiration": [
+        "RTL-SDR and phase measurements",
+        "rotary encoders AS5600",
+        "horology and angle cycles",
+        "music oscillators",
+        "orbital phase and astronomy"
+      ],
+      "reference": "https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html",
+      "proposed_owner": "CORE-MATH-LIBRARY-REVIEW",
+      "core_question": "Does a composable fold+MODULO library law suffice? Select as D10 only after owner judges universal distinct identity.",
+      "selection": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "rejected_as_core": [
+    {
+      "name": "FFT",
+      "hobby": "SDR/FPGA/acoustics",
+      "reason": "Algorithm or substrate implementation of spectral transformation; first prove primitive transform contract, not FFT as magic bit code.",
+      "disposition": "LIBRARY-OR-SUBSTRATE-HOLD"
+    },
+    {
+      "name": "CORDIC-ITERATE",
+      "hobby": "analog computing/FPGA",
+      "reason": "One algorithm for evaluating trig/rotations, not unique semantic identity.",
+      "disposition": "SUBSTRATE-HOLD"
+    },
+    {
+      "name": "AS5600-READ-ANGLE",
+      "hobby": "rotary encoder/electronics",
+      "reason": "Device driver with side effects; no universal D10 meaning.",
+      "disposition": "DRIVER-ISLAND"
+    },
+    {
+      "name": "ORBITAL-EPHEMERIS",
+      "hobby": "astronomy/space simulator",
+      "reason": "World model+time ephemeris package; no generic core resident.",
+      "disposition": "ASTRONOMY-PACKAGE-ISLAND"
+    },
+    {
+      "name": "EQUAL-TEMPERAMENT-NOTE",
+      "hobby": "acoustics/music",
+      "reason": "Tuning standard, typically derivable from rational/exponent arithmetic; package policy.",
+      "disposition": "MUSIC-PACKAGE-ISLAND"
+    },
+    {
+      "name": "PRATYAHARA-RULE",
+      "hobby": "Panini/Sanskrit",
+      "reason": "Existing Panini donor studies already include RESOLVE-PRATYAHARA and sound membership; no duplicate selection.",
+      "disposition": "PANINI-DONOR-EXISTING"
+    },
+    {
+      "name": "JPEG-DEBAYER",
+      "hobby": "Canon astronomy imaging",
+      "reason": "Image-processing device/camera model, not foundational Lisp operation.",
+      "disposition": "IMAGING-PACKAGE-ISLAND"
+    },
+    {
+      "name": "SPACE-GAME-ORBIT-PROPAGATE",
+      "hobby": "space simulation",
+      "reason": "Game/physical-model integration, not core semantic root.",
+      "disposition": "APPLICATION-ISLAND"
+    }
+  ],
+  "admission": {
+    "selected_added": 0,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle_source": "tests/test_d10_crossdomain_math_laws.py",
+    "owner_gate": "#4013, #4463; exclusive canonical selection writer required; derivability and donor admissibility remain OPEN"
+  },
+  "owned_repo_donors": [
+    {
+      "repo": "juv4uk/spanda",
+      "file": "README.md",
+      "blob": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "url": "https://github.com/juv4uk/spanda/blob/master/README.md",
+      "relevance": "Exact rational Clojure ↔ SENS ↔ FPGA oscillator/physical computation; no floating-point as normative identity. Motivates exact rational phase law and arithmetic reproducibility; this README is a project plan, not a phase-unwrap implementation.",
+      "disposition": "FIRST-PARTY-CROSSDOMAIN-NONPROOF"
+    },
+    {
+      "repo": "juv4uk/radio-log",
+      "file": "src/lib/sens-radio/channel-lab.ts",
+      "blob": "7d8c70691dc19f0c3d7121d8945529dd2b2335e7",
+      "url": "https://github.com/juv4uk/radio-log/blob/main/src/lib/sens-radio/channel-lab.ts",
+      "relevance": "Actual SENS radio laboratory: frequency offset, sample-rate scale, channel evidence, aligned BFSK decoding, linear resampling; the application motivates signal semantics but its channel-impairment mechanisms are not D10 primitives.",
+      "disposition": "FIRST-PARTY-APPLICATION-CROSSDOMAIN"
+    },
+    {
+      "repo": "juv4uk/radio-log",
+      "file": "tests/sens-radio-channel-lab.test.mjs",
+      "blob": "2f55b701d4974b161ddaa1af3314db5e4694081a",
+      "url": "https://github.com/juv4uk/radio-log/blob/main/tests/sens-radio-channel-lab.test.mjs",
+      "relevance": "Actual tests distinguish exact SENS frame/payload identity from noisy channel conditions and sample-rate-drift unlocking; prevents treating partial signal recovery as exact language meaning.",
+      "disposition": "FIRST-PARTY-TEST-WITNESS-NOT-D10-PROOF"
+    },
+    {
+      "repo": "juv4uk/my-lisp-panini",
+      "file": "panini/machine/siva-sutras.lisp",
+      "blob": "c64a17bac208d028fec0c070d91aab32ed81b3e3",
+      "url": "https://github.com/juv4uk/my-lisp-panini/blob/master/panini/machine/siva-sutras.lisp",
+      "relevance": "Actual Sanskrit pratyahara expansion and membership semantics; these donor identities already occur in D10's Panini source research, so do not mint duplicates. Demonstrates rules as data.",
+      "disposition": "EXISTING-PANINI-DONOR-DEDUPE"
+    }
+  ]
+}

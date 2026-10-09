@@ -1,0 +1,62 @@
+name: D10 Prolog sound constraints donor oracle
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-prolog-constraint-hobbies-research-v1.json'
+      - 'tests/d10_prolog_constraint_oracle.pl'
+      - 'scripts/check_d10_prolog_constraint_hobbies.py'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - '.github/workflows/d10-prolog-constraint-hobbies.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-prolog-constraint-hobbies-research-v1.json'
+      - 'tests/d10_prolog_constraint_oracle.pl'
+      - 'scripts/check_d10_prolog_constraint_hobbies.py'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - '.github/workflows/d10-prolog-constraint-hobbies.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-prolog-witness:
+    name: Real SWI donor, 13 cases + 12 rejection mutants
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install an actual donor Prolog runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends swi-prolog-nox
+          swipl --version
+      - name: Prove dossier law/identity gates and run real donor cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_prolog_constraint_hobbies.py \
+            --self-test --run-oracle \
+            --report "$RUNNER_TEMP/d10-prolog-constraint-witness.json"
+          python3 - "$RUNNER_TEMP/d10-prolog-constraint-witness.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert r["status"]=="PASS_RESEARCH_HOLD_NOT_SELECTED",r
+          assert r["selected_delta"]==0 and r["ratified_d10"]==0,r
+          assert r["proposals"]==3 and r["mutations_blocked"]==12,r
+          assert r["donor_runtime"]["cases_passed"]==13,r
+          assert r["sens_runtime_oracle"]=="NOT_EXECUTED",r
+          assert r["full_behavioral_d1_d9_d10_dedup"]=="PENDING",r
+          print("D10_PROLOG_SOURCE_RESEARCH_PROVEN_REMAINS_UNSELECTED")
+          PY
+      - name: Retain actual runtime version and stable case witness
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d10-real-prolog-constraint-witness
+          path: ${{ runner.temp }}/d10-prolog-constraint-witness.json
+          if-no-files-found: warn

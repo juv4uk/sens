@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 625,
-    "remaining_semantic_candidates": 399,
+    "selected_semantic_candidates": 636,
+    "remaining_semantic_candidates": 388,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 369,
+    "unplaced_selected_candidates": 380,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -80,6 +80,24 @@
       "mechanism_hold": 1,
       "donor_exhausted": true,
       "new_d10_candidates_added_by_this_audit": 0
+    },
+    "finite_bayes_update_v1": {
+      "authority": "#4013 #4463 #4956",
+      "artifact": "knowledge/d10-finite-bayes-update-research-v1.json",
+      "selected": 1,
+      "coordinates_assigned": 0,
+      "ratification_effect": "NONE",
+      "derivability": "PENDING-OWNER-REVIEW",
+      "oracle": "exact rational update vs independent common-denominator integer-weight enumeration"
+    },
+    "gf2_minimal_recurrence_v1": {
+      "authority": "#4013 #4463 #4950 #4952",
+      "artifact": "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+      "selected": 1,
+      "coordinates_assigned": 0,
+      "ratification_effect": "NONE",
+      "derivability": "PENDING-OWNER-REVIEW",
+      "dedup": "GF2-LINEAR-COMPLEXITY is only the L projection; no duplicate scalar row is added."
     }
   },
   "recovery_v2": {
@@ -318,5 +336,33 @@
     "selected": 23,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
+  },
+  "historical_primary_admission_batch1": {
+    "artifact": "knowledge/d10-historical-primary-admission-batch1-v1.json",
+    "selected": 2,
+    "names": [
+      "DPB",
+      "ARRAY-DISPLACEMENT"
+    ],
+    "coordinates_added": 0,
+    "ratified_added": 0
+  },
+  "primitive_word_root_v1": {
+    "artifact": "knowledge/d10-primitive-binary-word-root-v1.json",
+    "selected": 1,
+    "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle": "Chez Scheme R6RS + exhaustive divisor/KMP reference",
+    "proposal_id": "D10P-0007"
+  },
+  "gray_binary_word_intake": {
+    "source": "knowledge/d10-gray-reflected-binary-research-v1.json",
+    "source_sha": "0cf23c95660aa7ae199e6f683bc76f14eabbf958",
+    "base_selected": 632,
+    "added": 2,
+    "now_selected": 634,
+    "ratified_added": 0,
+    "coordinates_added": 0
   }
 }
