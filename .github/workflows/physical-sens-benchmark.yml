@@ -65,6 +65,16 @@ jobs:
             --sizes 1,16,128,1024 --samples 11 --work-budget 65536 \
             --out "$RUNNER_TEMP/sens-physical-bench"
 
+      - name: Measure D5 LABEL recursion, copy and higher-order MAP from real T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/d5_workloads.py \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --reps 19 --warmups 3 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
       - name: Publish exact measurements (not unit-test tallies)
         if: always()
         shell: bash
@@ -73,6 +83,9 @@ jobs:
             cat "$RUNNER_TEMP/sens-physical-bench/report.md" >> "$GITHUB_STEP_SUMMARY"
             if test -s "$RUNNER_TEMP/sens-physical-bench/hot-report.md"; then
               cat "$RUNNER_TEMP/sens-physical-bench/hot-report.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if test -s "$RUNNER_TEMP/sens-physical-bench/d5-report.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/d5-report.md" >> "$GITHUB_STEP_SUMMARY"
             fi
           else
             echo 'Benchmark did not finish. No performance claim from this run.' >> "$GITHUB_STEP_SUMMARY"
