@@ -3,7 +3,7 @@
 //! Rust observes mechanism; Lisp owns semantic meaning (see #112/#113, #1312).
 //! Tests observe four distinct classes of laws defined in contracts/world-transition-contract.lisp:
 //! 1. World snapshot parentage and historical preservation: verified via structural-relation (equal?).
-//! 2. Content address identity: verified via identity-relation (eq).
+//! 2. Content-address equality: independently observed via the current exact-domain evaluator.
 //! 3. Transaction receipts: embed structural-relation records (conflict, rejected, accepted).
 //! 4. Compatibility wrappers: maintain journal transitions without universal-T authority.
 
@@ -911,7 +911,7 @@ fn reconstructed_equal_worlds_have_no_branch_delta() {
 
 #[test]
 fn equal_knowledge_has_the_same_canonical_content_address() {
-    // #1312: content address identity observed as identity-relation same
+    // #1312: equal content-address byte strings for equal knowledge (not a retired identity relation).
     assert_eq!(
         eval_world(
             r#"
@@ -925,7 +925,7 @@ fn equal_knowledge_has_the_same_canonical_content_address() {
 
 #[test]
 fn different_knowledge_has_a_different_content_address() {
-    // #1312: content address divergence observed as identity-relation distinct
+    // #1312: distinct content-address byte strings for different knowledge.
     assert_eq!(
         eval_world(
             r#"
@@ -939,7 +939,7 @@ fn different_knowledge_has_a_different_content_address() {
 
 #[test]
 fn knowledge_content_addresses_round_trip_to_the_same_structure() {
-    // #1312: round-trip structure preservation observed as structural-relation same
+    // #1312: current D8 equality checks readback of the serialized knowledge structure.
     assert_eq!(
         eval_world(
             r#"
@@ -955,7 +955,7 @@ fn knowledge_content_addresses_round_trip_to_the_same_structure() {
 
 #[test]
 fn independently_reconstructed_worlds_have_the_same_content_address() {
-    // #1312: reconstructed world address identity observed as identity-relation same
+    // #1312: independently reconstructed worlds produce equal content-address bytes.
     assert_eq!(
         eval_world(
             r#"
