@@ -1,0 +1,516 @@
+{
+  "schema": "d10-abductive-minimal-explanations/v1",
+  "status": "SOURCE-GROUNDED-RESEARCH-HOLD-NOT-SELECTED",
+  "created_date": "2026-10-09",
+  "authority": [
+    "#4013",
+    "#4463"
+  ],
+  "intent": "Symbolic-AI research dossier only: bounded finite propositional abductive explanations; not selected D10 meaning, not runtime semantics, and not owner ratification.",
+  "baseline": {
+    "current_foundation_contract": "11.8",
+    "foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "selected_d10_at_creation": 634,
+    "d10_capacity": 1024,
+    "law_forced_coordinates": 256,
+    "unplaced_selected": 378,
+    "remaining_candidates": 390,
+    "ratified_d10": 0
+  },
+  "proposal": {
+    "semantic_name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+    "surface_names": {
+      "ук": "пояснити-припущеннями",
+      "укр": "знайти-мінімальні-пояснення"
+    },
+    "status": "HOLD-CORE-VS-LIBRARY-REVIEW",
+    "law": "For a finite ground propositional Horn theory T, designated abducibles A, observation g and finite integrity constraints IC, return the canonical antichain of inclusion-minimal Δ ⊆ A such that g belongs to the least fixed-point closure of T ∪ Δ and no integrity constraint is fully satisfied by that closure.",
+    "finite_fragment": {
+      "theory": "finite ground definite-Horn clauses over propositional atoms",
+      "abducibles": "finite designated set of atoms; only these may be hypothesized",
+      "integrity_constraints": "finite forbidden conjunctions; a candidate is inconsistent if every atom in one forbidden conjunction belongs to the closure",
+      "entailment": "least fixed-point closure under the ground Horn rules",
+      "minimality": "set-inclusion minimality among coherent explanations, not minimum cardinality alone",
+      "output_order": "each explanation has unique sorted atoms; explanations sort by ascending cardinality then lexicographic atom sequence"
+    },
+    "answer_distinctions": {
+      "no_explanation": "empty outer list []",
+      "valid_empty_explanation": "one explanation containing no assumptions [[]]",
+      "warning": "No explanation is not the same as a successful proof requiring zero assumptions."
+    },
+    "positive_witness": "wet_shoes follows from either rain or sprinkler, so the complete minimal explanation family is [[rain],[sprinkler]].",
+    "falsifiers": [
+      "Returning both rain and sprinkler as one required set is wrong when either alone proves wet_shoes.",
+      "Returning a superset such as [rain,sprinkler] is wrong when a proper subset already explains the observation.",
+      "Hypothesizing an atom outside the designated abducible set is forbidden.",
+      "A forbidden conjunction reached through derived facts must reject that candidate even when the forbidden atom was not explicitly hypothesized.",
+      "A mutually recursive Horn cycle without a seed must not prove itself.",
+      "A successful empty explanation [[]] must remain distinct from no explanations []."
+    ],
+    "neighboring_existing_semantics": [
+      "D9 UNIFY / PROVE-GOAL / PROVE-GOALS / REASON",
+      "D9 EXPLAIN-PROOF / PROVENANCE / ADD-JUSTIFICATION / SUPPORTING-EVIDENCE",
+      "D10 PROVE-RULE / PROVE-GOAL-STATE / ADVICE-CONFLICT-PROOF"
+    ],
+    "behavioral_dedup": "PENDING: current inventory exact-name and lower-domain check are automated; a human must still evaluate derivability via existing proof enumeration, integrity checks, and finite set algebra.",
+    "owner_review": "PENDING",
+    "physical_t5_authorized": false,
+    "d10_selection_delta": 0,
+    "coordinate": null,
+    "ratified": false
+  },
+  "sources": [
+    {
+      "id": "KAKAS-KOWALSKI-TONI-1992",
+      "title": "Abductive Logic Programming",
+      "authors": [
+        "A. C. Kakas",
+        "R. A. Kowalski",
+        "F. Toni"
+      ],
+      "publication": "Journal of Logic and Computation 2(6), pp. 719–770 (1992)",
+      "doi": "10.1093/logcom/2.6.719",
+      "url": "https://academic.oup.com/logcom/article-abstract/2/6/719/942121",
+      "author_copy": "https://www.doc.ic.ac.uk/~rak/papers/abdsurv.pdf",
+      "source_use": "Section 1.1 defines explanation against a background theory and observation and requires consistency; the paper treats abduction as a family with explicit restrictions and multiple possible explanations."
+    },
+    {
+      "id": "LIN-YOU-2002",
+      "title": "Abduction in logic programming: A new definition and an abductive procedure based on rewriting",
+      "authors": [
+        "Fangzhen Lin",
+        "Jia-Huai You"
+      ],
+      "publication": "Artificial Intelligence 140(1–2), pp. 175–205 (2002)",
+      "doi": "10.1016/S0004-3702(02)00227-8",
+      "url": "https://doi.org/10.1016/S0004-3702(02)00227-8",
+      "repository": "https://repository.hkust.edu.hk/ir/Record/1783.1-773",
+      "source_use": "Addresses minimal explanations and avoiding subsumed explanations; this dossier deliberately specifies a smaller finite propositional fragment."
+    }
+  ],
+  "oracle": {
+    "python_reference": "scripts/check_d10_abductive_minimal_explanations.py",
+    "independent_logic_program": "tests/oracles/d10_abductive_minimal_explanations.pl",
+    "independent_runtime": "SWI-Prolog, installed in the dedicated workflow",
+    "case_count": 12,
+    "case_ids": [
+      "wet_shoes_two_minima",
+      "empty_explanation_is_success",
+      "no_explanation_is_not_empty_success",
+      "integrity_constraint_filters_explanation",
+      "conjunction_keeps_all_required_abducibles",
+      "unsupported_cycle_does_not_self_prove",
+      "seeded_cycle_reaches_fixpoint",
+      "integrity_checks_derived_closure",
+      "canonical_output_ignores_input_order",
+      "duplicate_rules_do_not_duplicate_explanations",
+      "non_abducible_atoms_cannot_be_hypothesized",
+      "mixed_size_minimal_explanations_order_by_size"
+    ],
+    "cases": [
+      {
+        "id": "wet_shoes_two_minima",
+        "facts": [],
+        "rules": [
+          {
+            "head": "wet_shoes",
+            "body": [
+              "rain"
+            ]
+          },
+          {
+            "head": "wet_shoes",
+            "body": [
+              "sprinkler"
+            ]
+          }
+        ],
+        "abducibles": [
+          "rain",
+          "sprinkler"
+        ],
+        "integrity_constraints": [],
+        "goal": "wet_shoes",
+        "expected": [
+          [
+            "rain"
+          ],
+          [
+            "sprinkler"
+          ]
+        ]
+      },
+      {
+        "id": "empty_explanation_is_success",
+        "facts": [
+          "sunlight"
+        ],
+        "rules": [
+          {
+            "head": "plant_ready",
+            "body": [
+              "sunlight"
+            ]
+          }
+        ],
+        "abducibles": [
+          "rain",
+          "sprinkler"
+        ],
+        "integrity_constraints": [],
+        "goal": "plant_ready",
+        "expected": [
+          []
+        ]
+      },
+      {
+        "id": "no_explanation_is_not_empty_success",
+        "facts": [],
+        "rules": [],
+        "abducibles": [
+          "rain",
+          "sprinkler"
+        ],
+        "integrity_constraints": [],
+        "goal": "mystery",
+        "expected": []
+      },
+      {
+        "id": "integrity_constraint_filters_explanation",
+        "facts": [
+          "moon"
+        ],
+        "rules": [
+          {
+            "head": "wet_shoes",
+            "body": [
+              "rain"
+            ]
+          },
+          {
+            "head": "wet_shoes",
+            "body": [
+              "sprinkler"
+            ]
+          }
+        ],
+        "abducibles": [
+          "rain",
+          "sprinkler"
+        ],
+        "integrity_constraints": [
+          [
+            "rain",
+            "moon"
+          ]
+        ],
+        "goal": "wet_shoes",
+        "expected": [
+          [
+            "sprinkler"
+          ]
+        ]
+      },
+      {
+        "id": "conjunction_keeps_all_required_abducibles",
+        "facts": [],
+        "rules": [
+          {
+            "head": "alarm",
+            "body": [
+              "power",
+              "smoke"
+            ]
+          }
+        ],
+        "abducibles": [
+          "noise",
+          "power",
+          "smoke"
+        ],
+        "integrity_constraints": [],
+        "goal": "alarm",
+        "expected": [
+          [
+            "power",
+            "smoke"
+          ]
+        ]
+      },
+      {
+        "id": "unsupported_cycle_does_not_self_prove",
+        "facts": [],
+        "rules": [
+          {
+            "head": "p",
+            "body": [
+              "q"
+            ]
+          },
+          {
+            "head": "q",
+            "body": [
+              "p"
+            ]
+          }
+        ],
+        "abducibles": [],
+        "integrity_constraints": [],
+        "goal": "p",
+        "expected": []
+      },
+      {
+        "id": "seeded_cycle_reaches_fixpoint",
+        "facts": [],
+        "rules": [
+          {
+            "head": "p",
+            "body": [
+              "q"
+            ]
+          },
+          {
+            "head": "q",
+            "body": [
+              "p"
+            ]
+          },
+          {
+            "head": "q",
+            "body": [
+              "seed"
+            ]
+          }
+        ],
+        "abducibles": [
+          "seed"
+        ],
+        "integrity_constraints": [],
+        "goal": "p",
+        "expected": [
+          [
+            "seed"
+          ]
+        ]
+      },
+      {
+        "id": "integrity_checks_derived_closure",
+        "facts": [],
+        "rules": [
+          {
+            "head": "wet_shoes",
+            "body": [
+              "rain"
+            ]
+          },
+          {
+            "head": "danger",
+            "body": [
+              "rain"
+            ]
+          },
+          {
+            "head": "wet_shoes",
+            "body": [
+              "sprinkler"
+            ]
+          }
+        ],
+        "abducibles": [
+          "rain",
+          "sprinkler"
+        ],
+        "integrity_constraints": [
+          [
+            "danger"
+          ]
+        ],
+        "goal": "wet_shoes",
+        "expected": [
+          [
+            "sprinkler"
+          ]
+        ]
+      },
+      {
+        "id": "canonical_output_ignores_input_order",
+        "facts": [],
+        "rules": [
+          {
+            "head": "wet_shoes",
+            "body": [
+              "sprinkler"
+            ]
+          },
+          {
+            "head": "wet_shoes",
+            "body": [
+              "rain"
+            ]
+          }
+        ],
+        "abducibles": [
+          "sprinkler",
+          "rain"
+        ],
+        "integrity_constraints": [],
+        "goal": "wet_shoes",
+        "expected": [
+          [
+            "rain"
+          ],
+          [
+            "sprinkler"
+          ]
+        ]
+      },
+      {
+        "id": "duplicate_rules_do_not_duplicate_explanations",
+        "facts": [],
+        "rules": [
+          {
+            "head": "wet_shoes",
+            "body": [
+              "rain"
+            ]
+          },
+          {
+            "head": "wet_shoes",
+            "body": [
+              "rain"
+            ]
+          }
+        ],
+        "abducibles": [
+          "rain"
+        ],
+        "integrity_constraints": [],
+        "goal": "wet_shoes",
+        "expected": [
+          [
+            "rain"
+          ]
+        ]
+      },
+      {
+        "id": "non_abducible_atoms_cannot_be_hypothesized",
+        "facts": [],
+        "rules": [
+          {
+            "head": "target",
+            "body": [
+              "unlisted_atom"
+            ]
+          }
+        ],
+        "abducibles": [
+          "rain"
+        ],
+        "integrity_constraints": [],
+        "goal": "target",
+        "expected": []
+      },
+      {
+        "id": "mixed_size_minimal_explanations_order_by_size",
+        "facts": [],
+        "rules": [
+          {
+            "head": "goal",
+            "body": [
+              "rain"
+            ]
+          },
+          {
+            "head": "goal",
+            "body": [
+              "power",
+              "smoke"
+            ]
+          }
+        ],
+        "abducibles": [
+          "smoke",
+          "rain",
+          "power"
+        ],
+        "integrity_constraints": [],
+        "goal": "goal",
+        "expected": [
+          [
+            "rain"
+          ],
+          [
+            "power",
+            "smoke"
+          ]
+        ]
+      }
+    ]
+  },
+  "application_motivations_not_semantic_authority": [
+    "A Viber or command-line assistant without an LLM could surface explicitly supported alternative assumptions rather than inventing a narrative answer.",
+    "Prolog, Datalog, CLIPS and Advice-Taker-style knowledge programs can use the same finite explanation contract while retaining their own rule-engine mechanisms.",
+    "Constraint-heavy Panini/grammar work can ask which explicit properties would make one analysis consistent, subject to an abducible vocabulary.",
+    "All applications are motivation only; no messaging, network, grammar, hardware or host operation is admitted by this dossier."
+  ],
+  "repository_boundary_audit": {
+    "repository": "juv4uk/sens",
+    "base_commit": "48464f14375ebb10808025b3d51a4b78586c48b8",
+    "source_path": "lib/reason.lisp",
+    "source_blob_sha": "dadc52a2f40f2f30ad77642898afb81980044c08",
+    "source_ranges": [
+      {
+        "lines": "187-223",
+        "definitions": [
+          "prove-goal-accumulate",
+          "prove-goal",
+          "prove-goal-scan"
+        ],
+        "observable_contract": "prove/accumulate results for a goal using extant rules"
+      },
+      {
+        "lines": "269-275",
+        "definitions": [
+          "prove-goals"
+        ],
+        "observable_contract": "prove multiple goals against current knowledge/rule state"
+      },
+      {
+        "lines": "307-339",
+        "definitions": [
+          "explain-proof",
+          "explain-proof-node",
+          "explain-proof-list"
+        ],
+        "observable_contract": "construct/display a proof tree for an obtained proof"
+      }
+    ],
+    "contrast_to_candidate": "The candidate explicitly enumerates subsets of a finite designated abducible set, evaluates least-fixed-point Horn closure, rejects integrity constraints over derived closure, and returns all subset-minimal coherent explanations.",
+    "unresolved_question": "Can the full behavior be expressed as a library composition of existing proof, finite-set enumeration, and constraint checking? These source ranges establish a pinned comparison baseline; they do not prove a new Core identity.",
+    "exact_name_absence_is_not_novelty_proof": true
+  },
+  "atms_reduction_audit": {
+    "peer_pr": "https://github.com/juv4uk/sens/pull/4958",
+    "peer_candidate": "ATMS-CONSISTENT-LABEL-JOIN",
+    "relation": "Not the same primitive: ATMS label join combines two support families under nogoods. In the bounded positive Horn fragment, iterating such support joins over rule bodies, propagating to a least fixed point, and filtering the goal antichain yields the same answers as enumerating allowed assumptions and checking closure/constraints.",
+    "independent_oracle": "tests/test_d10_abductive_atms_reduction.py",
+    "comparison": [
+      "Powerset enumeration + least-fixed-point closure + integrity-constraint checks",
+      "ATMS-style minimal support-label propagation + derived nogood antichain + goal-label filtering"
+    ],
+    "fixture_count": 12,
+    "exhaustive_model_count": 16704,
+    "exhaustive_domain": "3 propositional atoms; 0..2 definite-Horn rules chosen from all heads and bodies of size 0..2; all 8 abducible sets; 3 fact sets; no constraint, unary a nogood, or {a,b} nogood.",
+    "expected_outcome": "bounded independent agreement strengthens the library-derivation hypothesis; keep HOLD pending owner/core review",
+    "caveats": [
+      "This is finite-model equivalence only, not a proof for unbounded or first-order ALP.",
+      "This is not a SENS runtime oracle.",
+      "ATMS-CONSISTENT-LABEL-JOIN alone is not the full Horn label-propagation engine."
+    ],
+    "canonical_inventory_mutated": false,
+    "d10_selection_delta": 0,
+    "coordinates_added": 0,
+    "ratified_added": 0
+  }
+}
