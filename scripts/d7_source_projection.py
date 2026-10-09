@@ -113,7 +113,14 @@ def main() -> int:
                     pass
                 else:
                     raise D7ProjectionError(f"unowned LocalOrdinal admitted: {bits}")
-            print("D7-PROJECTION=PASS; owner-residents=126/128; reserved=2; no-Rust-law")
+            for pin in ("0100001", "0101010"):
+                try:
+                    project(pin, role="sound-text")
+                except D7ProjectionError:
+                    pass
+                else:
+                    raise D7ProjectionError(f"reserved Sound/Text pin admitted: {pin}")
+            print("D7-PROJECTION=PASS; owner-residents=126/128; reserved=2; local-ordinals=14; no-Rust-law")
             return 0
         if opts.coordinate is None or opts.role is None:
             ap.error("--coordinate and --role are both required without --check")
