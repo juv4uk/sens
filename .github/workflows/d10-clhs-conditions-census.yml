@@ -11,6 +11,7 @@ on:
       - scripts/check-d10-proposal-ledger.py
       - tests/test_d10_proposal_ledger_growth.py
       - tests/d10-clhs-compute-restarts-sbcl.lisp
+      - tests/oracles/d10_clhs_conditions_restart_sbcl.lisp
       - .github/workflows/d10-clhs-conditions-census.yml
   push:
     branches: [main]
@@ -42,6 +43,8 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq sbcl
       - name: Execute real SBCL COMPUTE-RESTARTS witnesses
         run: sbcl --noinform --script tests/d10-clhs-compute-restarts-sbcl.lisp
+      - name: Execute independent SBCL restart identity and condition-filter witness
+        run: sbcl --noinform --script tests/oracles/d10_clhs_conditions_restart_sbcl.lisp
       - name: Verify proposal ledger schema, source trace, append-only history
         run: |
           python3 scripts/check-d10-proposal-ledger.py --self-test
