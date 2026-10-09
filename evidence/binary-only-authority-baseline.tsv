@@ -1,0 +1,13 @@
+# #1707 binary-only semantic-authority classification baseline
+# pattern_id	regex	path_regex	classification	owner	target
+expr-symbol	ExprKind::Symbol	^crates/sens/src/.*[.]rs$	transition-debt	#1696	zero
+value-symbol	Value::Symbol	^crates/sens/src/.*[.]rs$	transition-debt	#1696	zero
+expr-string	ExprKind::String	^crates/sens/src/.*[.]rs$	transition-debt	#1700	Text7
+value-string	Value::String	^crates/sens/src/.*[.]rs$	transition-debt	#1700	Text7
+host-bool	Value::Bool	^crates/sens/src/.*[.]rs$	transition-debt	#1713	predicate-or-boundary-only
+generic-truthiness	[.]is_truthy[(]	^crates/sens/src/.*[.]rs$	transition-debt	#1713	zero
+host-f64-parse	parse::<f64>	^crates/sens/src/eval/special_forms/json[.]rs$	mechanism-private	#1706	json-boundary-only
+fasl-symbol-tag	TAG_SYMBOL	^crates/sens/src/(syntax|layout)[.]rs$	transition-debt	#1696	zero
+fasl-string-tag	TAG_STRING	^crates/sens/src/(syntax|layout)[.]rs$	transition-debt	#1700	Text7
+utf8-decode	std::str::from_utf8	^crates/sens/src/syntax[.]rs$	transition-debt	#1700	Text7
+utf8-decode	std::str::from_utf8	^crates/sens/src/eval/special_forms/json[.]rs$	mechanism-private	#1706	json-boundary-only
