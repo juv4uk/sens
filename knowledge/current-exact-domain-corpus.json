@@ -1,0 +1,2580 @@
+{
+  "accounting": {
+    "admitted_residents": 252,
+    "coordinate_rows": 254,
+    "current_domains": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7"
+    ],
+    "d8_rows": 0,
+    "owner_reserved_pinned": 2,
+    "research_domains": [
+      "D8"
+    ]
+  },
+  "contract": "11.6",
+  "generated_from": [
+    "knowledge/d1-d7-foundation.json",
+    "knowledge/d4-cleanroom.json",
+    "knowledge/d5-ratified.json",
+    "knowledge/d6-ratified.json",
+    "knowledge/d7-ratified.json"
+  ],
+  "identity_rule": "exact bits + exact domain + admitted/proved law",
+  "non_conclusions": [
+    "This corpus is an authority projection, not a new semantic authority.",
+    "Residency does not imply derivability, callability, or runtime mechanism.",
+    "D7 owner-reserved/pinned coordinates are not free and are not admitted residents.",
+    "D8 is excluded because Contract 11.6 keeps Core.D8 unratified/research.",
+    "Historical Sens8/Sid8/Function8 coordinates have zero placement authority here."
+  ],
+  "rows": [
+    {
+      "authority_ref": "#1699",
+      "domain": "D1",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "NO",
+      "status": "admitted",
+      "width": 1,
+      "word": "0"
+    },
+    {
+      "authority_ref": "#1699",
+      "domain": "D1",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "YES",
+      "status": "admitted",
+      "width": 1,
+      "word": "1"
+    },
+    {
+      "authority_ref": "#1702",
+      "domain": "D2",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "SEPARATOR",
+      "status": "admitted",
+      "width": 2,
+      "word": "00"
+    },
+    {
+      "authority_ref": "#1702",
+      "domain": "D2",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "CLOSE",
+      "status": "admitted",
+      "width": 2,
+      "word": "01"
+    },
+    {
+      "authority_ref": "#1702",
+      "domain": "D2",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "OPEN",
+      "status": "admitted",
+      "width": 2,
+      "word": "10"
+    },
+    {
+      "authority_ref": "#1702",
+      "domain": "D2",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "DOT",
+      "status": "admitted",
+      "width": 2,
+      "word": "11"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "EMPTY",
+      "status": "admitted",
+      "width": 3,
+      "word": "000"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "QUOTE",
+      "status": "admitted",
+      "width": 3,
+      "word": "001"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "ATOM",
+      "status": "admitted",
+      "width": 3,
+      "word": "010"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "CDR",
+      "status": "admitted",
+      "width": 3,
+      "word": "011"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "CAR",
+      "status": "admitted",
+      "width": 3,
+      "word": "100"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "EQ",
+      "status": "admitted",
+      "width": 3,
+      "word": "101"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "COND",
+      "status": "admitted",
+      "width": 3,
+      "word": "110"
+    },
+    {
+      "authority_ref": "#3202",
+      "domain": "D3",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d1-d7-foundation.json",
+      "role": "CONS",
+      "status": "admitted",
+      "width": 3,
+      "word": "111"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "APPLY",
+      "status": "admitted",
+      "width": 4,
+      "word": "0000"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "EVAL",
+      "status": "admitted",
+      "width": 4,
+      "word": "0001"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "LAMBDA",
+      "status": "admitted",
+      "width": 4,
+      "word": "0010"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "DEFINE",
+      "status": "admitted",
+      "width": 4,
+      "word": "0011"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "NOT",
+      "status": "admitted",
+      "width": 4,
+      "word": "0100"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "NULL",
+      "status": "admitted",
+      "width": 4,
+      "word": "0101"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "CDAR",
+      "status": "admitted",
+      "width": 4,
+      "word": "0110"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "CDDR",
+      "status": "admitted",
+      "width": 4,
+      "word": "0111"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "CAAR",
+      "status": "admitted",
+      "width": 4,
+      "word": "1000"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "CADR",
+      "status": "admitted",
+      "width": 4,
+      "word": "1001"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "LOOKUP",
+      "status": "admitted",
+      "width": 4,
+      "word": "1010"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "BIND",
+      "status": "admitted",
+      "width": 4,
+      "word": "1011"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "EVCON",
+      "status": "admitted",
+      "width": 4,
+      "word": "1100"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "EVLIS",
+      "status": "admitted",
+      "width": 4,
+      "word": "1101"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "LIST",
+      "status": "admitted",
+      "width": 4,
+      "word": "1110"
+    },
+    {
+      "authority_ref": "#3272",
+      "domain": "D4",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d4-cleanroom.json",
+      "role": "APPEND",
+      "status": "admitted",
+      "width": 4,
+      "word": "1111"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "EVALQUOTE",
+      "status": "admitted",
+      "width": 5,
+      "word": "00000"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "FUNCTION",
+      "status": "admitted",
+      "width": 5,
+      "word": "00001"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "FEXPR",
+      "status": "admitted",
+      "width": 5,
+      "word": "00010"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "MACRO",
+      "status": "admitted",
+      "width": 5,
+      "word": "00011"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "LABEL",
+      "status": "admitted",
+      "width": 5,
+      "word": "00100"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "PROG",
+      "status": "admitted",
+      "width": 5,
+      "word": "00101"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "SET",
+      "status": "admitted",
+      "width": 5,
+      "word": "00110"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "SETQ",
+      "status": "admitted",
+      "width": 5,
+      "word": "00111"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "ZEROP",
+      "status": "admitted",
+      "width": 5,
+      "word": "01000"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "NUMBERP",
+      "status": "admitted",
+      "width": 5,
+      "word": "01001"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "PLUS",
+      "status": "admitted",
+      "width": 5,
+      "word": "01010"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "DIFFERENCE",
+      "status": "admitted",
+      "width": 5,
+      "word": "01011"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CDAAR",
+      "status": "admitted",
+      "width": 5,
+      "word": "01100"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CDADR",
+      "status": "admitted",
+      "width": 5,
+      "word": "01101"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CDDAR",
+      "status": "admitted",
+      "width": 5,
+      "word": "01110"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CDDDR",
+      "status": "admitted",
+      "width": 5,
+      "word": "01111"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CAAAR",
+      "status": "admitted",
+      "width": 5,
+      "word": "10000"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CAADR",
+      "status": "admitted",
+      "width": 5,
+      "word": "10001"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CADAR",
+      "status": "admitted",
+      "width": 5,
+      "word": "10010"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "CADDR",
+      "status": "admitted",
+      "width": 5,
+      "word": "10011"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "REVERSE",
+      "status": "admitted",
+      "width": 5,
+      "word": "10100"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "REVERSE-ONTO",
+      "status": "admitted",
+      "width": 5,
+      "word": "10101"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "TIMES",
+      "status": "admitted",
+      "width": 5,
+      "word": "10110"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "QUOTIENT",
+      "status": "admitted",
+      "width": 5,
+      "word": "10111"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "GO",
+      "status": "admitted",
+      "width": 5,
+      "word": "11000"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "RETURN",
+      "status": "admitted",
+      "width": 5,
+      "word": "11001"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "LESSP",
+      "status": "admitted",
+      "width": 5,
+      "word": "11010"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "GREATERP",
+      "status": "admitted",
+      "width": 5,
+      "word": "11011"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "ASSOC",
+      "status": "admitted",
+      "width": 5,
+      "word": "11100"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "MEMBER",
+      "status": "admitted",
+      "width": 5,
+      "word": "11101"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "PAIRLIS",
+      "status": "admitted",
+      "width": 5,
+      "word": "11110"
+    },
+    {
+      "authority_ref": "#3305",
+      "domain": "D5",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d5-ratified.json",
+      "role": "SUBST",
+      "status": "admitted",
+      "width": 5,
+      "word": "11111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "LENGTH",
+      "status": "admitted",
+      "width": 6,
+      "word": "000000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "LENGTH-ONTO",
+      "status": "admitted",
+      "width": 6,
+      "word": "000001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MIN-LIST",
+      "status": "admitted",
+      "width": 6,
+      "word": "000010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MAX-LIST",
+      "status": "admitted",
+      "width": 6,
+      "word": "000011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "NTH",
+      "status": "admitted",
+      "width": 6,
+      "word": "000100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MAPLIST",
+      "status": "admitted",
+      "width": 6,
+      "word": "000101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MACROEXPAND-1",
+      "status": "admitted",
+      "width": 6,
+      "word": "000110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MACROEXPAND",
+      "status": "admitted",
+      "width": 6,
+      "word": "000111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "LET",
+      "status": "admitted",
+      "width": 6,
+      "word": "001000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "LET*",
+      "status": "admitted",
+      "width": 6,
+      "word": "001001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "SUBLIS",
+      "status": "admitted",
+      "width": 6,
+      "word": "001010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "COMPOSE",
+      "status": "admitted",
+      "width": 6,
+      "word": "001011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "RASSOC",
+      "status": "admitted",
+      "width": 6,
+      "word": "001100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "ACONS",
+      "status": "admitted",
+      "width": 6,
+      "word": "001101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "ADD1",
+      "status": "admitted",
+      "width": 6,
+      "word": "001110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "SUB1",
+      "status": "admitted",
+      "width": 6,
+      "word": "001111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "EVENP",
+      "status": "admitted",
+      "width": 6,
+      "word": "010000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "ODDP",
+      "status": "admitted",
+      "width": 6,
+      "word": "010001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "NEG",
+      "status": "admitted",
+      "width": 6,
+      "word": "010010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "ABS",
+      "status": "admitted",
+      "width": 6,
+      "word": "010011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "REMAINDER",
+      "status": "admitted",
+      "width": 6,
+      "word": "010100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "GCD",
+      "status": "admitted",
+      "width": 6,
+      "word": "010101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "RECIP",
+      "status": "admitted",
+      "width": 6,
+      "word": "010110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "EXPT",
+      "status": "admitted",
+      "width": 6,
+      "word": "010111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDAAAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDAADR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDADAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDADDR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDDAAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDDADR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDDDAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CDDDDR",
+      "status": "admitted",
+      "width": 6,
+      "word": "011111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CAAAAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CAAADR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CAADAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CAADDR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CADAAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CADADR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CADDAR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CADDDR",
+      "status": "admitted",
+      "width": 6,
+      "word": "100111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MAP",
+      "status": "admitted",
+      "width": 6,
+      "word": "101000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "FILTER",
+      "status": "admitted",
+      "width": 6,
+      "word": "101001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MAP-ONTO",
+      "status": "admitted",
+      "width": 6,
+      "word": "101010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "FILTER-ONTO",
+      "status": "admitted",
+      "width": 6,
+      "word": "101011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "CURRY",
+      "status": "admitted",
+      "width": 6,
+      "word": "101100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "FLIP",
+      "status": "admitted",
+      "width": 6,
+      "word": "101101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "REDUCE",
+      "status": "admitted",
+      "width": 6,
+      "word": "101110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "SCAN",
+      "status": "admitted",
+      "width": 6,
+      "word": "101111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "TAKE",
+      "status": "admitted",
+      "width": 6,
+      "word": "110000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "DROP",
+      "status": "admitted",
+      "width": 6,
+      "word": "110001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "DO",
+      "status": "admitted",
+      "width": 6,
+      "word": "110010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "WHILE",
+      "status": "admitted",
+      "width": 6,
+      "word": "110011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "LEQ",
+      "status": "admitted",
+      "width": 6,
+      "word": "110100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MIN",
+      "status": "admitted",
+      "width": 6,
+      "word": "110101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "GEQ",
+      "status": "admitted",
+      "width": 6,
+      "word": "110110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "MAX",
+      "status": "admitted",
+      "width": 6,
+      "word": "110111"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "ZIP",
+      "status": "admitted",
+      "width": 6,
+      "word": "111000"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "UNZIP",
+      "status": "admitted",
+      "width": 6,
+      "word": "111001"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "INTERSECTION",
+      "status": "admitted",
+      "width": 6,
+      "word": "111010"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "UNION",
+      "status": "admitted",
+      "width": 6,
+      "word": "111011"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "ANY",
+      "status": "admitted",
+      "width": 6,
+      "word": "111100"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "ALL",
+      "status": "admitted",
+      "width": 6,
+      "word": "111101"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "INTEGERP",
+      "status": "admitted",
+      "width": 6,
+      "word": "111110"
+    },
+    {
+      "authority_ref": "#3393",
+      "domain": "D6",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d6-ratified.json",
+      "role": "RATIONALP",
+      "status": "admitted",
+      "width": 6,
+      "word": "111111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.K.voiceless",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.K.voiceless-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.K.voiced",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.K.voiced-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.K.nasal",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.C.voiceless",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.C.voiceless-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.C.voiced",
+      "status": "admitted",
+      "width": 7,
+      "word": "0000111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.C.voiced-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.C.nasal",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-retroflex.voiceless",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-retroflex.voiceless-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-retroflex.voiced",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-retroflex.voiced-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-retroflex.nasal",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-dental.voiceless",
+      "status": "admitted",
+      "width": 7,
+      "word": "0001111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-dental.voiceless-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-dental.voiced",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-dental.voiced-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.T-dental.nasal",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.P.voiceless",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.P.voiceless-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.P.voiced",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.P.voiced-aspirated",
+      "status": "admitted",
+      "width": 7,
+      "word": "0010111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "varga.P.nasal",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.8",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.9",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.punctuation.ellipsis",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.0",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.2",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.3",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.1",
+      "status": "admitted",
+      "width": 7,
+      "word": "0011111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.K.primary-voiceless-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0100000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": null,
+      "status": "owner-reserved-pinned",
+      "width": 7,
+      "word": "0100001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.modifier.uk-capital-next-letter",
+      "status": "admitted",
+      "width": 7,
+      "word": "0100010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.modifier.uk-combining-acute-stress",
+      "status": "admitted",
+      "width": 7,
+      "word": "0100011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.C.primary-voiceless-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0100100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.C.voiced-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0100101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.C.primary-sonorant",
+      "status": "admitted",
+      "width": 7,
+      "word": "0100110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.uk-ext.softness",
+      "status": "admitted",
+      "width": 7,
+      "word": "0100111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.T-retroflex.primary-voiceless-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0101000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.punctuation.left-guillemet",
+      "status": "admitted",
+      "width": 7,
+      "word": "0101001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": null,
+      "status": "owner-reserved-pinned",
+      "width": 7,
+      "word": "0101010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.punctuation.right-guillemet",
+      "status": "admitted",
+      "width": 7,
+      "word": "0101011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.T-dental.primary-voiceless-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0101100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.T-dental.voiced-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0101101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.T-dental.primary-sonorant",
+      "status": "admitted",
+      "width": 7,
+      "word": "0101110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.T-dental.lateral-or-secondary-sonorant",
+      "status": "admitted",
+      "width": 7,
+      "word": "0101111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.P.primary-voiceless-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.punctuation.em-dash",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.P.primary-sonorant",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.punctuation.en-dash",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.G-glottal.primary-voiceless-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.G-glottal.voiced-fricative",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.punctuation.left-double-quotation-mark",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.punctuation.right-double-quotation-mark",
+      "status": "admitted",
+      "width": 7,
+      "word": "0110111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.4",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.6",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.7",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "text.digit.5",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.uk-ext.ts",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.uk-ext.tsh",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.uk-ext.dz",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "non-varga.uk-ext.dzh",
+      "status": "admitted",
+      "width": 7,
+      "word": "0111111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.a.oral.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.a.oral.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.a.nasal.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.a.nasal.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.i.oral.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.i.oral.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.i.nasal.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.i.nasal.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1000111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.u.oral.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.u.oral.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.u.nasal.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.u.nasal.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.r-vocalic.oral.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.r-vocalic.oral.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.r-vocalic.nasal.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.r-vocalic.nasal.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1001111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.l-vocalic.oral.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.l-vocalic.oral.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.l-vocalic.nasal.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.l-vocalic.nasal.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.e.oral.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.e.oral.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.e.nasal.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.e.nasal.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1010111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.o.oral.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.o.oral.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.o.nasal.short",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.o.nasal.long",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.uk-ext.a",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.uk-ext.e",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.uk-ext.o",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "vowel.uk-ext.y",
+      "status": "admitted",
+      "width": 7,
+      "word": "1011111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.space",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.newline",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.tab",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.left-paren",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.right-paren",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.double-quote",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.backslash",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.underscore",
+      "status": "admitted",
+      "width": 7,
+      "word": "1100111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.anusvara",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.visarga",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.avagraha",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.danda",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.double-danda",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.ampersand",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.pipe",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.backquote",
+      "status": "admitted",
+      "width": 7,
+      "word": "1101111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.plus",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.minus",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.star",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.slash",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.equals",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.less",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.greater",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.question",
+      "status": "admitted",
+      "width": 7,
+      "word": "1110111"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.bang",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111000"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.apostrophe",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111001"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.dot",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111010"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.comma",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111011"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.colon",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111100"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.semicolon",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111101"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.hash",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111110"
+    },
+    {
+      "authority_ref": "#3572",
+      "domain": "D7",
+      "mechanism_status": "separate-not-projected",
+      "normative_source": "knowledge/d7-ratified.json",
+      "role": "sign.at",
+      "status": "admitted",
+      "width": 7,
+      "word": "1111111"
+    }
+  ],
+  "schema": "current-exact-domain-corpus/v1",
+  "status": "CURRENT-AUTHORITY-PROJECTION"
+}

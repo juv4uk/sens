@@ -1,0 +1,34 @@
+name: Canonical D2 W7 frame invariance
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/src/canonical_reader.rs'
+      - 'crates/sens/src/text7.rs'
+      - 'crates/sens/tests/canonical_w7_frame_invariance.rs'
+      - '.github/workflows/canonical-w7-frame-invariance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens/src/canonical_reader.rs'
+      - 'crates/sens/src/text7.rs'
+      - 'crates/sens/tests/canonical_w7_frame_invariance.rs'
+      - '.github/workflows/canonical-w7-frame-invariance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  d2-w7-no-silent-symbol-reinterpretation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Preserve D2 LIST / DOT and exact noncallable W7 in all source contexts
+        run: cargo test -p sens --locked --test canonical_w7_frame_invariance -- --nocapture
+      - name: Explain what the guard proves
+        run: |
+          echo "D2 list and dotted-pair semantics unchanged; no unratified Text7 binder/source frame admitted."
+          echo "Still requires #3910 owner-approved position-aware role, Local(depth,index), and original old/current oracle parity."

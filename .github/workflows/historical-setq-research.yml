@@ -21,7 +21,7 @@ permissions:
 jobs:
   historical-setq:
     name: Lisp 1.5 SETQ historical classification
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - name: Validate historical evidence record

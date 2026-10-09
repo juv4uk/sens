@@ -89,12 +89,23 @@ premise three repos downstream with no traceable evidence chain.
 16. **Асиметричний semantic firewall (#1347): Rust може рости, Lisp не
     копіює Rust як істину.** Заборонений напрямок
     `Rust/host/backend semantics -> Lisp language authority`.
-17. **SENS-primary (#1590): ідентичність → значення → виконання.**
-    Machine-readable: `knowledge/sens-primary.lisp`. Функціональний
-    простір — 256 SENS (`00000000..11111111`), кожен 8 біт. SENS не є
-    текстом. Історичні назви — surface. Backend — свідок. Не створюй
-    текстовий сурогат SENS у ядрі. Перед зміною: *«Як би це виглядало,
-    якби SENS був первинним з 1958?»*
+17. **SENS-primary (#1590/#3020): ідентичність → значення → виконання.**
+    Machine-readable: `knowledge/sens-primary.lisp`. Канонічна
+    ідентичність SENS — це **точний домен + точні біти + закон домену**;
+    ширина є частиною identity. Немає універсального 8-бітного
+    функціонального простору і немає semantic fallback через
+    Sens8/Sid8/u8. `D1:1`, `D2:01`, `D3:001` і `D4:0001` —
+    різні exact-width identities, навіть якщо host/container може
+    фізично зберігати їх у ширшому слові. SENS не є текстом і не є
+    «скомпільованим binary executable»: біти є канонічною семантичною
+    identity, а executable/object/FASL/byte container — лише механізм.
+    Історичні та людські назви — surface/projection; вони генеруються з
+    двійкової authority і не можуть відновлювати її у зворотному
+    напрямку. Backend — свідок. Не створюй текстовий, byte-width або
+    opcode-сурогат SENS у ядрі. Перед зміною спочатку класифікуй шар:
+    **identity / law / source structure / storage container / transport /
+    execution mechanism / human projection**. Перед зміною: *«Як би це
+    виглядало, якби SENS був первинним з 1958?»*
 18. **Ділися відкриттями з роєм (discovery board).** Finding, що змінює
     поведінку інших агентів (M8 fallout, surface/binding колізія,
     transport, bench gap, island admission), **не** лишається лише в

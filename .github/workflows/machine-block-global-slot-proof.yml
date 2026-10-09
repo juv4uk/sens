@@ -1,0 +1,63 @@
+name: Original machine-block global ordinal source-only proof
+
+on:
+  pull_request:
+    paths:
+      - "scripts/prove_lexical_locals.py"
+      - "tests/test_prove_lexical_locals.py"
+      - ".github/workflows/machine-block-global-slot-proof.yml"
+      - "lib/machine/block.lisp"
+      - "knowledge/sens8-current-coverage-v1.json"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/prove_lexical_locals.py"
+      - "tests/test_prove_lexical_locals.py"
+      - ".github/workflows/machine-block-global-slot-proof.yml"
+      - "lib/machine/block.lisp"
+      - "knowledge/sens8-current-coverage-v1.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  six-original-globals-no-false-t5-admission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+      - name: Exact original SHA + historical callable and Local + global source slots
+        run: python3 -m unittest discover -s tests -p 'test_prove_lexical_locals.py' -v
+      - name: Separate historical Lisp semantic oracle
+        run: python3 -m unittest discover -s tests -p 'test_machine_block_historical_oracle.py' -v
+      - name: Source-only global-export ordinal manifest (not executable T5)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/prove_lexical_locals.py \
+            --source lib/machine/block.lisp --require-machine-block-provenance \
+            > "$RUNNER_TEMP/machine-block-source-only.json"
+          python3 - "$RUNNER_TEMP/machine-block-source-only.json" <<'PY'
+          import json, sys
+          from pathlib import Path
+          row = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert row["source_git_blob_sha"] == "200201b741787c4e144ad4194848acf51d7b439e"
+          assert row["definition_count"] == 6
+          assert row["global_declaration_order_source_only_proven"] is True
+          assert row["global_declaration_count"] == 6
+          assert [x["ordinal_source_only"] for x in row["source_global_export_manifest"]] == list(range(6))
+          assert all(not x["runtime_binding_admitted"] for x in row["source_global_export_manifest"])
+          assert row["global_binding_runtime_admitted"] is False
+          assert row["global_names_encoded"] is False
+          assert row["d2_or_d7_framing_defined"] is False
+          assert row["original_executable_migrations_admitted"] == 0
+          assert not Path("lib/machine/block.sens").exists()
+          print("6 deterministic source-only global ordinals proved; physical admission remains BLOCKED")
+          PY
+      - name: Verify no original/file/bytes mutated
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }

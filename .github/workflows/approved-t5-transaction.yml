@@ -1,0 +1,35 @@
+name: approved-t5-transaction
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate-approved-t5.py"
+      - "tests/test_approved_t5_transaction.py"
+      - "docs/APPROVED-T5-TRANSACTION.uk.md"
+      - ".github/workflows/approved-t5-transaction.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-approved-t5.py"
+      - "tests/test_approved_t5_transaction.py"
+      - ".github/workflows/approved-t5-transaction.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-lisp-to-physical-sens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build actual Rust D2 SENS reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Verify approved batch exact source snapshot, no-clobber and real physical T5 file
+        env:
+          SENS_TRIT_BIN: ${{ github.workspace }}/target/debug/sens-trit
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_approved_t5_transaction.py' -v

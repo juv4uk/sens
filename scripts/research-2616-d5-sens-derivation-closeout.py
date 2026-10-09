@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """#2616 — conservative D5 SENS-derivation eligibility validator.
 
+Research-only historical closeout.
+
+The embedded 8-generated + 24-UNKNOWN map is a HISTORICAL-PRE-OD005
+eligibility snapshot. It is intentionally preserved as proof input, but it is
+not current occupancy authority. Current Core.D5 owner occupancy is 32/32 with
+UNKNOWN=0 under OD-005; #3055 owns the internal-law doctrine.
+
 Research-only. This script cannot allocate coordinates. It validates the
 boundary between structural factors and D5 placement candidates.
 
@@ -130,6 +137,8 @@ def main() -> None:
         "unknown_factors": unknown,
         "new_nonselector_d5_candidates": len(yes),
         "coordinates_allocated": 0,
+        "historical_pre_od005_map_unchanged": True,
+        "current_od005_occupancy": {"occupied": 32, "unknown": 0, "authority": "OD-005/#2750"},
         "ratified_d5_map_unchanged": True,
     }
 
@@ -144,7 +153,9 @@ def main() -> None:
     print(f"D5-ELIGIBLE-UNKNOWN={len(unknown)}")
     print("NEW-NONSELECTOR-D5-CANDIDATES=0")
     print("COORDINATES-ALLOCATED=0")
-    print("D5-MAP=8-GENERATED+24-UNKNOWN")
+    print("HISTORICAL-PRE-OD005-MAP=8-GENERATED+24-UNKNOWN")
+    print("CURRENT-OD005-D5=32/32")
+    print("CURRENT-OD005-UNKNOWN=0")
 
 
 if __name__ == "__main__":

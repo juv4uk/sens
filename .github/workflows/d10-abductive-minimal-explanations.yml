@@ -1,0 +1,29 @@
+name: D10 finite abductive explanations research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-abductive-minimal-explanations-v1.json'
+      - 'tests/oracles/d10_abductive_minimal_explanations.pl'
+      - 'tests/test_d10_abductive_atms_reduction.py'
+      - 'scripts/check_d10_abductive_minimal_explanations.py'
+      - 'docs/research/d10-abductive-minimal-explanations.uk.md'
+      - '.github/workflows/d10-abductive-minimal-explanations.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d1-d9-foundation.json'
+  workflow_dispatch:
+jobs:
+  finite-abductive-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install independent Prolog donor runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y swi-prolog
+      - name: Verify source, D1-D9 dedup boundary, and all finite reference cases
+        run: python3 scripts/check_d10_abductive_minimal_explanations.py --self-test
+      - name: Cross-check powerset abduction against ATMS label propagation
+        run: python3 tests/test_d10_abductive_atms_reduction.py
+      - name: Compare Python powerset oracle against independent Prolog implementation
+        run: python3 scripts/check_d10_abductive_minimal_explanations.py --swipl swipl

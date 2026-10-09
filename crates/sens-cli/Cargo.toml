@@ -36,6 +36,10 @@ path = "src/bin/cml-export.rs"
 name = "sens-to-sens"
 path = "src/bin/sens-to-sens.rs"
 
+[[bin]]
+name = "sens-trit"
+path = "src/bin/sens-trit.rs"
+
 [dependencies]
 sens = { path = "../sens" }
 sens-host = { path = "../sens-host" }

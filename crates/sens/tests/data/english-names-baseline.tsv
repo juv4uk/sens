@@ -465,6 +465,7 @@ lisp	knowledge/semantic-lineage-core-v1.lisp	identity	18
 lisp	knowledge/semantic-lineage-core-v1.lisp	lambda	1
 lisp	knowledge/semantic-lineage-core-v1.lisp	quote	2
 lisp	knowledge/semantic-ownership.lisp	gensym	1
+lisp	knowledge/sens-primary.lisp	identity	2
 lisp	lib/content-store.lisp	map-empty	1
 lisp	lib/core.lisp	abs	1
 lisp	lib/core.lisp	and	1

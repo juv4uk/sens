@@ -16,7 +16,7 @@ Hard rules:
 - Unknown D1 words may pass through unchanged as predicate/data evidence, but are never reclassified as D2.
 - Comments disappear before migration.
 - Unrecognized data/numbers/strings PASS THROUGH unchanged instead of being forced into Text7.
-- Output is extensionless; recognized language structure/functions are binary, unresolved source remains visible.
+- Output is a PHYSICAL T5 binary file with the same stem and extension .sens.\n- Unknown/unmapped words FAIL CLOSED: never ship text remnants as .sens.\n- Source .lisp is retained; migration never overwrites an existing .sens.
 """
 from __future__ import annotations
 
@@ -24,10 +24,21 @@ import argparse
 import ast
 from dataclasses import dataclass
 import json
+import hashlib
+import os
 from pathlib import Path
 import re
 import signal
+import tempfile
+import sys
 
+SCRIPTS = str(Path(__file__).resolve().parent)
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
+
+from sens_t5_codec import SensT5Error, decode_bytes, encode_projection, parse_words, typed_sha256
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_EXTS = {".lisp"}
 SKIP_DIRS = {".git","target","node_modules","vendor","dist","build",".venv","venv","__pycache__"}
 
@@ -244,6 +255,20 @@ def load_foundation(path: Path):
         raise MigrationError("foundation is not owner-ratified")
     return data
 
+def load_d1_uk_surfaces(path: Path = REPO_ROOT / "lib/domains/d1.lisp") -> dict[str, str]:
+    """Project ratified D1's Ukrainian literals; do not invent host truthiness."""
+    source = path.read_text(encoding="utf-8")
+    rows = re.findall(r"(?m)^\s*\(([01])\s+\(ук\s+([^\s()]+)\)", source)
+    if len(rows) != 2 or {bits for bits, _ in rows} != {"0", "1"}:
+        raise MigrationError("D1 Ukrainian surface table lacks exactly two canonical values")
+    if len({name for _, name in rows}) != 2:
+        raise MigrationError("D1 Ukrainian surface names must be unique")
+    return {name: bits for bits, name in rows}
+
+
+D1_UK_SURFACES = load_d1_uk_surfaces()
+
+
 def current_residents(data):
     labels={}
     for domain in ("D3","D4","D5","D6"):
@@ -299,6 +324,46 @@ def parse_legacy_successors(semantic_registry: Path, necessary_forms: Path):
         out[byte]=(bits,"D4","necessary-form-successor")
     return out
 
+def parse_audited_legacy_successors(path: Path, foundation: dict):
+    """Consume owner-audited SENS8 history; never treat old W8 as current D8.
+
+    Only DIRECT / single-identity DERIVED rows can become old-era successors.
+    Historical code coordinates never grant their own current placement.
+    """
+    data=json.loads(path.read_text(encoding="utf-8"))
+    if data.get("status") != "AUDIT-COMPLETE" or not isinstance(data.get("rows"),list):
+        raise MigrationError("legacy successor coverage is missing audit authority")
+    domains=foundation.get("domains",{})
+    exact=re.compile(r"\b(D[1-9]):([01]{1,9})\b")
+    allowed={"DIRECT-CURRENT-IDENTITY","CURRENT-PROJECTION-DERIVED"}
+    result={}
+    for row in data["rows"]:
+        if not isinstance(row,dict):
+            raise MigrationError("malformed owner-audited legacy successor")
+        if row.get("classification") not in allowed:
+            continue
+        sid=row.get("legacy_code")
+        if not isinstance(sid,str) or re.fullmatch(r"[01]{8}",sid) is None:
+            raise MigrationError("audited historical code is not exactly eight bits")
+        targets=set(exact.findall(row.get("current_target") or ""))
+        # A compound D4+D5, a D6/D8 ambiguity, or no admitted identity
+        # cannot be flattened to a guessed single callable.
+        if len(targets) != 1:
+            continue
+        domain,bits=next(iter(targets))
+        descriptor=domains.get(domain)
+        if descriptor is None:
+            continue
+        if len(bits)!=int(descriptor["width"]):
+            raise MigrationError(f"audited {domain}:{bits} has inconsistent exact width")
+        if bits not in descriptor.get("residents",{}):
+            raise MigrationError(f"audited {domain}:{bits} is not an owner-ratified resident")
+        value=(bits,domain,"audited-sens8-current-coverage")
+        if sid in result and result[sid][:2]!=value[:2]:
+            raise MigrationError(f"conflicting audited historical successor {sid}")
+        result[sid]=value
+    return result
+
 def parse_semantic_rows(path: Path):
     text=path.read_text(encoding="utf-8")
     rows={}
@@ -316,10 +381,17 @@ def parse_semantic_rows(path: Path):
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
                           semantic_registry: Path, necessary_forms: Path,
-                          historical_map: Path|None=None):
+                          historical_map: Path|None=None,
+                          legacy_coverage: Path|None=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
     proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
+    if legacy_coverage is not None:
+        for byte,ident in parse_audited_legacy_successors(legacy_coverage,data).items():
+            existing=proven_legacy.get(byte)
+            if existing is not None and existing[:2]!=ident[:2]:
+                raise MigrationError(f'conflicting successor for {byte}: {existing} vs {ident}')
+            proven_legacy.setdefault(byte,ident)
     sem_rows=parse_semantic_rows(semantic_generated)
 
     # A historical byte may gain a successor through semantic-name
@@ -358,7 +430,7 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
 
     # Preserve knowledge that an old function existed even when it has no
     # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
-    legacy={byte:proven_legacy.get(byte) for byte in sem_rows}
+    legacy={byte:proven_legacy.get(byte) for byte in sorted(set(sem_rows)|set(proven_legacy))}
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
@@ -451,10 +523,16 @@ def text7_encode(spelling: str,candidates,tok: Tok):
     return words
 
 class Resolver:
-    def __init__(self,legacy,my,upper):
+    def __init__(self,legacy,my,upper,source_era="auto",admitted_d8=None):
+        if source_era not in ("auto","legacy","current"):
+            raise ValueError(f"invalid source era {source_era!r}")
+        if source_era=="current" and not admitted_d8:
+            raise MigrationError("current D8 source requires an owner-ratified D8 foundation")
         self.legacy=legacy
         self.my=my
         self.upper=upper
+        self.source_era=source_era
+        self.admitted_d8=set(admitted_d8 or ())
         self.counts={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
     def head(self,tok: Tok):
         t=tok.text
@@ -469,10 +547,21 @@ class Resolver:
         if 3<=len(t)<=6 and set(t)<=set("01"):
             self.counts["already-exact"]+=1
             return [t],"already-exact"
-        # Pass 1: every exact-eight executable head belongs to the old
-        # SID8/Sens8 generation. It may migrate only through a proven current
-        # successor; old/unassigned bytes never fall through as text.
+        # The same eight visible bits can be historical SID8 or CURRENT D8.
+        # Auto must BLOCK: without source-era provenance these are ambiguous.
+        # Current D8 is left exact, never rewritten through an old SID.
         if len(t)==8 and set(t)<=set("01"):
+            if self.source_era=="auto":
+                raise MigrationError(
+                    f"ambiguous W8 executable head {t}: choose --source-era legacy or current",tok
+                )
+            if self.source_era=="current":
+                if t not in self.admitted_d8:
+                    raise MigrationError(
+                        f"unratified current D8 executable head {t}",tok
+                    )
+                self.counts["already-exact"]+=1
+                return [t],"already-exact"
             if t not in self.legacy:
                 raise MigrationError(
                     f"legacy-unmapped SID8/Sens8 {t}: no historical registry row",
@@ -528,6 +617,11 @@ def encode_atom_data(node: Atom,text7):
             f"D2 word {t} is structural control only; it cannot be ordinary data",
             node.tok,
         )
+    # Canonical .lisp human source is Ukrainian, while physical .sens keeps
+    # exact D1 bits. Resolve only explicitly ratified D1 literals; never use
+    # Lisp/NIL, host truthiness or an inferred width.
+    if t in D1_UK_SURFACES:
+        return [D1_UK_SURFACES[t]]
     # Fail-soft migration: other unresolved atoms remain visible until their
     # own semantic/number/text law is admitted.
     return [t]
@@ -627,37 +721,32 @@ def source_files(root: Path):
         if any(part in SKIP_DIRS for part in p.parts): continue
         if p.suffix.lower() in SOURCE_EXTS: yield p
 
-def extensionless(rel: Path):
-    return rel.with_suffix("")
+def sens_destination(rel: Path) -> Path:
+    """НАЗВА.lisp -> НАЗВА.sens у тому самому відносному каталозі."""
+    if rel.suffix.lower() != ".lisp":
+        raise ValueError("only .lisp sources are eligible")
+    return rel.with_suffix(".sens")
 
-def plan_extensionless_destinations(rels):
-    """Plan extensionless output names without file/directory collisions.
 
-    If foo.lisp coexists with foo/bar.lisp, plain "foo" cannot be both a file
-    and a directory. The file becomes "foo__file" (still extensionless).
-    """
-    rels=list(rels)
-    source_dirs=set()
-    for rel in rels:
-        parent=rel.parent
-        while parent != Path("."):
-            source_dirs.add(parent)
-            parent=parent.parent
+def write_atomic_no_clobber(target: Path, physical_bytes: bytes) -> None:
+    """Опублікувати новий .sens лише якщо не існує; ніяких тихих overwrite."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp_name = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", prefix=".sens-t5-", suffix=".tmp",
+            dir=target.parent, delete=False,
+        ) as staged:
+            tmp_name = Path(staged.name)
+            staged.write(physical_bytes)
+            staged.flush()
+            os.fsync(staged.fileno())
+        # Atomic hard-link with fail-if-exists; no permissions to replace targets.
+        os.link(tmp_name, target)
+    finally:
+        if tmp_name is not None:
+            tmp_name.unlink(missing_ok=True)
 
-    planned={}
-    used={}
-    for rel in sorted(rels,key=lambda p:str(p)):
-        dest=extensionless(rel)
-        if dest in source_dirs or dest in used:
-            base=dest.with_name(dest.name+"__file")
-            dest=base
-            n=2
-            while dest in source_dirs or dest in used:
-                dest=base.with_name(base.name+str(n))
-                n+=1
-        planned[rel]=dest
-        used[dest]=rel
-    return planned
 
 def migrate_file(source: str,resolver,text7):
     stripped=strip_comments(source)
@@ -672,100 +761,164 @@ def migrate_file(source: str,resolver,text7):
     return text
 
 def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument("root",type=Path)
-    ap.add_argument("--out",type=Path,required=True)
-    ap.add_argument("--foundation",type=Path,required=True)
-    ap.add_argument("--domain-surfaces",type=Path,required=True)
-    ap.add_argument("--semantic-generated",type=Path,required=True)
-    ap.add_argument("--semantic-registry",type=Path,required=True)
-    ap.add_argument("--necessary-forms",type=Path,required=True)
-    ap.add_argument("--historical-map",type=Path,required=True)
-    ap.add_argument("--text7",type=Path,required=True)
-    ap.add_argument("--report",type=Path,required=True)
-    args=ap.parse_args()
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("root", type=Path)
+    ap.add_argument("--out", type=Path, required=True,
+                    help="окрема вихідна папка; .lisp НЕ змінюється")
+    ap.add_argument("--foundation", type=Path, default=REPO_ROOT / "knowledge/d1-d9-foundation.json")
+    ap.add_argument("--domain-surfaces", type=Path, default=REPO_ROOT / "crates/sens/src/domain_surface_registry_generated.rs")
+    ap.add_argument("--semantic-generated", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry_generated.rs")
+    ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
+    ap.add_argument("--necessary-forms", type=Path, default=REPO_ROOT / "crates/sens/src/eval/necessary_forms_generated.rs")
+    ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
+    ap.add_argument("--legacy-coverage", type=Path, default=REPO_ROOT / "knowledge/sens8-current-coverage-v1.json")
+    ap.add_argument("--text7", type=Path, default=REPO_ROOT / "crates/sens/src/text7_projection_generated.rs")
+    ap.add_argument("--report", type=Path, default=None)
+    ap.add_argument("--dry-run", action="store_true",
+                    help="переклад/перевірка без запису фізичних файлів")
+    ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
+                    help="auto блокує W8; legacy = сумісний старий SID8 лише з provenance; current = ратифікований D8")
+    ap.add_argument("--unpaired-only", action="store_true",
+                    help="мігрувати лише .lisp без однойменного наявного .sens")
+    args = ap.parse_args()
+    if args.report is None:
+        args.report = args.out.with_name(args.out.name + ".report.json")
 
-    data=load_foundation(args.foundation)
-    legacy,my,upper=build_three_pass_maps(
-        data,args.domain_surfaces,args.semantic_generated,args.semantic_registry,args.necessary_forms,
-        args.historical_map
+    data = load_foundation(args.foundation)
+    if args.source_era=="current" and "D8" not in data.get("current_domains",()):
+        ap.error("--source-era=current requires a foundation ratifying D8")
+    admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
+    legacy, my, upper = build_three_pass_maps(
+        data, args.domain_surfaces, args.semantic_generated,
+        args.semantic_registry, args.necessary_forms, args.historical_map,
+        args.legacy_coverage
     )
-    text7=build_text7(data,args.text7)
-    args.out.mkdir(parents=True,exist_ok=True)
+    text7 = build_text7(data, args.text7)
+    rows = []
+    written = 0
+    blocked = 0
+    totals = {"already-exact": 0, "pass1-sens8": 0,
+              "pass2-my-lisp": 0, "pass3-lisp15": 0, "passthrough-head": 0}
 
-    rows=[]
-    written=0
-    blocked=0
-    totals={"already-exact":0,"pass1-sens8":0,"pass2-my-lisp":0,"pass3-lisp15":0,"passthrough-head":0}
-    destinations={}
-
-    root=args.root.resolve()
-    paths=list(source_files(root))
-    rels=[path.resolve().relative_to(root) for path in paths]
-    destination_plan=plan_extensionless_destinations(rels)
-    for path,rel in zip(paths,rels):
-        dest=destination_plan[rel]
-        if dest in destinations:
-            rows.append({"path":str(rel),"status":"blocked","reason":f"extensionless collision with {destinations[dest]}"})
-            blocked+=1
-            continue
-        resolver=Resolver(legacy,my,upper)
-        source=path.read_text(encoding="utf-8")
+    root = args.root.resolve()
+    # An explicit .lisp path means ONE input file, not an empty directory scan.
+    # A directory still gives the stable sorted tree inventory.
+    if root.is_file():
+        if root.suffix.lower() not in SOURCE_EXTS:
+            ap.error("a single source must be a .lisp file")
+        base_root = root.parent
+        paths = [root]
+    elif root.is_dir():
+        base_root = root
+        paths = sorted(source_files(root))
+    else:
+        ap.error(f"input path does not exist: {root}")
+    skipped_paired = []
+    if args.unpaired_only:
+        candidates = []
+        for path in paths:
+            partner = path.with_suffix(".sens")
+            if partner.exists() or partner.is_symlink():
+                skipped_paired.append(str(path.relative_to(base_root)))
+            else:
+                candidates.append(path)
+        paths = candidates
+    seen_destinations = set()
+    for path in paths:
+        rel = path.resolve().relative_to(base_root)
+        dest = sens_destination(rel)
+        target = args.out / dest
+        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8)
         try:
+            if dest in seen_destinations:
+                raise SensT5Error(f"duplicate destination {dest}")
+            seen_destinations.add(dest)
+            if target.exists() or target.is_symlink():
+                raise SensT5Error(f"target already exists; not overwriting {dest}")
+            source = path.read_text(encoding="utf-8")
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
-            output=migrate_file(source,resolver,text7)
-            signal.alarm(0)
-            if not output.strip():
-                rows.append({"path":str(rel),"status":"empty","passes":resolver.counts})
-                continue
-            target=args.out/dest
-            target.parent.mkdir(parents=True,exist_ok=True)
-            target.write_text(output,encoding="utf-8")
-            destinations[dest]=str(rel)
-            written+=1
-            for k,v in resolver.counts.items(): totals[k]+=v
-            rows.append({"path":str(rel),"output":str(dest),"status":"written","passes":resolver.counts})
-        except MigrationError as e:
-            signal.alarm(0)
-            blocked+=1
-            row={"path":str(rel),"status":"blocked","reason":e.message,"passes":resolver.counts}
-            if e.tok:
-                line,col=line_col(source,e.tok.offset)
-                row.update({"token":e.tok.text,"line":line,"column":col})
+            try:
+                projection = migrate_file(source, resolver, text7)
+            finally:
+                signal.alarm(0)
+            # Strict physical T5: any historic name, passthrough or unencoded
+            # value still visible is a blocker, never a falsely binary file.
+            words = parse_words(projection)
+            payload = encode_projection(projection)
+            if decode_bytes(payload) != words:
+                raise SensT5Error("byte roundtrip changes source word identities")
+            if not args.dry_run:
+                write_atomic_no_clobber(target, payload)
+            for key, value in resolver.counts.items():
+                totals[key] += value
+            status = "would-write" if args.dry_run else "written"
+            row = {
+                "path": str(rel), "output": str(dest), "status": status,
+                "bytes": len(payload), "semantic_word_count": len(words),
+                "semantic_bits": sum(len(word) for word in words),
+                "transport_trits": sum(len(word) for word in words) + len(words) - 1,
+                "physical_sha256": hashlib.sha256(payload).hexdigest(),
+                "typed_word_sha256": typed_sha256(words),
+                "passes": resolver.counts,
+            }
             rows.append(row)
-
+            written += 1
+        except (MigrationError, SensT5Error, UnicodeError, OSError) as error:
+            blocked += 1
+            row = {
+                "path": str(rel), "output": str(dest),
+                "status": "blocked", "reason": getattr(error, "message", str(error)),
+                "passes": resolver.counts,
+            }
+            token = getattr(error, "tok", None)
+            if token is not None:
+                text = locals().get("source", "")
+                line, column = line_col(text, token.offset)
+                row.update({"token": token.text, "line": line, "column": column})
+            rows.append(row)
         if (written + blocked) % 25 == 0:
-            print(
-                f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
-                flush=True,
-            )
+            print(f"PROGRESS seen={written + blocked} written={written} blocked={blocked}",
+                  flush=True)
 
-    report={
-        "schema":"sens-three-pass-migration/v2-fail-soft",
-        "passes":{
-            "1":"legacy Sens8/Sid8 -> proven current exact-domain successor",
-            "2":"my-lisp/current admitted surface -> exact-domain identity",
-            "3":"historical LISP 1-1.5 uppercase resident -> ratified D3-D6 identity",
+    report = {
+        "schema": "sens-three-pass-t5-migration/v3",
+        "naming_law": "SOURCE/name.lisp -> OUT/name.sens; extensionless outputs are forbidden",
+        "file_format": {
+            "suffix": ".sens", "physical": "binary-T5-five-trits-per-byte",
+            "language": "D1..D9 exact-width 0/1 words",
+            "transport_separator": "logical trit 2 strictly between words",
+            "file_eof": "physical byte length; no terminal 22",
+            "padding": "zero through four final trits 2",
+            "ascii_text": False,
         },
-        "structure":{
-            "empty":"000",
-            "control_domain":"D2-only",
-            "open":"10",
-            "separator":"00",
-            "dot":"11",
-            "close":"01",
-            "rule":"every exact-width W2 word in emitted source is grammar control, never data or a callable head",
+        "passes": {
+            "1": "historical 8-bit head -> admitted current successor",
+            "2": "my-lisp / current admitted name -> exact current domain",
+            "3": "Lisp-I/1.5 head -> proven current D3-D6",
         },
-        "output_naming":"source .lisp suffix removed; no new extension; file/directory collisions use __file",
-        "fallback":"unknown dynamic/data spelling may remain visible; any known legacy function without a current D3-D6 successor blocks the file",
-        "summary":{"files_written":written,"files_blocked":blocked,"resolved_heads":totals},
-        "files":rows,
+        "blocked_policy": "no unresolved textual source can become physical .sens",
+        "source_era": args.source_era,
+        "only_unpaired": args.unpaired_only,
+        "skipped_paired_paths": skipped_paired,
+        "source_era_law": "auto blocks ambiguous W8 heads; legacy maps SID8; current preserves ratified D8",
+        "source_policy": "input .lisp never rewritten; existing .sens never overwritten",
+        "mode": "dry-run" if args.dry_run else "write-new-only",
+        "summary": {
+            "files_seen": len(paths),
+            "files_skipped_paired": len(skipped_paired),
+            "files_written": written if not args.dry_run else 0,
+            "files_would_write": written if args.dry_run else 0,
+            "files_blocked": blocked, "resolved_heads": totals,
+        },
+        "files": rows,
     }
-    args.report.parent.mkdir(parents=True,exist_ok=True)
-    args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    print(json.dumps(report["summary"],ensure_ascii=False))
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+                           encoding="utf-8")
+    print(json.dumps(report["summary"], ensure_ascii=False))
     return 0 if written else 2
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     raise SystemExit(main())

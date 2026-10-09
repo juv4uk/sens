@@ -1,0 +1,19 @@
+link_id	link_name	level	class	evidence_ref	measured_on	notes
+L1	semantic-laws	source	own	lib/domains/d3.lisp; lib/**/*.lisp = 488 files @8ae1c183	2026-10-08	Закони написані самим sens; свідок парсингу: sens --oracle-check (crates/sens-cli/src/main.rs:342)
+L1	semantic-laws	execution	foreign	crates/sens/src/eval/mod.rs; crates/sens/src/eval/special_forms/json.rs	2026-10-08	Rust-оракул тлумачить Lisp-джерело; json-parse = живий foreign-білтін у виконанні
+L1	semantic-laws	dependency	foreign	Cargo.toml	2026-10-08	Збірка і залежності: rustc/cargo
+L2	parsing-encoding	source	partial	crates/sens/src/parser.rs; crates/sens/src/canonical_reader.rs; lib/core1-compiler-sid-resolver.lisp; lib/core1-sid8-bootstrap-overlay.lisp	2026-10-08	Рідер Rust (1009 + 388 рядків); SID8 resolver/overlay у Lisp; Lisp-рідера в lib/ не знайдено (grep (define (read = 0)
+L2	parsing-encoding	execution	foreign	crates/sens/src/parser.rs; crates/sens/src/canonical_reader.rs	2026-10-08	Парсинг виконує Rust-процес
+L2	parsing-encoding	dependency	foreign	Cargo.toml	2026-10-08	Збірка: rustc/cargo
+L3	compiler	source	partial	lib/compiler-nucleus.lisp; crates/sens/src/program_compiler.rs; crates/sens/src/compilation_artifact.rs; crates/sens/src/compiler_language.rs	2026-10-08	Нуклеус компілятора Lisp; обгортки/артефакти/мова компіляції Rust
+L3	compiler	execution	foreign	crates/sens/src/fixpoint_checkpoint.rs; tests/fixtures/2234-d4-fixed-point-witness.lisp; .github/workflows/compiler-role-cutover.yml	2026-10-08	Fixed-point свідок уже зберігається (fixed_point_proven), але ганяється Rust-тестом
+L3	compiler	dependency	foreign	Cargo.toml; .github/workflows/compiler-selfhost-lineage-contract.yml	2026-10-08	Лінія selfhost-контракту будується cargo-ранером
+L4	oracle-execution	source	foreign	crates/sens/src/eval/mod.rs	2026-10-08	Виконання мови повністю написане Rust; головний чужинець за класифікацією власника
+L4	oracle-execution	execution	foreign	crates/sens/src/eval/mod.rs; crates/sens-cli/src/main.rs	2026-10-08	Оракул = Rust-процес; сенс-на-sens виконання ще не показане
+L4	oracle-execution	dependency	foreign	Cargo.toml	2026-10-08	rustc/cargo
+L5	self-hosted-core	source	partial	wsm-my-lisp@23881bb: 8 *.lisp (lib/compiler.lisp, repo.lisp, scripts/run-nucleus-witnesses.lisp, ...)	2026-10-08	Нуклеус/свідки частково Lisp; у гілці домінують 20 *.rs і 10 *.s
+L5	self-hosted-core	execution	foreign	wsm-my-lisp@23881bb: asm/nucleus.s; harness/src/harness_sid8.rs; .github/workflows/core1-sid8-nucleus.yml	2026-10-08	Нуклеус рукописний asm; свідок йде через Rust-harness (cargo). Це вектор втечі, але не виконання на sens
+L5	self-hosted-core	dependency	foreign	wsm-my-lisp@23881bb: harness/Cargo.toml; TARGET_CONTRACT_COMMIT pin у core1-sid8-nucleus.yml	2026-10-08	cargo-harness + пінований зовнішній target-contract
+L6	tooling	source	foreign	.github/workflows/ci-hosted.yml; scripts/migrate-to-sens-codes.py; scripts/research-2351-exact-width-function-census.py	2026-10-08	Тести/бенчі/CI: Rust і Python
+L6	tooling	execution	foreign	.github/workflows/ci-hosted.yml	2026-10-08	Риштування виконується на чужих рушіях
+L6	tooling	dependency	foreign	Cargo.toml; requirements-free stdlib python3	2026-10-08	rustc/cargo + python3

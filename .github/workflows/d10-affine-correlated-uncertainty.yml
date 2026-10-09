@@ -1,0 +1,21 @@
+name: D10 affine correlated uncertainty research
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-affine-correlated-uncertainty-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "scripts/check_d10_affine_uncertainty.py"
+      - "tests/test_d10_affine_uncertainty.py"
+      - ".github/workflows/d10-affine-correlated-uncertainty.yml"
+  workflow_dispatch:
+jobs:
+  research-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check exact D1-D10 source identity in the full checkout
+        run: python3 scripts/check_d10_affine_uncertainty.py --require-checkout
+      - name: Run exact rational oracle with negative controls
+        run: python3 -m unittest discover -s tests -p 'test_d10_affine_uncertainty.py' -v

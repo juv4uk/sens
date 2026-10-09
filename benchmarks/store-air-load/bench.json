@@ -1,0 +1,23 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "store-air-load",
+  "wing": "STORE → AIR → LOAD",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can canonical exact-width payload identity be preserved while storage, transport, and load costs are measured as separate physical axes?",
+  "claim": "Measures STORE/AIR/LOAD accounting and validates exact-width recovery for declared fixtures; transport overhead does not become language semantics.",
+  "witness": [
+    "README.md",
+    "run.py",
+    "validate.py",
+    "fixtures.json",
+    "schema.json"
+  ],
+  "status": "ACTIVE",
+  "generation": "unknown",
+  "axis": "store-air-load/physical-separation",
+  "reproduce": "python3 benchmarks/store-air-load/run.py --out /tmp/store-air-load.jsonl --bitrate-bps 2 && python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl"
+}

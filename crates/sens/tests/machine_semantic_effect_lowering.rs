@@ -33,7 +33,7 @@ fn lowering_session() -> Session {
     session
 }
 
-fn current_d5_plus_coordinate() -> (usize, u8) {
+fn current_d5_coordinate(resident: &str) -> (usize, u8) {
     let foundation: Value =
         serde_json::from_str(&read("knowledge/d1-d9-foundation.json")).expect("foundation JSON");
 
@@ -51,8 +51,8 @@ fn current_d5_plus_coordinate() -> (usize, u8) {
     let residents = d5["residents"].as_object().expect("D5 residents");
     let (bits, _) = residents
         .iter()
-        .find(|(_, role)| role.as_str() == Some("PLUS"))
-        .expect("current D5 foundation must contain PLUS");
+        .find(|(_, role)| role.as_str() == Some(resident))
+        .unwrap_or_else(|| panic!("current D5 foundation must contain {resident}"));
 
     (
         width,
@@ -62,67 +62,106 @@ fn current_d5_plus_coordinate() -> (usize, u8) {
 
 #[test]
 fn current_foundation_runtime_identity_and_effect_router_agree() {
-    let expected = current_d5_plus_coordinate();
-
-    let parsed = parse("(додати 2 3)").expect("current PLUS source");
-    let lowered = lower_program(&parsed);
-    let ExprKind::DomainCall(identity, args) = &lowered[0].kind else {
-        panic!("current PLUS must lower to exact DomainCall");
-    };
-
-    assert_eq!(
-        (identity.width(), identity.packed_bits()),
-        expected,
-        "runtime exact DomainIdentity and owner foundation must agree before effect selection"
-    );
-    assert_eq!(args.len(), 2);
+    let cases = [
+        ("PLUS", "(додати 2 3)"),
+        ("DIFFERENCE", "(відняти 5 3)"),
+        ("TIMES", "(помножити 4 6)"),
+    ];
 
     let source = read("lib/machine/lowering/semantic-effects.lisp");
-    let guarded_coordinate = format!(
-        "(machine-effect-current-domain-key? width bits {} {})",
-        expected.0, expected.1
-    );
-    assert!(
-        source.contains(&guarded_coordinate),
-        "#4365 router drifted from current owner foundation: expected {guarded_coordinate}"
-    );
+    for (resident, program) in cases {
+        let expected = current_d5_coordinate(resident);
+
+        let parsed = parse(program).expect("current D5 source");
+        let lowered = lower_program(&parsed);
+        let ExprKind::DomainCall(identity, args) = &lowered[0].kind else {
+            panic!("{resident} must lower to exact DomainCall");
+        };
+
+        assert_eq!(
+            (identity.width(), identity.packed_bits()),
+            expected,
+            "runtime exact DomainIdentity and owner foundation must agree for {resident}"
+        );
+        assert_eq!(args.len(), 2);
+
+        let guarded_coordinate = format!(
+            "(machine-effect-current-domain-key? width bits {} {})",
+            expected.0, expected.1
+        );
+        assert!(
+            source.contains(&guarded_coordinate),
+            "semantic effect router drifted from owner foundation for {resident}: expected {guarded_coordinate}"
+        );
+    }
 }
 
 #[test]
-fn exact_d5_plus_selects_only_the_existing_target_neutral_effect() {
-    let (width, bits) = current_d5_plus_coordinate();
+fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
     let mut session = lowering_session();
+    let cases = [
+        ("PLUS", 2u64, 3u64, "(bounded-u64-add 2 3)"),
+        ("DIFFERENCE", 5, 3, "(bounded-u64-sub 5 3)"),
+        ("TIMES", 4, 6, "(bounded-u64-mul 4 6)"),
+    ];
 
-    assert_eq!(
-        eval_value(
-            &format!("(machine-lower-current-binary-effect {width} {bits} 2 3)"),
-            &mut session,
-        ),
-        "(bounded-u64-add 2 3)"
-    );
+    for (resident, left, right, expected_effect) in cases {
+        let (width, bits) = current_d5_coordinate(resident);
+        assert_eq!(
+            eval_value(
+                &format!("(machine-lower-current-binary-effect {width} {bits} {left} {right})"),
+                &mut session,
+            ),
+            expected_effect,
+            "{resident}"
+        );
+    }
 
+    let (plus_width, plus_bits) = current_d5_coordinate("PLUS");
     assert_eq!(
         eval_value(
             &format!(
-                "(machine-lower-current-binary-effect {width} {bits} 4294967296 3)"
+                "(machine-lower-current-binary-effect {plus_width} {plus_bits} 4294967296 3)"
             ),
             &mut session,
         ),
         "machine-effect-rejected",
-        "semantic selection must preserve the already-proved bounded carrier guard"
+        "PLUS must preserve the bounded u32 carrier guard"
+    );
+
+    let (difference_width, difference_bits) = current_d5_coordinate("DIFFERENCE");
+    assert_eq!(
+        eval_value(
+            &format!(
+                "(machine-lower-current-binary-effect {difference_width} {difference_bits} 2 3)"
+            ),
+            &mut session,
+        ),
+        "machine-effect-rejected",
+        "DIFFERENCE underflow must fail closed before target projection"
+    );
+
+    let (times_width, times_bits) = current_d5_coordinate("TIMES");
+    assert_eq!(
+        eval_value(
+            &format!(
+                "(machine-lower-current-binary-effect {times_width} {times_bits} 4294967296 1)"
+            ),
+            &mut session,
+        ),
+        "machine-effect-rejected",
+        "TIMES outside the proved u32×u32 rectangle must fail closed"
     );
 }
 
 #[test]
 fn wrong_domain_and_unmapped_current_identity_fail_closed() {
-    let (_, plus_bits) = current_d5_plus_coordinate();
+    let (_, plus_bits) = current_d5_coordinate("PLUS");
     let mut session = lowering_session();
 
     for source in [
         format!("(machine-lower-current-binary-effect 4 {plus_bits} 2 3)"),
         format!("(machine-lower-current-binary-effect 6 {plus_bits} 2 3)"),
-        "(machine-lower-current-binary-effect 5 11 5 3)".to_string(),
-        "(machine-lower-current-binary-effect 5 22 4 6)".to_string(),
         "(machine-lower-current-binary-effect 5 23 4 2)".to_string(),
     ] {
         assert_eq!(

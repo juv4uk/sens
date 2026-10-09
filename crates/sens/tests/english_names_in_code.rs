@@ -53,6 +53,40 @@ fn english_names() -> BTreeSet<String> {
     names
 }
 
+/// Історичні вимірювання та старі еталонні бенчмарки, а не діючі джерела.
+/// Перелік навмисно замкнутий: новий executable-код під benchmarks/ мусить
+/// проходити ті самі перевірки, що й увесь інший код СЕНС.
+fn is_historical_benchmark_data(rel: &str) -> bool {
+    const LEGACY_FIXTURES: &[&str] = &[
+        "benchmarks/arithmetic.lisp",
+        "benchmarks/closures.lisp",
+        "benchmarks/lists.lisp",
+        "benchmarks/parser.lisp",
+        "benchmarks/recursion.lisp",
+        "benchmarks/core-coremath-selector-convergence/src/main.rs",
+        "benchmarks/core-math-binary-exec/src/lib.rs",
+        "benchmarks/core-math-binary-exec/src/main.rs",
+        "benchmarks/core-math-binary-growth/src/lib.rs",
+        "benchmarks/core-math-binary-growth/src/main.rs",
+        "benchmarks/core-math-binary-seeds/src/lib.rs",
+        "benchmarks/core-math-binary-seeds/src/main.rs",
+        "benchmarks/foundation-ladder/foundation_ladder.rs",
+        "benchmarks/self-description/bench.rs",
+        "benchmarks/semantic-tree/bench.rs",
+        "benchmarks/sens-surface/results/20260927-three-way/phase_bench_legacy.rs",
+    ];
+    const PINNED_RESULT_PREFIXES: &[&str] = &[
+        "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/",
+        "benchmarks/sens-surface/results/20260925-213342-33bfb53a/programs/",
+        "benchmarks/sens-surface/results/20260925-225540-b49a87ea/programs/",
+        "benchmarks/sens-surface/results/20260925-icount-33bfb53a/programs/",
+        "benchmarks/sens-surface/results/20260925-inprocess-33bfb53a/programs/",
+    ];
+    LEGACY_FIXTURES.contains(&rel)
+        || (rel.ends_with(".lisp")
+            && PINNED_RESULT_PREFIXES.iter().any(|prefix| rel.starts_with(prefix)))
+}
+
 /// Таблиця функцій і її проєкції — джерело імен, не код.
 fn is_table_source(rel: &str) -> bool {
     rel == "lib/surface/semantic-registry.lisp"
@@ -73,6 +107,8 @@ fn is_table_source(rel: &str) -> bool {
         || rel.starts_with("lib/generated/")
         || rel.ends_with("_generated.rs")
         || rel.starts_with("crates/sens/tests/data/")
+        // Pinned historical benchmark evidence only; never blanket-exempt a tree.
+        || is_historical_benchmark_data(rel)
         // Сам цей тест: імена в його перевірках сканера — вхідні дані.
         || rel == "crates/sens/tests/english_names_in_code.rs"
 }
@@ -101,6 +137,18 @@ fn rust_test_is_semantic_authority(rel: &str) -> bool {
     })
 }
 
+/// This specific Lisp-shaped document declares itself operational doctrine,
+/// not an executable SENS source and not language-contract authority.
+/// Do NOT exempt a whole directory or unmarked Lisp files: the English
+/// name migration ratchet must still catch actual executable growth.
+fn is_operational_doctrine_data(rel: &str, text: &str) -> bool {
+    rel == "knowledge/sens-primary.lisp"
+        && text.lines().take(8).any(|line| {
+            line.trim() == "; Status: operational doctrine (not language-contract authority)."
+        })
+        && text.lines().take(20).any(|line| line.trim() == "(sens-primary/2")
+}
+
 fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static str {
     if rel.starts_with("crates/")
         && rel.contains("/tests/")
@@ -109,7 +157,9 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
     {
         return "rust-test-instrument";
     }
-    if !rel.ends_with(".rs") && explicit_nonsemantic_lisp_evidence(text) {
+    if !rel.ends_with(".rs")
+        && (explicit_nonsemantic_lisp_evidence(text) || is_operational_doctrine_data(rel, text))
+    {
         return "lisp-evidence";
     }
     base_kind
@@ -118,7 +168,7 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
 fn ratchet_enforced_kind(kind: &str) -> bool {
     !matches!(
         kind,
-        "rust-test-instrument" | "lisp-evidence" | "rust-contract-data" | "rust-evidence-data"
+        "rust-test-instrument" | "lisp-evidence" | "rust-contract-data" | "rust-evidence-data" | "rust-cli-surface"
     )
 }
 
@@ -140,6 +190,27 @@ fn rust_nonsemantic_data_kind(
         && line_text.contains("forbidden_legacy_operation: \"numeric-buffer-map\".to_string()")
     {
         return Some("rust-evidence-data");
+    }
+
+    // The command line dispatch of sens-trit is a human-facing surface, not
+    // an English-named SENS semantic primitive. Exempt EXACTLY this single
+    // match arm; an ordinary Rust `"eval"` elsewhere remains ratchet debt.
+    if rel == "crates/sens-cli/src/bin/sens-trit.rs"
+        && literal == "eval"
+        && line_text.trim() == "\"eval\" => {"
+    {
+        return Some("rust-cli-surface");
+    }
+
+    // This exact Lisp form is a negative test fixture embedded in a
+    // production module's #[cfg(test)] section. It intentionally checks that
+    // English "car" does NOT mint a current identity; class it as test input,
+    // while equivalent strings elsewhere remain executable-name debt.
+    if rel == "crates/sens/src/mixed_source.rs"
+        && literal == "(car x)"
+        && line_text.trim().starts_with("for source in [\"(car x)\"")
+    {
+        return Some("rust-test-instrument");
     }
 
     None
@@ -428,7 +499,7 @@ fn baseline_entry_enforced(key: &str) -> bool {
     }
     if !file.ends_with(".rs") {
         let text = fs::read_to_string(repo_root().join(file)).unwrap_or_default();
-        if explicit_nonsemantic_lisp_evidence(&text) {
+        if explicit_nonsemantic_lisp_evidence(&text) || is_operational_doctrine_data(file, &text) {
             return false;
         }
     }
@@ -533,6 +604,66 @@ fn summary(places: &[Place]) -> String {
 }
 
 #[test]
+fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
+    let relative = "crates/sens-cli/src/bin/sens-trit.rs";
+    let source = fs::read_to_string(repo_root().join(relative))
+        .expect("read exact real CLI");
+    let arms: Vec<_> = source.lines()
+        .filter(|line| line.trim() == "\"eval\" => {")
+        .collect();
+    assert_eq!(arms.len(), 1, "the reviewed CLI dispatch shape must not drift");
+    assert!(english_names().contains("eval"), "keep the real semantic name scanned");
+    assert_eq!(
+        rust_nonsemantic_data_kind(relative, arms[0], "eval"),
+        Some("rust-cli-surface"),
+    );
+    assert!(!ratchet_enforced_kind("rust-cli-surface"));
+    for (path, line) in [
+        (relative, "let function_name = \"eval\";"),
+        (relative, "\"eval\" => execute_host_command(),"),
+        ("crates/sens/src/eval/mod.rs", "\"eval\" => {"),
+        ("crates/sens-cli/src/bin/other.rs", "\"eval\" => {"),
+    ] {
+        assert_eq!(
+            rust_nonsemantic_data_kind(path, line, "eval"),
+            None,
+            "English executable names must remain debt outside the exact reviewed CLI arm",
+        );
+    }
+    assert!(ratchet_enforced_kind("rust"));
+}
+
+#[test]
+fn embedded_mixed_source_negative_fixture_is_test_input_only() {
+    let fixture_line =
+        r#"for source in ["(car x)", "(CONS x y)", "(00000101 x)", "(невідоме x)"] {"#;
+    assert_eq!(
+        rust_nonsemantic_data_kind(
+            "crates/sens/src/mixed_source.rs",
+            fixture_line,
+            "(car x)",
+        ),
+        Some("rust-test-instrument"),
+    );
+
+    // No broad path/name exemption: production uses of the same source text
+    // still contribute to the English-name ratchet.
+    for line in [
+        r#"let source = "(car x)";"#,
+        r#"parse_mixed_exact_domain("(car x)")"#,
+    ] {
+        assert_eq!(
+            rust_nonsemantic_data_kind(
+                "crates/sens/src/mixed_source.rs",
+                line,
+                "(car x)",
+            ),
+            None,
+        );
+    }
+}
+
+#[test]
 fn english_names_in_code_never_grow() {
     let places = places();
     let current = counts(&places);
@@ -599,6 +730,21 @@ fn no_english_names_in_code() {
 }
 
 #[test]
+fn sens_primary_operational_doctrine_does_not_count_as_executable_english() {
+    let rel = "knowledge/sens-primary.lisp";
+    let content = fs::read_to_string(repo_root().join(rel)).unwrap();
+    assert!(is_operational_doctrine_data(rel, &content));
+    assert_eq!(classified_kind(rel, &content, "lisp"), "lisp-evidence");
+    assert!(!ratchet_enforced_kind(classified_kind(rel, &content, "lisp")));
+
+    // A different executable source with identical Lisp-shaped content is
+    // never automatically exempted; nor is a source lacking the header.
+    assert!(!is_operational_doctrine_data("lib/core.lisp", &content));
+    assert!(ratchet_enforced_kind(classified_kind("lib/core.lisp", &content, "lisp")));
+    assert!(ratchet_enforced_kind(classified_kind(rel, "(identity 1)", "lisp")));
+}
+
+#[test]
 fn scanners_find_names_in_lisp_and_rust() {
     let lisp = lisp_tokens("(map car xs) ; cdr\n\"cons\" '(length 1) (quote (list)) (00000001 reverse) (f x)", 1);
     let tokens: Vec<(&str, bool)> = lisp.iter().map(|(_, t, d)| (t.as_str(), *d)).collect();
@@ -632,6 +778,17 @@ fn scanners_find_names_in_lisp_and_rust() {
     assert!(!is_table_source("contracts/core-universal-contract.lisp"));
     assert!(!is_table_source("lib/compiler-nucleus.lisp"));
     assert!(!is_table_source("lib/machine/encoding/x86-64.lisp"));
+    // A new benchmark, archive or old xtask file must NOT inherit a
+    // blanket English-identity exemption from its parent directory.
+    assert!(is_table_source("benchmarks/arithmetic.lisp"));
+    assert!(is_table_source(
+        "benchmarks/sens-surface/results/20260925-211421-33bfb53a/programs/closures-en.lisp"
+    ));
+    assert!(!is_table_source("benchmarks/new-executable.lisp"));
+    assert!(!is_table_source("benchmarks/new-module/src/main.rs"));
+    assert!(!is_table_source("benchmarks/sens-surface/results/20261010-new/programs/fib-en.lisp"));
+    assert!(!is_table_source("archive/new-executable.lisp"));
+    assert!(!is_table_source("crates/xtask.bak/src/main.rs"));
     assert!(!rust_literal_has_lisp_source("CDR: list accessor (structural)"));
     assert!(!rust_literal_has_lisp_source("CONS: pair construction (structural)"));
     assert!(rust_literal_has_lisp_source("(атом? x)"));

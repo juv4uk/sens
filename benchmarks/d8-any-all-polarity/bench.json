@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-any-all-polarity",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Is predicate complement the unique lawful polarity transform for the bounded ANY/ALL dual product?",
+  "claim": "Exhausts the finite predicate carrier and De Morgan permutations as Contract 11.6 research; it does not admit D8 residency or callability.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3663-d8-any-all-polarity.md",
+    "../../docs/research/3663-d8-any-all-polarity.uk.md"
+  ],
+  "status": "PRODUCT-CANDIDATE",
+  "generation": "11.6",
+  "axis": "d8/predicate-polarity",
+  "reproduce": "python3 benchmarks/d8-any-all-polarity/run.py --out /tmp/d8-any-all-polarity"
+}

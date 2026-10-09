@@ -1,0 +1,28 @@
+name: migration-eq-cond-rust-oracle
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/migration_eq_cond_main.rs"
+      - "crates/sens/src/**"
+      - ".github/workflows/migration-eq-cond-rust.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/migration_eq_cond_main.rs"
+      - "crates/sens/src/**"
+      - ".github/workflows/migration-eq-cond-rust.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migration-eq-cond-rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Compile and execute original EQ/COND physical-T5 Rust regression
+        run: cargo test -q -p sens --test migration_eq_cond_main

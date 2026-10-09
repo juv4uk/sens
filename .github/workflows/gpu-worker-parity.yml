@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/gpu_*.rs"
+      - "crates/sens/tests/gpu_oracle_conformance.rs"
       - "crates/sens/src/compiler_role.rs"
       - "contracts/compiler-gpu-execution-packet-v1.lisp"
       - "scripts/gpu-worker-parity.py"
@@ -39,11 +40,13 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Current GPU oracle fixtures match the CPU evaluator
-        run: cargo test -p sens --lib gpu_oracle_conformance::tests::every_fixture_matches_the_cpu_oracle -- --nocapture
+        run: cargo test -p sens --test gpu_oracle_conformance every_fixture_matches_the_cpu_oracle -- --nocapture
 
   gpu-worker-parity:
+    # SKIPPED (hardware UNVERIFIED) until a GitHub-hosted GPU runner is provisioned.
+    if: vars.GITHUB_HOSTED_GPU_RUNNER != ''
     # Лише GPU-runner: ніколи не падаємо назад на CPU-runner.
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04  # fixed GitHub-owned image; no variable can route to the owner PC
     timeout-minutes: 10
     env:
       CML_GPU_WORKER_SOCKET: /run/cml-gpu-worker/worker.sock

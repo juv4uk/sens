@@ -1,0 +1,3165 @@
+{
+  "schema": "early-lisp-graph-historical-evidence/v1",
+  "status": "RESEARCH-ARCHIVE-NOT-CANONICAL-SEMANTIC-AUTHORITY",
+  "purpose": "Preserve the LISP I (1960) / LISP 1.5 (1962) graph corpus, bounded countermodels and selector-relation experiment from an obsolete branch, while separating its old seed/prefix code model from current ratified D3.",
+  "sources": {
+    "research_branch": "research/1962-lisp1-15-domain-graph",
+    "old_branch_unique_commits": 4,
+    "old_branch_behind_main_at_audit": 1271,
+    "primary_sources": [
+      {
+        "title": "J. McCarthy, Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I (1960)",
+        "url": "https://www.cs.cmu.edu/~crary/819-f09/McCarthy60.pdf"
+      },
+      {
+        "title": "LISP 1.5 Programmer's Manual (1962)",
+        "url": "https://www.bitsavers.org/pdf/mit/rle_lisp/McCarthy_LISP_1.5_Programmers_Manual_2ed_1985.pdf"
+      },
+      {
+        "title": "Computer History Museum LISP History Collection",
+        "url": "https://softwarepreservation.computerhistory.org/LISP/"
+      }
+    ],
+    "source_file_sha": {
+      "nodes": {
+        "path": "docs/research/1962-lisp1-15-nodes.tsv",
+        "blob_sha": "fe34c59fcf2341980cc8dc9f14bfe7d482277227",
+        "url": "https://github.com/juv4uk/sens/blob/research/1962-lisp1-15-domain-graph/docs/research/1962-lisp1-15-nodes.tsv"
+      },
+      "edges": {
+        "path": "docs/research/1962-lisp1-15-edges.tsv",
+        "blob_sha": "4e4c55bdd5f30ffacaa7d7dae10cdb7baf1dc417",
+        "url": "https://github.com/juv4uk/sens/blob/research/1962-lisp1-15-domain-graph/docs/research/1962-lisp1-15-edges.tsv"
+      },
+      "equivalence": {
+        "path": "docs/research/1962-equivalence-evidence.tsv",
+        "blob_sha": "15bc2bbe7a87613bbb8b627aabc21a5db03c0818",
+        "url": "https://github.com/juv4uk/sens/blob/research/1962-lisp1-15-domain-graph/docs/research/1962-equivalence-evidence.tsv"
+      },
+      "falsifications": {
+        "path": "docs/research/2017-falsification-ledger.tsv",
+        "blob_sha": "2fb026557ae4bdddee95fd9a0b221e6681d95a7d",
+        "url": "https://github.com/juv4uk/sens/blob/research/1962-lisp1-15-domain-graph/docs/research/2017-falsification-ledger.tsv"
+      },
+      "pressure": {
+        "path": "docs/research/2019-bija3-pressure.tsv",
+        "blob_sha": "636641fb0afe83226a05204ea3b1a8a1a0de5af0",
+        "url": "https://github.com/juv4uk/sens/blob/research/1962-lisp1-15-domain-graph/docs/research/2019-bija3-pressure.tsv"
+      },
+      "relationKernel": {
+        "path": "docs/research/2023-selector-relation-kernel.tsv",
+        "blob_sha": "ec19d9e0c56bd203a17ee148386b6d7f63fde132",
+        "url": "https://github.com/juv4uk/sens/blob/research/1962-lisp1-15-domain-graph/docs/research/2023-selector-relation-kernel.tsv"
+      }
+    },
+    "corrected_main_report": {
+      "path": "docs/research/1962-lisp1-15-domain-graph-report.md",
+      "blob_sha": "23f7322f0aaf179f7fa0f498363e92d27cfdaaa1"
+    }
+  },
+  "current_authority_snapshot": {
+    "d1_d9_foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "d3_table_blob_sha": "55b837d05a5772a65c89c6c0d5a8305d2db34256",
+    "d10_selected": 625,
+    "d10_ratified": 0
+  },
+  "historical_model_note": "The original node TSV was authored against a pre-pivot 3-bit model with EQ=011, CONS=100, CAR=101, CDR=110, COND=111. These are preserved only as historical snapshots. The current ratified D3 crosswalk is separate and fail-closed.",
+  "current_d3_crosswalk": {
+    "()": {
+      "historical_code": "000",
+      "current_d3_code": "000",
+      "current_name": "()"
+    },
+    "QUOTE": {
+      "historical_code": "001",
+      "current_d3_code": "001",
+      "current_name": "QUOTE"
+    },
+    "ATOM": {
+      "historical_code": "010",
+      "current_d3_code": "010",
+      "current_name": "ATOM"
+    },
+    "EQ": {
+      "historical_code": "011",
+      "current_d3_code": "101",
+      "current_name": "EQ"
+    },
+    "CONS": {
+      "historical_code": "100",
+      "current_d3_code": "111",
+      "current_name": "CONS"
+    },
+    "CAR": {
+      "historical_code": "101",
+      "current_d3_code": "100",
+      "current_name": "CAR"
+    },
+    "CDR": {
+      "historical_code": "110",
+      "current_d3_code": "011",
+      "current_name": "CDR"
+    },
+    "COND": {
+      "historical_code": "111",
+      "current_d3_code": "110",
+      "current_name": "COND"
+    }
+  },
+  "dataset_counts": {
+    "nodes": 34,
+    "edges": 129,
+    "falsifications": 10,
+    "equivalence_evidence": 3,
+    "bija3_pressure": 16,
+    "selector_relation_kernel": 4
+  },
+  "interpretive_limits": [
+    "Old seed3_code and prefix_code are provenance about a historical research model, not current D1-D9 coordinates and not D10 coordinates.",
+    "Dependency, reachability, SCC, prefix, and support sets are analysis relations; none alone grants semantic identity or D10 placement.",
+    "Falsifications apply to the exact claim and scope in each ledger row, not to every possible future encoding or model.",
+    "Current exact-name matching is navigation only; neither a match nor absence proves semantic equivalence or novelty.",
+    "No D10 selection, coordinate, implementation, or ratification is created by this archive."
+  ],
+  "datasets": {
+    "nodes": [
+      {
+        "historical_id": "nil",
+        "era": "both",
+        "kind": "structure-ground",
+        "historical_role": "() / NIL ground; перший вузол повного 3-бітного зерна",
+        "historical_snapshot": {
+          "seed3_code": "000",
+          "prefix_code": "000",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "000",
+          "current_d3_code": "000",
+          "current_name": "()"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "quote",
+        "era": "both",
+        "kind": "evaluation-form",
+        "historical_role": "Історичний QUOTE; constitutive root",
+        "historical_snapshot": {
+          "seed3_code": "001",
+          "prefix_code": "001",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D3",
+              "coordinate": "001",
+              "semantic_name": "QUOTE"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "001",
+          "current_d3_code": "001",
+          "current_name": "QUOTE"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "atom",
+        "era": "both",
+        "kind": "semantic",
+        "historical_role": "Історичний ATOM; constitutive root",
+        "historical_snapshot": {
+          "seed3_code": "010",
+          "prefix_code": "010",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D3",
+              "coordinate": "010",
+              "semantic_name": "ATOM"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "010",
+          "current_d3_code": "010",
+          "current_name": "ATOM"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "eq",
+        "era": "both",
+        "kind": "semantic",
+        "historical_role": "Історичний EQ; constitutive root",
+        "historical_snapshot": {
+          "seed3_code": "011",
+          "prefix_code": "011",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D3",
+              "coordinate": "101",
+              "semantic_name": "EQ"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "011",
+          "current_d3_code": "101",
+          "current_name": "EQ"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "cons",
+        "era": "both",
+        "kind": "semantic",
+        "historical_role": "Історичний CONS; constitutive root",
+        "historical_snapshot": {
+          "seed3_code": "100",
+          "prefix_code": "100",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D3",
+              "coordinate": "111",
+              "semantic_name": "CONS"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "100",
+          "current_d3_code": "111",
+          "current_name": "CONS"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "car",
+        "era": "both",
+        "kind": "semantic",
+        "historical_role": "Історичний CAR; selector root",
+        "historical_snapshot": {
+          "seed3_code": "101",
+          "prefix_code": "101",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D3",
+              "coordinate": "100",
+              "semantic_name": "CAR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "101",
+          "current_d3_code": "100",
+          "current_name": "CAR"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "cdr",
+        "era": "both",
+        "kind": "semantic",
+        "historical_role": "Історичний CDR; selector root",
+        "historical_snapshot": {
+          "seed3_code": "110",
+          "prefix_code": "110",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D3",
+              "coordinate": "011",
+              "semantic_name": "CDR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "110",
+          "current_d3_code": "011",
+          "current_name": "CDR"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "cond",
+        "era": "both",
+        "kind": "evaluation-form",
+        "historical_role": "Історичний COND; constitutive root",
+        "historical_snapshot": {
+          "seed3_code": "111",
+          "prefix_code": "111",
+          "prefix_evidence": "exact-seed"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D3",
+              "coordinate": "110",
+              "semantic_name": "COND"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": {
+          "historical_code": "111",
+          "current_d3_code": "110",
+          "current_name": "COND"
+        },
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "lambda",
+        "era": "both",
+        "kind": "binding-form",
+        "historical_role": "Первинна binding form; можливий нащадок representation/evaluation family, код не призначено",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": "candidate-family-001"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0010",
+              "semantic_name": "LAMBDA"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "label",
+        "era": "both",
+        "kind": "binding-form",
+        "historical_role": "Первинна recursive-name form; код не призначено",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": "candidate-family-001"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D5",
+              "coordinate": "00100",
+              "semantic_name": "LABEL"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "caar",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "CAR∘CAR; prefix theorem",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": "1010",
+          "prefix_evidence": "exact-selector"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1000",
+              "semantic_name": "CAAR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "cadr",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "CAR∘CDR; prefix theorem",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": "1011",
+          "prefix_evidence": "exact-selector"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1001",
+              "semantic_name": "CADR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "cadar",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "CAR∘CDR∘CAR; prefix theorem",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": "10110",
+          "prefix_evidence": "exact-selector"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D5",
+              "coordinate": "10010",
+              "semantic_name": "CADAR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "caddr",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "CAR∘CDR∘CDR; prefix theorem",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": "10111",
+          "prefix_evidence": "exact-selector"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D5",
+              "coordinate": "10011",
+              "semantic_name": "CADDR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "cdar",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "CDR∘CAR; prefix theorem",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": "1100",
+          "prefix_evidence": "exact-selector"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0110",
+              "semantic_name": "CDAR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "cddr",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "CDR∘CDR; prefix theorem",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": "1101",
+          "prefix_evidence": "exact-selector"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0111",
+              "semantic_name": "CDDR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "list",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "Скорочення ланцюга CONS із NIL; construction-family candidate",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": "candidate-family-100"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1110",
+              "semantic_name": "LIST"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "null",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "Тест NIL через кілька root relations; не форсувати prefix-parent",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": "unresolved-multiparent"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0101",
+              "semantic_name": "NULL"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "equal",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "Рекурсивна структурна рівність; equality-family candidate",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": "candidate-family-011"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D8",
+              "coordinate": "11110111",
+              "semantic_name": "EQUAL"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "append",
+        "era": "both",
+        "kind": "derived",
+        "historical_role": "Рекурсивне конструювання списку через CONS; construction-family candidate",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": "candidate-family-100"
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1111",
+              "semantic_name": "APPEND"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "pair_lisp1",
+        "era": "lisp1",
+        "kind": "derived",
+        "historical_role": "LISP I helper pair",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D8",
+              "coordinate": "11111101",
+              "semantic_name": "PAIR"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "assoc_lisp1",
+        "era": "lisp1",
+        "kind": "derived",
+        "historical_role": "LISP I association-list lookup",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D5",
+              "coordinate": "11100",
+              "semantic_name": "ASSOC"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "appq_lisp1",
+        "era": "lisp1",
+        "kind": "derived",
+        "historical_role": "LISP I quote-each-argument helper",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [],
+          "d10_selected": [
+            {
+              "stable_id": "d10.crossrepo.early.df61e09eb40f66de",
+              "semantic_name": "APPQ",
+              "status": "SELECTED-RESEARCH-CANDIDATE",
+              "coordinate": null
+            }
+          ]
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "eval_lisp1",
+        "era": "lisp1",
+        "kind": "evaluator",
+        "historical_role": "Теоретичний eval LISP I",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0001",
+              "semantic_name": "EVAL"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "apply_lisp1",
+        "era": "lisp1",
+        "kind": "evaluator",
+        "historical_role": "Теоретичний apply LISP I",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0000",
+              "semantic_name": "APPLY"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "evcon_lisp1",
+        "era": "lisp1",
+        "kind": "evaluator",
+        "historical_role": "COND helper LISP I",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1100",
+              "semantic_name": "EVCON"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "evlis_lisp1",
+        "era": "lisp1",
+        "kind": "evaluator",
+        "historical_role": "Argument-list evaluator LISP I",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1101",
+              "semantic_name": "EVLIS"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "pairlis_lisp15",
+        "era": "lisp15",
+        "kind": "derived",
+        "historical_role": "LISP 1.5 environment pairing helper",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D5",
+              "coordinate": "11110",
+              "semantic_name": "PAIRLIS"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "assoc_lisp15",
+        "era": "lisp15",
+        "kind": "derived",
+        "historical_role": "LISP 1.5 association-list lookup",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D5",
+              "coordinate": "11100",
+              "semantic_name": "ASSOC"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "evalquote_lisp15",
+        "era": "lisp15",
+        "kind": "evaluator",
+        "historical_role": "Universal entry point LISP 1.5",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D5",
+              "coordinate": "00000",
+              "semantic_name": "EVALQUOTE"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "apply_lisp15",
+        "era": "lisp15",
+        "kind": "evaluator",
+        "historical_role": "Function+arguments evaluator LISP 1.5",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0000",
+              "semantic_name": "APPLY"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "eval_lisp15",
+        "era": "lisp15",
+        "kind": "evaluator",
+        "historical_role": "Form evaluator LISP 1.5",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "0001",
+              "semantic_name": "EVAL"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "evcon_lisp15",
+        "era": "lisp15",
+        "kind": "evaluator",
+        "historical_role": "COND helper LISP 1.5",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1100",
+              "semantic_name": "EVCON"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      },
+      {
+        "historical_id": "evlis_lisp15",
+        "era": "lisp15",
+        "kind": "evaluator",
+        "historical_role": "Argument-list evaluator LISP 1.5",
+        "historical_snapshot": {
+          "seed3_code": null,
+          "prefix_code": null,
+          "prefix_evidence": null
+        },
+        "current_exact_name_matches": {
+          "d1_d9": [
+            {
+              "domain": "D4",
+              "coordinate": "1101",
+              "semantic_name": "EVLIS"
+            }
+          ],
+          "d10_selected": []
+        },
+        "current_d3_crosswalk": null,
+        "selected_d10_candidate": false,
+        "coordinate": null,
+        "ratified": false
+      }
+    ],
+    "edges": [
+      {
+        "historical_edge_id": "edge-001",
+        "era": "both",
+        "source": "caar",
+        "target": "car",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20/L1.5 p11",
+        "note": "Repeated CAR",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-002",
+        "era": "both",
+        "source": "cadr",
+        "target": "car",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20-21/L1.5 p11",
+        "note": "CAR after CDR",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-003",
+        "era": "both",
+        "source": "cadr",
+        "target": "cdr",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20-21/L1.5 p11",
+        "note": "CAR after CDR",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-004",
+        "era": "both",
+        "source": "cadar",
+        "target": "car",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "notation",
+        "note": "Selector abbreviation",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-005",
+        "era": "both",
+        "source": "caddr",
+        "target": "car",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "notation",
+        "note": "Selector abbreviation",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-006",
+        "era": "both",
+        "source": "cdar",
+        "target": "car",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "notation",
+        "note": "Selector abbreviation",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-007",
+        "era": "both",
+        "source": "cadar",
+        "target": "cdr",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "notation",
+        "note": "Selector abbreviation",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-008",
+        "era": "both",
+        "source": "caddr",
+        "target": "cdr",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "notation",
+        "note": "Selector abbreviation",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-009",
+        "era": "both",
+        "source": "cdar",
+        "target": "cdr",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "notation",
+        "note": "Selector abbreviation",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-010",
+        "era": "both",
+        "source": "cddr",
+        "target": "cdr",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "notation",
+        "note": "Repeated CDR",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-011",
+        "era": "both",
+        "source": "list",
+        "target": "cons",
+        "relation": "composition",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "LIST expands to nested CONS",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-012",
+        "era": "both",
+        "source": "list",
+        "target": "nil",
+        "relation": "structure",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "List terminator",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-013",
+        "era": "both",
+        "source": "null",
+        "target": "atom",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20",
+        "note": "NULL = ATOM(x) ∧ EQ(x,NIL) in LISP I",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-014",
+        "era": "both",
+        "source": "null",
+        "target": "eq",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20",
+        "note": "NULL = ATOM(x) ∧ EQ(x,NIL) in LISP I",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-015",
+        "era": "both",
+        "source": "null",
+        "target": "nil",
+        "relation": "structure",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20",
+        "note": "Tests NIL",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-016",
+        "era": "both",
+        "source": "equal",
+        "target": "atom",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-017",
+        "era": "both",
+        "source": "equal",
+        "target": "eq",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-018",
+        "era": "both",
+        "source": "equal",
+        "target": "car",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-019",
+        "era": "both",
+        "source": "equal",
+        "target": "cdr",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-020",
+        "era": "both",
+        "source": "equal",
+        "target": "cond",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-021",
+        "era": "both",
+        "source": "equal",
+        "target": "equal",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p20/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-022",
+        "era": "both",
+        "source": "append",
+        "target": "null",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-023",
+        "era": "both",
+        "source": "append",
+        "target": "cons",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-024",
+        "era": "both",
+        "source": "append",
+        "target": "car",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-025",
+        "era": "both",
+        "source": "append",
+        "target": "cdr",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-026",
+        "era": "both",
+        "source": "append",
+        "target": "cond",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-027",
+        "era": "both",
+        "source": "append",
+        "target": "append",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21/L1.5 p18",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-028",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "null",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-029",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "atom",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-030",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "cons",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-031",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "list",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-032",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "car",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-033",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "cdr",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-034",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "cond",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-035",
+        "era": "lisp1",
+        "source": "pair_lisp1",
+        "target": "pair_lisp1",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-036",
+        "era": "lisp1",
+        "source": "assoc_lisp1",
+        "target": "eq",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-037",
+        "era": "lisp1",
+        "source": "assoc_lisp1",
+        "target": "caar",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-038",
+        "era": "lisp1",
+        "source": "assoc_lisp1",
+        "target": "cadar",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-039",
+        "era": "lisp1",
+        "source": "assoc_lisp1",
+        "target": "cdr",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-040",
+        "era": "lisp1",
+        "source": "assoc_lisp1",
+        "target": "cond",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-041",
+        "era": "lisp1",
+        "source": "assoc_lisp1",
+        "target": "assoc_lisp1",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p21",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-042",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "null",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-043",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "cons",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-044",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "list",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-045",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "quote",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-046",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "car",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-047",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "cdr",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-048",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "cond",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-049",
+        "era": "lisp1",
+        "source": "appq_lisp1",
+        "target": "appq_lisp1",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-050",
+        "era": "lisp1",
+        "source": "apply_lisp1",
+        "target": "eval_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-051",
+        "era": "lisp1",
+        "source": "apply_lisp1",
+        "target": "cons",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-052",
+        "era": "lisp1",
+        "source": "apply_lisp1",
+        "target": "appq_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-053",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "atom",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-054",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "assoc_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-055",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "car",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-056",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "eq",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-057",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "quote",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-058",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "cadr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-059",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "evcon_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-060",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "cdr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-061",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "cons",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-062",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "evlis_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-063",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "caar",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-064",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "label",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-065",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "cadar",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-066",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "lambda",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-067",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "append",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-068",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "pair_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-069",
+        "era": "lisp1",
+        "source": "eval_lisp1",
+        "target": "eval_lisp1",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-070",
+        "era": "lisp1",
+        "source": "evcon_lisp1",
+        "target": "eval_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-071",
+        "era": "lisp1",
+        "source": "evcon_lisp1",
+        "target": "caar",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-072",
+        "era": "lisp1",
+        "source": "evcon_lisp1",
+        "target": "cadar",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-073",
+        "era": "lisp1",
+        "source": "evcon_lisp1",
+        "target": "cdr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-074",
+        "era": "lisp1",
+        "source": "evcon_lisp1",
+        "target": "cond",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-075",
+        "era": "lisp1",
+        "source": "evcon_lisp1",
+        "target": "evcon_lisp1",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-076",
+        "era": "lisp1",
+        "source": "evlis_lisp1",
+        "target": "null",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-077",
+        "era": "lisp1",
+        "source": "evlis_lisp1",
+        "target": "cons",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-078",
+        "era": "lisp1",
+        "source": "evlis_lisp1",
+        "target": "eval_lisp1",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-079",
+        "era": "lisp1",
+        "source": "evlis_lisp1",
+        "target": "car",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-080",
+        "era": "lisp1",
+        "source": "evlis_lisp1",
+        "target": "cdr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-081",
+        "era": "lisp1",
+        "source": "evlis_lisp1",
+        "target": "cond",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-082",
+        "era": "lisp1",
+        "source": "evlis_lisp1",
+        "target": "evlis_lisp1",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1 p24",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-083",
+        "era": "lisp15",
+        "source": "pairlis_lisp15",
+        "target": "null",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-084",
+        "era": "lisp15",
+        "source": "pairlis_lisp15",
+        "target": "cons",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-085",
+        "era": "lisp15",
+        "source": "pairlis_lisp15",
+        "target": "car",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-086",
+        "era": "lisp15",
+        "source": "pairlis_lisp15",
+        "target": "cdr",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-087",
+        "era": "lisp15",
+        "source": "pairlis_lisp15",
+        "target": "cond",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-088",
+        "era": "lisp15",
+        "source": "pairlis_lisp15",
+        "target": "pairlis_lisp15",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-089",
+        "era": "lisp15",
+        "source": "assoc_lisp15",
+        "target": "equal",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-090",
+        "era": "lisp15",
+        "source": "assoc_lisp15",
+        "target": "caar",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-091",
+        "era": "lisp15",
+        "source": "assoc_lisp15",
+        "target": "car",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-092",
+        "era": "lisp15",
+        "source": "assoc_lisp15",
+        "target": "cdr",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-093",
+        "era": "lisp15",
+        "source": "assoc_lisp15",
+        "target": "cond",
+        "relation": "derivable",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-094",
+        "era": "lisp15",
+        "source": "assoc_lisp15",
+        "target": "assoc_lisp15",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p19",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-095",
+        "era": "lisp15",
+        "source": "evalquote_lisp15",
+        "target": "apply_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-096",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "atom",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-097",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "eq",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-098",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "car",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-099",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "cdr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-100",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "cons",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-101",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "eval_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-102",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "lambda",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-103",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "pairlis_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-104",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "label",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-105",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "cond",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-106",
+        "era": "lisp15",
+        "source": "apply_lisp15",
+        "target": "apply_lisp15",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-107",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "atom",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-108",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "cdr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-109",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "assoc_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-110",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "car",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-111",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "eq",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-112",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "quote",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-113",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "cond",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-114",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "evcon_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-115",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "apply_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-116",
+        "era": "lisp15",
+        "source": "eval_lisp15",
+        "target": "evlis_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-117",
+        "era": "lisp15",
+        "source": "evcon_lisp15",
+        "target": "eval_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-118",
+        "era": "lisp15",
+        "source": "evcon_lisp15",
+        "target": "caar",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-119",
+        "era": "lisp15",
+        "source": "evcon_lisp15",
+        "target": "cadar",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-120",
+        "era": "lisp15",
+        "source": "evcon_lisp15",
+        "target": "cdr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-121",
+        "era": "lisp15",
+        "source": "evcon_lisp15",
+        "target": "cond",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-122",
+        "era": "lisp15",
+        "source": "evcon_lisp15",
+        "target": "evcon_lisp15",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-123",
+        "era": "lisp15",
+        "source": "evlis_lisp15",
+        "target": "null",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-124",
+        "era": "lisp15",
+        "source": "evlis_lisp15",
+        "target": "cons",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-125",
+        "era": "lisp15",
+        "source": "evlis_lisp15",
+        "target": "eval_lisp15",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-126",
+        "era": "lisp15",
+        "source": "evlis_lisp15",
+        "target": "car",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-127",
+        "era": "lisp15",
+        "source": "evlis_lisp15",
+        "target": "cdr",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-128",
+        "era": "lisp15",
+        "source": "evlis_lisp15",
+        "target": "cond",
+        "relation": "calls",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_edge_id": "edge-129",
+        "era": "lisp15",
+        "source": "evlis_lisp15",
+        "target": "evlis_lisp15",
+        "relation": "recursion",
+        "old_rank_edge": "1",
+        "evidence": "L1.5 p20",
+        "note": "",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      }
+    ],
+    "equivalence_evidence": [
+      {
+        "historical_test_id": "equiv-01",
+        "left": "second",
+        "right": "cadr",
+        "implementation_equal": "yes",
+        "observational_equal": "yes",
+        "observational_domain": "proper-list",
+        "semantic_identity": "no",
+        "evidence": "experiments/function-genealogy.lisp + docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "note": "current CAR∘CDR body is shared; sequence ordinal vs pair-navigation intent remains distinct",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "equiv-02",
+        "left": "fourth",
+        "right": "cadddr",
+        "implementation_equal": "yes",
+        "observational_equal": "yes",
+        "observational_domain": "current-implementation-domain",
+        "semantic_identity": "unknown",
+        "evidence": "experiments/function-genealogy.lisp + docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "note": "current implementation is the same composition/closure; stronger semantic-identity evidence not established here",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "equiv-03",
+        "left": "pair",
+        "right": "list",
+        "implementation_equal": "no",
+        "observational_equal": "yes",
+        "observational_domain": "exactly-two-arguments",
+        "semantic_identity": "no",
+        "evidence": "experiments/function-genealogy.lisp + docs/architecture/PRIMITIVE-BUDGET-AUDIT-734.md",
+        "note": "binary constructor and variadic list constructor overlap only on the declared arity-2 observation domain",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      }
+    ],
+    "falsification_ledger": [
+      {
+        "id": "F001",
+        "status": "falsified",
+        "concept_key": "hamming-global-authority",
+        "claim": "Every strong semantic relation can be represented by Hamming-1 adjacency in one binary cube.",
+        "scope": "Any fixed-width hypercube used as the complete semantic-relation graph.",
+        "minimal_counterexample": "Strong triangle: ()--ATOM, ()--CONS, ATOM--CONS; hypercubes are bipartite/triangle-free.",
+        "evidence_ref": "scripts/research-1962-seed-cube-limit.py; docs/research/1962-cube-limit-selector-compression-run.txt",
+        "remains_open": "Hamming/prefix geometry may still be useful as address structure or inside a separately proven local family.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F002",
+        "status": "falsified",
+        "concept_key": "unordered-support-prefix-authority",
+        "claim": "Unordered direct seed-support is sufficient to choose a unique semantic prefix parent.",
+        "scope": "Bounded Lisp I/Lisp 1.5 selector corpus.",
+        "minimal_counterexample": "CADR and CDAR both have unordered support {CAR,CDR}, but ordered paths are 1011 and 1100 with different roots.",
+        "evidence_ref": "scripts/research-1962-prefix-order.py; docs/research/1962-prefix-order-run.txt",
+        "remains_open": "Typed ordered generators may still justify prefix edges.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F003",
+        "status": "falsified",
+        "concept_key": "named-depth-semantic-rank",
+        "claim": "Named call/dependency depth is a refactoring-invariant semantic rank.",
+        "scope": "Any ranking that counts named helper layers before semantic normalization.",
+        "minimal_counterexample": "CAR(CDR(x)) and CAR(tail(x)) with tail(y)=CDR(y) are semantically equal but the helper-factored named graph adds a layer.",
+        "evidence_ref": "scripts/research-1969-model-c-invariance.py; scripts/research-2017-falsification-ledger.py",
+        "remains_open": "Normalized derivation cost remains open and is researched in #1969/#2002.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F004",
+        "status": "falsified",
+        "concept_key": "transitive-seed-support-identity",
+        "claim": "Transitive derivability/seed-support alone is sufficient to rank or identify derived semantics.",
+        "scope": "Bounded Lisp I/Lisp 1.5 dependency corpus.",
+        "minimal_counterexample": "APPEND and PAIR (Lisp I) expand to the same seven-seed support set while denoting different operations; evaluator helpers also collapse onto shared full support.",
+        "evidence_ref": "scripts/research-domain-graph-1962.py; docs/research/1962-lisp1-15-first-run.txt",
+        "remains_open": "Seed-support remains useful as dependency evidence, not semantic identity/rank.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F005",
+        "status": "falsified",
+        "concept_key": "scc-topology-semantic-authority",
+        "claim": "Evaluator SCC topology is stable enough across historical realizations to determine semantic identity/domain placement.",
+        "scope": "Lisp I vs Lisp 1.5 bounded evaluator corpus.",
+        "minimal_counterexample": "Lisp I SCC={eval,evcon,evlis}; Lisp 1.5 SCC={apply,eval,evcon,evlis}.",
+        "evidence_ref": "scripts/research-domain-graph-1962.py; scripts/research-1969-model-c-invariance.py; docs/research/1969-model-c-invariance-run.txt",
+        "remains_open": "SCCs remain useful implementation/dependency analysis.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F006",
+        "status": "falsified",
+        "concept_key": "raw-00-inband-delimiter",
+        "claim": "The semantic 00 separator can also act as a raw in-band delimiter for unrestricted variable-width words.",
+        "scope": "Packed raw bitstream with no external token framing.",
+        "minimal_counterexample": "Word 0001 contains 00 internally; source token sequence 10 | 0001 | 01 cannot be recovered by splitting raw concatenation on 00.",
+        "evidence_ref": "docs/research/1962-framing-separation.md; scripts/research-1962-framing-cost.py; scripts/research-2017-falsification-ledger.py",
+        "remains_open": "00 remains a semantic/source boundary identity; transport may carry boundaries out-of-band/with length framing.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F007",
+        "status": "falsified",
+        "concept_key": "eq-immediate-selector-strength-children",
+        "claim": "NULL, EQUAL, or MEMBER already justify immediate selector-strength EQ children 0110/0111.",
+        "scope": "The bounded NULL/EQUAL/MEMBER candidates under the fixed local composition/no-new-control/no-recursion criterion.",
+        "minimal_counterexample": "NULL is not EQ-direct; EQUAL imports ATOM/CAR/CDR/COND plus recursion; MEMBER is recursive multi-root traversal.",
+        "evidence_ref": "PR #1977 research/1968-eq-family: scripts/research-1968-eq-family.py; docs/research/1968-eq-family-report.md",
+        "remains_open": "A richer typed EQ algebra may still exist; #2013 owns that search.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F008",
+        "status": "falsified",
+        "concept_key": "cons-named-helper-children",
+        "claim": "LIST/APPEND/PAIR/PAIRLIS already justify immediate selector-strength CONS children.",
+        "scope": "Bounded Lisp I/Lisp 1.5 named construction-helper candidates.",
+        "minimal_counterexample": "LIST needs CONS+NIL and changes arity; APPEND/PAIR/PAIRLIS import multiple roots and/or recursion/control.",
+        "evidence_ref": "scripts/research-1965-cons-family.py",
+        "remains_open": "A smaller algebraic CONS generator may still exist; #2014 owns that search.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "F009",
+        "status": "falsified",
+        "concept_key": "cond-predicate-and-or-children",
+        "claim": "Predicate AND/OR are valid immediate local COND children under current two-part COND and PredicateBit semantics.",
+        "scope": "Current answer-contract/2 where exhaustion=() and PredicateBit false=0.",
+        "minimal_counterexample": "AND(0,0) and AND(0,1) yield () instead of 0; OR(0,0) yields () instead of 0.",
+        "evidence_ref": "PR #1986 research/1968-cond-family: scripts/research-1968-cond-family.py; docs/research/1968-cond-family-report.md",
+        "remains_open": "Other COND specializations that preserve () != 0 may still exist; #2015 owns that search.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "id": "S001",
+        "status": "superseded-premise",
+        "concept_key": "exact8-semantic-ceiling",
+        "claim": "Function identity must be a flat exact-8-bit 256-peer semantic universe.",
+        "scope": "Historical pre-pivot SENS design premise.",
+        "minimal_counterexample": "No logical counterexample is claimed here; the premise was intentionally superseded by variable-width research and kept only as compatibility/backend donor evidence.",
+        "evidence_ref": "#1961; #1970; #2000; closed historical issues #1096/#1167/#1325",
+        "remains_open": "Whether a particular backend keeps an 8-bit projection remains an engineering question.",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      }
+    ],
+    "bija3_pressure": [
+      {
+        "historical_test_id": "pressure-01",
+        "era": "lisp1",
+        "seed": "nil",
+        "seed3_code": "000",
+        "dependent_nodes": "8",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp1,appq_lisp1,eval_lisp1,evlis_lisp1,list,null,pair_lisp1",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,cons,eq,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-02",
+        "era": "lisp1",
+        "seed": "quote",
+        "seed3_code": "001",
+        "dependent_nodes": "3",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "apply_lisp1,appq_lisp1,eval_lisp1",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,cons,eq,nil",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-03",
+        "era": "lisp1",
+        "seed": "atom",
+        "seed3_code": "010",
+        "dependent_nodes": "8",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp1,appq_lisp1,equal,eval_lisp1,evlis_lisp1,null,pair_lisp1",
+        "exclusive": "",
+        "co_seeds": "car,cdr,cond,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-04",
+        "era": "lisp1",
+        "seed": "eq",
+        "seed3_code": "011",
+        "dependent_nodes": "9",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp1,appq_lisp1,assoc_lisp1,equal,eval_lisp1,evlis_lisp1,null,pair_lisp1",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,cons,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-05",
+        "era": "lisp1",
+        "seed": "cons",
+        "seed3_code": "100",
+        "dependent_nodes": "7",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp1,appq_lisp1,eval_lisp1,evlis_lisp1,list,pair_lisp1",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-06",
+        "era": "lisp1",
+        "seed": "car",
+        "seed3_code": "101",
+        "dependent_nodes": "14",
+        "exclusive_nodes": "1",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp1,appq_lisp1,assoc_lisp1,caar,cadar,caddr,cadr,cdar,equal,eval_lisp1,evcon_lisp1,evlis_lisp1,pair_lisp1",
+        "exclusive": "caar",
+        "co_seeds": "atom,cdr,cond,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-07",
+        "era": "lisp1",
+        "seed": "cdr",
+        "seed3_code": "110",
+        "dependent_nodes": "14",
+        "exclusive_nodes": "1",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp1,appq_lisp1,assoc_lisp1,cadar,caddr,cadr,cdar,cddr,equal,eval_lisp1,evcon_lisp1,evlis_lisp1,pair_lisp1",
+        "exclusive": "cddr",
+        "co_seeds": "atom,car,cond,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-08",
+        "era": "lisp1",
+        "seed": "cond",
+        "seed3_code": "111",
+        "dependent_nodes": "9",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp1,appq_lisp1,assoc_lisp1,equal,eval_lisp1,evcon_lisp1,evlis_lisp1,pair_lisp1",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-09",
+        "era": "lisp15",
+        "seed": "nil",
+        "seed3_code": "000",
+        "dependent_nodes": "8",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp15,eval_lisp15,evalquote_lisp15,evlis_lisp15,list,null,pairlis_lisp15",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,cons,eq,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-10",
+        "era": "lisp15",
+        "seed": "quote",
+        "seed3_code": "001",
+        "dependent_nodes": "3",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "apply_lisp15,eval_lisp15,evalquote_lisp15",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,cons,eq,nil",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-11",
+        "era": "lisp15",
+        "seed": "atom",
+        "seed3_code": "010",
+        "dependent_nodes": "9",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp15,assoc_lisp15,equal,eval_lisp15,evalquote_lisp15,evlis_lisp15,null,pairlis_lisp15",
+        "exclusive": "",
+        "co_seeds": "car,cdr,cond,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-12",
+        "era": "lisp15",
+        "seed": "eq",
+        "seed3_code": "011",
+        "dependent_nodes": "9",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp15,assoc_lisp15,equal,eval_lisp15,evalquote_lisp15,evlis_lisp15,null,pairlis_lisp15",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,cons,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-13",
+        "era": "lisp15",
+        "seed": "cons",
+        "seed3_code": "100",
+        "dependent_nodes": "7",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp15,eval_lisp15,evalquote_lisp15,evlis_lisp15,list,pairlis_lisp15",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cond,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-14",
+        "era": "lisp15",
+        "seed": "car",
+        "seed3_code": "101",
+        "dependent_nodes": "14",
+        "exclusive_nodes": "1",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp15,assoc_lisp15,caar,cadar,caddr,cadr,cdar,equal,eval_lisp15,evalquote_lisp15,evcon_lisp15,evlis_lisp15,pairlis_lisp15",
+        "exclusive": "caar",
+        "co_seeds": "atom,cdr,cond,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-15",
+        "era": "lisp15",
+        "seed": "cdr",
+        "seed3_code": "110",
+        "dependent_nodes": "14",
+        "exclusive_nodes": "1",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp15,assoc_lisp15,cadar,caddr,cadr,cdar,cddr,equal,eval_lisp15,evalquote_lisp15,evcon_lisp15,evlis_lisp15,pairlis_lisp15",
+        "exclusive": "cddr",
+        "co_seeds": "atom,car,cond,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "pressure-16",
+        "era": "lisp15",
+        "seed": "cond",
+        "seed3_code": "111",
+        "dependent_nodes": "9",
+        "exclusive_nodes": "0",
+        "co_seed_count": "7",
+        "graph_has_outgoing_seed_path": "0",
+        "dependents": "append,apply_lisp15,assoc_lisp15,equal,eval_lisp15,evalquote_lisp15,evcon_lisp15,evlis_lisp15,pairlis_lisp15",
+        "exclusive": "",
+        "co_seeds": "atom,car,cdr,cons,eq,nil,quote",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      }
+    ],
+    "selector_relation_kernel": [
+      {
+        "historical_test_id": "selector-kernel-01",
+        "model": "K0-flat-explicit",
+        "primitive_relation_kinds": "3",
+        "stored_per_node_facts": "20",
+        "family_law_facts": "2",
+        "status": "PASS",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "selector-kernel-02",
+        "model": "K1-parent+edge",
+        "primitive_relation_kinds": "3",
+        "stored_per_node_facts": "12",
+        "family_law_facts": "2",
+        "status": "PASS",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "selector-kernel-03",
+        "model": "K2-parent-only",
+        "primitive_relation_kinds": "2",
+        "stored_per_node_facts": "6",
+        "family_law_facts": "2",
+        "status": "PASS",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      },
+      {
+        "historical_test_id": "selector-kernel-04",
+        "model": "K3-intrinsic-bits+family-law",
+        "primitive_relation_kinds": "1",
+        "stored_per_node_facts": "0",
+        "family_law_facts": "2",
+        "status": "PASS",
+        "coordinate": null,
+        "selected_d10_candidate": false,
+        "ratified": false
+      }
+    ]
+  }
+}

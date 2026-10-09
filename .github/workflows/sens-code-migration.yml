@@ -7,11 +7,13 @@ on:
       - "scripts/sens_source_resolver.py"
       - "scripts/classify-lisp-source-forms.py"
       - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
       - "tests/test_sens_code_migration.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
+      - "tests/test_sens_t5_codec.py"
       - "contracts/core1-historical-sid-map.lisp"
       - "knowledge/d1-d9-foundation.json"
       - "knowledge/number-width-ratified.json"
@@ -23,11 +25,13 @@ on:
       - "scripts/sens_source_resolver.py"
       - "scripts/classify-lisp-source-forms.py"
       - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
       - "scripts/audit-sens-name-debt.py"
       - "scripts/migrate-sens-ecosystem.py"
       - "tests/test_sens_code_migration.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
+      - "tests/test_sens_t5_codec.py"
       - "contracts/core1-historical-sid-map.lisp"
       - "knowledge/d1-d9-foundation.json"
       - "knowledge/number-width-ratified.json"
@@ -48,7 +52,8 @@ jobs:
           python3 -m unittest \
             tests/test_sens_code_migration.py \
             tests/test_classify_lisp_source_forms.py \
-            tests/test_three_pass_migration.py > migration-test.log 2>&1
+            tests/test_three_pass_migration.py \
+            tests/test_sens_t5_codec.py > migration-test.log 2>&1
           status=$?
           cat migration-test.log
           echo "$status" > migration-test.status

@@ -1,0 +1,37 @@
+name: real-original-block-integrity
+
+# Former success-asserting workflow was RED because an INVALID D2 binary
+# had been published as a completed real-library migration. This test now
+# enforces the honest BLOCK until the source has independent oracle proof.
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block.lisp"
+      - "lib/machine/block.sens"
+      - "scripts/migrate.py"
+      - "scripts/migrate-t5-batch.py"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/test_migration_real_block.py"
+      - ".github/workflows/real-original-block-migration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/block.lisp"
+      - "lib/machine/block.sens"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/migrate-t5-batch.py"
+      - "tests/test_migration_real_block.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Confirm original source is retained and rejected binary is not published
+        run: python3 -m unittest discover -s tests -p 'test_migration_real_block.py' -v

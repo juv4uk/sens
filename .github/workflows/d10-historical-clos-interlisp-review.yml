@@ -1,0 +1,23 @@
+name: D10 historical CLOS Interlisp research gate
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "scripts/check_d10_historical_clos_interlisp_review.py"
+      - "tests/test_d10_historical_clos_interlisp_review.py"
+      - ".github/workflows/d10-historical-clos-interlisp-review.yml"
+  workflow_dispatch:
+jobs:
+  review-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check against full D1-D9 and canonical selected D10
+        run: python3 scripts/check_d10_historical_clos_interlisp_review.py
+      - name: Verify negative admission and provenance tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_historical_clos_interlisp_review.py' -v
+      - name: No hidden generated changes
+        run: git diff --exit-code

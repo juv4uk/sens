@@ -1,0 +1,145 @@
+name: Report original T5 migration candidates
+on:
+  pull_request:
+    paths:
+      - '**/*.lisp'
+      - '**/*.sens'
+      - 'scripts/report_original_migration_candidates.py'
+      - 'knowledge/migration-nonprogram-*-2026-10-08.json'
+      - 'scripts/migration_source_scope.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/test_report_original_migration_candidates.py'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'contracts/core1-historical-sid-map.lisp'
+      - '.github/workflows/report-original-migration-candidates.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.lisp'
+      - '**/*.sens'
+      - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migration_source_scope.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'contracts/core1-historical-sid-map.lisp'
+      - '.github/workflows/report-original-migration-candidates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-eligibility-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: No-write classification + SHA tests
+        run: python3 -m unittest discover -s tests -p 'test_report_original_migration_candidates.py' -v
+      - name: Run ACTUAL canonical three-pass converter in dry-run, expose exact paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/report_original_migration_candidates.py --out "$RUNNER_TEMP/original-eligibility.json"
+          python3 - "$RUNNER_TEMP/original-eligibility.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          s=r['summary']
+          assert r['schema']=='sens-original-three-pass-eligibility/v1'
+          assert s['scanned']==s['blocked']+s['mechanical_candidates']
+          assert s['scanned']==s['original_unpaired_sources_scanned']
+          assert s['classified_nonprogram']==len(r['reviewed_nonprogram_sources'])
+          assert sum(s['classified_nonprogram_by_cohort'].values())==s['classified_nonprogram']
+          assert (s['executable_or_unclassified_unpaired']+s['classified_nonprogram']+
+                  s['archived_benchmark_data_sources'])==s['scanned']
+          assert sum(c['count'] for c in r['actionable_blocker_cohorts'])==s['actionable_blocked_sources']
+          # Build the migration workload from the EXISTING SHA-pinned ledger.
+          # A raw FIRST blocker for archived DATA is not an executable task.
+          inactive = {'NONPROGRAM_DATA_REVIEWED', 'ARCHIVED_BENCHMARK_NONPROGRAM'}
+          live = {row['path']: row['source_git_blob_sha']
+                  for row in r['blocked_sources']
+                  if row['source_scope'] not in inactive}
+          assert len(live) == s['actionable_blocked_sources']
+          actionable_exact = []
+          seen = set()
+          for group in r['exact_blocker_cohorts']:
+              active = [row for row in group['original_sources']
+                        if row['path'] in live]
+              for row in active:
+                  path = row['path']
+                  assert path not in seen, f'duplicate active original {path}'
+                  assert live[path] == row['source_git_blob_sha'], path
+                  seen.add(path)
+              if active:
+                  actionable_exact.append((len(active), group, active))
+          assert seen == set(live), 'a real source lacks an exact-owner group'
+          assert sum(n for n, _, _ in actionable_exact) == s['actionable_blocked_sources']
+          actionable_exact.sort(key=lambda item: (-item[0], item[1]['coordinate']))
+          assert all(row['automatic_sens_companion'] is False and
+                     row['semantic_oracle_admitted'] is False
+                     for row in r['reviewed_nonprogram_sources'])
+          assert s['already_paired_sources_excluded']==len(r['already_paired_sources_excluded'])
+          assert len(r['blocked_sources'])==s['blocked']
+          assert sum(c['count'] for c in r['blocker_cohorts'])==s['blocked']
+          assert sum(c['count'] for c in r['exact_blocker_cohorts'])==s['blocked']
+          assert s['exact_blocker_coordinates']==len(r['exact_blocker_cohorts'])
+          assert len({row['path'] for g in r['exact_blocker_cohorts'] for row in g['original_sources']})==s['blocked']
+          assert sum(s['blocker_family_counts'].values())==s['blocked']
+          assert len({x['path'] for x in r['blocked_sources']})==s['blocked']
+          assert all(x['source_git_blob_sha'] for x in r['blocked_sources'])
+          assert s['physical_outputs_created']==0
+          assert r['source_era']=='auto'
+          assert 'D1-D9' in r['authority']
+          assert all(not x['same_stem_sens_already_exists'] for x in r['mechanical_candidates'])
+          assert s['original_unpaired_executables_migrated_by_this_tool']==0
+          assert s['mechanical_candidates']==s['archived_nonprogram_mechanical_candidates']+s['nonarchive_mechanical_unproved']
+          assert s['unpaired_candidates_needing_original_oracle']==s['nonarchive_mechanical_unproved']
+          assert all(not x['independent_semantic_oracle_passed'] for x in r['mechanical_candidates'])
+          print('ORIGINAL_LISP_CANDIDATES',r['mechanical_candidates'])
+          from pathlib import Path
+          import os
+          with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a',encoding='utf-8') as out:
+              out.write('## Original Lisp → physical SENS — current ratified D1–D9\n\n')
+              out.write(f"- Historical unpaired originals scanned: **{s['scanned']}**\n")
+              out.write(f"- Reviewed nonprogram DATA: **{s['classified_nonprogram']}**\n")
+              out.write(f"- Archived benchmark evidence: **{s['archived_benchmark_data_sources']}**\n")
+              out.write(f"- Executable or not yet classified: **{s['executable_or_unclassified_unpaired']}**\n")
+              out.write(f"- Actionable FIRST blockers (still unproved): **{s['actionable_blocked_sources']}**\n")
+
+              out.write(f"- Already paired excluded: **{s['already_paired_sources_excluded']}**\n")
+              out.write(f"- Mechanically eligible unpaired: **{s['unpaired_candidates_needing_original_oracle']}**\n")
+              out.write(f"- BLOCKED: **{s['blocked']}**\n")
+              out.write('- Semantic oracle approvals in this report: **0** (never inferred from syntax)\n\n')
+              out.write('### Work queue: real executable/unknown sources ONLY\n\n')
+              out.write('These are still BLOCKED and need source-era, owner-law and independent oracle proof.\n\n')
+              for n, group, sources in actionable_exact[:15]:
+                  examples = ', '.join(f"`{row['path']}`" for row in sources[:2])
+                  out.write(
+                      f"- **{n} source(s)** — {group['family']} "
+                      f"`{group['coordinate']}` → {group['owner_issue']}: "
+                      f"{examples}\n"
+                  )
+              out.write('\nEvery item is SHA-checked against the unmodified canonical report. No automatic .sens emission.\n\n')
+              out.write('### Raw FIRST blockers (includes DATA and archives; diagnostic only)\n\n')
+              for cohort in r['blocker_cohorts']:
+                  out.write(f"- **{cohort['family']}**: {cohort['count']} original SHA-pinned sources — {cohort['next_action']}\n")
+              out.write('\n### Top exact FIRST-BLOCKER coordinates (single-law agent work)\n\n')
+              for group in r['exact_blocker_cohorts'][:12]:
+                  examples=', '.join(group['example_paths'][:2])
+                  out.write(
+                      f"- {group['count']} originals x {group['family']} "
+                      f"{group['coordinate']} -> {group['owner_issue']}; {examples}\n"
+                  )
+              out.write('\nEvery source appears in exactly one exact-coordinate group. First blocker is NOT semantic admission.\n')
+              out.write('\n### First blocked originals (exact source paths)\n\n')
+              for row in r['unpaired_blocker_sample'][:12]:
+                  reason=row.get('reason','unknown').replace('\n',' ')[:200]
+                  out.write(f"- `{row['path']}`: {reason}\n")
+              out.write('\nFull SHA-pinned evidence for every original source, not just the first 20, is attached as JSON. Grouping is the FIRST mechanical block and never an executable/semantic admission.\n')
+          PY
+      - name: Save exact source SHA and admission decision
+        uses: actions/upload-artifact@v4
+        with:
+          name: t5-original-candidate-report
+          path: ${{ runner.temp }}/original-eligibility.json
+          if-no-files-found: error

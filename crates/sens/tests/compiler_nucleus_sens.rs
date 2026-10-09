@@ -8,8 +8,8 @@
 
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
-    compiler_execution_role, eval_parsed_expressions, eval_program, load_core_library,
-    lower_program, parse, Bija3, Bit3, CompilerExecutionRole, CoreDomainIdentity,
+    compiler_execution_role, eval_parsed_expressions, load_core_library,
+    lower_program, parse_mixed_exact_domain, Bija3, Bit3, CompilerExecutionRole, CoreDomainIdentity,
     DomainIdentity, Session, Value,
 };
 use std::rc::Rc;
@@ -136,7 +136,7 @@ fn list_values(value: &Value) -> Option<Vec<&Value>> {
 
 #[test]
 fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
-    let parsed = parse(NUCLEUS).expect("compiler nucleus source parses");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
     let lowered = lower_program(&parsed);
     assert!(lowered.len() >= 2, "compiler nucleus contains executable language definitions");
     for expression in &lowered {
@@ -144,11 +144,33 @@ fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
     }
 }
 
+
+#[test]
+fn nucleus_top_level_form_failure_is_localized() {
+    let expressions =
+        parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("active core loads");
+
+    for (index, expression) in expressions.iter().enumerate() {
+        if let Err(error) =
+            eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+        {
+            panic!(
+                "compiler nucleus top-level form {index} failed: {error:?}; expression={expression:?}"
+            );
+        }
+    }
+}
+
+
 #[test]
 fn nucleus_looks_up_current_d3_roles_by_exact_identity_and_fails_closed() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("active core loads");
-    eval_program(NUCLEUS, &mut session).expect("SENS compiler nucleus loads");
+    let expressions = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus parses");
+    eval_parsed_expressions(&expressions, &mut session)
+        .expect("SENS compiler nucleus loads");
 
     for raw in 0u8..=0b111 {
         let expected_role = compiler_execution_role(d3_core(raw));

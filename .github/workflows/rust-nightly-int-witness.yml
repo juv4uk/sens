@@ -1,0 +1,32 @@
+name: Rust nightly arbitrary-width integer witness
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/rust-nightly-int-witness/**"
+      - ".github/workflows/rust-nightly-int-witness.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Probe native u<N>/i<N> frontier
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@nightly
+      - name: Run exact builtin syntax probe
+        run: |
+          rustc --version --verbose
+          python3 benchmarks/rust-nightly-int-witness/run.py             --toolchain nightly             --emit-llvm             --json-out /tmp/rust-nightly-int-witness.json
+      - name: Publish probe result
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-nightly-int-witness
+          path: /tmp/rust-nightly-int-witness.json
+          if-no-files-found: error

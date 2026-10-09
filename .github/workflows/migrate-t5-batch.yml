@@ -1,0 +1,93 @@
+name: safe-batch-t5-migration
+
+# The migrator must run when REAL library sources change, not only when
+# somebody edits the migrator. This is an audit, never an automatic publisher.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'lib/**/*.lisp'
+      - 'lib/**/*.sens'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'scripts/migrate-t5-batch.py'
+      - 'tests/test_migrate_t5_batch.py'
+      - 'contracts/core1-historical-sid-map.lisp'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'crates/sens/src/domain_surface_registry_generated.rs'
+      - 'crates/sens/src/semantic_registry_generated.rs'
+      - 'crates/sens/src/semantic_registry.rs'
+      - 'crates/sens/src/eval/necessary_forms_generated.rs'
+      - 'crates/sens/src/text7_projection_generated.rs'
+      - '.github/workflows/migrate-t5-batch.yml'
+      - 'docs/MIGRATE-T5-BATCH.uk.md'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**/*.lisp'
+      - 'lib/**/*.sens'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'scripts/migrate-t5-batch.py'
+      - 'tests/test_migrate_t5_batch.py'
+      - 'contracts/core1-historical-sid-map.lisp'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'crates/sens/src/domain_surface_registry_generated.rs'
+      - 'crates/sens/src/semantic_registry_generated.rs'
+      - 'crates/sens/src/semantic_registry.rs'
+      - 'crates/sens/src/eval/necessary_forms_generated.rs'
+      - 'crates/sens/src/text7_projection_generated.rs'
+      - '.github/workflows/migrate-t5-batch.yml'
+permissions:
+  contents: read
+jobs:
+  real-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test real Core1 physical T5 conversion and fail-closed batch
+        run: python3 -m unittest discover -s tests -p test_migrate_t5_batch.py -v
+
+      - name: Dry-run REAL lib corpus and preserve blocked ledger (never mint false .sens)
+        run: |
+          set +e
+          python3 scripts/migrate-t5-batch.py lib \
+            --out /tmp/sens-library-batch-mirror \
+            --report /tmp/sens-library-batch.json
+          rc=$?
+          set -e
+          if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then exit "$rc"; fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("/tmp/sens-library-batch.json").read_text())
+          summary = data["summary"]
+          print("REAL LIB MIGRATION CENSUS:", json.dumps(summary, sort_keys=True))
+          assert summary["files_seen"] > 0
+          assert summary["files_written"] == 0
+          assert summary["files_seen"] == summary["files_admitted"] + summary["files_blocked"]
+          assert not Path("/tmp/sens-library-batch-mirror").exists()
+          # Make the actual reason for ZERO migrated files visible in Actions UI,
+          # not just in a downloadable JSON that nobody opens.
+          from collections import Counter
+          issues = [row for row in data["files"] if row["status"] == "blocked"]
+          reasons = Counter(row.get("reason", "unknown") for row in issues)
+          with Path(__import__("os").environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as stream:
+              stream.write("## Реальна міграція lib/ — тільки перевірка\n\n")
+              stream.write(f"- Перевірено: **{summary['files_seen']}**\n")
+              stream.write(f"- Допущено: **{summary['files_admitted']}**\n")
+              stream.write(f"- BLOCK: **{summary['files_blocked']}**\n")
+              stream.write("- **Жоден .sens тут не записано в репозиторій**\n\n")
+              stream.write("### Основні причини BLOCK\n\n")
+              for reason, count in reasons.most_common(10):
+                  safe = reason.replace("|", "∣").replace("\n", " ")[:250]
+                  stream.write(f"- {count} × `{safe}`\n")
+              stream.write("\nПовний журнал: артефакт `real-lib-t5-migration-ledger`.\n")
+          if summary["files_blocked"]:
+              print(f"::warning::REAL lib/ migration still BLOCKS {summary['files_blocked']} files; inspect artifact")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-lib-t5-migration-ledger
+          path: /tmp/sens-library-batch.json

@@ -1,0 +1,50 @@
+name: canonical-one-file-T5
+on:
+  pull_request:
+    paths:
+      - 'scripts/migrate-one-to-sens.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/test_migrate_one_to_sens.py'
+      - '.github/workflows/migrate-one-to-sens.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/migrate-one-to-sens.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/test_migrate_one_to_sens.py'
+      - '.github/workflows/migrate-one-to-sens.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  canonical-one-file:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run real one-file canonical three-pass tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_migrate_one_to_sens.py' -v
+      - name: Show canonical physical canary (read-only, no publication)
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate-one-to-sens.py \
+            tests/fixtures/migration-multiform-cohort/two-forms.lisp \
+            --source-era legacy --dry-run > /tmp/one-file-t5-report.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path("/tmp/one-file-t5-report.json").read_text())
+          assert r["status"]=="would-write", r
+          assert r["bytes"]==14, r
+          assert r["semantic_parity"]=="NOT_VERIFIED", r
+          print(json.dumps({k:r[k] for k in ("status","source","bytes","physical_sha256","semantic_parity")},sort_keys=True))
+          PY
+      - name: Publish traceable preview report
+        uses: actions/upload-artifact@v4
+        with:
+          name: one-file-canonical-T5-preview
+          path: /tmp/one-file-t5-report.json

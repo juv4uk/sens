@@ -1,0 +1,39 @@
+name: original machine-block historical vs current Rust parity
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block.lisp"
+      - "tests/test_machine_block_historical_oracle.py"
+      - "crates/sens/tests/machine_block_original_parity.rs"
+      - "crates/sens/src/**"
+      - ".github/workflows/machine-block-original-parity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/block.lisp"
+      - "tests/test_machine_block_historical_oracle.py"
+      - "crates/sens/tests/machine_block_original_parity.rs"
+      - "crates/sens/src/**"
+      - ".github/workflows/machine-block-original-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  two-independent-source-oracles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Independent immutable original Python semantic witness
+        run: python3 -m unittest discover -s tests -p test_machine_block_historical_oracle.py -v
+      - name: Execute nine original calls with current Rust SENS and compare historical output
+        run: cargo test -q -p sens --test machine_block_original_parity -- --nocapture
+      - name: Mark scope of proof — physical T5 not yet admitted
+        run: |
+          echo "Historical/current TEXT execution 9-case parity only." >> "$GITHUB_STEP_SUMMARY"
+          echo "Physical .sens and D2 source file admission require independent proof and manifest." >> "$GITHUB_STEP_SUMMARY"
+          test -z "$(git status --porcelain --untracked-files=all)"

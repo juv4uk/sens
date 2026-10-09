@@ -1,0 +1,79 @@
+{
+  "schema": "d10-clos-method-class-observation/v1",
+  "status": "HISTORICAL-DONOR-ORACLE-RESEARCH-ONLY",
+  "authority": "juv4uk/sens#4463; source reconciliation #4841; CLOS review #4842",
+  "selected_count_at_creation": 625,
+  "donor": "ANSI Common Lisp Object System / CLOS",
+  "oracle": "SBCL external donor runtime; not the SENS runtime",
+  "source_urls": {
+    "FIND-METHOD": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/stagenfun_find-method.html",
+    "REMOVE-METHOD": "https://www.lispworks.com/documentation/HyperSpec/Body/f_rm_met.htm",
+    "CHANGE-CLASS": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_change-class.html"
+  },
+  "functions": [
+    {
+      "name": "FIND-METHOD",
+      "law": "Returns the method matching the exact method qualifiers and parameter specializers in one generic function; this query is not the same operation as dispatch for runtime arguments.",
+      "positive_witness": "A generic function has integer and number methods plus a :before integer method; exact lookup returns the selected descriptor and differs by qualifier/specializer.",
+      "falsifiers": [
+        "An absent signature with errorp=false must return NIL.",
+        "An absent signature with default errorp and an invalid specializer-list arity must signal an error.",
+        "The exact number-specialized method descriptor is not the method dispatched for an integer argument when an integer-specialized method exists."
+      ]
+    },
+    {
+      "name": "REMOVE-METHOD",
+      "law": "Removes one method object from a generic function, returns that same generic function, and does not signal an error if the specified method is not currently among that generic function's methods.",
+      "positive_witness": "Removing the integer-primary method leaves the number-primary and before methods, changes dispatch for 42 to the number method, and repeated removal of the now-absent method remains a no-error result.",
+      "falsifiers": [
+        "The generic function identity changes.",
+        "The unrelated number or before method disappears.",
+        "The removed integer method remains discoverable or is still chosen for dispatch."
+      ]
+    },
+    {
+      "name": "CHANGE-CLASS",
+      "law": "Destructively changes an instance's class and returns the same instance; common local-slot values and common local-slot unbound state are preserved, and update-instance-for-different-class runs.",
+      "positive_witness": "An instance changes from the source class to the target class while preserving identity/value/unbound slot state; the new slot initializes, and the update hook observes the old value and current instance.",
+      "falsifiers": [
+        "A fresh object is returned instead of the original instance.",
+        "A common unbound slot becomes bound or a common bound value is lost.",
+        "The target class is not visible after change-class.",
+        "The newly added slot is not initialized by its declared initform or the update hook does not run."
+      ]
+    }
+  ],
+  "oracle_path": "tests/oracles/d10_clos_method_class.lisp",
+  "observed_case_ids": [
+    "FIND_METHOD_INTEGER_EXACT",
+    "FIND_METHOD_NUMBER_EXACT",
+    "FIND_METHOD_BEFORE_QUALIFIER_EXACT",
+    "FIND_METHOD_QUALIFIER_DISTINCT",
+    "FIND_METHOD_MISSING_RETURNS_NIL",
+    "FIND_METHOD_MISSING_DEFAULT_ERRORS",
+    "FIND_METHOD_SPECIALIZER_ARITY_ERRORS",
+    "FIND_METHOD_LOOKUP_NOT_DISPATCH_RESULT",
+    "REMOVE_METHOD_RETURNS_SAME_GF",
+    "REMOVE_METHOD_INTEGER_METHOD_ABSENT",
+    "REMOVE_METHOD_ABSENT_NO_ERROR",
+    "REMOVE_METHOD_ABSENT_RETURNS_SAME_GF",
+    "REMOVE_METHOD_OTHER_METHOD_STILL_PRESENT",
+    "REMOVE_METHOD_FALLBACK_DISPATCH",
+    "REMOVE_METHOD_BEFORE_STILL_PRESENT",
+    "CHANGE_CLASS_RETURNS_SAME_INSTANCE",
+    "CHANGE_CLASS_INSTANCE_CLASS_CHANGED",
+    "CHANGE_CLASS_RETAINS_COMMON_VALUE",
+    "CHANGE_CLASS_PRESERVES_COMMON_UNBOUND",
+    "CHANGE_CLASS_INITIALIZES_NEW_SLOT",
+    "CHANGE_CLASS_UPDATE_HOOK_RUNS",
+    "CHANGE_CLASS_HOOK_SEES_OLD_VALUE",
+    "CHANGE_CLASS_HOOK_SEES_CURRENT_INSTANCE"
+  ],
+  "boundary": {
+    "changes_inventory": false,
+    "assigns_coordinate": false,
+    "ratifies_d10": false,
+    "authorizes_physical_t5": false,
+    "selected_count_at_creation_is_historical_snapshot_only": true
+  }
+}

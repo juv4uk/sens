@@ -70,3 +70,61 @@
           (00100111 (00000001 bounded-u64-add) left right))
          (t (00000001 machine-effect-rejected))))
       (t (00000001 machine-effect-rejected)))))
+
+; #4358 replay — target-neutral bounded DIFFERENCE/TIMES mechanism requests.
+;
+; These constructors preserve the already-proved bounded rectangles:
+;   DIFFERENCE: exact non-negative u64 inputs with left >= right;
+;   TIMES: exact non-negative u32 inputs, whose product is guaranteed u64.
+;
+; No target, ISA, register, flag, encoding, surface spelling, or domain
+; coordinate belongs in this generic effect-definition module.
+
+(00001001 machine-effect-u64-carrier?
+  (00001000 (value)
+    (00000111
+      ((machine-effect-exact-integer? value)
+       (machine-effect-within-inclusive-integer-range?
+         value 0 18446744073709551615))
+      (t (00000001 ())))))
+
+(00001001 machine-effect-bounded-u64-sub-form?
+  (00001000 (effect)
+    (00000111
+      ((00000010 effect) (00000001 ()))
+      ((00100010 (00101000 effect) 3)
+       (00000011 (00000101 effect) (00000001 bounded-u64-sub)))
+      (t (00000001 ())))))
+
+(00001001 machine-effect-bounded-u64-mul-form?
+  (00001000 (effect)
+    (00000111
+      ((00000010 effect) (00000001 ()))
+      ((00100010 (00101000 effect) 3)
+       (00000011 (00000101 effect) (00000001 bounded-u64-mul)))
+      (t (00000001 ())))))
+
+(00001001 machine-effect-bounded-u64-sub
+  (00001000 (left right)
+    (00000111
+      ((machine-effect-u64-carrier? left)
+       (00000111
+         ((machine-effect-u64-carrier? right)
+          (00000111
+            ((00011110 left right) 1
+             (00100111 (00000001 bounded-u64-sub) left right))
+            ((00011110 left right) 0
+             (00000001 machine-effect-rejected))))
+         (t (00000001 machine-effect-rejected))))
+      (t (00000001 machine-effect-rejected)))))
+
+(00001001 machine-effect-bounded-u64-mul
+  (00001000 (left right)
+    (00000111
+      ((machine-effect-u32-carrier? left)
+       (00000111
+         ((machine-effect-u32-carrier? right)
+          (00100111 (00000001 bounded-u64-mul) left right))
+         (t (00000001 machine-effect-rejected))))
+      (t (00000001 machine-effect-rejected)))))
+

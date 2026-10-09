@@ -5,6 +5,20 @@ Issue: #2642
 This is a **MECHANISM** benchmark. It does not create or assign a SENS
 semantic domain.
 
+## NEW: T5 multi-program keyed stream emulator (#4447)
+
+Емулятор в `t5_stream.py` передає **послідовність програм**, використовуючи 1τ/3τ імпульси для 0/1, 1τ між бітами, 7τ між доменними словами та **одну тривалу тишу 21τ як завершення кожної програми**. За цією паузою може починатися наступна програма. Файл `.sens` лишається T5 без службового EOS=22.
+
+```shell
+python3 benchmarks/human-wire/t5_stream.py demo
+python3 benchmarks/human-wire/t5_stream.py send --program '10 001 01' --program '000' --events /tmp/t5-event.json --jitter 0.2
+python3 benchmarks/human-wire/t5_stream.py receive --events /tmp/t5-event.json
+python3 -m unittest discover -s benchmarks/human-wire -p 'test_t5_stream.py' -v
+```
+
+Це механічна симуляція, не готовий радіомодем і не виконавець SENS. До довіреного виконання потрібен канонічний рідер, окрема перевірка цілісності й політика повторів (#2646). [Повне пояснення українською](T5-STREAM-EMU.uk.md).
+
+---
 ## Question
 
 For the **same complete binary frame**, how much wall-clock time does a human

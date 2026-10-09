@@ -1,0 +1,56 @@
+{
+  "schema": "sens-d10-explanation-generalization-research/v1",
+  "status": "HOLD-CORE-VS-DERIVED-LIBRARY",
+  "origin": "Mitchell, Keller and Kedar-Cabelli, Explanation-Based Generalization: A Unifying View, Machine Learning 1:47-80 (1986)",
+  "source_url": "https://doi.org/10.1007/BF00116250",
+  "source_role": "historical conceptual source; NOT an implementation donor or exact legacy SENS parity proof",
+  "research_name": "PROOF-OPERATIONAL-CLAUSE-PROJECTION",
+  "surface_uk": "прояснити-доказ",
+  "surface_ukr": "вивести-операційні-умови-із-доведення",
+  "scope": "Finite acyclic Horn one-rule-per-predicate expansion over string-symbol atoms with at least one argument; an explicit operational predicate set. No negation, disjunction, effects, recursion or implicit rule preference.",
+  "behavior": "Expand one symbolic goal through Horn rule heads to conjunctive operational leaves, preserving variable co-reference, constants and ordered rule-id provenance. Output is a sufficient operational clause pattern; not a minimal proof, not a learned executable opcode.",
+  "falsifiers": [
+    "If parent(X,Y) and parent(Y,Z), the resulting grandparent(X,Z) precondition must preserve one shared Y, not two unbound variables",
+    "With two competing rules for a predicate, refuse rather than selecting an arbitrary explanation",
+    "With a recursive or undefined non-operational dependency, refuse rather than claiming a finite proof",
+    "If the source head contains repeated ?x, do not silently admit a target with two distinct unification variables",
+    "For all 512 possible binary parent relations on three atoms, projected operational preconditions coincide with independent relational two-step closure"
+  ],
+  "related_donors": [
+    {
+      "kind": "already-selected D9",
+      "name": "UNIFY",
+      "relation": "equation resolution and substitution, not itself this projection"
+    },
+    {
+      "kind": "already-selected D10",
+      "name": "PROVE-RULE",
+      "relation": "operational source rule proof, derivability unresolved"
+    },
+    {
+      "kind": "existing research",
+      "name": "FINITE-STRIPS-GOAL-REGRESSION",
+      "relation": "backward action planning, not proof rule expansion"
+    },
+    {
+      "kind": "existing research",
+      "name": "GROUND-TERM-LEAST-GENERAL-GENERALIZATION",
+      "relation": "antiunification of two ground terms, not one deductive proof expansion"
+    },
+    {
+      "kind": "existing research",
+      "name": "CANONICAL-VERSION-SPACE-BOUNDARIES",
+      "relation": "supervised finite hypothesis boundaries, not proof operationality"
+    }
+  ],
+  "open_reviews": [
+    "Is transformation derivable from D9 UNIFY and D10 PROVE-RULE plus list substitution?",
+    "Does Core-Math or a symbolic-AI library own this law?",
+    "Independent native SENS proof oracle and semantic minimality witness outstanding"
+  ],
+  "coordinate": null,
+  "ratified_resident": false,
+  "selected_in_canonical_inventory": false,
+  "physical_t5_authorized": false,
+  "control_domain_ownership": "D2 only"
+}

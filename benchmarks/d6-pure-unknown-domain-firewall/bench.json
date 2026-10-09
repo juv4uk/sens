@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d6-pure-unknown-domain-firewall",
+  "wing": "D6 PURE-UNKNOWN",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can equal raw bits or shared low-level mechanisms import foreign semantic authority into a PURE-UNKNOWN Core D6 slot?",
+  "claim": "Rejects selector, exact-Q, HUMAN-WIRE, and GC lookalikes unless a separately proved semantic bridge exists.",
+  "witness": [
+    "run.py",
+    "README.md"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "d6/pure-unknown/domain-firewall",
+  "reproduce": "python3 benchmarks/d6-pure-unknown-domain-firewall/run.py --out /tmp/d6-pure-unknown-domain-firewall"
+}

@@ -1,0 +1,421 @@
+{
+  "schema": "d10-r6rs-historical-hashtable-hygiene-audit/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-ONLY-UNSELECTED-UNRATIFIED",
+  "authority": "juv4uk/sens#4013 / #4463 / #4182",
+  "snapshot": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "d10_selected": 625,
+    "d10_capacity": 1024,
+    "ratified_d10": 0
+  },
+  "scope": "R6RS 2007 Standard Libraries, chapters 12.3, 12.5, 12.6, 13.1-13.4. Name absence NOT proof of distinct Core law; no D2 authority created",
+  "exact_exclusions_from_D1_D9": [],
+  "rows": [
+    {
+      "review_id": "R6RS-01",
+      "historical_spelling": "MAKE-EQ-HASHTABLE",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.1",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "новий змінюваний словник з тотожністю ключів eq?",
+      "positive_witness_spec": "два різні, але структурно рівні об'єкти не обов'язково один ключ",
+      "falsifier_spec": "словник тихцем порівнює структурною рівністю",
+      "closest_existing_semantics": [
+        "MAKE-HASH-TABLE",
+        "EQ"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-02",
+      "historical_spelling": "MAKE-EQV-HASHTABLE",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.1",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "новий змінюваний словник з порівнянням eqv?",
+      "positive_witness_spec": "ключі з різною числовою репрезентацією перевіряти за eqv?",
+      "falsifier_spec": "вибір порівняння ігнорується",
+      "closest_existing_semantics": [
+        "MAKE-HASH-TABLE",
+        "EQUAL"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-03",
+      "historical_spelling": "MAKE-HASHTABLE",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.1",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
+      "positive_witness_spec": "еквівалентні ключі мають збігатися за хешем; однаковий ключ замінює значення",
+      "falsifier_spec": "несумісні hash/equiv мовчки гарантовано коректні",
+      "closest_existing_semantics": [
+        "MAKE-HASH-TABLE",
+        "GETHASH"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-04",
+      "historical_spelling": "HASHTABLE-REF",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.2",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "пошук ключа з явним значенням за відсутності",
+      "positive_witness_spec": "пошук відсутнього ключа повертає саме переданий default",
+      "falsifier_spec": "втрата відмінності між відсутнім та значенням #f",
+      "closest_existing_semantics": [
+        "GETHASH",
+        "MAP-GET"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-05",
+      "historical_spelling": "HASHTABLE-UPDATE!",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.2",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "оновити асоціацію результатом однієї процедури від поточного значення або default",
+      "positive_witness_spec": "відсутній ключ створює ключ з proc(default)",
+      "falsifier_spec": "процедуру викликають на помилковому нульовому значенні",
+      "closest_existing_semantics": [
+        "GETHASH",
+        "HASH-TABLE-COUNT"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-06",
+      "historical_spelling": "HASHTABLE-COPY",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.2",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "копія словника за замовчуванням незмінна, з mutable=true змінна",
+      "positive_witness_spec": "копія зі старими асоціаціями не приймає set! без mutable",
+      "falsifier_spec": "копія за замовчуванням залишається змінною",
+      "closest_existing_semantics": [
+        "COPY-STRUCTURE",
+        "MAKE-HASH-TABLE"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-07",
+      "historical_spelling": "HASHTABLE-KEYS",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.2",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "повернути вектор усіх ключів, порядок стандартом не задано",
+      "positive_witness_spec": "кількість і множина ключів збігаються зі словником",
+      "falsifier_spec": "сортування нав'язується як обов'язкове спостереження",
+      "closest_existing_semantics": [
+        "MAP-KEYS",
+        "VECTOR"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-08",
+      "historical_spelling": "HASHTABLE-ENTRIES",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.2",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "повернути два вектори у двох значеннях зі збереженою відповідністю ключ→значення",
+      "positive_witness_spec": "пари key[i] і value[i] відображають ті самі асоціації",
+      "falsifier_spec": "вектори однакової довжини, але значення змішані між ключами",
+      "closest_existing_semantics": [
+        "VALUES",
+        "CALL-WITH-VALUES",
+        "GETHASH"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-09",
+      "historical_spelling": "HASHTABLE-HASH-FUNCTION",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.3",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "повернути hash-процедуру словника, але #f для eq?/eqv? конструкторів",
+      "positive_witness_spec": "eq-hashtable має результат #f",
+      "falsifier_spec": "повернута довільна внутрішня функція для eq-hashtable",
+      "closest_existing_semantics": [
+        "MAKE-HASH-TABLE"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-10",
+      "historical_spelling": "HASHTABLE-EQUIVALENCE-FUNCTION",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.3",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "повернути функцію еквівалентності, що визначає семантику ключів",
+      "positive_witness_spec": "eq-словник повертає eq?",
+      "falsifier_spec": "повернута функція порівняння має інше відношення",
+      "closest_existing_semantics": [
+        "MAKE-HASH-TABLE",
+        "EQ"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-11",
+      "historical_spelling": "HASHTABLE-MUTABLE?",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.3",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "перевірка змінності екземпляра словника",
+      "positive_witness_spec": "за замовчуванням копія незмінна, оригінал змінний",
+      "falsifier_spec": "копія default проголошена змінною",
+      "closest_existing_semantics": [
+        "HASH-TABLE-P"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-12",
+      "historical_spelling": "EQUAL-HASH",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.4",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "структурний хеш, сумісний з equal?, мусить завершуватися і для циклів",
+      "positive_witness_spec": "два equal? циклічні об'єкти мають сумісний hash і обчислення завершується",
+      "falsifier_spec": "нескінченна рекурсія для циклічної структури",
+      "closest_existing_semantics": [
+        "SXHASH",
+        "EQUAL"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-13",
+      "historical_spelling": "STRING-CI-HASH",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "13.4",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "observable_law": "хеш рядка без врахування регістру, сумісний зі string-ci=?",
+      "positive_witness_spec": "ключі, рівні за string-ci=?, мають рівні хеші",
+      "falsifier_spec": "рядки, що відрізняються регістром, гарантовано мають різні хеші",
+      "closest_existing_semantics": [
+        "SXHASH"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D10-CANDIDATE-OWNERSHIP-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-14",
+      "historical_spelling": "IDENTIFIER?",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "12.5",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "observable_law": "предикат синтаксичного об'єкта, що представляє ідентифікатор, не просто символ",
+      "positive_witness_spec": "звичайний datum символ не проходить перевірку identifier?",
+      "falsifier_spec": "довільний символ вважається контекстним identifier",
+      "closest_existing_semantics": [
+        "EQ",
+        "BIND"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D2-CONTROL-OWNER-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-15",
+      "historical_spelling": "BOUND-IDENTIFIER=?",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "12.5",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "observable_law": "рівність зв'язаних ідентифікаторів за іменем і контекстними мітками",
+      "positive_witness_spec": "однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?",
+      "falsifier_spec": "порівняння лише по рядку імені",
+      "closest_existing_semantics": [
+        "BIND",
+        "EQ"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D2-CONTROL-OWNER-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-16",
+      "historical_spelling": "FREE-IDENTIFIER=?",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "12.5",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "observable_law": "рівність ідентифікаторів як лексичних посилань на ту саму прив'язку",
+      "positive_witness_spec": "різні контекстні записи з тією самою лексичною прив'язкою еквівалентні",
+      "falsifier_spec": "порівняння тільки поверхневого імені",
+      "closest_existing_semantics": [
+        "LOOKUP",
+        "BIND",
+        "EQ"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D2-CONTROL-OWNER-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-17",
+      "historical_spelling": "SYNTAX->DATUM",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "12.6",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "observable_law": "зняття синтаксичного контексту із синтаксичного об'єкта до звичайних даних",
+      "positive_witness_spec": "після конверсії ідентифікатор стає символом без marks/lexical context",
+      "falsifier_spec": "контекстні мітки потай залишаються семантично активними",
+      "closest_existing_semantics": [
+        "QUOTE"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D2-CONTROL-OWNER-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-18",
+      "historical_spelling": "DATUM->SYNTAX",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "12.6",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "observable_law": "перенесення лексичного контексту шаблонного ідентифікатора на datum",
+      "positive_witness_spec": "однаковий datum з різними template-id має різну лексичну прив'язку",
+      "falsifier_spec": "контекст з template-id губиться та спричиняє небажане захоплення",
+      "closest_existing_semantics": [
+        "QUOTE",
+        "BIND"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D2-CONTROL-OWNER-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "review_id": "R6RS-19",
+      "historical_spelling": "MAKE-VARIABLE-TRANSFORMER",
+      "source": "R6RS Standard Libraries (2007)",
+      "section": "12.3",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+      "observable_law": "трансформер, що перехоплює також set! позицію ідентифікатора",
+      "positive_witness_spec": "ліва частина set! переписується трансформером, а не відхиляється",
+      "falsifier_spec": "звичайний transformer помилково отримує право переписати set!",
+      "closest_existing_semantics": [
+        "DEFINE",
+        "BIND"
+      ],
+      "exact_in_D1_D9": false,
+      "exact_in_current_D10_selected": false,
+      "overlaps_other_open_historical_audits": false,
+      "owner_boundary": "D2-CONTROL-OWNER-REVIEW",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "coordinate": null,
+      "ratified": false
+    }
+  ],
+  "accounting": {
+    "historical_spellings_reviewed": 19,
+    "exact_name_absent_D1_D9": 19,
+    "exact_name_absent_D10_selected": 19,
+    "admitted_d10": 0,
+    "new_coordinates": 0
+  }
+}

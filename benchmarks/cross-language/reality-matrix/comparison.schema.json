@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/juv4uk/sens/benchmarks/cross-language/reality-matrix/comparison.schema.json",
+  "title": "SENS Reality Matrix comparison",
+  "type": "object",
+  "required": ["system", "sens", "competitor", "environment", "workloads", "verdicts"],
+  "properties": {
+    "system": {"type": "string"},
+    "sens": {
+      "type": "object",
+      "required": ["commit", "contract"],
+      "properties": {
+        "commit": {"type": "string"},
+        "contract": {"type": "string"},
+        "ratified_domains": {"type": "string", "const": "D1-D7"}
+      },
+      "additionalProperties": true
+    },
+    "competitor": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "commit": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "environment": {
+      "type": "object",
+      "required": ["os", "arch"],
+      "properties": {
+        "os": {"type": "string"},
+        "arch": {"type": "string"},
+        "cpu": {"type": ["string", "null"]},
+        "ram_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "load_context": {"enum": ["idle", "high", "unknown"]},
+        "fpga": {"type": ["string", "null"]},
+        "toolchain": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "workloads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "parity", "measurements"],
+        "properties": {
+          "id": {"type": "string"},
+          "parity": {"enum": ["pass", "fail", "unsupported"]},
+          "params": {"type": "object"},
+          "measurements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["axis", "status"],
+              "properties": {
+                "axis": {"type": "string"},
+                "status": {"enum": ["measured", "unsupported", "inconclusive"]},
+                "unit": {"type": ["string", "null"]},
+                "sens_samples": {"type": "array", "items": {"type": "number"}},
+                "competitor_samples": {"type": "array", "items": {"type": "number"}},
+                "sens_median": {"type": ["number", "null"]},
+                "competitor_median": {"type": ["number", "null"]},
+                "sens_p95": {"type": ["number", "null"]},
+                "competitor_p95": {"type": ["number", "null"]},
+                "notes": {"type": ["string", "null"]}
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "semantic_density": {
+      "type": ["object", "null"],
+      "properties": {
+        "independent_roots": {"type": ["integer", "null"], "minimum": 0},
+        "independent_laws": {"type": ["integer", "null"], "minimum": 0},
+        "derived_residents": {"type": ["integer", "null"], "minimum": 0},
+        "admitted_residents_in_scope": {"type": ["integer", "null"], "minimum": 0},
+        "canonical_description_bits": {"type": ["integer", "null"], "minimum": 0},
+        "coverage": {"type": ["number", "null"], "minimum": 0},
+        "residents_per_root": {"type": ["number", "null"], "minimum": 0},
+        "residents_per_law": {"type": ["number", "null"], "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "verdicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["axis", "verdict"],
+        "properties": {
+          "axis": {"type": "string"},
+          "verdict": {
+            "enum": ["sens", "competitor", "pareto", "tie", "inconclusive", "unsupported"]
+          },
+          "evidence": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,70 @@
+name: Audit immutable W8 source-era provenance
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit_w8_source_era.py'
+      - 'tests/test_audit_w8_source_era.py'
+      - '.github/workflows/audit-w8-source-era.yml'
+      - 'scripts/report_original_migration_candidates.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'knowledge/d1-d9-foundation.json'
+      - '**/*.lisp'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit_w8_source_era.py'
+      - 'scripts/report_original_migration_candidates.py'
+      - '.github/workflows/audit-w8-source-era.yml'
+      - 'knowledge/d1-d9-foundation.json'
+      - '**/*.lisp'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  w8-git-source-era-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Test Git snapshot and SHA provenance (no migration)
+        run: python3 -m unittest discover -s tests -p 'test_audit_w8_source_era.py' -v
+      - name: Verify full original W8 corpus against immutable pre-D8 Git tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_w8_source_era.py --repo "$PWD" \
+            --out "$RUNNER_TEMP/w8-pre-d8-provenance.json"
+          python3 - "$RUNNER_TEMP/w8-pre-d8-provenance.json" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          report=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          s=report['summary']
+          assert report['schema']=='sens-w8-pre-d8-blob-provenance/v1'
+          assert s['current_semantic_admissions']==0 and s['published_sens']==0
+          assert sum(s[k] for k in ('SAME_BLOB_BEFORE_D8_RATIFICATION',
+              'CHANGED_SINCE_PRE_D8_SNAPSHOT','NOT_PRESENT_IN_PRE_D8_SNAPSHOT'))==s['w8_first_blocked_originals']
+          assert len({row['path'] for row in report['sources']})==s['w8_first_blocked_originals']
+          assert all(not r['permission_to_choose_legacy'] for r in report['sources'])
+          assert all(r['executable_semantics']=='NOT_PROVEN' for r in report['sources'])
+          with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a',encoding='utf-8') as f:
+              f.write('## W8 original source pre-D8 Git-blob chronology — NOT executable admission\n\n')
+              f.write(f"- First W8 blocked originals: **{s['w8_first_blocked_originals']}**\n")
+              f.write(f"- Same path and blob in 2026-09-30 Git snapshot: **{s['SAME_BLOB_BEFORE_D8_RATIFICATION']}**\n")
+              f.write(f"- Changed blob: **{s['CHANGED_SINCE_PRE_D8_SNAPSHOT']}**\n")
+              f.write(f"- Not present in baseline: **{s['NOT_PRESENT_IN_PRE_D8_SNAPSHOT']}**\n")
+              f.write('- Legacy opcode identity proven: **0**; semantic oracle admitted: **0**\n\n')
+              for word,detail in report['by_w8_first_blocker'].items():
+                  f.write(f"- `{word}`: {detail['same_blob']}/{detail['total']} same historical blob\n")
+              f.write('\nSee JSON artifact for EVERY exact path + original Git SHA. No source-era mode is automatically selected.\n')
+          PY
+      - name: Keep per-source SHA-provenance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-original-w8-history
+          path: ${{ runner.temp }}/w8-pre-d8-provenance.json
+          if-no-files-found: error

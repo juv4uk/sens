@@ -108,14 +108,16 @@ pub(crate) fn evaluate_domain_cond(
                 clause.span,
             ));
         };
+        // Contract 11.8: canonical D3 COND has exactly two fields.
+        // Reject old explicit-result clauses *before* evaluating their query:
+        // evaluating a malformed clause would produce observable side effects.
         if parts.len() != 2 {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "D3:110 COND expects only (test expression) clauses",
+                "D3:110 COND requires exactly (test expression); three-part compatibility is forbidden",
                 clause.span,
             ));
         }
-
         let value = evaluate(&parts[0], environment)?;
         match exact_d3_cond_control(&value, parts[0].span)? {
             ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
@@ -132,21 +134,68 @@ pub(crate) fn evaluate_definition(
     span: Span,
 ) -> Result<Value, LanguageError> {
     exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
-    let ExprKind::Symbol(name) = &arguments[0].kind else {
-        return Err(LanguageError::new(
+
+    match &arguments[0].kind {
+        ExprKind::Symbol(name) => {
+            canon::ensure_bindable(name, arguments[0].span)?;
+            let value = evaluate(&arguments[1], environment)?;
+            // The shared lexical frame makes recursive definitions visible to their closure after binding.
+            // Spilnyi leksychnyi freim robyt rekursyvne vyznachennia vydymym zamykanniu pislia zv’yazuvannia.
+            // Der gemeinsame lexikalische Frame macht rekursive Definitionen nach der Bindung für ihre Closure sichtbar.
+            canon::bind_language_definition(name, &value, environment);
+            environment.define(name.clone(), value.clone());
+            Ok(value)
+        }
+        ExprKind::DomainIdentity(identity) => {
+            let Some(identity) = identity.core_operation() else {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    "exact DEFINE target must be a callable D3/D4/D5/D6 DomainIdentity",
+                    arguments[0].span,
+                ));
+            };
+
+            if !environment.is_root() {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    "exact DEFINE target may install a language-owned mechanism only at the root frame",
+                    arguments[0].span,
+                ));
+            }
+
+            if environment.domain_code_slot(identity).is_some() {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("exact DEFINE target already has a language-owned binding: {identity}"),
+                    arguments[0].span,
+                ));
+            }
+
+            let value = evaluate(&arguments[1], environment)?;
+            if !matches!(value, Value::Closure(_) | Value::Builtin(_)) {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "exact DEFINE target requires a callable closure or builtin mechanism",
+                    arguments[1].span,
+                ));
+            }
+
+            if !environment.bind_domain_code_slot_once(identity, value.clone()) {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("exact DEFINE target was concurrently bound: {identity}"),
+                    arguments[0].span,
+                ));
+            }
+
+            Ok(value)
+        }
+        _ => Err(LanguageError::new(
             ErrorKind::InvalidForm,
-            "def expects a symbol name · def ochikuie nazvu-symvol · def erwartet einen Symbolnamen",
+            "def expects a symbol name or exact callable DomainIdentity · def ochikuie nazvu-symvol abo tochnyi vyklychnyi DomainIdentity · def erwartet einen Symbolnamen oder eine exakte aufrufbare DomainIdentity",
             arguments[0].span,
-        ));
-    };
-    canon::ensure_bindable(name, arguments[0].span)?;
-    let value = evaluate(&arguments[1], environment)?;
-    // The shared lexical frame makes recursive definitions visible to their closure after binding.
-    // Spilnyi leksychnyi freim robyt rekursyvne vyznachennia vydymym zamykanniu pislia zv’yazuvannia.
-    // Der gemeinsame lexikalische Frame macht rekursive Definitionen nach der Bindung für ihre Closure sichtbar.
-    canon::bind_language_definition(name, &value, environment);
-    environment.define(name.clone(), value.clone());
-    Ok(value)
+        )),
+    }
 }
 
 pub(crate) fn evaluate_cond(

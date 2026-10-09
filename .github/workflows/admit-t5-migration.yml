@@ -1,0 +1,97 @@
+name: Proven physical T5 migration admission
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/admit-t5-migration.py'
+      - 'tests/test_admit_t5_migration.py'
+      - '.github/workflows/admit-t5-migration.yml'
+      - 'docs/ADMIT-T5-MIGRATION.uk.md'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'knowledge/migration-admissions/**'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/admit-t5-migration.py'
+      - 'tests/test_admit_t5_migration.py'
+      - '.github/workflows/admit-t5-migration.yml'
+      - 'knowledge/migration-admissions/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-admission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build actual typed SENS D2 reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Verify original source provenance, real physical T5 and oracle-gated publication
+        run: python3 -m unittest discover -s tests -p 'test_admit_t5_migration.py' -v
+      - name: Run reviewed proof manifests through ACTUAL migration publisher
+        env:
+          SENS_T5_ADMISSION_DIR: ${{ runner.temp }}/sens-t5-admission
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          root = Path.cwd()
+          manifests = sorted((root / "knowledge/migration-admissions").glob("*.json"))
+          result_root = Path(os.environ["SENS_T5_ADMISSION_DIR"])
+          mirror = result_root / "physical-mirror"
+          reports = result_root / "reports"
+          reports.mkdir(parents=True, exist_ok=True)
+          failures = []
+          # NO_FILES is not an admission: installing the tool without a
+          # reviewed proof never counts as a migrated original Lisp program.
+          if not manifests:
+              print("BLOCK: zero reviewed migration-admission manifests", file=sys.stderr)
+              raise SystemExit(2)
+          for index, manifest in enumerate(manifests):
+              report = reports / f"{index:04d}.json"
+              command = [
+                  sys.executable, str(root / "scripts/admit-t5-migration.py"),
+                  "--root", str(root),
+                  "--manifest", str(manifest),
+                  "--mirror", str(mirror),
+                  "--reader", str(root / "target/debug/sens-trit"),
+                  "--report", str(report),
+                  "--write",
+              ]
+              proc = subprocess.run(command, cwd=root, check=False, capture_output=True,
+                                    text=True, timeout=300)
+              if report.is_file():
+                  record = json.loads(report.read_text(encoding="utf-8"))
+              else:
+                  record = {"status": "BLOCKED", "reason": "missing proof report"}
+              outcome = {
+                  "manifest": manifest.relative_to(root).as_posix(),
+                  "status": record.get("status"),
+                  "returncode": proc.returncode,
+                  "source": record.get("source"),
+                  "reason": record.get("reason"),
+              }
+              print(json.dumps(outcome, ensure_ascii=False), flush=True)
+              if proc.returncode != 0 or record.get("status") != "WRITTEN":
+                  failures.append(outcome)
+          print(f"REVIEWED_PROOFS={len(manifests)} BLOCKED={len(failures)}")
+          if failures:
+              raise SystemExit(2)
+          PY
+      - name: Upload physical binaries and per-source admission evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reviewed-t5-migration-admissions
+          path: ${{ runner.temp }}/sens-t5-admission
+          if-no-files-found: warn
+          retention-days: 14

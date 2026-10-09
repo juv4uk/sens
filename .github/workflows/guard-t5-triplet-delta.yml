@@ -1,0 +1,47 @@
+name: Incremental SENS T5 triple-view ratchet
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Immutable Git baseline SHA (40 lowercase hex)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  physical-view-delta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test changed/new/deleted physical-view triples using real Git history
+        run: python3 -m unittest discover -s tests -p 'test_guard_t5_triplet_delta.py' -v
+      - name: Only changed/new T5 physical files and view require exact parity
+        env:
+          MANUAL_BASE: ${{ inputs.base_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            # Use the current target tip, not the PR-creation snapshot in base.sha.
+            # This is an immutable SHA for this run and excludes pre-existing T5 debt.
+            git fetch --no-tags origin "$GITHUB_BASE_REF"
+            BASE="$(git rev-parse FETCH_HEAD)"
+          else
+            BASE="$MANUAL_BASE"
+          fi
+          echo "T5 delta baseline: $BASE"
+          if [[ ! "$BASE" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "BLOCK: missing immutable base SHA"; exit 2
+          fi
+          python3 scripts/guard_t5_triplet_delta.py \
+            --root . --base-sha "$BASE"
+          # This is only a mechanical delta gate, NOT release preflight.
+          # Canonical Ukrainian oracle and old-corpus debt remain gated.

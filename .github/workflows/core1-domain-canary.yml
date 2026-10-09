@@ -1,0 +1,29 @@
+name: Core1 exact-domain physical T5 canary
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/core1-domain-canary.yml"
+      - "tests/fixtures/core1-domain-canary/**"
+      - "tests/test_core1_domain_canary.py"
+      - "crates/sens/tests/core1_domain_canary.rs"
+      - "lib/core1.lisp"
+      - "knowledge/d1-d9-foundation.json"
+      - "scripts/sens_t5_codec.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core1-physical-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the checked-in physical T5 bytes from existing Core1
+        run: python3 tests/fixtures/core1-domain-canary/regenerate.py
+      - name: Fail-closed Core1 domain/transport regressions
+        run: python3 -m unittest discover -s tests -p test_core1_domain_canary.py -v
+      - name: Current SENS oracle executes the actual Core1 physical T5 file
+        run: cargo test -p sens --test core1_domain_canary

@@ -1,0 +1,12 @@
+name: D10 finite transducer witness
+on: [pull_request, push]
+permissions:
+  contents: read
+jobs:
+  witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check_d10_finite_transducer_cross_hobby.py
+      - run: python3 tests/test_d10_finite_transducer_cross_hobby.py
+      - run: python3 tests/test_d10_finite_transducer_composition.py

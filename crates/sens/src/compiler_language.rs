@@ -13,7 +13,7 @@
 
 use crate::{
     canonical_value_sha256_mechanism, domain_identity_shape_mechanism,
-    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, eval_program,
+    domain_identity_shape_or_empty_mechanism, eval_parsed_expressions, parse_mixed_exact_domain,
     load_core_library, sha256_source, CompilerExecutionRole, CompilerLoweringRole,
     CoreDomainIdentity, DomainIdentity, ErrorKind, Exactness, Expr, ExprKind, LanguageError,
     Session, Span, Value,
@@ -570,6 +570,12 @@ fn compiler_program_call() -> Expr {
     }
 }
 
+fn eval_compiler_nucleus(session: &mut Session) -> Result<(), LanguageError> {
+    let expressions = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)?;
+    eval_parsed_expressions(&expressions, session)?;
+    Ok(())
+}
+
 fn compiler_program_artifact_call() -> Expr {
     Expr {
         kind: ExprKind::List(Rc::from(
@@ -656,7 +662,7 @@ pub fn compiler_lowering_role_from_sens(
         .environment
         .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
 
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    eval_compiler_nucleus(&mut session)?;
 
     let result = eval_parsed_expressions(&[language_role_call(identity)], &mut session)?.value;
     decode_language_lowering_role(&result)
@@ -709,7 +715,7 @@ pub fn compiler_program_requests_from_sens(program: Value) -> Result<Value, Lang
     let mut session = Session::default();
     load_core_library(&mut session)?;
     install_compiler_program_bindings(&mut session, program)?;
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    eval_compiler_nucleus(&mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_call()], &mut session)?.value)
 }
 
@@ -764,7 +770,7 @@ pub fn compiler_program_artifact_from_sens(
             Value::String(Rc::from(sha256_hex(COMPILER_NUCLEUS_SOURCE.as_bytes()))),
         ]),
     );
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut session)?;
+    eval_compiler_nucleus(&mut session)?;
     Ok(eval_parsed_expressions(&[compiler_program_artifact_call()], &mut session)?.value)
 }
 
@@ -926,7 +932,7 @@ pub fn verify_compiler_program_artifact_from_sens(
     role_session
         .environment
         .define(D4_LAW_VALUE_NAME, compiler_d4_bootstrap_law_value()?);
-    eval_program(COMPILER_NUCLEUS_SOURCE, &mut role_session)?;
+    eval_compiler_nucleus(&mut role_session)?;
 
     let verified_requests = requests
         .into_iter()
@@ -1023,6 +1029,23 @@ mod tests {
         CoreDomainIdentity::D4(
             crate::CoreD4::from_word(crate::Bit4::new(raw).expect("D4 test word")),
         )
+    }
+
+    #[test]
+    fn compiler_nucleus_loads_each_definition_without_an_opaque_binding_failure() {
+        let expressions =
+            parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let mut session = Session::default();
+        load_core_library(&mut session).expect("active core loads");
+        for (index, expression) in expressions.iter().enumerate() {
+            if let Err(error) =
+                eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+            {
+                panic!(
+                    "compiler nucleus form {index} failed: {error:?}; expression={expression:?}"
+                );
+            }
+        }
     }
 
     #[test]
@@ -1178,7 +1201,7 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1274,7 +1297,8 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses through exact-domain seam");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
@@ -1339,7 +1363,7 @@ mod tests {
         assert!(!requests.is_empty(), "whole artifact must carry SENS-produced requests");
         let expected_request_digest = match crate::eval::invoke_value(
             &canonical_value_sha256_mechanism(),
-            &[request_value.clone()],
+            std::slice::from_ref(request_value),
             &crate::Environment::root(),
             Span::default(),
         )

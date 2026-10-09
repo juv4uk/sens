@@ -17,13 +17,17 @@
        (00100010 bits expected-bits))
       (t (00000001 ())))))
 
-; First executable mapping only: the current D5 PLUS identity selects the
-; already-merged bounded-u64-add mechanism. DIFFERENCE/TIMES remain
-; not-applicable until their constructors are independently merged under #4358.
+; Current bounded arithmetic mappings. Exact D5 identity remains upstream
+; semantic authority; this seam only selects already-defined target-neutral
+; mechanism requests.
 (00001001 machine-lower-current-binary-effect
   (00001000 (width bits left right)
     (00000111
       ((machine-effect-current-domain-key? width bits 5 10)
        (machine-effect-bounded-u64-add left right))
+      ((machine-effect-current-domain-key? width bits 5 11)
+       (machine-effect-bounded-u64-sub left right))
+      ((machine-effect-current-domain-key? width bits 5 22)
+       (machine-effect-bounded-u64-mul left right))
       (t
        (00000001 machine-effect-not-applicable)))))

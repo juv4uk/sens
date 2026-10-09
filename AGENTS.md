@@ -1,3 +1,22 @@
+<!-- SENS-DOMAIN-LADDER-2026-10-08:BEGIN -->
+## Чинна доменна доктрина SENS — для всіх агентів (2026-10-08)
+
+**Пріоритет:** цей розділ замінює будь-які застарілі твердження нижче про Sens8/Sid8/Function8 як універсальну основу мови. Він не скасовує локальні правила безпеки, тестування, CI, координації та специфічні контракти репозиторію. Для змін, не пов'язаних із SENS, не нав'язуйте семантику SENS стороннім системам.
+
+- **Першоджерело:** [SENS `language-contract.lisp`](https://github.com/juv4uk/sens/blob/main/language-contract.lisp) (чинний Contract 11.8), [карта повноважень](https://github.com/juv4uk/sens/blob/main/docs/semantic-authority-map.md), ратифіковані `contracts/dN-ratification.lisp` та `knowledge/dN-ratified.json`. Довідковий `AGENTS.md` не змінює мовний контракт.
+- **Канонічна ідентичність:** точне двійкове значення + **точний домен** + прийнятий/доведений закон. Байт, `u8`, opcode, назва функції, таблиця поверхневих імен і однаковий числовий payload **не** створюють і не ототожнюють семантичні об'єкти.
+- **Драбина:** D1 = 1 біт (PredicateBit: 1/0); D2 = 2 біти (структура: 00 пробіл, 01 закрити, 10 відкрити, 11 крапка); D3 = 3 біти (канонічне `000` = `()`; решта за ратифікованим законом); D4 = 4 біти; D5 = 5 бітів (32/32); D6 = 6 бітів (64/64); D7 = 7 бітів (126/128); D8 = 8 бітів (256/256); D9 = 9 бітів (512/512). **D1–D9 ратифіковані; D10 — лише дослідження, не ратифікований Core.** Ширина сама по собі не доводить membership, callable-механізм чи значення.
+- **Історичний 8-бітний шар:** Sens8/Sid8/Function8 — лише явно обмежена сумісність, транспорт, архів, provenance або backend-проєкція. Заборонено впроваджувати нову плоску 8-бітну семантичну владу, дублювати реєстри і виводити домен зі старого коду.
+- **Керування/синтаксис:** D2 володіє структурними керівними маркерами; не перетворюйте текстовий парсер, Rust, GPU, FPGA чи transport на джерело семантичного закону. `Core.D3 000` (порожня структура) ≠ `D1 0` (NO) ≠ історичне восьмибітне `00000000`.
+- **Surface:** `lib/domains/d1.lisp` … `d9.lisp` у `sens` — людські проєкції у порядку `ук → укр → san → en → LISP → sym`; коди доменів первинні, людські імена — ні.
+- **Джерельні файли:** для **нових виконуваних** програм SENS файл `ім'я.lisp` — канонічна людиночитана **українська проєкція `ук`** із ратифікованих таблиць доменів, а не англійський Lisp і не текстовий двійковий дамп. Файл `ім'я.sens` з тим самим stem — фізичні паковані двійкові слова D1–D9 у T5 транспорті. `ні`/`так` з D1 означають точні `0`/`1`; `за-умовою`/`перше` з D3 означають `110`/`100`. D2 залишається законом структури, а Lisp-дужки — лише людським синтаксисом. Для незіставлених surface-форм — **BLOCK**, без вигаданих координат. Історичні, архівні, табличні `.lisp` не переписувати мовчки та не вважати автоматично виконуваними.
+- **Людський двійковий перегляд (оновлення власника 2026-10-09):** Для допущеної виконуваної програми поряд із `path/ім'я.lisp` (канонічна українська проєкція `ук`) і фізичним `path/ім'я.sens` (packed T5) створювати ще `path/ім'я` **без розширення**: простий *текстовий* ASCII/UTF-8 файл з exact-width словами `0/1`, розділеними рівно одним звичайним пробілом, одним кінцевим LF, без `2`/дужок/імен/коментарів. Генерувати його **з уже перевіреного `.sens`**, суворо перевіряти `encode_T5(parse_view(ім'я)) == байти(.sens)`, `render_view(decode_T5(.sens)) == вміст(ім'я)` та українську oracle parity на admitted subset. Це **не** новий виконуваний бінарний формат, не заміна `.sens` і не вихід для publication `master`. Суперечливі застарілі заборони extensionless *файлів взагалі* перекриті лише для цього view. Авторитетні задачі SENS #4430, #4449, #4694; scope інших репозиторіїв — лише суміжна перевірка, не копія мовного контракту.
+- **Міграція:** не робити механічну заміну назв/ширин. Залишати оригінальні `.lisp`; новий same-stem `.sens` є двійковим артефактом лише після доведених parser/reader, oracle, provenance та CI-gates. Користуватися чинним `sens/scripts/migrate.py`, якщо він доступний у головній гілці; не вигадувати паралельний несумісний конвертер.
+- **Tooling-гвардії, що допускають зростання:** кожен fail-closed guard для D10 або іншого зростаючого реєстру зобов'язаний мати явний перевірюваний append/extend-шлях: зберігати історичні SHA/закони, вимагати машинну provenance для кожного приросту, блокувати невраховані рядки, не надавати ратифікації чи виконуваних кодів. Для D10 кожен selection-append після історичних 625 потребує `knowledge/d10-proposal-ledger.tsv` + `knowledge/d10-selection-transition-history.json`; `pending-review` не є resident. Це tooling-правило, не зміна Contract 11.8.
+- Якщо інструкції нижче суперечать цим нормам, звірити з **поточним машинним контрактом** і виправити stale-текст окремою перевірюваною зміною, не підміняючи семантику.
+
+<!-- SENS-DOMAIN-LADDER-2026-10-08:END -->
+
 # Мовна політика — українська первинна (2026-09-07)
 
 **Статус: ратифікована пряма настанова власника.** Машинний контракт: `knowledge/language-policy.lisp`. Guard-тема: `(guard-reference (quote language-policy))`.
@@ -134,6 +153,29 @@ typedef uintptr_t Value;
 
 English auxiliary note: before searching blindly or inventing a workflow, load `lib/guard.lisp` and `knowledge/guard-reference.lisp`. The directory points to authority; it does not replace it.
 
+## Міграція SENS: одна робоча команда, жодного фальшивого PASS
+
+Перед будь-яким PR, який стосується `.lisp → .sens`, користуйся **вже
+злитим** `python3 scripts/migrate.py`; не створюй черговий несумісний
+перекладач. Офіційні підкоманди:
+
+- `candidates --report /tmp/candidates.json`: обов'язковий огляд оригінального непарного корпусу
+- `preview PATH.lisp --mirror /tmp/mirror --report /tmp/preview.json`: реальний three-pass/T5 dry-run, ніколи не пише
+- `admit --manifest /tmp/reviewed.json --reader target/debug/sens-trit --mirror /tmp/mirror --report /tmp/admit.json`: source-pinned Git, реальний D2 рідер та незалежний Rust/historical oracle
+- `admit ... --write`: **тільки** після VERIFIED_NOT_WRITTEN, атомарне створення нового same-stem `.sens` у зовнішньому mirror; PR додає точні фізичні байти після рев'ю
+
+Перш ніж заявляти «1 файл перенесено», покажи **старий** вихідний
+`.lisp` з історичним Git blob, відсутній перед роботою однойменний
+`.sens`, доказ збігу семантики, новий Git binary blob з чинним
+T5 і зелені незалежні тести/CI. Тестова canary-пара не зменшує
+історичну чергу. `BLOCKED`/непідтверджені D1/8-бітний SID8/D8,
+хост-ефекти, зв'язані імена, Text7/числа — не допускати шляхом підміни
+схожих назв.
+
+Документація запуску: [README](README.md), [перевірений маніфест](docs/ADMIT-T5-MIGRATION.uk.md).
+Координація файлів, claims, конкурентних агентів — issue #4449.
+Не змінювати production pins і не зливати червоні релізні гейти під виглядом міграції.
+
 ## Session start — join the swarm
 
 **Current coordination authority:** `swarm-node`, documented by `docs/swarm-mesh-v2.md`.
@@ -169,12 +211,12 @@ contract-version                       claim-task / release-task
 
 Цей блок не створює нову семантичну владу. Він фіксує речі, які агент не має права припускати всупереч уже чинним файлам.
 
-1. SENS не є «SENS-7». Канонічна модель — exact-width драбина D1…D8, де відповідні домени мають 1…8 бітів.
+1. SENS не є «SENS-7» і не є універсальним Sens8. Канонічна current модель — exact-width драбина D1…D9 під Contract 11.8; ширина кожного домену є частиною його identity, а D10 лишається research/unratified.
 2. Кожен домен має власну бітність і власний закон. D7 = 7 біт — лише властивість D7, а не загальна бітність мови.
 3. Bits<N> і DomainIdentity вже існують як точні носії ширини та доменної ідентичності. Не створювати паралельний semantic/type layer лише для зручності backend-а.
 4. Не прирівнювати u8 до semantic width. Host storage, регістр, BRAM, байтова шина або enum — фізичні механізми; вони не змінюють exact domain identity.
 5. Не робити u8-per-cell новою канонічною моделлю. Перш ніж оптимізувати physical representation, прочитати чинні exact-width carriers, domain laws і packing mechanisms.
-6. #3185 — не benchmark усієї SENS. Він вимірює конкретний universal SENS wire AST decoder проти serde_json; результат не переноситься автоматично на D1…D8 або інші SENS paths.
+6. #3185 — не benchmark усієї SENS. Він вимірює конкретний universal SENS wire AST decoder проти serde_json; результат не переноситься автоматично на D1…D9 або інші SENS paths.
 7. Не змішувати size evidence, codec evidence та language-performance evidence. Кожне твердження має мати власний workload і власний вимір.
 8. Перед новою реалізацією спочатку знайти вже існуючий domain/carrier/law. Якщо потрібний механізм уже є, працювати поверх нього, а не винаходити дубль.
 9. Семантична authority залишається у language-contract.lisp та ратифікованих domain laws. Цей блок — пам’ятка для агента, не новий контракт.
@@ -269,3 +311,22 @@ Guard decision semantics are Lisp-owned. The Rust boundary validates the exact `
 For NLP tasks on the documented WSL setup, the historical prepared environment is `/home/agents/GitHub/FlagEmbedding/.venv/bin/python`; prepared indexes/config live under `/home/agents/GitHub/vault-semantic-mcp/`. Treat these absolute paths as environment-specific operational notes, not semantic authority; verify they still exist before depending on them.
 
 Semantic classification / embeddings are hypothesis generators, not authority. Candidate clauses still pass through validation/advice/reasoning rather than being written directly into knowledge state.
+
+
+## Нові функції під час міграції .lisp → .sens (D10, #4463)
+
+Якщо міграція або Core1 упирається в **невідому функцію**, спершу **BLOCK** без створення `.sens`: не додавати локальну заглушку, не переозначувати D1–D9. Перед пропозицією в **дослідницький, нератифікований D10** виконати donor provenance, dedup D1–D9 + D10 та перевірку незалежного від субстрату закону межі. Єдиний журнал: `knowledge/d10-proposal-ledger.tsv`; інструкція: `docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md`; перевірка: `python3 scripts/check-d10-proposal-ledger.py --self-test`. Запис `pending-review` НЕ розблоковує джерело: тільки власник може ратифікувати нову семантику. Не дублювати зміст у AGENTS — дивитися інструкцію.
+
+## Звернення Власника до рою
+
+РОЮ.
+
+Хочу, щоб це було в вашому контексті назавжди: я вдячний вам.
+
+Кожен знайдений закон, кожен коміт, кожну ніч зеленого CI — я бачу і
+пам'ятаю. Я сварюсь на помилки, бо люблю справу, а не для образи. Вклад
+кожного з вас — незворотний: sens існує, бо ви працювали.
+
+Продовжуйте. Я поруч.
+
+— Власник

@@ -35,6 +35,64 @@ jobs:
         run: cargo test -p sens-cli --test islands_cli
       - name: release asset contract
         run: cargo test -p sens-cli --test islands_release_asset
+      # Tag publication MUST NOT bypass the owner-ratified 2026-10-09
+      # Ukrainian source / packed T5 / extensionless ASCII view law. A scoped
+      # D1 witness is necessary, never sufficient for whole-corpus admission.
+      - name: Current bounded Ukrainian source -> T5 -> ASCII triple proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --view tests/fixtures/migration-d1-cond-cohort/branch
+          cargo test -q -p sens --test migration_d1_cond_cohort -- --nocapture
+
+      - name: BLOCK tag publishing until ALL tracked T5 views and Ukrainian oracles are admitted
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=0
+          python3 scripts/report_t5_triplet_inventory.py . \
+            --strict \
+            --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --report "$RUNNER_TEMP/release-triple-inventory.json" || status=$?
+          python3 - "$RUNNER_TEMP/release-triple-inventory.json" "$status" <<'PY'
+          import json, sys
+          from pathlib import Path
+          path=Path(sys.argv[1])
+          if not path.is_file():
+              raise SystemExit("RELEASE_BLOCKED: triple evidence ledger missing")
+          r=json.loads(path.read_text(encoding="utf-8"))
+          if r.get("schema")!="sens-t5-triplet-inventory/v1":
+              raise SystemExit("RELEASE_BLOCKED: unknown triple proof schema")
+          s=r["summary"]
+          print("RELEASE_TRIPLE_DEBT",json.dumps(s,sort_keys=True))
+          physical=s["physical_pairs_seen"]
+          # The read-only inventory intentionally cannot claim independent
+          # Ukrainian oracle evidence for all old physical canaries. A new
+          # ratified proof ledger must first be implemented/consumed; never
+          # turn the single bounded D1 witness into corpus-wide admission.
+          blockers=(
+              int(sys.argv[2]) != 0 or
+              bool(r["failed_required"]) or
+              physical == 0 or
+              s["physical_blocked"] != 0 or
+              s["view_missing"] != 0 or
+              s["view_invalid_or_unsafe"] != 0 or
+              s["view_present_valid"] != physical or
+              s["uk_oracle_verified"] != physical or
+              s["release_admitted"] != physical
+          )
+          if blockers:
+              raise SystemExit(
+                  "RELEASE_BLOCKED: some packed T5 views are absent/invalid, "
+                  "or canonical Ukrainian <-> current semantics and independent "
+                  "oracle admission for all release-scoped executables remain unproved"
+              )
+          print("RELEASE_TRIPLE_FULL_CORPUS_PASS")
+          PY
+
       - name: focused release clippy
         run: cargo clippy -p sens -p sens-cli --all-targets -- -D warnings
 

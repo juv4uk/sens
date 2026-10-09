@@ -1,0 +1,194 @@
+name: audit-t5-program-syntax
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - '**/*.lisp'
+      - '**/*.sens'
+      - 'scripts/guard_original_sens_admission.py'
+      - 'tests/test_guard_original_sens_admission.py'
+      - 'knowledge/migration-admissions/**'
+      - 'scripts/audit_t5_program_syntax.py'
+      - 'scripts/audit_t5_file_pairs.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/migrate.py'
+      - 'crates/sens-cli/**'
+      - 'crates/sens/src/parser.rs'
+      - 'crates/sens/src/syntax.rs'
+      - 'crates/sens/src/semantic_registry.rs'
+      - 'tests/test_audit_t5_program_syntax.py'
+      - 'docs/T5-PROGRAM-SYNTAX-AUDIT-2026-10-08.uk.md'
+      - '.github/workflows/audit-t5-program-syntax.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  d2-grammar-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build the ACTUAL SENS binary reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Show canonical D2 word-coordinate failures without executing SENS
+        run: |
+          set -euo pipefail
+          cargo test -q -p sens-cli --bin sens-trit explain_
+          target/debug/sens-trit explain tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            | grep 'D2 syntax PASS; .*semantic oracle NOT_VERIFIED'
+      - name: Test physically valid but structurally invalid .sens
+        env:
+          SENS_TRIT_BIN: ${{ github.workspace }}/target/debug/sens-trit
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_audit_t5_program_syntax.py' -v
+      - name: Audit tracked .sens without claiming semantic oracle parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Не сховати причину, навіть коли D2 reader повернув BLOCK.
+          status=0
+          python3 scripts/audit_t5_program_syntax.py . \
+            --reader "$PWD/target/debug/sens-trit" \
+            --output "$RUNNER_TEMP/t5-syntax-report.json" \
+            --require-files || status=$?
+          python3 - "$RUNNER_TEMP/t5-syntax-report.json" "$status" <<'PY'
+          import json, sys
+          with open(sys.argv[1], encoding='utf-8') as stream:
+              report=json.load(stream)
+          summary=report['summary']
+          print('D2_SYNTAX_AUDIT',report['status'],summary,flush=True)
+          for row in report['files']:
+              if row['syntax_status'] != 'PASS_D2_SYNTAX':
+                  print('D2_BLOCKED',row['sens'],row.get('syntax_reason','unknown'),flush=True)
+                  hint=row.get('d2_structure_balance_hint')
+                  if hint:
+                      print('D2_EXACT_WORD_HINT',row['sens'],json.dumps({
+                          'typed_word_count':hint['typed_word_count'],
+                          'first_unclosed_open_word':hint['first_unclosed_open_word'],
+                          'last_unclosed_open_word':hint['last_unclosed_open_word'],
+                          'unclosed_open_count':hint['unclosed_open_count'],
+                          'first_unmatched_close_word':hint['first_unmatched_close_word'],
+                          'unclosed_open_contexts':hint['unclosed_open_contexts'],
+                      },sort_keys=True),flush=True)
+          if (report['schema']!='sens-t5-d2-program-syntax-audit/v1'
+                  or report['status']!='SYNTAX_ONLY'
+                  or int(sys.argv[2])!=0
+                  or summary['pairs_seen']<1
+                  or summary['d2_syntax_blocked']!=0
+                  or summary['executable_semantics_certified']!=0):
+              raise SystemExit('BLOCKED: physical T5 + Rust D2 required; syntax does not certify semantics')
+          PY
+      - name: "Real end-to-end original: source existed first, new packed .sens demands oracle"
+        shell: bash
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+        run: |
+          set -euo pipefail
+          # Isolated cloned history: original .lisp predates .sens; never touch checkout.
+          work="$RUNNER_TEMP/original-proof-e2e"
+          # PR synthetic merge commits can be unreferenced by a fresh clone.
+          # Worktree shares the exact checked-out Git objects, not build artifacts.
+          git -C "$GITHUB_WORKSPACE" worktree add --detach "$work" "$GITHUB_SHA" >/dev/null
+          cd "$work"
+          git config user.name 'SENS CI Proof'
+          git config user.email 'ci@proof.invalid'
+          paired='tests/fixtures/migration-multiform-cohort/two-forms.sens'
+          manifest='knowledge/migration-admissions/two-forms-canary.json'
+          git rm -q "$paired"
+          git commit -qm 'fixture baseline: historical source with no binary pair'
+          BASE="$(git rev-parse HEAD)"
+          git show "HEAD^:$paired" > "$paired"
+          git add "$paired"
+          git commit -qm 'fixture candidate: original source gains binary'
+          python3 scripts/guard_original_sens_admission.py \
+            --base-sha "$BASE" --root "$PWD" \
+            --reader "$GITHUB_WORKSPACE/target/debug/sens-trit" \
+            --report "$RUNNER_TEMP/original-proof-e2e-pass.json"
+          python3 - "$RUNNER_TEMP/original-proof-e2e-pass.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert r['status']=='EVIDENCE_CHECKED',r
+          assert r['summary']['original_files_proof_checked']==1,r
+          assert r['summary']['new_cohorts_not_original_credit']==0,r
+          assert r['files'][0]['d2_reader']=='PASS',r
+          assert r['files'][0]['oracle_commands_passed']>=1,r
+          assert r['summary']['automatic_semantic_certification']==0,r
+          PY
+          # Source-anchored physical T5 must NOT pass with a fabricated current result.
+          python3 - "$manifest" <<'PY'
+          import json,sys
+          from pathlib import Path
+          path=Path(sys.argv[1])
+          proof=json.loads(path.read_text(encoding="utf-8"))
+          proof["expected_current_eval_stdout"]="INVALID_EXPECTATION\\n"
+          path.write_text(json.dumps(proof),encoding="utf-8")
+          PY
+          if python3 scripts/guard_original_sens_admission.py \
+            --base-sha "$BASE" --root "$PWD" \
+            --reader "$GITHUB_WORKSPACE/target/debug/sens-trit" \
+            --report "$RUNNER_TEMP/original-proof-e2e-eval-blocked.json"; then
+            echo 'ERROR: original T5 passed with fabricated current-SENS result'; exit 1
+          fi
+          python3 - "$RUNNER_TEMP/original-proof-e2e-eval-blocked.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert r["status"]=="BLOCKED",r
+          assert r["summary"]["blocked"]==1,r
+          assert "CURRENT_EVAL" in r["files"][0]["reason"],r
+          PY
+          git checkout -- "$manifest"
+          # Exactly the same bytes WITHOUT reviewed proof must fail closed.
+          mv "$manifest" "$manifest.withheld"
+          if python3 scripts/guard_original_sens_admission.py \
+            --base-sha "$BASE" --root "$PWD" \
+            --reader "$GITHUB_WORKSPACE/target/debug/sens-trit" \
+            --report "$RUNNER_TEMP/original-proof-e2e-blocked.json"; then
+            echo 'ERROR: original-source T5 admitted without proof'; exit 1
+          fi
+          python3 - "$RUNNER_TEMP/original-proof-e2e-blocked.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert r['status']=='BLOCKED',r
+          assert r['summary']['blocked']==1,r
+          assert 'MANIFEST' in r['files'][0]['reason'],r
+          PY
+      - name: Real original-source T5 proof gate (not new canary)
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_guard_original_sens_admission.py' -v
+          python3 scripts/guard_original_sens_admission.py \
+            --base-sha "$BASE_SHA" --root . \
+            --reader target/debug/sens-trit \
+            --report "$RUNNER_TEMP/original-proof-ledger.json"
+          python3 - "$RUNNER_TEMP/original-proof-ledger.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert r['schema']=='sens-original-proof-carrying-gate/v1'
+          assert r['status']=='EVIDENCE_CHECKED',r
+          assert r['summary']['blocked']==0,r
+          assert r['summary']['automatic_semantic_certification']==0,r
+          PY
+      - name: Upload provenance + D2 grammar report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t5-d2-syntax-audit
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/t5-syntax-report.json
+            ${{ runner.temp }}/original-proof-ledger.json
+            ${{ runner.temp }}/original-proof-e2e-pass.json
+            ${{ runner.temp }}/original-proof-e2e-blocked.json
+            ${{ runner.temp }}/original-proof-e2e-eval-blocked.json

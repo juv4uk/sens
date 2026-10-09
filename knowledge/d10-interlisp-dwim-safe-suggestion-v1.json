@@ -1,0 +1,50 @@
+{
+  "schema": "sens-d10-interlisp-dwim-safe-suggestion/v1",
+  "status": "RESEARCH-PENDING-NOT-SELECTED",
+  "date": "2026-10-09",
+  "owner_issues": ["#4013", "#4182", "#4463"],
+  "historical_family": "BBN-LISP / INTERLISP / DWIM (Teitelman)",
+  "source_provenance": [
+    {"url": "https://interlisp.org/history/timeline/", "scope": "BBN Lisp DWIM; context-sensitive typo correction including transposition and doubled characters"},
+    {"url": "https://interlisp.org/documentation/1986-interlisp-language-book-1.pdf", "scope": "Interlisp 1986 reference, chapter 22 DWIM automatic error correction and chapter 22.6 spelling corrector"},
+    {"url": "https://interlisp.org/documentation/lispcourse.pdf", "scope": "Interlisp course 11: spelling correction and transposition/doubling heuristics"}
+  ],
+  "provenance_boundary": "Historical references support existence and design motivation of DWIM, NOT identity/equivalence with our deterministic OSA metric or new no-auto-rewrite policy. These are original proposed SENS data-level restrictions.",
+  "snapshot": {"selected_at_claim": 631, "ratified": 0, "lower_domain_sha1": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4", "d10_inventory_sha1": "34efd273000e3de8510441764cb59acbb5ab284b", "canonical_inventory_modified": false},
+  "candidate": {
+    "semantic_name": "UNIQUE-SURFACE-CORRECTION-SUGGESTION",
+    "surface_uk": "спрв?",
+    "surface_ukr": "запропонувати-однозначне-виправлення-назви",
+    "arity": 3,
+    "argument_contract": "(user_surface, explicit [(surface, exact-bit-identity)] table, max_osa_distance in 0..2)",
+    "output_contract": "EXACT/SUGGEST with [surface, exact-identity], AMBIGUOUS with ordered alternatives, ABSENT, or BLOCKED-SURFACE; no execution side effect",
+    "law": "Return the unique lowest-distance candidate within an explicit maximum adjacent-transposition edit bound. Exact binary identity is never guessed; equal-score distinct identities produce AMBIGUOUS; bit words or D2 syntax are blocked. Never rewrite or evaluate source.",
+    "positive_witnesses": [
+      "CONNS => CONS if context contains exactly CONS and OSA distance=1",
+      "CNOS => CONS by one adjacent transposition",
+      "CONX => COND only when the explicitly supplied context lacks another tied candidate such as CONS",
+      "Unicode Cyrillic non-binary surface may receive data-only suggestion; no Text7 identity mutation",
+      "An exact present label returns EXACT with its pinned bit-identity"
+    ],
+    "negative_falsifiers": [
+      "CONX with tied COND and CONS at distance=1 is AMBIGUOUS, never arbitrary winner",
+      "equal surface with two DIFFERENT bit-identities must be AMBIGUOUS even at distance=0",
+      "binary input 01011 must be BLOCKED-SURFACE, never corrected to 01010",
+      "source control tokens (., brackets, quotes, spaces) BLOCKED-SURFACE",
+      "out-of-bound candidate must be ABSENT, never rewritten or executed",
+      "same identity repeated must not spuriously be two alternatives",
+      "non-integer limit/negative/unbounded distance rejected"
+    ],
+    "triage": "HOLD-CORE-VS-PURE-LIBRARY-DERIVABILITY",
+    "coordinate": null,
+    "selected": false,
+    "ratified": false,
+    "automatic_rewrite_authorized": false,
+    "automatic_execute_authorized": false,
+    "physical_t5_authorized": false
+  },
+  "dedup": {"D1-D9": "ABSENT-EXACT-NAME; CHECK BEHAVIOR AGAINST MAP/SEARCH/EDIT-DISTANCE LIBRARY", "D10": "ABSENT-EXACT-NAME IN 631 AT CLAIM; UNIQUE-FIND-IF-ANYWHERE and TRANSLATION-AMBIGUITY-VALID? may be compositions; behavioral dedup still HOLD"},
+  "hold": {"semantic_derivability": true, "D2_reader_control": "FORBIDDEN", "Text7_identity": "FORBIDDEN", "migrate_T5": "NOT_A_MIGRATION_BLOCKER"},
+  "user_interests": ["Interlisp Lisp-machine history", "Ukrainian/Sanskrit phonemic surfaces", "binary SENS identities", "radio bit-word detection", "programming diagnostics", "math/algorithmic proof"],
+  "peers_already_owned_do_not_duplicate": ["#4887/#4889 astronomy", "#4909/#4919 Allan/horology", "#4888 phase/convolution", "#4912 finite transducers", "#4921 syllable-stress/transliteration", "#4891/#4892 exact bounded rational", "#4916 delayed Prolog constraints", "#4907 mechanical words", "#4923 primitive word root", "#4922 exact-interval conflict"]
+}

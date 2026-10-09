@@ -1,0 +1,85 @@
+{
+  "schema": "sens-legacy-successor-audit/1",
+  "generated_from_main": "a4e5032466f1e4e31042639559592aeb2d296ced",
+  "issue": 4459,
+  "rule": "legacy bit pattern has zero placement authority; current successor requires independent current-domain evidence",
+  "entries": [
+    {
+      "legacy_sid8": "00100010",
+      "legacy_surface": "equal?",
+      "occurrence_count": 36,
+      "successor_identity": {
+        "domain": "D8",
+        "bits": "11110111",
+        "resident": "EQUAL"
+      },
+      "successor_status": "PROVEN-CURRENT-IDENTITY",
+      "executable_rewrite": "BLOCKED-CALLABILITY",
+      "evidence": [
+        "lib/surface/semantic-registry.lisp",
+        "lib/domains/d8.lisp",
+        "contracts/d8-ratification.lisp",
+        "knowledge/sens8-current-coverage-v1.json"
+      ],
+      "anti_inference": "D8:00100010 is SIGNUM, proving legacy bits cannot be reused as current placement"
+    },
+    {
+      "legacy_sid8": "01001011",
+      "legacy_surface": "read-all",
+      "occurrence_count": 19,
+      "successor_identity": {
+        "domain": "D9",
+        "bits": "110101001",
+        "resident": "READ-ALL"
+      },
+      "successor_status": "PROVEN-CURRENT-IDENTITY",
+      "executable_rewrite": "BLOCKED-CALLABILITY",
+      "evidence": [
+        "lib/surface/semantic-registry.lisp",
+        "lib/domains/d9.lisp",
+        "contracts/d9-ratification.lisp",
+        "knowledge/sens8-current-coverage-v1.json"
+      ],
+      "anti_inference": "D8:01001011 is ABS∘RECIP, proving legacy bits cannot be reused as current placement"
+    },
+    {
+      "legacy_sid8": "00101111",
+      "legacy_surface": "second",
+      "occurrence_count": 15,
+      "successor_identity": {
+        "domain": "D4",
+        "bits": "1001",
+        "resident": "CADR"
+      },
+      "successor_status": "PROVEN-LOWER-PROJECTION",
+      "executable_rewrite": "BLOCKED-PARITY",
+      "evidence": [
+        "contracts/core1-historical-sid-map.lisp",
+        "knowledge/d9-registry-tail-v1.json",
+        "lib/domains/d4.lisp",
+        "contracts/d4-bootstrap-ratification.lisp",
+        "knowledge/sens8-current-coverage-v1.json"
+      ],
+      "anti_inference": "D8:00101111 is VCONS; SECOND→CADR comes from registry-tail projection evidence, not bit shape"
+    },
+    {
+      "legacy_sid8": "00111010",
+      "legacy_surface": "string-append",
+      "occurrence_count": 9,
+      "successor_identity": {
+        "domain": "D9",
+        "bits": "110011110",
+        "resident": "STRING-APPEND"
+      },
+      "successor_status": "PROVEN-CURRENT-IDENTITY",
+      "executable_rewrite": "BLOCKED-CALLABILITY",
+      "evidence": [
+        "lib/surface/semantic-registry.lisp",
+        "lib/domains/d9.lisp",
+        "contracts/d9-ratification.lisp",
+        "knowledge/sens8-current-coverage-v1.json"
+      ],
+      "anti_inference": "D8:00111010 is SET-DIFFERENCE, proving legacy bits cannot be reused as current placement"
+    }
+  ]
+}

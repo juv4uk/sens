@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d6-pure-unknown-antinumerology",
+  "wing": "D6 PURE-UNKNOWN",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Can coordinate labels alone canonically select a resident among evidence-equivalent PURE-UNKNOWN D6 slots?",
+  "claim": "Negative theorem: class-preserving relabelings defeat label-based selection; no occupancy, width, resident, or owner decision is changed.",
+  "witness": [
+    "run.py",
+    "README.md"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "d6/pure-unknown/anti-numerology",
+  "reproduce": "python3 benchmarks/d6-pure-unknown-antinumerology/run.py --out /tmp/d6-pure-unknown-antinumerology"
+}

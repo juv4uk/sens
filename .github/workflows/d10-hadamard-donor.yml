@@ -1,0 +1,29 @@
+name: D10 NIST Hadamard clock stability donor
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-hadamard-variance-proposal-20261009.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'scripts/check_d10_hadamard_proposal_v1.py'
+      - 'scripts/check-d10-proposal-ledger.py'
+      - 'tests/oracles/d10_hadamard_chez.ss'
+      - '.github/workflows/d10-hadamard-donor.yml'
+  workflow_dispatch:
+jobs:
+  independent-chez-clock-law:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify current ledger, 625 baseline and SHA transition gate
+        run: |
+          python3 scripts/check-d10-proposal-ledger.py --self-test
+          python3 scripts/check-d10-proposal-ledger.py
+      - name: Check NIST provenance and 9 fail-closed negative controls
+        run: python3 scripts/check_d10_hadamard_proposal_v1.py
+      - name: Install independent R6RS Scheme donor executor
+        run: sudo apt-get update -qq && sudo apt-get install -y chezscheme
+      - name: Run 15 real exact arithmetic Chez Scheme observations
+        run: python3 scripts/check_d10_hadamard_proposal_v1.py --real-donor --scheme scheme

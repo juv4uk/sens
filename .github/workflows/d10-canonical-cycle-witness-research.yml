@@ -1,0 +1,26 @@
+name: D10 canonical directed cycle witness research
+
+on:
+  push:
+    paths:
+      - knowledge/d10-canonical-directed-cycle-witness-research-v1.json
+      - scripts/check_d10_cycle_witness_hobbies.py
+      - tests/test_d10_canonical_cycle_witness_hobbies.py
+      - .github/workflows/d10-canonical-cycle-witness-research.yml
+  pull_request:
+    paths:
+      - knowledge/d10-canonical-directed-cycle-witness-research-v1.json
+      - scripts/check_d10_cycle_witness_hobbies.py
+      - tests/test_d10_canonical_cycle_witness_hobbies.py
+      - .github/workflows/d10-canonical-cycle-witness-research.yml
+  workflow_dispatch:
+
+jobs:
+  semantic-research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent DFS and permutation oracles, 4,627 bounded graphs
+        run: python3 scripts/check_d10_cycle_witness_hobbies.py
+      - name: Test cycle orientation, proof identity, negative guards
+        run: python3 tests/test_d10_canonical_cycle_witness_hobbies.py

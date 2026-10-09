@@ -1,0 +1,32 @@
+name: mixed-source-compatibility-boundary
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/src/mixed_source.rs'
+      - '.github/workflows/mixed-source-compatibility-boundary.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens/src/mixed_source.rs'
+      - '.github/workflows/mixed-source-compatibility-boundary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  opaque-w8-and-d4-binder-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Prove legacy W8 stays opaque and exact D4 binding slots remain data
+        run: cargo test -q -p sens --lib mixed_source::tests -- --nocapture
+      - name: Guard against invented D8 admission
+        run: |
+          echo "W8 legacy spelling is opaque, never inferred current D8." >> "$GITHUB_STEP_SUMMARY"
+          echo "D3-D6 code-call lifting remains tested; D4 binder metadata is not code." >> "$GITHUB_STEP_SUMMARY"
+          echo "This is parser-bridge safety, NOT original semantic parity or release admission." >> "$GITHUB_STEP_SUMMARY"
+          test -z "$(git status --porcelain --untracked-files=all)"

@@ -5,7 +5,10 @@ Two outputs are deliberately different:
 
 1. --mirror
    Conservative source migration: rewrite only admitted executable call heads.
-2. --binary-mirror
+2. --sens-mirror (NEW canonical migration destination)
+   Preserve the input name, replacing .lisp with .sens, and write real
+   physically packed T5 bytes; block non-binary leftovers; no overwrite.
+3. --binary-mirror (legacy staging ONLY, NEVER a .sens deliverable)
    Produce visible-binary SENS source:
    - D2 owns list structure: 10=open, 01=close, 11=dot, 00=separator;
    - executable admitted heads use their exact D3-D6 words;
@@ -26,6 +29,9 @@ import json
 from pathlib import Path
 import re
 import sys
+import os
+import tempfile
+from sens_t5_codec import SensT5Error, encode_projection, decode_bytes, parse_words, typed_sha256
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -35,7 +41,7 @@ from domain_tables import read_domain_table
 from sens_source_resolver import SourceResolver, build_resolver
 
 CALL_DOMAINS = ("D3", "D4", "D5", "D6")
-LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt", ".sens"}
+LISP_EXTS = {".lisp", ".lsp", ".cl", ".scm", ".rkt"}  # .sens is packed BYTES, NEVER text
 BINARY_MASTER_EXTS = {".lisp"}
 SKIP_DIRS = {
     ".git", ".hg", ".svn", "target", "node_modules", ".venv", "venv",
@@ -652,6 +658,19 @@ def binary_rewrite(
             return True
         return bool(frames and (frames[-1]["quoted"] or frames[-1]["quote_children"]))
 
+    def emit_text7_atom(token: str):
+        # A Lisp atom is ONE D2 term, not a naked run of D7 glyph cells.
+        # Text7 characters do not establish an owner-ratified token-length or
+        # binder identity law. The legacy converter used to silently flatten
+        # machine-block/forms into consecutive 7-bit words and falsely call
+        # the packed T5 "migrated", although real Rust D2 rejects it.
+        cells = encode_text7_spelling(token, text7_candidates)
+        raise BinaryMigrationError(
+            f"UNFRAMED_TEXT7_ATOM {token!r}: {len(cells)} D7 cells have no "
+            "ratified D2 Text7 atom/binder frame; current executable oracle "
+            "and positional binding law are required"
+        )
+
     def begin_item():
         nonlocal top_has_item
         if frames:
@@ -679,18 +698,26 @@ def binary_rewrite(
                 j += 1
             if j < len(source) and source[j] == ")":
                 begin_item()
+                if frames and frames[-1]["head"]:
+                    frames[-1]["head"] = False
                 out.append("000")
                 i = j + 1
                 pending_quote = False
                 continue
 
             begin_item()
-            parent_quoted = bool(frames and (frames[-1]["quoted"] or frames[-1]["quote_children"]))
+            parent = frames[-1] if frames else None
+            parent_quoted = bool(parent and (parent["quoted"] or parent["quote_children"]))
+            parent_data_slot = bool(parent and parent["data_slots"] > 0)
+            if parent is not None and parent["head"]:
+                parent["head"] = False
             frames.append({
-                "quoted": parent_quoted or pending_quote,
+                "quoted": parent_quoted or pending_quote or parent_data_slot,
                 "head": True,
                 "quote_children": False,
                 "items": 0,
+                "data_slots": 0,
+                "parent_data_slot": parent_data_slot,
             })
             out.append(D2_OPEN)
             i += 1
@@ -700,10 +727,12 @@ def binary_rewrite(
         if ch == ")":
             if not frames:
                 raise BinaryMigrationError("unexpected closing parenthesis")
-            frames.pop()
+            closing = frames.pop()
             out.append(D2_CLOSE)
             i += 1
             pending_quote = False
+            if frames and closing["parent_data_slot"] and frames[-1]["data_slots"] > 0:
+                frames[-1]["data_slots"] -= 1
             continue
 
         if ch == '"':
@@ -721,29 +750,31 @@ def binary_rewrite(
             else:
                 raise BinaryMigrationError("unterminated string")
             token = source[start:i]
-            out.extend(encode_text7_spelling(token, text7_candidates))
+            emit_text7_atom(token)
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
+            elif frames and frames[-1]["data_slots"] > 0:
+                frames[-1]["data_slots"] -= 1
             pending_quote = False
             continue
 
         # Reader abbreviations stay spelling, but are now D7 cells.
         if source.startswith("#'", i):
             begin_item()
-            out.extend(encode_text7_spelling("#'", text7_candidates))
+            emit_text7_atom("#'")
             i += 2
             pending_quote = True
             continue
         if ch in ("'", "`"):
             begin_item()
-            out.extend(encode_text7_spelling(ch, text7_candidates))
+            emit_text7_atom(ch)
             i += 1
             pending_quote = True
             continue
         if ch == ",":
             begin_item()
             token = ",@" if i + 1 < len(source) and source[i + 1] == "@" else ","
-            out.extend(encode_text7_spelling(token, text7_candidates))
+            emit_text7_atom(token)
             i += len(token)
             pending_quote = True
             continue
@@ -773,7 +804,8 @@ def binary_rewrite(
         begin_item()
         frame = frames[-1] if frames else None
         is_head = bool(frame and frame["head"])
-        quoted = current_quoted()
+        is_data_slot = bool(frame and frame["data_slots"] > 0 and not frame["head"])
+        quoted = current_quoted() or is_data_slot
         resolved_label = None
 
         if is_head and not quoted:
@@ -825,6 +857,10 @@ def binary_rewrite(
                 identity = resolution.current
                 assert identity is not None
                 out.append(identity.bits)
+            elif token in {"0", "1"}:
+                # Canonical source spelling for the exact D1 PredicateBit.
+                # Do not treat these as Number-domain values.
+                out.append(token)
             elif re.fullmatch(
                 r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)"
                 r"(?:[eE][+-]?[0-9]+)?(?:/[0-9]+)?",
@@ -836,12 +872,16 @@ def binary_rewrite(
                     "numeric lowering is not yet supplied by this migration"
                 )
             else:
-                out.extend(encode_text7_spelling(token, text7_candidates))
+                emit_text7_atom(token)
 
         if frame and frame["head"]:
             frame["head"] = False
             if resolved_label == "QUOTE":
                 frame["quote_children"] = True
+            elif resolved_label in {"LAMBDA", "DEFINE"}:
+                frame["data_slots"] = 1
+        elif frame and is_data_slot and frame["data_slots"] > 0:
+            frame["data_slots"] -= 1
         pending_quote = False
 
     if frames:
@@ -883,6 +923,10 @@ def main():
     parser.add_argument("--foundation", type=Path, required=True)
     parser.add_argument("--domains", nargs="+", default=list(CALL_DOMAINS))
     parser.add_argument("--apply", action="store_true", help="rewrite supported source in place")
+    parser.add_argument(
+        "--sens-mirror", type=Path,
+        help="write NEW packed T5 .sens files with same stem as .lisp; no overwrite",
+    )
     parser.add_argument("--mirror", type=Path, help="write conservative migrated mirror")
     parser.add_argument(
         "--binary-mirror",
@@ -917,9 +961,11 @@ def main():
     parser.add_argument("--report", type=Path, default=Path("sens-code-migration-report.json"))
     args = parser.parse_args()
 
-    selected_modes = sum(bool(x) for x in (args.apply, args.mirror, args.binary_mirror))
+    selected_modes = sum(bool(x) for x in (
+        args.apply, args.mirror, args.binary_mirror, args.sens_mirror
+    ))
     if selected_modes > 1:
-        parser.error("--apply, --mirror and --binary-mirror are mutually exclusive")
+        parser.error("--apply, --mirror, --binary-mirror and --sens-mirror are mutually exclusive")
 
     foundation, digest = load_foundation(args.foundation)
     code_map = build_map(foundation, args.domains)
@@ -933,7 +979,7 @@ def main():
     )
     text7_candidates = (
         build_text7_encoder(foundation, args.text7_projection)
-        if args.binary_mirror
+        if (args.binary_mirror or args.sens_mirror)
         else None
     )
     legacy_sid_map = (
@@ -953,11 +999,11 @@ def main():
     blocked_files = 0
     total_hits = 0
 
-    for path in source_files(root, binary_master=bool(args.binary_mirror)):
+    for path in source_files(root, binary_master=bool(args.binary_mirror or args.sens_mirror)):
         text = path.read_text(encoding="utf-8")
         rel = path.relative_to(root)
 
-        if args.binary_mirror:
+        if args.binary_mirror or args.sens_mirror:
             try:
                 converted, hits, shadowed = binary_rewrite(
                     text,
@@ -970,14 +1016,45 @@ def main():
                 if not converted.strip():
                     status = "empty"
                 else:
-                    target = args.binary_mirror / rel
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(converted, encoding="ascii")
-                    status = "binary-mirrored"
+                    if args.sens_mirror:
+                        target = args.sens_mirror / rel.with_suffix(".sens")
+                        source_words = parse_words(converted)
+                        physical = encode_projection(converted)
+                        if decode_bytes(physical) != source_words:
+                            raise SensT5Error("physical T5 roundtrip changed exact typed words")
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        # Atomic no-overwrite: stage beside destination, link O_EXCL.
+                        staged_path = None
+                        try:
+                            with tempfile.NamedTemporaryFile(
+                                mode="wb", prefix=".sens-stage-", suffix=".tmp",
+                                dir=target.parent, delete=False,
+                            ) as staged:
+                                staged_path = Path(staged.name)
+                                staged.write(physical)
+                                staged.flush()
+                                os.fsync(staged.fileno())
+                            os.link(staged_path, target)
+                        finally:
+                            if staged_path is not None:
+                                staged_path.unlink(missing_ok=True)
+                        status = "sens-written"
+                        extra = {
+                            "output": str(rel.with_suffix(".sens")),
+                            "physical_bytes": len(physical),
+                            "physical_sha256": sha256(physical).hexdigest(),
+                            "typed_word_sha256": typed_sha256(source_words),
+                        }
+                    else:
+                        target = args.binary_mirror / rel
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_text(converted, encoding="ascii")
+                        status = "binary-mirrored"
+                        extra = {}
                     rewritten_files += 1
                 total_hits += len(hits)
                 blocked = []
-            except BinaryMigrationError as error:
+            except (BinaryMigrationError, SensT5Error, OSError) as error:
                 converted = ""
                 hits = []
                 shadowed = []
@@ -1011,11 +1088,13 @@ def main():
             "hits": [asdict(x) for x in hits],
             "shadowed_labels": shadowed,
             "blockers": blocked,
+            **(extra if (args.binary_mirror or args.sens_mirror) and status == "sens-written" else {}),
         })
 
     mode = (
         "apply" if args.apply
         else "mirror" if args.mirror
+        else "sens-mirror" if args.sens_mirror
         else "binary-mirror" if args.binary_mirror
         else "audit"
     )
@@ -1030,7 +1109,7 @@ def main():
         "mode": mode,
         "binary_source_rule": (
             "D2 structure + exact D3-D6 callable heads + D7/Text7 spelling; comments absent"
-            if args.binary_mirror else None
+            if args.binary_mirror or args.sens_mirror else None
         ),
         "summary": {
             "files_seen": len(rows),
@@ -1047,7 +1126,7 @@ def main():
     )
     print(json.dumps(report["summary"], ensure_ascii=False))
 
-    if args.binary_mirror:
+    if args.binary_mirror or args.sens_mirror:
         return 0 if rewritten_files else 2
     return 2 if blocked_files else (1 if total_hits and not (args.apply or args.mirror) else 0)
 

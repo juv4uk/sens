@@ -1,0 +1,109 @@
+name: plan-t5-agent-work
+
+on:
+  pull_request:
+    paths:
+      - "scripts/plan_t5_agent_work.py"
+      - "tests/test_plan_t5_agent_work.py"
+      - "scripts/report_original_migration_candidates.py"
+      - "knowledge/migration-nonprogram-*.json"
+      - "docs/T5-AGENT-SHARDS.uk.md"
+      - ".github/workflows/plan-t5-agent-work.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/plan_t5_agent_work.py"
+      - "tests/test_plan_t5_agent_work.py"
+      - "scripts/report_original_migration_candidates.py"
+      - "knowledge/migration-nonprogram-*.json"
+      - ".github/workflows/plan-t5-agent-work.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-agent-shards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test exhaustive disjoint family shards and all fail-closed blockers
+        run: python3 -m unittest discover -s tests -p "test_plan_t5_agent_work.py" -v
+      - name: Transform real current source blocker census into exclusive SHA-pinned queues
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate.py candidates --report "$RUNNER_TEMP/t5-candidates.json"
+          python3 scripts/plan_t5_agent_work.py \
+            --candidates "$RUNNER_TEMP/t5-candidates.json" \
+            --out "$RUNNER_TEMP/t5-agent-shards.json" \
+            --max-files 20
+          python3 - "$RUNNER_TEMP/t5-candidates.json" "$RUNNER_TEMP/t5-agent-shards.json" <<'PY'
+          import json, sys
+          candidates=json.load(open(sys.argv[1],encoding="utf-8"))
+          plan=json.load(open(sys.argv[2],encoding="utf-8"))
+          paths=[source["path"] for shard in plan["shards"] for source in shard["sources"]]
+          summary=candidates["summary"]
+          assert len(paths)==summary["original_unpaired_sources_scanned"]
+          assert len(set(paths))==len(paths)
+          assert not any(s["claimed_by"] for s in plan["shards"])
+          assert all(s["status"] in ("UNCLAIMED__BLOCKED_NOT_ADMITTED",
+                                     "UNCLAIMED__NONPROGRAM_DATA_ONLY")
+                     for s in plan["shards"])
+          reviewed = [s for s in plan["shards"] if s["family"] == "reviewed-nonprogram-data"]
+          archived = [s for s in plan["shards"] if s["family"] == "archived-benchmark-data"]
+          data_shards = reviewed + archived
+          assert all(s["status"] == "UNCLAIMED__NONPROGRAM_DATA_ONLY"
+                     and s["release_gate"] == "DATA_CONTRACT_NO_EXECUTABLE_T5"
+                     for s in data_shards)
+          assert all(s["release_gate"] == "NO_OUTPUT_UNTIL_INDEPENDENT_SEMANTIC_ORACLE"
+                     for s in plan["shards"] if s not in data_shards)
+          reviewed_count=sum(s["source_count"] for s in reviewed)
+          archived_count=sum(s["source_count"] for s in archived)
+          assert reviewed_count == plan["summary"]["reviewed_nonprogram_originals"]
+          assert reviewed_count == summary.get("classified_nonprogram", 0)
+          assert archived_count == plan["summary"]["archived_benchmark_nonprogram_originals"]
+          assert archived_count == summary.get("archived_benchmark_data_sources", 0)
+          count=reviewed_count+archived_count
+          assert plan["summary"]["executable_or_unclassified_originals"] + count == len(paths)
+          assert plan["summary"]["claimed"]==0 and plan["summary"]["admitted"]==0
+          archived_mechanical = plan["summary"]["archived_mechanical_nonprogram_originals"]
+          archived_paths = {r["path"] for shard in archived for r in shard["sources"]}
+          observed_archive = {row["path"] for row in candidates["mechanical_candidates"]
+                              if row.get("source_scope") == "ARCHIVED_BENCHMARK_NONPROGRAM"}
+          assert observed_archive <= archived_paths
+          assert archived_mechanical == len(observed_archive)
+          assert len(candidates["mechanical_candidates"]) == (
+              plan["summary"]["mechanical_pending_oracle"] + archived_mechanical)
+          assert len(paths) == (plan["summary"]["blocked"]
+                               + plan["summary"]["mechanical_pending_oracle"]
+                               + archived_mechanical)
+          print("DISJOINT_T5_AGENT_SHARDS_CONFIRMED",len(paths),"sources",len(plan["shards"]),
+                "shards",reviewed_count,"reviewed data plus",archived_count,"archived data-only")
+          import os
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summaryfile:
+              summaryfile.write("## Original Lisp agent work allocation\\n\\n")
+              summaryfile.write(f"- Unpaired originals: **{len(paths)}**\\n")
+              summaryfile.write(f"- Reviewed DATA original sources: **{reviewed_count}** (no executable .sens)\\n")
+              summaryfile.write(f"- Archived benchmark sources: **{archived_count}** (nonprogram)\\n")
+              summaryfile.write(f"- Executable/unclassified originals: **{len(paths)-count}** (oracle required)\\n")
+              summaryfile.write(f"- Distinct claimable shards: **{len(plan['shards'])}**\\n")
+          PY
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            echo "ERROR: read-only work planning mutated repository"
+            git status --short
+            exit 1
+          }
+      - name: Attach read-only candidate and agent shard ledgers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t5-agent-shards-no-publish
+          if-no-files-found: ignore
+          path: |
+            ${{ runner.temp }}/t5-candidates.json
+            ${{ runner.temp }}/t5-agent-shards.json

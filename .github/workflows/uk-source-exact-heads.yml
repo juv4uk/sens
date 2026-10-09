@@ -1,0 +1,43 @@
+name: Ukrainian source heads to exact D3-D5 AST
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "lib/compiler-nucleus.lisp"
+      - "crates/sens/tests/compiler_uk_projection.rs"
+      - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
+      - "lib/domains/d5.lisp"
+      - ".github/workflows/uk-source-exact-heads.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - ".github/workflows/uk-source-exact-heads.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ukrainian-callable-heads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Ukrainian canonical heads are exact DomainIdentity, never runtime SID lookup
+        run: cargo test -p sens --lib mixed_source::tests -- --nocapture
+      - name: Real compiler Ukrainian source 51 definitions lower to exact D4 without rewriting .lisp
+        run: cargo test -p sens --test compiler_uk_projection -- --nocapture
+      - name: Current source surface rows must match ratified D3-D5
+        run: cargo test -p sens --lib semantic_registry::tests -- --nocapture
+      - name: Source migration still rejects D7/W8 reinterpretation
+        run: cargo test -p sens --test canonical_w7_frame_invariance -- --nocapture

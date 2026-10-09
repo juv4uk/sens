@@ -1,0 +1,63 @@
+name: Read-only SENS T5 triple-view inventory
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/report_t5_triplet_inventory.py'
+      - 'tests/test_report_t5_triplet_inventory.py'
+      - '.github/workflows/report-t5-triplet-inventory.yml'
+      - 'scripts/audit_t5_file_pairs.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/fixtures/migration-d1-cond-cohort/**'
+      - '**/*.sens'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/report_t5_triplet_inventory.py'
+      - 'tests/test_report_t5_triplet_inventory.py'
+      - '.github/workflows/report-t5-triplet-inventory.yml'
+      - 'tests/fixtures/migration-d1-cond-cohort/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  triple-view-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Negative source/T5/view parity regressions
+        run: python3 -m unittest discover -s tests -p 'test_report_t5_triplet_inventory.py' -v
+      - name: Census all tracked physical pairs and REQUIRE existing Ukrainian COND view
+        env:
+          RECEIPT: ${{ runner.temp }}/sens-triple-view-inventory.json
+        run: |
+          python3 scripts/report_t5_triplet_inventory.py . \
+            --require-view tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --report "$RECEIPT"
+          python3 - "$RECEIPT" <<'PY'
+          import json, sys
+          from pathlib import Path
+          record=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert record["schema"]=="sens-t5-triplet-inventory/v1", record
+          assert not record["failed_required"], record
+          assert record["summary"]["physical_pairs_seen"] >= 1, record
+          assert record["summary"]["physical_blocked"]==0, record
+          assert record["summary"]["uk_oracle_verified"]==0, record
+          assert record["summary"]["original_executable_migrations_certified"]==0, record
+          assert record["summary"]["release_admitted"]==0, record
+          checked={x["sens"]: x for x in record["files"]}
+          assert checked["tests/fixtures/migration-d1-cond-cohort/branch.sens"]["view_status"]=="PHYSICAL_VIEW_PASS", record
+          print("TRIPLE_GOLDEN_PASS / UK_ORACLE_PENDING / RELEASE_NOT_ADMITTED")
+          print("REMAINING_VIEW_DEBT",record["summary"]["view_missing"],flush=True)
+          PY
+      - name: Upload independent read-only triple coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-triple-view-inventory
+          path: ${{ runner.temp }}/sens-triple-view-inventory.json
+          if-no-files-found: warn
+          retention-days: 14

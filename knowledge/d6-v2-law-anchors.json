@@ -147,7 +147,54 @@
         "crates/sens/tests/d6_pure_laws.rs",
         "lib/core.lisp"
       ]
+    },
+    {
+      "names": [
+        "NTH"
+      ],
+      "candidate_coordinates": [],
+      "law": "NTH(0,xs)=CAR(xs); NTH(n+1,xs)=NTH(n,CDR(xs)) on proper lists for non-negative in-range indices",
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN",
+      "evidence": [
+        "#3336",
+        "#3350",
+        "#3352",
+        "crates/sens/tests/d6_pure_laws.rs"
+      ]
+    },
+    {
+      "names": [
+        "MAPLIST"
+      ],
+      "candidate_coordinates": [],
+      "law": "MAPLIST(xs,CAR)=xs; MAPLIST(xs,LENGTH) yields the descending lengths of successive non-empty suffixes",
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN",
+      "evidence": [
+        "#3336",
+        "#3350",
+        "#3352",
+        "crates/sens/tests/d6_pure_laws.rs",
+        "lib/core.lisp"
+      ]
+    },
+    {
+      "names": [
+        "SUBLIS"
+      ],
+      "candidate_coordinates": [],
+      "law": "For singleton association lists SUBLIS(((old new)),tree)=SUBST(new,old,tree); multi-key SUBLIS performs observable simultaneous substitution beyond one SUBST call",
+      "geometry_status": "UNPLACED-LAW",
+      "witness_status": "EXECUTABLE-GREEN",
+      "evidence": [
+        "#3336",
+        "#3350",
+        "#3352",
+        "crates/sens/tests/d6_pure_laws.rs",
+        "lib/core.lisp"
+      ]
     }
   ],
-  "law_covered_semantics": 36
+  "law_covered_semantics": 39
 }

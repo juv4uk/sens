@@ -1,0 +1,226 @@
+{
+  "schema": "sens-d10-general-congruence-hobbies/v1",
+  "status": "RESEARCH-HOLD-NOT-SELECTED",
+  "as_of": "2026-10-09",
+  "baseline": {
+    "D10_selected_snapshot": 630,
+    "D10_capacity": 1024,
+    "D10_ratified": 0,
+    "D10_inventory_git_blob": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "D1_D9_foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "proposal": {
+    "semantic_name": "MERGE-CONGRUENCE-CONSTRAINTS",
+    "surface_uk": "звірити-цикли",
+    "surface_ukr": "узгодити-модульні-обмеження",
+    "arity": "finite ordered sequence of exact integer (residue,positive-modulus) pairs",
+    "status": "HOLD-DERIVABILITY-CORE-VS-LIBRARY",
+    "coordinate": null,
+    "selected": false,
+    "ratified": false,
+    "source_era": "research-only-no-binary",
+    "law": "Normalize each r modulo m>0. For pairwise compatible constraints (ri-rj) mod gcd(mi,mj)=0, return unique least nonnegative representative x and period L=lcm(mi) such that x mod mi=ri mod mi for every original i; for empty input return x=0,L=1. On inconsistency return the lexicographically earliest original conflicting index pair (i,j) with gcd and nonzero difference mod gcd. Invalid modulus/type is a distinct input failure.",
+    "result_types": [
+      "SOLUTION:exact-residue-and-period",
+      "CONFLICT:earliest-pair-proof",
+      "INVALID:input-domain-error"
+    ],
+    "boundary": "No floating approximate clock drift, baud assumptions, UTC leap seconds, MCU register state, sample rate or hardware dispatch; this is an exact integer law only."
+  },
+  "primary_sources": [
+    {
+      "url": "https://docs.sympy.org/latest/modules/ntheory.html",
+      "symbol": "sympy.ntheory.modular.solve_congruence",
+      "witness": "residue/modulus solutions or None; noncoprime moduli supported",
+      "donor_scope": "original solver public behavior, NOT our earliest-conflicting-pair evidence"
+    },
+    {
+      "url": "https://doc.sagemath.org/html/en/reference/rings_standard/sage/arith/misc.html",
+      "symbol": "sage.arith.misc.CRT_list",
+      "witness": "CRT_list([32,2,2],[60,90,150])=452; noncoprime inconsistent triples raise no-solution",
+      "donor_scope": "positive/negative generalized CRT law; our deterministic conflict pair is extra evidence contract"
+    }
+  ],
+  "positive_witnesses": [
+    {
+      "input": [],
+      "expected": {
+        "status": "SOLUTION",
+        "residue": 0,
+        "modulus": 1
+      }
+    },
+    {
+      "input": [
+        [
+          2,
+          6
+        ],
+        [
+          5,
+          9
+        ]
+      ],
+      "expected": {
+        "status": "SOLUTION",
+        "residue": 14,
+        "modulus": 18
+      }
+    },
+    {
+      "input": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          2,
+          7
+        ]
+      ],
+      "expected": {
+        "status": "SOLUTION",
+        "residue": 23,
+        "modulus": 105
+      }
+    },
+    {
+      "input": [
+        [
+          6,
+          10
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "expected": {
+        "status": "SOLUTION",
+        "residue": 16,
+        "modulus": 20
+      }
+    },
+    {
+      "input": [
+        [
+          7,
+          5
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "expected": {
+        "status": "SOLUTION",
+        "residue": 2,
+        "modulus": 5
+      }
+    }
+  ],
+  "negative_witnesses": [
+    {
+      "input": [
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          6
+        ]
+      ],
+      "conflict_indices": [
+        0,
+        1
+      ]
+    },
+    {
+      "input": [
+        [
+          2,
+          6
+        ],
+        [
+          4,
+          9
+        ]
+      ],
+      "conflict_indices": [
+        0,
+        1
+      ]
+    },
+    {
+      "input": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "conflict_indices": [
+        0,
+        2
+      ]
+    }
+  ],
+  "owner_hobby_bridge": [
+    {
+      "field": "horology/music",
+      "reason": "align exact integer beat/counter cycles without assuming any time-zone model"
+    },
+    {
+      "field": "SDR/FPGA/electronics",
+      "reason": "detect incompatible modular frame/counter-phase constraints, independent of register-level devices"
+    },
+    {
+      "field": "astronomy",
+      "reason": "mathematical repeated integer periods only, no empirical ephemeris or Julian conversion"
+    },
+    {
+      "field": "Sanskrit metres / Panini formal grammars",
+      "reason": "optional application to periodic syllable patterns, no claim that grammar follows CRT"
+    },
+    {
+      "field": "mathematics and Prolog/Advice Taker",
+      "reason": "constructive proof of inconsistent constraints via earliest conflicting pair and exact numeric certificate"
+    }
+  ],
+  "dedup_review": {
+    "exact_selected_D10_name_collision": false,
+    "current_semantic_inventory_selected_at_check": 630,
+    "nearest_existing": [
+      "D10:MODULO",
+      "D6/D8 integer GCD/LCM/extended Euclid or recursion (check actual D1-D9 identity)"
+    ],
+    "full_behavioral_dedup": "HOLD; mere absent name cannot prove independence",
+    "core_vs_selfhosted_library": "HOLD: CRT is constructible from GCD, multiplication, modular inverse; may be derived callable rather than one D10 resident",
+    "not_an_opcode": true
+  },
+  "scope": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "modifies_canonical_inventory": false,
+    "writes_binary_sens": false,
+    "edits_proposal_ledger": false
+  },
+  "approval_dependency": [
+    "owner-ratified D1-D9/D10 behavioral duplicate test",
+    "prove minimal language-level primitive not derivable cheaply from existing arithmetic",
+    "independent current SENS runtime semantics and source-to-typed executable oracle",
+    "only then append source-pinned proposal ledger, serial owner review and canonical selection"
+  ]
+}

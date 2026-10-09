@@ -1,0 +1,23 @@
+name: D10 Flavors/Restarts research admissibility
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-flavors-restarts-research-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "scripts/check_d10_flavors_restarts_research_v1.py"
+      - "tests/test_d10_flavors_restarts_research_v1.py"
+      - ".github/workflows/d10-flavors-restarts-research.yml"
+  workflow_dispatch:
+jobs:
+  proposal-review-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cross-domain name, evidence, and no-physical-admission invariant
+        run: python3 scripts/check_d10_flavors_restarts_research_v1.py
+      - name: Adversarial research constraints
+        run: python3 -m unittest discover -s tests -p 'test_d10_flavors_restarts_research_v1.py' -v
+      - name: Preserve canonical domain tables, physical migration and inventory
+        run: git diff --exit-code

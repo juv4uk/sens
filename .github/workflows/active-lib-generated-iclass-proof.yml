@@ -1,0 +1,36 @@
+name: Active Lisp vs generated instruction catalogue
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens-cli/tests/active_lib_sens_completion.rs'
+      - 'lib/machine/encoding/admitted-iclass-index.lisp'
+      - 'scripts/generate-encoder-coverage-input.py'
+      - '.github/workflows/active-lib-generated-iclass-proof.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens-cli/tests/active_lib_sens_completion.rs'
+      - 'lib/machine/encoding/admitted-iclass-index.lisp'
+      - 'scripts/generate-encoder-coverage-input.py'
+      - '.github/workflows/active-lib-generated-iclass-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generated-nonprogram-vs-active-code:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify ALL active Lisp, compiler-role AST and generated-data boundary tests
+        run: |
+          cargo test -q -p sens-cli --test active_lib_sens_completion
+      - name: Explain separate unfinished semantic migration
+        shell: bash
+        run: |
+          echo 'Data-only classification never counts as a migrated executable.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Compiler nucleus is verified through canonical Ukrainian AST/lowering; every other active source keeps strict zero-convertible gate.' >> "$GITHUB_STEP_SUMMARY"

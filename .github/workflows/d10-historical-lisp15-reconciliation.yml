@@ -1,0 +1,27 @@
+name: D10 historical Lisp 1.5 reconciliation
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-historical-lisp15-reconciliation-20261009.json"
+      - "knowledge/d10-selection-transition-history.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "scripts/d10_historical_snapshot_compat.py"
+      - "scripts/check_d10_historical_admission_batch1.py"
+      - "knowledge/d10-growth-baseline-v1.json"
+      - "scripts/check_d10_historical_lisp15_reconciliation.py"
+      - "tests/test_d10_historical_lisp15_reconciliation.py"
+      - ".github/workflows/d10-historical-lisp15-reconciliation.yml"
+  workflow_dispatch:
+jobs:
+  research-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconcile the pinned historical view against current D10
+        run: python3 scripts/check_d10_historical_lisp15_reconciliation.py
+      - name: Reject authority leakage and unrecorded changes
+        run: python3 -m unittest discover -s tests -p 'test_d10_historical_lisp15_reconciliation.py' -v
+      - name: No generated changes
+        run: git diff --exit-code

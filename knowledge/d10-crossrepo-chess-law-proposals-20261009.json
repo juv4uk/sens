@@ -1,0 +1,269 @@
+{
+  "schema": "d10-crossrepo-chess-law-proposals/v1",
+  "status": "RESEARCH-ONLY-PENDING-PEER-REVIEW",
+  "date": "2026-10-09",
+  "authority": [
+    "#4162",
+    "#4182",
+    "#4299",
+    "#4463",
+    "#4013"
+  ],
+  "snapshot": {
+    "selected": 630,
+    "capacity": 1024,
+    "remaining": 394,
+    "ratified": 0,
+    "d10_blob": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "lower_foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "scope": {
+    "owner": "juv4uk/chess-lisp-zero",
+    "donor_head": "593a38282999636c6bafc8b38f340292f9a1a24e",
+    "one_d10_stream": true,
+    "selection_delta": 0,
+    "ratification_delta": 0,
+    "coordinate_assignment_delta": 0
+  },
+  "epistemic_boundary": "Donor code is real executable my-lisp/WSM source, but tests in this PR are independent Python models of its observable mathematical laws, not an actual my-lisp/SENS runtime parity proof. Name-level absence is only a prefilter, not behavioral dedup.",
+  "candidates": [
+    {
+      "proposal_key": "CHESS-20261009-01",
+      "semantic_name": "ALTERNATING-ZERO-SUM-BACKUP",
+      "surface_uk": "чергувати-зворотну-оцінку",
+      "surface_ukr": "згортати-оцінку-шляхом-із-чергуванням-знака",
+      "decision": "PROPOSE-NOT-SELECTED",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "source_class": "GENERAL-ZERO-SUM-SEARCH-TREE-LAW",
+      "donor_provenance": {
+        "repository": "juv4uk/chess-lisp-zero",
+        "commit": "593a38282999636c6bafc8b38f340292f9a1a24e",
+        "path": "lib/puct/backup.lisp",
+        "blob_sha": "4ca86d0c5a93e40ce1162aabd993e36a3f8598d8",
+        "lines": "6-20",
+        "function": "backup!",
+        "url": "https://github.com/juv4uk/chess-lisp-zero/blob/593a38282999636c6bafc8b38f340292f9a1a24e/lib/puct/backup.lisp#L6-L20"
+      },
+      "law": "Given a finite chain from leaf to root, current per-node (visit_count,value_sum) and a leaf-side exact score v, visit_count increases exactly once at every chain node, value_sum at node depth k from leaf increases (-1)^k*v, and no off-path node changes. The sign changes because each node's score is from its own side-to-move perspective.",
+      "arguments": "(finite_acyclic_leaf_to_root_chain, exact_rational_value)",
+      "result": "same chain identities with updated (visits:int,value_sum:exact-rational) states",
+      "positives": [
+        {
+          "input": {
+            "chain": [
+              {
+                "visits": 0,
+                "sum": "0"
+              },
+              {
+                "visits": 3,
+                "sum": "1/4"
+              },
+              {
+                "visits": 9,
+                "sum": "-2"
+              }
+            ],
+            "value": "1/2"
+          },
+          "expected": [
+            {
+              "visits": 1,
+              "sum": "1/2"
+            },
+            {
+              "visits": 4,
+              "sum": "-1/4"
+            },
+            {
+              "visits": 10,
+              "sum": "-3/2"
+            }
+          ]
+        },
+        {
+          "input": {
+            "chain": [
+              {
+                "visits": 5,
+                "sum": "1"
+              }
+            ],
+            "value": "-3/4"
+          },
+          "expected": [
+            {
+              "visits": 6,
+              "sum": "1/4"
+            }
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Updating a grandparent by -v instead of +v.",
+        "Incrementing ancestor visits twice or modifying a sibling.",
+        "Treating 0 as a terminal stop before root."
+      ],
+      "degenerate_cases": [
+        "An empty chain changes nothing.",
+        "A cyclic parent relation is INVALID: do not loop indefinitely."
+      ],
+      "dedup": {
+        "D1_D9": "No exact semantic name in foundation blob 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4. Behavioral attack required against D6 folds, negation and mutable state operations.",
+        "D10": "No exact semantic name in inventory blob a55f307c27f17091795d75ebfcd7d051547d80bc. Compare with search/bridge state laws and pending chess #4299 HOLD.",
+        "derivability": "Alternating negation and folding may be a library-level projection; DERIVABLE is not a reason to auto-exclude under #4162, but a minimal root must be independently argued."
+      },
+      "owner_test": "The observation is defined over abstract path nodes and exact scores; chess piece encoding, GPU, PUCT exploration constant and memory layout are irrelevant. No control transfer outside D2.",
+      "required_oracles": [
+        "Execute pinned donor backup! against three-level path with nonzero old totals in my-lisp",
+        "Independent arithmetic oracle with exact fractions",
+        "Check off-path identity preservation"
+      ],
+      "unblock_fanout": [
+        "MCTS/zero-sum chess",
+        "adversarial planning",
+        "proof-search with alternating perspectives"
+      ],
+      "external_rule_reference": {
+        "url": "https://davidbarbera.github.io/blog/mcts/",
+        "section": "6. Backup: sharing the result (and the sign flip)",
+        "claim": "Independent documented explanation of alternating player-to-move perspective, not authoritative to SENS or source execution."
+      }
+    },
+    {
+      "proposal_key": "CHESS-20261009-02",
+      "semantic_name": "CHESS-CASTLING-RIGHTS-TRANSITION",
+      "surface_uk": "оновити-права-рокіровки",
+      "surface_ukr": "права-рокіровки-після-ходу",
+      "decision": "PROPOSE-NOT-SELECTED",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "source_class": "APPLICATION-CHESS-STATE-LAW-ALLOWED-BY-4162",
+      "donor_provenance": {
+        "repository": "juv4uk/chess-lisp-zero",
+        "commit": "593a38282999636c6bafc8b38f340292f9a1a24e",
+        "path": "lib/chess.lisp",
+        "blob_sha": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "lines": "45-87",
+        "function": "chess-castling-after-move",
+        "url": "https://github.com/juv4uk/chess-lisp-zero/blob/593a38282999636c6bafc8b38f340292f9a1a24e/lib/chess.lisp#L45-L87"
+      },
+      "law": "Given the exact subset of K,Q,k,q before a legal move: moving a white/black king erases both own rights; moving a rook from its home corner erases that right; capturing a rook on its home corner erases that captured side's right; all unrelated rights are preserved. Rights never reappear. This operation updates rights only; it does not itself establish legal move, king safety or FEN validity.",
+      "arguments": "(rights:subset{K,Q,k,q},moved_piece,from_square:int,captured_piece,to_square:int)",
+      "result": "new_rights:subset{K,Q,k,q}",
+      "positives": [
+        {
+          "input": {
+            "rights": [
+              "K",
+              "Q",
+              "k",
+              "q"
+            ],
+            "moved": "wk",
+            "from": 4,
+            "captured": "",
+            "to": 5
+          },
+          "expected": [
+            "k",
+            "q"
+          ]
+        },
+        {
+          "input": {
+            "rights": [
+              "K",
+              "Q",
+              "k",
+              "q"
+            ],
+            "moved": "wr",
+            "from": 7,
+            "captured": "br",
+            "to": 56
+          },
+          "expected": [
+            "Q",
+            "k"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "A rook moving from h1 removes white Q as well as K.",
+        "A rook captured on a8 leaves black q available.",
+        "A rook moving back to h1 re-creates lost K right.",
+        "An unrelated pawn move erases some right."
+      ],
+      "dedup": {
+        "D1_D9": "No exact named chess right-state law in lower foundation blob 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; verify equivalence to existing generic set subtraction + state transition.",
+        "D10": "No exact named selected chess law in current 630-row blob a55f307c27f17091795d75ebfcd7d051547d80bc; chess issue #4299 is prior research HOLD.",
+        "derivability": "Set removals and conditionals can implement this; specifically evaluate whether a chess domain law merits a named D10 meaning under #4162."
+      },
+      "owner_test": "Language-visible game-state meaning independent of board storage, ABI, GPU/FPGA; no new syntax or D2 control.",
+      "required_oracles": [
+        "Execute pinned chess-castling-after-move on corner and capture cases",
+        "Crosscheck against chess.js differential fixture/authoritative FIDE move rights, without copying third-party code",
+        "16 starting right subsets × source/destination/capture state negative tests"
+      ],
+      "unblock_fanout": [
+        "chess-lisp-zero semantic parity",
+        "FEN and search state correctness"
+      ],
+      "external_rule_reference": {
+        "authority": "FIDE Laws of Chess effective 2023-01-01",
+        "url": "https://handbook.fide.com/chapter/e012023",
+        "sections": [
+          "3.8.2.1",
+          "9.2.3.2"
+        ],
+        "claim": "Castling rights are permanently forfeited once king or corresponding rook moves; loss of rights distinguishes otherwise identical positions in repetition adjudication.",
+        "scope_limit": "Standard chess corner-square convention a1/h1/a8/h8 only. Chess960 requires a separately specified castling origin mapping; do not silently generalize this fixed-square law.",
+        "note": "Independent official rules witness, not automatically proof that the current donor implementation has passed runtime parity."
+      }
+    }
+  ],
+  "holds": [
+    {
+      "name": "CHESS-LEGAL-MOVE?",
+      "donor": "juv4uk/chess-lisp-zero@593a38282999636c6bafc8b38f340292f9a1a24e:lib/chess.lisp:648-664",
+      "decision": "HOLD-REQUIRES-FULL-GAME-ORACLE",
+      "reason": "Pseudo-legal origin, in-check, en-passant king exposure and preconditions must be tested against independent engine and full game law; do not auto-select on exact-name absence."
+    },
+    {
+      "name": "CHESS-TERMINAL-STATE",
+      "donor": "juv4uk/chess-lisp-zero@593a38282999636c6bafc8b38f340292f9a1a24e:lib/chess.lisp:678-686",
+      "decision": "HOLD-DERIVABLE-CHESS-LAW",
+      "reason": "Checkmate/stalemate classification constructed from legal-moves and king-in-check; may be a composed library law."
+    },
+    {
+      "name": "MCTS-BEST-MOVE-BY-VISITS",
+      "donor": "juv4uk/chess-lisp-zero@593a38282999636c6bafc8b38f340292f9a1a24e:lib/puct/search.lisp:46-58",
+      "decision": "HOLD-D6-PROJECTION",
+      "reason": "Finite argmax tie-first is plausibly derived from D6 MAX-LIST, fold and index-order rules. Need edge-case proof before proposing."
+    },
+    {
+      "name": "PUCT-NODE-PRIOR-UCB",
+      "donor": "juv4uk/chess-lisp-zero@593a38282999636c6bafc8b38f340292f9a1a24e:lib/puct/selection.lisp:9-22",
+      "decision": "HOLD-MODEL-SPECIFIC",
+      "reason": "Search tuning parameter and scoring heuristic are not automatically a universal language-visible root."
+    },
+    {
+      "name": "PUCT-SELF-PLAY-POLICY",
+      "donor": "juv4uk/chess-lisp-zero@593a38282999636c6bafc8b38f340292f9a1a24e:lib/self-play.lisp:28-48",
+      "decision": "HOLD-SOURCE-DEPENDENCY",
+      "reason": "Depends on puct-policy, and result is a training data projection; audit independently before admitting."
+    }
+  ],
+  "remaining_donor_queue": [
+    "juv4uk/chess",
+    "juv4uk/chess-tauri-zero",
+    "juv4uk/hsChess",
+    "juv4uk/lisp-chess-engine",
+    "juv4uk/simple-lisp-chess-engine"
+  ],
+  "ratification_notice": "No D10 coordinate, no D10 owner ratification, no physical T5/.sens admission. Do not change released D1-D9."
+}

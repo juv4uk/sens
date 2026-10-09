@@ -115,7 +115,7 @@ def render_index(evidence):
       "; Compact #175 evidence projection: no status, opcode, semantic ID, or policy.","",
       "(x86-admitted-iclass-index/2",f"  (pair-count #b{len(rows):b})",
     ]
-    lines += [f'  (pair {ext} "{iclass}")' for ext,iclass in rows]
+    lines += [f'  (00101110 {ext} "{iclass}")' for ext,iclass in rows]
     return "\n".join(lines+[" )".replace(" ","",1),""])
 
 def render_projection(heads,pairs):

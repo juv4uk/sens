@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "owner_issue": 3680,
+  "classes": [
+    {
+      "id": "tiny-structural",
+      "goal": "Measure the smallest fair structural/selector artifact and its load/decode/execute path."
+    },
+    {
+      "id": "recursive-tree",
+      "goal": "Same recursive tree/list traversal and golden result across systems."
+    },
+    {
+      "id": "exact-integer",
+      "goal": "Exact integer arithmetic with pinned parameters and output."
+    },
+    {
+      "id": "exact-rational",
+      "goal": "Exact rational arithmetic only where both systems provide a semantically fair exact lane."
+    },
+    {
+      "id": "branch-heavy",
+      "goal": "Branch/COND dominated control with matched decisions and output."
+    },
+    {
+      "id": "binary-transport",
+      "goal": "Measure canonical artifact bits/bytes plus read/decode/validate costs separately."
+    },
+    {
+      "id": "domain-dispatch",
+      "goal": "Exercise current exact-domain identity/dispatch for ratified D1-D7 only."
+    },
+    {
+      "id": "cross-backend-parity",
+      "goal": "Require one SENS program to agree across at least two independent execution substrates."
+    }
+  ]
+}

@@ -7,9 +7,9 @@
 (00001001 lint-form-head
   (00001000 (ast)
     (00000111
-      ((00000010 (00000110 ast)) (0)
+      ((00000010 (00000110 ast)) 
        (00000111
-         ((00000010 (00000110 (00000110 ast))) (0) (lint-head (00000101 ast)))
+         ((00000010 (00000110 (00000110 ast)))  (lint-head (00000101 ast)))
          (t t (lint-short-head (00000101 ast)))))
       (t t (00000101 ast)))))
 
@@ -79,7 +79,7 @@
   (00001000 (ast)
     (00000111
       ((00000010 ast) () (00000001 ()))
-      ((00000010 ast) (1) (00000001 ()))
+      ((00000010 ast)  (00000001 ()))
       ((00100011 (00000101 ast))
        (00000111
          ((00101100 (01000010 (00000101 ast)) effectful-primitives)
@@ -95,11 +95,11 @@
     (00000111
       ((00000010 (00000110 ast)) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      ((00000010 (00000110 ast)) (1) (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((00000010 (00000110 ast))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 (00000110 ast))) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      ((00000010 (00000110 (00000110 ast))) (1) (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((00000010 (00000110 (00000110 ast)))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       (t
        (10011100 ((bindings (00000101 (00000110 ast)))
@@ -121,11 +121,11 @@
     (00000111
       ((00000010 (00000110 ast)) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      ((00000010 (00000110 ast)) (1) (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((00000010 (00000110 ast))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 (00000110 ast))) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      ((00000010 (00000110 (00000110 ast))) (1) (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((00000010 (00000110 (00000110 ast)))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       (t
        (10011100 ((bindings (00000101 (00000110 ast)))

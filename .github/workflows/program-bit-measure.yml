@@ -4,12 +4,22 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "benchmarks/human-wire/t5_stream.py"
+      - "benchmarks/human-wire/test_t5_stream.py"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
   push:
     branches: [main]
     paths:
       - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "benchmarks/human-wire/t5_stream.py"
+      - "benchmarks/human-wire/test_t5_stream.py"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
       - ".github/workflows/program-bit-measure.yml"
 
@@ -22,3 +32,86 @@ jobs:
       - name: Prove canonical source bit measure and dense packing parity
         run: |
           cargo test -p sens source_packing::tests::
+          cargo test -p sens ternary_transport::tests::
+          cargo test -p sens-cli --bin sens-trit eval_tests::
+      - name: Keyed multi-program T5 AIR streaming emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s benchmarks/human-wire -p 'test_t5_stream.py' -v
+          python3 benchmarks/human-wire/t5_stream.py send \
+            --program '10 001 01' --program '10 000 01' --program '000' \
+            --jitter 0.20 --seed 73 --events "$RUNNER_TEMP/t5-events.json" \
+            > "$RUNNER_TEMP/t5-sent.json"
+          python3 benchmarks/human-wire/t5_stream.py receive \
+            --events "$RUNNER_TEMP/t5-events.json" > "$RUNNER_TEMP/t5-received.json"
+          python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["program_count"] == 3; assert r["frame_gap_events"] == 3; assert r["exact_width_programs"] == ["10 001 01", "10 000 01", "000"]' "$RUNNER_TEMP/t5-received.json"
+          # Verify the independent Python T5 byte projection matches the Rust
+          # production codec for a concrete stream frame.
+          printf '10 001 01\n' > "$RUNNER_TEMP/wire.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/wire.lisp"
+          PYTHONPATH=benchmarks/human-wire python3 -c 'import sys; from pathlib import Path; from t5_stream import parse_program,t5_pack; assert Path(sys.argv[1]).read_bytes()==t5_pack(parse_program("10 001 01"))' "$RUNNER_TEMP/wire.sens"
+      - name: Physical T5 file must open as spaces, never transport 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- verify "$RUNNER_TEMP/sample.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/opened.txt"
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/expected.txt"
+          cmp "$RUNNER_TEMP/opened.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/direct.txt"
+          cmp "$RUNNER_TEMP/direct.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- view "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/viewed.txt"
+          cmp "$RUNNER_TEMP/viewed.txt" "$RUNNER_TEMP/expected.txt"
+          cargo run -q -p sens-cli --bin sens-trit -- decode "$RUNNER_TEMP/sample.sens" > "$RUNNER_TEMP/vertical.txt"
+          printf '10\n001\n00\n000\n01\n' > "$RUNNER_TEMP/expected-vertical.txt"
+          cmp "$RUNNER_TEMP/vertical.txt" "$RUNNER_TEMP/expected-vertical.txt"
+          test "$(wc -c < "$RUNNER_TEMP/sample.sens")" -eq 4
+          # Explicit evaluation: real Rust D2 parser + current pure oracle,
+          # using EXISTING migrated historical QUOTE as byte-accurate input.
+          cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-cohort-main/quote-legacy.sens > "$RUNNER_TEMP/quote-value.txt"
+          printf '()\n' > "$RUNNER_TEMP/quote-expected.txt"
+          cmp "$RUNNER_TEMP/quote-value.txt" "$RUNNER_TEMP/quote-expected.txt"
+          # Opening MUST NEVER execute, even when the payload is evaluable.
+          cargo run -q -p sens-cli --bin sens-trit -- open tests/fixtures/migration-quote-cohort-main/quote-legacy.sens > "$RUNNER_TEMP/quote-visible.txt"
+          printf '10 001 00 000 01\n' > "$RUNNER_TEMP/quote-visible-expected.txt"
+          cmp "$RUNNER_TEMP/quote-visible.txt" "$RUNNER_TEMP/quote-visible-expected.txt"
+          # Corrupted T5 byte and unbalanced D2 must fail before evaluation.
+          printf '\363' > "$RUNNER_TEMP/bad.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- eval "$RUNNER_TEMP/bad.sens"; then
+            echo "ERROR: corrupted T5 ran in oracle"
+            exit 1
+          fi
+          # Physical EOF, not a magic 22: short D2 form fits in one byte.
+          printf '10 01\n' > "$RUNNER_TEMP/short.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/short.lisp"
+          test "$(wc -c < "$RUNNER_TEMP/short.sens")" -eq 1
+          printf '\144' > "$RUNNER_TEMP/short.expected" # 0x64 = T5 10201
+          cmp "$RUNNER_TEMP/short.sens" "$RUNNER_TEMP/short.expected"
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/short.sens" > "$RUNNER_TEMP/short.opened"
+          printf '10 01\n' > "$RUNNER_TEMP/short.visible"
+          cmp "$RUNNER_TEMP/short.opened" "$RUNNER_TEMP/short.visible"
+          # Legacy physical EOS 22 may add an entire block; reject instead of guessing.
+          printf '\362' >> "$RUNNER_TEMP/short.sens" # 0xf2 = 22222, full extra block
+          if cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/short.sens"; then
+            echo "ERROR: accepted obsolete EOS=22 with extra trit block"
+            exit 1
+          fi
+          # EOF can occur after an atom and after multiple top-level D2 forms.
+          printf '000\n' > "$RUNNER_TEMP/atom.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/atom.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/atom.sens" > "$RUNNER_TEMP/atom.opened"
+          printf '000\n' > "$RUNNER_TEMP/atom.visible"
+          cmp "$RUNNER_TEMP/atom.opened" "$RUNNER_TEMP/atom.visible"
+          printf '10 01 10 01\n' > "$RUNNER_TEMP/multiple.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- encode "$RUNNER_TEMP/multiple.lisp"
+          cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/multiple.sens" > "$RUNNER_TEMP/multiple.opened"
+          printf '10 01 10 01\n' > "$RUNNER_TEMP/multiple.visible"
+          cmp "$RUNNER_TEMP/multiple.opened" "$RUNNER_TEMP/multiple.visible"
+          printf '\000' >> "$RUNNER_TEMP/sample.sens"
+          if cargo run -q -p sens-cli --bin sens-trit -- open "$RUNNER_TEMP/sample.sens"; then
+            echo "ERROR: corrupted T5 physical tail opened"
+            exit 1
+          fi

@@ -1,0 +1,31 @@
+name: D10 STRIPS independent oracle
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_d10_strips_goal_regression.py'
+      - 'tests/test_d10_strips_goal_regression.py'
+      - 'tests/oracles/d10_strips_goal_regression.pl'
+      - 'knowledge/d10-symbolic-ai-strips-goal-regression-research-v1.json'
+      - '.github/workflows/d10-strips-goal-regression.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check_d10_strips_goal_regression.py'
+      - 'tests/test_d10_strips_goal_regression.py'
+      - '.github/workflows/d10-strips-goal-regression.yml'
+permissions:
+  contents: read
+jobs:
+  exact-world-oracle:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Python action-goal exhaustive world test
+        run: python3 -m unittest discover -s tests -p 'test_d10_strips_goal_regression.py' -v
+      - name: Independent SWI-Prolog bounded world oracle
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq swi-prolog-nox
+          swipl -q -s tests/oracles/d10_strips_goal_regression.pl -g main -t halt
+      - name: Cross-check all finite predecessor worlds
+        run: python3 scripts/check_d10_strips_goal_regression.py --self-check

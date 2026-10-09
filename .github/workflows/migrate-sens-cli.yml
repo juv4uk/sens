@@ -1,0 +1,50 @@
+name: migrate-sens-operational-cli
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate-sens.py"
+      - "knowledge/migration-nonprogram-domain-tables-2026-10-08.json"
+      - "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
+      - "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json"
+      - "scripts/report_original_migration_candidates.py"
+      - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
+      - "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
+      - "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json"
+      - "knowledge/migration-nonprogram-expr-records-2026-10-08.json"
+      - "knowledge/migration-benchmark-snapshot-2026-10-08.json"
+      - "scripts/migrate-approved-t5.py"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/test_migrate_sens.py"
+      - ".github/workflows/migrate-sens-cli.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-sens.py"
+      - "knowledge/migration-nonprogram-domain-tables-2026-10-08.json"
+      - "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
+      - "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json"
+      - "scripts/report_original_migration_candidates.py"
+      - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
+      - "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
+      - "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json"
+      - "knowledge/migration-nonprogram-expr-records-2026-10-08.json"
+      - "knowledge/migration-benchmark-snapshot-2026-10-08.json"
+      - "scripts/migrate-approved-t5.py"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/test_migrate_sens.py"
+      - ".github/workflows/migrate-sens-cli.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  operational-physical-t5:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: One source, SHA-pinned transaction, binary parity, dry-run and no-clobber
+        run: python3 -m unittest discover -s tests -p 'test_migrate_sens.py' -v

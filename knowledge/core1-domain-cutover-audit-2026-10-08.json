@@ -1,0 +1,305 @@
+{
+  "schema": "sens-core1-domain-cutover-audit/v1",
+  "audited_on": "2026-10-08",
+  "status": "READ_ONLY_EVIDENCE_NOT_MIGRATION",
+  "issue": "https://github.com/juv4uk/sens/issues/4467",
+  "source": {
+    "repo": "juv4uk/sens",
+    "ref_at_audit": "main",
+    "file": "lib/core1.lisp",
+    "git_blob_sha": "a2f184373428bc516a0b03491dfabfb3255d07ef",
+    "byte_length": 11941
+  },
+  "historical_identity_map": {
+    "path": "contracts/core1-historical-sid-map.lisp",
+    "git_blob_sha": "d16fc3416500fddf9361a5ae9fb6c8154268d853",
+    "authority_status": "HISTORICAL_PROFILE_ONLY"
+  },
+  "canonical_inputs": [
+    {
+      "domain": "D3",
+      "path": "lib/domains/d3.lisp",
+      "git_blob_sha": "610bf7df6e4101e12ab8add52496717a2f715e6f"
+    },
+    {
+      "domain": "D4",
+      "path": "lib/domains/d4.lisp",
+      "git_blob_sha": "03bca09faf5a5299384a5413b0a16ba42eb0a741"
+    }
+  ],
+  "fixture": {
+    "path": "tests/fixtures/core1-s0-witness.lisp",
+    "git_blob_sha": "e444e9965d4f0a067a4eeda62376cd303832167b",
+    "status": "EXISTING_HISTORICAL_REPLAY_NOT_MODERN_D1_D4_PARITY"
+  },
+  "observations": {
+    "already_implemented_top_level_c1_definitions": 34,
+    "already_implemented_names": [
+      "C1-SECOND",
+      "C1-THIRD",
+      "C1-FOURTH",
+      "C1-MAKE-ERROR",
+      "C1-ERRORP",
+      "C1-MAKE-FOUND",
+      "C1-FOUNDP",
+      "C1-FOUND-VALUE",
+      "C1-LOOKUP-IN",
+      "C1-ADMITTED-SID-VALUEP",
+      "C1-PRIMITIVE-IDENTITY",
+      "C1-DEFAULT",
+      "C1-LOOKUP",
+      "C1-FUNARGP",
+      "C1-ONE-ARGP",
+      "C1-TWO-ARGP",
+      "C1-BIND",
+      "C1-APPLY-PRIMITIVE",
+      "C1-EVLIS",
+      "C1-EVCON",
+      "C1-APPLY",
+      "C1-QUOTE-NAMEP",
+      "C1-COND-NAMEP",
+      "C1-LAMBDA-NAMEP",
+      "C1-DEFINE-NAMEP",
+      "C1-LABEL-NAMEP",
+      "C1-EVAL",
+      "C1-MAKE-WORLD",
+      "C1-WORLD-VALUE",
+      "C1-WORLD-GLOBAL",
+      "C1-DEFINITIONP",
+      "C1-EVAL-PROGRAM",
+      "C1-WORLD-EVAL",
+      "C1-EVAL-PROGRAM-THEN"
+    ],
+    "exact_eight_bit_word_occurrences": 405,
+    "distinct_exact_eight_bit_words": 15,
+    "row_verified_candidate_legacy_identities": 12,
+    "mapping_hold_or_block_count": 3,
+    "missing_or_inconsistent_canonical_candidate_rows": [],
+    "nontrivial_profile_witnesses": [
+      "Historical T/NIL predicate results are not current D1 PredicateBit values",
+      "Modern EQ(pair,..) Type error vs historical result",
+      "LABEL 10101010 has no arbitrary current semantic coordinate",
+      "FUNCTION/FUNARG remains historical closure mechanism; D4 LAMBDA owns current semantics"
+    ],
+    "potential_drift": [
+      "Core1 C1-ADMITTED-SID-VALUEP contains legacy 00001100 PLUS and 00001101 DIFFERENCE although historical ledger calls them available-not-admitted; validate at evaluator/runtime before promotion"
+    ]
+  },
+  "legacy_word_inventory": [
+    {
+      "historical_exact8": "00000001",
+      "occurrences_in_core1": 56,
+      "historical_name": "QUOTE",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D3",
+        "bits": "001",
+        "role": "QUOTE",
+        "canonical_row_verified": true
+      },
+      "disposition": "SAME_OPERATION_VERIFY_RESULT_LAW",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00000010",
+      "occurrences_in_core1": 17,
+      "historical_name": "ATOM",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D3",
+        "bits": "010",
+        "role": "ATOM",
+        "canonical_row_verified": true
+      },
+      "disposition": "ADAPTER_D1_PREDICATE_BIT",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00000011",
+      "occurrences_in_core1": 86,
+      "historical_name": "EQ",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D3",
+        "bits": "101",
+        "role": "EQ",
+        "canonical_row_verified": true
+      },
+      "disposition": "ADAPTER_D1_AND_TYPE_ERROR",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00000100",
+      "occurrences_in_core1": 20,
+      "historical_name": "CONS",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D3",
+        "bits": "111",
+        "role": "CONS",
+        "canonical_row_verified": true
+      },
+      "disposition": "WITNESS_PAIR_ALLOCATION",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00000101",
+      "occurrences_in_core1": 43,
+      "historical_name": "CAR",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D3",
+        "bits": "100",
+        "role": "CAR",
+        "canonical_row_verified": true
+      },
+      "disposition": "WITNESS_PAIR_AND_ERROR",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00000110",
+      "occurrences_in_core1": 30,
+      "historical_name": "CDR",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D3",
+        "bits": "011",
+        "role": "CDR",
+        "canonical_row_verified": true
+      },
+      "disposition": "WITNESS_PAIR_AND_ERROR",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00000111",
+      "occurrences_in_core1": 45,
+      "historical_name": "COND",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D3",
+        "bits": "110",
+        "role": "COND",
+        "canonical_row_verified": true
+      },
+      "disposition": "ADAPTER_D1_TWO_BRANCH",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00001000",
+      "occurrences_in_core1": 50,
+      "historical_name": "LAMBDA",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D4",
+        "bits": "0010",
+        "role": "LAMBDA",
+        "canonical_row_verified": true
+      },
+      "disposition": "HISTORICAL_FUNCTION_FUNARG_ADAPTER",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00001001",
+      "occurrences_in_core1": 36,
+      "historical_name": "DEFINE",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D4",
+        "bits": "0011",
+        "role": "DEFINE",
+        "canonical_row_verified": true
+      },
+      "disposition": "TOPLEVEL_BINDING_REVIEW",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00001011",
+      "occurrences_in_core1": 1,
+      "historical_name": "DEFINE",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D4",
+        "bits": "0011",
+        "role": "DEFINE",
+        "canonical_row_verified": true
+      },
+      "disposition": "HISTORICAL_ALIAS_NOT_SECOND_IDENTITY",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00001100",
+      "occurrences_in_core1": 1,
+      "historical_name": "PLUS",
+      "historical_admission": "available-not-admitted",
+      "candidate": null,
+      "disposition": "HOLD_NUMERIC_NOT_BOOTSTRAP_ADMITTED",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00001101",
+      "occurrences_in_core1": 1,
+      "historical_name": "DIFFERENCE",
+      "historical_admission": "available-not-admitted",
+      "candidate": null,
+      "disposition": "HOLD_NUMERIC_NOT_BOOTSTRAP_ADMITTED",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00100001",
+      "occurrences_in_core1": 6,
+      "historical_name": "NOT",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D4",
+        "bits": "0100",
+        "role": "NOT",
+        "canonical_row_verified": true
+      },
+      "disposition": "DERIVED_D1_RESULT_LAW_CHECK",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "00100111",
+      "occurrences_in_core1": 6,
+      "historical_name": "LIST",
+      "historical_admission": "admitted",
+      "candidate": {
+        "domain": "D4",
+        "bits": "1110",
+        "role": "LIST",
+        "canonical_row_verified": true
+      },
+      "disposition": "DERIVED_LIST_FUNCTION_CHECK",
+      "release_admitted": false
+    },
+    {
+      "historical_exact8": "10101010",
+      "occurrences_in_core1": 7,
+      "historical_name": "LABEL",
+      "historical_admission": "admitted",
+      "candidate": null,
+      "disposition": "BLOCK_LABEL_NEEDS_DERIVED_RECURSION_WITNESS",
+      "release_admitted": false
+    }
+  ],
+  "policy": {
+    "no_new_evaluator": true,
+    "no_code_change_in_this_pr": true,
+    "old_sid8_is_not_d8": true,
+    "translation_is_contextual_not_binary_substitution": true,
+    "D2_only_language_structure": true,
+    "T5_wire_2_is_not_d2": true,
+    "require_same_stem_physical_sens": true,
+    "retain_original_lisp": true,
+    "no_unproven_label_allocation": true,
+    "no_release_pin_from_this_report": true,
+    "candidate_status_meaning": "Coordinates are verified against current human-readable D3/D4 tables, not validated behavioral equivalence or authorized mass conversion."
+  },
+  "next_steps": [
+    "Replay existing Core1 historical fixture unchanged and capture typed outcomes before modification.",
+    "For only one bounded admitted case, map old Core1 semantic role to current exact D3/D4 and independently test D1 predicate/error behavior.",
+    "Treat LABEL, historical T/NIL, FUNCTION/FUNARG closure adapter, and old numeric tokens as explicit blockers/adapters.",
+    "Consume merged T5 codec/migrator without editing their agent-owned files; convert only after oracle parity evidence.",
+    "Hand off physical .sens native verification to wsm-my-lisp#88 and update release pins only after independent green consumer CI."
+  ]
+}

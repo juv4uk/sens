@@ -1,0 +1,34 @@
+name: Migration D4 CAAR physical T5 cohort
+
+on:
+  pull_request:
+    paths:
+      - "tests/fixtures/migration-d4-selector-cohort/**"
+      - "tests/test_migration_d4_selector_cohort.py"
+      - "crates/sens/tests/migration_d4_selector_cohort.rs"
+      - ".github/workflows/migration-d4-selector-cohort.yml"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+  push:
+    branches: [main]
+    paths:
+      - "tests/fixtures/migration-d4-selector-cohort/**"
+      - "tests/test_migration_d4_selector_cohort.py"
+      - "crates/sens/tests/migration_d4_selector_cohort.rs"
+      - ".github/workflows/migration-d4-selector-cohort.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-d4-caar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Actual historical three-pass conversion and physical byte law
+        run: python3 -m unittest discover -s tests -p test_migration_d4_selector_cohort.py -v
+      - name: Current exact D4 selector Rust oracle and negative controls
+        run: cargo test -p sens --test migration_d4_selector_cohort -- --nocapture

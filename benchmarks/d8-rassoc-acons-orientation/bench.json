@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-rassoc-acons-orientation",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE"
+  ],
+  "question": "Does pair transposition provide a lawful independent association-orientation axis for the RASSOC/ACONS family?",
+  "claim": "Tests typed query/extend × value/key conjugations only; it does not admit a D8 resident or callability.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3741-d8-rassoc-acons-orientation.md",
+    "../../docs/research/3741-d8-rassoc-acons-orientation.uk.md"
+  ],
+  "status": "PRODUCT-CANDIDATE-TYPED",
+  "generation": "unknown",
+  "axis": "d8/association-orientation",
+  "reproduce": "python3 benchmarks/d8-rassoc-acons-orientation/run.py --out /tmp/d8-rassoc-acons-orientation"
+}

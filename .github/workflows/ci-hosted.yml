@@ -29,6 +29,33 @@ jobs:
           python3 scripts/public_api_inventory.py --check
           python3 scripts/sens8-semantic-ratchet.py --self-test
           python3 scripts/sens8-semantic-ratchet.py --summary
+      - name: One-file canonical T5 migration canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/migration-one"
+          python3 scripts/migrate-one-to-sens.py \
+            tests/fixtures/migration-multiform-cohort/two-forms.lisp \
+            --source-era legacy \
+            --output "$RUNNER_TEMP/migration-one/two-forms.sens" \
+            > "$RUNNER_TEMP/migration-one/report.json"
+          cmp -s "$RUNNER_TEMP/migration-one/two-forms.sens" \
+            tests/fixtures/migration-multiform-cohort/two-forms.sens
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          row=json.loads((Path(os.environ["RUNNER_TEMP"])/"migration-one/report.json").read_text())
+          assert row["status"] == "written", row
+          assert row["bytes"] == 14, row
+          assert row["semantic_parity"] == "NOT_VERIFIED", row
+          print("CANONICAL T5 MATCH; independent semantic admission is a separate gate")
+          PY
+      - name: Publish one-file migration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-one-canonical-two-form
+          path: ${{ runner.temp }}/migration-one/
+          if-no-files-found: error
       - name: Build SENS CLI
         run: cargo build -p sens-cli --bin sens
       - name: D7 domain table is canonical-parser re-readable

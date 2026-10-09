@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d6-set-lattice",
+  "wing": "D6 laws",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Do the recovered D6 set operations satisfy the finite set-lattice laws independently of their current coordinates and names?",
+  "claim": "Uses stable resident handles and finite-set semantics; current coordinates/human names are diagnostics only and do not enter the proof.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "d6/set-lattice",
+  "reproduce": "python3 benchmarks/d6-set-lattice/run.py --out /tmp/d6-set-lattice"
+}

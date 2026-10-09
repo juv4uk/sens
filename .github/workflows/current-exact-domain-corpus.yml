@@ -1,0 +1,39 @@
+name: Current exact-domain corpus
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/current-exact-domain-corpus/run.py"
+      - "knowledge/current-exact-domain-corpus.json"
+      - "knowledge/current-exact-domain-corpus.tsv"
+      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d4-cleanroom.json"
+      - "knowledge/d5-ratified.json"
+      - "knowledge/d6-ratified.json"
+      - "knowledge/d7-ratified.json"
+      - ".github/workflows/current-exact-domain-corpus.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/current-exact-domain-corpus/run.py"
+      - "knowledge/current-exact-domain-corpus.json"
+      - "knowledge/current-exact-domain-corpus.tsv"
+      - "knowledge/d1-d7-foundation.json"
+      - "knowledge/d4-cleanroom.json"
+      - "knowledge/d5-ratified.json"
+      - "knowledge/d6-ratified.json"
+      - "knowledge/d7-ratified.json"
+      - ".github/workflows/current-exact-domain-corpus.yml"
+
+concurrency:
+  group: current-exact-domain-corpus-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  projection:
+    runs-on: [self-hosted, guix]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify current D1-D7 projection
+        run: python3 benchmarks/current-exact-domain-corpus/run.py --check

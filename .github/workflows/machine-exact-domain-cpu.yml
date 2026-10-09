@@ -10,6 +10,7 @@ on:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
+      - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
       - "crates/sens/tests/machine_semantic_effect_lowering.rs"
       - "crates/sens/src/program_data.rs"
@@ -32,6 +33,9 @@ on:
       - "crates/sens-host/src/native_exec.rs"
       - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
+      - "knowledge/encoder-coverage-legacy-parity.lisp"
+      - "scripts/generate-encoder-coverage.lisp"
+      - "scripts/check-encoder-coverage.lisp"
       - "scripts/silicon-census.py"
       - "scripts/silicon-coverage.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
@@ -41,6 +45,7 @@ on:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
+      - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
       - "crates/sens/tests/machine_semantic_effect_lowering.rs"
       - "crates/sens/tests/native_first_exact_domain.rs"
@@ -63,6 +68,9 @@ on:
       - "crates/sens-host/src/native_exec.rs"
       - "crates/sens-host/tests/native_lisp_bytes.rs"
       - "scripts/generate-encoder-coverage-input.py"
+      - "knowledge/encoder-coverage-legacy-parity.lisp"
+      - "scripts/generate-encoder-coverage.lisp"
+      - "scripts/check-encoder-coverage.lisp"
       - "scripts/silicon-census.py"
       - "scripts/silicon-coverage.py"
       - ".github/workflows/machine-exact-domain-cpu.yml"
@@ -89,6 +97,7 @@ jobs:
         run: |
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
           cargo test -p sens --test machine_effect_add_projection -- --nocapture
+          cargo test -p sens --test machine_effect_d5_arithmetic_projection -- --nocapture
           cargo test -p sens --test machine_effect_explicit_outputs -- --nocapture
           cargo test -p sens --test machine_semantic_effect_lowering -- --nocapture
           # Exact lowered DomainCall data must select native CAR(CONS ...) without spelling/SID authority.
@@ -106,6 +115,15 @@ jobs:
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Derived machine coverage inputs
         run: python3 scripts/generate-encoder-coverage-input.py --check
+      - name: Lisp-owned encoder coverage authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          coverage_status="$(cargo run --quiet -p sens-cli --bin sens -- scripts/check-encoder-coverage.lisp)"
+          if [[ "$coverage_status" != "(encoder-coverage-check (status pass))" ]]; then
+            printf 'Lisp encoder coverage check failed: %s\n' "$coverage_status" >&2
+            exit 1
+          fi
       - name: Full silicon census projection
         run: |
           python3 scripts/silicon-census.py --self-test
@@ -124,7 +142,7 @@ jobs:
   d6-add1-sub1-gpu-witness:
     name: D6 ADD1/SUB1 GPU-runner witness
     if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
@@ -132,10 +150,22 @@ jobs:
       - name: Exact D6 ADD1/SUB1 machine witness
         run: cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
 
+  d5-sub-mul-effects-gpu-witness:
+    name: D5 SUB/MUL effect GPU-runner witness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: GPU runner identity
+        run: nvidia-smi || /usr/lib/wsl/lib/nvidia-smi || true
+      - name: Exact D5 DIFFERENCE/TIMES target-neutral effect witness
+        run: cargo test -p sens --test machine_effect_d5_arithmetic_projection -- --nocapture
+
   owner-i5-6400-real-silicon:
     name: Owner i5-6400 real-silicon witness
     if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5

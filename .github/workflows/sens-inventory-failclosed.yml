@@ -1,0 +1,51 @@
+name: SENS inventory no false admission
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/sens_inventory.py'
+      - 'tests/test_sens_inventory_failclosed.py'
+      - 'scripts/sens_spaced_view.py'
+      - 'scripts/verify_uk_t5_triplet.py'
+      - '.github/workflows/sens-inventory-failclosed.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sens_inventory.py'
+      - 'tests/test_sens_inventory_failclosed.py'
+      - '.github/workflows/sens-inventory-failclosed.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  no-false-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regression — no mechanical or false W8 admission
+        run: python3 -m unittest discover -s tests -p 'test_sens_inventory_failclosed.py' -v
+      - name: Verify real canonical triplet is explicitly NOT release-admitted
+        run: |
+          python3 scripts/sens_inventory.py tests/fixtures/migration-d1-cond-cohort \
+            --require-bounded-uk tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            --json /tmp/sens-inventory-failclosed.json
+          python3 - /tmp/sens-inventory-failclosed.json <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding="utf-8") as file:
+              receipt = json.load(file)
+          assert receipt["summary"]["release_admitted"] == 0
+          assert receipt["summary"]["mechanically_admitted"] == 0
+          assert receipt["summary"]["original_executable_migrations_certified"] == 0
+          assert receipt["files"][0]["independent_execution_oracle"] == "NOT_VERIFIED"
+          assert receipt["files"][0]["status"] == "BOUNDED_UK_PROVEN_ORACLE_PENDING"
+          print("Inventory fail-closed: bounded proof cannot become release admission")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sens-inventory-failclosed-receipt
+          path: /tmp/sens-inventory-failclosed.json
+          retention-days: 14

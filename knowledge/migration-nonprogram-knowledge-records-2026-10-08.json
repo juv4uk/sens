@@ -1,0 +1,82 @@
+{
+  "schema": "sens-migration-nonprogram-manifest/1",
+  "issue": 4460,
+  "classification": "lisp-data-nonprogram",
+  "authority": "research/classification; not executable SENS or domain law",
+  "source_head_commit": "78454f3ba2a2b937adc3425c13692a679a2d4bc1",
+  "reason": "fixed immutable knowledge audit, metadata, source-lineage and phoneme registry records; no executable DEFINE/LAMBDA or PRINT source permitted",
+  "automatic_sens_companion": false,
+  "admitted_as_executable": 0,
+  "entries": [
+    {
+      "path": "knowledge/agent-discoveries.lisp",
+      "git_blob_sha1": "c58f21e2e8c00376f0d777e5a75cc74ea09ee283",
+      "record_head": "agent-discoveries"
+    },
+    {
+      "path": "knowledge/canon-authority-inventory.lisp",
+      "git_blob_sha1": "48fab4ace633815945cbb36308cc5aa3aa5c70cd",
+      "record_head": "schema"
+    },
+    {
+      "path": "knowledge/core4-predicate-record-inventory.lisp",
+      "git_blob_sha1": "7189f69bf93e8e01ad94885508310dce33a09f71",
+      "record_head": "core4-predicate-record-inventory/2"
+    },
+    {
+      "path": "knowledge/function-table-sculpt-audit.lisp",
+      "git_blob_sha1": "24c83a1632abd69596a144abad421ff31eb98be8",
+      "record_head": "function-table-sculpt-audit/1"
+    },
+    {
+      "path": "knowledge/meta-eval-evidence.lisp",
+      "git_blob_sha1": "461e45a4c196d4705661e9b6023a0d00faf89ffb",
+      "record_head": "schema"
+    },
+    {
+      "path": "knowledge/repo-tooling-inventory.lisp",
+      "git_blob_sha1": "8436cc454d5946a5cb48a5eb4fffb48917ebefe2",
+      "record_head": "about"
+    },
+    {
+      "path": "knowledge/sanskrit-cyrillic-audit.lisp",
+      "git_blob_sha1": "9a875c3fdd4f27cf0311f8a23f306da73b0a4a66",
+      "record_head": "sanskrit-cyrillic-audit"
+    },
+    {
+      "path": "knowledge/sanskrit-cyrillic-keyboard.lisp",
+      "git_blob_sha1": "b375630abbff97c3135c070aac1931decff3279d",
+      "record_head": "sanskrit-cyrillic-keyboard"
+    },
+    {
+      "path": "knowledge/sanskrit-cyrillic-phoneme-map.lisp",
+      "git_blob_sha1": "413bfe3d18f5a27cd00ca9acac65c9b63be47180",
+      "record_head": "sound-unit-registry"
+    },
+    {
+      "path": "knowledge/semantic-lineage-core-v1.lisp",
+      "git_blob_sha1": "0e27d9c03d858481fa4a319b06816a3e528513e6",
+      "record_head": "semantic-lineage/1"
+    },
+    {
+      "path": "knowledge/semantic-ownership.lisp",
+      "git_blob_sha1": "0cc7ed16e8489abdaba51a1230ab934a7c99aebe",
+      "record_head": "schema"
+    },
+    {
+      "path": "knowledge/sens-primary.lisp",
+      "git_blob_sha1": "7d5cafc5f3dc0cbd24079b3575336f0f2aef3ec5",
+      "record_head": "sens-primary/2"
+    },
+    {
+      "path": "knowledge/silent-fallback-inventory.lisp",
+      "git_blob_sha1": "faec56d38f5060bc15322fc86c8592c3bd16952f",
+      "record_head": "silent-fallback-inventory"
+    },
+    {
+      "path": "knowledge/structure-not-ontology-inventory.lisp",
+      "git_blob_sha1": "f286a30d5aa481fbe681763368541fb657511f78",
+      "record_head": "structure-not-ontology/1"
+    }
+  ]
+}

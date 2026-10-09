@@ -49,7 +49,7 @@
     (10011100 ((binding (01101101 name (fs-bindings fs))))
       (00000111
         ((00000010 binding) () (00100111 (00000001 not-found) name))
-        ((00000010 binding) (1) (00100111 (00000001 not-found) name))
+        ((00000010 binding)  (00100111 (00000001 not-found) name))
         (t
           (10011100 ((address (00000101 binding)))
             (00000111
@@ -98,7 +98,7 @@
   (00001000 (entries)
     (00000111
       ((00000010 entries) () (00000001 ()))
-      ((00000010 entries) (1) (00000001 ()))
+      ((00000010 entries)  (00000001 ()))
       (t (00000100 (00000101 (00000101 entries))
                (fs-object-addresses (00000110 entries)))))))
 
@@ -106,13 +106,13 @@
   (00001000 (name package)
     (10011100 ((entry (00101101 name package)))
       (00000111 ((00000010 entry) () (00000001 ()))
-            ((00000010 entry) (1) (00000001 ())) (t (00000110 entry))))))
+            ((00000010 entry)  (00000001 ())) (t (00000110 entry))))))
 
 (00001001 fs-object-package-decision
   (00001000 (package)
     (00000111
       ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
-      ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00000010 package)  (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-object)))
        (00100111 (00000001 rejected) (00000001 invalid-format)))
       ((00100001 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
@@ -134,7 +134,7 @@
   (00001000 (package)
     (00000111
       ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
-      ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00000010 package)  (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-root)))
        (00100111 (00000001 rejected) (00000001 invalid-format)))
       ((00100001 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
@@ -165,7 +165,7 @@
   (00001000 (packages store)
     (00000111
       ((00000010 packages) () (00100111 (00000001 accepted) store))
-      ((00000010 packages) (1) (00100111 (00000001 accepted) store))
+      ((00000010 packages)  (00100111 (00000001 accepted) store))
       (t
         (10011100 ((decision (fs-object-package-decision (00000101 packages))))
           (00000111
@@ -272,7 +272,7 @@
   (00001000 (event)
     (00000111
       ((00000010 event) () (00100111 (00000001 rejected) (00000001 invalid-event)))
-      ((00000010 event) (1) (00100111 (00000001 rejected) (00000001 invalid-event)))
+      ((00000010 event)  (00100111 (00000001 rejected) (00000001 invalid-event)))
       ((00100001 (00000011 (fs-package-field (00000001 format) event) (00000001 wsm-fs-event)))
        (00100111 (00000001 rejected) (00000001 invalid-format)))
       ((00100001 (00100010 (fs-package-field (00000001 version) event) *fs-journal-version*))
@@ -357,7 +357,7 @@
   (00001000 (journal fs)
     (00000111
       ((00000010 journal) () (00100111 (00000001 accepted) fs))
-      ((00000010 journal) (1) (00100111 (00000001 accepted) fs))
+      ((00000010 journal)  (00100111 (00000001 accepted) fs))
       (t
         (10011100 ((decision (fs-journal-replay-event fs (00000101 journal))))
           (00000111

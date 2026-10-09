@@ -1,0 +1,122 @@
+name: Canonical SENS migration entrypoint
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/migrate.py'
+      - 'tests/test_migrate_entrypoint.py'
+      - '.github/workflows/migrate-entrypoint.yml'
+      - 'README.md'
+      - 'AGENTS.md'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/migrate.py'
+      - 'tests/test_migrate_entrypoint.py'
+      - '.github/workflows/migrate-entrypoint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actual-canonical-migration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: One-command routing and no-unsafe-write tests
+        run: python3 -m unittest discover -s tests -p 'test_migrate_entrypoint.py' -v
+      - name: Check ORIGINAL source census on real tracked repository
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate.py candidates --report "$RUNNER_TEMP/original-candidates.json"
+          python3 - "$RUNNER_TEMP/original-candidates.json" <<'PY'
+          import json, sys
+          report=json.load(open(sys.argv[1],encoding='utf-8'))
+          summary=report['summary']
+          assert summary['scanned']==summary['blocked']+summary['mechanical_candidates']
+          assert summary['physical_outputs_created']==0
+          assert summary['original_unpaired_executables_migrated_by_this_tool']==0
+          print('ORIGINAL_UNPAIRED',summary['unpaired_candidates_needing_original_oracle'])
+          PY
+      - name: Real three-pass physical T5 preview (never publish)
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate.py preview \
+            tests/fixtures/migration-multiform-cohort/two-forms.lisp \
+            --mirror "$RUNNER_TEMP/preview" --report "$RUNNER_TEMP/preview.json" \
+            --source-era legacy
+          python3 - "$RUNNER_TEMP/preview.json" <<'PY'
+          import json,sys
+          result=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert result['summary']['files_seen']==1
+          assert result['summary']['files_written']==0
+          assert result['summary']['files_would_write']==1
+          assert result['summary']['files_blocked']==0
+          PY
+          test ! -f "$RUNNER_TEMP/preview/tests/fixtures/migration-multiform-cohort/two-forms.sens"
+      - name: Build ACTUAL SENS Rust D2 reader
+        run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Use committed two-sided historical/current oracle manifest
+        run: |
+          set -euo pipefail
+          # The publisher now requires two IMMUTABLE reviewed oracle witnesses.
+          # Never synthesize unreviewed witness SHA or bypass required evidence.
+          cp knowledge/migration-admissions/two-forms-canary.json "$RUNNER_TEMP/approved-proof.json"
+          python3 - "$RUNNER_TEMP/approved-proof.json" <<'PY'
+          import hashlib, json, sys
+          from pathlib import Path
+          proof = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert proof["schema"] == "sens-t5-proof-admission/v1"
+          assert proof["source_era"] == "historical-legacy"
+          assert set(proof["oracle_witnesses"]) == {"historical", "current"}
+          for witness in proof["oracle_witnesses"].values():
+              path = Path(witness["path"])
+              data = path.read_bytes()
+              sha = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+              assert sha == witness["git_blob_sha1"], path
+          PY
+      - name: Real proof-gated .lisp → .sens and bitwise parity / no-clobber
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate.py admit \
+            --manifest "$RUNNER_TEMP/approved-proof.json" \
+            --mirror "$RUNNER_TEMP/verified-mirror" \
+            --reader target/debug/sens-trit \
+            --report "$RUNNER_TEMP/admission.json"
+          test ! -f "$RUNNER_TEMP/verified-mirror/tests/fixtures/migration-multiform-cohort/two-forms.sens"
+          python3 scripts/migrate.py admit \
+            --manifest "$RUNNER_TEMP/approved-proof.json" \
+            --mirror "$RUNNER_TEMP/verified-mirror" \
+            --reader target/debug/sens-trit \
+            --report "$RUNNER_TEMP/admission-written.json" --write
+          cmp tests/fixtures/migration-multiform-cohort/two-forms.sens \
+              "$RUNNER_TEMP/verified-mirror/tests/fixtures/migration-multiform-cohort/two-forms.sens"
+          if python3 scripts/migrate.py admit \
+            --manifest "$RUNNER_TEMP/approved-proof.json" \
+            --mirror "$RUNNER_TEMP/verified-mirror" \
+            --reader target/debug/sens-trit \
+            --report "$RUNNER_TEMP/no-clobber.json" --write; then
+            echo 'ERROR: second write incorrectly succeeded'; exit 1
+          fi
+          python3 - "$RUNNER_TEMP/admission-written.json" "$RUNNER_TEMP/no-clobber.json" <<'PY'
+          import json,sys
+          assert json.load(open(sys.argv[1]))['status']=='WRITTEN'
+          assert json.load(open(sys.argv[2]))['status']=='BLOCKED'
+          PY
+      - name: Ensure migration never touched original source or tracked files
+        run: git diff --exit-code && test -z "$(git status --porcelain)"
+      - name: Upload original path and admission evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-sens-migration-evidence
+          path: |
+            ${{ runner.temp }}/original-candidates.json
+            ${{ runner.temp }}/preview.json
+            ${{ runner.temp }}/admission.json
+            ${{ runner.temp }}/admission-written.json
+            ${{ runner.temp }}/no-clobber.json
+          if-no-files-found: warn

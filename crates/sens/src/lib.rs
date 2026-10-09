@@ -19,7 +19,6 @@ pub mod conformance_oracle;
 pub mod fixpoint_checkpoint;
 pub mod gpu_admission;
 pub mod gpu_oracle;
-pub mod gpu_oracle_conformance;
 pub mod program_compiler;
 mod program_data;
 mod compiler_role;
@@ -29,6 +28,7 @@ pub mod selfhost_lineage;
 mod domain_words;
 mod domain_identity;
 mod packed_bits;
+mod outer_envelope;
 mod binary_framing;
 mod gpu_execution_packet;
 mod environment;
@@ -36,10 +36,12 @@ mod error;
 pub(crate) mod eval;
 mod language_items;
 mod parser;
+mod mixed_source;
 mod presentation;
 mod semantic_registry;
 mod source_words;
 mod source_packing;
+mod ternary_transport;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -99,6 +101,18 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
+    /// Current ratified Ukrainian CALL-head projection (exact domain width),
+    /// not a historical eight-bit identity. Source editors must preserve
+    /// these forms in authored .lisp; the mixed parser already lowers them to
+    /// exact DomainIdentity only in legitimate executable head positions.
+    ///
+    /// In particular, the legacy sens-to-sens compatibility migrator must
+    /// NEVER rewrite a valid current Ukrainian head into an old SID8 token.
+    pub fn exact_uk_callable_for_source_head(name: &str) -> Option<super::DomainIdentity> {
+        super::semantic_registry::exact_uk_callable_for_source_head(name)
+    }
+
+
     /// Legacy packed-byte export for external projection consumers.
     ///
     /// Runtime/source semantics use opaque `Sens8`; this function deliberately
@@ -142,6 +156,7 @@ pub use binary_number::{BinaryNumber, BinaryNumberError};
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::parse_canonical_binary;
+pub use mixed_source::parse_mixed_exact_domain;
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
@@ -159,6 +174,7 @@ pub use gpu_admission::{GpuAdmission, GpuAdmissionInventory};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, CoreD9, PredicateBit, Racana2};
 pub use packed_bits::{BitPacker, PackedBitstream};
+pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     BinaryFrame, BinaryFrameError,
@@ -174,6 +190,12 @@ pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
 pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
+};
+pub use ternary_transport::{
+    decode_ternary_program, decode_ternary_words, encode_binary_projection_ternary,
+    encode_ternary_words, open_ternary_program, render_ternary_words_spaced,
+    render_ternary_words_vertical, ternary_transport_accounting,
+    TernaryTransportAccounting, TernaryTransportError,
 };
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, packed_transport_accounting,

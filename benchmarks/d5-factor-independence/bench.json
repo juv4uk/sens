@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d5-factor-independence",
+  "wing": "D5 laws",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Are the currently observed post-D4 semantic factors independently necessary on the landed evidence corpus?",
+  "claim": "Performs corpus accounting for factor independence only; it does not infer roothood, width, placement, or residency.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "BOUNDED-INDEPENDENT",
+  "generation": "unknown",
+  "axis": "d5/post-d4-factor-independence",
+  "reproduce": "python3 benchmarks/d5-factor-independence/run.py --out /tmp/d5-factor-independence"
+}

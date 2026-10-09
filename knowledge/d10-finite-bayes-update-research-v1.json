@@ -1,0 +1,96 @@
+{
+  "schema": "d10-research-finite-bayes-update/v1",
+  "date": "2026-10-09",
+  "semantic_name": "FINITE-BAYES-UPDATE-EXACT",
+  "surface_uk": "оновити-ймовірності",
+  "surface_ukr": "байєсівське-оновлення-скінченних-гіпотез",
+  "domain": "D10",
+  "status": "PROPOSE-UNSELECTED",
+  "selected": false,
+  "ratified": false,
+  "coordinate": null,
+  "physical_t5_authorized": false,
+  "contract": "Nonempty finite index-aligned exact-rational priors p in [0,1] with sum(p)=1 and exact-rational likelihoods l in [0,1]. Z=sum(p_i*l_i). If Z>0 return (p_i*l_i/Z in original order, Z). Zero Z, inexact floats, malformed arrays or probabilities are errors.",
+  "donor": {
+    "source": "Stanford Encyclopedia of Philosophy, Bayesian Epistemology, Finite Bayes Theorem",
+    "url": "https://plato.stanford.edu/entries/epistemology-bayesian/"
+  },
+  "witnesses": [
+    {
+      "p": [
+        "1/2",
+        "1/2"
+      ],
+      "l": [
+        "3/4",
+        "1/4"
+      ],
+      "posterior": [
+        "3/4",
+        "1/4"
+      ],
+      "z": "1/2"
+    },
+    {
+      "p": [
+        "1/3",
+        "2/3"
+      ],
+      "l": [
+        "1/2",
+        "1/4"
+      ],
+      "posterior": [
+        "1/2",
+        "1/2"
+      ],
+      "z": "1/3"
+    },
+    {
+      "p": [
+        "1/4",
+        "1/4",
+        "1/2"
+      ],
+      "l": [
+        "1",
+        "0",
+        "1/2"
+      ],
+      "posterior": [
+        "1/2",
+        "0",
+        "1/2"
+      ],
+      "z": "1/2"
+    }
+  ],
+  "falsifiers": [
+    "zero evidence cannot be normalized",
+    "prior cannot be silently renormalized",
+    "no float or boolean coercion",
+    "index order and zero entries persist",
+    "posterior sum is exactly one"
+  ],
+  "motivation": [
+    "astronomy and astrophysics",
+    "SDR and radio model identification",
+    "exact rational analog computation",
+    "Prolog and Advice Taker epistemology",
+    "chess and symbolic decision modeling"
+  ],
+  "dedup": {
+    "D1_D9_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "D10_before_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "D10_selected_before": 634,
+    "exact_name_hit": false,
+    "derived_test": "Potentially implementable with exact D8/D9 arithmetic plus map/reduce; owner decides Core vs math library; name absence alone does not prove semantic uniqueness."
+  },
+  "oracle": {
+    "implementation": "scripts/check_d10_finite_bayes_update.py",
+    "tests": "tests/test_d10_finite_bayes_update.py",
+    "independent": "integer-weight common-denominator enumeration, no call into model",
+    "SENS_runtime_parity": false
+  },
+  "limits": "Pure mathematical candidate only. No D2 control, D1-D9 change, hardware, GPU/FPGA opcode, machine .sens or D10 coordinates."
+}

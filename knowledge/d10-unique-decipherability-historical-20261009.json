@@ -1,0 +1,82 @@
+{
+  "schema": "sens-d10-unique-decipherability-research/v1",
+  "date": "2026-10-09",
+  "research_status": "HOLD-D10-DERIVABILITY-AND-D2-BOUNDARY",
+  "owner_issues": ["#4013", "#4182", "#4463", "#1971"],
+  "snapshot_selected_at_authoring": 632,
+  "selected_delta": 0,
+  "ratified_delta": 0,
+  "changes_to_d2_or_t5": false,
+  "original_historical_source": {
+    "authors": "August Albert Sardinas and George W. Patterson",
+    "year": 1953,
+    "title": "A necessary and sufficient condition for the unique decomposition of coded messages",
+    "venue": "IRE Convention Record, Part 8, pp. 104-108",
+    "status": "bibliographic historical provenance, not source code and not a SENS donor implementation",
+    "confirming_1963_paper": "https://doi.org/10.1016/S0019-9958(63)80011-X",
+    "confirming_1967_paper": "https://doi.org/10.1016/S0019995867800020"
+  },
+  "novelty_boundary": "Pure finite labelled binary codebook property. NOT D2 parser control, NOT T5 transport/serializer, NOT SENS runtime parity. An already existing sequence-scan composition may make this library/Core-Math derived; review required.",
+  "proposals": [
+    {
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "surface_uk": "одкод?",
+      "surface_ukr": "однозначно-декодується?",
+      "status": "HOLD-PENDING-BEHAVIORAL-DERIVABILITY",
+      "coordinate": null,
+      "ratified": false,
+      "selected": false,
+      "physical_t5_authorized": false,
+      "arity": 1,
+      "typed_input": "finite ordered sequence of (distinct nonempty symbol id, nonempty binary word), no duplicate ids",
+      "typed_output": "existing D1:YES or D1:NO; invalid input BLOCK through existing typed failure",
+      "semantic_law": "Decide if any two different nonempty finite sequences of identities concatenate to the same bitstream; unlike PREFIX-FREE, a nonprefix-free code may still be uniquely decipherable. Empty codebook YES. Finite fixed-point suffix construction always terminates.",
+      "positive_witnesses": [
+        "[(a,0),(b,11)] -> YES (prefix-free)",
+        "[(a,0),(b,01)] -> YES though 0 prefixes 01",
+        "[(a,0),(b,01),(c,10)] -> NO because a,c and b,a both encode 010"
+      ],
+      "falsifiers": [
+        "prefix-free-only implementation incorrectly rejects [(a,0),(b,01)]",
+        "greedy decoder incorrectly accepts ambiguous 010",
+        "codebook [(a,0),(b,1),(c,000000)] must reject: c vs six a identities",
+        "duplicate binary encodings for different identities must reject",
+        "empty word, nonbinary character, duplicate identity must BLOCK"
+      ],
+      "ownership_boundary": "D10 research library/property candidate vs derived Core-Math and D2-only structural read authority; no wire-level change.",
+      "source_urls": [
+        "https://doi.org/10.1016/S0019-9958(63)80011-X",
+        "https://doi.org/10.1016/S0019995867800020"
+      ]
+    },
+    {
+      "semantic_name": "FINITE-CODE-AMBIGUITY-WITNESS",
+      "surface_uk": "свіднеод",
+      "surface_ukr": "свідок-неоднозначного-декодування",
+      "status": "HOLD-DERIVED-FROM-DECIPHERABILITY",
+      "coordinate": null,
+      "ratified": false,
+      "selected": false,
+      "physical_t5_authorized": false,
+      "arity": 1,
+      "typed_input": "same finite labelled codebook",
+      "typed_output": "none, or two unequal finite symbol-id lists and the same encoded word",
+      "semantic_law": "For an ambiguous finite codebook, produce two genuinely different source identity sequences yielding identical concatenated binary output. Deterministic source-order BFS returns first reached witness, without claiming globally shortest bits. For unique codebook give typed absence, not made-up ambiguity.",
+      "positive_witnesses": [
+        "[(a,0),(b,01),(c,10)] -> ([a,c],[b,a]), both 010 (order may reverse)",
+        "[(a,00),(b,00)] -> ([a],[b]), both 00"
+      ],
+      "falsifiers": [
+        "returning only D1:NO without reconstructible differing sequences is not a witness",
+        "returning the same source sequence twice is invalid",
+        "claiming ambiguity on [(a,0),(b,01)] is incorrect",
+        "unbounded guessed search depth is not a proof of uniqueness"
+      ],
+      "ownership_boundary": "Proof-producing projection likely derivable from the finite-code decision; explicit HOLD until D10/Core-Math review.",
+      "source_urls": [
+        "https://doi.org/10.1016/S0019-9958(63)80011-X",
+        "https://doi.org/10.1016/S0019995867800020"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "sens-t5-proof-admission/v1",
+  "source": "tests/fixtures/migration-multiform-cohort/two-forms.lisp",
+  "source_era": "historical-legacy",
+  "source_git_blob_sha1": "1b60de53b722bcacacd054f3ccf90d4c78ea6f48",
+  "source_sha256": "e16e18e775877fc15401aa4e2cdfdb4f4b78329bdb140b58f93687075fd4ab99",
+  "expected_physical_sha256": "fafd77ff776795c95bb678c42f90c875b65f22bb98cf73a74daf2047b17e38df",
+  "expected_typed_sha256": "bbdb4b0a4fc4b3cc84d6748239ee87fdbfdb7ea00dfa719d799f8b6819451d43",
+  "oracle_commands": [
+    [
+      "python3",
+      "tests/test_migration_multiform_cohort.py",
+      "-q"
+    ],
+    [
+      "cargo",
+      "test",
+      "-p",
+      "sens",
+      "--test",
+      "migration_multiform_cohort"
+    ]
+  ],
+  "expected_current_eval_stdout": "(())\n",
+  "oracle_witnesses": {
+    "historical": {
+      "path": "tests/test_migration_multiform_cohort.py",
+      "git_blob_sha1": "c812e501563839b47eb1effca9bc156a25f34426"
+    },
+    "current": {
+      "path": "crates/sens/tests/migration_multiform_cohort.rs",
+      "git_blob_sha1": "62966dc8ee589891460dd37bc10c01c4d64b7906"
+    }
+  }
+}

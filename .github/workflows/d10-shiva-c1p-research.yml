@@ -1,0 +1,21 @@
+name: D10 Shiva C1P canonical binary-matrix research
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-shiva-c1p-canonical-order-research-v1.json
+      - scripts/check_d10_shiva_c1p_research.py
+      - docs/research/d10-shiva-c1p-canonical-order.uk.md
+      - .github/workflows/d10-shiva-c1p-research.yml
+  workflow_dispatch:
+jobs:
+  exact-c1p-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Verify independent oracles and metadata with Python assertions enabled
+        run: python3 scripts/check_d10_shiva_c1p_research.py
+      - name: Verify fail-closed even with Python assertions disabled
+        run: python3 -O scripts/check_d10_shiva_c1p_research.py
+      - name: Confirm canonical D10 registry guards unchanged
+        run: python3 scripts/check-d10-fill-v1-seed.py

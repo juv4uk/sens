@@ -13,27 +13,27 @@
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
 (00001001 native-first-parity-corpus
-  (00000001
+  '
     ((car-cons-u64-zero
-       (car (cons 0 1))
+       (перше (сполучити 0 1))
        0
        pure
        not-applicable)
      (car-cons-u64-small
-       (car (cons 2 3))
+       (перше (сполучити 2 3))
        2
        pure
        not-applicable)
      (car-cons-u64-independent-fields
-       (car (cons 42 99))
+       (перше (сполучити 42 99))
        42
        pure
        not-applicable)
      (car-cons-u64-max-exact-result
-       (car (cons 9007199254740991 7))
+       (перше (сполучити 9007199254740991 7))
        9007199254740991
        pure
-       not-applicable))))
+       not-applicable)))
 
 (00001001 native-first-parity-verdicts
   (native-first-parity-run native-first-parity-corpus))

@@ -1,0 +1,30 @@
+name: English identity vs CLI surface ratchet
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/english_names_in_code.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/tests/data/english-names-baseline.tsv"
+      - ".github/workflows/english-cli-surface-ratchet.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/english_names_in_code.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/tests/data/english-names-baseline.tsv"
+      - ".github/workflows/english-cli-surface-ratchet.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  english-identity-debt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Prove no new English executable identity and tight CLI surface scope
+        run: cargo test -p sens --test english_names_in_code -- --nocapture

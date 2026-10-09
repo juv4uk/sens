@@ -9,109 +9,160 @@
 ; the native route MUST NOT silently retry through the evaluator if admission
 ; or native mechanism rejects it; doing so would hide machine bugs.
 ;
+; The host's existing `load` boundary uses the bounded mixed exact-domain reader.
+; Current D3/D4 heads are exact domain identities. D4:1110 LIST is deliberately NOT used here because
+; residency does not grant callability; records are built from exact D3 CONS.
+; The remaining EVAL/READ-ALL seams stay compatibility mechanisms until their
+; own current-domain owners migrate them.
+;
 ; Required layers are loaded by the caller:
 ;   lib/machine/encoding/x86-64.lisp
 ;   lib/machine/operands/x86-64.lisp
 ;   lib/machine/admission/x86-64.lisp
 ;   lib/machine/dispatch/native-first.lisp
 
-(00001001 native-first-execution-completed
-  (00001000 (route value)
-    (00100111
-      (00000001 execution-route)
+(0011 native-first-list-2
+  (0010 (a b)
+    (111 a (111 b (001 ())))))
+
+(0011 native-first-list-4
+  (0010 (a b c d)
+    (111 a (111 b (111 c (111 d (001 ())))))))
+
+(0011 native-first-execution-completed
+  (0010 (route value)
+    (native-first-list-4
+      (001 execution-route)
       route
-      (00000001 (status completed))
-      (00100111 (00000001 value) value))))
+      (001 (status completed))
+      (native-first-list-2 (001 value) value))))
 
-(00001001 native-first-execution-rejected
-  (00001000 (route detail)
-    (00100111
-      (00000001 execution-route)
+(0011 native-first-execution-rejected
+  (0010 (route detail)
+    (native-first-list-4
+      (001 execution-route)
       route
-      (00000001 (status rejected))
-      (00100111 (00000001 detail) detail))))
+      (001 (status rejected))
+      (native-first-list-2 (001 detail) detail))))
 
-(00001001 native-first-plan-tag-state
-  (00001000 (plan tag)
-    (00000111
-      ((00000010 plan) (0)
-       (00000111
-         ((00000011 (00000101 plan) tag) (1) (00000001 same))
-         ((00000011 (00000101 plan) tag) (0) (00000001 distinct))))
-      ((00000001 native-first-plan-tag-state-fallback)
-       native-first-plan-tag-state-fallback
-       (00000001 distinct)))))
+(0011 native-first-proper-list-length-2?
+  (0010 (value)
+    (110
+      ((010 value)
+       (native-first-domain-false ()))
+      ((010 (011 value))
+       (native-first-domain-false ()))
+      ((101 (011 (011 value)) ())
+       (native-first-domain-true ()))
+      ((native-first-domain-true ())
+       (native-first-domain-false ())))))
 
-(00001001 native-first-execute-native-plan
-  (00001000 (plan)
-    (10011100 ((result
-            (x86-call-admitted-u64
-              (00101111 plan)
-              (00110000 plan))))
-      (00000111
-        ((00100010 (x86-machine-rejected? result) t)
-         (1)
-         (native-first-execution-rejected (00000001 native) result))
-        ((00100010 (x86-machine-rejected? result) t)
-         (0)
-         (native-first-execution-completed (00000001 native) result))))))
+(0011 native-first-proper-list-length-3?
+  (0010 (value)
+    (110
+      ((010 value)
+       (native-first-domain-false ()))
+      ((010 (011 value))
+       (native-first-domain-false ()))
+      ((010 (011 (011 value)))
+       (native-first-domain-false ()))
+      ((101 (011 (011 (011 value))) ())
+       (native-first-domain-true ()))
+      ((native-first-domain-true ())
+       (native-first-domain-false ())))))
 
-(00001001 native-first-execute-plan
-  (00001000 (plan)
-    (10011100 ((native-state
-            (native-first-plan-tag-state plan (00000001 native-plan))))
-      (00000111
-        ((00000011 native-state (00000001 same)) (1)
-         (00000111
-           ((00100010 (00101000 plan) 3) (1)
-            (native-first-execute-native-plan plan))
-           ((00100010 (00101000 plan) 3) (0)
-            (native-first-execution-rejected
-              (00000001 native)
-              (00100111 (00000001 malformed-native-plan) plan)))))
-        ((00000011 native-state (00000001 distinct)) (1)
-         (10011100 ((fallback-state
-                 (native-first-plan-tag-state
-                   plan
-                   (00000001 evaluator-fallback))))
-           (00000111
-             ((00000011 fallback-state (00000001 same)) (1)
-              (00000111
-                ((00100010 (00101000 plan) 2) (1)
-                 (native-first-execution-completed
-                   (00000001 evaluator)
-                   (01001101 (00101111 plan))))
-                ((00100010 (00101000 plan) 2) (0)
-                 (native-first-execution-rejected
-                   (00000001 evaluator)
-                   (00100111 (00000001 malformed-evaluator-fallback) plan)))))
-             ((00000011 fallback-state (00000001 distinct)) (1)
-              (native-first-execution-rejected
-                (00000001 invalid-plan)
-                (00100111 (00000001 unknown-native-first-plan) plan))))))))))
+(0011 native-first-plan-tag-state
+  (0010 (plan tag)
+    (110
+      ((010 plan)
+       (001 distinct))
+      ((101 (100 plan) tag)
+       (001 same))
+      ((native-first-domain-true ())
+       (001 distinct)))))
 
-(00001001 native-first-execute-expression
-  (00001000 (expression)
+(0011 native-first-execute-native-plan-result
+  (0010 (plan result)
+    (110
+      ((010 result)
+       (native-first-execution-completed (001 native) result))
+      ((101 (100 result) (001 rejected))
+       (native-first-execution-rejected (001 native) result))
+      ((native-first-domain-true ())
+       (native-first-execution-completed (001 native) result)))))
+
+(0011 native-first-execute-native-plan
+  (0010 (plan)
+    (native-first-execute-native-plan-result
+      plan
+      (x86-call-admitted-u64
+        (100 (011 plan))
+        (100 (011 (011 plan)))))))
+
+(0011 native-first-execute-plan
+  (0010 (plan)
+    (110
+      ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 same))
+       (110
+         ((native-first-proper-list-length-3? plan)
+          (native-first-execute-native-plan plan))
+         ((native-first-domain-true ())
+          (native-first-execution-rejected
+            (001 native)
+            (native-first-list-2 (001 malformed-native-plan) plan)))))
+      ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 distinct))
+       (110
+         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 same))
+          (110
+            ((native-first-proper-list-length-2? plan)
+             (native-first-execution-completed
+               (001 evaluator)
+               (01001101 (100 (011 plan))))
+            ((native-first-domain-true ())
+             (native-first-execution-rejected
+               (001 evaluator)
+               (native-first-list-2 (001 malformed-evaluator-fallback) plan)))))
+         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 distinct))
+          (native-first-execution-rejected
+            (001 invalid-plan)
+            (native-first-list-2 (001 unknown-native-first-plan) plan))
+         ((native-first-domain-true ())
+          (native-first-execution-rejected
+            (001 invalid-plan)
+            (native-first-list-2 (001 malformed-fallback-tag-state) plan)))))
+      ((native-first-domain-true ())
+       (native-first-execution-rejected
+         (001 invalid-plan)
+         (native-first-list-2 (001 unknown-native-first-plan) plan))))))))
+
+(0011 native-first-execute-expression
+  (0010 (expression)
     (native-first-execute-plan
       (native-first-plan expression))))
 
-(00001001 native-first-execute-source-forms
-  (00001000 (forms)
-    (00000111
-      ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1)
-       (00100111
-         (native-first-execution-rejected
-           (00000001 evaluator)
-           (00100111 (00000001 malformed-source-form-tail) forms))))
-      ((00000010 forms) (0)
-       (00000100
-         (native-first-execute-expression (00000101 forms))
-         (native-first-execute-source-forms (00000110 forms)))))))
+(0011 native-first-execute-source-forms
+  (0010 (forms)
+    (110
+      ((010 forms)
+       (110
+         ((101 forms ())
+          (001 ()))
+         ((native-first-domain-true ())
+          (111
+            (native-first-execution-rejected
+              (001 evaluator)
+              (native-first-list-2
+                (001 malformed-source-form-tail)
+                forms))
+            (001 ())))))
+      ((native-first-domain-true ())
+       (111
+         (native-first-execute-expression (100 forms))
+         (native-first-execute-source-forms (011 forms)))))))
 
-(00001001 native-first-execute-source
-  (00001000 (source)
-    (00100111
-      (00000001 source-execution)
+(0011 native-first-execute-source
+  (0010 (source)
+    (native-first-list-2
+      (001 source-execution)
       (native-first-execute-source-forms
         (01001011 source)))))

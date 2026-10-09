@@ -1,0 +1,133 @@
+{
+  "schema": "d10-crossrepo-donor-review/1",
+  "generated_from_main": "9f20e0c0a29384f2ead1fa584ed215f2fa9e27f3",
+  "parent_issue": 4182,
+  "batch_issue": 4301,
+  "authority_issue": 4162,
+  "inventory_mutation": false,
+  "coordinates_assigned": false,
+  "ratification": false,
+  "rows": [
+    {
+      "repository": "juv4uk/esp32-pendulum",
+      "path/source": "components/physics/{unwrap.c,velocity.c,period_estimator.c,peak_detector.c,quality_factor.c,gravity.c}; README.md",
+      "semantic_name": "PENDULUM-PHYSICS-PIPELINE",
+      "behavior/law": "Wrapped angle -> unwrap -> velocity -> period -> peaks/Q -> gravity is a documented measurement pipeline.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "main @ 65f2d0dc0928a84e97cac235f7b8bdc7e4d4931b; README says skeleton/TODO."
+    },
+    {
+      "repository": "juv4uk/esp32-pendulum",
+      "path/source": "README.md; components/physics/include/physics.h",
+      "semantic_name": "EXACT-RATIONAL-PHYSICS-CARRIER",
+      "behavior/law": "Pipeline arithmetic is constrained to Rational32/Rational64, with floating-point only for console output.",
+      "decision": "PROJECTION",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "main @ 65f2d0dc0928a84e97cac235f7b8bdc7e4d4931b; duplicate audit against existing numeric semantics required."
+    },
+    {
+      "repository": "juv4uk/SpaceEngineers",
+      "path/source": "Sources/Sandbox.Game/Game/AI/Pathfinding/IMyPathfinding.cs; MyPathfinding.cs; MyVoxelNavigationMesh.cs",
+      "semantic_name": "BOUNDED-PATH-SEARCH",
+      "behavior/law": "Path query maps start/destination relations to a path or no result and may transform world coordinates into local search space.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "main @ a109106fc0ded66bdd5da70e099646203c56550f"
+    },
+    {
+      "repository": "juv4uk/SpaceEngineers",
+      "path/source": "Sources/VRage.Math/{MatrixD.cs,Vector3.cs,Vector3D.cs}; MyCamera.cs",
+      "semantic_name": "GEOMETRIC-COORDINATE-TRANSFORM",
+      "behavior/law": "Vectors/points are transformed between coordinate frames; world/screen and spherical/cartesian transforms are explicit.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "main @ a109106fc0ded66bdd5da70e099646203c56550f"
+    },
+    {
+      "repository": "juv4uk/radio-log",
+      "path/source": "docs/features.md; tests/qso.test.mjs; qso logic",
+      "semantic_name": "CALLSIGN-NORMALIZATION",
+      "behavior/law": "A station callsign is normalized to uppercase before entering the log model.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "main @ 4d2af66a55798c3afbb14164881ea534fd14c397; likely normalization family."
+    },
+    {
+      "repository": "juv4uk/radio-log",
+      "path/source": "src/routes/+page.svelte; docs/features.md; docs/radio-rules.md",
+      "semantic_name": "POWER-RANGE-CLASSIFICATION",
+      "behavior/law": "Transmit power is classified as QRPp below 1 W and QRP from 1 through 5 W while exact power remains preserved.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "main @ 4d2af66a55798c3afbb14164881ea534fd14c397"
+    },
+    {
+      "repository": "juv4uk/VedicAstro",
+      "path/source": "README.md; VedicHoroscopeData methods",
+      "semantic_name": "ASTROLOGICAL-CHART-DERIVATION",
+      "behavior/law": "Time/location input is transformed into chart state, planetary/house tables, significators and Vimshottari Dasa relations.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "default donor snapshot; executable operations documented in README."
+    },
+    {
+      "repository": "juv4uk/xva-trainer",
+      "path/source": "README.md; python/speaker_diarization/pipeline/*",
+      "semantic_name": "SPEAKER-SEGMENTATION-AND-CLUSTERING",
+      "behavior/law": "Audio is segmented into speech turns and grouped/resegmented by speaker identity.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "main @ 4961ef0b0389dc91d6fd6b5cfd0b1d0d1f06cb8a"
+    },
+    {
+      "repository": "juv4uk/WSM-24",
+      "path/source": "README.md; src/brahmanda/*",
+      "semantic_name": "TIME-LONGITUDE-POLAR-PROJECTION",
+      "behavior/law": "24-hour circular time is modeled as a 360° longitude projection with explicit coordinate transformations.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "default donor snapshot; README marks prototype/archive."
+    },
+    {
+      "repository": "juv4uk/spanda",
+      "path/source": "README.md; docs/provenance.md; sens↔FPGA↔analog boundary",
+      "semantic_name": "RATIONAL-TO-MASK-AND-BACK",
+      "behavior/law": "Exact p/q is intended to cross a discrete FPGA mask boundary and return from analog measurement via closest-rational approximation.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "default donor snapshot; README cites Stern-Brocot/continued-fraction approximation and exact-rational sens boundary."
+    },
+    {
+      "repository": "juv4uk/pravda",
+      "path/source": "VOLNOST.md; PACTA.md; research/BOUND-AUTHORITY-TEST.md; research/VOLIA-VOLNOST-SVAVILLIA.md",
+      "semantic_name": "BOUNDED-AUTHORITY-RECIPROCITY",
+      "behavior/law": "Authority is constrained by reciprocal recognition of another participant's will; unilateral power over the other is rejected.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "language_visible": true,
+      "coordinate": null,
+      "provenance": "default donor snapshot; README identifies bound authority, reciprocity and anti-judge principle as core research."
+    }
+  ]
+}

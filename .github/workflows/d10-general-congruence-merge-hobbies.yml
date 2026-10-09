@@ -1,0 +1,36 @@
+name: D10 exact congruence hobby donor research
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-general-congruence-merge-hobbies-v1.json'
+      - 'scripts/check_d10_general_congruence_merge_hobbies.py'
+      - 'tests/test_d10_general_congruence_merge_hobbies.py'
+      - '.github/workflows/d10-general-congruence-merge-hobbies.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-general-congruence-merge-hobbies-v1.json'
+      - 'scripts/check_d10_general_congruence_merge_hobbies.py'
+      - 'tests/test_d10_general_congruence_merge_hobbies.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-math-and-real-donor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install actual SymPy mathematics donor (not a mock)
+        run: python -m pip install 'sympy==1.14.0'
+      - name: Execute distinct extended-GCD and brute-force exhaustive checks
+        run: python scripts/check_d10_general_congruence_merge_hobbies.py --sympy-donor
+      - name: Negative mutants, source locks and independent donor parity
+        run: python -m unittest discover -s tests -p 'test_d10_general_congruence_merge_hobbies.py' -v

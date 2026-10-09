@@ -1,0 +1,347 @@
+{
+  "schema": "d10-music-enharmonic-primary-review/v1",
+  "status": "RESEARCH-ONLY-HOLD-INDEPENDENT-REVIEW",
+  "authority": [
+    "#4013",
+    "#4301",
+    "#4896",
+    "#4463"
+  ],
+  "source": {
+    "primary_standard": "MusicXML 4.0",
+    "publisher": "W3C Music Notation Community Group",
+    "url": "https://www.w3.org/2021/06/musicxml40/tutorial/midi-compatible-part/",
+    "pitch_section": "Pitch",
+    "transpose_section": "Transpose",
+    "schema_url": "https://www.w3.org/2021/06/musicxml40/listings/musicxml.xsd",
+    "note": "MusicXML specifies source pitch step+alter+octave and transpose diatonic+chromatic; predicates and two-valued intervals below are SENS research proposals derived from this model, not claimed existing MusicXML APIs."
+  },
+  "snapshot": {
+    "foundation": "contracts/d1-d9-foundation-ratification.lisp",
+    "foundation_git_blob": "9ee79df9d0f0d4a980b860fddf9c7d2900c9768a",
+    "d10_inventory": "knowledge/d10-v1-semantic-inventory.json",
+    "d10_inventory_git_blob": "34efd273000e3de8510441764cb59acbb5ab284b",
+    "d10_selected_at_claim": 631,
+    "d10_capacity": 1024,
+    "ratified_d10_at_claim": 0
+  },
+  "accounting": {
+    "research_candidate_rows": 2,
+    "selected_added": 0,
+    "coordinates_assigned": 0,
+    "ratified_added": 0,
+    "physical_sens_written": 0
+  },
+  "scope": {
+    "pitch_model": "MIDI-compatible 12 equal-tempered semitone numbers; retain MusicXML distinct diatonic spelling",
+    "step_set": [
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "A",
+      "B"
+    ],
+    "alter_integer_min": -2,
+    "alter_integer_max": 2,
+    "octave_min": 0,
+    "octave_max": 9,
+    "exclude": [
+      "microtonal alterations or arbitrary temperament",
+      "rests and unpitched notes",
+      "keys/tonality context or transposing instruments without explicit written-to-sounding policy",
+      "MIDI routing, devices, host audio effects",
+      "D2 control or machine instructions"
+    ],
+    "representation": "(step, integer chromatic alter, octave), not a MIDI packet"
+  },
+  "candidates": [
+    {
+      "stable_id": "d10.hobby.music.enharmonic-spelling-distinct.v1",
+      "semantic_name": "ENHARMONIC-SPELLING-DISTINCT?",
+      "surfaces": {
+        "uk": "енгармонічно-інші?",
+        "укр": "та-сама-висота-інший-запис?",
+        "sa": null,
+        "en": "enharmonic-spelling-distinct?",
+        "LISP": "ENHARMONIC-SPELLING-DISTINCT?",
+        "sym": null
+      },
+      "arity": 2,
+      "result_cardinality": "one 1-bit predicate",
+      "semantic_law": "Given two valid 12-TET MusicXML-like pitches (step, integer alter, octave), return 1 iff their exact sounding semitone index matches AND their notation triple differs; otherwise 0. An equal note written identically is not an enharmonic respelling.",
+      "positive_witnesses": [
+        {
+          "a": [
+            "C",
+            1,
+            4
+          ],
+          "b": [
+            "D",
+            -1,
+            4
+          ],
+          "expected": 1,
+          "explanation": "C-sharp and D-flat agree in sounding semitones"
+        },
+        {
+          "a": [
+            "B",
+            1,
+            3
+          ],
+          "b": [
+            "C",
+            0,
+            4
+          ],
+          "expected": 1,
+          "explanation": "cross-octave B-sharp and C agree"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "D",
+            -2,
+            4
+          ],
+          "expected": 1,
+          "explanation": "double flat is distinct notation with same sound"
+        }
+      ],
+      "falsifiers": [
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "C",
+            0,
+            4
+          ],
+          "expected": 0,
+          "explanation": "identical spelling is not different"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "C",
+            0,
+            5
+          ],
+          "expected": 0,
+          "explanation": "octave is audible; pitch class alone insufficient"
+        },
+        {
+          "a": [
+            "C",
+            1,
+            4
+          ],
+          "b": [
+            "D",
+            -1,
+            5
+          ],
+          "expected": 0,
+          "explanation": "different octave despite pitch class"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "B",
+            0,
+            3
+          ],
+          "expected": 0,
+          "explanation": "distinct sounding semitone"
+        }
+      ],
+      "dedup_attack": "Different from MODULO, EQ, EQUAL and raw MIDI pitch equality: predicate requires BOTH equality under 12-TET sounding projection AND inequality of preserved diatonic spelling. Explicit D1-D9 behavioral review required before SELECT, not established solely by name search.",
+      "dependency": "Derived from exact integer addition and equality; derivability alone not an exclusion under #4013. Distinct two-identity observation needs owner review.",
+      "attacks": [
+        "Two identical pitch triples MUST yield 0, not 1",
+        "Enharmonic equality must not be inferred from pitch class modulo 12 alone",
+        "No claim for just intonation or microtones"
+      ],
+      "decision": "HOLD-REVIEW-D10-CANDIDATE",
+      "coordinate": null,
+      "ratified": false,
+      "selected": false,
+      "oracle_status": "TWO-INDEPENDENT-MATHEMATICAL-IMPLEMENTATIONS;EXTERNAL-MUSICXML-CONFORMER-NOT-YET-EXECUTED"
+    },
+    {
+      "stable_id": "d10.hobby.music.notated-chromatic-interval.v1",
+      "semantic_name": "NOTATED-CHROMATIC-INTERVAL",
+      "surfaces": {
+        "uk": "нотний-хроматичний-інтервал",
+        "укр": "кроки-й-півтони-між-нотами",
+        "sa": null,
+        "en": "notated-chromatic-interval",
+        "LISP": "NOTATED-CHROMATIC-INTERVAL",
+        "sym": null
+      },
+      "arity": 2,
+      "result_cardinality": "two exact signed integers (diatonic steps, chromatic semitones)",
+      "semantic_law": "Given two valid pitches, return ordered signed pair (target octave*7+step ordinal minus source octave*7+step ordinal, target exact 12-TET semitone number minus source semitone number); neither component may be silently discarded.",
+      "positive_witnesses": [
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "E",
+            0,
+            4
+          ],
+          "expected": [
+            2,
+            4
+          ],
+          "explanation": "major third, two notated diatonic steps"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "F",
+            -1,
+            4
+          ],
+          "expected": [
+            3,
+            4
+          ],
+          "explanation": "F-flat and E natural have same sounding semitone distance but DIFFERENT diatonic interval"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "D",
+            -2,
+            4
+          ],
+          "expected": [
+            1,
+            0
+          ],
+          "explanation": "the sounding note is same yet one written step apart"
+        }
+      ],
+      "falsifiers": [
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "E",
+            0,
+            4
+          ],
+          "forbid": [
+            4,
+            4
+          ],
+          "explanation": "diatonic steps are not semitone count"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "F",
+            -1,
+            4
+          ],
+          "forbid": [
+            2,
+            4
+          ],
+          "explanation": "do not erase spelling via MIDI pitch projection"
+        },
+        {
+          "a": [
+            "B",
+            1,
+            3
+          ],
+          "b": [
+            "C",
+            0,
+            4
+          ],
+          "expected": [
+            1,
+            0
+          ],
+          "forbid": [
+            0,
+            0
+          ],
+          "explanation": "enharmonic change still one diatonic step"
+        }
+      ],
+      "dedup_attack": "Not ordinary pitch subtraction and not two aliases of SUB/MOD: the semitone result alone cannot recover the exact notated diatonic distance, so the two-component observable remains distinct from a single scalar. Behavioral dedup against D1-D9 / selected D10 still mandatory.",
+      "dependency": "Exact diatonic ordinal and 12-TET semitone projection; two outputs may be implemented using existing arithmetic, but that does not collapse the observable law.",
+      "attacks": [
+        "C→E and C→F-flat must NOT return identical two-component results",
+        "Notation-aware negative intervals must be antisymmetric",
+        "Host MIDI opcode and audio synthesis are not language-owned laws"
+      ],
+      "decision": "HOLD-REVIEW-D10-CANDIDATE",
+      "coordinate": null,
+      "ratified": false,
+      "selected": false,
+      "oracle_status": "TWO-INDEPENDENT-MATHEMATICAL-IMPLEMENTATIONS;EXTERNAL-MUSICXML-CONFORMER-NOT-YET-EXECUTED"
+    }
+  ],
+  "reviewer_gates": [
+    "Confirm no behavioral duplicates in all owner-ratified D1–D9, not name-only",
+    "Compare against full current D10 semantic inventory and concurrent PRs",
+    "Execute a real external independent MusicXML importer/conformer for source-to-representation cases",
+    "Decide whether each composed law deserves one D10 resident or a library derived definition",
+    "Never assign coordinates, ratify or change the 631 selected census before explicit owner review"
+  ],
+  "relation_to_other_work": {
+    "no_overlap": [
+      "#4887 astronomy radio calendar",
+      "#4888 phase unwrap",
+      "#4890 covariance/frames/resample",
+      "#4907 binary word",
+      "#4912 finite state transducer",
+      "#4916 Prolog",
+      "#4921 phonology",
+      "#4923 binary word"
+    ],
+    "benefit": "Score-oriented symbolic music and exact note semantics; same source-independent integer law may be tested for acoustic analyzers, FPGA pitch-display frontends and music theory libraries, without declaring any hardware backend a new resident."
+  }
+}

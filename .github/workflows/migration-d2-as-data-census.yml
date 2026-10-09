@@ -1,0 +1,26 @@
+name: Migration D2-as-data census
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/migration-d2-as-data-census-2026-10-08.json"
+      - "tests/test_migration_d2_as_data_census.py"
+      - ".github/workflows/migration-d2-as-data-census.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/migration-d2-as-data-census-2026-10-08.json"
+      - "tests/test_migration_d2_as_data_census.py"
+      - ".github/workflows/migration-d2-as-data-census.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify exact D2-as-data blocked cohort
+        run: python3 -m unittest tests.test_migration_d2_as_data_census -v

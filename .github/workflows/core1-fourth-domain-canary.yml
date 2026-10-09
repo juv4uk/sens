@@ -1,0 +1,30 @@
+name: Core1 C1-FOURTH physical domain canary
+
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/core1-fourth-domain-canary/**'
+      - 'tests/test_core1_fourth_domain_canary.py'
+      - 'crates/sens/tests/core1_fourth_domain_canary.rs'
+      - '.github/workflows/core1-fourth-domain-canary.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/fixtures/core1-fourth-domain-canary/**'
+      - 'tests/test_core1_fourth_domain_canary.py'
+      - 'crates/sens/tests/core1_fourth_domain_canary.rs'
+      - '.github/workflows/core1-fourth-domain-canary.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Historical Core1 origin + actual three-pass packed mirror
+        run: python3 -m unittest discover -s tests -p 'test_core1_fourth_domain_canary.py' -v
+      - name: Current D2/D3 Rust oracle returns exact Pair(Nil,Nil)
+        run: cargo test -p sens --test core1_fourth_domain_canary

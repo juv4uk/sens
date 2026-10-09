@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d5-arithmetic-sibling-law",
+  "wing": "D5 laws",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Does one suffix bit uniformly encode a direct-vs-inverse-rhs arithmetic sibling law for D5?",
+  "claim": "Separates the narrower Core.D5 value law from the full historical Lisp 1.5 calling protocol; historical arity/policy axes can falsify a one-delta theorem without mutating OD-005 occupancy.",
+  "witness": [
+    "run.py",
+    "result.json"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "d5/arithmetic-sibling-law",
+  "reproduce": "python3 benchmarks/d5-arithmetic-sibling-law/run.py"
+}

@@ -31,7 +31,7 @@ on:
 jobs:
   life-1:
     name: does LIFE-1 still live?
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5

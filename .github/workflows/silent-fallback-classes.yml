@@ -23,7 +23,7 @@ permissions:
 jobs:
   silent-fallback-classes:
     name: No unnamed silent fallback
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5

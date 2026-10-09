@@ -1,0 +1,75 @@
+name: Selected original Lisp to verified physical T5
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate-selected-lisp.py"
+      - "tests/test_migrate_selected_lisp.py"
+      - "docs/migrate-selected-lisp.uk.md"
+      - ".github/workflows/migrate-selected-lisp.yml"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-selected-lisp.py"
+      - "tests/test_migrate_selected_lisp.py"
+      - ".github/workflows/migrate-selected-lisp.yml"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  selected-original-t5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build actual SENS T5 opener / D2 grammar gate
+        run: cargo build -p sens-cli --bin sens-trit
+      - name: SHA-pinned single-file physical T5 CLI, negative controls, no-clobber
+        run: python3 -m unittest discover -s tests -p 'test_migrate_selected_lisp.py' -v
+      - name: Independently execute current admitted D4 CAAR oracle
+        run: cargo test -p sens --test migration_d4_selector_cohort -- --nocapture
+      - name: Inspect REAL tracked original Lisp sources (no publishing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p triage-reports
+          for src in benchmarks/closures.lisp benchmarks/parser.lisp lib/machine/block.lisp; do
+            slug="$(printf '%s' "$src" | tr '/' '_')"
+            report="triage-reports/$slug.json"
+            set +e
+            python3 scripts/migrate-selected-lisp.py \
+              --source "$src" --source-blob HEAD --source-era legacy \
+              --inspect --out-root "$RUNNER_TEMP/sens-inspect-only" \
+              --reader target/debug/sens-trit --report "$report"
+            code=$?
+            set -e
+            python3 - "$report" "$code" <<'PY'
+          import json, pathlib, sys
+          report = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          code = int(sys.argv[2])
+          assert report["status"] in {"BLOCKED", "SYNTAX_ONLY_UNVERIFIED"}, report
+          assert code == (2 if report["status"] == "BLOCKED" else 0), report
+          assert report["original_491_reduced"] is False, report
+          assert report.get("files_written", 0) == 0, report
+          if report["status"] == "BLOCKED":
+              assert report["reason"], report
+          else:
+              assert report["oracle"] == "NOT_VERIFIED", report
+          print("ORIGINAL_TRIAGE:", report["source"], report["status"])
+          PY
+          done
+          test -z "$(find "$RUNNER_TEMP/sens-inspect-only" -name '*.sens' -type f -print -quit 2>/dev/null)"
+      - name: Publish original-source blocker reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-original-lisp-triage
+          path: triage-reports/*.json
+          if-no-files-found: warn

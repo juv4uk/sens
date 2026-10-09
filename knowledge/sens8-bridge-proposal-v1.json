@@ -1,0 +1,841 @@
+{
+ "schema": "sens8-bridge-proposal/v2",
+ "authority": "PROPOSAL ONLY — not ratified",
+ "owner_law": "#2953 — the language becomes MORE DETAILED with each domain; names are NOT collapsed to aliases. Only EXACT-name matches are bridged.",
+ "sources": {
+  "sens8_names": {
+   "path": "lib/surface/semantic-registry.lisp",
+   "blob": "ed267a5a21de8c59842469b2e8927ff475bae6be"
+  },
+  "domains": "lib/domains/d1..d9.lisp"
+ },
+ "counts": {
+  "exact_bridge": 140,
+  "separate_needing_own_cell": 22,
+  "ambiguous": 1
+ },
+ "exact_bridge": [
+  {
+   "sid8": "00001100",
+   "sens8_name": "plus",
+   "target": "D5:01010"
+  },
+  {
+   "sid8": "00001101",
+   "sens8_name": "difference",
+   "target": "D5:01011"
+  },
+  {
+   "sid8": "00001110",
+   "sens8_name": "times",
+   "target": "D5:10110"
+  },
+  {
+   "sid8": "00001111",
+   "sens8_name": "divide",
+   "target": "D8:11110110"
+  },
+  {
+   "sid8": "00010000",
+   "sens8_name": "abs",
+   "target": "D6:010011"
+  },
+  {
+   "sid8": "00010001",
+   "sens8_name": "min",
+   "target": "D6:110101"
+  },
+  {
+   "sid8": "00010010",
+   "sens8_name": "max",
+   "target": "D6:110111"
+  },
+  {
+   "sid8": "00010011",
+   "sens8_name": "mod",
+   "target": "D8:00101100"
+  },
+  {
+   "sid8": "00010101",
+   "sens8_name": "sqrt",
+   "target": "D8:00001110"
+  },
+  {
+   "sid8": "00010110",
+   "sens8_name": "isqrt",
+   "target": "D9:110111010"
+  },
+  {
+   "sid8": "00010111",
+   "sens8_name": "min-list",
+   "target": "D6:000010"
+  },
+  {
+   "sid8": "00011000",
+   "sens8_name": "max-list",
+   "target": "D6:000011"
+  },
+  {
+   "sid8": "00011010",
+   "sens8_name": "lessp?",
+   "target": "D5:11010"
+  },
+  {
+   "sid8": "00011011",
+   "sens8_name": "greaterp?",
+   "target": "D5:11011"
+  },
+  {
+   "sid8": "00100001",
+   "sens8_name": "not?",
+   "target": "D4:0100"
+  },
+  {
+   "sid8": "00100010",
+   "sens8_name": "equal?",
+   "target": "D8:11110111"
+  },
+  {
+   "sid8": "00100011",
+   "sens8_name": "symbol?",
+   "target": "D9:110101100"
+  },
+  {
+   "sid8": "00100101",
+   "sens8_name": "string<?",
+   "target": "D8:10110001"
+  },
+  {
+   "sid8": "00100111",
+   "sens8_name": "list",
+   "target": "D4:1110"
+  },
+  {
+   "sid8": "00101000",
+   "sens8_name": "length",
+   "target": "D6:000000"
+  },
+  {
+   "sid8": "00101011",
+   "sens8_name": "nth",
+   "target": "D6:000100"
+  },
+  {
+   "sid8": "00101110",
+   "sens8_name": "pair",
+   "target": "D8:11111101"
+  },
+  {
+   "sid8": "00110010",
+   "sens8_name": "fifth",
+   "target": "D9:110110101"
+  },
+  {
+   "sid8": "00110110",
+   "sens8_name": "cadddr",
+   "target": "D6:100111"
+  },
+  {
+   "sid8": "00111000",
+   "sens8_name": "filter",
+   "target": "D6:101001"
+  },
+  {
+   "sid8": "00111001",
+   "sens8_name": "reduce",
+   "target": "D6:101110"
+  },
+  {
+   "sid8": "00111010",
+   "sens8_name": "string-append",
+   "target": "D9:110011110"
+  },
+  {
+   "sid8": "00111011",
+   "sens8_name": "string-length",
+   "target": "D9:110100010"
+  },
+  {
+   "sid8": "00111100",
+   "sens8_name": "string-empty?",
+   "target": "D9:110011100"
+  },
+  {
+   "sid8": "00111101",
+   "sens8_name": "string-prefix?",
+   "target": "D9:110101010"
+  },
+  {
+   "sid8": "00111110",
+   "sens8_name": "string-contains?",
+   "target": "D9:110101000"
+  },
+  {
+   "sid8": "00111111",
+   "sens8_name": "string-first",
+   "target": "D9:110101011"
+  },
+  {
+   "sid8": "01000000",
+   "sens8_name": "string-rest",
+   "target": "D9:110011101"
+  },
+  {
+   "sid8": "01000001",
+   "sens8_name": "string-slice",
+   "target": "D9:110100011"
+  },
+  {
+   "sid8": "01000010",
+   "sens8_name": "symbol->string",
+   "target": "D8:11101110"
+  },
+  {
+   "sid8": "01000011",
+   "sens8_name": "string->symbol",
+   "target": "D8:11101101"
+  },
+  {
+   "sid8": "01000110",
+   "sens8_name": "number->string",
+   "target": "D9:110111001"
+  },
+  {
+   "sid8": "01001000",
+   "sens8_name": "print",
+   "target": "D8:11011011"
+  },
+  {
+   "sid8": "01001001",
+   "sens8_name": "princ",
+   "target": "D8:11010110"
+  },
+  {
+   "sid8": "01001010",
+   "sens8_name": "read",
+   "target": "D8:11101010"
+  },
+  {
+   "sid8": "01001011",
+   "sens8_name": "read-all",
+   "target": "D9:110101001"
+  },
+  {
+   "sid8": "01001100",
+   "sens8_name": "write-to-string",
+   "target": "D8:11110100"
+  },
+  {
+   "sid8": "01001101",
+   "sens8_name": "eval",
+   "target": "D4:0001"
+  },
+  {
+   "sid8": "01001111",
+   "sens8_name": "vector",
+   "target": "D8:11101111"
+  },
+  {
+   "sid8": "01010000",
+   "sens8_name": "make-vector",
+   "target": "D8:11111001"
+  },
+  {
+   "sid8": "01010001",
+   "sens8_name": "vector-length",
+   "target": "D8:11111111"
+  },
+  {
+   "sid8": "01010010",
+   "sens8_name": "vector-ref",
+   "target": "D8:11110000"
+  },
+  {
+   "sid8": "01010011",
+   "sens8_name": "vector-set!",
+   "target": "D8:11110010"
+  },
+  {
+   "sid8": "01010100",
+   "sens8_name": "i32-buffer",
+   "target": "D9:110011001"
+  },
+  {
+   "sid8": "01010101",
+   "sens8_name": "f32-buffer",
+   "target": "D9:110100001"
+  },
+  {
+   "sid8": "01010110",
+   "sens8_name": "numeric-buffer-type",
+   "target": "D9:110100000"
+  },
+  {
+   "sid8": "01010111",
+   "sens8_name": "numeric-buffer-length",
+   "target": "D9:110011010"
+  },
+  {
+   "sid8": "01011000",
+   "sens8_name": "numeric-buffer-ref",
+   "target": "D9:110100111"
+  },
+  {
+   "sid8": "01011001",
+   "sens8_name": "numeric-buffer-map",
+   "target": "D9:110011111"
+  },
+  {
+   "sid8": "01011110",
+   "sens8_name": "utc-now",
+   "target": "D9:101011110"
+  },
+  {
+   "sid8": "01011111",
+   "sens8_name": "utc-from-unix",
+   "target": "D9:101110110"
+  },
+  {
+   "sid8": "01100000",
+   "sens8_name": "unix-time-observation->utc",
+   "target": "D9:101101011"
+  },
+  {
+   "sid8": "01100001",
+   "sens8_name": "milliseconds-from-nanoseconds",
+   "target": "D9:101111110"
+  },
+  {
+   "sid8": "01100010",
+   "sens8_name": "mono-ms",
+   "target": "D9:101111001"
+  },
+  {
+   "sid8": "01100011",
+   "sens8_name": "timezone-name",
+   "target": "D9:101110001"
+  },
+  {
+   "sid8": "01100100",
+   "sens8_name": "timezone-detect",
+   "target": "D9:101001111"
+  },
+  {
+   "sid8": "01100101",
+   "sens8_name": "timezone-offset-seconds",
+   "target": "D9:101111101"
+  },
+  {
+   "sid8": "01100110",
+   "sens8_name": "deadline-reached?",
+   "target": "D9:101101000"
+  },
+  {
+   "sid8": "01100111",
+   "sens8_name": "deadline-reached-at?",
+   "target": "D9:101001101"
+  },
+  {
+   "sid8": "01101000",
+   "sens8_name": "elapsed-ns",
+   "target": "D9:101010101"
+  },
+  {
+   "sid8": "01101001",
+   "sens8_name": "deadline-from",
+   "target": "D9:110000000"
+  },
+  {
+   "sid8": "01101010",
+   "sens8_name": "deadline-after-ns",
+   "target": "D9:101001010"
+  },
+  {
+   "sid8": "01101011",
+   "sens8_name": "internet-time-sync",
+   "target": "D9:110000001"
+  },
+  {
+   "sid8": "01101100",
+   "sens8_name": "map-empty",
+   "target": "D9:101100011"
+  },
+  {
+   "sid8": "01101101",
+   "sens8_name": "map-get",
+   "target": "D9:101100101"
+  },
+  {
+   "sid8": "01101110",
+   "sens8_name": "map-insert",
+   "target": "D9:101101110"
+  },
+  {
+   "sid8": "01101111",
+   "sens8_name": "map-contains?",
+   "target": "D9:101100010"
+  },
+  {
+   "sid8": "01110000",
+   "sens8_name": "map->list",
+   "target": "D9:101001100"
+  },
+  {
+   "sid8": "01110001",
+   "sens8_name": "vec-empty",
+   "target": "D9:101101101"
+  },
+  {
+   "sid8": "01110010",
+   "sens8_name": "vec-conj",
+   "target": "D9:101011101"
+  },
+  {
+   "sid8": "01110011",
+   "sens8_name": "vec-count",
+   "target": "D9:101010111"
+  },
+  {
+   "sid8": "01110100",
+   "sens8_name": "vec-nth",
+   "target": "D9:110000010"
+  },
+  {
+   "sid8": "01110101",
+   "sens8_name": "vec->list",
+   "target": "D9:101011000"
+  },
+  {
+   "sid8": "01110110",
+   "sens8_name": "vec-from-list",
+   "target": "D9:101111011"
+  },
+  {
+   "sid8": "01110111",
+   "sens8_name": "is-fact?",
+   "target": "D9:101011111"
+  },
+  {
+   "sid8": "01111000",
+   "sens8_name": "describe",
+   "target": "D9:101011100"
+  },
+  {
+   "sid8": "01111001",
+   "sens8_name": "collect-facts-about",
+   "target": "D9:101011001"
+  },
+  {
+   "sid8": "01111010",
+   "sens8_name": "contains-atom?",
+   "target": "D9:101110011"
+  },
+  {
+   "sid8": "01111011",
+   "sens8_name": "forward-in",
+   "target": "D9:101111100"
+  },
+  {
+   "sid8": "01111100",
+   "sens8_name": "reason-in",
+   "target": "D9:101111010"
+  },
+  {
+   "sid8": "01111101",
+   "sens8_name": "check-conflict?",
+   "target": "D9:101100000"
+  },
+  {
+   "sid8": "01111110",
+   "sens8_name": "module-known?",
+   "target": "D9:101010010"
+  },
+  {
+   "sid8": "01111111",
+   "sens8_name": "module-clauses-now",
+   "target": "D9:110000011"
+  },
+  {
+   "sid8": "10000000",
+   "sens8_name": "prove-goal",
+   "target": "D9:101011011"
+  },
+  {
+   "sid8": "10000001",
+   "sens8_name": "prove-goals",
+   "target": "D9:101010001"
+  },
+  {
+   "sid8": "10000010",
+   "sens8_name": "explain-proof",
+   "target": "D9:101001011"
+  },
+  {
+   "sid8": "10000011",
+   "sens8_name": "source-of",
+   "target": "D9:101110000"
+  },
+  {
+   "sid8": "10000100",
+   "sens8_name": "provenance",
+   "target": "D9:101101111"
+  },
+  {
+   "sid8": "10000101",
+   "sens8_name": "reason",
+   "target": "D9:101001110"
+  },
+  {
+   "sid8": "10000110",
+   "sens8_name": "reason-explain",
+   "target": "D9:101100111"
+  },
+  {
+   "sid8": "10000111",
+   "sens8_name": "unify",
+   "target": "D9:101010000"
+  },
+  {
+   "sid8": "10001000",
+   "sens8_name": "logic-var",
+   "target": "D9:101110010"
+  },
+  {
+   "sid8": "10001001",
+   "sens8_name": "var?",
+   "target": "D9:101100100"
+  },
+  {
+   "sid8": "10001010",
+   "sens8_name": "apply-subst",
+   "target": "D9:101101001"
+  },
+  {
+   "sid8": "10001011",
+   "sens8_name": "walk",
+   "target": "D9:101110100"
+  },
+  {
+   "sid8": "10001100",
+   "sens8_name": "occurs-check?",
+   "target": "D9:101110101"
+  },
+  {
+   "sid8": "10001101",
+   "sens8_name": "claim?",
+   "target": "D9:101110111"
+  },
+  {
+   "sid8": "10001110",
+   "sens8_name": "claim-statement",
+   "target": "D9:101100110"
+  },
+  {
+   "sid8": "10001111",
+   "sens8_name": "claim-review",
+   "target": "D9:101101010"
+  },
+  {
+   "sid8": "10010000",
+   "sens8_name": "evidence?",
+   "target": "D9:101010110"
+  },
+  {
+   "sid8": "10010001",
+   "sens8_name": "evidence-method",
+   "target": "D9:101010011"
+  },
+  {
+   "sid8": "10010010",
+   "sens8_name": "evidence-outcome",
+   "target": "D9:101111111"
+  },
+  {
+   "sid8": "10010011",
+   "sens8_name": "observation?",
+   "target": "D9:101011010"
+  },
+  {
+   "sid8": "10010100",
+   "sens8_name": "observation-statement",
+   "target": "D9:101111000"
+  },
+  {
+   "sid8": "10010101",
+   "sens8_name": "intent?",
+   "target": "D9:101101100"
+  },
+  {
+   "sid8": "10010110",
+   "sens8_name": "intent-goal",
+   "target": "D9:101010100"
+  },
+  {
+   "sid8": "10010111",
+   "sens8_name": "supporting-evidence",
+   "target": "D9:101100001"
+  },
+  {
+   "sid8": "10011000",
+   "sens8_name": "identity",
+   "target": "D9:110101110"
+  },
+  {
+   "sid8": "10011001",
+   "sens8_name": "gensym",
+   "target": "D9:110111000"
+  },
+  {
+   "sid8": "10011010",
+   "sens8_name": "and",
+   "target": "D8:11110101"
+  },
+  {
+   "sid8": "10011011",
+   "sens8_name": "or",
+   "target": "D8:11111100"
+  },
+  {
+   "sid8": "10011100",
+   "sens8_name": "let",
+   "target": "D6:001000"
+  },
+  {
+   "sid8": "10011101",
+   "sens8_name": "let*",
+   "target": "D6:001001"
+  },
+  {
+   "sid8": "10011110",
+   "sens8_name": "thread-first",
+   "target": "D9:111000001"
+  },
+  {
+   "sid8": "10011111",
+   "sens8_name": "thread-last",
+   "target": "D9:110110000"
+  },
+  {
+   "sid8": "10100000",
+   "sens8_name": "json-parse",
+   "target": "D9:110100100"
+  },
+  {
+   "sid8": "10100001",
+   "sens8_name": "sha256-hex",
+   "target": "D9:110011000"
+  },
+  {
+   "sid8": "10100010",
+   "sens8_name": "process-run",
+   "target": "D9:110101111"
+  },
+  {
+   "sid8": "10100011",
+   "sens8_name": "tcp-read",
+   "target": "D9:110111110"
+  },
+  {
+   "sid8": "10100100",
+   "sens8_name": "tcp-write",
+   "target": "D9:110110011"
+  },
+  {
+   "sid8": "10100101",
+   "sens8_name": "tcp-listen",
+   "target": "D9:110111101"
+  },
+  {
+   "sid8": "10100110",
+   "sens8_name": "read-file",
+   "target": "D9:110110111"
+  },
+  {
+   "sid8": "10100111",
+   "sens8_name": "write-file",
+   "target": "D9:110111100"
+  },
+  {
+   "sid8": "10101001",
+   "sens8_name": "binary",
+   "target": "D9:110110110"
+  },
+  {
+   "sid8": "10101010",
+   "sens8_name": "label",
+   "target": "D5:00100"
+  },
+  {
+   "sid8": "10101101",
+   "sens8_name": "sublis",
+   "target": "D6:001010"
+  },
+  {
+   "sid8": "10101110",
+   "sens8_name": "maplist",
+   "target": "D6:000101"
+  },
+  {
+   "sid8": "10101111",
+   "sens8_name": "apply",
+   "target": "D4:0000"
+  },
+  {
+   "sid8": "10110000",
+   "sens8_name": "divmod",
+   "target": "D9:110111111"
+  },
+  {
+   "sid8": "10110001",
+   "sens8_name": "answer-not",
+   "target": "D9:110111011"
+  },
+  {
+   "sid8": "10110010",
+   "sens8_name": "answer-and",
+   "target": "D9:110110100"
+  },
+  {
+   "sid8": "10110011",
+   "sens8_name": "answer-or",
+   "target": "D9:110110010"
+  },
+  {
+   "sid8": "10110100",
+   "sens8_name": "answer-weaken",
+   "target": "D9:110101101"
+  },
+  {
+   "sid8": "10110101",
+   "sens8_name": "answer-atom",
+   "target": "D9:111000000"
+  },
+  {
+   "sid8": "10110110",
+   "sens8_name": "answer-eq",
+   "target": "D9:110110001"
+  }
+ ],
+ "separate": [
+  {
+   "sid8": "00001010",
+   "sens8_name": "defmacro",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00001011",
+   "sens8_name": "def",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00011001",
+   "sens8_name": "largest-chunk",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00011100",
+   "sens8_name": "equalp?",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00011101",
+   "sens8_name": "not-greaterp?",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00011110",
+   "sens8_name": "not-lessp?",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00011111",
+   "sens8_name": "nondecreasing-from?",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00100000",
+   "sens8_name": "nonincreasing-from?",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00100100",
+   "sens8_name": "string?",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00100110",
+   "sens8_name": "numeric-buffer?",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00101111",
+   "sens8_name": "second",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00110000",
+   "sens8_name": "third",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "00110001",
+   "sens8_name": "fourth",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01000100",
+   "sens8_name": "codepoint->string",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01000101",
+   "sens8_name": "string->codepoint",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01000111",
+   "sens8_name": "digit->string",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01001110",
+   "sens8_name": "env",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01011010",
+   "sens8_name": "mono-ns",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01011011",
+   "sens8_name": "unix-time-now",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01011100",
+   "sens8_name": "ntp-query-raw",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "01011101",
+   "sens8_name": "timezone-declarations-raw",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  },
+  {
+   "sid8": "10101000",
+   "sens8_name": "invoke",
+   "status": "needs-own-coordinate (no exact-name resident)"
+  }
+ ],
+ "ambiguous": [
+  {
+   "sid8": "00110111",
+   "sens8_name": "map",
+   "candidates": [
+    "D6:101000",
+    "D8:11000101"
+   ]
+  }
+ ]
+}
