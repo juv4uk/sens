@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 635,
+    "selected_semantic_candidates": 637,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 379,
-    "remaining_semantic_inventory": 389,
+    "unplaced_selected_candidates": 381,
+    "remaining_semantic_inventory": 387,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13665,6 +13665,127 @@
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false,
       "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hobby.babbage.exact-finite-difference-certificate.v1",
+      "semantic_name": "FINITE-DIFFERENCE-CERTIFICATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "BABBAGE-1822-EXACT-DIFFERENCES-RESEARCH",
+      "relation_class": "EXACT-POLYNOMIAL-SEQUENCE-DEGREE-BOUND-WITNESS",
+      "surface_uk": "посвідчити-скінченні-різниці",
+      "surface_ukr": "св-різн",
+      "arity": 2,
+      "argument_shape": "(samples:finite-list-of-exact-rationals, max_degree:d>=0 with len(samples)>=d+2)-> CERTIFIED(initial differences through d,next exact value) or NOT_CERTIFIED(first nonzero (d+1)-difference index,value)",
+      "behavior": "For at least d+2 equally-spaced exact samples, certify their table has identically zero (d+1)th forward differences; on success expose first forward differences orders 0..d and one exact next sample by Newton's finite binomial formula. On failure show the first nonzero (d+1)-difference. Return INSUFFICIENT-DATA if fewer than d+2 samples; no claim about future physical samples or noise.",
+      "positive_witnesses": [
+        {
+          "input": "samples=[1,4,9,16], d=2",
+          "result": "CERTIFIED: initial [1,3,2], next=25"
+        },
+        {
+          "input": "samples=[7,7,7], d=0",
+          "result": "CERTIFIED: initial [7], next=7"
+        },
+        {
+          "input": "samples=[1,4,9,17], d=2",
+          "result": "NOT_CERTIFIED: first Δ³[0]=1"
+        }
+      ],
+      "falsifiers": [
+        "Accept [1,4,9,17] as quadratic-certified (third difference is +1)",
+        "Claim any 3 samples certify degree<=2; fourth independent datum is required",
+        "Lose exact rational values to floating point",
+        "Claim predicted next mathematical sample must match noisy astronomical observations"
+      ],
+      "semantic_neighbors": [
+        "D8 polynomial and exact arithmetic",
+        "D10 BOUNDED-RATIONAL-APPROX",
+        "D10 FINITE-BAYES-UPDATE-EXACT",
+        "D9 UNIFY/PROVE-GOAL (unrelated)"
+      ],
+      "dedup_check": "No exact name in ratified D1–D9 or selected D10 at 635; unlike interpolation of n samples, requires independent (d+1)-difference zero witnesses. It is a derived algebraic invariant potentially suitable to Core-Math; no claim of irreducibility.",
+      "primary_url": "https://en.wikisource.org/wiki/Page:Memoirs_of_Royal_Astronomical_Society_Volume_01.djvu/332",
+      "source_title": "Charles Babbage, A Note respecting the Application of Machinery to the Calculation of Astronomical Tables (1822), Memoirs RAS Vol 1, p.309",
+      "source_scope": "Historical inspiration and finite-difference mechanism; precise certification/error-output interface is a modern SENS research proposal, not an alleged Babbage API.",
+      "user_domain_examples": [
+        "astronomy ephemeris polynomial tables",
+        "musical discrete motifs/tempo curves",
+        "FPGA exact recurrence",
+        "SDR calibration sample sequences",
+        "horology periodic observations"
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "Babbage 1822 RAS p309",
+        "https://collection.sciencemuseumgroup.org.uk/objects/co62243/difference-engine-no-1-difference-engine"
+      ],
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hobby.reiter.minimal-conflict-diagnoses.v1",
+      "semantic_name": "MINIMAL-CONFLICT-DIAGNOSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "REITER-1987-MODEL-BASED-DIAGNOSIS-RESEARCH",
+      "relation_class": "FINITE-CONFLICT-MINIMAL-TRANSVERSAL-ANTICHAIN",
+      "surface_uk": "знайти-мінімальні-набори-несправностей",
+      "surface_ukr": "діаг-мін",
+      "arity": 2,
+      "argument_shape": "(components:finite-set, complete_conflicts:finite-family-of-subsets-of-components) -> all inclusion-minimal hitting sets, as a set-family (canonical order only for serialization)",
+      "behavior": "Given a complete family of system conflict sets already derived from a model and observations, return all inclusion-minimal component subsets intersecting every conflict. Empty family returns singleton empty diagnosis; any empty conflict yields no diagnosis. This does not itself derive conflicts, identify real-world broken hardware, or assign Bayesian probabilities.",
+      "positive_witnesses": [
+        {
+          "input": "components={A,B,C}; conflicts={{A,B},{B,C}}",
+          "result": "diagnoses={{B},{A,C}}"
+        },
+        {
+          "input": "components={A,B}; conflicts=∅",
+          "result": "diagnoses={∅}"
+        },
+        {
+          "input": "components={A,B}; conflicts={∅}",
+          "result": "diagnoses=∅"
+        }
+      ],
+      "falsifiers": [
+        "Return {A,B,C} despite strict subset {B} hitting every conflict",
+        "Merge empty conflict and no conflicts into the same result",
+        "Call a hitting set a proven broken component without complete conflict evidence",
+        "Confuse minimum-cardinality with inclusion-minimal, which may have differing sizes"
+      ],
+      "semantic_neighbors": [
+        "D9 UNIFY",
+        "D9 PROVE-GOAL",
+        "D9 ADD-JUSTIFICATION",
+        "D9 FIRE-RULE-JTMS",
+        "D10 MINIMAL-ABDUCTIVE-EXPLANATIONS research #4965"
+      ],
+      "dedup_check": "D9 truth maintenance tracks justifications and derived facts, but does not expose the complete antichain of minimal transversals for an input conflict hypergraph. Abductive explanations pursue enough hypotheses to entail a goal, not necessarily a transversal of every known inconsistency; independent equivalence/core-or-library review still needed.",
+      "primary_url": "https://www.sciencedirect.com/science/article/pii/0004370287900622",
+      "source_title": "Raymond Reiter, A theory of diagnosis from first principles, Artificial Intelligence 32(1), pp.57–95, April 1987, DOI 10.1016/0004-3702(87)90062-2",
+      "source_scope": "Finite conflict-family restriction of Reiter's hitting-set correspondence. Complete set of conflicts is an explicit precondition; diagnosis from system observations alone is NOT claimed.",
+      "user_domain_examples": [
+        "radio amplifier repair",
+        "ESP32/FPGA signal fault localization",
+        "SDR receiver chain diagnosis",
+        "self-hosted Lisp OS component health inference",
+        "symbolic AI knowledge base fault isolation"
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "Reiter 1987 DOI 10.1016/0004-3702(87)90062-2",
+        "https://www.sciencedirect.com/science/article/abs/pii/0004370287900622"
+      ],
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -13704,6 +13825,7 @@
     "knowledge/d10-hobby-exact-measurement-intake-v1.json",
     "knowledge/d10-primitive-binary-word-root-v1.json",
     "knowledge/d10-gray-reflected-binary-research-v1.json",
-    "knowledge/d10-finite-bayes-update-research-v1.json"
+    "knowledge/d10-finite-bayes-update-research-v1.json",
+    "knowledge/d10-babbage-reiter-hobby-selected-20261009.json"
   ]
 }

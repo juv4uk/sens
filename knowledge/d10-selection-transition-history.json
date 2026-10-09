@@ -175,6 +175,36 @@
         "tests/test_d10_finite_bayes_selection.py",
         "tests/test_d10_finite_bayes_update.py"
       ]
+    },
+    {
+      "id": "d10.hobby.babbage-reiter-symbolic-pair.20261009",
+      "authority": "#4013 #4463 D10 owner-directed historical hobby/symbolic-AI selection; ratification pending",
+      "evidence": [
+        "Charles Babbage 1822 RAS https://en.wikisource.org/wiki/Page:Memoirs_of_Royal_Astronomical_Society_Volume_01.djvu/332",
+        "Raymond Reiter 1987 DOI 10.1016/0004-3702(87)90062-2",
+        "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+        "scripts/check_d10_babbage_reiter_selection.py"
+      ],
+      "previous_inventory_blob_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+      "resulting_inventory_blob_sha": "dadb803b8e1e1f51ec84894f417e0aaed2717165",
+      "added_stable_ids": [
+        "d10.hobby.babbage.exact-finite-difference-certificate.v1",
+        "d10.hobby.reiter.minimal-conflict-diagnoses.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-babbage-reiter-hobby-selected-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 635,
+      "resulting_selected": 637,
+      "decision": "RESEARCH SELECTED only, no width-10 address or physical T5; finite mathematical witnesses and owner Core/library evaluation pending",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check_d10_babbage_reiter_selection.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }

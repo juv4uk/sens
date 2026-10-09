@@ -1,0 +1,22 @@
+name: D10 Babbage Reiter symbolic hobby selection
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-babbage-reiter-hobby-selected-20261009.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - 'scripts/check_d10_babbage_reiter_selection.py'
+      - '.github/workflows/d10-babbage-reiter-selection.yml'
+  workflow_dispatch:
+jobs:
+  mathematical-source-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact independent Babbage and Reiter finite reference models with negative cases
+        run: python3 scripts/check_d10_babbage_reiter_selection.py --self-test
+      - name: No checker-induced edits
+        run: git diff --exit-code

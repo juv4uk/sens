@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 635,
-    "remaining_semantic_candidates": 389,
+    "selected_semantic_candidates": 637,
+    "remaining_semantic_candidates": 387,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 379,
+    "unplaced_selected_candidates": 381,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -355,5 +355,12 @@
     "now_selected": 634,
     "ratified_added": 0,
     "coordinates_added": 0
+  },
+  "babbage_reiter_hobby_selection_20261009": {
+    "source": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+    "selected_delta": 2,
+    "selected_total": 637,
+    "coordinates_added": 0,
+    "ratified_added": 0
   }
 }
