@@ -1,0 +1,689 @@
+{
+  "schema": "d10-hobbies-source-laws/v1",
+  "scope": "SOURCE-PINNED-PROPOSALS-ONLY",
+  "created_at": "2026-10-09",
+  "authority": [
+    "juv4uk/sens#4013",
+    "juv4uk/sens#4463",
+    "juv4uk/sens#4162",
+    "juv4uk/sens#4301"
+  ],
+  "baseline": {
+    "d9_blob_sha": "c615ee5026ecb61d5c6620ce4f8cb3e3367f1c48",
+    "d10_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "selected_d10_at_read": 630,
+    "selected_delta": 0,
+    "new_coordinates": 0,
+    "ratified_delta": 0
+  },
+  "candidate_counts": {
+    "propose_review": 6,
+    "hold": 3
+  },
+  "candidates": [
+    {
+      "semantic_name": "CALENDAR-TO-JULIAN-DAY",
+      "theme": "astronomy/chronometry",
+      "decision": "PROPOSE-REVIEW",
+      "arity": 5,
+      "input_shape": "(calendar: GREGORIAN|JULIAN, astronomical-year:int, month:int, day:int, ut-hours:exact-rational)",
+      "output_shape": "JD exact-rational | INVALID-DATE",
+      "law": "A calendar-specific, validity-checked civil date plus UT hours maps to a continuous Julian-day value whose fractional-day origin is noon; year 0 is astronomical, not historical. Invalid civil dates are rejected rather than normalized.",
+      "source": {
+        "repository": "juv4uk/maitreya8",
+        "path": "src/swe/swedate.c",
+        "blob_sha": "cf2c83a7bc38c086d2fae14cc80b382a05a35c84",
+        "start_line": 64,
+        "end_line": 185,
+        "source_url": "https://github.com/juv4uk/maitreya8/blob/cf2c83a7bc38c086d2fae14cc80b382a05a35c84/src/swe/swedate.c#L64-L185"
+      },
+      "positives": [
+        {
+          "input": [
+            "GREGORIAN",
+            2000,
+            1,
+            1,
+            12
+          ],
+          "expected": 2451545
+        },
+        {
+          "input": [
+            "GREGORIAN",
+            2000,
+            1,
+            1,
+            0
+          ],
+          "expected": 2451544.5
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": [
+            "GREGORIAN",
+            2000,
+            2,
+            30,
+            0
+          ],
+          "forbidden": "valid JD; source normalization must not masquerade as accepted civil date"
+        },
+        {
+          "input": [
+            "JULIAN",
+            2000,
+            1,
+            1,
+            12
+          ],
+          "forbidden": 2451545
+        }
+      ],
+      "dedup_attack": "Compare D9 UTC-FROM-UNIX and current D10 CIVIL-FROM-DAYS proposal; JD noon epoch/calendar mode makes output distinguishable, but must prove non-derivability versus calendar arithmetic.",
+      "mechanism_attack": "Gregorian/Julian date semantics are language-visible; Swiss Ephemeris host calls, leap-second tables, file loaders are not.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "JULIAN-DAY-TO-CALENDAR",
+      "theme": "astronomy/chronometry",
+      "decision": "PROPOSE-REVIEW",
+      "arity": 2,
+      "input_shape": "(JD:exact-rational, calendar:GREGORIAN|JULIAN)",
+      "output_shape": "(astronomical-year,month,day,ut-hours)",
+      "law": "Inverse on admitted civil-date domain of CALENDAR-TO-JULIAN-DAY; noon JD integral; midnight JD half-integer, with an explicit chosen calendar and astronomical year numbering.",
+      "source": {
+        "repository": "juv4uk/maitreya8",
+        "path": "src/swe/swedate.c",
+        "blob_sha": "cf2c83a7bc38c086d2fae14cc80b382a05a35c84",
+        "start_line": 188,
+        "end_line": 236,
+        "source_url": "https://github.com/juv4uk/maitreya8/blob/cf2c83a7bc38c086d2fae14cc80b382a05a35c84/src/swe/swedate.c#L188-L236"
+      },
+      "positives": [
+        {
+          "input": [
+            2451545,
+            "GREGORIAN"
+          ],
+          "expected": [
+            2000,
+            1,
+            1,
+            12
+          ]
+        },
+        {
+          "input": [
+            2451544.5,
+            "GREGORIAN"
+          ],
+          "expected": [
+            2000,
+            1,
+            1,
+            0
+          ]
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": [
+            2451545,
+            "GREGORIAN"
+          ],
+          "forbidden": [
+            2000,
+            1,
+            1,
+            0
+          ]
+        },
+        {
+          "input": [
+            2451545,
+            "JULIAN"
+          ],
+          "forbidden": [
+            2000,
+            1,
+            1,
+            12
+          ]
+        }
+      ],
+      "dedup_attack": "Inverse law is not the same output shape as current D9 UTC-FROM-UNIX; verify exact recurrence and admitted year range before selection.",
+      "mechanism_attack": "Do not copy donor float approximations, host calendar library or outdated leap seconds into canonical numeric semantics.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "LEAPFROG-SNAPSHOT-STEP",
+      "theme": "astronomy/physics/analog-computing",
+      "decision": "PROPOSE-REVIEW",
+      "arity": 3,
+      "input_shape": "(snapshot:{positions,half-step-velocities}, acceleration-law:snapshot->accelerations, dt:number)",
+      "output_shape": "new-snapshot",
+      "law": "Synchronous leapfrog: derive every new position from previous snapshot and half-step velocity, then every new half-step velocity from accelerations evaluated on the same next-position snapshot. Original snapshot unchanged; update order must not change result.",
+      "source": {
+        "repository": "juv4uk/vsop2013",
+        "path": "CelestialObjects.pas",
+        "blob_sha": "811c574c7a3de7873951de8db7eebd8960b4e27a",
+        "start_line": 211,
+        "end_line": 263,
+        "source_url": "https://github.com/juv4uk/vsop2013/blob/811c574c7a3de7873951de8db7eebd8960b4e27a/CelestialObjects.pas#L211-L263"
+      },
+      "positives": [
+        {
+          "input": {
+            "x": 0,
+            "vhalf": 1,
+            "a": 2,
+            "dt": 2
+          },
+          "expected": {
+            "x": 2,
+            "vhalf": 5
+          }
+        },
+        {
+          "input": {
+            "x": 4,
+            "vhalf": -2,
+            "a": 9,
+            "dt": 0
+          },
+          "expected": {
+            "x": 4,
+            "vhalf": -2
+          }
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": {
+            "x": 0,
+            "vhalf": 1,
+            "a": 2,
+            "dt": 2
+          },
+          "forbidden": {
+            "x": 6,
+            "vhalf": 5
+          }
+        },
+        {
+          "input": "two interacting particles",
+          "forbidden": "result changes with iteration order"
+        }
+      ],
+      "dedup_attack": "Compare generic state-transform/composition and vector arithmetic in D1–D9; test whether synchronous whole-snapshot update adds an observable law rather than only an algorithm.",
+      "mechanism_attack": "VSOP file IO, vector storage, positions in AU, solar special-casing and acceleration backend are implementation/policy, not distinct D10 identities.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "WINDOWED-SPECTRAL-FRAME",
+      "theme": "acoustics/music/signal-processing",
+      "decision": "PROPOSE-REVIEW",
+      "arity": 2,
+      "input_shape": "(samples: length-N finite real vector, window: same-length finite real vector)",
+      "output_shape": "one-sided (magnitude[k],phase[k]) bins k=0..floor(N/2)",
+      "law": "Apply explicit window pointwise then DFT; return one-sided magnitude and atan2 phase with declared zero-amplitude phase convention 0. No implicit device, sample rate, hop or tensor layout.",
+      "source": {
+        "repository": "juv4uk/xva-trainer",
+        "path": "python/xvapitch/stft.py",
+        "blob_sha": "297af5efb10f5f8211fda7cd352b09a1d91c4738",
+        "start_line": 56,
+        "end_line": 118,
+        "source_url": "https://github.com/juv4uk/xva-trainer/blob/297af5efb10f5f8211fda7cd352b09a1d91c4738/python/xvapitch/stft.py#L56-L118"
+      },
+      "positives": [
+        {
+          "input": {
+            "samples": [
+              1,
+              0,
+              0,
+              0
+            ],
+            "window": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "expected": {
+            "magnitude": [
+              1,
+              1,
+              1
+            ],
+            "phase": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "input": {
+            "samples": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "window": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "expected": {
+            "magnitude": [
+              4,
+              0,
+              0
+            ],
+            "phase": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": {
+            "samples": [
+              1,
+              0,
+              0
+            ],
+            "window": [
+              1,
+              1
+            ]
+          },
+          "forbidden": "silent truncation"
+        },
+        {
+          "input": {
+            "samples": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "window": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "forbidden": "claimed measured physical phase for zero amplitude"
+        }
+      ],
+      "dedup_attack": "DFT from arithmetic/complex operations is derivable; separate resident requires evidence of a reusable observable frame contract. Do not pretend STFT implementation is a new primitive.",
+      "mechanism_attack": "Torch convolutions, CUDA tensors, reflection padding, numpy arrays, and librosa interface are backend-only.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "COHERENT-PHASE-BIT-DECISION",
+      "theme": "radio/digital-signal-processing",
+      "decision": "PROPOSE-REVIEW",
+      "arity": 3,
+      "input_shape": "(observed_samples:vector,reference_carrier:vector,minimum_confidence:number in (0,1])",
+      "output_shape": "(bit:0|1,confidence:number) | AMBIGUOUS",
+      "law": "For equal nonempty sample and reference vectors, use signed correlation, normalized by the geometric mean of energies, to classify a reliable coherent bit. Zero energy or confidence below threshold yields AMBIGUOUS rather than a reliable fabricated bit.",
+      "source": {
+        "repository": "juv4uk/radio-log",
+        "path": "src/lib/sens-radio/bpsk.ts",
+        "blob_sha": "5c1b9f838686800bc049b34f4aecf6c8a8e74a04",
+        "start_line": 77,
+        "end_line": 133,
+        "source_url": "https://github.com/juv4uk/radio-log/blob/5c1b9f838686800bc049b34f4aecf6c8a8e74a04/src/lib/sens-radio/bpsk.ts#L77-L133"
+      },
+      "positives": [
+        {
+          "input": {
+            "samples": [
+              1,
+              1
+            ],
+            "reference": [
+              1,
+              1
+            ],
+            "threshold": 0.5
+          },
+          "expected": {
+            "bit": 1,
+            "confidence": 1
+          }
+        },
+        {
+          "input": {
+            "samples": [
+              -1,
+              -1
+            ],
+            "reference": [
+              1,
+              1
+            ],
+            "threshold": 0.5
+          },
+          "expected": {
+            "bit": 0,
+            "confidence": 1
+          }
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": {
+            "samples": [
+              0,
+              0
+            ],
+            "reference": [
+              1,
+              1
+            ],
+            "threshold": 0.5
+          },
+          "forbidden": "reliably classified bit 1"
+        },
+        {
+          "input": {
+            "samples": [
+              1
+            ],
+            "reference": [
+              1,
+              1
+            ],
+            "threshold": 0.5
+          },
+          "forbidden": "silent zip truncation"
+        }
+      ],
+      "dedup_attack": "Check D9/D10 observation, evidence, and ambiguity outcomes; signed normalized correlation may be derived from vectors. Proposed AMBIGUOUS is a wrapper law: source's low-level zero-correlation bit=1 is NOT a reliable observation.",
+      "mechanism_attack": "Radio hardware, sample-rate selection, center frequency, sync locks and protocol framing remain outside the language-visible decision.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "PHASE-CONTINUOUS-TONE-SEQUENCE",
+      "theme": "radio/music/FPGA",
+      "decision": "PROPOSE-REVIEW",
+      "arity": 6,
+      "input_shape": "(bits:list<0|1>, sample_rate:positive, symbol_rate:positive, tone0:positive, tone1:positive, amplitude:(0,1])",
+      "output_shape": "finite sampled waveform",
+      "law": "Generate two-tone samples from a single phase accumulator: successive symbol tones may differ but phase never resets at a symbol boundary. Reject non-integral samples-per-symbol, Nyquist violations and invalid bits.",
+      "source": {
+        "repository": "juv4uk/radio-log",
+        "path": "src/lib/sens-radio/bfsk-tx.ts",
+        "blob_sha": "5ca28e0cf64737c7a0ad6421e2ad91a2fcb1c896",
+        "start_line": 1,
+        "end_line": 57,
+        "source_url": "https://github.com/juv4uk/radio-log/blob/5ca28e0cf64737c7a0ad6421e2ad91a2fcb1c896/src/lib/sens-radio/bfsk-tx.ts#L1-L57"
+      },
+      "positives": [
+        {
+          "input": {
+            "bits": "01",
+            "sample_rate": 16,
+            "symbol_rate": 2,
+            "tone0": 1.5,
+            "tone1": 2.5,
+            "amplitude": 1
+          },
+          "expected": "16 samples; sample[8] = -1 within tolerance"
+        },
+        {
+          "input": {
+            "bits": "",
+            "sample_rate": 16,
+            "symbol_rate": 2,
+            "tone0": 1.5,
+            "tone1": 2.5,
+            "amplitude": 1
+          },
+          "expected": []
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": {
+            "bits": "01",
+            "sample_rate": 16,
+            "symbol_rate": 2,
+            "tone0": 8,
+            "tone1": 2.5,
+            "amplitude": 1
+          },
+          "forbidden": "accepted at Nyquist"
+        },
+        {
+          "input": {
+            "bits": "0x1",
+            "sample_rate": 16,
+            "symbol_rate": 2,
+            "tone0": 1.5,
+            "tone1": 2.5,
+            "amplitude": 1
+          },
+          "forbidden": "accepted arbitrary alphabet"
+        }
+      ],
+      "dedup_attack": "Phase accumulation may be numeric recurrence composition, so prove a distinct reusable signal state law before selection. SENS language code itself is not an RF framing protocol.",
+      "mechanism_attack": "No DAC, GPIO, transmitter, device register, channel center frequency, or T5 framing identity.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "PENDULUM-PERIOD-FROM-DIRECTIONAL-CROSSINGS",
+      "theme": "pendulum/metrology/horology",
+      "decision": "HOLD-SOURCE-TODO",
+      "arity": 2,
+      "input_shape": "(timestamped crossing events, direction)",
+      "output_shape": "positive time interval | INSUFFICIENT",
+      "law": "Period is the difference between successive crossings in the same direction, with timestamps in exact rational time; adjacent opposite-direction crossings may represent a half-period instead.",
+      "source": {
+        "repository": "juv4uk/esp32-pendulum",
+        "path": "components/physics/period_estimator.c",
+        "blob_sha": "062d7889bff31c58d17cfee1c0dfdcfb62ad0c29",
+        "start_line": 1,
+        "end_line": 10,
+        "source_url": "https://github.com/juv4uk/esp32-pendulum/blob/062d7889bff31c58d17cfee1c0dfdcfb62ad0c29/components/physics/period_estimator.c#L1-L10"
+      },
+      "positives": [
+        {
+          "input": [
+            [
+              "UP",
+              0
+            ],
+            [
+              "DOWN",
+              5
+            ],
+            [
+              "UP",
+              10
+            ]
+          ],
+          "expected": 10
+        },
+        {
+          "input": [
+            [
+              "UP",
+              0
+            ]
+          ],
+          "expected": "INSUFFICIENT"
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": [
+            [
+              "UP",
+              0
+            ],
+            [
+              "DOWN",
+              5
+            ],
+            [
+              "UP",
+              10
+            ]
+          ],
+          "forbidden": 5
+        }
+      ],
+      "dedup_attack": "No implemented estimator in pinned donor (only TODO); must prove threshold/hysteresis/direction law and test real events before promotion.",
+      "mechanism_attack": "Sensor GPIO, microsecond clock host API and interrupt delivery are excluded.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "RADIO-FRAME-UNIQUE-ACQUISITION",
+      "theme": "radio/logic/observation",
+      "decision": "HOLD-DERIVABILITY",
+      "arity": 1,
+      "input_shape": "(validated frame candidates with identity)",
+      "output_shape": "LOCKED(frame) | AMBIGUOUS | UNLOCKED",
+      "law": "Classify distinct valid frame identities: cardinality 0 UNLOCKED, 1 LOCKED, greater than 1 AMBIGUOUS.",
+      "source": {
+        "repository": "juv4uk/radio-log",
+        "path": "src/lib/sens-radio/frame-sync.ts",
+        "blob_sha": "5d3be712b417379b7c8d68bb83cd95f00acbff90",
+        "start_line": 137,
+        "end_line": 206,
+        "source_url": "https://github.com/juv4uk/radio-log/blob/5d3be712b417379b7c8d68bb83cd95f00acbff90/src/lib/sens-radio/frame-sync.ts#L137-L206"
+      },
+      "positives": [
+        {
+          "input": [],
+          "expected": "UNLOCKED"
+        },
+        {
+          "input": [
+            "A",
+            "A"
+          ],
+          "expected": "LOCKED(A)"
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": [
+            "A",
+            "B"
+          ],
+          "forbidden": "LOCKED(A)"
+        }
+      ],
+      "dedup_attack": "Likely derived from D9/D10 RESULT-COUNT plus explicit observation ambiguity and equality; do not mint another resident without a falsifier.",
+      "mechanism_attack": "Magic bits, CRC, modulation and frame parsing are transport.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    },
+    {
+      "semantic_name": "JULIAN-CENTURIES-FROM-JD",
+      "theme": "astronomy/time",
+      "decision": "HOLD-PURE-DERIVATION",
+      "arity": 1,
+      "input_shape": "JD",
+      "output_shape": "rational",
+      "law": "(JD-2451545)/36525.",
+      "source": {
+        "repository": "juv4uk/maitreya8",
+        "path": "src/swe/swedate.c",
+        "blob_sha": "cf2c83a7bc38c086d2fae14cc80b382a05a35c84",
+        "start_line": 136,
+        "end_line": 156,
+        "source_url": "https://github.com/juv4uk/maitreya8/blob/cf2c83a7bc38c086d2fae14cc80b382a05a35c84/src/swe/swedate.c#L136-L156"
+      },
+      "positives": [
+        {
+          "input": 2451545,
+          "expected": 0
+        },
+        {
+          "input": 2488070,
+          "expected": 1
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": 2451545,
+          "forbidden": 1
+        }
+      ],
+      "dedup_attack": "Arithmetic-only expression, likely derived under domain math and not a separately irreducible state law.",
+      "mechanism_attack": "No calendar/ephemeris backend.",
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_canonical_inventory": false,
+      "root_review": "PENDING-INDEPENDENT-SOURCE-ORACLE-AND-SEMANTIC-DEDUP",
+      "unblock_fanout": "UNKNOWN",
+      "expressibility_gap": "UNPROVEN",
+      "exact_name_prefilter": "CLEAR-D9-AND-D10-AT-SNAPSHOT; D1-D8 FULL SEMANTIC CHECK PENDING"
+    }
+  ],
+  "review_rule": "All listed names are research proposals, NOT selected D10 inventory; full D1-D9 and intra-D10 semantic root/reuse audits and source runtime parity required before admission. D2 alone defines control, no host/hardware/T5 slots."
+}
