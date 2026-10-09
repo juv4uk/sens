@@ -135,6 +135,32 @@ def scan_active_lisp() -> tuple[list[tuple[Path, Token]], list[tuple[Path, Token
     return nil_heads, zero_heads, zero_tokens, nil_token_count
 
 
+
+def contract_has_ground_separation(contract: str) -> bool:
+    """Вимагає чинний закон D3, а не вилучене формулювання Function8.
+
+    Шукаємо лише значення властивості structural-empty-non-alias: окремі
+    згадки D3, D1 та історичного байта в інших реченнях не є доказом.
+    Відсутність чи зміна нормативного поля завершується fail-closed.
+    """
+    match = re.search(
+        r'(?m)^[ \\t]*\\(structural-empty-non-alias\\s*\\.\\s*"(?P<law>(?:\\\\.|[^"\\\\])*)"\\s*\\)',
+        contract,
+    )
+    if match is None:
+        return False
+    law = match.group("law").casefold()
+    return all(
+        requirement in law
+        for requirement in (
+            "core.d3 000 structural empty",
+            "not historical exact-eight-bit 00000000",
+            "not predicatebit 0 or number zero",
+            "equal packed numeric zero across domains never collapses those identities",
+        )
+    )
+
+
 def route_evidence() -> tuple[bool, bool]:
     """Inspect the historical metadata and the language-owned separation law.
 
@@ -150,11 +176,7 @@ def route_evidence() -> tuple[bool, bool]:
         token.text == ZERO8 for token in call_heads(mechanism_tokens)
     )
 
-    contract_separates_ground = (
-        "function 00000000 is not the empty-list value" in contract.lower()
-        and "() is represented as a structural empty value outside the function space"
-        in contract.lower()
-    )
+    contract_separates_ground = contract_has_ground_separation(contract)
 
     return zero_in_mechanism_rows, contract_separates_ground
 
@@ -188,7 +210,7 @@ def main() -> int:
             "current zero Function8 has mechanism metadata; H-NIL snapshot needs semantic reclassification"
         )
     if not separated:
-        failures.append("Contract 10 no longer explicitly separates () from Function8 zero")
+        failures.append("Contract 11.8 must explicitly separate D3:000 from D1:0 and historical Function8 zero")
 
     if failures:
         for failure in failures:
