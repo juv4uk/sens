@@ -271,15 +271,14 @@ mod eval_tests {
     }
 
     #[test]
-    fn physical_eval_path_uses_direct_domain_words_not_visible_text() {
+    fn physical_eval_path_uses_packed_words_not_visible_text() {
         let source = include_str!("sens-trit.rs");
         let start = source.find("fn eval_t5_bytes_core4(").expect("physical eval route");
         let end = source[start..].find("\n}\n").expect("route body") + start + 3;
         let route = &source[start..end];
-        assert!(route.contains("sens::decode_ternary_words(bytes)"));
-        assert!(route.contains("sens::parse_canonical_word_sequence(&words)"));
-        assert!(!route.contains("sens::pack_binary_source_words(&words)"));
-        assert!(!route.contains("sens::parse_canonical_packed_words(&packed, &widths)"));
+        assert!(route.contains("sens::decode_ternary_program(bytes)"));
+        assert!(route.contains("sens::pack_binary_source_words(&words)"));
+        assert!(route.contains("sens::parse_canonical_packed_words(&packed, &widths)"));
         assert!(!route.contains("sens::open_ternary_program(bytes)"));
         assert!(!route.contains("sens::parse_canonical_binary(&visible)"));
     }
