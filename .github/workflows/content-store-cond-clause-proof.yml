@@ -20,6 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate generated API report and print exact diff (diagnostic)
+        run: |
+          python3 scripts/public_api_inventory.py --write-report
+          git diff --unified=2 -- docs/generated/public-api-discovery.md
       - name: Assert original content-store semantic and deterministic history laws
         run: cargo test -p sens --test content_store_authority -- --nocapture
       - name: Assert Canon V2 unchanged
