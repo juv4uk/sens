@@ -1,0 +1,41 @@
+name: D10 current archipelago documentation projection
+
+on:
+  pull_request:
+    paths:
+      - "docs/architecture/ARCHIPELAGO-V1.uk.md"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-owner-repo-donor-matrix-v3.json"
+      - "scripts/check-d10-archipelago-doc-projection.py"
+      - "tests/test_d10_archipelago_doc_projection.py"
+      - ".github/workflows/d10-archipelago-doc-projection.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/architecture/ARCHIPELAGO-V1.uk.md"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-owner-repo-donor-matrix-v3.json"
+      - "scripts/check-d10-archipelago-doc-projection.py"
+      - "tests/test_d10_archipelago_doc_projection.py"
+      - ".github/workflows/d10-archipelago-doc-projection.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  doc-follows-owner-ratified-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify D10 625 count and the single stream from CURRENT repository authority
+        run: python3 scripts/check-d10-archipelago-doc-projection.py
+      - name: Regression tests reject stale counts and wrong owner namespace
+        run: python3 -m unittest discover -s tests -p test_d10_archipelago_doc_projection.py -v
+      - name: Guarantee read-only classification
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
