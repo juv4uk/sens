@@ -495,14 +495,14 @@ use wsm_kernel_c_abi::{
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct SemanticId(pub u8);
+pub struct LegacyAbiSemanticId(pub u8);
 
 #[derive(Debug)]
 struct DatalogAbiContext {
     db: Database,
     program: Program,
     running: bool,
-    last_semantic_id: Option<SemanticId>,
+    last_legacy_abi_id: Option<LegacyAbiSemanticId>,
 }
 
 pub struct DatalogAbiAdapter {
@@ -516,7 +516,7 @@ impl DatalogAbiAdapter {
             db,
             program,
             running: false,
-            last_semantic_id: None,
+            last_legacy_abi_id: None,
         });
         let context_ptr = (&mut *context) as *mut DatalogAbiContext as *mut c_void;
 
@@ -537,8 +537,8 @@ impl DatalogAbiAdapter {
         self.vtable
     }
 
-    pub fn last_semantic_id(&self) -> Option<SemanticId> {
-        self.context.last_semantic_id
+    pub fn last_legacy_abi_id(&self) -> Option<LegacyAbiSemanticId> {
+        self.context.last_legacy_abi_id
     }
 }
 
@@ -637,8 +637,8 @@ unsafe extern "C" fn datalog_exchange(
         return WsmStatus::InvalidArgument;
     }
 
-    let output = if arithmetic::is_math_sid(request.semantic_id) {
-        match arithmetic::parse_semantic_request(request.semantic_id, relation)
+    let output = if arithmetic::is_legacy_math_id(request.semantic_id) {
+        match arithmetic::parse_legacy_abi_request(request.semantic_id, relation)
             .and_then(|expression| expression.evaluate(&HashMap::new()))
         {
             Ok(Value::Int(value)) => value.to_string().into_bytes(),
@@ -650,7 +650,7 @@ unsafe extern "C" fn datalog_exchange(
         relation_bytes(&context.db, relation)
     };
 
-    context.last_semantic_id = Some(SemanticId(request.semantic_id));
+    context.last_legacy_abi_id = Some(LegacyAbiSemanticId(request.semantic_id));
 
     if response.len < output.len() {
         unsafe {

@@ -667,11 +667,11 @@ impl Drop for ClipsFact {
 /// provenance and never maps it to CLIPS constructs, facts, rules or agenda
 /// operations.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct SemanticId(pub u8);
+pub struct LegacyAbiSemanticId(pub u8);
 
 const SID_ADD: u8 = 0b0000_1100;
 
-fn semantic_add_expression(payload: &str) -> Result<String, ()> {
+fn legacy_abi_add_expression(payload: &str) -> Result<String, ()> {
     let mut parts = payload.split_whitespace();
     let left = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
     let right = parts.next().and_then(|value| value.parse::<i64>().ok()).ok_or(())?;
@@ -688,7 +688,7 @@ fn semantic_add_expression(payload: &str) -> Result<String, ()> {
 /// assigning language meaning to those values.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ClipsExecutionResult {
-    pub semantic_id: Option<SemanticId>,
+    pub semantic_id: Option<LegacyAbiSemanticId>,
     pub fired: i64,
     pub facts_before: std::ffi::c_ulong,
     pub facts_after: std::ffi::c_ulong,
@@ -696,7 +696,7 @@ pub struct ClipsExecutionResult {
 
 impl ClipsExecutionResult {
     pub const fn new(
-        semantic_id: Option<SemanticId>,
+        semantic_id: Option<LegacyAbiSemanticId>,
         fired: i64,
         facts_before: std::ffi::c_ulong,
         facts_after: std::ffi::c_ulong,
@@ -711,7 +711,7 @@ struct ClipsAbiContext {
     #[allow(dead_code)]
     fact_text: String,
     running: bool,
-    last_semantic_id: Option<SemanticId>,
+    last_legacy_abi_id: Option<LegacyAbiSemanticId>,
     last_fired: Option<i64>,
     last_eval_output: Option<Vec<u8>>,
     #[cfg(feature = "native-clips")]
@@ -737,7 +737,7 @@ impl ClipsAbiAdapter {
             rule: rule.into(),
             fact_text: fact.into(),
             running: false,
-            last_semantic_id: None,
+            last_legacy_abi_id: None,
             last_fired: None,
             last_eval_output: None,
             #[cfg(feature = "native-clips")]
@@ -762,8 +762,8 @@ impl ClipsAbiAdapter {
         self.vtable
     }
 
-    pub fn last_semantic_id(&self) -> Option<SemanticId> {
-        self.context.last_semantic_id
+    pub fn last_legacy_abi_id(&self) -> Option<LegacyAbiSemanticId> {
+        self.context.last_legacy_abi_id
     }
 
     pub fn last_fired(&self) -> Option<i64> {
@@ -889,7 +889,7 @@ unsafe extern "C" fn clips_exchange(
             return WsmStatus::NotRunning;
         };
         let output = if request.semantic_id == SID_ADD {
-            let Ok(expression) = semantic_add_expression(command) else {
+            let Ok(expression) = legacy_abi_add_expression(command) else {
                 return WsmStatus::InvalidArgument;
             };
             let value = match environment.eval_bytes(&expression) {
@@ -913,7 +913,7 @@ unsafe extern "C" fn clips_exchange(
         } else {
             return WsmStatus::InvalidArgument;
         };
-        context.last_semantic_id = Some(SemanticId(request.semantic_id));
+        context.last_legacy_abi_id = Some(LegacyAbiSemanticId(request.semantic_id));
         copy_response(&output, response, written)
     }
 }
@@ -956,14 +956,14 @@ mod tests {
         }
     }
     #[test]
-    fn semantic_add_expression_is_arguments_only() {
-        assert_eq!(semantic_add_expression("2 3"), Ok("(+ 2 3)".to_string()));
+    fn legacy_abi_add_expression_is_arguments_only() {
+        assert_eq!(legacy_abi_add_expression("2 3"), Ok("(+ 2 3)".to_string()));
         assert!(
-            semantic_add_expression("eval:(+ 2 3)").is_err(),
+            legacy_abi_add_expression("eval:(+ 2 3)").is_err(),
             "eval/operator text must never be semantic identity"
         );
         assert!(
-            semantic_add_expression("- 7 3").is_err(),
+            legacy_abi_add_expression("- 7 3").is_err(),
             "operator text must not override the + SID"
         );
     }
@@ -978,7 +978,7 @@ mod tests {
         assert_eq!(vtable.abi_version, WSM_KERNEL_ABI_VERSION);
         assert_eq!(vtable.kernel, WsmKernelKind::Clips);
         assert!(vtable.is_mechanically_complete());
-        assert_eq!(adapter.last_semantic_id(), None);
+        assert_eq!(adapter.last_legacy_abi_id(), None);
         assert_eq!(adapter.last_fired(), None);
         assert_eq!(adapter.last_eval_output(), None);
     }

@@ -1,22 +1,22 @@
-; #1117 — language Sens8 vs kernel ABI coordinate boundary.
+; #1117 / #2817 — canonical domain identity vs legacy kernel ABI coordinate.
 ;
-; The language owns exact SID identity. External kernels may preserve one
-; transport byte as an observation/ABI coordinate, but that wrapper is not
-; the language's Sens8 type and may not become a reverse semantic authority.
+; The language owns exact domain-qualified identity. External kernels may
+; preserve one historical transport byte as an observation/ABI coordinate,
+; but that wrapper is explicitly legacy and may not become reverse authority.
 
 (kernel-abi-transport-boundary/1
   (owner sens)
-  (language-identity-type Sens8)
+  (language-identity-type CoreDomainIdentity)
   (shared-abi-type WsmKernelRequest)
   (shared-abi-field semantic_id)
   (shared-abi-storage opaque-u8)
 
-  (kernel-wrapper-type SemanticId)
+  (kernel-wrapper-type LegacyAbiSemanticId)
   (kernel-wrapper-role transport-coordinate-only)
   (wrapper-language-type-equivalence forbidden)
   (kernel-to-language-authority forbidden)
   (kernel-may-query-semantic-registry forbidden)
-  (kernel-may-import-language-sid-type forbidden)
+  (kernel-may-import-language-identity-type forbidden)
   (kernel-may-mint-semantic-identity forbidden)
 
   (shared-abi-source
@@ -36,7 +36,7 @@
     "crates/wsm-datalog-kernel/src/lib.rs"
     "crates/wsm-datalog-kernel/Cargo.toml")
 
-  (allowed-direction language-sid8-to-kernel-transport)
+  (allowed-direction language-domain-to-explicit-legacy-abi-projection)
   (reverse-direction kernel-transport-to-language-meaning forbidden)
   (native-result-role observation-only)
   (diagnostic kernel-abi-transport-boundary-violation))

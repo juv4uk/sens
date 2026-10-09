@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use wsm_kernel_host::{
     KernelDriver, KernelHandle, KernelHostError, KernelId, KernelLifecycleState, KernelRouter,
 };
-use wsm_prolog_kernel::{PrologKernel, PrologQuery, PrologRequest, SemanticId};
+use wsm_prolog_kernel::{LegacyAbiSemanticId, PrologKernel, PrologQuery, PrologRequest};
 
 const UNIFY_SID: u8 = 0b1000_0111;
 
@@ -44,14 +44,14 @@ impl KernelDriver for PrologLifecycleDriver {
         let goal = std::str::from_utf8(payload)
             .map_err(|error| KernelHostError::Driver(error.to_string()))?;
         let request = PrologRequest::new(
-            UNIFY_SID,
+            LegacyAbiLegacyAbiSemanticId(UNIFY_SID),
             PrologQuery::new(goal, "X"),
         );
         let result = self
             .kernel
             .execute(&self.program, &request)
             .map_err(|error| KernelHostError::Driver(error.to_string()))?;
-        if result.semantic_id != SemanticId(UNIFY_SID) {
+        if result.semantic_id != LegacyAbiSemanticId(UNIFY_SID) {
             return Err(KernelHostError::Driver(
                 "Prolog lifecycle witness changed opaque semantic provenance".into(),
             ));

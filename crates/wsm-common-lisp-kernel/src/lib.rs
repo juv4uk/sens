@@ -21,11 +21,11 @@ use wsm_kernel_c_abi::{
 ///
 /// This crate deliberately does not attach meaning to the byte.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct SemanticId(pub u8);
+pub struct LegacyAbiSemanticId(pub u8);
 
 const SID_ADD: u8 = 0b0000_1100;
 
-fn semantic_form_for_request(semantic_id: u8, payload: &str) -> Result<String, ()> {
+fn legacy_abi_form_for_request(semantic_id: u8, payload: &str) -> Result<String, ()> {
     if semantic_id != SID_ADD {
         return Ok(payload.to_string());
     }
@@ -42,14 +42,14 @@ fn semantic_form_for_request(semantic_id: u8, payload: &str) -> Result<String, (
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CommonLispRequest {
-    pub semantic_id: SemanticId,
+    pub semantic_id: LegacyAbiSemanticId,
     pub form: String,
 }
 
 impl CommonLispRequest {
-    pub fn new(semantic_id: u8, form: impl Into<String>) -> Self {
+    pub fn new(semantic_id: LegacyAbiSemanticId, form: impl Into<String>) -> Self {
         Self {
-            semantic_id: SemanticId(semantic_id),
+            semantic_id,
             form: form.into(),
         }
     }
@@ -64,7 +64,7 @@ impl CommonLispRequest {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CommonLispResult {
-    pub semantic_id: SemanticId,
+    pub semantic_id: LegacyAbiSemanticId,
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
 }
@@ -79,7 +79,7 @@ pub struct ProcessResult {
 pub enum CommonLispKernelError {
     Spawn(std::io::Error),
     ProcessFailed {
-        semantic_id: Option<SemanticId>,
+        semantic_id: Option<LegacyAbiSemanticId>,
         status: Option<i32>,
         stdout: Vec<u8>,
         stderr: Vec<u8>,
@@ -191,7 +191,7 @@ impl CommonLispKernel {
 struct CommonLispAbiContext {
     kernel: CommonLispKernel,
     running: bool,
-    last_semantic_id: Option<SemanticId>,
+    last_legacy_abi_id: Option<LegacyAbiSemanticId>,
 }
 
 /// Owns the stable context behind the semantic-neutral C ABI vtable.
@@ -216,7 +216,7 @@ impl CommonLispAbiAdapter {
         let mut context = Box::new(CommonLispAbiContext {
             kernel,
             running: false,
-            last_semantic_id: None,
+            last_legacy_abi_id: None,
         });
         let context_ptr = (&mut *context) as *mut CommonLispAbiContext as *mut c_void;
 
@@ -237,8 +237,8 @@ impl CommonLispAbiAdapter {
         self.vtable
     }
 
-    pub fn last_semantic_id(&self) -> Option<SemanticId> {
-        self.context.last_semantic_id
+    pub fn last_legacy_abi_id(&self) -> Option<LegacyAbiSemanticId> {
+        self.context.last_legacy_abi_id
     }
 }
 
@@ -307,20 +307,20 @@ unsafe extern "C" fn common_lisp_exchange(
     let Ok(payload_text) = std::str::from_utf8(payload) else {
         return WsmStatus::InvalidArgument;
     };
-    let Ok(form) = semantic_form_for_request(request.semantic_id, payload_text) else {
+    let Ok(form) = legacy_abi_form_for_request(request.semantic_id, payload_text) else {
         return WsmStatus::InvalidArgument;
     };
 
-    let kernel_request = CommonLispRequest::new(request.semantic_id, form);
+    let kernel_request = CommonLispRequest::new(LegacyAbiSemanticId(request.semantic_id), form);
     let result = match context.kernel.evaluate(&kernel_request) {
         Ok(result) => result,
         Err(_) => return WsmStatus::KernelFailure,
     };
 
-    if result.semantic_id != SemanticId(request.semantic_id) {
+    if result.semantic_id != LegacyAbiSemanticId(request.semantic_id) {
         return WsmStatus::KernelFailure;
     }
-    context.last_semantic_id = Some(result.semantic_id);
+    context.last_legacy_abi_id = Some(result.semantic_id);
 
     if response.len < result.stdout.len() {
         unsafe {
@@ -353,23 +353,23 @@ mod tests {
 
     #[test]
     fn request_keeps_semantic_id_opaque() {
-        let request = CommonLispRequest::new(0b0000_0101, "(car '(left right))");
-        assert_eq!(request.semantic_id, SemanticId(0b0000_0101));
+        let request = CommonLispRequest::new(LegacyAbiSemanticId(0b0000_0101), "(car '(left right))");
+        assert_eq!(request.semantic_id, LegacyAbiSemanticId(0b0000_0101));
         assert!(request.printable_eval_form().contains("(car '(left right))"));
     }
 
     #[test]
-    fn semantic_add_uses_exact_sid8_and_arguments_only() {
+    fn legacy_abi_add_uses_exact_byte_and_arguments_only() {
         assert_eq!(
-            semantic_form_for_request(SID_ADD, "2 3"),
+            legacy_abi_form_for_request(SID_ADD, "2 3"),
             Ok("(+ 2 3)".to_string())
         );
         assert!(
-            semantic_form_for_request(SID_ADD, "(- 7 3)").is_err(),
+            legacy_abi_form_for_request(SID_ADD, "(- 7 3)").is_err(),
             "operator/form text must not override the + SID"
         );
         assert_eq!(
-            semantic_form_for_request(0b0000_0101, "(car '(left right))"),
+            legacy_abi_form_for_request(0b0000_0101, "(car '(left right))"),
             Ok("(car '(left right))".to_string()),
             "raw legacy semantic paths are unchanged in this first slice"
         );
@@ -378,7 +378,7 @@ mod tests {
     #[test]
     fn missing_runtime_is_a_transport_failure_not_a_semantic_result() {
         let kernel = CommonLispKernel::new("__wsm_common_lisp_that_does_not_exist__");
-        let request = CommonLispRequest::new(0b0000_0101, "(car '(left right))");
+        let request = CommonLispRequest::new(LegacyAbiSemanticId(0b0000_0101), "(car '(left right))");
         assert!(matches!(
             kernel.evaluate(&request),
             Err(CommonLispKernelError::Spawn(_))
@@ -388,7 +388,7 @@ mod tests {
     #[test]
     fn process_failure_retains_the_semantic_id() {
         let error = CommonLispKernelError::ProcessFailed {
-            semantic_id: Some(SemanticId(0b0000_0101)),
+            semantic_id: Some(LegacyAbiSemanticId(0b0000_0101)),
             status: Some(1),
             stdout: vec![],
             stderr: b"failure".to_vec(),
@@ -396,14 +396,14 @@ mod tests {
         assert!(matches!(
             error,
             CommonLispKernelError::ProcessFailed {
-                semantic_id: Some(SemanticId(0b0000_0101)),
+                semantic_id: Some(LegacyAbiSemanticId(0b0000_0101)),
                 ..
             }
         ));
     }
 
     #[test]
-    fn c_abi_add_uses_sid8_and_arguments_only() {
+    fn c_abi_add_uses_legacy_byte_and_arguments_only() {
         if std::env::var_os("WSM_COMMON_LISP_INTEGRATION").is_none() {
             return;
         }
@@ -437,7 +437,7 @@ mod tests {
         };
         assert_eq!(status, WsmStatus::Ok);
         assert_eq!(String::from_utf8_lossy(&output[..written]).trim(), "5");
-        assert_eq!(adapter.last_semantic_id(), Some(SemanticId(SID_ADD)));
+        assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(SID_ADD)));
 
         let override_text = b"(- 7 3)";
         written = 0;
@@ -477,7 +477,7 @@ mod tests {
         assert_eq!(vtable.abi_version, WSM_KERNEL_ABI_VERSION);
         assert_eq!(vtable.kernel, WsmKernelKind::CommonLisp);
         assert!(vtable.is_mechanically_complete());
-        assert_eq!(adapter.last_semantic_id(), None);
+        assert_eq!(adapter.last_legacy_abi_id(), None);
     }
 
     #[test]

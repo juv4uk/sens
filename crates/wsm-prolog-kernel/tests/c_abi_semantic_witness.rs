@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use wsm_kernel_c_abi::{
     WsmByteSpan, WsmKernelKind, WsmKernelRequest, WsmMutableByteSpan, WsmStatus,
 };
-use wsm_prolog_kernel::{PrologAbiAdapter, PrologKernel, SemanticId};
+use wsm_prolog_kernel::{PrologAbiAdapter, PrologKernel, LegacyAbiSemanticId};
 
 const PROBE_ID: u8 = 0b0000_0011;
 
@@ -16,7 +16,7 @@ fn fixture() -> PathBuf {
 }
 
 #[test]
-fn opaque_semantic_id_crosses_same_c_abi_into_real_prolog_backtracking() {
+fn opaque_legacy_abi_id_crosses_same_c_abi_into_real_prolog_backtracking() {
     if !swipl_available() {
         eprintln!("SKIP: swipl is not installed on this machine");
         return;
@@ -58,7 +58,7 @@ fn opaque_semantic_id_crosses_same_c_abi_into_real_prolog_backtracking() {
         String::from_utf8_lossy(&output[..written]).trim(),
         "[bob,dave,carol]"
     );
-    assert_eq!(adapter.last_semantic_id(), Some(SemanticId(PROBE_ID)));
+    assert_eq!(adapter.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
 
     assert_eq!(
         unsafe { vtable.stop.expect("stop")(vtable.context) },
@@ -177,7 +177,7 @@ fn prolog_native_substitutions_preserve_zero_one_many_without_truth_projection()
 
     // These are native Prolog answer lists. This witness deliberately does
     // not reinterpret [] as false or [..] as truth.
-    assert_eq!(zero.last_semantic_id(), Some(SemanticId(PROBE_ID)));
-    assert_eq!(one.last_semantic_id(), Some(SemanticId(PROBE_ID)));
-    assert_eq!(many.last_semantic_id(), Some(SemanticId(PROBE_ID)));
+    assert_eq!(zero.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
+    assert_eq!(one.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
+    assert_eq!(many.last_legacy_abi_id(), Some(LegacyAbiSemanticId(PROBE_ID)));
 }
