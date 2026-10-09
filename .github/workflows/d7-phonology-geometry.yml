@@ -1,0 +1,44 @@
+name: D7 phonology geometry research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d7-phonology-geometry/**"
+      - "knowledge/d3-d8-stable-residents.json"
+      - "knowledge/d7-full-map.json"
+      - ".github/workflows/d7-phonology-geometry.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d7-phonology-geometry/**"
+      - "knowledge/d3-d8-stable-residents.json"
+      - "knowledge/d7-full-map.json"
+      - ".github/workflows/d7-phonology-geometry.yml"
+  workflow_dispatch:
+
+jobs:
+  varga-product-s1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate stable resident donor
+        run: |
+          rm -rf /tmp/d7-stable-resident-audit
+          python3 scripts/check-3051-stable-resident-corpus.py --out /tmp/d7-stable-resident-audit
+      - name: Run D7 varga product geometry S1
+        run: |
+          rm -rf /tmp/d7-phonology-geometry
+          python3 benchmarks/d7-phonology-geometry/run.py             --null-samples 4096             --out /tmp/d7-phonology-geometry
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/d7-phonology-geometry/report.md; then
+            cat /tmp/d7-phonology-geometry/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d7-phonology-geometry-s1
+          path: /tmp/d7-phonology-geometry/
+          retention-days: 14
