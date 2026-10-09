@@ -1,0 +1,45 @@
+name: Temporary presentation test repair
+
+on:
+  push:
+    branches:
+      - fix/presentation-bool-boundary
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/presentation-bool-boundary
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Replace stale semantic dependency in presentation test
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('crates/my-lisp/src/presentation.rs')
+          text = path.read_text()
+          old = "        let mut session = Session::default();\n        let truth = eval_program(\"(atom 'мама)\", &mut session)\n            .expect(\"predicate\")\n            .value;\n"
+          new = "        // Presentation owns only the human-facing rendering of a value. Do not\n        // manufacture a boolean through a Lisp semantic operation such as `atom`:\n        // #218 correctly returns a structural result there now.\n        let truth = Value::Bool(true);\n"
+          if old not in text:
+              raise SystemExit('expected stale presentation test block not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          cargo fmt --check
+          cargo test -p my-lisp presentation::tests::ukrainian_value_presentation_changes_only_the_human_view
+      - name: Commit focused test repair
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add crates/my-lisp/src/presentation.rs
+          git diff --cached --check
+          git commit -m "test(presentation): decouple bool rendering from atom semantics"
+          git push origin HEAD:fix/presentation-bool-boundary
