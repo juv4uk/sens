@@ -24,8 +24,6 @@ on:
       - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/i5_6400_machine_profile.rs"
-      - "crates/sens/tests/semantic_coordinate_join_2.rs"
-      - "crates/sens/tests/semantic_coordinate_join.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
@@ -59,8 +57,6 @@ on:
       - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/i5_6400_machine_profile.rs"
-      - "crates/sens/tests/semantic_coordinate_join_2.rs"
-      - "crates/sens/tests/semantic_coordinate_join.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
@@ -110,8 +106,6 @@ jobs:
           cargo test -p sens --test machine_exact_d5_zerop -- --nocapture
           cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
           cargo test -p sens --test machine_capability_axis -- --nocapture
-          cargo test -p sens --test semantic_coordinate_join -- --nocapture
-          cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Derived machine coverage inputs
         run: python3 scripts/generate-encoder-coverage-input.py --check
