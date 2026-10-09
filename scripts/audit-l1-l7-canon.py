@@ -130,6 +130,22 @@ def inspect(m: Any, forms: list[Any]) -> tuple[list[dict[str, str]], list[dict[s
     return blockers, rewrites
 
 
+def strict_resolver_type(m: Any):
+    class StrictResolver(m.Resolver):
+        """No L3 unknown-head passthrough; retain original lexical binding routing."""
+
+        def head(self, tok):
+            words, status = super().head(tok)
+            if status == "passthrough-head":
+                raise m.MigrationError(
+                    f"L3_UNMAPPED: {tok.text!r} has no proved executable domain coordinate",
+                    tok,
+                )
+            return words, status
+
+    return StrictResolver
+
+
 def triage_source(m: Any, text: str, path: str, foundation: dict, maps: tuple, text7,
                   oracle: dict[str, Any] | None = None) -> dict[str, Any]:
     row: dict[str, Any] = {"path": path, "source_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
@@ -152,7 +168,7 @@ def triage_source(m: Any, text: str, path: str, foundation: dict, maps: tuple, t
 
     normalized = "\n".join(render(m, node) for node in forms) + ("\n" if forms else "")
     legacy, my, upper = maps
-    resolver = m.Resolver(legacy, my, upper, source_era="auto",
+    resolver = strict_resolver_type(m)(legacy, my, upper, source_era="auto",
                           admitted_d8=foundation["domains"].get("D8", {}).get("residents", {}))
     try:
         projection = m.migrate_file(normalized, resolver, text7)
@@ -169,11 +185,19 @@ def triage_source(m: Any, text: str, path: str, foundation: dict, maps: tuple, t
         if m.decode_bytes(payload) != words:
             raise m.SensT5Error("codec failed exact-word roundtrip")
     except (m.MigrationError, m.SensT5Error, ValueError) as exc:
+        token = getattr(getattr(exc, "tok", None), "text", "")
         row.update(status="BLOCK", blockers=[{
             "rule": "L3",
             "reason": str(exc),
-            "token": getattr(getattr(exc, "tok", None), "text", ""),
+            "token": token,
         }])
+        if str(exc).startswith("L3_UNMAPPED:") and token:
+            row["d10_proposal"] = {
+                "source_head": token,
+                "status": "OWNER_REVIEW_UNPLACED",
+                "coordinate": None,
+                "admission": "BLOCK",
+            }
         return row
 
     row["physical_sha256"] = hashlib.sha256(payload).hexdigest()
@@ -181,6 +205,12 @@ def triage_source(m: Any, text: str, path: str, foundation: dict, maps: tuple, t
     row["semantic_words"] = len(words)
     row["resolver_passes"] = resolver.counts
     row["status"] = "NEEDS_INDEPENDENT_ORACLE"
+    if (path.startswith("tests/fixtures/") and
+            any(resolver.counts.get(key, 0) for key in (
+                "pass1-sens8", "pass2-my-lisp", "pass3-lisp15", "pass4-text7-global",
+            ))):
+        row.update(status="REGENERATE_L6", reason="regenerate migrated fixtures via canonical generator")
+        return row
     if oracle is not None:
         # Digest agreement by itself does NOT certify observable semantic parity.
         if oracle.get("source_sha256") != row["source_sha256"]:
