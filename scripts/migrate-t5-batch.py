@@ -160,6 +160,20 @@ def run(args: argparse.Namespace) -> dict:
                 ValueError, OSError) as exc:
             row.update({"status": "blocked", "reason": str(exc),
                         "passes": dict(resolver.counts), "source_era": source_era, "decision_table": args.decision_table})
+            # L3 is a research proposal, not a new callable D10 coordinate.
+            if "L3 BLOCK + D10-PROPOSAL" in str(exc):
+                row["d10_proposal"] = {
+                    "status": "HOLD", "domain": "D10",
+                    "candidate": getattr(getattr(exc, "tok", None), "text", None),
+                    "coordinate": None, "authority": "UNRATIFIED",
+                }
+            # L5 source removal is separately reviewed and preserved in
+            # archaeology; the migration pass never deletes historical input.
+            if str(exc).startswith("L5 BLOCK"):
+                row["archaeology"] = {
+                    "status": "REVIEW", "policy": "retired executable corpus",
+                    "source_sha256": row.get("source_sha256"),
+                }
             tok = getattr(exc, "tok", None)
             if tok is not None:
                 row["token"] = tok.text
