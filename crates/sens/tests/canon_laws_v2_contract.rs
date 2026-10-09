@@ -100,6 +100,10 @@ fn executable_canon_speaks_layered_answer_semantics() {
         if row.expr == "canon-empty-list" {
             eprintln!("#229 diagnostic actual envelope: {actual}");
             for (label, probe) in [
+                ("ASSOC", format!("(00101101 (quote expected) (quote {}))", row.source)),
+                ("ATOM-ASSOC", format!("(00000010 (00101101 (quote expected) (quote {})))", row.source)),
+                ("ATOM-PAIR", "(00000010 (00000001 (expected . \"()\")))".to_owned()),
+                ("ATOM-EMPTY", "(00000010 (00000001 ()))".to_owned()),
                 ("FIELD", format!("(witness-field (quote expected) (quote {}))", row.source)),
                 ("SUPERSEDED", format!("(witness-superseded-outcome (quote {}) (witness-field (quote expected) (quote {})))", row.source, row.source)),
                 ("EXPECTED", format!("(witness-expected-outcome (quote {}))", row.source)),
