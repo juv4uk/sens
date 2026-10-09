@@ -35,13 +35,25 @@ fn content_store_semantic_relations_are_owned_by_lisp_witness() {
     .expect("Lisp-owned content-store witness must load");
 
     let probes = [
-        ("fs-objects", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-objects fs))"#),
-        ("object-values", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (01110000 (fs-objects fs)))"#),
-        ("object-addresses", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-object-addresses (01110000 (fs-objects fs))))"#),
-        ("root-package", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-root-package fs))"#),
-        ("root-image", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-serialize-root fs))"#),
-    ];
-    for (name, source) in probes {
+        ("fs-empty", r#"(fs-empty)"#),
+        ("fs-empty-car", r#"(car (fs-empty))"#),
+        ("fs-empty-cdr", r#"(cdr (fs-empty))"#),
+        ("fs-empty-objects", r#"(fs-objects (fs-empty))"#),
+        ("fs-empty-bindings", r#"(fs-bindings (fs-empty))"#),
+        ("fs-empty-revision", r#"(fs-revision (fs-empty))"#),
+        ("empty-content-store", r#"(empty-content-store)"#),
+        ("empty-content-store-size", r#"(content-store-size (empty-content-store))"#),
+        ("empty-content-store-map-list", r#"(map->list (empty-content-store))"#),
+        ("content-address", r#"(knowledge-content-address (quote (lambda (x) x)))"#),
+        ("fs-write", r#"(fs-write (fs-empty) "code" (quote (lambda (x) x)))"#),
+        ("fs-write-first", r#"(car (fs-write (fs-empty) "code" (quote (lambda (x) x))))"#),
+        ("fs-write-rest", r#"(cdr (fs-write (fs-empty) "code" (quote (lambda (x) x))))"#),
+        ("fs-objects", r#"(let* ((written (fs-write (fs-empty) "code" (quote (lambda (x) x)))) (fs (car written))) (fs-objects fs))"#),
+        ("object-map-list", r#"(let* ((written (fs-write (fs-empty) "code" (quote (lambda (x) x)))) (fs (car written))) (map->list (fs-objects fs))"#),
+        ("object-addresses", r#"(let* ((written (fs-write (fs-empty) "code" (quote (lambda (x) x)))) (fs (car written))) (fs-object-addresses (map->list (fs-objects fs)))"#),
+        ("root-package", r#"(let* ((written (fs-write (fs-empty) "code" (quote (lambda (x) x)))) (fs (car written))) (fs-root-package fs))"#),
+        ("root-image", r#"(let* ((written (fs-write (fs-empty) "code" (quote (lambda (x) x)))) (fs (car written))) (fs-serialize-root fs))"#),
+    ];    for (name, source) in probes {
         eprintln!("CONTENT-STORE-DIAG: {name} => {}", observe(&mut session, source));
     }
 
