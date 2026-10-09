@@ -52,15 +52,15 @@
                   (00000001
                     (content-store-authority-witness
                       (status fail)
-                      (law equal-current-projection)))))
+                      (law equal-current-projection))))))
             ((content-store-no? object-relation)
               (00000001
                 (content-store-authority-witness
                   (status fail)
-                  (law object-image-deterministic)))))
+                  (law object-image-deterministic))))))
         ((content-store-no? root-relation)
           (00000001
             (content-store-authority-witness
               (status fail)
-              (law root-image-deterministic))))))))
+              (law root-image-deterministic))))))
 ))
