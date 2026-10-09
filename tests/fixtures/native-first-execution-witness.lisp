@@ -15,10 +15,9 @@
   (00001000 (actual expected)
     (00000111
       ((00100010 actual expected)
-       (1)
        (00000001 pass))
-      ((00100010 actual expected)
-       (0)
+      ((00100010 (00100010 actual expected)
+     (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
        (00100111 (00000001 fail) actual expected)))))
 
 (00001001 native-first-execution-witness
