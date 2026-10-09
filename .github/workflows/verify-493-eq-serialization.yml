@@ -1,0 +1,102 @@
+name: Verify 493 EQ serialization collision
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-493-eq-serialization.yml'
+      - 'docs/research/493/**'
+
+jobs:
+  eq-serialization:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install temporary serialization observer
+        shell: bash
+        run: |
+          cat > crates/my-lisp/tests/verify_493_eq_serialization.rs <<'RS'
+          use my_lisp::{eval_program, Session};
+
+          fn value(source: &str) -> String {
+              eval_program(source, &mut Session::default())
+                  .expect(source)
+                  .value
+                  .to_string()
+          }
+
+          fn text_route(left: &str, right: &str) -> String {
+              let source = format!(
+                  r#"
+                  ((lambda (left right)
+                     ((lambda (left-text right-text)
+                        (cond
+                          ((string<? left-text right-text) ()
+                           (cond
+                             ((string<? right-text left-text) () (quote text-same))
+                             ((quote fallback) fallback (quote text-distinct))))
+                          ((quote fallback) fallback (quote text-distinct))))
+                      (write-to-string left)
+                      (write-to-string right)))
+                   {left}
+                   {right})
+                  "#
+              );
+              value(&source)
+          }
+
+          #[test]
+          fn eq_preserves_closure_identity() {
+              assert_eq!(
+                  value("((lambda (f) (eq f f)) (lambda (x) x))"),
+                  "(identity-relation same)"
+              );
+              assert_eq!(
+                  value(
+                      "((lambda (left right) (eq left right)) (lambda (x) x) (lambda (x) x))"
+                  ),
+                  "(identity-relation distinct)"
+              );
+          }
+
+          #[test]
+          fn write_to_string_collapses_distinct_closures_to_one_text() {
+              assert_eq!(
+                  value("(write-to-string (lambda (x) x))"),
+                  r#""<lambda>""#
+              );
+              assert_eq!(
+                  value("(write-to-string (lambda (y) y))"),
+                  r#""<lambda>""#
+              );
+          }
+
+          #[test]
+          fn no_eq_text_route_false_positives_two_distinct_closures_as_same() {
+              assert_eq!(
+                  text_route("(lambda (x) x)", "(lambda (x) x)"),
+                  "text-same"
+              );
+          }
+
+          #[test]
+          fn no_eq_text_route_still_distinguishes_ordinary_symbol_control() {
+              assert_eq!(
+                  text_route("(quote radio)", "(quote antenna)"),
+                  "text-distinct"
+              );
+          }
+          RS
+
+      - name: Execute serialization collision probes
+        run: cargo test -p my-lisp --test verify_493_eq_serialization -- --nocapture
+
+      - name: Remove temporary observer
+        run: rm crates/my-lisp/tests/verify_493_eq_serialization.rs
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
