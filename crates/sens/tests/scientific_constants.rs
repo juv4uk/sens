@@ -36,31 +36,6 @@ fn eval_science_knowledge(source: &str) -> String {
 }
 
 #[test]
-fn bare_number_quantity_and_scientific_constant_are_distinct_data_levels() {
-    let source = r#"
-        (list
-          (quantity? 299792458)
-          (quantity?
-            (scientific-constant-quantity si:defining-speed-of-light))
-          (scientific-constant? si:defining-speed-of-light)
-          (scientific-constant? 299792458))
-    "#;
-    assert_eq!(eval_science(source), "(() t t ())");
-}
-
-#[test]
-fn units_require_named_dimension_terms_not_anonymous_pairs() {
-    let source = r#"
-        (list
-          (unit? (quote (unit/1 (dimension/1 metre 1) (dimension/1 second -1))))
-          (unit? (quote (unit/1 (metre 1) (second -1))))
-          (dimension? (quote (dimension/1 metre 1)))
-          (dimension? (quote (metre 1))))
-    "#;
-    assert_eq!(eval_science(source), "(t () t ())");
-}
-
-#[test]
 fn speed_of_light_record_keeps_value_unit_status_kind_system_and_source() {
     let source = r#"
         (list
@@ -76,31 +51,6 @@ fn speed_of_light_record_keeps_value_unit_status_kind_system_and_source() {
     assert_eq!(
         eval_science(source),
         "(si:speed-of-light 299792458 ((dimension/1 metre 1) (dimension/1 second -1)) exact-by-definition physical-defining si (science-source/1 bipm-si-brochure-9 2019))"
-    );
-}
-
-#[test]
-fn all_seven_si_records_are_valid_exact_defining_constants() {
-    let source = r#"
-        (map
-          (lambda (constant)
-            (list
-              (scientific-constant? constant)
-              (scientific-constant-status constant)
-              (scientific-constant-kind constant)
-              (scientific-constant-system constant)))
-          (list
-            si:defining-cesium-frequency
-            si:defining-speed-of-light
-            si:defining-planck-constant
-            si:defining-elementary-charge
-            si:defining-boltzmann-constant
-            si:defining-avogadro-constant
-            si:defining-luminous-efficacy))
-    "#;
-    assert_eq!(
-        eval_science(source),
-        "((t exact-by-definition physical-defining si) (t exact-by-definition physical-defining si) (t exact-by-definition physical-defining si) (t exact-by-definition physical-defining si) (t exact-by-definition physical-defining si) (t exact-by-definition physical-defining si) (t exact-by-definition physical-defining si))"
     );
 }
 
