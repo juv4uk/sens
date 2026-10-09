@@ -7,10 +7,11 @@
     "CONFORMANCE",
     "FALSIFIER"
   ],
-  "question": "Does the current D2 reader ingest pre-bounded dense physical bits faster than visible 0/1 source, and how many payload bytes are saved at equal domain-AST output?",
-  "claim": "Compares in-process release-mode parse and allocation for identical D2 ASTs, across paired repetitions and multiple sizes. Width schedule is caller-supplied and excluded from payload bytes: this is NOT a self-describing wire format, not end-to-end CLI execution, and CI timings cannot establish stable hardware speedups.",
+  "question": "How fast do packed physical bits vs visible D2 words reach the same evaluated D1/D3 result, with warm and fresh sessions, beyond ingest alone?",
+  "claim": "Paired release-mode ingest and parse-lower-execute timings on the exact same D2/domain corpus, oracle checked before timing; warm sessions and fresh Sessions reported separately alongside execute-only baseline. Does not include independent width-metadata cost, process startup, core bootstrap, file IO, or cross-language performance.",
   "witness": [
     "crates/sens/examples/packed_vs_visible_bench.rs",
+    "crates/sens/examples/packed_vs_visible_runtime.rs",
     "README.md",
     ".github/workflows/packed-vs-visible-bench.yml"
   ],
