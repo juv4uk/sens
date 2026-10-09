@@ -77,6 +77,13 @@ fn flat_sid8_cannot_choose_a_rung_or_call_a_domain_mechanism() {
 fn legacy_d5_byte_cannot_mint_a_domain_law() {
     // Rust перевіряє лише походження проєкції, а не власноруч описує закон D5.
     assert!(!REGISTRY.contains("match byte {"));
-    assert!(REGISTRY.contains("find_map(|surface| d5_binding_identity_for_definition(surface.name))"));
+    assert!(
+        !REGISTRY.contains("fn transitional_d5_binding_identity_from_registry_byte("),
+        "retired SID8-to-D5 alias must remain absent"
+    );
+    assert!(
+        REGISTRY.contains("fn d5_binding_identity_for_definition("),
+        "D5 projections must come from the generated domain binding ledger"
+    );
     assert!(REGISTRY.contains("D5_DEFINITION_BINDINGS"));
 }
