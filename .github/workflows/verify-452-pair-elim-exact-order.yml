@@ -1,0 +1,114 @@
+name: Verify 452 exact pair-elim order
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-452-pair-elim-exact-order.yml'
+      - 'docs/research/452/**'
+
+jobs:
+  exact-order:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install temporary observer
+        shell: bash
+        run: |
+          cat > crates/my-lisp/tests/verify_452_exact_order.rs <<'RS'
+          use my_lisp::{eval_program, ErrorKind, Session};
+
+          #[test]
+          fn reverse_derivation_orders_pair_then_selector_then_selector_body() {
+              let source = r#"
+                  ((lambda (p selector)
+                     (selector (car p) (cdr p)))
+                   ((lambda ()
+                      (print (quote pair-expression-effect))
+                      (quote (fresh-left . fresh-right))))
+                   ((lambda ()
+                      (print (quote selector-expression-effect))
+                      (lambda (left right)
+                        (print (quote selector-body-effect))
+                        left))))
+              "#;
+              let mut session = Session::default();
+              let result = eval_program(source, &mut session).expect("valid reverse derivation");
+              assert_eq!(result.value.to_string(), "fresh-left");
+              assert_eq!(
+                  session.environment.output_snapshot(),
+                  vec![
+                      "pair-expression-effect".to_string(),
+                      "selector-expression-effect".to_string(),
+                      "selector-body-effect".to_string(),
+                  ],
+              );
+          }
+
+          #[test]
+          fn reverse_derivation_nonpair_still_evaluates_outer_selector_before_car_failure() {
+              let source = r#"
+                  ((lambda (p selector)
+                     (selector (car p) (cdr p)))
+                   ((lambda ()
+                      (print (quote pair-expression-effect))
+                      (quote atom-value)))
+                   ((lambda ()
+                      (print (quote selector-expression-effect))
+                      (lambda (left right)
+                        (print (quote selector-body-effect))
+                        left))))
+              "#;
+              let mut session = Session::default();
+              let error = eval_program(source, &mut session).expect_err("CAR must reject atom");
+              assert_eq!(error.kind, ErrorKind::Type);
+              assert_eq!(
+                  session.environment.output_snapshot(),
+                  vec![
+                      "pair-expression-effect".to_string(),
+                      "selector-expression-effect".to_string(),
+                  ],
+                  "selector body must not run after pair projection fails"
+              );
+          }
+
+          #[test]
+          fn reverse_derivation_propagates_selector_body_failure_after_all_outer_effects() {
+              let source = r#"
+                  ((lambda (p selector)
+                     (selector (car p) (cdr p)))
+                   ((lambda ()
+                      (print (quote pair-expression-effect))
+                      (quote (fresh-left . fresh-right))))
+                   ((lambda ()
+                      (print (quote selector-expression-effect))
+                      (lambda (left right)
+                        (print (quote selector-body-effect))
+                        (car (quote atom-value))))))
+              "#;
+              let mut session = Session::default();
+              let error = eval_program(source, &mut session).expect_err("selector body must fail");
+              assert_eq!(error.kind, ErrorKind::Type);
+              assert_eq!(
+                  session.environment.output_snapshot(),
+                  vec![
+                      "pair-expression-effect".to_string(),
+                      "selector-expression-effect".to_string(),
+                      "selector-body-effect".to_string(),
+                  ],
+              );
+          }
+          RS
+
+      - name: Execute exact reverse-derivation probes
+        run: cargo test -p my-lisp --test verify_452_exact_order -- --nocapture
+
+      - name: Remove temporary observer
+        run: rm crates/my-lisp/tests/verify_452_exact_order.rs
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
