@@ -25,7 +25,7 @@ contract_sentence = (
     "100 CAR, 101 EQ, 110 COND, 111 CONS"
 )
 assert contract_sentence in contract
-assert "(minor . 5)" in contract
+assert "((major . #d11) (minor . 8)" in contract, "D3 contract guard must follow current Contract 11.8"
 assert "#3202" in contract
 
 for line in EXPECTED:
