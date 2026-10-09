@@ -688,7 +688,7 @@
             (my-result-fail
               (my-error
                 (00000001 invalid-form)
-                (00100111 (00000001 cond-clause) clause)))))))))))
+                (00100111 (00000001 cond-clause) clause))))))))))
 
 (00001001 my-eval-cond-result
   (00001000 (clauses env-ref)
