@@ -17,9 +17,10 @@
            (actual (reason-observe goal (00000001 ())))
            (expected (00000001 ())))
       (00000111
-        ((00100010 actual expected) (1)
+        ((00100010 actual expected)
          (00000001 (explicit-negative-reason-observe-witness (status pass))))
-        ((00100010 actual expected) (0)
+        ((00100010 (00100010 actual expected)
+     (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
          (00100111
            (00000001 explicit-negative-reason-observe-witness)
            (00000001 (status fail))
