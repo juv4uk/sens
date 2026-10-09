@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import json
 import re
-import re
 from pathlib import Path
 
 from domain_tables import D7_TABLE, read_domain_table
@@ -28,9 +27,9 @@ assert set(d["residents"]) | set(d["reserved_coordinates"]) == {f"{i:07b}" for i
 # so a missing row, reused reserved slot, or label drift fails closed.
 canonical_d7_rows = {}
 row_pattern = re.compile(
-    r"^\\s*\\(([01]{7})\\s+\\(ук\\s+[^()]+\\)\\s+"
-    r"\\(укр\\s+[^()]+\\)\\s+\\(san\\s+[^()]+\\)\\s+"
-    r"\\(en\\s+([^()\\s]+)\\)"
+    r"^\s*\(([01]{7})\s+\(ук\s+[^()]+\)\s+"
+    r"\(укр\s+[^()]+\)\s+\(san\s+[^()]+\)\s+"
+    r"\(en\s+([^()\s]+)\)"
 )
 table = (root / "lib/domains/d7.lisp").read_text(encoding="utf-8")
 for line_number, line in enumerate(table.splitlines(), start=1):
