@@ -1,0 +1,37 @@
+name: D10 de Bruijn cyclic binary-word donor oracle
+on:
+  push:
+    paths:
+      - 'knowledge/d10-debruijn-binary-cycle-research-v1.json'
+      - 'scripts/check_d10_debruijn_binary_cycle.py'
+      - 'tests/test_d10_debruijn_binary_cycle.py'
+      - 'tests/d10_debruijn_binary_cycle_chez.ss'
+      - 'docs/research/d10-debruijn-binary-cycle.uk.md'
+      - '.github/workflows/d10-debruijn-binary-cycle.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-debruijn-binary-cycle-research-v1.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check_d10_debruijn_binary_cycle.py'
+      - 'tests/test_d10_debruijn_binary_cycle.py'
+      - 'tests/d10_debruijn_binary_cycle_chez.ss'
+      - 'docs/research/d10-debruijn-binary-cycle.uk.md'
+      - '.github/workflows/d10-debruijn-binary-cycle.yml'
+jobs:
+  exact-cyclic-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Source, D1-D9/D10 dedup, HOLD and 11 adverse controls
+        run: python3 scripts/check_d10_debruijn_binary_cycle.py --self-test
+      - name: 65812 exhaustive binary-word differential cases
+        run: python3 -m unittest discover -s tests -p test_d10_debruijn_binary_cycle.py -v
+      - name: Install Chez Scheme R6RS reference runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chezscheme
+      - name: Actual independent Chez R6RS donor
+        run: scheme --script tests/d10_debruijn_binary_cycle_chez.ss

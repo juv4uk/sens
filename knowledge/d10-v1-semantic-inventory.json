@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 635,
+    "selected_semantic_candidates": 637,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 379,
-    "remaining_semantic_inventory": 389,
+    "unplaced_selected_candidates": 381,
+    "remaining_semantic_inventory": 387,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13665,6 +13665,106 @@
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false,
       "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.fpga.gf2.minimum-recurrence.20261009",
+      "semantic_name": "BINARY-LFSR-MINIMAL-RECURRENCE",
+      "surface_uk": "найкоротша-двійкова-рекуренція",
+      "surface_ukr": "мін-лін-рекур",
+      "source_class": "GF2-FINITE-RECURRENCE-HOBBY-20261009",
+      "relation_class": "FINITE-GF2-WORD-EXACT-MINIMAL-RECURRENCE",
+      "signature": "(finite ordered list of D1 bits)->(minimal nonnegative order L, lex-first binary tap vector a1..aL)",
+      "behavior": "Among all binary homogeneous GF(2) linear recurrences matching every observed position t>=L in the finite input, return the least possible order L and lexicographically least (a1..aL) taps for s[t] = XOR_j(a_j AND s[t-j]); all-zero or empty words return (0,()). No unseen-future prediction guarantee.",
+      "positive_witnesses": [
+        "input 00000 -> (L=0, taps empty)",
+        "input 11111 -> (L=1, taps=1)",
+        "input 010101 -> (L=2, taps=01), despite primitive word root 01",
+        "input 101001 -> (L=3, taps=101)",
+        "Sage 20-bit LFSR example 11010110010001111010 -> (L=4, taps=1001)"
+      ],
+      "falsifiers": [
+        "Treat primitive period length 2 as order-1 GF2 linear recurrence for 010101",
+        "Choose greater L than necessary or nonminimal lex taps",
+        "Claim unobserved future is guaranteed or that radio noise has been removed",
+        "Silently accept non-bits, booleans, or floating-point input"
+      ],
+      "minimality": "Direct name absent from ratified D1-D9 and 634 selected D10; differs from primitive exact word repetition and reflected Gray binary bijection. It is mathematically derivable by finite GF(2) linear algebra, so owner review must still decide Core versus mathematical library. Behavior-level dedup: the scalar GF2-LINEAR-COMPLEXITY result is only the L projection of this richer (L,taps) result; do not create a second row for that scalar.",
+      "unblock_fanout": [
+        "FPGA LFSR and binary stream model checks",
+        "SDR symbol sequence analysis without claiming noise correction",
+        "sensor clock traces, mathematical finite-word semantics",
+        "rhythmic patterns in abstract binary symbol form"
+      ],
+      "source_path": "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+      "primary_url": "https://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lfsr.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4952",
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+        "SageMath LFSR and Berlekamp–Massey manuals",
+        "#4950 scalar projection dedup",
+        "knowledge/d10-finite-bayes-update-research-v1.json already selected as D10P-0011"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.symbolicai.mackworth77.arc-consistency-fixpoint.20261009",
+      "semantic_name": "FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-SYMBOLIC-AI-MACKWORTH-1977",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-BINARY-DIRECTED-CSP-FIXEDPOINT",
+      "signature": "(finite named domain map, directed allowed-pair arcs)->(fixedpoint domain map, local-consistency status)",
+      "behavior": "Given finite named variables X, finite ordered enumerated domains D(X), and explicitly directed binary relations R(X,Y) of allowed pairs, monotonically delete any x in D(X) having no current y in D(Y) with (x,y) in every arc from X to Y. Return the unique greatest subdomain fixpoint independent of revision order, sorted by variable/value, together with ARC-CONSISTENT when all remaining domains are nonempty, otherwise EMPTY-DOMAIN-CONTRADICTION. An absent reverse arc is not synthesized. Input is immutable, any missing variable or malformed relation is invalid. Local consistency does not assert existence of a complete assignment.",
+      "positive_witnesses": [
+        "asymmetric-forward: A={0,1},B={0,1}; R(A,B)={(0,1)} -> A={0},B={0,1}; ARC-CONSISTENT",
+        "reverse-is-not-inferred: A={0,1},B={0,1}; R(B,A)={(0,1)} -> A={0,1},B={0}; ARC-CONSISTENT",
+        "cascade: A=B={0,1},C={1}; A=B; B=C -> A=B=C={1}; ARC-CONSISTENT",
+        "single-unsupport: A={0},B={1}; R(A,B)={(0,0)} -> A=empty,B={1}; EMPTY-DOMAIN-CONTRADICTION",
+        "empty-graph: A={0,1}; no arcs -> A={0,1}; ARC-CONSISTENT",
+        "odd-two-color-cycle: A=B=C={0,1}; symmetric edges A!=B,B!=C,C!=A -> all domains remain {0,1}; ARC-CONSISTENT despite globally unsatisfiable network"
+      ],
+      "falsifiers": [
+        "Reverse directed relation cannot be inferred when only one directed arc is present.",
+        "No support under current target domain must remove a source value, including chained re-revision.",
+        "Nonempty arc-consistent odd binary inequality cycle is not globally SAT; report only local consistency.",
+        "Duplicate input arcs and different arc schedules cannot change greatest fixpoint.",
+        "Original input domain mapping and relations are never modified.",
+        "A contradictory empty domain must not be reported ARC-CONSISTENT.",
+        "Unification equality/term substitution, ATMS support-label, STRIPS regression and global backtracking solver do not have the same observable input/output law."
+      ],
+      "minimality": "Finite directed arc-revision yields a deterministic greatest local-consistency fixed point, not a global SAT claim. The existing Python queue/round witnesses and independent native SWI-Prolog CLP(FD) oracle test the bounded behavior. Core-versus-library minimality remains pending owner review.",
+      "unblock_fanout": [
+        "Finite symbolic constraint networks and diagnosis",
+        "Scheduling and resource-domain pruning without asserting global satisfiability",
+        "Cross-language rule/constraint reasoning over explicit directed relations"
+      ],
+      "source_path": "knowledge/d10-ai-interest-proposal-v1.json",
+      "primary_url": "https://doi.org/10.1016/0004-3702(77)90007-8",
+      "provenance": [
+        "#4991",
+        "https://doi.org/10.1016/0004-3702(77)90007-8",
+        "tests/test_d10_finite_arc_consistency.py",
+        "tests/oracles/d10_finite_arc_consistency.pl",
+        "knowledge/d10-ai-interest-proposal-v1.json"
+      ],
+      "donor_repo": "juv4uk/sens",
+      "donor_source_file": "knowledge/d10-ai-interest-proposal-v1.json",
+      "ownership": "CORE-CANDIDATE",
+      "law_status": "DONOR-ATTESTED-UNPLACED",
+      "proposal_status": "pending-review",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -13704,6 +13804,8 @@
     "knowledge/d10-hobby-exact-measurement-intake-v1.json",
     "knowledge/d10-primitive-binary-word-root-v1.json",
     "knowledge/d10-gray-reflected-binary-research-v1.json",
-    "knowledge/d10-finite-bayes-update-research-v1.json"
+    "knowledge/d10-finite-bayes-update-research-v1.json",
+    "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+    "knowledge/d10-ai-interest-proposal-v1.json"
   ]
 }

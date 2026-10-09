@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 635,
-    "remaining_semantic_candidates": 389,
+    "selected_semantic_candidates": 636,
+    "remaining_semantic_candidates": 388,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 379,
+    "unplaced_selected_candidates": 380,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -89,6 +89,15 @@
       "ratification_effect": "NONE",
       "derivability": "PENDING-OWNER-REVIEW",
       "oracle": "exact rational update vs independent common-denominator integer-weight enumeration"
+    },
+    "gf2_minimal_recurrence_v1": {
+      "authority": "#4013 #4463 #4950 #4952",
+      "artifact": "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+      "selected": 1,
+      "coordinates_assigned": 0,
+      "ratification_effect": "NONE",
+      "derivability": "PENDING-OWNER-REVIEW",
+      "dedup": "GF2-LINEAR-COMPLEXITY is only the L projection; no duplicate scalar row is added."
     }
   },
   "recovery_v2": {
@@ -355,5 +364,17 @@
     "now_selected": 634,
     "ratified_added": 0,
     "coordinates_added": 0
+  },
+  "finite_binary_arc_consistency_4991": {
+    "artifact": "knowledge/d10-ai-interest-proposal-v1.json",
+    "selected": 1,
+    "semantic_name": "FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT",
+    "proposal_id": "D10P-4991",
+    "base_selected": 636,
+    "now_selected": 637,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle": "existing main oracle: exhaustive Python queue-vs-round witnesses + native SWI-Prolog CLP(FD)",
+    "core_vs_library": "PENDING-OWNER-REVIEW"
   }
 }

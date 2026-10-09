@@ -1,0 +1,49 @@
+name: D10 finite binary arc consistency #4991 — research only
+on:
+  pull_request:
+    paths:
+      - 'scripts/research_d10_finite_arc_consistency.py'
+      - 'tests/test_d10_finite_arc_consistency.py'
+      - 'tests/oracles/d10_finite_arc_consistency.pl'
+      - 'knowledge/d10-ai-interest-proposal-v1.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - '.github/workflows/d10-finite-arc-consistency.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/research_d10_finite_arc_consistency.py'
+      - 'tests/test_d10_finite_arc_consistency.py'
+      - 'tests/oracles/d10_finite_arc_consistency.pl'
+permissions:
+  contents: read
+jobs:
+  source-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install independent SWI-Prolog CLP(FD) runtime
+        run: sudo apt-get update -qq && sudo apt-get install -y swi-prolog-nox
+      - name: Exhaustive queue/round proofs + real SWI CLPFD oracle
+        run: python3 -m unittest discover -s tests -p 'test_d10_finite_arc_consistency.py' -v
+      - name: Preserve D10 as unratified research with NO .sens edits
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('knowledge/d10-v1-semantic-inventory.json').read_text())
+          assert x['accounting']['ratified_d10_residents'] == 0
+          name = 'FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT'
+          rows = [r for r in x['rows'] if r['semantic_name'] == name]
+          assert len(rows) == 1
+          row = rows[0]
+          assert row['stable_id'] == 'd10.symbolicai.mackworth77.arc-consistency-fixpoint.20261009'
+          assert row['status'] == 'SELECTED-RESEARCH-CANDIDATE'
+          assert row['coordinate'] is None and row['coordinate_basis'] == 'UNPLACED'
+          assert row['ratified_resident'] is False
+          assert x['accounting']['selected_semantic_candidates'] == len(x['rows'])
+          assert x['accounting']['ratified_d10_residents'] == 0
+          print('D10 ARC-CONSISTENCY = SELECTED-RESEARCH; coordinate=null; ratified=0; no T5 authority')
+          PY
