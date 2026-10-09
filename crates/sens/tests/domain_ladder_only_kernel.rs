@@ -9,6 +9,7 @@ const BOOT: &str = include_str!("../src/bootstrap_measurement.rs");
 const LIB: &str = include_str!("../src/lib.rs");
 const DOMAIN: &str = include_str!("../src/domain_identity.rs");
 const REGISTRY: &str = include_str!("../src/semantic_registry.rs");
+const MANIFEST: &str = include_str!("../Cargo.toml");
 const EVALUATOR: &str = include_str!("../src/eval/canon.rs");
 
 #[test]
@@ -86,4 +87,21 @@ fn legacy_d5_byte_cannot_mint_a_domain_law() {
         "D5 projections must come from the generated domain binding ledger"
     );
     assert!(REGISTRY.contains("D5_DEFINITION_BINDINGS"));
+}
+
+#[test]
+fn legacy_host_oracle_schema_is_not_part_of_rust_core() {
+    assert!(!MANIFEST.contains("legacy-evidence-schemas"));
+    for forbidden in [
+        "pub mod compilation_artifact;",
+        "pub mod compilation_artifact_producer;",
+        "pub mod conformance_oracle;",
+        "pub mod fixpoint_checkpoint;",
+        "pub mod gpu_admission;",
+        "pub mod gpu_oracle;",
+        "pub mod program_compiler;",
+        "pub mod selfhost_lineage;",
+    ] {
+        assert!(!LIB.contains(forbidden), "retired Rust-owned oracle returned: {forbidden}");
+    }
 }
