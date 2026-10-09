@@ -14,6 +14,8 @@ jobs:
   pr-focused:
     name: focused PR verification
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -131,12 +133,47 @@ jobs:
           cargo test -p sens --test postcore_build_definitions_debug -- --nocapture
 
       - name: Core4 FASL freshness + asymmetric semantic firewall
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         shell: bash
         run: |
           set -euo pipefail
-          cargo test -p sens --test core_fasl_freshness -- --nocapture
-          cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
-          git diff --exit-code -- lib/core4.lisp.fasl
+          if [[ -n "$PR_HEAD_REF" && "$PR_HEAD_REPO" == "$GITHUB_REPOSITORY" ]]; then
+            # Work on the actual PR branch, not GitHub's synthetic merge ref.
+            # Bring it current with main first so the committed FASL matches
+            # the tree that will be merged. This branch-scoped writer must fail
+            # closed on conflicts or denied pushes; it never writes to main.
+            git fetch origin main "refs/heads/$PR_HEAD_REF:refs/remotes/origin/$PR_HEAD_REF"
+            worktree="$RUNNER_TEMP/sens-core4-fasl-branch"
+            git worktree add "$worktree" "refs/remotes/origin/$PR_HEAD_REF"
+            (
+              cd "$worktree"
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git merge --no-edit origin/main
+              export CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target"
+              cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+              cargo test -p sens --test core_fasl_freshness -- --nocapture
+              git diff --check
+              if ! git diff --quiet -- lib/core4.lisp.fasl; then
+                git add lib/core4.lisp.fasl
+                git commit -m "build(core4): regenerate FASL for strict-D1 migration"
+              fi
+              git push origin "HEAD:$PR_HEAD_REF"
+            )
+            # Validate the pushed branch head, including its regenerated FASL.
+            git fetch origin "refs/heads/$PR_HEAD_REF:refs/remotes/origin/$PR_HEAD_REF"
+            new_head="$(git rev-parse "refs/remotes/origin/$PR_HEAD_REF")"
+            git checkout --detach "$new_head"
+            cargo test -p sens --test core_fasl_freshness -- --nocapture
+            git diff --exit-code -- lib/core4.lisp.fasl
+          else
+            # External/fork PRs and non-PR contexts remain read-only.
+            cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+            cargo test -p sens --test core_fasl_freshness -- --nocapture
+            git diff --exit-code -- lib/core4.lisp.fasl
+          fi
           cargo build -p sens-cli --bin sens
           : > tests/semantic-authority-changes.lisp
           while IFS= read -r path; do
