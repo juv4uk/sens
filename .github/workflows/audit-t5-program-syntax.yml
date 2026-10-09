@@ -18,6 +18,7 @@ on:
       - 'crates/sens-cli/**'
       - 'crates/sens/src/parser.rs'
       - 'crates/sens/src/syntax.rs'
+      - 'crates/sens/src/semantic_registry.rs'
       - 'tests/test_audit_t5_program_syntax.py'
       - 'docs/T5-PROGRAM-SYNTAX-AUDIT-2026-10-08.uk.md'
       - '.github/workflows/audit-t5-program-syntax.yml'
