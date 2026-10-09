@@ -5,6 +5,8 @@ on:
       - 'knowledge/early-lisp-graph-historical-evidence-v1.json'
       - 'knowledge/d1-d9-foundation.json'
       - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'scripts/d10_historical_snapshot_compat.py'
       - 'lib/domains/d3.lisp'
       - 'scripts/check-early-lisp-graph-archive.py'
       - '.github/workflows/early-lisp-graph-archive.yml'
@@ -15,7 +17,7 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Check archived graph corpus and falsification controls
+      - name: Check archived graph corpus and append-only authority history
         run: python3 scripts/check-early-lisp-graph-archive.py --self-test
       - name: Prove no canonical-source edits
         run: git diff --exit-code -- knowledge/d1-d9-foundation.json knowledge/d10-v1-semantic-inventory.json lib/domains/d3.lisp
