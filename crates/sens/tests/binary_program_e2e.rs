@@ -14,8 +14,12 @@ use sens::{
 
 const BINARY_PROGRAM: &str =
     include_str!("../../../examples/binary/d7-first-program.lisp");
-const D3_COND_PROGRAM: &str =
-    include_str!("../../../examples/binary/d3-cond-program.sens");
+const D3_COND_SOURCE: &str =
+    include_str!("../../../examples/binary/d3-cond-program.lisp");
+const D3_COND_VIEW: &str =
+    include_str!("../../../examples/binary/d3-cond-program");
+const D3_COND_PHYSICAL: &[u8] =
+    include_bytes!("../../../examples/binary/d3-cond-program.sens");
 
 fn assert_exact_binary_ast(expr: &Expr) {
     match &expr.kind {
@@ -85,19 +89,29 @@ fn real_packed_t5_runs_binary_d4_d7_definition_and_d1_result() {
 #[test]
 fn physical_t5_executes_exact_d3_cond_with_d1_skip_and_select() {
     assert!(
-        D3_COND_PROGRAM
+        D3_COND_SOURCE
             .bytes()
             .all(|b| b == b'0' || b == b'1' || b.is_ascii_whitespace()),
         "the D3 program must contain only bits and whitespace"
     );
-    let physical = encode_binary_projection_ternary(D3_COND_PROGRAM)
-        .expect("exact D3 source must encode as physical T5");
-    let visible = open_ternary_program(&physical)
-        .expect("physical T5 must decode to exact-width D3 source");
-    let normalized = D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert!(!D3_COND_PHYSICAL.is_empty(), "committed physical T5 must not be empty");
+    let physical = D3_COND_PHYSICAL;
+    let visible = open_ternary_program(physical)
+        .expect("committed physical T5 must decode to exact-width D3 source");
+    let normalized = D3_COND_SOURCE.split_whitespace().collect::<Vec<_>>().join(" ");
     assert_eq!(visible, normalized);
-    let decoded = decode_ternary_program(&physical).expect("packed T5 must decode");
+    assert_eq!(
+        D3_COND_VIEW.split_whitespace().collect::<Vec<_>>().join(" "),
+        normalized,
+        "the extensionless decoder view must match the canonical source words"
+    );
+    let decoded = decode_ternary_program(physical).expect("packed T5 must decode");
     assert_eq!(visible, sens::render_ternary_words_spaced(&decoded));
+    assert_eq!(
+        encode_binary_projection_ternary(&visible).unwrap().as_slice(),
+        physical,
+        "committed T5 bytes must be canonical under exact-word re-encoding"
+    );
 
     let parsed = parse_canonical_binary(&visible)
         .expect("the canonical reader must preserve D3:110 and D1 control inputs");
