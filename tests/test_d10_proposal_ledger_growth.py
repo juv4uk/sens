@@ -101,6 +101,55 @@ class SelectionLedgerTrace(unittest.TestCase):
             with self.subTest(field=index):
                 self.assertTrue(guard.validate(bad), "unverified proposal must be rejected")
 
+    def test_ledger_existing_bytes_must_be_append_only(self):
+        self.assertEqual([], guard.append_only_errors(self.content, self.content + ""))
+        self.assertEqual([], guard.append_only_errors(self.content, self.content + "# appended\n"))
+        rewritten = self.content.replace("вкласти-біти", "переписано-біти", 1)
+        self.assertTrue(guard.append_only_errors(self.content, rewritten))
+
+    def test_new_selection_requires_exact_law_and_matching_surfaces(self):
+        old = {
+            "stable_id": "old", "semantic_name": "OLD", "behavior": "old law",
+            "coordinate": None, "coordinate_basis": "UNPLACED",
+            "ratified_resident": False, "surface_uk": "старий-закон",
+            "surface_ukr": "давній-закон", "source_class": "test",
+            "relation_class": "test",
+        }
+        new = {
+            "stable_id": "new", "semantic_name": "NEW-STRICT-LAW",
+            "behavior": "Exact new law", "coordinate": None,
+            "coordinate_basis": "UNPLACED", "ratified_resident": False,
+            "surface_uk": "новий-закон", "surface_ukr": "точний-новий-закон",
+            "source_class": "test", "relation_class": "test",
+            "status": "SELECTED-RESEARCH-CANDIDATE",
+        }
+        sha = "a" * 40
+        entry = [
+            "D10P-9999", "новий-закон", "точний-новий-закон", "NEW-STRICT-LAW",
+            "Exact new law", "D10", f"juv4uk/sens@{sha}:lib/core1.lisp:42",
+            f"D1-D9@{sha}=NO-MATCH;D10@{sha}=NO-MATCH",
+            "UNIVERSAL-BORDER: новий закон незалежний від носія",
+            "NOT-A-MIGRATION-BLOCK", "pending-review", "0",
+        ]
+        content = "\t".join(guard.FIELDS) + "\n" + "\t".join(entry) + "\n"
+        before = {"rows": [old]}
+        after = {"rows": [old, new]}
+        self.assertEqual([], guard.new_selection_contract_errors(before, after, content))
+        wrong_law = entry.copy()
+        wrong_law[4] = "short paraphrase"
+        wrong_content = "\t".join(guard.FIELDS) + "\n" + "\t".join(wrong_law) + "\n"
+        self.assertTrue(guard.new_selection_contract_errors(before, after, wrong_content))
+        wrong_surface = entry.copy()
+        wrong_surface[1] = "не-та-поверхня"
+        wrong_content = "\t".join(guard.FIELDS) + "\n" + "\t".join(wrong_surface) + "\n"
+        self.assertTrue(guard.new_selection_contract_errors(before, after, wrong_content))
+
+    def test_preexisting_selected_law_paraphrases_are_not_rewritten(self):
+        # Current selected roots predate byte-exact law matching; preserve them.
+        self.assertEqual([], guard.new_selection_contract_errors(
+            self.inventory, self.inventory, self.content
+        ))
+
     def test_migration_block_may_still_provide_true_source(self):
         records=self.content.splitlines()
         fields=records[1].split("\t")
