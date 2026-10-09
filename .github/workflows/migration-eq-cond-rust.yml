@@ -24,5 +24,5 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Compile and execute original EQ/COND physical-T5 Rust regression
+      - name: Run historical EQ/COND T5 transport-only checks
         run: cargo test -q -p sens --test migration_eq_cond_main
