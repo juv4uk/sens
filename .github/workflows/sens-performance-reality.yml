@@ -1,0 +1,151 @@
+name: SENS performance reality — T5 and paired CPU
+
+# Actual measurements, independent of the existing conformance CI.
+# No cancel-in-progress: evidence remains attributable to an immutable SHA.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "37 3 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/sens-performance-reality.yml"
+      - "scripts/benchmark-sens-physical.py"
+      - "scripts/sens_t5_codec.py"
+      - "scripts/sens_t5_spaced_view.py"
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+  pull_request:
+    paths:
+      - ".github/workflows/sens-performance-reality.yml"
+      - "scripts/benchmark-sens-physical.py"
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+
+permissions:
+  contents: read
+
+jobs:
+  physical-t5:
+    name: Physical T5 size and decode/encode throughput
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Benchmark real physical T5 against exact-bit view
+        run: |
+          python3 scripts/benchmark-sens-physical.py \
+            --out-dir "$RUNNER_TEMP/sens-real-t5" --reps 7 --iterations 10000
+      - name: Show measured numbers or explicit block
+        if: always()
+        shell: bash
+        run: |
+          if test -f "$RUNNER_TEMP/sens-real-t5/physical-t5.md"; then
+            cat "$RUNNER_TEMP/sens-real-t5/physical-t5.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Physical T5 benchmark BLOCKED. No performance claim." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sens-t5-real-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-real-t5/
+          if-no-files-found: warn
+          retention-days: 30
+
+  paired-cpu:
+    name: Paired English vs binary D3 phase measurements
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build one release helper shared by both candidates
+        run: cargo build --release --locked -p sens --example current_en_vs_d1d8_cpu
+      - name: Paired timing only after independent oracle and exact trace parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-real-cpu"
+          python3 benchmarks/current-en-vs-d1d8/cpu_runner.py \
+            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
+            --helper target/release/examples/current_en_vs_d1d8_cpu \
+            --out "$RUNNER_TEMP/sens-real-cpu/paired.jsonl" \
+            --blocked-out "$RUNNER_TEMP/sens-real-cpu/blocked.json" \
+            --phases session,ingest,lower,execute,full,repeated \
+            --reps 5 --repeat-n 128
+          python3 benchmarks/current-en-vs-d1d8/validate.py \
+            "$RUNNER_TEMP/sens-real-cpu/paired.jsonl"
+      - name: Aggregate real CPU timing without unproved extrapolation
+        shell: bash
+        run: |
+          python3 - "$RUNNER_TEMP/sens-real-cpu" <<'PY'
+          import collections, json, statistics, sys
+          from pathlib import Path
+          dest = Path(sys.argv[1])
+          source = dest / "paired.jsonl"
+          if not source.exists():
+              raise SystemExit("no preflight-proved paired timings")
+          rows = [json.loads(x) for x in source.read_text().splitlines() if x.strip()]
+          if not rows or any(row.get("oracle_ok") is not True for row in rows):
+              raise SystemExit("benchmark has no complete oracle-preflight")
+          groups = collections.defaultdict(lambda: collections.defaultdict(list))
+          pairs = collections.defaultdict(list)
+          for row in rows:
+              pairs[row["pair_id"]].append(row)
+              groups[(row["workload"], row["phase"])][row["candidate"]].append(
+                  row["metrics"]["phase_elapsed_ns"])
+          if any(len(pair) != 2 for pair in pairs.values()):
+              raise SystemExit("incomplete paired timing")
+          lines = [
+              "# SENS CPU matched phases — limited D3 smoke",
+              "",
+              "Git SHA: " + rows[0]["git_sha"] + "; pairs: " + str(len(pairs)),
+              "",
+              "| Workload | Phase | English median ns | Binary median ns | English/Binary |",
+              "|---|---|---:|---:|---:|",
+          ]
+          for (case, phase), lanes in sorted(groups.items()):
+              if set(lanes) != {"english-surface", "canonical-d1d8"}:
+                  raise SystemExit("candidate missing")
+              en = statistics.median(lanes["english-surface"])
+              binary = statistics.median(lanes["canonical-d1d8"])
+              if binary <= 0:
+                  raise SystemExit("invalid timing")
+              lines.append(f"| {case} | {phase} | {en:.0f} | {binary:.0f} | {en/binary:.3f}x |")
+          blocked = json.loads((dest / "blocked.json").read_text())["blocked"]
+          lines.extend([
+              "",
+              f"Blocked in this tiny D3 fixture: {len(blocked)}.",
+              "The eleven headline production workloads are not measured.",
+              "Ratio above 1 means binary is faster in that measured phase.",
+              "**This is not the full D1-D9 runtime, and not a Python-vs-SENS benchmark.**",
+              "",
+          ])
+          summary = "\n".join(lines)
+          (dest / "cpu-summary.md").write_text(summary)
+          print(summary)
+          PY
+      - name: Publish measured numbers or an explicit failure
+        if: always()
+        shell: bash
+        run: |
+          if test -f "$RUNNER_TEMP/sens-real-cpu/cpu-summary.md"; then
+            cat "$RUNNER_TEMP/sens-real-cpu/cpu-summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "CPU measurement BLOCKED by build, oracle or timing failure." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sens-cpu-real-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-real-cpu/
+          if-no-files-found: warn
+          retention-days: 30
