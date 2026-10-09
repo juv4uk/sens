@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/examples/packed_vs_visible_bench.rs"
+      - "crates/sens/examples/packed_vs_visible_runtime.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/source_packing.rs"
       - "benchmarks/packed-vs-visible/**"
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - "crates/sens/examples/packed_vs_visible_bench.rs"
+      - "crates/sens/examples/packed_vs_visible_runtime.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/source_packing.rs"
       - "benchmarks/packed-vs-visible/**"
@@ -35,7 +37,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Build release benchmark executable
-        run: cargo build --locked --release -p sens --example packed_vs_visible_bench
+        run: cargo build --locked --release -p sens --example packed_vs_visible_bench --example packed_vs_visible_runtime
 
       - name: Record hosted hardware and Rust toolchain
         run: |
@@ -44,12 +46,17 @@ jobs:
           rustc --version >> artifacts/performance/environment.txt
           uname -a >> artifacts/performance/environment.txt
           lscpu >> artifacts/performance/environment.txt
-          echo "benchmark=paired-ingest-only; word-width-metadata=external" >> artifacts/performance/environment.txt
+          echo "benchmark=paired-ingest-plus-evaluation; word-width-metadata=external" >> artifacts/performance/environment.txt
 
       - name: Measure current packed-vs-visible reader (not a unit-test proxy)
         run: |
           target/release/examples/packed_vs_visible_bench --samples 9 \
             | tee artifacts/performance/packed-vs-visible.jsonl
+
+      - name: Benchmark real evaluation with warm and cold session
+        run: |
+          target/release/examples/packed_vs_visible_runtime --samples 9 \
+            | tee artifacts/performance/packed-vs-visible-runtime.jsonl
 
       - name: Publish measured ratios, not imagined performance claims
         run: |
@@ -86,6 +93,61 @@ jobs:
           print(summary)
           PY
           cat artifacts/performance/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish separate runtime (not just ingest) performance table
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          rows = [
+              json.loads(line)
+              for line in Path("artifacts/performance/packed-vs-visible-runtime.jsonl").read_text().splitlines()
+              if line.strip()
+          ]
+          phases = {"warm-session-parse-lower-eval", "fresh-session-parse-lower-eval"}
+          cases = {"quote-empty-1", "quote-empty-64", "quote-empty-256", "d1-one-64"}
+          if (
+              len(rows) != 8
+              or {(x.get("case"), x.get("phase")) for x in rows} != {
+                  (case, phase) for case in cases for phase in phases
+              }
+              or any(
+                  x.get("oracle") != "same-evaluated-value-output"
+                  or x.get("samples") != 9
+                  or not all(v > 0 for v in [x["visible_median_ns"], x["packed_median_ns"], x["execute_only_baseline_ns"]])
+                  for x in rows
+              )
+          ):
+              raise SystemExit("runtime performance rows/oracle missing; do not publish ratios")
+          lines = [
+              "## Actual execution: parse → lower → eval",
+              "",
+              "One release executable and one GitHub-hosted CPU; 9 paired sample medians. "
+              "Warm phase reuses a session. Fresh phase creates a new Session per invocation. "
+              "Execute-only baseline reuses already-lowered AST and session, so it is not a candidate speedup.",
+              "",
+              "| Corpus | Session | Visible µs | Packed µs | Visible / packed | Execute-only µs |",
+              "|---|---|---:|---:|---:|---:|",
+          ]
+          for row in rows:
+              label = "warm" if row["phase"].startswith("warm") else "fresh"
+              lines.append(
+                  f"| {row['case']} | {label} | {row['visible_median_ns']/1000:.2f} "
+                  f"| {row['packed_median_ns']/1000:.2f} "
+                  f"| {row['ratio_visible_over_packed']:.2f}× "
+                  f"| {row['execute_only_baseline_ns']/1000:.2f} |"
+              )
+          lines.extend([
+              "",
+              "All workloads passed independent exact D1/D3 result parity before timing. "
+              "No core library bootstrap, process start, disk I/O, self-describing file framing "
+              "or out-of-band width-schedule cost is included. This is not a cross-language benchmark.",
+          ])
+          report = "\n".join(lines) + "\n"
+          Path("artifacts/performance/runtime-summary.md").write_text(report, encoding="utf-8")
+          print(report)
+          PY
+          cat artifacts/performance/runtime-summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload full raw sample evidence and CPU provenance
         if: always()
