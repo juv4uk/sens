@@ -7,10 +7,12 @@ on:
     branches: [main]
     paths:
       - "benchmarks/physical-binary-performance/**"
+      - "scripts/sens_t5_codec.py"
       - ".github/workflows/physical-binary-performance.yml"
   pull_request:
     paths:
       - "benchmarks/physical-binary-performance/**"
+      - "scripts/sens_t5_codec.py"
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/eval/**"
@@ -56,6 +58,7 @@ jobs:
             crates/sens-cli/src/main.rs \
             crates/sens-cli/src/bin/sens-trit.rs \
             benchmarks/physical-binary-performance/run.py \
+            scripts/sens_t5_codec.py \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
             > /tmp/sens-physical-performance/inputs.sha256
