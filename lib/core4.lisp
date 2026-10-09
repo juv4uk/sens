@@ -193,11 +193,13 @@
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
+; Strict D3 COND tests are exact D1 bits: ATOM selects the empty-list base,
+; the always-true D1 comparison handles the non-empty recursive case.
 (00001001 зворот-до
   (00001000 (values acc)
     (00000111
-      ((00000010 values) () acc)
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values) acc)
+      ((00011010 0 1)
        (зворот-до (00000110 values) (00000100 (00000101 values) acc))))))
 
 (00001001 reverse-onto зворот-до)
@@ -227,9 +229,8 @@
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values)  (00000001 ()))
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values) (00101010 acc))
+      ((00011010 0 1)
        (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
 (00001001 map
@@ -239,14 +240,13 @@
 (00001001 filter-onto
   (00001000 (predicate values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values)  (00101010 acc))
-      ((00000010 values) 
+      ((00000010 values) (00101010 acc))
+      ((00011010 0 1)
        (10011100 ((decision (predicate (00000101 values))))
          (00000111
            (decision
             (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((00000010 predicate)
+           ((00011010 0 1)
             (filter-onto predicate (00000110 values) acc))))))))
 
 (00001001 filter
@@ -256,9 +256,9 @@
 (00001001 reduce
   (00001000 (f acc values)
     (00000111
-      ((00000010 values) () acc)
-      ((00000010 values) 
-       (00111001 f (f acc (00000101 values)) (00000110 values))))))
+      ((00000010 values) acc)
+      ((00011010 0 1)
+       (reduce f (f acc (00000101 values)) (00000110 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
