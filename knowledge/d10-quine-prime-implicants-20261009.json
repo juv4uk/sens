@@ -1,0 +1,183 @@
+{
+  "schema": "d10-quine-prime-implicant-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-HOLD-CORE-VS-LIBRARY-NOT-SELECTED",
+  "coordination": [
+    "#4013",
+    "#4463",
+    "#1599",
+    "#4867"
+  ],
+  "baseline": {
+    "foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "selected": 634,
+    "ratified": 0
+  },
+  "proposal": {
+    "stable_id": "d10.logic.prime-implicants.quine.20261009",
+    "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+    "surface_uk": "прості-імпліканти",
+    "surface_ukr": "усі-максимальні-куби-булевої-функції",
+    "relation_class": "FINITE-BOOLEAN-ON-DC-PRIME-CUBE-FAMILY",
+    "signature": "(width:natural n, ON:set of n-bit ranks, DC:set of n-bit ranks disjoint ON)->ordered list of n-literal ternary cubes",
+    "law": "Let U={0,...,2^n-1}, ON∩DC=∅ and OFF=U\\(ON∪DC). A cube is an n-character pattern in {0,1,-}, where '-' is free. Return EVERY and ONLY cube c whose coverage intersects ON, whose coverage has empty intersection with OFF, and for which no strictly less constrained cube c' (covering strictly more assignments) also avoids OFF. Sort cubes by canonical lexicographic order '-'<'0'<'1'. The output is the complete prime implicant family, NOT a chosen minimum cover and not an individual Boolean gate.",
+    "width_policy": "Research executable oracle n≤4 for bounded checks; mathematical law for any finite natural n subject to explicit finite-input resource policy.",
+    "zero_width": "n=0 has one assignment, rank 0; ON={0} produces ['']; ON=∅ produces [].",
+    "examples": [
+      {
+        "width": 2,
+        "on": [
+          1,
+          3
+        ],
+        "dc": [],
+        "result": [
+          "-1"
+        ]
+      },
+      {
+        "width": 2,
+        "on": [
+          1,
+          2
+        ],
+        "dc": [],
+        "result": [
+          "01",
+          "10"
+        ]
+      },
+      {
+        "width": 3,
+        "on": [
+          1,
+          3,
+          5,
+          7
+        ],
+        "dc": [],
+        "result": [
+          "--1"
+        ]
+      },
+      {
+        "width": 2,
+        "on": [
+          0
+        ],
+        "dc": [
+          1
+        ],
+        "result": [
+          "0-"
+        ]
+      },
+      {
+        "width": 2,
+        "on": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "dc": [],
+        "result": [
+          "--"
+        ]
+      },
+      {
+        "width": 2,
+        "on": [],
+        "dc": [
+          1,
+          2
+        ],
+        "result": []
+      },
+      {
+        "width": 0,
+        "on": [
+          0
+        ],
+        "dc": [],
+        "result": [
+          ""
+        ]
+      }
+    ],
+    "falsifiers": [
+      "Any returned cube intersects OFF.",
+      "A reported prime cube can free another constrained bit without touching OFF.",
+      "ON coverage is lost or cubes covering only DC are reported.",
+      "Returns one minimized sum-of-products cover rather than all primes.",
+      "Treats a don't-care as mandatory output-1 or silently allows overlapping ON/DC."
+    ],
+    "status": "RESEARCH-UNSELECTED",
+    "coordinate": null,
+    "ratified": false,
+    "physical_t5_authorized": false
+  },
+  "historical_sources": [
+    {
+      "year": 1952,
+      "name": "W. V. Quine, The Problem of Simplifying Truth Functions",
+      "doi": "10.1080/00029890.1952.11988183",
+      "url": "https://www.tandfonline.com/doi/abs/10.1080/00029890.1952.11988183",
+      "claim": "Early systematic search for simplified propositional truth functions."
+    },
+    {
+      "year": 1956,
+      "name": "E. J. McCluskey, Minimization of Boolean Functions, Bell System Technical Journal 35(6)",
+      "doi": "10.1002/j.1538-7305.1956.tb03835.x",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/j.1538-7305.1956.tb03835.x",
+      "claim": "Systematic method for minimum sum-of-products including optional don't-care assignments; current proposed function takes only the prime enumeration sub-law."
+    },
+    {
+      "year": 1938,
+      "name": "C. E. Shannon, A Symbolic Analysis of Relay and Switching Circuits",
+      "url": "https://doi.org/10.1109/T-AIEE.1938.5057767",
+      "claim": "Boolean treatment of electrical switching as donor context, not a function-specific prior implementation."
+    }
+  ],
+  "owner_sources": [
+    {
+      "repo": "juv4uk/fpga-lisp",
+      "path": "README.md",
+      "sha": "fe9713029ae67fce5c3ded5decc55b7c3e803fc8",
+      "note": "Physical Lisp-machine FPGA context only; no assertion that a Quine minimizer exists in the repo."
+    },
+    {
+      "repo": "juv4uk/sens",
+      "path": "lib/reason.lisp",
+      "sha": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "note": "Existing symbolic reasoning and clauses; boolean cube enumeration is a proposed independent research law, not transplanted code."
+    }
+  ],
+  "dedup": {
+    "foundation_d1_d9": "No exact named prime-implicant family found in pinned D1-D9 tables; behavioral review still required.",
+    "d10_at_snapshot": "No exact named prime-implicant family found among 634 selected; neighboring D10 Prove/Boolean and historical logic proposals must be inspected before any selection.",
+    "distinguish_from": [
+      "D1 predicates: evaluate truth, not enumerate maximal valid cubes",
+      "D8 Boolean algebra: can derive result with finite enumeration, but that does not imply exact semantic identity",
+      "D9 EXPLAIN-PROOF: explains inferred rules, not maximal Boolean cubes",
+      "Other symbolic-AI proposals (#4963 #4965 #4970): probability, abduction and term LGG are different laws"
+    ],
+    "owner_decision": "Independent review whether to admit into D10 semantic Core or retain as Core-Math/FPGA/AI library law. Mathematically derivable via ordinary finite operations, so not claim irreducibility.",
+    "dedup_state": "PRELIMINARY-NOT-ADMITTED"
+  },
+  "oracle": {
+    "reference": "Quine combine-adjacent-minterms over ON union DC; discard cubes without ON",
+    "independent": "Enumerate all 3^n possible cubes; independently test ON intersection, OFF avoidance and maximality under wildcard relaxation",
+    "exhaustive": "all ternary truth tables of width 0..3 (3+9+81+6561=6654) plus width4 witnesses",
+    "test_file": "tests/test_d10_quine_prime_implicants.py",
+    "ci": "not yet established in machine at first draft"
+  },
+  "constraints": [
+    "Research-only source evidence, no authority to add opcode or D10 10-bit coordinate",
+    "No migration blocker invented",
+    "Any acceptance requires current-main dedup proof and proposal ledger/history append",
+    "D2 exclusive control remains unchanged",
+    "Historical source is a donor, not a claim of new primitive in historical computers"
+  ]
+}
