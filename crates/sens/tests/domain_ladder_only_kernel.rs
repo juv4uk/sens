@@ -72,7 +72,6 @@ fn flat_sid8_cannot_choose_a_rung_or_call_a_domain_mechanism() {
     );
 }
 
-const REGISTRY: &str = include_str!("../src/semantic_registry.rs");
 
 #[test]
 fn legacy_d5_byte_cannot_mint_a_domain_law() {
