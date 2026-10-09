@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from d10_historical_snapshot_compat import pinned_inventory_git_blob
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "knowledge/early-lisp-post-d4-history-provenance-v1.json"
@@ -24,6 +25,8 @@ def load(path):
 
 
 def blob_sha(path):
+    if path == INVENTORY:
+        return pinned_inventory_git_blob(path)
     rel = str(path.relative_to(ROOT))
     return subprocess.run(
         ["git", "rev-parse", f"HEAD:{rel}"], cwd=ROOT, check=True,
