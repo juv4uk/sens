@@ -220,8 +220,7 @@ def build_census(
 
 
 def self_test() -> None:
-    # Regression: the live generated index uses \`(00101110 EXT "ICLASS")\`.
-    # Retain compatibility with archived \`(pair EXT "ICLASS")\` snapshots too.
+    # Regression: current generated rows use 00101110; archived rows used pair.
     for line in (
         '(00101110 X86-BASE "ADD")',
         '(pair X86-BASE "ADD")',
@@ -294,47 +293,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main()))
-PARTIAL_RE = re.compile(
-    r'^\s*\(partial\s+([^\s()]+)\s+"([^"]+)"\s+\(heads\s+([^)]*)\)\)\s*$'
-)
-PARTIAL_COUNT_RE = re.compile(r'^\s*\(partial-pair-count\s+#b([01]+)\)\s*$')
-
-# Admitted forms intentionally not physically executed by the generic owner
-# sweep until they have a dedicated bounded side-effect/control-flow witness.
-DECODE_ONLY_ICLASSES = {
-    "CALL_NEAR",
-    "CLD",
-    "RDTSC",
-    "REP_MOVSB",
-    "REP_MOVSQ",
-    "REP_STOSB",
-    "REP_STOSQ",
-    "STD",
-}
-
-PHYSICAL_PRECEDENCE = {
-    "platform-gated": 1,
-    "execute-safe": 2,
-}
-
-
-class CensusError(RuntimeError):
-    pass
-
-
-def load_pairs(path: Path = INDEX) -> list[tuple[str, str]]:
-    pairs: list[tuple[str, str]] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        match = PAIR_RE.match(line)
-        if match:
-            pairs.append((match.group(1), match.group(2)))
-    if len(pairs) != 1176:
-        raise CensusError(f"expected 1176 pinned evidence pairs, found {len(pairs)}")
-    if len(set(pairs)) != len(pairs):
-        raise CensusError("pinned evidence pair inventory contains duplicates")
-    return pairs
-
-
-def load_projection(path: Path = PROJECTION) -> tuple[dict[tuple[str, str], list[str]], dict[str, tuple[str, str]]]:
-    pairs: dict[tuple[str, str], list[str]] = {}
+    raise SystemExit(main())
