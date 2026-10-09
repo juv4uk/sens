@@ -135,6 +135,17 @@ pub(crate) fn evaluate_definition(
 ) -> Result<Value, LanguageError> {
     exact_sens_arity(crate::sens!(00001011), arguments, 2, span)?;
 
+    // A D2-framed W7 sequence is a Text7 identifier only in this explicit
+    // DEFINE target role. The canonical reader remains structural and makes
+    // no global W7→Text7 inference.
+    if let Some(name) = crate::canonical_reader::text7_binding_key(&arguments[0]) {
+        canon::ensure_bindable(&name, arguments[0].span)?;
+        let value = evaluate(&arguments[1], environment)?;
+        canon::bind_language_definition(&name, &value, environment);
+        environment.define(name, value.clone());
+        return Ok(value);
+    }
+
     match &arguments[0].kind {
         ExprKind::Symbol(name) => {
             canon::ensure_bindable(name, arguments[0].span)?;

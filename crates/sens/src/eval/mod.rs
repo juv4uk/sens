@@ -191,7 +191,18 @@ pub(crate) fn evaluate_step(
         }
         // Empty structure is a structural value, not any function SID.
         ExprKind::List(items) if items.is_empty() => Ok(EvalStep::Value(Value::Nil)),
-        ExprKind::List(items) => evaluate_list(items, environment, expression.span),
+        ExprKind::List(items) => {
+            // A whole D2/W7 frame is a Text7 identifier only when the
+            // executable context already has the corresponding binding.
+            // This is the value-reference case for local/global variables;
+            // quoted/data lists never reach here as executable references.
+            if let Some(key) = text7_binding_key(expression) {
+                if let Some(value) = environment.get(&key) {
+                    return Ok(EvalStep::Value(value));
+                }
+            }
+            evaluate_list(items, environment, expression.span)
+        },
         ExprKind::Call(sid, arguments) => {
             dispatch_call(None, Some(*sid), None, arguments, environment, expression.span)
         }
@@ -227,6 +238,19 @@ fn evaluate_list(
 ) -> Result<EvalStep, LanguageError> {
     if let Some(identity) = binary_head_domain_identity(&items[0]) {
         return dispatch_domain_call(identity, &items[1..], environment, span);
+    }
+    // A D2/W7 frame becomes a Text7 binding only in executable call-head
+    // position. Ordinary D2 lists, quoted data and dotted data remain governed
+    // solely by the canonical D2 reader.
+    if let Some(key) = text7_binding_key(&items[0]) {
+        let function = environment.get(&key).ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::UnknownSymbol,
+                format!("unknown Text7 binding: {key}"),
+                items[0].span,
+            )
+        })?;
+        return closures::apply(function, &items[1..], environment, span);
     }
     dispatch_call(
         items[0].kind.as_symbol(),
