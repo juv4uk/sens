@@ -1,0 +1,26 @@
+name: Temporary time loader first-failure diagnosis
+
+on:
+  push:
+    branches:
+      - fix/time-twofield-cond-latest-main-20261009
+    paths:
+      - ".github/workflows/time-load-debug-20261009.yml"
+      - "crates/sens/tests/time_loader_first_failure_debug.rs"
+      - "lib/time.lisp"
+      - "lib/core4.lisp"
+      - "lib/core4.lisp.fasl"
+
+permissions:
+  contents: read
+
+jobs:
+  find-first-failing-time-form:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run one-form-at-a-time loader diagnostic
+        run: cargo test --locked -p sens --test time_loader_first_failure_debug -- --nocapture
