@@ -83,7 +83,10 @@ def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
     if row is None:
         raise D7ProjectionError(f"D7:{bits} is reserved; owner admission required")
     owner = evidence[bits]
-    surface = getattr(row, namespace)
+    # Lisp columns use ук/укр; the structural table reader exposes uk/ukr.
+    # Namespaces are presentation only, never the coordinate authority.
+    field = {"ук": "uk", "укр": "ukr"}.get(namespace, namespace)
+    surface = getattr(row, field)
     if surface is None:
         raise D7ProjectionError(f"D7:{bits} has no {namespace} projection")
     return {
