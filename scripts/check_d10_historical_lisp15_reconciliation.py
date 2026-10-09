@@ -56,7 +56,7 @@ def _verify_appended_rows(rows: list[dict], transition: dict) -> None:
         _check(row.get("stable_id") in added_ids, "unlisted stable ID in appended tail")
         _check(bool(row.get("semantic_name")), "appended row has no semantic name")
         _check(bool(row.get("behavior")), "appended row has no behavior law")
-        _check(bool(row.get("provenance")), "appended row has no provenance")
+        _check(bool(row.get("provenance") or row.get("source_path") or row.get("primary_url")), "appended row has no explicit source reference")
         _check(row.get("status") == "SELECTED-RESEARCH-CANDIDATE", "appended row is not a selected research candidate")
         _check(row.get("coordinate") is None, "append transition assigned a coordinate")
         _check(row.get("ratified_resident") is False, "append transition ratified a resident")
