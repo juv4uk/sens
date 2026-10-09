@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d5-order-sibling-law",
+  "wing": "D5 laws",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does GREATERP(a,b) equal LESSP(b,a) across the bounded historical numeric carrier?",
+  "claim": "Tests a local D5 sibling law only; it does not alter OD-005 coordinates or infer D4 parenthood.",
+  "witness": [
+    "run.py",
+    "result.json"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "d5/order-sibling-law",
+  "reproduce": "python3 benchmarks/d5-order-sibling-law/run.py"
+}

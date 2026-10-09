@@ -1,0 +1,38 @@
+name: Benchmark registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/**"
+      - "scripts/benchmark_registry.py"
+      - ".github/workflows/benchmark-registry.yml"
+  pull_request:
+    paths:
+      - "benchmarks/**"
+      - "scripts/benchmark_registry.py"
+      - ".github/workflows/benchmark-registry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    name: benchmark discovery registry
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate manifests and generated index
+        run: python3 scripts/benchmark_registry.py --check
+
+      - name: Reject newly created unmanifested stands
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 scripts/benchmark_registry.py --check-new "$BASE_SHA" "$HEAD_SHA"
