@@ -203,9 +203,9 @@ fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
 #[test]
 fn tracked_d3_cond_is_a_real_physical_t5_file_with_exact_byte_parity() {
     const PHYSICAL: &[u8] =
-        include_bytes!("../../../examples/binary-language/current-cond-reference.sens");
+        include_bytes!("../../../examples/binary-language/d3-cond-current-t5.sens");
     // A physical .sens file contains 5-trit packed bytes, not printable bit text.
-    let reference = include_str!("../../../examples/binary-language/current-cond-reference.lisp");
+    let reference = include_str!("../../../examples/binary-language/d3-cond-current-t5.lisp");
     let from_source = encode_binary_projection_ternary(reference)
         .expect("the current ratified D3:110 source must encode canonically");
     assert_eq!(PHYSICAL, from_source.as_slice(), "tracked T5 bytes drifted");
