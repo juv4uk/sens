@@ -31,12 +31,14 @@ def verify(review: dict, foundation: dict, inventory: dict) -> dict:
         if row.get("selected_d10") is not False or row.get("coordinate") is not None or row.get("ratified") is not False:
             raise ValueError(f"authority leak in {row.get('review_id')}")
     ob = next((r for r in rows if r.get("review_id") == "L15-31"), None)
-    if not ob or ob.get("exact_d1_d9_name_matches") or ob.get("exact_selected_d10_name_matches"):
-        raise ValueError("MAPATOMS/OBARRAY is not an exact-name match; behavioral dedup remains mandatory")
+    if not ob or ob.get("exact_d1_d9_name_matches") or not any(x.get("name", "").upper() == "MAPATOMS" for x in ob.get("exact_selected_d10_name_matches", [])) or ob.get("exact_name_residuals") != ["OBARRAY", "OBLIST"]:
+        raise ValueError("MAPATOMS must be deduplicated against selected D10; only OBARRAY/OBLIST remains on HOLD")
     selected_names = {r["semantic_name"].upper() for r in inventory["rows"]}
     lower_names = {str(name).upper() for dom in foundation["domains"].values() for name in dom["residents"].values()}
-    if any(n in selected_names or n in lower_names for n in ("MAPATOMS", "OBARRAY")):
-        raise ValueError("new exact-name collision: update research disposition before review")
+    if "MAPATOMS" not in selected_names:
+        raise ValueError("expected existing selected D10 MAPATOMS row was not found")
+    if "OBARRAY" in selected_names or "OBLIST" in selected_names or "OBARRAY" in lower_names or "OBLIST" in lower_names:
+        raise ValueError("OBARRAY/OBLIST now has an exact-name collision: update hold disposition before review")
     return {"rows": len(rows), "d10_selected": inventory["accounting"]["selected_semantic_candidates"],
             "selected_added": 0, "coordinates_added": 0, "ratifications_added": 0}
 
