@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/migrate-to-sens-codes.py"
+      - "scripts/migrate-approved-t5.py"
       - "scripts/sens_source_resolver.py"
       - "scripts/classify-lisp-source-forms.py"
       - "scripts/migrate-three-pass.py"
@@ -13,6 +14,7 @@ on:
       - "tests/test_sens_code_migration.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
+      - "tests/test_migrate_approved_t5.py"
       - "tests/test_sens_t5_codec.py"
       - "contracts/core1-historical-sid-map.lisp"
       - "knowledge/d1-d9-foundation.json"
@@ -22,6 +24,7 @@ on:
     branches: [main]
     paths:
       - "scripts/migrate-to-sens-codes.py"
+      - "scripts/migrate-approved-t5.py"
       - "scripts/sens_source_resolver.py"
       - "scripts/classify-lisp-source-forms.py"
       - "scripts/migrate-three-pass.py"
@@ -31,6 +34,7 @@ on:
       - "tests/test_sens_code_migration.py"
       - "tests/test_classify_lisp_source_forms.py"
       - "tests/test_three_pass_migration.py"
+      - "tests/test_migrate_approved_t5.py"
       - "tests/test_sens_t5_codec.py"
       - "contracts/core1-historical-sid-map.lisp"
       - "knowledge/d1-d9-foundation.json"
@@ -53,6 +57,7 @@ jobs:
             tests/test_sens_code_migration.py \
             tests/test_classify_lisp_source_forms.py \
             tests/test_three_pass_migration.py \
+            tests/test_migrate_approved_t5.py \
             tests/test_sens_t5_codec.py > migration-test.log 2>&1
           status=$?
           cat migration-test.log
@@ -73,7 +78,6 @@ jobs:
             --summary-only \
             --json /tmp/lisp-source-forms.json \
             --tsv /tmp/lisp-source-forms.tsv
-
       - name: Upload three-pass inventory
         uses: actions/upload-artifact@v4
         with:
@@ -81,13 +85,11 @@ jobs:
           path: |
             /tmp/lisp-source-forms.json
             /tmp/lisp-source-forms.tsv
-
       - name: Audit migrator itself
         run: |
           python3 scripts/audit-sens-name-debt.py . \
             --foundation knowledge/d1-d9-foundation.json \
             --report /tmp/sens-name-debt.json
-
       - name: Enforce migration tests
         if: always()
         run: exit "$(cat migration-test.status)"
