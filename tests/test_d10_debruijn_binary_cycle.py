@@ -72,7 +72,7 @@ class DeBruijnWordLaw(unittest.TestCase):
                 self.assertEqual(explicit_set_oracle(bits,order),
                                  rolling_register_oracle(bits,order))
                 cases+=1
-        self.assertEqual(cases,65556)
+        self.assertEqual(cases,65812)
 
     def test_generated_canonical_examples_and_rotations(self):
         for n in range(1,8):
