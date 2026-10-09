@@ -22,6 +22,27 @@
 (defmethod d10-method-class-dispatch :before ((x integer)) nil)
 (defmethod d10-method-class-dispatch ((x string)) :string)
 
+;;; CHANGE-CLASS classes and hook must be global definitions.
+(defclass d10-method-class-before ()
+  ((retained :initarg :retained)
+   (common-unbound)
+   (old-only :initform :old)))
+(defclass d10-method-class-after ()
+  ((retained)
+   (common-unbound)
+   (new-only :initform :new)))
+
+(defvar *d10-change-class-target* nil)
+(defvar *d10-change-class-hook-observation* nil)
+(defmethod update-instance-for-different-class :before
+    ((previous d10-method-class-before)
+     (current d10-method-class-after)
+     &rest initargs)
+  (declare (ignore initargs))
+  (setf *d10-change-class-hook-observation*
+        (list (slot-value previous 'retained)
+              (eq current *d10-change-class-target*))))
+
 (let* ((gf #'d10-method-class-dispatch)
        (integer-specializer (find-class 'integer))
        (number-specializer (find-class 'number))
@@ -67,26 +88,6 @@
     (eq before-method (find-method gf '(:before) (list integer-specializer))))
 
   ;; CHANGE-CLASS preserves identity, common slot value and unbound state.
-  (defclass d10-method-class-before ()
-    ((retained :initarg :retained)
-     (common-unbound)
-     (old-only :initform :old)))
-  (defclass d10-method-class-after ()
-    ((retained)
-     (common-unbound)
-     (new-only :initform :new)))
-
-  (defvar *d10-change-class-target* nil)
-  (defvar *d10-change-class-hook-observation* nil)
-  (defmethod update-instance-for-different-class :before
-      ((previous d10-method-class-before)
-       (current d10-method-class-after)
-       &rest initargs)
-    (declare (ignore initargs))
-    (setf *d10-change-class-hook-observation*
-          (list (slot-value previous 'retained)
-                (eq current *d10-change-class-target*))))
-
   (let ((object (make-instance 'd10-method-class-before :retained 41)))
     (setf *d10-change-class-target* object
           *d10-change-class-hook-observation* nil)
