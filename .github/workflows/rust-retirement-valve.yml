@@ -1,0 +1,104 @@
+name: Rust Retirement Valve
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-retirement-valve:
+    name: Rust subtraction valve
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-retirement-valve
+
+      - name: Build existing Lisp runner
+        run: cargo build -p my-lisp-cli --bin my-lisp
+
+      - name: Collect real Rust diff facts
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > tests/rust-retirement-changes.lisp
+          MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+          git diff --numstat "$MERGE_BASE" "$HEAD_SHA" -- '*.rs' > /tmp/rust-numstat.txt
+          git diff --diff-filter=A --name-only "$MERGE_BASE" "$HEAD_SHA" -- '*.rs' > /tmp/rust-added.txt
+          git diff --diff-filter=D --name-only "$MERGE_BASE" "$HEAD_SHA" -- '*.rs' > /tmp/rust-deleted.txt
+          while IFS=$'\t' read -r additions deletions path; do
+            [[ -z "${path:-}" ]] && continue
+            status=existing
+            if grep -Fxq "$path" /tmp/rust-added.txt; then
+              status=new
+            elif grep -Fxq "$path" /tmp/rust-deleted.txt; then
+              status=deleted
+            fi
+            printf '(rust-change "%s" %s %s %s)\n' "$path" "$additions" "$deletions" "$status" >> tests/rust-retirement-changes.lisp
+          done < /tmp/rust-numstat.txt
+          cat tests/rust-retirement-changes.lisp
+
+      - name: Enforce real PR subtraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/debug/my-lisp scripts/rust-retirement-valve.lisp > tests/rust-retirement-verdict.lisp
+          cat tests/rust-retirement-verdict.lisp
+          ./target/debug/my-lisp scripts/rust-retirement-valve-enforce.lisp
+
+      - name: Self-test forbidden added line
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/fixtures/rust-retirement-valve/added-line.lisp tests/rust-retirement-changes.lisp
+          ./target/debug/my-lisp scripts/rust-retirement-valve.lisp > tests/rust-retirement-verdict.lisp
+          cp tests/rust-retirement-verdict.lisp /tmp/rust-valve-added.log
+          if ./target/debug/my-lisp scripts/rust-retirement-valve-enforce.lisp >> /tmp/rust-valve-added.log 2>&1; then
+            echo 'ERROR: added Rust line was accepted'
+            exit 1
+          fi
+          grep -q 'rust-retirement-violation' /tmp/rust-valve-added.log
+
+      - name: Self-test forbidden new Rust path
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/fixtures/rust-retirement-valve/new-file.lisp tests/rust-retirement-changes.lisp
+          ./target/debug/my-lisp scripts/rust-retirement-valve.lisp > tests/rust-retirement-verdict.lisp
+          cp tests/rust-retirement-verdict.lisp /tmp/rust-valve-new.log
+          if ./target/debug/my-lisp scripts/rust-retirement-valve-enforce.lisp >> /tmp/rust-valve-new.log 2>&1; then
+            echo 'ERROR: new Rust path was accepted'
+            exit 1
+          fi
+          grep -q 'rust-retirement-violation' /tmp/rust-valve-new.log
+
+      - name: Self-test forbidden replacement Rust
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/fixtures/rust-retirement-valve/replacement.lisp tests/rust-retirement-changes.lisp
+          ./target/debug/my-lisp scripts/rust-retirement-valve.lisp > tests/rust-retirement-verdict.lisp
+          cp tests/rust-retirement-verdict.lisp /tmp/rust-valve-replacement.log
+          if ./target/debug/my-lisp scripts/rust-retirement-valve-enforce.lisp >> /tmp/rust-valve-replacement.log 2>&1; then
+            echo 'ERROR: replacement Rust was accepted'
+            exit 1
+          fi
+          grep -q 'rust-retirement-violation' /tmp/rust-valve-replacement.log
+
+      - name: Self-test deletion-only Rust
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp tests/fixtures/rust-retirement-valve/deletion-only.lisp tests/rust-retirement-changes.lisp
+          ./target/debug/my-lisp scripts/rust-retirement-valve.lisp > tests/rust-retirement-verdict.lisp
+          grep -q '(rust-retirement-ok)' tests/rust-retirement-verdict.lisp
+          ./target/debug/my-lisp scripts/rust-retirement-valve-enforce.lisp
