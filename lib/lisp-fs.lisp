@@ -108,9 +108,9 @@
       (00000111 ((00000010 entry) () (00000001 ()))
             ((00000010 entry)  (00000001 ())) (t (00000110 entry))))))
 
-; Exact D1 predicate inversion for filesystem guards. The comparison result is
-; already D1; compare it with ATOM of a non-empty quoted pair (D1 NO), avoiding
-; generic truthiness and avoiding a computed expression in COND's data slot.
+; Exact D1 predicate inversion for filesystem guards. Comparison returns D1;
+; compare it with ATOM of a non-empty quoted pair (D1 NO), avoiding generic
+; truthiness and avoiding a computed expression in COND's data slot.
 (00001001 fs-d1-no?
   (00001000 (value)
     (00100010 value (00000010 (00000001 (x))))))

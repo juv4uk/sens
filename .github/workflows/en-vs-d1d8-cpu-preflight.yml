@@ -1,0 +1,72 @@
+name: English vs D1-D8 CPU preflight
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/en_vs_d1d8_preflight.rs"
+      - "benchmarks/en-vs-d1d8-cpu/**"
+      - ".github/workflows/en-vs-d1d8-cpu-preflight.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: en-vs-d1d8-cpu-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: en-vs-d1d8-cpu-preflight
+
+      - name: Build preflight executable
+        run: cargo build -p sens --example en_vs_d1d8_preflight
+
+      - name: Negative trace-mismatch control
+        run: |
+          printf '(%s)\n' 'car' > /tmp/preflight-en.lisp
+          printf '%s\n' '10 110 01' > /tmp/preflight-bin.lisp
+          set +e
+          target/debug/examples/en_vs_d1d8_preflight /tmp/preflight-en.lisp /tmp/preflight-bin.lisp
+          rc=$?
+          set -e
+          test "$rc" -eq 4
+
+      - name: Run paired manifest preflight
+        run: |
+          rm -rf /tmp/en-vs-d1d8-preflight
+          python3 benchmarks/en-vs-d1d8-cpu/run.py \
+            --preflight-bin target/debug/examples/en_vs_d1d8_preflight \
+            --manifest benchmarks/en-vs-d1d8-cpu/selftest-manifest.tsv \
+            --out /tmp/en-vs-d1d8-preflight \
+            --require-ready
+
+      - name: Validate machine-readable artifacts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          schema = json.loads(Path("benchmarks/en-vs-d1d8-cpu/raw-row.schema.json").read_text())
+          assert schema["title"].startswith("SENS #3113")
+          rows = [
+              json.loads(line)
+              for line in Path("/tmp/en-vs-d1d8-preflight/preflight.jsonl").read_text().splitlines()
+              if line.strip()
+          ]
+          assert len(rows) == 1
+          assert rows[0]["status"] == "PREFLIGHT_OK"
+          env = json.loads(Path("/tmp/en-vs-d1d8-preflight/environment.json").read_text())
+          assert env["blocked_cases"] == 0
+          assert env["timing_enabled"] is False
+          print("paired-preflight-artifacts: PASS")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: en-vs-d1d8-cpu-preflight
+          path: /tmp/en-vs-d1d8-preflight

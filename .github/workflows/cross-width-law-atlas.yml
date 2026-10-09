@@ -1,0 +1,44 @@
+name: Cross-width family-law atlas
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/cross-width-law-atlas.json"
+      - "scripts/check-cross-width-law-atlas.py"
+      - ".github/workflows/cross-width-law-atlas.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "knowledge/cross-width-law-atlas.json"
+      - "scripts/check-cross-width-law-atlas.py"
+      - ".github/workflows/cross-width-law-atlas.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ratchet:
+    name: Width x family semantic-law boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate cross-width atlas
+        run: python3 scripts/check-cross-width-law-atlas.py
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Cross-width family-law atlas"
+            echo
+            echo "~~~text"
+            python3 scripts/check-cross-width-law-atlas.py
+            echo "~~~"
+            echo
+            echo "- Width and semantic-family lineage remain independent axes."
+            echo "- Coordinate automorphisms do not become semantic authority automatically."
+            echo "- #2508 domain firewall remains mandatory."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 50
-- top-level функцій: 893
+- top-level функцій: 894
 - top-level макросів: 34
-- усього визначень: 927
+- усього визначень: 928
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -377,6 +377,7 @@
 | `lib/lisp-fs.lisp` | function | `fs-root-package` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-object-addresses` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-package-field` | unreviewed |
+| `lib/lisp-fs.lisp` | function | `fs-d1-no?` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-object-package-decision` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-serialize-object` | unreviewed |
 | `lib/lisp-fs.lisp` | function | `fs-deserialize-object` | unreviewed |
