@@ -34,6 +34,17 @@ fn content_store_semantic_relations_are_owned_by_lisp_witness() {
     )
     .expect("Lisp-owned content-store witness must load");
 
+    let probes = [
+        ("fs-objects", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-objects fs))"#),
+        ("object-values", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (01110000 (fs-objects fs)))"#),
+        ("object-addresses", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-object-addresses (01110000 (fs-objects fs))))"#),
+        ("root-package", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-root-package fs))"#),
+        ("root-image", r#"(let* ((value (quote (lambda (x) x))) (written (fs-write (fs-empty) "code" value)) (fs (car written))) (fs-serialize-root fs))"#),
+    ];
+    for (name, source) in probes {
+        eprintln!("CONTENT-STORE-DIAG: {name} => {}", observe(&mut session, source));
+    }
+
     eprintln!("CONTENT-STORE-PROBE: witness observe BEGIN");
     let verdict = observe(&mut session, "(content-store-authority-witness)");
     eprintln!("CONTENT-STORE-PROBE: witness observe END => {verdict}");
