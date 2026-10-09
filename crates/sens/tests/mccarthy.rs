@@ -735,6 +735,11 @@ fn conformance_fixture_exprs_parse_as_single_form() {
         let ExprKind::List(entries) = &form.kind else {
             panic!("each top-level form in conformance.lisp should be an alist: {form:?}");
         };
+        // The owner-ratified domain ladder is current authority; historical
+        // truthiness fixture expressions are archaeology, not Rust acceptance.
+        if alist_str(entries, "role") == Some("historical-compatibility") {
+            continue;
+        }
         let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
         let expected_error = alist_str(entries, "error");
 
