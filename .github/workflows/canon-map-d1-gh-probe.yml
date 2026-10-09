@@ -1,9 +1,9 @@
-name: Probe strict map-onto NO for Canon V2
+name: Regenerate exact Core4 FASL for Contract 11.8 let-star repair
 
 on:
   push:
     branches:
-      - fix/canon-let-map-d1-no-20261009
+      - fix/core-let-star-cond-118-20261010
     paths:
       - lib/core.lisp
       - lib/core4.lisp
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fix/canon-let-map-d1-no-20261009
+          ref: fix/core-let-star-cond-118-20261010
           persist-credentials: true
       - uses: dtolnay/rust-toolchain@stable
       - name: Generate authentic FASL from updated core4 source
@@ -39,7 +39,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'test(core): regenerate FASL for verified map-onto candidate'
-          git push origin HEAD:refs/heads/fix/canon-let-map-d1-no-20261009
+          git push origin HEAD:refs/heads/fix/core-let-star-cond-118-20261010
       - name: Probe lexical LET and map behavior without weakening Canon
         run: cargo test -p sens --test canon_let_ephemeral_diagnostic -- --nocapture
       - name: Execute current D3 COND and D1 PredicateBit witness
