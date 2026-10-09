@@ -19,6 +19,20 @@
    (generic-truth-coercion . forbidden)
    (control-dispatch . explicit-result-equality))
 
+  ((identity . "1023")
+   (surface . symbol?)
+   (domain-owner . structural-observation)
+   (input-domain . value)
+   (result-form . class-membership)
+   (target-class . symbol)
+   (cases .
+     (((when . symbol)
+       (result . (class-membership symbol member)))
+      ((when . non-symbol)
+       (result . (class-membership symbol nonmember)))))
+   (generic-truth-coercion . forbidden)
+   (control-dispatch . explicit-result-equality))
+
   ((identity . "1024")
    (surface . string?)
    (domain-owner . structural-observation)

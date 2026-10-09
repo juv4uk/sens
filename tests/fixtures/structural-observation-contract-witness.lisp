@@ -98,6 +98,22 @@
                 (so-expect "1023" (00000001 generic-truth-coercion) (00000001 forbidden))
                 (so-expect "1023" (00000001 control-dispatch) (00000001 explicit-result-equality))
 
+                ; #369: symbol? is a runtime class observation, not universal
+                ; truth. Demand the explicit Lisp-owned result algebra first;
+                ; this commit is intentionally RED until the contract is ratified.
+                (so-expect "1023" (quote result-form) (quote class-membership))
+                (so-expect "1023" (quote target-class) (quote symbol))
+                (so-expect-case
+                  "1023"
+                  (quote symbol)
+                  (quote (class-membership symbol member)))
+                (so-expect-case
+                  "1023"
+                  (quote non-symbol)
+                  (quote (class-membership symbol nonmember)))
+                (so-expect "1023" (quote generic-truth-coercion) (quote forbidden))
+                (so-expect "1023" (quote control-dispatch) (quote explicit-result-equality))
+
                 ; #218 broader type/text queries: first make the witness demand
                 ; explicit domain-owned result records. The contract update that
                 ; satisfies these checks lands only after this witness is seen RED.
