@@ -1,0 +1,121 @@
+{
+  "schema": "d10-adjust-array-rearray-differential/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-HOLD-DIFFERENTIAL-REVIEW",
+  "authority": [
+    "#4013",
+    "#4182",
+    "#4463",
+    "#4840"
+  ],
+  "snapshot": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "starting_d10_inventory_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "starting_selected_candidates": 625,
+    "starting_ratified_residents": 0,
+    "note": "The D10 blob/count records the pre-selection snapshot for provenance only. Parallel candidate-selection PRs are in progress; the checker does not require current main to remain at 625."
+  },
+  "candidate": {
+    "semantic_name": "ADJUST-ARRAY",
+    "status": "HOLD-DIFFERENTIAL-REVIEW",
+    "selected_d10": false,
+    "coordinate": null,
+    "ratified": false,
+    "physical_t5_authorized": false,
+    "source_class": "HISTORICAL-PRIMARY-CLHS-DIFFERENTIAL-20261009",
+    "relation_class": "ARRAY-ADJUSTMENT-IDENTITY-AND-VIEW-ALGEBRA",
+    "proposed_behavior": "Change the dimensions or storage view of an array while preserving rank; for adjustable arrays return the same array identity, while if a distinct result is returned the original array remains unchanged. Observable options include replacing contents, resizing a fill pointer, and establishing or removing displacement while preserving intermediate displaced-array identity.",
+    "positive_laws": [
+      {
+        "id": "AA-IDENTITY",
+        "law": "If the input array is actually adjustable, ADJUST-ARRAY returns that identical array object.",
+        "witness": "Make an adjustable vector, change its dimensions with INITIAL-ELEMENT, and check EQ between the input and result."
+      },
+      {
+        "id": "AA-DISTINCT-PRESERVES-ORIGINAL",
+        "law": "If the returned array is not EQ to the input, the input array is unchanged.",
+        "witness": "Adjust a non-adjustable vector and compare the original with a pre-call copy only when the returned array differs."
+      },
+      {
+        "id": "AA-FILL-POINTER",
+        "law": "An explicit FILL-POINTER of T sets the resulting vector fill pointer to its size.",
+        "witness": "Adjust an adjustable vector to four elements with FILL-POINTER T and observe fill-pointer = 4."
+      },
+      {
+        "id": "AA-DISPLACEMENT-SHARING",
+        "law": "DISPLACED-TO shares backing storage; mutation through the adjusted view is observed by the immediate backing array.",
+        "witness": "Adjust an adjustable vector to be displaced to a base at offset 2, write index 0 of the result, and observe base index 2."
+      },
+      {
+        "id": "AA-DISPLACEMENT-CHAIN",
+        "law": "If A is displaced to B and B is adjusted, A remains displaced to B; the intermediate view is not flattened away.",
+        "witness": "Create C <- B <- A, adjust B into its own storage, then verify ARRAY-DISPLACEMENT(A) still returns B and A writes are observed through B."
+      }
+    ],
+    "falsifiers": [
+      "Claiming novelty solely because Common Lisp spells the operation ADJUST-ARRAY.",
+      "Treating ADJUST-ARRAY as identical to historical *REARRAY without testing returned identity, preservation of the original when a distinct result is returned, fill-pointer updates, and displacement chains.",
+      "Treating ARRAY-DISPLACEMENT (which only observes backing array plus offset) as equivalent to array adjustment.",
+      "Assuming any difference from REARRAY must automatically earn a resident: test derivability from MAKE-ARRAY, REARRAY, COPY-ARRAY, element access/update and the concurrently reviewed ARRAY-DISPLACEMENT law.",
+      "Assigning a coordinate or ratification before the owner reviews the behavioral/derivability results."
+    ],
+    "ratified_resident": false
+  },
+  "neighbors": [
+    {
+      "name": "MAKE-ARRAY",
+      "status": "ALREADY-SELECTED-D10",
+      "relationship": "Creates a new array. It does not itself implement the identity/conditional-original-preservation protocol of adjusting an existing object."
+    },
+    {
+      "name": "REARRAY",
+      "status": "ALREADY-SELECTED-D10",
+      "relationship": "MacLisp operation; preserves row-major contents while redefining dimensions and fills new typed cells. This is the main differential/derivability attack."
+    },
+    {
+      "name": "COPY-ARRAY",
+      "status": "RATIFIED-D8",
+      "relationship": "Copies an array; copying alone does not express identity-preserving adjustment or displaced-view mutation."
+    },
+    {
+      "name": "ARRAY-DISPLACEMENT",
+      "status": "PARALLEL-CANDIDATE-PR-4865",
+      "relationship": "Observation of immediate base array and offset, not the mutation/adjustment operation. Keep the PR's selection decision separate."
+    }
+  ],
+  "sources": [
+    {
+      "kind": "primary-standard",
+      "title": "ANSI Common Lisp HyperSpec — ADJUST-ARRAY",
+      "url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_adjust-array.html",
+      "sections": [
+        "syntax and values",
+        "adjustable-array identity",
+        "initial-contents",
+        "fill-pointer",
+        "displaced-to and displacement-chain rules"
+      ]
+    },
+    {
+      "kind": "primary-historical",
+      "title": "MacLisp Reference Manual, 17 December 1975",
+      "url": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "sections": [
+        "§2-8, printed pp. 2-86–2-89, *REARRAY"
+      ],
+      "source_artifact": "knowledge/d10-historical-maclisp-v2.json",
+      "printed_page": "2-86..2-89"
+    },
+    {
+      "kind": "secondary-cross-check",
+      "title": "The Pitmanual: MacLisp arrays / *REARRAY",
+      "url": "https://www.maclisp.info/pitmanual/array.html",
+      "note": "Cross-check only; the 1975 primary manual remains the historical authority."
+    }
+  ],
+  "admission_decision": {
+    "selected": false,
+    "rationale": "The source laws are precise and executable, but semantic independence from selected D10 REARRAY/MAKE-ARRAY has not yet been demonstrated strongly enough for selection. This tranche deliberately stops at HOLD pending the donor oracle and owner review.",
+    "next_gate": "Run the SBCL oracle; review its output against the pinned MacLisp *REARRAY contract and active D10 neighbors. If only a composition of existing semantics remains, reject as a new root; otherwise propose a separate serialized +1 selection PR."
+  }
+}

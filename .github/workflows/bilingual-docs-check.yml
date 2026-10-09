@@ -12,7 +12,7 @@ on:
 
 jobs:
   check:
-    runs-on: [self-hosted, guix]
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:

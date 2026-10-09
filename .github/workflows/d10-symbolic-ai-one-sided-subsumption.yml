@@ -1,0 +1,35 @@
+name: D10 symbolic AI one-sided subsumption SWI oracle
+on:
+  push:
+    paths:
+      - 'knowledge/d10-symbolic-ai-one-sided-subsumption-v1.json'
+      - 'tests/d10_finite_subsumes_swi.pl'
+      - 'tests/test_d10_finite_subsumes.py'
+      - 'scripts/check_d10_finite_subsumes.py'
+      - '.github/workflows/d10-symbolic-ai-one-sided-subsumption.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-symbolic-ai-one-sided-subsumption-v1.json'
+      - 'tests/d10_finite_subsumes_swi.pl'
+      - 'tests/test_d10_finite_subsumes.py'
+      - 'scripts/check_d10_finite_subsumes.py'
+      - '.github/workflows/d10-symbolic-ai-one-sided-subsumption.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+jobs:
+  independent-one-sided-oracle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Review donor source, live domain duplicates and 10 refusal cases
+        run: python3 scripts/check_d10_finite_subsumes.py --self-test
+      - name: Run exact Python witness plus bounded substitution enumeration
+        run: python3 -m unittest discover -s tests -p test_d10_finite_subsumes.py -v
+      - name: Install real independent SWI-Prolog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y swi-prolog-nox
+      - name: Execute real subsumes_term/2 oracle
+        run: swipl -q -s tests/d10_finite_subsumes_swi.pl

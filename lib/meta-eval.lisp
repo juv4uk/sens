@@ -50,7 +50,7 @@
   (00001000 (result)
     (00000111
       ((00000010 result) () (00000001 ()))
-      ((00000010 result) (1) (00000001 ()))
+      ((00000010 result)  (00000001 ()))
       (t (00000011 (00000101 result) my-result-fail-token)))))
 
 (00001001 my-result-value
@@ -180,14 +180,14 @@
   (00001000 (binding)
     (00000111
       ((00000010 binding) () (00000001 ()))
-      ((00000010 binding) (1) (00000001 ()))
+      ((00000010 binding)  (00000001 ()))
       (t (00000011 (00000101 binding) 0)))))
 
 (00001001 my-frame-bound?
   (00001000 (name frame)
     (00000111
       ((00000010 frame) () (00000001 ()))
-      ((00000010 frame) (1) (00000001 ()))
+      ((00000010 frame)  (00000001 ()))
       ((00000011 (00000101 (00000101 frame)) name) t)
       (t (my-frame-bound? name (00000110 frame))))))
 
@@ -201,7 +201,7 @@
   (00001000 (env-ref)
     (00000111
       ((00000010 env-ref) () (00000001 ()))
-      ((00000010 env-ref) (1) (00000001 ()))
+      ((00000010 env-ref)  (00000001 ()))
       ((my-shared-frame-binding? (00000101 env-ref)) t)
       (t (my-env-has-shared-frame? (00000110 env-ref))))))
 
@@ -209,7 +209,7 @@
   (00001000 (env-ref)
     (00000111
       ((00000010 env-ref) () (00000001 ()))
-      ((00000010 env-ref) (1) (00000001 ()))
+      ((00000010 env-ref)  (00000001 ()))
       ((my-shared-frame-binding? (00000101 env-ref)) (00000110 (00000101 env-ref)))
       (t (my-shared-frame-value (00000110 env-ref))))))
 
@@ -249,7 +249,7 @@
   (00001000 (name value env-ref)
     (00000111
       ((00000010 env-ref) () (00000100 (00000100 name value) env-ref))
-      ((00000010 env-ref) (1) (00000100 (00000100 name value) env-ref))
+      ((00000010 env-ref)  (00000100 (00000100 name value) env-ref))
       ((my-shared-frame-binding? (00000101 env-ref))
        (00000100
          (00000100 0
@@ -269,7 +269,7 @@
         ((my-canon-callable-identity? identity-ref) (my-primitive identity-ref))
         ((my-canon-name? name) (my-canon-binding-error name))
         ((00000010 env-ref) () (my-default-binding name))
-        ((00000010 env-ref) (1) (my-default-binding name))
+        ((00000010 env-ref)  (my-default-binding name))
         ((my-shared-frame-binding? (00000101 env-ref))
          (00000111
            ((my-frame-bound? name (00000110 (00000101 env-ref)))
@@ -283,7 +283,7 @@
     (00000111
       ((my-canon-name? name) t)
       ((00000010 env-ref) () (00000001 ()))
-      ((00000010 env-ref) (1) (00000001 ()))
+      ((00000010 env-ref)  (00000001 ()))
       ((my-shared-frame-binding? (00000101 env-ref))
        (00000111
          ((my-frame-bound? name (00000110 (00000101 env-ref))) t)
@@ -295,7 +295,7 @@
   (00001000 (value)
     (00000111
       ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      ((00000010 value)  (00000001 ()))
       (t (00000011 (00000101 value) (00000001 primitive))))))
 
 ; UnknownSymbol belongs to name resolution, not application. A symbol produced
@@ -320,14 +320,14 @@
   (00001000 (value)
     (00000111
       ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      ((00000010 value)  (00000001 ()))
       (t (00000011 (00000101 value) (00000001 macro))))))
 
 (00001001 my-closure?
   (00001000 (value)
     (00000111
       ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      ((00000010 value)  (00000001 ()))
       (t (00000011 (00000101 value) (00000001 closure))))))
 
 ; A recursive closure is finite Lisp data. It does not require a cyclic host
@@ -340,7 +340,7 @@
   (00001000 (value)
     (00000111
       ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      ((00000010 value)  (00000001 ()))
       (t (00000011 (00000101 value) (00000001 recursive-closure))))))
 
 ; A mutually-recursive group is also finite Lisp data. Every member stores the
@@ -353,23 +353,23 @@
   (00001000 (value)
     (00000111
       ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      ((00000010 value)  (00000001 ()))
       (t (00000011 (00000101 value) (00000001 recursive-group-closure))))))
 
 (00001001 my-lambda-form?
   (00001000 (form)
     (00000111
       ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
+      ((00000010 form)  (00000001 ()))
       ((00000010 (00000101 form)) () (my-lambda-name? (00000101 form)))
-      ((00000010 (00000101 form)) (1) (my-lambda-name? (00000101 form)))
+      ((00000010 (00000101 form))  (my-lambda-name? (00000101 form)))
       (t (00000001 ())))))
 
 (00001001 my-lambda-def-form?
   (00001000 (form)
     (00000111
       ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
+      ((00000010 form)  (00000001 ()))
       ((my-definition-name? (00000101 form))
        (00000111
          ((my-canon-name? (00101111 form)) (00000001 ()))
@@ -451,7 +451,7 @@
       ((00000010 params) () (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
          (t t)))
-      ((00000010 params) (1) (00000111
+      ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
          (t t)))
       (t (my-rest-param? (00000110 params))))))
@@ -492,7 +492,7 @@
   (00001000 (name names)
     (00000111
       ((00000010 names) () (00000001 ()))
-      ((00000010 names) (1) (00000001 ()))
+      ((00000010 names)  (00000001 ()))
       ((00000011 name (00000101 names)) t)
       (t (my-symbol-member? name (00000110 names))))))
 
@@ -509,7 +509,7 @@
              (00100111 (00000001 duplicate-parameter) params))
             (t (00000001 ()))))
          (t (00100111 (00000001 invalid-rest) params))))
-      ((00000010 params) (1) (00000111
+      ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
          ((00100011 params)
           (00000111
@@ -542,7 +542,7 @@
              (00100111 (00000001 canonical-parameter) params))
             (t (00000001 ()))))
          (t (00100111 (00000001 invalid-parameters) params))))
-      ((00000010 params) (1) (00000111
+      ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
          ((00100011 params)
           (00000111
@@ -563,7 +563,7 @@
     (10011100 ((problem (my-lambda-list-error params)))
       (00000111
         ((00000010 problem) () (00100111 (00000001 closure) params body env-ref))
-        ((00000010 problem) (1) (00100111 (00000001 closure) params body env-ref))
+        ((00000010 problem)  (00100111 (00000001 closure) params body env-ref))
         (t (my-lambda-invalid-form problem))))))
 
 ; Return the first malformed lambda-list in a top-level recursive group.
@@ -573,13 +573,13 @@
   (00001000 (forms)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       (t
        (10011100 ((problem
                (my-lambda-list-error (00101111 (00110000 (00000101 forms))))))
          (00000111
            ((00000010 problem) () (my-lambda-def-group-error (00000110 forms)))
-           ((00000010 problem) (1) (my-lambda-def-group-error (00000110 forms)))
+           ((00000010 problem)  (my-lambda-def-group-error (00000110 forms)))
            (t problem)))))))
 
 ; Parameter binding owns only the successful path. Arity and Canon-name
@@ -590,7 +590,7 @@
       ((00000010 params) () (00000111
          ((00000011 params (00000001 ())) env-ref)
          (t (00000100 (00000100 params args) env-ref))))
-      ((00000010 params) (1) (00000111
+      ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) env-ref)
          (t (00000100 (00000100 params args) env-ref))))
       (t (00000100 (00000100 (00000101 params) (00000101 args))
@@ -600,7 +600,7 @@
   (00001000 (exprs env-ref)
     (00000111
       ((00000010 exprs) () (my-result-ok (00000001 ())))
-      ((00000010 exprs) (1) (my-result-ok (00000001 ())))
+      ((00000010 exprs)  (my-result-ok (00000001 ())))
       (t
        (10011100 ((head-result (my-eval-result (00000101 exprs) env-ref)))
          (00000111
@@ -623,7 +623,7 @@
   (00001000 (body env-ref)
     (00000111
       ((00000010 (00000110 body)) () (my-eval-result (00000101 body) env-ref))
-      ((00000010 (00000110 body)) (1) (my-eval-result (00000101 body) env-ref))
+      ((00000010 (00000110 body))  (my-eval-result (00000101 body) env-ref))
       (t
        (10011100 ((first-result (my-eval-result (00000101 body) env-ref)))
          (00000111
@@ -638,11 +638,11 @@
   (00001000 (clauses)
     (00000111
       ((00000010 clauses) () (00000001 ()))
-      ((00000010 clauses) (1) (00000001 ()))
+      ((00000010 clauses)  (00000001 ()))
       ((00000010 (00000101 clauses)) () (my-cond-has-migration-clause? (00000110 clauses)))
-      ((00000010 (00000101 clauses)) (1) (my-cond-has-migration-clause? (00000110 clauses)))
+      ((00000010 (00000101 clauses))  (my-cond-has-migration-clause? (00000110 clauses)))
       ((00000011 (00101000 (00000101 clauses)) 2) (1) t)
-      ((00000011 (00101000 (00000101 clauses)) 2) (0)
+      ((00000011 (00101000 (00000101 clauses)) 2) 
        (my-cond-has-migration-clause? (00000110 clauses))))))
 
 (00001001 my-eval-cond-result-mode
@@ -653,7 +653,7 @@
          (t
           (my-result-fail
             (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
-      ((00000010 clauses) (1) (00000111
+      ((00000010 clauses)  (00000111
          (migration-compatibility? (my-result-ok (00000001 ())))
          (t
           (my-result-fail
@@ -664,7 +664,7 @@
            ; #217 canonical path: evaluate only the query. The expected result
            ; is already Lisp data in the interpreted program and must never be
            ; executed as code. Match it structurally, then evaluate the branch.
-           ((00000011 (00101000 clause) 3) (1)
+           ((00000011 (00101000 clause) 3) 
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
                 ((my-result-fail? test-result) test-result)
@@ -678,7 +678,7 @@
            ; Historical two-part clauses remain migration-only, mirroring the
            ; native evaluator until their callers are moved to explicit result
            ; matching. This path intentionally retains old truthiness.
-           ((00000011 (00101000 clause) 2) (1)
+           ((00000011 (00101000 clause) 2) 
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
                 ((my-result-fail? test-result) test-result)
@@ -706,7 +706,7 @@
   (00001000 (forms)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       ((my-lambda-def-form? (00000101 forms))
        (00000100 (00000101 forms)
              (my-take-lambda-def-group (00000110 forms))))
@@ -716,7 +716,7 @@
   (00001000 (forms)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       ((my-lambda-def-form? (00000101 forms))
        (my-drop-lambda-def-group (00000110 forms)))
       (t forms))))
@@ -786,7 +786,7 @@
   (00001000 (fn args caller-env)
     (00000111
       ((00000010 fn) () (my-result-fail (my-error (00000001 not-callable) fn)))
-      ((00000010 fn) (1) (my-result-fail (my-error (00000001 not-callable) fn)))
+      ((00000010 fn)  (my-result-fail (my-error (00000001 not-callable) fn)))
       ((my-primitive? fn)
        (my-result-ok (my-apply-primitive (00101111 fn) args)))
       ((my-closure? fn)
@@ -858,7 +858,7 @@
     (10011100 ((caller-env
             (00000111
               ((00000010 caller-env-rest) () (00000001 ()))
-              ((00000010 caller-env-rest) (1) (00000001 ()))
+              ((00000010 caller-env-rest)  (00000001 ()))
               (t (00000101 caller-env-rest)))))
       (my-result-value (my-apply-result fn args caller-env)))))
 
@@ -908,7 +908,7 @@
             (my-error (00000001 unbound-symbol) expr)))
          (t
           (my-result-ok (env-lookup expr env-ref)))))
-      ((00000010 expr) (1) (00000111
+      ((00000010 expr)  (00000111
          ((my-unresolved-name? expr env-ref)
           (my-result-fail
             (my-error (00000001 unbound-symbol) expr)))
@@ -927,7 +927,7 @@
                    (00101111 expr)
                    (00000110 (00000110 expr))
                    env-ref)))
-              ((00000010 problem) (1) (my-result-ok
+              ((00000010 problem)  (my-result-ok
                  (my-make-closure
                    (00101111 expr)
                    (00000110 (00000110 expr))
@@ -937,7 +937,7 @@
                  (my-lambda-invalid-form problem))))))
          (t
           (my-eval-application-result expr env-ref))))
-      ((00000010 (00000101 expr)) (1) (00000111
+      ((00000010 (00000101 expr))  (00000111
          ((my-canon-quote-name? (00000101 expr))
           (my-result-ok (00101111 expr)))
          ((my-canon-cond-name? (00000101 expr))
@@ -950,7 +950,7 @@
                    (00101111 expr)
                    (00000110 (00000110 expr))
                    env-ref)))
-              ((00000010 problem) (1) (my-result-ok
+              ((00000010 problem)  (my-result-ok
                  (my-make-closure
                    (00101111 expr)
                    (00000110 (00000110 expr))
@@ -977,7 +977,7 @@
   (00001000 (form env-ref)
     (00000111
       ((00000010 form) () (00000100 env-ref (my-eval form env-ref)))
-      ((00000010 form) (1) (00000100 env-ref (my-eval form env-ref)))
+      ((00000010 form)  (00000100 env-ref (my-eval form env-ref)))
       ((my-definition-name? (00000101 form))
        (00000111
          ((my-canon-name? (00101111 form))
@@ -997,7 +997,7 @@
                       (00000100
                         (my-env-define (00101111 form) value env-ref)
                         value)))
-                   ((00000010 problem) (1) (10011100 ((value
+                   ((00000010 problem)  (10011100 ((value
                             (00100111 (00000001 recursive-closure)
                                   (00101111 form)
                                   (00101111 value-form)
@@ -1037,7 +1037,7 @@
          ((00000011 params (00000001 ())) (00000001 ()))
          ((00000011 params name) t)
          (t (00000001 ()))))
-      ((00000010 params) (1) (00000111
+      ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
          ((00000011 params name) t)
          (t (00000001 ()))))
@@ -1048,7 +1048,7 @@
   (00001000 (forms name)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       ((my-form-references-name? (00000101 forms) name) t)
       (t (my-forms-reference-name? (00000110 forms) name)))))
 
@@ -1058,7 +1058,7 @@
       ((00000010 form) () (00000111
          ((00100011 form) (00000011 form name))
          (t (00000001 ()))))
-      ((00000010 form) (1) (00000111
+      ((00000010 form)  (00000111
          ((00100011 form) (00000011 form name))
          (t (00000001 ()))))
       ((00000010 (00000101 form)) () (00000111
@@ -1070,7 +1070,7 @@
             ((my-params-bind-name? name (00101111 form)) (00000001 ()))
             (t (my-forms-reference-name? (00000110 (00000110 form)) name))))
          (t (my-forms-reference-name? form name))))
-      ((00000010 (00000101 form)) (1) (00000111
+      ((00000010 (00000101 form))  (00000111
          ; Quoted data is not a lexical dependency.
          ((my-canon-quote-name? (00000101 form)) (00000001 ()))
          ; A nested lambda can shadow a candidate top-level name.
@@ -1092,7 +1092,7 @@
   (00001000 (forms)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       (t (00000100 (00101111 (00000101 forms))
                (my-lambda-def-names (00000110 forms)))))))
 
@@ -1100,7 +1100,7 @@
   (00001000 (form candidates)
     (00000111
       ((00000010 candidates) () (00000001 ()))
-      ((00000010 candidates) (1) (00000001 ()))
+      ((00000010 candidates)  (00000001 ()))
       ((my-lambda-def-references-name? form (00000101 candidates))
        (00000100 (00000101 candidates)
              (my-def-dependencies form (00000110 candidates))))
@@ -1110,7 +1110,7 @@
   (00001000 (forms names)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       (t
        (00000100
          (00100111
@@ -1127,7 +1127,7 @@
   (00001000 (name graph)
     (00000111
       ((00000010 graph) () (00000001 ()))
-      ((00000010 graph) (1) (00000001 ()))
+      ((00000010 graph)  (00000001 ()))
       ((00000011 name (00000101 (00000101 graph))) (00101111 (00000101 graph)))
       (t (my-graph-dependencies name (00000110 graph))))))
 
@@ -1135,7 +1135,7 @@
   (00001000 (dependencies target graph visited)
     (00000111
       ((00000010 dependencies) () (00000001 ()))
-      ((00000010 dependencies) (1) (00000001 ()))
+      ((00000010 dependencies)  (00000001 ()))
       ((00000011 (00000101 dependencies) target) t)
       ((my-symbol-member? (00000101 dependencies) visited)
        (my-graph-dependencies-reach?
@@ -1165,7 +1165,7 @@
   (00001000 (name candidates graph)
     (00000111
       ((00000010 candidates) () (00000001 ()))
-      ((00000010 candidates) (1) (00000001 ()))
+      ((00000010 candidates)  (00000001 ()))
       ((00000011 name (00000101 candidates))
        (00000100 (00000101 candidates)
              (my-scc-names name (00000110 candidates) graph)))
@@ -1181,7 +1181,7 @@
   (00001000 (forms names)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       ((my-symbol-member? (00101111 (00000101 forms)) names)
        (00000100 (00000101 forms)
              (my-select-defs-by-names (00000110 forms) names)))
@@ -1191,7 +1191,7 @@
   (00001000 (forms names)
     (00000111
       ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
+      ((00000010 forms)  (00000001 ()))
       ((my-symbol-member? (00101111 (00000101 forms)) names)
        (my-remove-defs-by-names (00000110 forms) names))
       (t
@@ -1202,14 +1202,14 @@
   (00001000 (forms)
     (00000111
       ((00000010 (00000110 forms)) () (00101111 (00000101 forms)))
-      ((00000010 (00000110 forms)) (1) (00101111 (00000101 forms)))
+      ((00000010 (00000110 forms))  (00101111 (00000101 forms)))
       (t (my-last-lambda-def-name (00000110 forms))))))
 
 (00001001 my-eval-lambda-components
   (00001000 (forms graph env-ref final-name)
     (00000111
       ((00000010 forms) () (00000100 env-ref (env-lookup final-name env-ref)))
-      ((00000010 forms) (1) (00000100 env-ref (env-lookup final-name env-ref)))
+      ((00000010 forms)  (00000100 env-ref (env-lookup final-name env-ref)))
       (t
        (10011100 ((name (00101111 (00000101 forms))))
          (10011100 ((component-names
@@ -1227,7 +1227,7 @@
                   graph
                   (00000101 result)
                   final-name)))
-             ((00000010 (00000110 component-names)) (1) (10011100 ((result (my-eval-top-form (00000101 forms) env-ref)))
+             ((00000010 (00000110 component-names))  (10011100 ((result (my-eval-top-form (00000101 forms) env-ref)))
                 (my-eval-lambda-components
                   (00000110 forms)
                   graph
@@ -1264,7 +1264,7 @@
   (00001000 (forms env-ref)
     (00000111
       ((00000010 forms) () (00000100 env-ref (00000001 ())))
-      ((00000010 forms) (1) (00000100 env-ref (00000001 ())))
+      ((00000010 forms)  (00000100 env-ref (00000001 ())))
       (t
        (10011100 ((program-env (my-ensure-shared-frame env-ref)))
          (00000111
@@ -1282,7 +1282,7 @@
                           (my-eval-program
                             rest
                             (00000101 block-result)))))))
-                  ((00000010 problem) (1) (10011100 ((rest (my-drop-lambda-def-group forms)))
+                  ((00000010 problem)  (10011100 ((rest (my-drop-lambda-def-group forms)))
                      (10011100 ((block-result
                              (my-eval-lambda-block block program-env)))
                        (00000111

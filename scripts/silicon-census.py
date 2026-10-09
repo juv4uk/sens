@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "lib/machine/encoding/admitted-iclass-index.lisp"
 PROJECTION = ROOT / "lib/machine/encoding/admission-iclass-projection.lisp"
 
-PAIR_RE = re.compile(r'^\s*\(pair\s+([^\s()]+)\s+"([^"]+)"\)\s*$')
+PAIR_RE = re.compile(r'^\s*\(00101110\s+([^\s()]+)\s+"([^"]+)"\)\s*$')
 PARTIAL_RE = re.compile(
     r'^\s*\(partial\s+([^\s()]+)\s+"([^"]+)"\s+\(heads\s+([^)]*)\)\)\s*$'
 )
@@ -216,6 +216,17 @@ def build_census(
 
 
 def self_test() -> None:
+    # The generated evidence index is canonical visible-binary Lisp. Protect
+    # the exact owner row grammar so the census cannot silently regress to an
+    # obsolete textual (pair ...) projection and misreport all 1176 rows absent.
+    canonical_pair = PAIR_RE.match('  (00101110 X86-BASE "AAA")')
+    assert canonical_pair is not None
+    assert canonical_pair.groups() == ("X86-BASE", "AAA")
+    assert PAIR_RE.match('(pair X86-BASE "AAA")') is None
+    actual_pairs = load_pairs()
+    assert len(actual_pairs) == 1176
+    assert ("X86-BASE", "AAA") in actual_pairs
+
     evidence = [("X86-BASE", "ADD"), ("X86-BASE", "CALL_NEAR"), ("AVX", "VADDPS")]
     admitted = {
         ("X86-BASE", "ADD"): ["add-r64-r64"],

@@ -1,0 +1,245 @@
+{
+  "schema": "d10-canonical-directed-cycle-witness-research/v1",
+  "status": "RESEARCH-HOLD-LIBRARY-OR-CORE-REVIEW",
+  "basis": {
+    "baseline_selected_at_research": 632,
+    "baseline_inventory_blob": "7683f1e2bfcf67d3a45d412d3b1790b72ad623ad",
+    "current_D1_D9": "owner-ratified",
+    "D2_syntax_control_owner": true,
+    "D10_ratified_added": 0,
+    "selected_added": 0,
+    "coordinates_added": 0
+  },
+  "identity": {
+    "stable_id": "d10.research.graph.canonical-directed-cycle-witness.v1",
+    "semantic_name": "CANONICAL-DIRECTED-CYCLE-WITNESS",
+    "surface_uk": "канонічний-цикл-орієнтованого-графа",
+    "surface_ukr": "найменший-доказ-циклу",
+    "relation_class": "FINITE-GRAPH-CYCLE-WITNESS",
+    "status": "HOLD-CORE-LIBRARY-DERIVABILITY",
+    "decision": "RESEARCH-NOT-SELECTED",
+    "proposal_status": "not-submitted-for-ratification",
+    "coordinate": null,
+    "ratified_resident": false,
+    "physical_t5_authorized": false,
+    "behavior": "Given finite directed simple graph with explicit distinct totally ordered vertex identities, return NONE if acyclic. Otherwise return the lexicographically smallest cyclic-rotation-normalized vertex sequence representing any elementary directed cycle. An elementary cycle visits each vertex once; sequence omits repeated terminal start. Self-loop is a length-1 cycle. Directed reversal is never silently identified. Same vertex/edge sets must give exactly the same witness independent of insertion and traversal order; no mutation of input.",
+    "arity": "(finite ordered vertex set, directed edge pairs)->NONE or nonempty ordered vertex sequence",
+    "source_role": "New SENS candidate law invented as deterministic witness selection; graph mathematics documented by source references, NOT a claim that donor already implemented canonical selection.",
+    "primary_reference": "https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.cycles.simple_cycles.html",
+    "positive_witnesses": [
+      {
+        "vertices": [
+          0,
+          1,
+          2
+        ],
+        "edges": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            1
+          ]
+        ],
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "vertices": [
+          0,
+          1,
+          2
+        ],
+        "edges": [
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "vertices": [
+          0,
+          1,
+          2
+        ],
+        "edges": [
+          [
+            2,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "expected": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "vertices": [
+          0,
+          1,
+          2
+        ],
+        "edges": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "expected": null
+      },
+      {
+        "vertices": [
+          0,
+          1
+        ],
+        "edges": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "expected": [
+          0,
+          1
+        ]
+      }
+    ],
+    "falsifiers": [
+      "Return SCC members without an explicit edge-connected simple cycle path; an SCC set is not a cycle proof.",
+      "Treat reverse orientation as the same cycle when reverse directed edges do not exist.",
+      "Choose first DFS-observed cycle instead of lexicographically least normalized witness.",
+      "Drop a self-loop because cycle length less than two.",
+      "Invent a vertex or accept an edge endpoint outside the explicit vertex set.",
+      "Mutate adjacency or select a different witness when insertion order changes."
+    ],
+    "dedup": {
+      "exact_name_in_D1_D9_or_D10_at_632": false,
+      "neighbors": [
+        "MY-GRAPH-REACHES?",
+        "MY-SCC-NAMES",
+        "MY-BUILD-DEPENDENCY-GRAPH",
+        "ANUVRTTI-GRAPH-VALID?",
+        "MY-DEF-DEPENDENCIES"
+      ],
+      "core_root_independence": "Unproved. Enumerable from SCC/reachability and finite enumeration, so library derivability is likely; do NOT add a 10-bit slot without owner gate and a demonstrated independent behavioral root.",
+      "critical_distinction": "MY-SCC-NAMES returns mutually reachable names (unordered/set group); this proposal returns one deterministic directed edge-by-edge cycle proof."
+    }
+  },
+  "donor_evidence": [
+    {
+      "repo": "juv4uk/knowledge-graph-basalt",
+      "path": "src/lib/bases.ts",
+      "git_blob_sha": "1bda7dd7a7c04fc7636d2ab90ed2250087af9eb7",
+      "line": 1185,
+      "actual_law": "A formula dependency cycle resolves to null rather than unbounded recursion; this is error-safe evaluation only, not canonical graph witness."
+    },
+    {
+      "repo": "juv4uk/knowledge-graph-basalt",
+      "path": "src/lib/bases.test.ts",
+      "git_blob_sha": "42b0cd2b54ba8f352e29dedb28b5dc0c752ac249",
+      "line": 402,
+      "actual_law": "Cycle-break behavior is tested in project."
+    },
+    {
+      "repo": "juv4uk/sens",
+      "path": "lib/meta-eval.lisp",
+      "git_blob_sha": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "line": 1030,
+      "actual_law": "Definition dependency graph and strongly connected recursive closure analysis are language implementation evidence; not the proposed canonical cycle witness."
+    },
+    {
+      "repo": "juv4uk/shiva-sutras",
+      "path": "RESEARCH_MAP.md",
+      "git_blob_sha": "763bf48a7ff890ca6947707f16d98bea605f97c1",
+      "line": 1,
+      "actual_law": "Formal Śiva-sūtras class/marker constraints and epistemic proofs motivate explicit verifiable witnesses, not a historical cycle function."
+    }
+  ],
+  "hobby_links": [
+    {
+      "interest": "Sanskrit Panini rule inheritance",
+      "usage": "Cycle witness in anuvrtti/rule dependency graph, distinct from phoneme D7 identity"
+    },
+    {
+      "interest": "Lisp self-hosting",
+      "usage": "Show concrete mutual-definition loop to justify or reject recursive group"
+    },
+    {
+      "interest": "personal knowledge graphs",
+      "usage": "Explain cyclic formula/backlink dependencies instead of silently losing information"
+    },
+    {
+      "interest": "analogue electronics/FPGA",
+      "usage": "Describe feedback cycles in block-dependency topology, not an FPGA instruction"
+    },
+    {
+      "interest": "astronomy/astrophysics",
+      "usage": "Check cyclic dependencies in model-derived computation DAGs"
+    },
+    {
+      "interest": "Prolog/Advice Taker",
+      "usage": "Explain cyclic derivation dependency before choosing proof strategies"
+    },
+    {
+      "interest": "chess/AI search",
+      "usage": "Witness state-transition cycles in a bounded directed game graph without assuming repetition rule"
+    },
+    {
+      "interest": "horology/acoustics",
+      "usage": "Structural schedule/signal feedback cycles, distinct from periodic numeric phase law"
+    }
+  ],
+  "technical_contract": {
+    "vertex_domain": "nonnegative distinct integers 0..n-1 in bounded oracle; generalized future source identity must have explicit total ordering",
+    "edges": "pairs of present vertices, directed; duplicate edges tolerated as set-equivalent",
+    "cycle_definition": "elementary directed cycle as in NetworkX simple_cycles; self-loop included",
+    "normalization": "rotate directed list so its least vertex is first; then compare lexicographic tuples",
+    "result": "NONE or tuple; no mutation; no D2 control ownership",
+    "source_oracle": "Python DFS enumerator vs independent exhaustive permutations; optional NetworkX available only for external cross-check",
+    "runtime_oracle": "NOT_EXECUTED in native SENS",
+    "ratification": "NONE",
+    "core_vs_library": "HOLD until owner determines primitive irreducibility"
+  }
+}

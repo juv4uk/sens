@@ -1,0 +1,35 @@
+name: D10 ADJUST-ARRAY vs historical REARRAY differential review
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-adjust-array-rearray-differential-v1.json"
+      - "docs/research/d10-adjust-array-rearray-differential-20261009.uk.md"
+      - "tests/oracles/d10_adjust_array_rearray_oracle.lisp"
+      - "scripts/check_d10_adjust_array_rearray_differential.py"
+      - ".github/workflows/d10-adjust-array-rearray-differential.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-adjust-array-rearray-differential-v1.json"
+      - "docs/research/d10-adjust-array-rearray-differential-20261009.uk.md"
+      - "tests/oracles/d10_adjust_array_rearray_oracle.lisp"
+      - "scripts/check_d10_adjust_array_rearray_differential.py"
+      - ".github/workflows/d10-adjust-array-rearray-differential.yml"
+  workflow_dispatch:
+jobs:
+  differential-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install independent Common Lisp oracle runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sbcl
+      - name: Execute standard ADJUST-ARRAY behavioral witnesses
+        run: sbcl --script tests/oracles/d10_adjust_array_rearray_oracle.lisp
+      - name: Verify pinned foundation, existing neighbors, and no promotion
+        run: python3 scripts/check_d10_adjust_array_rearray_differential.py --self-test

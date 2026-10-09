@@ -1,0 +1,26 @@
+name: D10 Younger 1967 ambiguity oracle
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-younger-1967-cnf-ambiguity-research.json
+      - tests/test_d10_younger_cnf_ambiguity.py
+      - .github/workflows/d10-younger-cnf-ambiguity.yml
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-younger-1967-cnf-ambiguity-research.json
+      - tests/test_d10_younger_cnf_ambiguity.py
+      - .github/workflows/d10-younger-cnf-ambiguity.yml
+
+permissions:
+  contents: read
+
+jobs:
+  exact-ambiguity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Younger chart exact integers against unshared brute-force tree enumerator and Catalan formula
+        run: python3 tests/test_d10_younger_cnf_ambiguity.py

@@ -1,0 +1,26 @@
+name: D10 chess crossrepo research laws
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-crossrepo-chess-law-proposals-20261009.json
+      - tests/test_d10_crossrepo_chess_semantic_donors.py
+      - .github/workflows/d10-crossrepo-chess-law-proposals.yml
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-crossrepo-chess-law-proposals-20261009.json
+      - tests/test_d10_crossrepo_chess_semantic_donors.py
+      - .github/workflows/d10-crossrepo-chess-law-proposals.yml
+
+permissions:
+  contents: read
+
+jobs:
+  research-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити шахові закони, математичний оракул і негативні контролі
+        run: python3 tests/test_d10_crossrepo_chess_semantic_donors.py

@@ -1,0 +1,31 @@
+name: migration-eq-cohort
+
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/migration-eq-cohort/**'
+      - 'tests/test_migration_eq_cohort.py'
+      - 'crates/sens/tests/migration_eq_cohort.rs'
+      - '.github/workflows/migration-eq-cohort.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/fixtures/migration-eq-cohort/**'
+      - 'tests/test_migration_eq_cohort.py'
+      - 'crates/sens/tests/migration_eq_cohort.rs'
+      - '.github/workflows/migration-eq-cohort.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify real three-pass .lisp migration and physical T5 receipts
+        run: python3 -m unittest discover -s tests -p 'test_migration_eq_cohort.py' -v
+      - name: Check executable D3 EQ -> exact D1 oracle parity
+        run: cargo test -p sens --test migration_eq_cohort

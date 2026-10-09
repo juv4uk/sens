@@ -1,0 +1,23 @@
+name: D10 Allen 1983 / ATMS 1986 historical semantic review
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-allen-atms-research-20261009.json"
+      - "scripts/check_d10_allen_atms_research.py"
+      - "tests/test_d10_allen_atms_research.py"
+      - ".github/workflows/d10-allen-atms-research.yml"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d1-d9-foundation.json"
+  workflow_dispatch:
+jobs:
+  source-and-independent-witnesses:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail closed on pre-existing domains and fake admission
+        run: python3 scripts/check_d10_allen_atms_research.py
+      - name: Exact rational and powerset independent oracles
+        run: python3 -m unittest discover -s tests -p 'test_d10_allen_atms_research.py' -v
+      - name: Keep checkout unmodified
+        run: git diff --exit-code

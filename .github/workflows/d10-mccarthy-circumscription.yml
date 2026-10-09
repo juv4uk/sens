@@ -1,0 +1,22 @@
+name: D10 McCarthy finite circumscription research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-mccarthy-finite-circumscription-20261009.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'scripts/check_d10_finite_circumscription.py'
+      - 'docs/research/d10-mccarthy-finite-circumscription-20261009.uk.md'
+      - '.github/workflows/d10-mccarthy-circumscription.yml'
+  workflow_dispatch:
+jobs:
+  finite-preferred-models:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact finite dominance vs grouped antichain and negative cases
+        run: python3 scripts/check_d10_finite_circumscription.py --self-test
+      - name: Verify research tests do not change the repository
+        run: git diff --exit-code

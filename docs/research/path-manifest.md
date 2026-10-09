@@ -1,5 +1,13 @@
 # Pinned path manifest: executable vs declarative (#4460)
 
+Мета: задовольнити приймання #4460 — *класифікувати виконувані vs Lisp-дані таблиці* і
+зафіксувати path manifest, щоб декларативні файли **ніколи** не кодувались auto-T5 без
+окремого контракту. Метод: прогнати канонічний мігратор по `lib/`, взяти head першої
+форми кожного файлу; head, що є версіонованою схемою/документом (`name/N`) або відомим
+документним head, — **декларативний**; решта — **виконавчі кандидати** (заблоковані з
+інших причин, перелічені для беклогу наступників). Підсумок: **49 декларативних**,
+**79 виконавчих кандидатів** (з 128 файлів `lib/`).
+
 Purpose: satisfy #4460 acceptance — *classify executable vs Lisp-data tables* and pin a
 path manifest, so declarative files are **never** auto-T5-encoded without a separate contract.
 

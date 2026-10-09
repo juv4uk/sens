@@ -1,0 +1,174 @@
+{
+  "schema": "d10-historical-symbolic-ai-cnf-ambiguity/v1",
+  "date": "2026-10-09",
+  "status": "SOURCE-PINNED-RESEARCH-HOLD-UNRATIFIED",
+  "authority": [
+    "#4013",
+    "#4162",
+    "#4182",
+    "#4463",
+    "#4977"
+  ],
+  "baseline": {
+    "inventory_blob": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "selected": 635,
+    "capacity": 1024,
+    "remaining": 389,
+    "ratified": 0,
+    "lower_domain_source": "knowledge/d1-d9-foundation.json"
+  },
+  "sources": [
+    {
+      "author": "Daniel H. Younger",
+      "year": 1967,
+      "title": "Recognition and parsing of context-free languages in time n³",
+      "url": "https://www.sciencedirect.com/science/article/pii/S001999586780007X",
+      "doi": "10.1016/S0019-9958(67)80007-X",
+      "primary_claim": "A cubic-in-sentence-length CFG chart recognition algorithm and a small modification producing the integer number of distinct parses/ambiguity of a sentence."
+    },
+    {
+      "author": "Tadao Kasami",
+      "year": 1966,
+      "title": "An Efficient Recognition and Syntax-Analysis Algorithm for Context-Free Languages",
+      "url": "https://www.ideals.illinois.edu/items/100444",
+      "repository": "University of Illinois Coordinated Science Laboratory Report R-257",
+      "primary_claim": "Early context-free language recognition / syntax analysis."
+    },
+    {
+      "author": "Stanford Encyclopedia of Philosophy",
+      "year": 2014,
+      "title": "Computational Linguistics",
+      "url": "https://plato.stanford.edu/entries/computational-linguistics/",
+      "primary_claim": "Contextual documentation of Cocke–Kasami–Younger and Earley chart parsing. Background, not original source."
+    }
+  ],
+  "scope": {
+    "current_selected_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0,
+    "d2_control_delta": 0,
+    "physical_t5_delta": 0,
+    "syntax_delta": 0,
+    "one_global_d10_stream": true,
+    "epistemic_class": "SOURCE-GROUNDED-HYPOTHESIS"
+  },
+  "proposed": [
+    {
+      "semantic_name": "FINITE-CNF-PARSE-COUNT",
+      "surface_uk": "рахрозб",
+      "surface_ukr": "лічити-дерева-розбору",
+      "status": "HOLD-CORE-VERSUS-LIBRARY-REVIEW",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "law": "For a well-formed context-free grammar in strict nonempty Chomsky normal form with distinct productions A→terminal or A→B C and a finite nonempty input token sequence, return an exact nonnegative integer equal to the number of distinct ordered labelled derivation trees rooted at designated start symbol. Each terminal production A→t accounts for one leaf, each binary production A→B C and split k contributes the product of independently counted left and right trees. Sum all valid alternatives. Inadmissible/duplicate production records, missing nonterminal names, empty input, epsilon/unit productions are rejected rather than silently normalized.",
+      "result": "exact nonnegative integer; 0=no parse, 1=unique derivation tree, >1=ambiguous token-sequence parse",
+      "arguments": "(grammar:{start,nonterminals:set,terminal_rules:set of (A,t),binary_rules:set of (A,B,C)}, tokens: nonempty finite sequence of terminal symbols)",
+      "positive_witnesses": [
+        {
+          "grammar": "S→SS | 'a'",
+          "tokens": [
+            "a"
+          ],
+          "expected": 1
+        },
+        {
+          "grammar": "S→SS | 'a'",
+          "tokens": [
+            "a",
+            "a",
+            "a"
+          ],
+          "expected": 2
+        },
+        {
+          "grammar": "S→SS | 'a'",
+          "tokens": [
+            "a",
+            "a",
+            "a",
+            "a",
+            "a"
+          ],
+          "expected": 14
+        },
+        {
+          "grammar": "S→AB | CD; A,C→'a'; B,D→'b'",
+          "tokens": [
+            "a",
+            "b"
+          ],
+          "expected": 2
+        },
+        {
+          "grammar": "S→AB; A→'a'; B→'b'",
+          "tokens": [
+            "b",
+            "a"
+          ],
+          "expected": 0
+        }
+      ],
+      "falsifiers": [
+        "A boolean recognition result replaces the count and cannot distinguish 2 from 14.",
+        "Counting distinct grammar rule orderings as separate trees or collapsing distinct binary derivations into one violates integer ambiguity.",
+        "A recursive epsilon cycle is silently accepted in strict CNF: this is outside the defined finite positive grammar.",
+        "Returning a float or capped integer for ambiguous input violates exactness.",
+        "Double-counting the same production listed twice is invalid: grammar is a set, duplicates must be rejected."
+      ],
+      "dedup": {
+        "exact_name_check": "No exact name in current 635 D10 selected, D1-D9 contains JSON-PARSE and UNIFY; only a preliminary name filter.",
+        "nearby": [
+          "D9 JSON-PARSE",
+          "D9 UNIFY",
+          "D10 TRANSLATION-AMBIGUITY-VALID?",
+          "D10 AMBIGUOUS-APAVADA?",
+          "D10 COUNT-USAGE",
+          "D10 PANINI morpho/phonemic rules"
+        ],
+        "behavioral_open": "A generic semiring chart parser, existing list recursion or dynamic programming can derive this as a self-hosted library. Need proof of an independently justified language-visible D10 root versus a library projection."
+      },
+      "provenance_note": "Original Younger (1967) explicitly documents returning an integer representing ambiguity; the exact grammar-validation and empty-input convention below are new SENS proposal conventions, not claims of literal Younger code."
+    }
+  ],
+  "derived_and_hold": [
+    {
+      "semantic_name": "FINITE-CNF-AMBIGUOUS?",
+      "decision": "DERIVED-NO-SEPARATE-SLOT",
+      "law": "result > 1 for the exact parse count."
+    },
+    {
+      "semantic_name": "FINITE-CNF-RECOGNIZE?",
+      "decision": "DERIVED-NO-SEPARATE-SLOT",
+      "law": "result > 0 for the exact parse count."
+    },
+    {
+      "semantic_name": "FINITE-CNF-CHART",
+      "decision": "HOLD-REPRESENTATION",
+      "reason": "Chart cells and pointers are implementation/witness structures, not yet a separate semantic root."
+    },
+    {
+      "semantic_name": "PANINI-FULL-ASHTADHYAYI-PARSER",
+      "decision": "HOLD-INVALID-TRANSFER",
+      "reason": "Panini rules and Sanskrit morphology are not automatically reducible to a plain strict CNF context-free grammar; do not claim full semantics."
+    },
+    {
+      "semantic_name": "SENS-EXACT-BINARY-PARSER",
+      "decision": "HOLD-D2-BOUNDARY",
+      "reason": "Do not confuse language runtime D2 binary structure parsing with data-level CFG derivation counting."
+    },
+    {
+      "semantic_name": "CYK-EPSILON-PARSE-COUNT",
+      "decision": "HOLD-PROOF-OBLIGATION",
+      "reason": "Epsilon/unit rules and potential infinitely many derivations require separate normalization and occurrence-count preservation proofs."
+    }
+  ],
+  "oracle_plan": {
+    "independent_1": "Bottom-up dynamic-programming chart over exact Python integers",
+    "independent_2": "Top-down exhaustive grammar-tree enumeration without memoization on bounded token counts",
+    "independent_3": "Independent Catalan number formula for S→SS|'a', n=1..10",
+    "anti_forgeries": 10,
+    "no_native_sens_parity": "Source-grade mathematical tests are not binary SENS self-hosted implementation or hardware execution."
+  },
+  "owner_decision": "None. Non-ratified research only; source-grounded semantic review pending."
+}

@@ -1,0 +1,129 @@
+{
+  "schema": "sens-d10-historical-hobby-allen-atms-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-UNRATIFIED-HOLD-NOT-SELECTED",
+  "canonical_snapshot": {
+    "main_selected_at_claim": 634,
+    "capacity": 1024,
+    "ratified_d10_residents": 0,
+    "foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3"
+  },
+  "coordination": [
+    "#4013",
+    "#4463",
+    "#4182"
+  ],
+  "provenance_policy": "External primary work motivates an independent SENS semantics experiment. No claim that 1983/1986 papers implement SENS or add Lisp 1.5 opcodes. No foreign code copied.",
+  "rows": [
+    {
+      "proposal_id": "D10-HIST-HOBBY-ALLEN-001",
+      "semantic_name": "ALLEN-INTERVAL-RELATION",
+      "surface_uk": "відношення-часових-відрізків",
+      "surface_ukr": "яке-відношення-між-інтервалами",
+      "family": "QUALITATIVE-TEMPORAL-ALGEBRA",
+      "source": {
+        "title": "James F. Allen, Maintaining Knowledge about Temporal Intervals, Communications of the ACM 26(11), 1983",
+        "primary_url": "https://doi.org/10.1145/182.358434",
+        "institutional_url": "https://urresearch.rochester.edu/institutionalPublicationPublicView.action?institutionalItemId=10115&versionNumber=1"
+      },
+      "historical_is_lisp_opcode": false,
+      "signature": "((a_start,a_end),(b_start,b_end)) -> one of 13 tagged Allen relations, exact rational endpoints a_start<a_end and b_start<b_end",
+      "semantic_law": "Exactly one of BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS and their six distinct converse relations for two nonempty intervals; MEETS differs from a positive temporal gap; swapping operands yields the specified inverse.",
+      "positive_witnesses": [
+        "[0,1] BEFORE [2,3]",
+        "[0,1] MEETS [1,2]",
+        "[0,2] OVERLAPS [1,3]",
+        "[0,3] CONTAINS [1,2]",
+        "[0,2] EQUALS [0,2]"
+      ],
+      "falsifiers": [
+        "Coincident endpoints MEETS must never be BEFORE",
+        "All 13 mutually exclusive relations appear on small exhaustive ordered endpoint samples",
+        "Swapping intervals returns exact converse; EQUALS is self-converse",
+        "Empty/reversed interval must raise an explicit invalid-input outcome, not a fabricated relation"
+      ],
+      "use_cases": [
+        "astronomy observing windows",
+        "SDR timeslot collisions",
+        "musical phrase intervals",
+        "clock coordination",
+        "provenance time reasoning"
+      ],
+      "duplicate_review": "Exact-name absent from D1-D9 and 634 canonical D10 candidates. Strong expressibility concern: 13-way predicate derivable from exact rational ordering + conditional control; D2 retains control ownership. Core-vs-library review mandatory.",
+      "triage_status": "HOLD-CORE-DERIVABILITY",
+      "owner_review_required": true,
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "proposal_id": "D10-HIST-HOBBY-ATMS-002",
+      "semantic_name": "ATMS-CONSISTENT-LABEL-JOIN",
+      "surface_uk": "з'єднати-сумісні-припущення",
+      "surface_ukr": "об'єднати-мінімальні-несуперечливі-підтримки",
+      "family": "ASSUMPTION-SUPPORT-ALGEBRA",
+      "source": {
+        "title": "Johan de Kleer, An assumption-based TMS, Artificial Intelligence 28(2), 1986, pp.127–162",
+        "primary_url": "https://doi.org/10.1016/0004-3702(86)90080-9",
+        "author_reference": "https://dekleer.org/bib.htm"
+      },
+      "historical_is_lisp_opcode": false,
+      "signature": "(left_label,right_label,nogoods) -> ordered minimal consistent finite assumption environments; each assumption is an exact nonnegative integer ID",
+      "semantic_law": "Form all unions of one left support and one right support. Discard any union that contains a known inconsistent nogood as a subset. Remove strict supersets of surviving support environments. Return the antichain sorted first by support cardinality then lexicographically. Empty environment () denotes unconditional support and differs from no support alternatives ().",
+      "positive_witnesses": [
+        "left {{0},{1}}, right {{2}}, nogoods {{0,2}} -> {{1,2}}",
+        "left {{}}, right {{4}}, no nogood -> {{4}}",
+        "left {{0},{0,1}}, right {{}}, no nogoods -> {{0}}",
+        "empty nogood {} invalidates every candidate"
+      ],
+      "falsifiers": [
+        "No returned support can contain any nogood subset",
+        "No two returned environments may be strict subsets of one another",
+        "Order/duplicate of input supports may not change canonical result",
+        "An empty family of alternatives is not the same as one empty support",
+        "Inputs remain unchanged"
+      ],
+      "use_cases": [
+        "Advice Taker multi-hypothesis proof states",
+        "fault diagnosis in radio/electronics",
+        "astronomical competing explanations",
+        "agent reasoning provenance"
+      ],
+      "duplicate_review": "Exact-name absent from D1-D9 and 634 canonical D10 candidates; possible composition using D6 UNION, subset predicate, proof provenance and ordinary filtering. Must prove an irreducible language-level observer rather than an application ATMS library function.",
+      "triage_status": "HOLD-D9-LOGIC-DERIVABILITY",
+      "owner_review_required": true,
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "exclusions": [
+    {
+      "name": "BINARY-LFSR-MINIMAL-RECURRENCE",
+      "reason": "Another agent independently claimed the SDR/FPGA Berlekamp-Massey lane in #4013; no overlapping work"
+    },
+    {
+      "name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "reason": "Already source-reviewed and landed as HOLD via PR #4946"
+    },
+    {
+      "name": "CYCLIC-BINARY-WORD-CANON",
+      "reason": "Already researched by peers via PR #4944"
+    },
+    {
+      "name": "CROSS-HOBBY-HISTORICAL-API",
+      "reason": "Application APIs, OS clocks, and driver behavior are not automatically D10 residents"
+    }
+  ],
+  "invariants": {
+    "selected_inventory_mutated": false,
+    "d1_d9_changed": false,
+    "d2_control_changed": false,
+    "t5_changed": false,
+    "coordinate_count_new": 0,
+    "ratified_new": 0
+  }
+}
