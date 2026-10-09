@@ -30,6 +30,10 @@
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
 (00001001 list (00001000 args args))
 
+; Exact D4 LIST binding. The implementation remains a Lisp closure; the
+; exact identity is installed only when this core source is explicitly loaded.
+(00001011 1110 (0010 args args))
+
 ; and/or are Lisp-owned short-circuit macros. A tested operand must return
 ; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
 ; Each COND clause below has exactly two fields: (test expression). The last
@@ -225,6 +229,10 @@
 (00001001 append
   (00001000 (left right)
     (зворот-до (00101010 left) right)))
+
+; Exact D4 APPEND binding to the same Lisp-owned sequence law.
+(00001011 1111 (0010 (left right)
+  (зворот-до (00101010 left) right)))
 
 (00001001 map-onto
   (00001000 (f values acc)
