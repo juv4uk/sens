@@ -89,6 +89,32 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(result["files"][0]["view_sha256"],
                          result["files"][0]["view_sha256"])
 
+    def test_new_exact_binary_source_checks_typed_words_not_uk_spelling(self):
+        stem = self.root / "binary"
+        stem.with_suffix(".lisp").write_text(" ".join(WORDS) + "\n", encoding="ascii")
+        stem.with_suffix(".sens").write_bytes(PHYSICAL)
+        stem.write_bytes(VIEW)
+        self.commit("new exact binary T5 trio")
+        report = self.scan()
+        self.assertEqual(report["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
+        self.assertEqual(report["files"][0]["bounded_uk_source_roundtrip"],
+                         "EXACT_BINARY_SOURCE_NOT_RUNTIME_ORACLE")
+        self.assertEqual(report["summary"]["uk_oracle_verified"], 0)
+        self.assertEqual(report["summary"]["release_admitted"], 0)
+
+    def test_exact_binary_source_drift_blocks_even_if_physical_view_matches(self):
+        stem = self.root / "binary"
+        stem.with_suffix(".lisp").write_text(" ".join(WORDS) + "\n", encoding="ascii")
+        stem.with_suffix(".sens").write_bytes(PHYSICAL)
+        stem.write_bytes(VIEW)
+        self.commit("baseline exact binary trio")
+        self.base = self.cmd("rev-parse", "HEAD").strip()
+        stem.with_suffix(".lisp").write_text("10 001 01\n", encoding="ascii")
+        self.commit("change source but not physical")
+        report = self.scan()
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("exact binary source differs", report["files"][0]["reason"])
+
     def test_existing_binary_modified_without_matching_view_is_rejected(self):
         old = self.root / "old"
         old.write_bytes(VIEW)

@@ -17,6 +17,7 @@ import sys
 
 from report_t5_triplet_inventory import inspect as inspect_triplets
 from verify_uk_t5_triplet import ProjectionBlocked, verify as verify_bounded_uk
+from sens_t5_codec import SensT5Error, decode_bytes, parse_words
 
 SCHEMA = "sens-t5-triplet-delta-ratchet/v1"
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")
@@ -109,15 +110,32 @@ def inspect(root: Path, *, base: str) -> dict:
             # changes the actual human Ukrainian source of a paired program.
             # Reuse the EXISTING ratified bounded uk adapter. Unsupported
             # D4/Text7/binders/aliases or source drift must fail closed.
+            source_roundtrip = "NOT_CHECKED_SOURCE_UNCHANGED"
             if name in source_changed:
                 stem = (root / name).with_suffix("")
                 try:
-                    proof = verify_bounded_uk(
-                        stem.with_suffix(".lisp"),
-                        stem.with_suffix(".sens"),
-                        stem,
-                    )
-                except (ProjectionBlocked, OSError, ValueError) as exc:
+                    source_text = stem.with_suffix(".lisp").read_text(encoding="utf-8")
+                    try:
+                        binary_words = parse_words(source_text)
+                    except SensT5Error:
+                        binary_words = None
+                    if binary_words is not None:
+                        # D1..D9 exact-width binary source is NOT Ukrainian
+                        # prose. Check identical typed words against actual
+                        # physical T5, never skip source/byte validation.
+                        if binary_words != decode_bytes(stem.with_suffix(".sens").read_bytes()):
+                            raise ValueError("exact binary source differs from physical typed T5 words")
+                        source_roundtrip = "EXACT_BINARY_SOURCE_NOT_RUNTIME_ORACLE"
+                    else:
+                        proof = verify_bounded_uk(
+                            stem.with_suffix(".lisp"),
+                            stem.with_suffix(".sens"),
+                            stem,
+                        )
+                        if not proof.get("canonical_uk_roundtrip"):
+                            raise ValueError("bounded canonical Ukrainian witness missing")
+                        source_roundtrip = "PASS_NOT_RUNTIME_ORACLE"
+                except (ProjectionBlocked, OSError, ValueError, UnicodeError, SensT5Error) as exc:
                     rows.append({
                         "sens": name,
                         "status": "BLOCKED",
@@ -126,22 +144,13 @@ def inspect(root: Path, *, base: str) -> dict:
                         "uk_oracle": "NOT_VERIFIED",
                     })
                     continue
-                if not proof.get("canonical_uk_roundtrip"):
-                    rows.append({
-                        "sens": name, "status": "BLOCKED",
-                        "reason": "UK_SOURCE_DELTA: bounded canonical witness missing",
-                    })
-                    continue
             rows.append({
                 "sens": name, "status": "PHYSICAL_VIEW_PASS_UK_ORACLE_PENDING",
                 "source_sha256": entry["source_sha256"],
                 "physical_sha256": entry["physical_sha256"],
                 "typed_word_sha256": entry["typed_word_sha256"],
                 "view_sha256": entry["view_sha256"],
-                "bounded_uk_source_roundtrip": (
-                    "PASS_NOT_RUNTIME_ORACLE" if name in source_changed
-                    else "NOT_CHECKED_SOURCE_UNCHANGED"
-                ),
+                "bounded_uk_source_roundtrip": source_roundtrip,
                 "uk_oracle": "NOT_VERIFIED", "release_admitted": False,
             })
     blocked = sum(row["status"] == "BLOCKED" for row in rows)
