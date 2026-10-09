@@ -197,6 +197,22 @@ class TestD10UnitPropagation(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     unit_closure(cnf, assumptions)
 
+    def test_real_donor_evidence_is_not_sens_authority(self):
+        p = ROOT / "knowledge/d10-dll1962-glucose3-oracle-evidence-v1.json"
+        evidence = json.loads(p.read_text(encoding="utf-8"))
+        self.assertEqual(evidence["schema"],
+                         "d10-dll1962-unit-fixedpoint-real-sat-oracle/v1")
+        self.assertEqual(evidence["real_donor_cases"], 600)
+        self.assertEqual(evidence["real_donor_conflict"] +
+                         evidence["real_donor_quiescent"], 600)
+        self.assertEqual(evidence["math_cases"], 2304)
+        self.assertEqual(evidence["observed_compiled_sat_package"],
+                         "python-sat==1.8.dev30")
+        self.assertEqual(evidence["authority"],
+                         {"new_selected": 0, "new_ratified": 0, "new_coordinates": 0})
+        dossier = json.loads(DOSSIER.read_text(encoding="utf-8"))
+        self.assertEqual(dossier["tests"]["observed_evidence"], p.relative_to(ROOT).as_posix())
+
     def test_non_admission_dossier(self):
         x = json.loads(DOSSIER.read_text(encoding="utf-8"))
         self.assertEqual(x["schema"], "d10-dll1962-unit-closure-research/v1")
