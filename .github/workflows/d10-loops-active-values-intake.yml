@@ -1,0 +1,32 @@
+name: D10 LOOPS active values — bounded historical witness
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-loops-active-values-intake-v1.json'
+      - 'scripts/check_d10_loops_active_values.py'
+      - 'tests/d10_loops_closure_derivability.lisp'
+      - '.github/workflows/d10-loops-active-values-intake.yml'
+  push:
+    branches:
+      - research/d10-loops-active-values-intake-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  loops-source-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check source-pinned D10 accounting and run negative witnesses
+        run: python3 scripts/check_d10_loops_active_values.py --self-test
+      - name: Install independent Lisp implementation (SBCL)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sbcl
+      - name: Construct nested access from plain Lisp closures
+        run: sbcl --noinform --script tests/d10_loops_closure_derivability.lisp
