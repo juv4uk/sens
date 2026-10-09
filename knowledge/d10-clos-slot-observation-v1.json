@@ -1,0 +1,72 @@
+{
+  "schema": "d10-clos-slot-observation/v1",
+  "status": "INDEPENDENT-DONOR-ORACLE-RESEARCH-PENDING-OWNER-REVIEW",
+  "foundation_contract": "11.8",
+  "donor_lisp": "ANSI Common Lisp CLOS",
+  "oracle_implementation": "SBCL (external Common Lisp executor, not SENS)",
+  "canonical_history": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+  "authority": "juv4uk/sens#4463, source audit #4843",
+  "canonical_baseline": {
+    "selected": 625,
+    "ratified": 0,
+    "width": 10,
+    "forced_selector_coordinates": 256
+  },
+  "historical_functions": [
+    {
+      "name": "SLOT-EXISTS-P",
+      "surface_uk": "існує-комірка?",
+      "surface_ukr": "існує-комірка?",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-exists-p.html",
+      "intake": "PENDING-OWNER-REVIEW"
+    },
+    {
+      "name": "SLOT-BOUNDP",
+      "surface_uk": "має-значення-комірка?",
+      "surface_ukr": "має-значення-комірка?",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-boundp.html",
+      "intake": "PENDING-OWNER-REVIEW"
+    },
+    {
+      "name": "SLOT-MAKUNBOUND",
+      "surface_uk": "розв'язати-комірку",
+      "surface_ukr": "розв'язати-комірку",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-makunbound.html",
+      "intake": "PENDING-OWNER-REVIEW"
+    },
+    {
+      "name": "CLASS-OF",
+      "surface_uk": "безпосередній-клас",
+      "surface_ukr": "безпосередній-клас",
+      "source_url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_clas_1.htm",
+      "intake": "PENDING-OWNER-REVIEW"
+    }
+  ],
+  "oracle_path": "tests/oracles/d10_clos_slot_states.lisp",
+  "observed_case_ids": [
+    "SLOT_EXISTS_UNBOUND",
+    "SLOT_EXISTS_BOUND_NIL",
+    "SLOT_EXISTS_ABSENT_NO",
+    "SLOT_BOUNDP_UNBOUND_NO",
+    "SLOT_BOUNDP_BOUND_NIL_YES",
+    "SLOT_VALUE_BOUND_NIL_IS_NIL",
+    "SLOT_BOUNDP_MISSING_ERROR",
+    "SLOT_VALUE_UNBOUND_ERROR",
+    "SLOT_MAKUNBOUND_RETURNS_SAME",
+    "SLOT_MAKUNBOUND_EXISTS_AFTER",
+    "SLOT_MAKUNBOUND_NOT_BOUND_AFTER",
+    "SLOT_MAKUNBOUND_UNTOUCHED",
+    "SLOT_MAKUNBOUND_MISSING_ERROR",
+    "SLOT_MAKUNBOUND_REBIND_POSSIBLE",
+    "CLASS_OF_EXACT_CLASS_OBJECT",
+    "CLASS_OF_NOT_CLASS_SYMBOL",
+    "CLASS_OF_CHILD_NOT_PARENT"
+  ],
+  "blocked_current_sens_execution": "D10 proposal only: 0 ratified, no admitted D10 runtime semantics, no .sens emitted",
+  "geometry": {
+    "coordinate": null,
+    "coordinate_basis": "UNPLACED",
+    "ratified": false
+  },
+  "owner_decision_required": "Only owner review can promote candidates into D10 selected; SBCL donor results alone never prove SENS runtime parity."
+}
