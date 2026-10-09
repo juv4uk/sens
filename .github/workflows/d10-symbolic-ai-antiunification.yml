@@ -5,6 +5,7 @@ on:
       - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
       - 'scripts/d10_antiunify_oracle.py'
       - 'tests/test_d10_symbolic_ai_antiunification.py'
+      - 'tests/test_d10_symbolic_ai_crossruntime.py'
       - 'tests/d10_symbolic_anti_unify_donor.pl'
       - '.github/workflows/d10-symbolic-ai-antiunification.yml'
   push:
@@ -13,6 +14,7 @@ on:
       - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
       - 'scripts/d10_antiunify_oracle.py'
       - 'tests/test_d10_symbolic_ai_antiunification.py'
+      - 'tests/test_d10_symbolic_ai_crossruntime.py'
       - 'tests/d10_symbolic_anti_unify_donor.pl'
       - '.github/workflows/d10-symbolic-ai-antiunification.yml'
 permissions:
@@ -32,3 +34,7 @@ jobs:
           swipl --version
       - name: Verify SWI-Prolog term_subsumer ground LGG law (14 plunit cases)
         run: swipl -q -s tests/d10_symbolic_anti_unify_donor.pl -g "run_tests,halt(0)" -t "halt(1)"
+      - name: Differential 576 ground-pair canonical LGG vs native SWI builtin
+        env:
+          D10_REQUIRE_SWIPL: '1'
+        run: python3 -m unittest discover -s tests -p 'test_d10_symbolic_ai_crossruntime.py' -v

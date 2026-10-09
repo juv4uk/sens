@@ -1,0 +1,424 @@
+{
+  "schema": "sens-d10-ground-congruence-research/v1",
+  "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+  "surface_uk": "зімкнути-рівності-термів",
+  "surface_ukr": "найменше-конгруентне-замикання-основних-термів",
+  "domain": "D10",
+  "status": "HOLD-CORE-VS-LIBRARY",
+  "selected": false,
+  "ratified_resident": false,
+  "coordinate": null,
+  "foundation": "ratified D1-D9 / Contract 11.8",
+  "coordination_issue": "https://github.com/juv4uk/sens/issues/4977",
+  "current_d9_behavioral_dedup": "REVIEW_REQUIRED",
+  "existing_domain_dedup": [
+    "EQ",
+    "UNIFY",
+    "PROVE-GOALS",
+    "EXPLAIN-PROOF",
+    "REWRITE",
+    "SIMPLIFY"
+  ],
+  "contract": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+  "input": "nodes topological DAG ids, single fixed symbol arity, equality pairs and queries; no variables, quantifiers, rewriting, host effects, numeric semantics, structural D2 or device state",
+  "output": "lexicographically stable partition classes plus ordered entailed booleans",
+  "minimality_review": "POTENTIALLY DERIVABLE using union-find and D9 fixed-point/list operations: no independent Core root proved; owner decides whether D10 or library",
+  "primary_sources": [
+    {
+      "author": "Greg Nelson; Derek C. Oppen",
+      "year": "1980",
+      "title": "Fast Decision Procedures Based on Congruence Closure",
+      "doi": "10.1145/322186.322198",
+      "url": "https://doi.org/10.1145/322186.322198"
+    },
+    {
+      "author": "Peter J. Downey; Ravi Sethi; Robert Endre Tarjan",
+      "year": "1980",
+      "title": "Variations on the Common Subexpression Problem",
+      "doi": "10.1145/322217.322228",
+      "url": "https://doi.org/10.1145/322217.322228"
+    }
+  ],
+  "modern_implementation": {
+    "title": "egg: Fast and Extensible E-graphs (POPL 2021)",
+    "url": "https://www.mwillsey.com/papers/egg",
+    "role": "implementation context only, not 1980 source"
+  },
+  "oracles": [
+    "independent explicit relation fixed point",
+    "independent union-find signature saturation",
+    "live Microsoft Z3 EUF solver pinned 4.13.3.0"
+  ],
+  "falsifiers": [
+    "given a=b infer F(a)=F(b), not F(a)=G(b)",
+    "same-symbol same-argument terms equal even when no equations",
+    "no stated equations never entail equality of two distinct constants",
+    "entailed=false is not explicit disequality",
+    "unknown node, forward/cyclic reference, inconsistent function arity BLOCK",
+    "no rewriting or symbolic variable substitution is smuggled into congruence"
+  ],
+  "uses": [
+    "Lisp symbolic trees and Advice Taker facts",
+    "Panini grammar term graphs",
+    "astronomy observation symbolic equation graphs",
+    "radio and FPGA symbolic circuit verification",
+    "chess and Prolog proof graph deduplication"
+  ],
+  "examples": [
+    {
+      "name": "same-symbol congruence and unlike-symbol negative",
+      "input": {
+        "nodes": [
+          {
+            "id": "a",
+            "symbol": "A",
+            "args": []
+          },
+          {
+            "id": "b",
+            "symbol": "B",
+            "args": []
+          },
+          {
+            "id": "fa",
+            "symbol": "F",
+            "args": [
+              "a"
+            ]
+          },
+          {
+            "id": "fb",
+            "symbol": "F",
+            "args": [
+              "b"
+            ]
+          },
+          {
+            "id": "ga",
+            "symbol": "G",
+            "args": [
+              "a"
+            ]
+          }
+        ],
+        "equalities": [
+          [
+            "a",
+            "b"
+          ]
+        ],
+        "queries": [
+          [
+            "fa",
+            "fb"
+          ],
+          [
+            "fa",
+            "ga"
+          ],
+          [
+            "a",
+            "b"
+          ]
+        ]
+      },
+      "output": {
+        "classes": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "fa",
+            "fb"
+          ],
+          [
+            "ga"
+          ]
+        ],
+        "entailed": [
+          true,
+          false,
+          true
+        ]
+      }
+    },
+    {
+      "name": "absence of axioms",
+      "input": {
+        "nodes": [
+          {
+            "id": "a",
+            "symbol": "A",
+            "args": []
+          },
+          {
+            "id": "b",
+            "symbol": "B",
+            "args": []
+          },
+          {
+            "id": "fa",
+            "symbol": "F",
+            "args": [
+              "a"
+            ]
+          },
+          {
+            "id": "fb",
+            "symbol": "F",
+            "args": [
+              "b"
+            ]
+          },
+          {
+            "id": "ga",
+            "symbol": "G",
+            "args": [
+              "a"
+            ]
+          }
+        ],
+        "equalities": [],
+        "queries": [
+          [
+            "fa",
+            "fb"
+          ],
+          [
+            "fa",
+            "ga"
+          ],
+          [
+            "a",
+            "b"
+          ]
+        ]
+      },
+      "output": {
+        "classes": [
+          [
+            "a"
+          ],
+          [
+            "b"
+          ],
+          [
+            "fa"
+          ],
+          [
+            "fb"
+          ],
+          [
+            "ga"
+          ]
+        ],
+        "entailed": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    {
+      "name": "direct unrelated function equation without equality of leaves",
+      "input": {
+        "nodes": [
+          {
+            "id": "a",
+            "symbol": "A",
+            "args": []
+          },
+          {
+            "id": "b",
+            "symbol": "B",
+            "args": []
+          },
+          {
+            "id": "fa",
+            "symbol": "F",
+            "args": [
+              "a"
+            ]
+          },
+          {
+            "id": "fb",
+            "symbol": "F",
+            "args": [
+              "b"
+            ]
+          },
+          {
+            "id": "ga",
+            "symbol": "G",
+            "args": [
+              "a"
+            ]
+          }
+        ],
+        "equalities": [
+          [
+            "fa",
+            "ga"
+          ]
+        ],
+        "queries": [
+          [
+            "fa",
+            "fb"
+          ],
+          [
+            "fa",
+            "ga"
+          ],
+          [
+            "a",
+            "b"
+          ]
+        ]
+      },
+      "output": {
+        "classes": [
+          [
+            "a"
+          ],
+          [
+            "b"
+          ],
+          [
+            "fa",
+            "ga"
+          ],
+          [
+            "fb"
+          ]
+        ],
+        "entailed": [
+          false,
+          true,
+          false
+        ]
+      }
+    },
+    {
+      "name": "transitive ground axioms",
+      "input": {
+        "nodes": [
+          {
+            "id": "a",
+            "symbol": "A",
+            "args": []
+          },
+          {
+            "id": "b",
+            "symbol": "B",
+            "args": []
+          },
+          {
+            "id": "c",
+            "symbol": "C",
+            "args": []
+          },
+          {
+            "id": "fa",
+            "symbol": "F",
+            "args": [
+              "a"
+            ]
+          },
+          {
+            "id": "fc",
+            "symbol": "F",
+            "args": [
+              "c"
+            ]
+          }
+        ],
+        "equalities": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "b",
+            "c"
+          ]
+        ],
+        "queries": [
+          [
+            "fa",
+            "fc"
+          ],
+          [
+            "a",
+            "c"
+          ]
+        ]
+      },
+      "output": {
+        "classes": [
+          [
+            "a",
+            "b",
+            "c"
+          ],
+          [
+            "fa",
+            "fc"
+          ]
+        ],
+        "entailed": [
+          true,
+          true
+        ]
+      }
+    },
+    {
+      "name": "identical syntax with two DAG node IDs",
+      "input": {
+        "nodes": [
+          {
+            "id": "a",
+            "symbol": "A",
+            "args": []
+          },
+          {
+            "id": "fa1",
+            "symbol": "F",
+            "args": [
+              "a"
+            ]
+          },
+          {
+            "id": "fa2",
+            "symbol": "F",
+            "args": [
+              "a"
+            ]
+          }
+        ],
+        "equalities": [],
+        "queries": [
+          [
+            "fa1",
+            "fa2"
+          ]
+        ]
+      },
+      "output": {
+        "classes": [
+          [
+            "a"
+          ],
+          [
+            "fa1",
+            "fa2"
+          ]
+        ],
+        "entailed": [
+          true
+        ]
+      }
+    }
+  ]
+}
