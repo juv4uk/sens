@@ -56,6 +56,30 @@
       "previous_selected": 627,
       "resulting_selected": 630,
       "decision": "research only; awaiting owner review"
+    },
+    {
+      "id": "d10.loops.active-values.20261009",
+      "authority": "#4013 #4463 #4864 original LOOPS donor; stacked replay after CLOS #4879",
+      "evidence": [
+        "#4864",
+        "The LOOPS Manual (1983) §§5.1–5.5",
+        "knowledge/d10-loops-active-values-intake-v1.json"
+      ],
+      "previous_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+      "resulting_inventory_blob_sha": "bc1adf570bf3b9486735419d6b4f11f818bede93",
+      "added_stable_ids": [
+        "d10.loops.1983.get",
+        "d10.loops.1983.put"
+      ],
+      "appended_sources": [
+        "knowledge/d10-loops-active-values-intake-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 630,
+      "resulting_selected": 632,
+      "decision": "research only; historical getter/putter law under owner review; closure-based derivability challenge"
     }
   ]
 }
