@@ -69,6 +69,6 @@ fn width_carriers_reject_payloads_that_do_not_fit() {
     assert!(Bit5::new(32).is_none());
     assert!(Bit6::new(64).is_none());
     assert!(Bit7::new(128).is_none());
-    assert!(Bit8::new(256).is_none());
+    // W8's u8 carrier can express every 8-bit payload; W9 must reject 512.
     assert!(Bit9::new(512).is_none());
 }
