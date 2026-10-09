@@ -1,0 +1,20 @@
+name: LISP 1.5 arithmetic archival provenance guard
+on:
+  pull_request:
+    paths:
+      - 'knowledge/lisp15-arithmetic-history-provenance-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check-lisp15-arithmetic-provenance.py'
+      - '.github/workflows/lisp15-arithmetic-provenance.yml'
+  workflow_dispatch:
+jobs:
+  archival-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check exact-name dedup and no-selection controls
+        run: python3 scripts/check-lisp15-arithmetic-provenance.py --self-test
+      - name: Ensure guard is read-only
+        run: git diff --exit-code
