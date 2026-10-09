@@ -1,0 +1,97 @@
+name: SENS physical bytes vs visible bits — performance
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/packed_vs_visible_bench.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "benchmarks/packed-vs-visible/**"
+      - ".github/workflows/packed-vs-visible-bench.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/examples/packed_vs_visible_bench.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "benchmarks/packed-vs-visible/**"
+      - ".github/workflows/packed-vs-visible-bench.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sens-packed-bench-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  performance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build release benchmark executable
+        run: cargo build --locked --release -p sens --example packed_vs_visible_bench
+
+      - name: Record hosted hardware and Rust toolchain
+        run: |
+          mkdir -p artifacts/performance
+          echo "git_sha=${GITHUB_SHA}" > artifacts/performance/environment.txt
+          rustc --version >> artifacts/performance/environment.txt
+          uname -a >> artifacts/performance/environment.txt
+          lscpu >> artifacts/performance/environment.txt
+          echo "benchmark=paired-ingest-only; word-width-metadata=external" >> artifacts/performance/environment.txt
+
+      - name: Measure current packed-vs-visible reader (not a unit-test proxy)
+        run: |
+          target/release/examples/packed_vs_visible_bench --samples 9 \
+            | tee artifacts/performance/packed-vs-visible.jsonl
+
+      - name: Publish measured ratios, not imagined performance claims
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("artifacts/performance/packed-vs-visible.jsonl")
+          rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+          if len(rows) != 5 or any(row.get("preflight") != "same-D2-domain-AST" for row in rows):
+              raise SystemExit("benchmark output missing real D2 parity evidence")
+          header = [
+              "## SENS packed vs visible — observed results",
+              "",
+              "Shared GitHub-hosted CPU, one release executable. Each number is the median of nine paired samples; **not end-to-end runtime**.",
+              "",
+              "| Corpus | Forms | Visible ns/program | Packed ns/program | Visible / packed | Text bytes | Packed payload bytes | External width entries |",
+              "|---|---:|---:|---:|---:|---:|---:|---:|",
+          ]
+          for row in rows:
+              header.append(
+                  f"| {row['case']} | {row['forms']} | {row['visible_median_ns']:.0f} "
+                  f"| {row['packed_median_ns']:.0f} | {row['ratio_visible_over_packed']:.2f}x "
+                  f"| {row['visible_source_bytes']} | {row['packed_payload_bytes']} "
+                  f"| {row['width_schedule_entries']} |"
+              )
+          header.extend([
+              "",
+              "Payload-size figures **exclude the externally provided word-width schedule** and file framing.",
+              "No result here measures interpreter execution or compares different hardware.",
+          ])
+          summary = "\n".join(header) + "\n"
+          Path("artifacts/performance/summary.md").write_text(summary, encoding="utf-8")
+          print(summary)
+          PY
+          cat artifacts/performance/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload full raw sample evidence and CPU provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-packed-vs-visible-${{ github.sha }}
+          path: artifacts/performance/
+          if-no-files-found: warn
+          retention-days: 30
