@@ -88,6 +88,85 @@ mod tests {
         );
     }
 
+    fn q(numerator: i64, denominator: i64) -> Value {
+        Value::Rational(crate::Rational::new(numerator, denominator).unwrap())
+    }
+
+    fn call_d5(bits: u8, args: &[Value]) -> Result<Value, LanguageError> {
+        invoke(
+            d5(bits),
+            args,
+            &Environment::root(),
+            Span::default(),
+        )
+        .expect("ratified D5 arithmetic resident must dispatch")
+    }
+
+    #[test]
+    fn additive_and_multiplicative_siblings_follow_local_inverse_orientation_laws() {
+        // #3003: this is Core.D5-local evidence.  The exact-Q Core-Math
+        // factorization is only a counter-domain comparison and is not used
+        // to select these identities or define their meaning.
+        let corpus = [
+            (-3, 1),
+            (-1, 2),
+            (0, 1),
+            (1, 3),
+            (2, 1),
+            (5, 2),
+        ];
+
+        for &(a_num, a_den) in &corpus {
+            for &(b_num, b_den) in &corpus {
+                let a = q(a_num, a_den);
+                let b = q(b_num, b_den);
+
+                let difference = call_d5(0b01011, &[a.clone(), b.clone()]).unwrap();
+                let additive_inverse = q(-b_num, b_den);
+                let plus_inverse =
+                    call_d5(0b01010, &[a.clone(), additive_inverse]).unwrap();
+                assert_eq!(
+                    difference.to_string(),
+                    plus_inverse.to_string(),
+                    "Core.D5 DIFFERENCE must equal PLUS with independently constructed additive inverse for {a_num}/{a_den}, {b_num}/{b_den}"
+                );
+
+                let quotient = call_d5(0b10011, &[a.clone(), b.clone()]);
+                if b_num == 0 {
+                    let error = quotient.expect_err(
+                        "Core.D5 QUOTIENT must preserve division-by-zero partiality",
+                    );
+                    assert_eq!(error.kind, crate::ErrorKind::DivisionByZero);
+                } else {
+                    let quotient = quotient.unwrap();
+                    let multiplicative_inverse = q(b_den, b_num);
+                    let times_inverse =
+                        call_d5(0b10010, &[a.clone(), multiplicative_inverse]).unwrap();
+                    assert_eq!(
+                        quotient.to_string(),
+                        times_inverse.to_string(),
+                        "Core.D5 QUOTIENT must equal TIMES with independently constructed multiplicative inverse for {a_num}/{a_den}, {b_num}/{b_den}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn arithmetic_sibling_law_does_not_mint_a_d4_parent() {
+        let d4 = CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0101).unwrap()));
+        assert!(
+            invoke(
+                d4,
+                &[q(1, 2), q(1, 3)],
+                &Environment::root(),
+                Span::default(),
+            )
+            .is_none(),
+            "local D5 sibling law must not create a D4 arithmetic parent"
+        );
+    }
+
     #[test]
     fn d5_order_rejects_inexact_operands_instead_of_manufacturing_truth() {
         let error = call_d5(
