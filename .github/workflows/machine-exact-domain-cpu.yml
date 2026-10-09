@@ -110,8 +110,10 @@ jobs:
           cargo test -p sens --test machine_exact_d5_zerop -- --nocapture
           cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
           cargo test -p sens --test machine_capability_axis -- --nocapture
-          cargo test -p sens --test semantic_coordinate_join -- --nocapture
-          cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
+          # Retired Rust semantic-coordinate oracles were removed by the D1-D9
+          # binary-first migration. The active mechanical width/domain witness
+          # is domain_ladder; never resurrect SID8 semantic authority here.
+          cargo test -p sens --test domain_ladder -- --nocapture
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Derived machine coverage inputs
         run: python3 scripts/generate-encoder-coverage-input.py --check
