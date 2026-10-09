@@ -1,0 +1,10 @@
+p	uk	pl	en
+1/2	Звіт про стан	Raport stanu	Status report
+2	Ідентифікатор повідомлення	Identyfikator wiadomości	Message ID
+3	Час UTC	Czas UTC	UTC time
+4	Стан добробуту	Stan dobrostanu	Welfare status
+4/0	У безпеці	Bezpiecznie	Safe
+5	Місцезнаходження	Lokalizacja	Location
+5/0	Невідомо	Nieznana	Unknown
+6	Примітка	Notatka	Note
+6/0	Відсутня	Brak	Absent
