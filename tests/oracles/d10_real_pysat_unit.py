@@ -27,11 +27,24 @@ def main():
             if not status:
                 raise AssertionError(
                     f"real SAT donor produced false unit conflict at {case_number}")
-            if sorted(observed) != pure["forced"]:
+            # PySAT returns *new* propagations due to assumptions, and MAY
+            # omit CNF root-level units already cached during bootstrap.
+            # Therefore equality of the API list to the mathematical full
+            # closure would be false. Check every reported literal is in our
+            # closure, then independently force the opposite of *every*
+            # mathematical implication: real Glucose3 BCP must conflict.
+            if not set(observed).issubset(set(pure["forced"])):
                 raise AssertionError(
-                    f"unit closure mismatch case={case_number}: "
-                    f"actual={sorted(observed)} expected={pure['forced']}, "
-                    f"cnf={cnf}, assumptions={assumptions}")
+                    f"compiled SAT donor invented a literal case={case_number}: "
+                    f"actual={sorted(observed)}, exact_closure={pure['forced']}")
+            for forced in pure["forced"]:
+                with Glucose3(bootstrap_with=cnf) as second_solver:
+                    opposite_ok, _ = second_solver.propagate(
+                        assumptions=sorted(assumptions + [-forced]))
+                if opposite_ok:
+                    raise AssertionError(
+                        f"real compiled Glucose3 BCP did not imply {forced}; "
+                        f"case={case_number} cnf={cnf} assumptions={assumptions}")
             compatible += 1
     assert compatible > 0 and conflicts > 0
     assert compatible + conflicts == 600
