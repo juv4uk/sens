@@ -42,6 +42,22 @@ if [[ -z "$binary_cond_status" ]]; then
   exit 1
 fi
 
+# The smallest physical binary fixture is one exact D3 EMPTY word: 000.
+# T5 trits are 00022 (two canonical pad trits), packed into one byte 0x08.
+empty_sens="tests/fixtures/current-d3-empty-smoke.sens"
+empty_view="tests/fixtures/current-d3-empty-smoke"
+actual_empty_view="$(cargo run --quiet -p sens-cli --bin sens-trit -- open "$empty_sens")"
+expected_empty_view="$(cat "$empty_view")"
+if [[ "$actual_empty_view" != "$expected_empty_view" ]]; then
+  printf 'physical D3 EMPTY T5 view mismatch: %s\\n' "$actual_empty_view" >&2
+  exit 1
+fi
+empty_binary_status="$(cargo run --quiet -p sens-cli --bin sens -- "$empty_sens")"
+if [[ "$empty_binary_status" != "()" ]]; then
+  printf 'physical D3 EMPTY T5 result mismatch: %s\\n' "$empty_binary_status" >&2
+  exit 1
+fi
+
 # #305 / TASK-001: empty meta-program semantics are owned by Lisp. The shell
 # observes only the named pass envelope; environment/result meaning stays in
 # the witness and no replacement Rust semantic assertion is introduced.
