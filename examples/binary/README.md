@@ -1,10 +1,14 @@
 # Pure-binary runnable SENS specimens — D1/D2/D3/D4/D7
 
-The files in this directory are **not human Lisp syntax**. `d7-first-program.lisp` and `d3-cond-program.sens` contain only exact-width bit words separated by whitespace. Every payload
-word in that source consists of only `0` and `1`, with ASCII whitespace
-separating **exact-width** domain words. It contains a D4 definition,
-a D2-framed D7 Text7 binding, a D4 lambda, an exact D1 return value, and a
-subsequent invocation of the binding through its D7 frame.
+The specimens use visible binary SENS words, not human Lisp spellings. The
+D7 source is `d7-first-program.lisp`. The D3 source is
+`d3-cond-program.lisp`; its same-stem `.sens` is a **packed physical T5
+byte stream**, and its extensionless file is the exact-width visible decoder
+view. The D3 source and view contain only 0/1 words separated by whitespace;
+the physical file contains bytes in the canonical T5 range 0..242, not ASCII
+digits. The D7 specimen contains a D4 definition, a D2-framed D7 Text7 binding,
+a D4 lambda, an exact D1 return value, and a subsequent invocation through
+its D7 frame.
 
 Tests in `crates/sens/tests/binary_program_e2e.rs` execute the complete
 physical transport path for both programs. The D3 specimen uses exact `110` COND, a first clause whose ATOM test is D1:0 (must skip), then an ATOM test returning D1:1 (must select). A negative case proves structural empty is not accepted as a predicate.
