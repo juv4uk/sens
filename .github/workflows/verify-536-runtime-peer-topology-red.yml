@@ -1,0 +1,14 @@
+name: Verify 536 runtime peer topology RED
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  red:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Require not-yet-implemented Lisp topology witness
+        run: cargo run --quiet -p my-lisp-cli --bin my-lisp -- tests/fixtures/runtime-peer-comparison-topology-witness.lisp
