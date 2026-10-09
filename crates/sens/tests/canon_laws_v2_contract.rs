@@ -102,6 +102,11 @@ fn executable_canon_speaks_layered_answer_semantics() {
                 for (label, probe) in [
                     ("witness-field/expected", format!("(witness-field (00000001 expected) (quote {}))", row.source)),
                     ("witness-field/error", format!("(witness-field (00000001 error) (quote {}))", row.source)),
+                    ("assoc/expected", format!("(00101101 (00000001 expected) (quote {}))", row.source)),
+                    ("assoc/empty", "(00101101 (00000001 expected) (00000001 ()))".to_string()),
+                    ("assoc/simple", "(00101101 (00000001 b) (00000001 ((a . 1) (b . 2))))".to_string()),
+                    ("eqbit/no", "(00100010 (00000001 a) (00000001 b))".to_string()),
+                    ("eqbit/yes", "(00100010 (00000001 b) (00000001 b))".to_string()),
                     ("witness-superseded", format!("(witness-superseded-outcome (quote {}) (witness-field (00000001 expected) (quote {})))", row.source, row.source)),
                     ("expected-outcome", format!("(witness-expected-outcome (quote {}))", row.source)),
                 ] {
