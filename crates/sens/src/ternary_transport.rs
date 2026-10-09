@@ -43,45 +43,75 @@ const MAX_FILE_BYTES: usize = 4 * 1024 * 1024;
 
 /// Структурно зв'язані доменні слова віддані вже наявним типом.
 /// Транспорт не змінює їхню двійкову ідентичність.
+/// Один транспортний трит додається без проміжного масиву всіх тритів.
+/// П'ять тритів утворюють число 0..242; `2` — тільки фізична межа.
+#[inline]
+fn append_t5_digit(
+    out: &mut Vec<u8>,
+    current: &mut u8,
+    used: &mut usize,
+    digit: u8,
+) {
+    debug_assert!(digit <= 2);
+    *current = *current * 3 + digit;
+    *used += 1;
+    if *used == TRITS_PER_BYTE {
+        out.push(*current);
+        *current = 0;
+        *used = 0;
+    }
+}
+
+/// Потокове фізичне пакування точних доменних слів.
+///
+/// Тут немає таблиці функцій чи семантики D1–D9: трит `2` лише розділяє
+/// слова; невикористаний фізичний хвіст заповнюється щонайбільше чотирма `2`.
+/// Пам'ять пропорційна тільки вихідним байтам T5, не проміжним тритам.
 pub fn encode_ternary_words(
     words: &[BinarySourceWord],
 ) -> Result<Vec<u8>, TernaryTransportError> {
     if words.is_empty() {
         return Err(TernaryTransportError::EmptyProgram);
     }
-    let mut trits = Vec::new();
-    for (position, word) in words.iter().copied().enumerate() {
-        if position != 0 {
-            trits.push(2);
-        }
+    let mut semantic_trits = 0usize;
+    for word in words {
         let width = word.width();
         if !(1..=9).contains(&width) {
             return Err(TernaryTransportError::UnsupportedDomainWidth);
         }
-        let value = word.packed_bits();
-        for shift in (0..width).rev() {
-            trits.push(((value >> shift) & 1) as u8);
-        }
+        semantic_trits = semantic_trits.checked_add(width)
+            .ok_or(TernaryTransportError::TransportTooLarge)?;
     }
-    // У файлі EOF вже відомий з його фізичної довжини.
-    // Роздільник 2 пишеться ВИКЛЮЧНО між двома словами.
-    // Трити 2 в кінці — тільки байтовий padding (0..4 шт.).
-    while trits.len() % TRITS_PER_BYTE != 0 {
-        trits.push(2);
-    }
-    let byte_len = trits.len() / TRITS_PER_BYTE;
+    let trit_count = semantic_trits.checked_add(words.len() - 1)
+        .ok_or(TernaryTransportError::TransportTooLarge)?;
+    let byte_len = trit_count.checked_add(TRITS_PER_BYTE - 1)
+        .ok_or(TernaryTransportError::TransportTooLarge)? / TRITS_PER_BYTE;
     if byte_len > MAX_FILE_BYTES {
         return Err(TernaryTransportError::TransportTooLarge);
     }
-    let mut encoded = Vec::with_capacity(byte_len);
-    let (chunks, remainder) = trits.as_chunks::<TRITS_PER_BYTE>();
-    debug_assert!(remainder.is_empty(), "T5 encoding pads to whole five-trit bytes");
-    for five in chunks {
-        let value = five.iter().fold(0u16, |n, d| n * 3 + u16::from(*d));
-        // Кожна п'ятірка дає рівно діапазон 0..=242.
-        encoded.push(value as u8);
+
+    let mut out = Vec::with_capacity(byte_len);
+    let mut current = 0u8;
+    let mut used = 0usize;
+    for (position, word) in words.iter().copied().enumerate() {
+        if position != 0 {
+            append_t5_digit(&mut out, &mut current, &mut used, 2);
+        }
+        let value = word.packed_bits();
+        for shift in (0..word.width()).rev() {
+            append_t5_digit(
+                &mut out,
+                &mut current,
+                &mut used,
+                ((value >> shift) & 1) as u8,
+            );
+        }
     }
-    Ok(encoded)
+    while used != 0 {
+        append_t5_digit(&mut out, &mut current, &mut used, 2);
+    }
+    debug_assert_eq!(out.len(), byte_len);
+    Ok(out)
 }
 
 /// Lift a bit payload into the exact-width word carrier.
