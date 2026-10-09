@@ -1,0 +1,44 @@
+name: Independent reconstruction benchmark
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/independent-reconstruction/**"
+      - ".github/workflows/independent-reconstruction-bench.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/independent-reconstruction/**"
+      - ".github/workflows/independent-reconstruction-bench.yml"
+  workflow_dispatch:
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run independent reconstruction smoke benchmark
+        run: |
+          python3 benchmarks/independent-reconstruction/run.py \
+            --smoke --reps 3 --queries 256 \
+            --out /tmp/independent-reconstruction/results
+
+      - name: Run reconstruction ablation smoke benchmark
+        run: |
+          python3 benchmarks/independent-reconstruction/ablation.py \
+            --smoke --queries 256 \
+            --out /tmp/reconstruction-ablation/results
+
+      - name: Upload raw reconstruction evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-reconstruction
+          path: |
+            /tmp/independent-reconstruction/results.tsv
+            /tmp/independent-reconstruction/results.json
+            /tmp/reconstruction-ablation/results.tsv
+            /tmp/reconstruction-ablation/results.json
+          retention-days: 7

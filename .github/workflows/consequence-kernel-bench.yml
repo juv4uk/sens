@@ -1,0 +1,52 @@
+name: Consequence kernel benchmark
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/consequence-kernel/**"
+      - ".github/workflows/consequence-kernel-bench.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/consequence-kernel/**"
+      - ".github/workflows/consequence-kernel-bench.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sens-consequence-kernel-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  consequence-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run consequence-kernel matrix
+        run: |
+          rm -rf /tmp/sens-consequence-kernel
+          python3 benchmarks/consequence-kernel/run.py \
+            --out-dir /tmp/sens-consequence-kernel
+
+      - name: Publish benchmark summary
+        if: always()
+        run: |
+          {
+            echo '## Consequence kernel'
+            echo
+            echo 'Research-only. UNKNOWN != false; support+refutation preserved; no explosion.'
+            echo
+            if test -f /tmp/sens-consequence-kernel/summary.tsv; then
+              echo '~~~text'
+              cat /tmp/sens-consequence-kernel/summary.tsv
+              echo '~~~'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sens-consequence-kernel
+          path: /tmp/sens-consequence-kernel
+          retention-days: 7
