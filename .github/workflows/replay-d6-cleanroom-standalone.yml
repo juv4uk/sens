@@ -1,0 +1,24 @@
+name: Replay D6 cleanroom standalone proof
+
+on:
+  push:
+    branches:
+      - replay/research-d6-cleanroom-v2-current-20261009
+  pull_request:
+    paths:
+      - "knowledge/d6-v2-cleanroom-shadow.json"
+      - "scripts/check-d6-v2-cleanroom-shadow.py"
+      - ".github/workflows/replay-d6-cleanroom-standalone.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduce historical independent oracle
+        run: python3 scripts/check-d6-v2-cleanroom-shadow.py
