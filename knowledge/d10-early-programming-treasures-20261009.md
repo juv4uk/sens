@@ -34,6 +34,22 @@ These are donor leads, not automatic D10 admissions.
 | Interactive correction / DWIM-style recovery | Produce a bounded set of explicit correction candidates while preserving the original input and exposing ambiguity rather than silently rewriting intent | Risk of UI-only fuzzy correction; may be a language-visible relation if deterministic, inspectable and non-mutating | **HOLD; REQUIRE GENERIC LAW** |
 | Incremental compilation / interpreted-compiled coexistence | A function can be replaced or compiled while preserving the defined language-level identity and call behavior | Compiler/backend details are mechanisms unless observable identity, redefinition, or staging laws differ | **MECHANISM-ONLY UNTIL PROVEN OTHERWISE** |
 
+## Fourth early source: Lovelace's 1843 Notes A and G
+
+Ada Lovelace's notes to Menabrea's description of Babbage's Analytical Engine provide a useful *pre-Lisp* comparison for the owner's interest in astronomy, exact arithmetic, music/acoustics and programmable symbolic data. The primary text distinguishes a general-purpose sequence of operations from a machine restricted to repeated addition; Note G lays out a step-by-step operation table for Bernoulli numbers, while Note A speculates that other structured subjects (including musical relations) might be encoded for manipulation. The Analytical Engine was not a running SENS/Lisp runtime, so this is historical evidence about a model of programmable computation—not a donor implementation or a new SENS semantic identity.
+
+- Primary text, Lovelace's 1843 Notes: https://psychclassics.yorku.ca/Lovelace/lovelace.htm
+- Institutional archival record: https://galileo.ou.edu/exhibits/notes.html
+- Publication-history / technical-historical discussion: https://ieeexplore.ieee.org/document/1253887
+
+### Questions worth preserving
+
+1. **Program-as-data vs data-as-program.** Can a finite operation table be inspected, transformed and then executed while preserving its explicit instruction/data distinction? Compare with existing Lisp quotation, `APPQ`, `DEFINE-BATCH`, metaevaluation, D2 control and finite-word candidates before minting a name.
+2. **Representation independence.** Which parts of an operation sequence are generic control, and which depend on the represented domain's primitive operations? A candidate must not claim that arithmetic on Bernoulli numbers proves a general law for music, symbolic terms, radio frames or astronomy data.
+3. **Trace as falsifiable witness.** A useful donor test can encode a short sequence of read/compute/write steps with exact pre/post values, repeated update and a control back-edge. It must separately label what the source actually states and what is our modern formalization; no engine execution may be invented.
+
+Current disposition: **historical donor / audit questions only**. Store, array, evaluator, sequencing, branch and quotation meanings already exist in lower domains or D10's selected research set. The research target is a counterexample to composition from those roots—not another opcode named after the historical machine. The same discipline applies to the owner's musical, Sanskrit, chess, SDR, ESP32 and FPGA projects: applications can reveal a universal observable law, but the application name itself is not that law.
+
 ## Concrete investigation order
 
 ### 1. First: procedural embedding versus ordinary rule matching
