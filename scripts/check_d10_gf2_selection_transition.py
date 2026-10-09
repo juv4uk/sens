@@ -28,12 +28,12 @@ def verify(inv,state,history,low,ledger,dossier,doc):
     assert inv["accounting"]["remaining_semantic_inventory"]==388
     assert inv["accounting"]["ratified_d10_residents"]==0
     assert state["target"]["selected_semantic_candidates"]==636
-    assert state["target"]["unplaced_selected_candidates"]==379
-    assert state["target"]["remaining_semantic_candidates"]==389
+    assert state["target"]["unplaced_selected_candidates"]==380
+    assert state["target"]["remaining_semantic_candidates"]==388
     assert state["target"]["ratified_residents"]==0
     assert "D10 selected              636/1024" in doc
-    assert "unplaced                  379" in doc
-    assert "remaining                 389" in doc
+    assert "unplaced                  380" in doc
+    assert "remaining                 388" in doc
     assert inv["sources"][-1]=="knowledge/d10-gf2-minimal-recurrence-research-v1.json"
     row=inv["rows"][-1]
     assert row["semantic_name"]==NAME and row["stable_id"]==STABLE
@@ -44,15 +44,15 @@ def verify(inv,state,history,low,ledger,dossier,doc):
     assert row["ratified_resident"] is False
     assert row["physical_t5_authorized"] is False
     assert row["coordinate"] is None and row["coordinate_basis"]=="UNPLACED"
-    assert len({x["stable_id"] for x in inv["rows"]})==635
-    assert len({x["semantic_name"] for x in inv["rows"]})==635
+    assert len({x["stable_id"] for x in inv["rows"]})==636
+    assert len({x["semantic_name"] for x in inv["rows"]})==636
     previous=copy.deepcopy(inv)
     previous["rows"]=previous["rows"][:-1]
     previous["sources"]=previous["sources"][:-1]
     previous["accounting"]["selected_semantic_candidates"]=635
     previous["accounting"]["unplaced_selected_candidates"]=379
     previous["accounting"]["remaining_semantic_inventory"]=389
-    assert gitsha(previous)==PRE,"existing 634 historical rows are immutable"
+    assert gitsha(previous)==PRE,"all existing 635 historical rows are immutable"
     event=history["transitions"][-1]
     assert event["id"]=="d10.hobby.gf2.minimal-recurrence.after-bayes.20261009"
     assert event["previous_inventory_blob_sha"]==PRE
