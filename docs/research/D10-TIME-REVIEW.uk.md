@@ -1,6 +1,14 @@
 # D10: перевірка часових законів — source-grounded, без автоматичної ратифікації
 
-Цей пакет **не додає резидентів D10**. Він переводить 9 знайдених у `lib/time.lisp` визначень у перевірювані пропозиції з pinned Git blob SHA `74013e20c0c5abb9a68c62334f40095c29294a53`, точними рядками і 34 позитивними/негативними **референсними** прикладами. Канонічний `sens/main` на початок: **625/1024 selected; 399 missing; 256 law-forced; 369 unplaced; 0 ratified**. Не додавати число 9 до selected до завершення семантичного review.
+Цей пакет **не додає резидентів D10**. Він відстежує 9 визначень із `lib/time.lisp` на зафіксованому Git blob `c809c8b7291841c47c4072d0371105fb6596ab34`, з точними рядками та 34 позитивними/негативними **референсними** прикладами. Канонічний `sens/main` на початок огляду: **625/1024 selected; 399 missing; 256 law-forced; 369 unplaced; 0 ratified**. Не додавати число 9 до selected до завершення семантичного review.
+
+## Перехід джерела — 2026-10-09
+
+- Попередній review pin: `b6e8278932298e5541ac79390051000a8804d1f9`.
+- Фактичний blob `main` перед цією правкою: `b6e8278932298e5541ac79390051000a8804d1f9`.
+- Новий blob джерела після виправлення форми: `c809c8b7291841c47c4072d0371105fb6596ab34`; зміна внесена комітом `5efdddc4a3a2f3211e1c3219cd2b3c2693556dc7`.
+
+Виправлено групування вкладених форм у `lib/time.lisp`, щоб кожна клауза D3:110 мала рівно два поля `(test expression)` згідно з Contract 11.8. Збережено пояснювальні коментарі про сирий host-boundary та похідні мілісекунди. **Це структурна міграція форми, а не доказ поведінкової еквівалентності.** У JSON оновлено pin і точні рядки; усі дев'ять пропозицій залишаються не вибраними й не ратифікованими.
 
 ## Попередній відбір
 
@@ -10,26 +18,22 @@
 - **TIMEZONE-DECLARATIONS->OBSERVATION**: deterministic explicit source precedence, possibly application policy.
 - **TIMEZONE-CONFIG**: typed validated constructor with inclusive ±86400 bound; could be derived from arithmetic and tagged lists.
 
-**HOLD**: `INTERNET-TIME-MODE-VALID?`, `INTERNET-TIME-STRATUM-VALID?` (protocol subrules); `INTERNET-TIME-RAW->OBSERVATION`, `TIMEZONE-RAW->OBSERVATION` (tag adapters). D10 should not silently mint bits for transport, schema tags, host I/O or D2 control. User's directive: **тільки D2 керує мовою**.
+**HOLD**: `INTERNET-TIME-MODE-VALID?`, `INTERNET-TIME-STRATUM-VALID?` (protocol subrules); `INTERNET-TIME-RAW->OBSERVATION`, `TIMEZONE-RAW->OBSERVATION` (tag adapters). D10 should not silently mint bits for transport, schema tags, host I/O or D2 control. Owner directive: **тільки D2 керує мовою**.
 
 ## Evidence and negative tests
 
-`tests/test_d10_time_law_review_v2.py` contains independent reference-model cases for leap years, NTP epoch/valid mode/stratum/fraction, timezone precedence, validation boundaries, tagged accepted/rejected. These are **NOT** executions of `lib/time.lisp`; no language-runtime parity claimed. In a real `sens` checkout, `scripts/check_d10_time_law_review_v2.py` additionally validates the exact Git blob SHA and definition-line pins and checks semantic name duplicates against full D1–D9/D10 inventories.
-
-## Deploy into repository (when GitHub restriction lifts)
-
-Copy `knowledge/`, `scripts/`, `tests/`, `docs/` contents onto the same relative paths in `juv4uk/sens`. Run:
+`tests/test_d10_time_law_review_v2.py` contains independent reference-model cases for leap years, NTP epoch/valid mode/stratum/fraction, timezone precedence, validation boundaries, tagged accepted/rejected. These are **NOT** executions of `lib/time.lisp`; no language-runtime parity is claimed. In a real `sens` checkout, `scripts/check_d10_time_law_review_v2.py --require-checkout` validates the exact Git blob SHA, every definition-line pin, and semantic-name duplicates against the full D1–D9/D10 inventories. Run the unittest suite separately:
 
 ```sh
-python3 scripts/check_d10_time_law_review_v2.py
+python3 scripts/check_d10_time_law_review_v2.py --require-checkout
 python3 -m unittest discover -s tests -p 'test_d10_time_law_review_v2.py' -v
 ```
 
-Then create a research-only PR referencing #4013 / #4463 / #4162. Do not increment `knowledge/d10-v1-semantic-inventory.json` or `knowledge/d10-fill-v1-state.json` until independent old/current executable parity and owner review prove an additional D10 meaning. Keep separate from +9 pending unification branch.
+A successful research-ledger check does **not** prove the Lisp runtime's behavior. Required Hosted CI / Vertical Day tests remain the acceptance gate for the time-library loading repair.
 
 ## Agent-handoff priority
 
-1. Execute **actual** pure-source witnesses on canonical `lib/time.lisp`, including branch-specific NTP reject shapes and negative date limitations, then compare to independent oracle.
+1. Execute **actual** pure-source witnesses on canonical `lib/time.lisp`, including branch-specific NTP reject shapes and negative date limitations, then compare to an independent oracle.
 2. Audit reusability/derivability versus existing `UTC-FROM-UNIX`, `UTC-NOW`, D9 and D10 outcome constructors.
 3. Decide whether NTP/timezone policies belong to Core D10, TIME library/island, or pure derived convenience.
 4. Rank by real source migration unblock fan-out only after collecting actual blocked paths; unknown != 0. No invented positions.
