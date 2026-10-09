@@ -1,0 +1,26 @@
+name: Ratified L1-L7 migration gate
+on:
+  pull_request:
+    paths:
+      - 'scripts/ratified_l1_l7_migrate.py'
+      - 'tests/test_ratified_l1_l7_migrate.py'
+      - '.github/workflows/ratified-l1-l7-migration.yml'
+      - 'docs/research/l1-l7-owner-ratification-20261009.uk.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ratified-l1-l7:
+    name: exact-domain ratification regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test L1-L7 reader and oracle gate
+        run: python3 -m unittest discover -s tests -p 'test_ratified_l1_l7_migrate.py' -v
+      - name: No automatic in-place migration
+        run: |
+          python3 scripts/ratified_l1_l7_migrate.py --help
+          test ! -e "scripts/ratified_l1_l7_migrate.py.sens"
