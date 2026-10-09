@@ -47,8 +47,14 @@
   (00001000 (observation)
     (00000111
       ((00000011 (00000101 observation) (00000001 unix-time))
-       (01011111 (00101111 observation) (00110000 observation)))
-      (t (00100111 (00000001 rejected) (00000001 invalid-unix-time-observation))))))
+       (00100111
+         (00000001 utc)
+         (00000101 observation)
+         (00101111 observation)
+         (00110000 observation)))
+      ((00000010 (00000001 ()))
+       (00100111 (00000001 rejected) (00000001 invalid-unix-time-observation)))))
+
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
 ; the raw Unix observation above.
@@ -65,47 +71,44 @@
 ;   host, mode, stratum, ntp-seconds, fraction
 ; Successful interpretation preserves the existing public observation shape:
 ;   (accepted host unix-seconds nanosecond)
-; Exact-Q answers 1 (так) / 0 (ні), and 0 is truthy, so `or` / `and` / `not`
-; over comparison results no longer decide anything (or collapses every
-; operand, falsy or not, to t). E1 (#216): validity is decided by explicit
-; three-part gates whose queries answer 1/0 and are consumed by expected
-; 1/0 slots; canonical cond accepts no bare t/() clause query.
+; Current control law: numeric comparisons produce exact D1 PredicateBit;
+; AND/OR consume only that typed answer. All COND clauses are two-field
+; (test expression). Explicit (ATOM ()) is the D1:1 fallback expression;
+; neither Number 1/0, T/NIL, structural () nor rich classifiers act as tests.
 (00001001 internet-time-mode-valid?
   (00001000 (mode)
-    (00000111
-      ((00011100 mode 4) 1 1)
-      ((00011100 mode 4) 0
-       (00000111
-         ((00011100 mode 5) 1 1)
-         ((00011100 mode 5) 0 0))))))
+    (or
+      (00011100 mode 4)
+      (00011100 mode 5)))
+
 
 (00001001 internet-time-stratum-valid?
   (00001000 (stratum)
-    (00000111
-      ((00011100 stratum 0) 1 0)
-      ((00011100 stratum 0) 0
-       (00000111
-         ((00011011 stratum 15) 1 0)
-         ((00011011 stratum 15) 0 1))))))
+    (and
+      (00011011 stratum 0)
+      (00011010 stratum 16)))
+
 
 (00001001 internet-time-fields->observation
   (00001000 (host mode stratum ntp-seconds fraction)
     (00000111
-      ((internet-time-mode-valid? mode) 1
-        (00000111
-          ((internet-time-stratum-valid? stratum) 1
-            (00000111
-              ((00011010 ntp-seconds 2208988800) 1
-               (00100111 (00000001 rejected) (00000001 invalid-epoch)))
-              ((00011010 ntp-seconds 2208988800) 0
-               (00100111 (00000001 accepted)
-                     host
-                     (00001101 ntp-seconds 2208988800)
-                     (00010100 (00001110 fraction #d1000000000) 4294967296)))))
-          ((internet-time-stratum-valid? stratum) 0
-            (00100111 (00000001 rejected) (00000001 invalid-response)))))
-      ((internet-time-mode-valid? mode) 0
-        (00100111 (00000001 rejected) (00000001 invalid-response))))))
+      ((internet-time-mode-valid? mode)
+       (00000111
+         ((internet-time-stratum-valid? stratum)
+          (00000111
+            ((00011010 ntp-seconds 2208988800)
+             (00100111 (00000001 rejected) (00000001 invalid-epoch)))
+            ((00000010 (00000001 ()))
+             (00100111
+               (00000001 accepted)
+               host
+               (00001101 ntp-seconds 2208988800)
+               (00010100 (00001110 fraction #d1000000000) 4294967296))))
+         ((00000010 (00000001 ()))
+          (00100111 (00000001 rejected) (00000001 invalid-response))))
+      ((00000010 (00000001 ()))
+       (00100111 (00000001 rejected) (00000001 invalid-response)))))
+
 
 ; Adapter for the raw host boundary. The host returns either:
 ;   (ntp-fields host mode stratum ntp-seconds fraction)
@@ -121,7 +124,8 @@
          (00000101 (00000110 (00000110 (00000110 raw))))
          (00000101 (00000110 (00000110 (00000110 (00000110 raw)))))
          (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 raw))))))))
-      (t raw))))
+      ((00000010 (00000001 ())) raw)))
+
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
 ; query mechanism under the deliberately mechanical name `ntp-query-raw`.
@@ -135,12 +139,14 @@
   (00001000 (observation)
     (00000111
       ((00000011 (00000101 observation) (00000001 accepted))
-       (00100111 (00000001 accepted)
-             (00101111 observation)
-             (01011111
-               (00110000 observation)
-               (00000101 (00000110 (00000110 (00000110 observation)))))))
-      (t observation))))
+       (00100111
+         (00000001 accepted)
+         (00101111 observation)
+         (01011111
+           (00110000 observation)
+           (00000101 (00000110 (00000110 (00000110 observation))))))
+      ((00000010 (00000001 ())) observation)))
+
 
 ; Nanoseconds are the one monotonic host observation. Milliseconds are only a
 ; coarser language-level view, so derive them instead of requiring a second
@@ -185,14 +191,13 @@
 (00001001 timezone-declarations->observation
   (00001000 (tz-value etc-timezone-value)
     (00000111
-      ((nonempty-string-membership-helper tz-value)
-       (class-membership string nonempty-member)
+      ((and (00100100 tz-value) (00011011 (00111011 tz-value) 0))
        (00100111 (00000001 detected) tz-value (00000001 TZ)))
-      ((nonempty-string-membership-helper etc-timezone-value)
-       (class-membership string nonempty-member)
+      ((and (00100100 etc-timezone-value) (00011011 (00111011 etc-timezone-value) 0))
        (00100111 (00000001 detected) etc-timezone-value (00000001 etc-timezone)))
-      (t
-       (00100111 (00000001 unknown) (00000001 host-declaration-unavailable))))))
+      ((00000010 (00000001 ()))
+       (00100111 (00000001 unknown) (00000001 host-declaration-unavailable)))))
+
 
 ; Adapt the mechanism-only host observation to public timezone meaning.
 (00001001 timezone-raw->observation
@@ -202,8 +207,9 @@
        (timezone-declarations->observation
          (00101111 raw)
          (00110000 raw)))
-      (t
-       (00100111 (00000001 rejected) (00000001 invalid-timezone-observation))))))
+      ((00000010 (00000001 ()))
+       (00100111 (00000001 rejected) (00000001 invalid-timezone-observation)))))
+
 
 (00001001 timezone-detect
   (00001000 ()
@@ -213,17 +219,19 @@
 (00001001 timezone-config
   (00001000 (name offset-seconds)
     (00000111
-      ((string-membership-helper name)
-       (class-membership string nonmember)
-       (00100111 (00000001 rejected) (00000001 invalid-name)))
-      ((00011010 offset-seconds -86400) 1
-       (00100111 (00000001 rejected) (00000001 invalid-offset)))
-      ((00011010 offset-seconds -86400) 0
+      ((00100100 name)
        (00000111
-         ((00011011 offset-seconds 86400) 1
+         ((00011010 offset-seconds -86400)
           (00100111 (00000001 rejected) (00000001 invalid-offset)))
-         ((00011011 offset-seconds 86400) 0
-          (00100111 (00000001 accepted) (00100111 (00000001 timezone) name offset-seconds))))))))
+         ((00011011 offset-seconds 86400)
+          (00100111 (00000001 rejected) (00000001 invalid-offset)))
+         ((00000010 (00000001 ()))
+          (00100111
+            (00000001 accepted)
+            (00100111 (00000001 timezone) name offset-seconds))))
+      ((00000010 (00000001 ()))
+       (00100111 (00000001 rejected) (00000001 invalid-name)))))
+
 
 (00001001 timezone-name
   (00001000 (config)
