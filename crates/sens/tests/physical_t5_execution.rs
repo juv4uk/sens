@@ -43,8 +43,8 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
     let visible = parse_canonical_binary(&reference).expect("reference visualization");
     assert_eq!(physical.len(), visible.len());
     for (from_bytes, from_reference) in physical.iter().zip(visible.iter()) {
-        let left = sens::lower_program(&[from_bytes.clone()]);
-        let right = sens::lower_program(&[from_reference.clone()]);
+        let left = sens::lower_program(std::slice::from_ref(from_bytes));
+        let right = sens::lower_program(std::slice::from_ref(from_reference));
         assert_eq!(
             sens::expr_to_exact_program_data(&left[0]).unwrap(),
             sens::expr_to_exact_program_data(&right[0]).unwrap(),
