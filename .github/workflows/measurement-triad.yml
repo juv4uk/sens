@@ -58,12 +58,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y valgrind
+          cd "$RUNNER_TEMP"
           cargo install --locked --version 0.16.1 iai-callgrind-runner
       - name: Capture deterministic Callgrind lane
         shell: bash
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP"
+          cargo test --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml"
           cargo bench --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml" --bench instruction_lane | tee "$RUNNER_TEMP/sens-iai-callgrind.log"
           {
             echo "SHA=$GITHUB_SHA"
