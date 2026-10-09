@@ -28,6 +28,11 @@ def verify(report, inv, foundation):
     assert c["arity"] == 3 and len(c["witnesses"]) >= 7
     assert len(c["invariants"]) >= 4 and len(c["falsifiers"]) >= 3
     assert len(c["hold_related"]) >= 3 and c["independent_root_challenge"]
+    triage=json.loads((ROOT/"knowledge/d10-user-interests-semantics-triage-v1.json").read_text(encoding="utf-8"))
+    assert triage["schema"] == "d10-personal-interests-cross-domain-triage/v1"
+    assert len(triage["categories"]) == 15
+    assert triage["limits"]["source_only_no_new_selected"] is True
+    assert triage["limits"]["ratified_d10"] == 0
     assert report["admission"]["d10_count_delta"] == 0
     assert report["admission"]["coordinate_delta"] == 0
     assert report["admission"]["ratified_delta"] == 0
