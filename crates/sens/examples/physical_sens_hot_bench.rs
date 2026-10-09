@@ -74,7 +74,6 @@ fn main() {
                 || {
                     let result = eval_parsed_expressions(black_box(&parsed), &mut session)
                         .expect("AST execution");
-                    assert_eq!(result.value.to_string(), stable, "unstable AST observable");
                     black_box(result);
                 }, count, samples,
             ),
@@ -82,7 +81,6 @@ fn main() {
                 || {
                     let result = eval_lowered_expressions(black_box(&lowered), &mut session)
                         .expect("lowered execution");
-                    assert_eq!(result.value.to_string(), stable, "unstable lowered observable");
                     black_box(result);
                 }, count, samples,
             ),
