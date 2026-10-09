@@ -20,6 +20,7 @@ fresh classification.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import re
 import sys
@@ -31,6 +32,8 @@ METADATA_LISP = {
     Path("lib/generated/function-table.lisp"),
     Path("lib/surface/semantic-registry.lisp"),
     Path("lib/surface/semantic-registry-experiment.lisp"),
+    # D8 is an owner-ratified coordinate table, never executable call syntax.
+    Path("lib/domains/d8.lisp"),
 }
 
 ZERO8 = "00000000"
@@ -150,10 +153,29 @@ def route_evidence() -> tuple[bool, bool]:
         token.text == ZERO8 for token in call_heads(mechanism_tokens)
     )
 
+    # Contract 10's flat Function8 prose was superseded by owner-ratified
+    # Contract 11.8. Require the *current* separation law plus independently
+    # pinned domain identities; do not reinterpret the D8 zero coordinate as
+    # D3 empty, and do not grant it a callable machine mechanism.
+    foundation = json.loads(
+        (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+    )
+    domains = foundation["domains"]
+    d3 = domains["D3"]
+    d8 = domains["D8"]
+    current_laws = (
+        "(binary-domain-identity",
+        "(d3-foundation",
+        "(d8-ratified-status",
+        "(structural-empty-non-alias",
+    )
     contract_separates_ground = (
-        "function 00000000 is not the empty-list value" in contract.lower()
-        and "() is represented as a structural empty value outside the function space"
-        in contract.lower()
+        all(law in contract for law in current_laws)
+        and foundation["status"] == "owner-ratified"
+        and d3["width"] == 3
+        and d3["residents"]["000"] == "EMPTY"
+        and d8["width"] == 8
+        and d8["residents"].get(ZERO8) not in (None, "EMPTY", "NIL")
     )
 
     return zero_in_mechanism_rows, contract_separates_ground
@@ -178,7 +200,7 @@ def main() -> int:
     print(f"zero8_call_heads_nonmetadata\t{len(zero_heads)}\t{format_sites(zero_heads)}")
     print(f"zero8_tokens_nonmetadata\t{len(zero_tokens)}\t{format_sites(zero_tokens)}")
     print(f"zero8_in_mechanism_rows\t{int(zero_mechanism)}\tcurrent function mechanism metadata")
-    print(f"contract_ground_separated\t{int(separated)}\t() data is distinct from Function8 zero")
+    print(f"contract_ground_separated\t{int(separated)}\tD3 EMPTY is distinct from D8 zero")
 
     failures: list[str] = []
     if nil_heads:
@@ -188,7 +210,7 @@ def main() -> int:
             "current zero Function8 has mechanism metadata; H-NIL snapshot needs semantic reclassification"
         )
     if not separated:
-        failures.append("Contract 10 no longer explicitly separates () from Function8 zero")
+        failures.append("Contract 11.8 and the ratified D3/D8 identities do not prove distinct structural empty")
 
     if failures:
         for failure in failures:
