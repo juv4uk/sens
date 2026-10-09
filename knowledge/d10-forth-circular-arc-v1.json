@@ -1,0 +1,199 @@
+{
+  "schema": "d10-forth-circular-arc-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-ONLY-NOT-SELECTED",
+  "width": "D10",
+  "foundation": {
+    "d1_d9": "OWNER-RATIFIED",
+    "d10_selected_at_claim": 634,
+    "d10_ratified": 0
+  },
+  "source": [
+    {
+      "source_class": "PRIMARY-NORMATIVE-DONOR",
+      "reference": "Forth 2012 CORE EXT 6.2.2440 WITHIN",
+      "url": "https://forth-standard.org/standard/core/WITHIN",
+      "law_grade": "OFFICIAL-STANDARD",
+      "evidence": "lower<upper uses [lower,upper), lower>upper wraps via OR, lower==upper false; signed/unsigned cell semantics explicitly distinguished"
+    },
+    {
+      "source_class": "SOURCE-PINNED-EXECUTABLE-FORTH-DONOR",
+      "source": "ncw/ccforth@92b242f43cac97a4c527dd817706c500c52ed7a6:pkg/forth/core.fth:438",
+      "source_blob_sha": "b89b55747d329fa54726b2ba23895ec31470c13d",
+      "url": "https://github.com/ncw/ccforth/blob/92b242f43cac97a4c527dd817706c500c52ed7a6/pkg/forth/core.fth#L438",
+      "note": "Forth-defined WITHIN is exactly OVER - >R - R> U< on native cells, NOT an arbitrary-precision explicit-modulus operation"
+    },
+    {
+      "source_class": "SOURCE-PINNED-FORTH-CONFORMANCE",
+      "source": "ncw/ccforth@92b242f43cac97a4c527dd817706c500c52ed7a6:testdata/end-to-end/forth2012/core_ext.fth:256-263",
+      "source_blob_sha": "6c1fc1a2cdd96d177c69c7795f1a0f9f7286fb9c",
+      "url": "https://github.com/ncw/ccforth/blob/92b242f43cac97a4c527dd817706c500c52ed7a6/testdata/end-to-end/forth2012/core_ext.fth#L256-L263"
+    },
+    {
+      "source_class": "OWNER-DEVICE-MOTIVATION-NOT-EXECUTED-DONOR",
+      "source": "juv4uk/esp32-pendulum@72d6b73d762cf389bad0d663e3d135534f5cbb1e:components/physics/unwrap.c:3-10",
+      "source_blob_sha": "d4e96f8611bf1c7ffce3cf291adfecb3372be43f",
+      "url": "https://github.com/juv4uk/esp32-pendulum/blob/72d6b73d762cf389bad0d663e3d135534f5cbb1e/components/physics/unwrap.c#L3-L10",
+      "note": "TODO only; describes 0/4095 wrap failure and two-direction crossing; never assert an operational sensor or tested feature"
+    }
+  ],
+  "candidate": {
+    "semantic_name": "CIRCULAR-HALF-OPEN-CONTAINS",
+    "surface_uk": "в-циклічній-дузі?",
+    "surface_ukr": "належить-напіввідкритій-дузі?",
+    "argument_shape": "(test:int, start:int, end:int, modulus:int>=2) -> 1-bit yes/no",
+    "domain_precondition": "0<=test,start,end<modulus, all are exact integers, modulus>=2; invalid operands -> explicit domain error",
+    "semantic_law": "If start<end, return start<=test<end. If start>end, return test>=start OR test<end. If start==end, return NO, not whole ring. This is explicit-modulus, exact rational-free generalization of Forth WITHIN for canonical residues. It must not wrap invalid out-of-domain inputs silently.",
+    "positive_witnesses": [
+      {
+        "input": [
+          250,
+          240,
+          16,
+          256
+        ],
+        "result": 1,
+        "reason": "wraps 255→0; high segment"
+      },
+      {
+        "input": [
+          10,
+          240,
+          16,
+          256
+        ],
+        "result": 1,
+        "reason": "wraps 255→0; low segment"
+      },
+      {
+        "input": [
+          5,
+          0,
+          10,
+          256
+        ],
+        "result": 1,
+        "reason": "nonwrap half-open interval"
+      },
+      {
+        "input": [
+          4095,
+          4088,
+          8,
+          4096
+        ],
+        "result": 1,
+        "reason": "AS5600-like wrap source motivation, not device inference"
+      }
+    ],
+    "falsifiers": [
+      {
+        "input": [
+          16,
+          240,
+          16,
+          256
+        ],
+        "result": 0,
+        "why": "End exclusive"
+      },
+      {
+        "input": [
+          100,
+          240,
+          16,
+          256
+        ],
+        "result": 0,
+        "why": "Middle gap must be excluded"
+      },
+      {
+        "input": [
+          7,
+          7,
+          7,
+          256
+        ],
+        "result": 0,
+        "why": "Equal bounds are empty, not whole ring"
+      },
+      {
+        "input": [
+          10,
+          0,
+          10,
+          256
+        ],
+        "result": 0,
+        "why": "Upper boundary excluded"
+      },
+      {
+        "input": [
+          256,
+          240,
+          16,
+          256
+        ],
+        "result": "ERROR",
+        "why": "Out-of-domain input rejected rather than silently masked"
+      },
+      {
+        "input": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "result": "ERROR",
+        "why": "Modulus too small"
+      }
+    ],
+    "dedup": {
+      "name_scan": "NO-EXACT-IDENTIFIER-IN-D9-OR-D10-AT-CLAIM",
+      "behavioral_proof": "PENDING",
+      "d9_neighbors": [
+        "DIVMOD",
+        "WORLD-QUANTITY-OPERATIONS"
+      ],
+      "d10_neighbors": [
+        "MODULO",
+        "GRAY-ENCODE-WORD",
+        "GRAY-DECODE-WORD"
+      ],
+      "other_pending": [
+        "#4922 linear interval conflict",
+        "#4938 congruence merge",
+        "#4939 hysteresis",
+        "#4944/#4945 cyclic word identity"
+      ],
+      "question": "Is a circular interval membership a language independent Core root or derived pure arithmetic predicate using MODULO and comparisons? Forth cell-width behavior may belong to a distinct substrate/bitvector family.",
+      "core_status": "HOLD-CORE-VS-DERIVED-LIBRARY"
+    },
+    "authority": {
+      "selected": false,
+      "ratified": false,
+      "coordinate": null,
+      "physical_t5": false,
+      "fpga_opcode": false
+    },
+    "oracle_plan": {
+      "reference_python": "tests/test_d10_forth_circular_arc.py",
+      "actual_forth": "tests/oracles/d10-forth-within.fs",
+      "source_oracle": "gforth, Forth 2012 native machine-cell WITHIN",
+      "important_caveat": "Forth WITHIN runs in its native cell-width modular arithmetic; Python explicit-modulus generalization is NOT equivalent to interpreting gforth cell width as arbitrary b. Compare overlapping boundary cases only. Two independent lines of evidence; do not claim full cross-runtime parity."
+    }
+  },
+  "accounting": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0
+  },
+  "uses": [
+    "AS5600 absolute angle circular sector gates (sensor driver remains substrate)",
+    "astronomical angle/sky position sector membership",
+    "radio phase windows modulo coherent cycles",
+    "musical cyclic pitch class sectors",
+    "clock-phase modulo periods",
+    "FPGA index/ring buffer membership"
+  ]
+}

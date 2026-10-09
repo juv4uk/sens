@@ -1,0 +1,37 @@
+name: D10 Forth circular arc evidence
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-forth-circular-arc-v1.json
+      - docs/research/D10-FORTH-CIRCULAR-ARC.uk.md
+      - tests/test_d10_forth_circular_arc.py
+      - tests/oracles/d10-forth-within.fs
+      - .github/workflows/d10-forth-circular-arc.yml
+  push:
+    branches:
+      - main
+    paths:
+      - knowledge/d10-forth-circular-arc-v1.json
+      - tests/test_d10_forth_circular_arc.py
+      - tests/oracles/d10-forth-within.fs
+      - .github/workflows/d10-forth-circular-arc.yml
+
+permissions:
+  contents: read
+
+jobs:
+  independent-donor-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact finite ring exhaustive references
+        run: python3 -m unittest discover -s tests -p test_d10_forth_circular_arc.py -v
+      - name: Install real Forth 2012 donor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gforth
+          gforth --version
+      - name: Execute native-cell WITHIN donor cases
+        run: gforth tests/oracles/d10-forth-within.fs
