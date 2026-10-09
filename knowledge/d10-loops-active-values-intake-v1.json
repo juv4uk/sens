@@ -142,5 +142,20 @@
       "why_not_selected": "Derivability of class-default copy-on-first-write from existing DEFCLASS/SLOT-VALUE and explicit copy/alias algebra not yet proved."
     }
   ],
-  "evidence_limit": "A bounded executable Python reference model is a consistency witness of this reading of the manual, NOT an independent historical LOOPS implementation oracle. No runtime or T5 execution claim."
+  "evidence_limit": "A bounded executable Python reference model is a consistency witness of this reading of the manual, NOT an independent historical LOOPS implementation oracle. No runtime or T5 execution claim.",
+  "integration_replay": {
+    "parent": "research/d10-clos-three-roots-stacked-627-to-630-20261009",
+    "parent_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "replay_inventory_blob_sha": "bc1adf570bf3b9486735419d6b4f11f818bede93",
+    "previous_selected": 630,
+    "resulting_selected": 632,
+    "added_only": [
+      "d10.loops.1983.get",
+      "d10.loops.1983.put"
+    ],
+    "transition_history": "knowledge/d10-selection-transition-history.json",
+    "ratified_added": 0,
+    "assigned_coordinates": 0,
+    "note": "The historical 625→627 initial LOOPS experiment is preserved in baseline; this stacked replay appends the same two rows only after distinct DPB/ARRAY and CLOS tranches."
+  }
 }
