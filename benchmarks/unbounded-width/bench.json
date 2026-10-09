@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "unbounded-width",
+  "wing": "Exact-width carrier mechanisms",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Do dynamic exact-width carriers preserve bit identity and avoid a semantic width ceiling through the measured 4096-bit sample?",
+  "claim": "Bounded Cachegrind and exact-width identity evidence only; no production carrier selection, universal performance law, or D1-D10 ratification.",
+  "witness": [
+    "README.md",
+    "run.py",
+    "width_scale.c"
+  ],
+  "status": "HISTORICAL-RESEARCH-ONLY",
+  "generation": "historical source PR #2005 replayed 2026-10-09",
+  "axis": "carrier/dynamic-unbounded-width",
+  "reproduce": "python3 benchmarks/unbounded-width/run.py --smoke"
+}
