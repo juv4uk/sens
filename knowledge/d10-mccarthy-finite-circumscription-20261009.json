@@ -1,0 +1,186 @@
+{
+  "schema": "d10-mccarthy-finite-predicate-circumscription/v1",
+  "title": "Finite Boolean model preference by minimized predicate extension",
+  "date": "2026-10-09",
+  "proposed_semantic_name": "FINITE-PREDICATE-CIRCUMSCRIPTION",
+  "surface_uk": "обмежити-винятки",
+  "surface_ukr": "найменші-аномалії-моделей",
+  "status": "PENDING-REVIEW-UNSELECTED-UNRATIFIED",
+  "ratified": false,
+  "selected": false,
+  "coordinate": null,
+  "physical_t5_authorized": false,
+  "proposal_id": "D10P-0012",
+  "historical_origin": {
+    "author": "John McCarthy",
+    "paper": "Circumscription—A Form of Non-Monotonic Reasoning",
+    "year": 1980,
+    "doi": "10.1016/0004-3702(80)90011-9",
+    "primary_url": "https://www.sciencedirect.com/science/article/pii/0004370280900119",
+    "formal_reference": "https://plato.stanford.edu/entries/reasoning-defeasible/#Cir",
+    "modern_exposition": "https://plato.stanford.edu/entries/logic-nonmonotonic/",
+    "note": "A finite propositional model-order fragment of circumscription, NOT an implementation of second-order predicate circumscription or original McCarthy's entire AI system."
+  },
+  "snapshot": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob_at_review": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "d10_selected_at_review": 635,
+    "d10_ratified_at_review": 0,
+    "main_at_branch": "9e79f08935dd9d92c23047a4b2b89b10a76ea32f"
+  },
+  "semantics": {
+    "input": "width n (1..8), distinct satisfying Boolean assignments of a previously evaluated theory (bit masks 0..2^n-1), designated minimized predicate mask M and fixed predicate mask F; M & F=0",
+    "output": "ordered finite set of exactly all preferred entire satisfying assignments (numeric ascending), or explicit NO-MODELS when input has no satisfying assignments",
+    "dominance": "u strictly dominates v iff (u & F)=(v & F), ((u & M) & (v & M))=(u & M), and (u & M)!=(v & M). Positions outside M|F are variable without affecting comparison.",
+    "inclusion": "keep v iff no other satisfying u strictly dominates it",
+    "boundary": "Minimize set inclusion of true minimized atoms, NOT numeric value, number of true bits, edit distance, confidence or arbitrary heuristic rank.",
+    "absence": "0 satisfying models means NO-MODELS, and must not be misreported as a true skeptical proposition by vacuous universal quantification.",
+    "epistemic": "Output is a defeasible model preference, not an OBSERVATION, mathematical certainty about the physical world, or destructive update of D9 truth maintenance.",
+    "scope": "Ground propositional finite and explicit-model input; no first-order quantifier elimination, hidden open-world completion, or default rule engine."
+  },
+  "examples": [
+    {
+      "label": "incomparable abnormalities",
+      "width": 2,
+      "models": [
+        1,
+        2,
+        3
+      ],
+      "minimize_mask": 3,
+      "fixed_mask": 0,
+      "want": [
+        1,
+        2
+      ],
+      "why": "1 and 2 are distinct incomparable minimal exceptions; 3 contains both and is dominated"
+    },
+    {
+      "label": "cardinality is not subset minimality",
+      "width": 3,
+      "models": [
+        3,
+        4
+      ],
+      "minimize_mask": 7,
+      "fixed_mask": 0,
+      "want": [
+        3,
+        4
+      ],
+      "why": "3 has two bits and 4 one bit yet neither abnormality set is subset of the other"
+    },
+    {
+      "label": "fixed world signatures remain distinct",
+      "width": 3,
+      "models": [
+        0,
+        5
+      ],
+      "minimize_mask": 1,
+      "fixed_mask": 4,
+      "want": [
+        0,
+        5
+      ],
+      "why": "fixed bit 2 differs, so the two worlds must never dominate each other"
+    },
+    {
+      "label": "variable (nonminimized) predicates do not suppress alternatives",
+      "width": 3,
+      "models": [
+        0,
+        2,
+        3
+      ],
+      "minimize_mask": 1,
+      "fixed_mask": 0,
+      "want": [
+        0,
+        2
+      ],
+      "why": "0 and 2 have same minimal abnormality, both survive; 3 has abnormal bit and is dominated"
+    },
+    {
+      "label": "contradiction explicit",
+      "width": 2,
+      "models": [],
+      "minimize_mask": 1,
+      "fixed_mask": 0,
+      "want": [],
+      "status": "NO-MODELS",
+      "why": "inconsistent theory has no world; not a proof of every proposition"
+    },
+    {
+      "label": "nonmonotonic update example",
+      "width": 2,
+      "models": [
+        0,
+        1
+      ],
+      "minimize_mask": 1,
+      "fixed_mask": 0,
+      "want": [
+        0
+      ],
+      "why": "later hard evidence that bit0 is true leaves only model 1 and withdraws prior default that bit0 was absent"
+    }
+  ],
+  "nearby_existing": {
+    "D9": [
+      "UNIFY",
+      "PROVE-GOALS",
+      "REASON",
+      "ASSERT-FACT-TMS!",
+      "RETRACT-FACT-TMS!",
+      "PROVENANCE"
+    ],
+    "selected_D10": [
+      "PROVE-RULE",
+      "PROVE-GOAL-STATE",
+      "MAP-GOAL-RESULTS",
+      "COUNT-USAGE",
+      "MERGE-USAGE"
+    ],
+    "parallel_holds": [
+      "#4958 Allen ATMS support",
+      " #4965 abductive minimal explanations",
+      "#4971 Plotkin LGG",
+      "#4974 Dung grounded argumentation",
+      "#4963 finite Bayes update"
+    ],
+    "behavioral_distinction": "JTMS/ATMS justify or retract facts under specific assumptions; abductive reasoning seeks explaining hypotheses; Bayes ranks weighted hypotheses; circumscription prefers models by subset order of designated minimized predicates with FIXED/VARYING boundary and returns all incomparable preferred models."
+  },
+  "crossdomain": [
+    {
+      "interest": "Advice Taker / symbolic AI",
+      "mapping": "Prefer knowledge worlds with the smallest extension of explicitly designated abnormality atoms."
+    },
+    {
+      "interest": "radio SDR / electronics / FPGA",
+      "mapping": "Hypothesis diagnosis: minimize failed-component atoms while conditioning on fixed measurements; not a driver or assertion of physical diagnosis."
+    },
+    {
+      "interest": "astronomy / astrophotography",
+      "mapping": "Model anomalous sensor or sky-observation assumptions while preserving multiple incomparable explanations; no astrophysical empirical claim."
+    },
+    {
+      "interest": "Sanskrit Panini",
+      "mapping": "Grammar exception hypotheses can be treated as minimized exception atoms, but linguistic derivations themselves remain separate and unvalidated."
+    }
+  ],
+  "review": {
+    "new_core_function_not_proven": true,
+    "expressibility_as_library_open": true,
+    "independent_external_solver_not_run": true,
+    "owner_required": true,
+    "blocked_source": "NOT-A-MIGRATION-BLOCK",
+    "does_not_modify": [
+      "D1–D9",
+      "D2",
+      "D10 selected inventory",
+      "binary file encoding",
+      "FPGA/GPU substrate"
+    ]
+  }
+}
