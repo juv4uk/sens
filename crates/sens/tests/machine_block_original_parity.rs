@@ -181,6 +181,7 @@ fn physical_t5_executes_empty_and_blocks_unencoded_quoted_symbols() {
     assert_eq!(original_manifest["summary"]["files_written"], 1);
     assert_eq!(original_manifest["summary"]["files_blocked"], 0);
     assert_eq!(original_manifest["files"][0]["path"], ORIGINAL);
+    assert_eq!(original_manifest["files"][0]["source_blob_sha"], GIT_BLOB);
     let original_blob = Command::new("git")
         .args(["hash-object", "--"])
         .arg(original_input.join(ORIGINAL))
@@ -203,11 +204,11 @@ fn physical_t5_executes_empty_and_blocks_unencoded_quoted_symbols() {
     // actually express: a zero-argument global call whose Text7 target is
     // resolved from the six preceding physical DEFINE forms.
     let mut probe_bytes = source_bytes.clone();
-    if !probe_bytes.ends_with(b"\\n") {
-        probe_bytes.push(b'\\n');
+    if !probe_bytes.ends_with(b"\n") {
+        probe_bytes.push(b'\n');
     }
     probe_bytes.extend_from_slice(cases[0].1.as_bytes());
-    probe_bytes.push(b'\\n');
+    probe_bytes.push(b'\n');
     fs::write(probe_input.join(ORIGINAL), &probe_bytes)
         .expect("write external empty-call probe source");
     let probe_migration = Command::new("python3")
@@ -283,12 +284,12 @@ fn physical_t5_executes_empty_and_blocks_unencoded_quoted_symbols() {
     fs::create_dir_all(blocked_input.join("lib/machine"))
         .expect("create external blocked-data source root");
     let mut blocked_bytes = source_bytes.clone();
-    if !blocked_bytes.ends_with(b"\\n") {
-        blocked_bytes.push(b'\\n');
+    if !blocked_bytes.ends_with(b"\n") {
+        blocked_bytes.push(b'\n');
     }
     for (_, expression) in &cases[1..] {
         blocked_bytes.extend_from_slice(expression.as_bytes());
-        blocked_bytes.push(b'\\n');
+        blocked_bytes.push(b'\n');
     }
     fs::write(blocked_input.join(ORIGINAL), &blocked_bytes)
         .expect("write external symbol-data probe");
