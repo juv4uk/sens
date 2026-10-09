@@ -143,8 +143,17 @@ def selection_trace_errors(content: str, inventory: dict, baseline: dict, histor
         errors.append(f"виявлено {len(rows)-prior} неврахованих selection-рядків у D10")
     for ent in ledger:
         name = ent["semantic_name"].strip().upper()
-        if ent["blocked_source"] == "NOT-A-MIGRATION-BLOCK" and name not in selected_now:
-            errors.append(f"{name}: маркер без реального selection-запису; pending donor мусить мати source")
+        if name not in selected_now:
+            # PROPOSE precedes SELECT. A documented, source-pinned research
+            # donor needs NO invented migration BLOCK; remain pending and
+            # never auto-admit a new semantic identity.
+            if ent["blocked_source"] == "NOT-A-MIGRATION-BLOCK":
+                if not PROVENANCE.fullmatch(ent.get("donor_provenance", "")):
+                    errors.append(f"{name}: unselected donor lacks pinned source")
+                if ent.get("status") != "pending-review" or ent.get("ratified") != "0":
+                    errors.append(f"{name}: unselected donor cannot ratify itself")
+            elif not PROVENANCE.fullmatch(ent.get("blocked_source", "")):
+                errors.append(f"{name}: missing real migration BLOCK provenance")
     return errors
 
 
