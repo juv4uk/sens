@@ -68,10 +68,9 @@
   (00001000 (x y)
     (00000111
       ((00000010 (00000100 x y))
-       (0)
-       (canon-law-satisfied (00000001 atom-cons)))
-      ((00000001 canon-fallback) canon-fallback
-       (canon-law-violated (00000001 atom-cons))))))
+       (canon-law-violated (00000001 atom-cons)))
+      (t
+       (canon-law-satisfied (00000001 atom-cons))))))
 
 (00001001 canon-law-car-cons
   (00001000 (x y)
@@ -94,19 +93,13 @@
 (00001001 canon-law-eq-reflexive-atom
   (00001000 (x)
     (00000111
-      ((00000010 x) (1)
+      ((00000010 x)
        (00000111
          ((00000011 x x) (1)
           (canon-law-satisfied (00000001 eq-reflexive-atom)))
-         ((00000001 canon-fallback) canon-fallback
+         (t
           (canon-law-violated (00000001 eq-reflexive-atom)))))
-      ((00000010 x) ()
-       (00000111
-         ((00000011 x x) (1)
-          (canon-law-satisfied (00000001 eq-reflexive-atom)))
-         ((00000001 canon-fallback) canon-fallback
-          (canon-law-violated (00000001 eq-reflexive-atom)))))
-      ((00000001 canon-fallback) canon-fallback
+      (t
        (canon-law-violated (00000001 eq-reflexive-atom))))))
 
 ; `решта` must be a pair projection, not a human-language "second element".
@@ -133,13 +126,12 @@
           (1)
           (00000111
             ((00000010 (00000110 (00000110 (00000110 (00000001 (1 2 3))))))
-             ()
              (canon-law-satisfied (00000001 cdr-proper)))
-            ((00000001 canon-fallback) canon-fallback
+            (t
              (canon-law-violated (00000001 cdr-proper)))))
-         ((00000001 canon-fallback) canon-fallback
+         (t
           (canon-law-violated (00000001 cdr-proper)))))
-      ((00000001 canon-fallback) canon-fallback
+      (t
        (canon-law-violated (00000001 cdr-proper))))))
 
 ; EQ is atom-only, so the improper tail is checked through atom projections.
@@ -191,15 +183,17 @@
     (00000111
       ((00000011
          (00000111
-           ((00000010 'атом) (1)
+           ((00000010 'атом)
             (00000111
               ((00000011 (00000101 (00000100 'ліве 'праве)) 'ліве)
                (1)
-               (00000110 (00000100 'ліве 'праве))))))
+               (00000110 (00000100 'ліве 'праве)))
+              (t
+               (canon-law-violated (00000001 symbolic-surface))))))
          (00000001 праве))
        (1)
        (canon-law-satisfied (00000001 symbolic-surface)))
-      ((00000001 canon-fallback) canon-fallback
+      (t
        (canon-law-violated (00000001 symbolic-surface))))))
 
 ; Aggregate explicit law records recursively. The empty list terminates the
