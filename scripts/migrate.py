@@ -23,7 +23,7 @@ def command(args: argparse.Namespace) -> list[str]:
                 "--out", str(args.report)]
     if args.action == "preview":
         return [sys.executable, str(SCRIPTS / "migrate-t5-batch.py"),
-                *args.paths, "--root", str(ROOT), "--out", str(args.mirror),
+                *args.paths, "--decision-table", "l1-l7", "--root", str(ROOT), "--out", str(args.mirror),
                 "--report", str(args.report), "--source-era", args.source_era]
     if args.action == "view":
         # Reuse canonical physical T5 decoder; no second implementation.
