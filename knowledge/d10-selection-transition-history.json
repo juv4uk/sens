@@ -175,6 +175,36 @@
         "tests/test_d10_finite_bayes_selection.py",
         "tests/test_d10_finite_bayes_update.py"
       ]
+    },
+    {
+      "id": "d10.hobby.gf2.minimal-recurrence.after-bayes.20261009",
+      "authority": "#4013 #4463 owner-directed hobby-based D10 research filling",
+      "evidence": [
+        "#4950",
+        "#4952",
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+        "SageMath LFSR and Berlekamp–Massey manuals"
+      ],
+      "previous_inventory_blob_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+      "resulting_inventory_blob_sha": "292ef3086114ad0dfe71776c831c2a31b39352a8",
+      "added_stable_ids": [
+        "d10.fpga.gf2.minimum-recurrence.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 635,
+      "resulting_selected": 636,
+      "decision": "research selection only; Core-vs-library derivability pending owner review; coordinate=null and ratification pending",
+      "tests": [
+        "scripts/check_d10_gf2_minimal_recurrence.py",
+        "tests/d10_gf2_minimal_recurrence_r6rs.ss",
+        "scripts/check_d10_gf2_selection_transition.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }
