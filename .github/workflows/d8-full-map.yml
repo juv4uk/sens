@@ -1,0 +1,50 @@
+name: D8 admitted-cells and candidates guard
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/d7-full-map.json"
+      - "knowledge/d8-historical-full-map.json"
+      - "scripts/build-d8-historical-full-map.py"
+      - "scripts/check-d8-full-map.py"
+      - "scripts/research-2322-generative-domain-forecast.py"
+      - ".github/workflows/d8-full-map.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d6-historical-full-map.json"
+      - "knowledge/d7-full-map.json"
+      - "knowledge/d8-historical-full-map.json"
+      - "scripts/build-d8-historical-full-map.py"
+      - "scripts/check-d8-full-map.py"
+      - "scripts/research-2322-generative-domain-forecast.py"
+      - ".github/workflows/d8-full-map.yml"
+
+jobs:
+  historical-map:
+    name: D8 admission constitution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify the committed D8 map
+        run: python3 scripts/check-d8-full-map.py
+      - name: Prove the committed map is reproducible from the builder
+        run: |
+          python3 scripts/build-d8-historical-full-map.py
+          git diff --exit-code -- knowledge/d8-historical-full-map.json
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## D8 admitted cells and attested candidates"
+            echo
+            echo "- D8: capacity 256; admitted 64; attested-not-admitted 192"
+            echo "- Blanket occupancy is NOT claimed; the guard fails if unallocated=0 returns"
+            echo "- All 64 admitted coordinates come from the admitted D3 CAR/CDR selector law"
+            echo "- The 192 candidates keep provenance as witness material but are not identities"
+            echo "- D8 is an exact 8-bit Core domain, NOT a legacy Sens8 byte table"
+            echo "- Lineage: 4 children per D6 coordinate; the D7 rung is crossed by documented fact"
+            echo "- Progress metric: independent admitted laws, NOT occupancy out of 256"
+            echo "- Residency and semantic derivability remain separate axes"
+          } >> "$GITHUB_STEP_SUMMARY"
