@@ -128,6 +128,132 @@ pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
     DomainOwnerCoordinate { width: 6, bits: 0b111101, source: 2 },
     DomainOwnerCoordinate { width: 6, bits: 0b111110, source: 2 },
     DomainOwnerCoordinate { width: 6, bits: 0b111111, source: 2 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0000111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0001111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0010111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0011111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0100111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0101111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0110111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b0111111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1000111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1001111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1010111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1011111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1100111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1101111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1110111, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111000, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111001, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111010, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111011, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111100, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111101, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111110, source: 3 },
+    DomainOwnerCoordinate { width: 7, bits: 0b1111111, source: 3 },
 ];
 
 #[cfg(test)]
@@ -136,16 +262,27 @@ mod tests {
 
     #[test]
     fn generated_projection_has_owner_counts_and_controls() {
-        assert_eq!(DOMAIN_OWNER_COORDINATES.len(), 117);
+        assert_eq!(DOMAIN_OWNER_COORDINATES.len(), 243);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 3).count(), 7);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 4).count(), 14);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 5).count(), 32);
         assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 6).count(), 64);
+        assert_eq!(DOMAIN_OWNER_COORDINATES.iter().filter(|row| row.width == 7).count(), 126);
 
         for (width, bits) in [(4, 0b1100), (5, 0b01010), (6, 0b001111)] {
             assert!(DOMAIN_OWNER_COORDINATES
                 .iter()
                 .any(|row| row.width == width && row.bits == bits));
+        }
+    }
+
+    #[test]
+    fn generated_d7_occupancy_excludes_two_pinned_reservations() {
+        for word in 0..128u8 {
+            let admitted = DOMAIN_OWNER_COORDINATES
+                .iter()
+                .any(|row| row.width == 7 && row.bits == word);
+            assert_eq!(admitted, word != 0b0100001 && word != 0b0101010);
         }
     }
 
