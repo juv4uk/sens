@@ -20,6 +20,16 @@ files=(
   crates/sens/src/value.rs
 )
 
+# A scan that silently skips a missing file is not a successful guard.
+# Validate every explicit input before running grep; report_forbidden below
+# also distinguishes "no matches" (grep exit 1) from an actual scan error.
+for path in "${files[@]}" contracts/primitive-budget-audit-734.lisp; do
+  if [[ ! -f "$path" ]]; then
+    printf 'SID-BINARY-IDENTITY guard: ERROR required file missing: %s\n' "$path" >&2
+    exit 2
+  fi
+done
+
 fail=0
 
 report_forbidden() {
@@ -27,10 +37,18 @@ report_forbidden() {
   local pattern="$2"
   shift 2
   local output
-  output="$(grep -En "$pattern" "$@" || true)"
-  if [[ -n "$output" ]]; then
+  local grep_status
+
+  if output="$(grep -En "$pattern" "$@")"; then
     printf 'SID-BINARY-IDENTITY violation: %s\n%s\n' "$description" "$output" >&2
     fail=1
+  else
+    grep_status=$?
+    if (( grep_status != 1 )); then
+      printf 'SID-BINARY-IDENTITY guard: ERROR scan failed (grep exit %s): %s\n' \
+        "$grep_status" "$description" >&2
+      fail=1
+    fi
   fi
 }
 
@@ -49,12 +67,19 @@ report_forbidden \
   '(Value|ExprKind)::Sid\((0b[01_]+|[0-9]+|"[^"]*")\)' \
   "${files[@]}"
 
-direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/sens/src \
-  --exclude=sid.rs --exclude=sens.rs || true)"
-if [[ -n "$direct_sid8" ]]; then
+direct_sid8=''
+if direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/sens/src \
+  --exclude=sid.rs --exclude=sens.rs)"; then
   printf 'SID-BINARY-IDENTITY violation: direct Sid8/Sens8 constructor outside sid.rs/sens.rs\n%s\n' \
     "$direct_sid8" >&2
   fail=1
+else
+  grep_status=$?
+  if (( grep_status != 1 )); then
+    printf 'SID-BINARY-IDENTITY guard: ERROR recursive source scan failed (grep exit %s)\n' \
+      "$grep_status" >&2
+    fail=1
+  fi
 fi
 
 report_forbidden \
