@@ -70,6 +70,16 @@ class D10FlavorsRestartsResearch(unittest.TestCase):
         self.assertIn("without invoking methods", row["semantic_law"])
         self.assertIn("missing-primary failure", row["falsifier"])
 
+    def test_all_eight_rows_remain_unratified_and_outside_physical_admission(self):
+        self.assertEqual(len(self.ledger["rows"]), 8)
+        for row in self.ledger["rows"]:
+            with self.subTest(proposal_id=row["proposal_id"]):
+                self.assertFalse(row["ratified_resident"])
+                self.assertIsNone(row["coordinate"])
+                self.assertFalse(row["physical_t5_authorized"])
+        self.assertEqual(self.ledger["snapshot"]["selected_main_at_authoring"], 625)
+        self.assertEqual(self.ledger["snapshot"]["existing_semantic_inventory_mutated"], False)
+
     def test_invented_coordinate_or_physical_admission_blocks(self):
         for edit in (
             {"coordinate": "0000000000"},
