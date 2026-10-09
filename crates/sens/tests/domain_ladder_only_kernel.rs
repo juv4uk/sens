@@ -71,3 +71,13 @@ fn flat_sid8_cannot_choose_a_rung_or_call_a_domain_mechanism() {
         "surface projection must originate only in the Lisp-generated domain ladder"
     );
 }
+
+const REGISTRY: &str = include_str!("../src/semantic_registry.rs");
+
+#[test]
+fn legacy_d5_byte_cannot_mint_a_domain_law() {
+    // Rust перевіряє лише походження проєкції, а не власноруч описує закон D5.
+    assert!(!REGISTRY.contains("match byte {"));
+    assert!(REGISTRY.contains("find_map(|surface| d5_binding_identity_for_definition(surface.name))"));
+    assert!(REGISTRY.contains("D5_DEFINITION_BINDINGS"));
+}
