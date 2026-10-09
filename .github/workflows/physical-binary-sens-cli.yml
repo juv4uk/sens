@@ -72,7 +72,18 @@ jobs:
               exit 1
             fi
             test ! -s "$RUNNER_TEMP/sens-binary/${invalid}.stdout"
-            grep -q 'physical T5/D2 rejected' "$RUNNER_TEMP/sens-binary/${invalid}.stderr"
+            case "$invalid" in
+              illegal-base3)
+                grep -q 'physical T5 transport rejected' "$RUNNER_TEMP/sens-binary/${invalid}.stderr"
+                ;;
+              stray-close)
+                grep -q 'exact packed binary reader rejected' "$RUNNER_TEMP/sens-binary/${invalid}.stderr"
+                ;;
+              *)
+                echo "ERROR: unclassified negative fixture: $invalid" >&2
+                exit 1
+                ;;
+            esac
           done
 
       - name: Human Lisp text can never impersonate physical .sens
