@@ -1109,13 +1109,23 @@ def main():
         dest = sens_destination(rel)
         target = args.out / dest
         resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8)
+        source = ""
+        source_blob_sha = None
+        source_sha256 = None
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")
             seen_destinations.add(dest)
             if target.exists() or target.is_symlink():
                 raise SensT5Error(f"target already exists; not overwriting {dest}")
-            source = path.read_text(encoding="utf-8")
+            # Hash exact source bytes using Git object framing; never hash
+            # text after newline normalization.
+            source_bytes = path.read_bytes()
+            source_blob_sha = hashlib.sha1(
+                b"blob " + str(len(source_bytes)).encode("ascii") + b"\0" + source_bytes
+            ).hexdigest()
+            source_sha256 = hashlib.sha256(source_bytes).hexdigest()
+            source = source_bytes.decode("utf-8")
             signal.signal(signal.SIGALRM, _timeout_handler)
             signal.alarm(5)
             try:
@@ -1135,6 +1145,8 @@ def main():
             status = "would-write" if args.dry_run else "written"
             row = {
                 "path": str(rel), "output": str(dest), "status": status,
+                "source_blob_sha": source_blob_sha,
+                "source_sha256": source_sha256,
                 "bytes": len(payload), "semantic_word_count": len(words),
                 "semantic_bits": sum(len(word) for word in words),
                 "transport_trits": sum(len(word) for word in words) + len(words) - 1,
@@ -1149,6 +1161,8 @@ def main():
             row = {
                 "path": str(rel), "output": str(dest),
                 "status": "blocked", "reason": getattr(error, "message", str(error)),
+                "source_blob_sha": source_blob_sha,
+                "source_sha256": source_sha256,
                 "passes": resolver.counts,
             }
             token = getattr(error, "tok", None)
