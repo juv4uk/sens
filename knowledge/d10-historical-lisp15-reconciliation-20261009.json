@@ -1159,23 +1159,34 @@
         "OBARRAY"
       ],
       "primary_or_historical_source": "MacLisp Reference Manual, 17 Dec 1975, §5.4 pp. 2-53–2-54 (interning/multiple obarrays) and §9 mapping functions p. 2-95 (MAPATOMS); https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
-      "original_research_classification": "NEW-SOURCE-GROUNDED-REVIEW-LEAD",
-      "source_behavior_summary": "MAPATOMS applies a callback to each symbol in a supplied/current obarray without requiring client code to know the hash-bucket representation. The manual describes multiple obarrays, identical print-names on distinct symbols in different obarrays, and uninterned symbols.",
-      "former_lower_domain_relation": "No exact MAPATOMS or OBLIST name found in current D1-D9. D10 already has INTERN and REMOB, but enumeration over the chosen intern table is not proven derivable merely by those operations.",
-      "law_hypothesis": "Enumerate symbols registered in one specified/current symbol table independently of that table's internal layout. Do not promise iteration order until the donor specifies it; do not include uninterned symbols merely because their print-name matches.",
+      "original_research_classification": "EXACT-D10-MAPATOMS-DUPLICATE-PLUS-OBARRAY-HOLD",
+      "source_behavior_summary": "The selected D10 inventory already contains MAPATOMS with the same MacLisp p. 2-95 law: apply a function to every symbol in a selected/current intern table without exposing its bucket representation. The remaining historical question is whether MacLisp's multi-obarray state and same-print-name/non-EQ symbols in different tables require a separate portable language-visible law.",
+      "former_lower_domain_relation": "MAPATOMS is already selected in D10 (#4042, MacLisp Reference Manual, printed p. 2-95); INTERN, REMOB, COPYSYMBOL and NEW-SYMBOL are also selected. Only OBLIST/OBARRAY as multiple independent table identities or current-table state remains an exact-name-absent hypothesis. Name absence alone does not make it a D10 resident.",
+      "law_hypothesis": "HOLD: determine whether independently addressable symbol tables have observable identity/isolation semantics not expressible by current INTERN/REMOB/MAPATOMS/COPYSYMBOL/NEW-SYMBOL composition. Do not propose MAPATOMS again. Avoid promising iteration order until a donor requires it; a same-print-name symbol in another obarray must not be assumed EQ.",
       "exact_d1_d9_name_matches": [],
-      "exact_selected_d10_name_matches": [],
-      "exact_name_residuals": [
-        "MAPATOMS",
-        "OBARRAY"
+      "exact_selected_d10_name_matches": [
+        {
+          "name": "MAPATOMS",
+          "behavior": "apply a function to every symbol in a selected/current intern table without exposing the table's bucket representation",
+          "provenance": [
+            "#4042",
+            "MacLisp Reference Manual, 17 Dec 1975",
+            "2-95"
+          ]
+        }
       ],
-      "current_disposition": "HOLD-UNIVERSAL-CORE-BOUNDARY-AND-BEHAVIORAL-DEDUP",
+      "exact_name_residuals": [
+        "OBARRAY",
+        "OBLIST"
+      ],
+      "current_disposition": "HOLD-OBARRAY-MULTI-TABLE-IDENTITY-AND-ISOLATION-ONLY",
       "oracle_witnesses": [
-        "Positive A: intern a fresh symbol into table A; a table-A enumeration observes that same symbol exactly once.",
-        "Positive B: a symbol can be interned in distinct tables; a same-print-name but non-EQ symbol in table B is not silently conflated with the table-A symbol.",
-        "Falsifier: an uninterned symbol is emitted by table-A enumeration, or semantics depend on exposing the historical hash-bucket layout."
+        "Positive A: the same symbol can be interned in tables A and B, and its identity/lookup behavior remains explicitly specified for both.",
+        "Positive B: two non-EQ symbols with identical print-names may coexist in separate obarrays and do not silently collapse by name across tables.",
+        "Falsifier: every proposed table operation is definable as composition of selected INTERN/REMOB/MAPATOMS/COPYSYMBOL/NEW-SYMBOL without losing any specified observable outcome, or table identity is only hidden host data."
       ],
       "dedup_targets": [
+        "D10 MAPATOMS (already selected; no duplicate row)",
         "D10 INTERN",
         "D10 REMOB",
         "D10 COPYSYMBOL",
