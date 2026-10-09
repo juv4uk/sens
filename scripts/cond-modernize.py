@@ -9,7 +9,8 @@ rewrite однаково видаляв expected (1) та (0), підмінюю�
 завжди завершується BLOCK (код 4) без запису байтів. Для AST-класифікації
 використовуйте #3170 / PR #3182; канонічний .sens admission іде через
 scripts/migrate.py тільки після окремих оракулів і CI.
-"""import sys, re, pathlib, argparse
+"""
+import sys, re, pathlib, argparse
 
 EQ    = "00000011"   # sens8 EQ
 ATOM  = "00000010"   # sens8 ATOM
