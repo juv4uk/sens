@@ -1,0 +1,186 @@
+{
+  "schema": "d10-cross-hobby-exact-interval-conflict/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "source": {
+    "standard": "IEEE 1788-2015 interval arithmetic",
+    "url": "https://standards.ieee.org/ieee/1788/4431/",
+    "library": "Boost Interval Arithmetic library: intersect, empty and overlap, no closed-union as interval",
+    "library_url": "https://live.boost.org/doc/libs/1_68_0/libs/numeric/interval/doc/interval.htm",
+    "derivation_boundary": "Ordering of UNSAT pair witnesses and source labels is our explicit higher-level research law, not a claim that IEEE or Boost specifies it."
+  },
+  "owner_inspiration": [
+    "juv4uk/esp32-pendulum: exact rational physical observations",
+    "juv4uk/spanda: analog measurement -> exact SENS rational",
+    "astronomy: independent observations with bounded uncertainty",
+    "horology and music: intervals for period/frequency ratios",
+    "Panini, Prolog, Advice Taker: provenance-carrying consistency or contradiction"
+  ],
+  "authority": [
+    "#4013",
+    "#4182",
+    "#4463",
+    "#225"
+  ],
+  "snapshot": {
+    "inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "selected": 630,
+    "ratified": 0
+  },
+  "candidate": {
+    "semantic_name": "EXACT-INTERVAL-CONFLICT-WITNESS",
+    "stable_proposal_id": "D10-INT-CERT-20261009",
+    "surface_uk": "ідпс",
+    "surface_ukr": "інтервальні-докази-перетину-суперечності",
+    "coordinate": null,
+    "ratified": false,
+    "selected": false,
+    "proposal_status": "pending-owner-review",
+    "domain_width": 10,
+    "source_class": "EXACT-RATIONAL-INTERVAL-CONSTRAINT",
+    "arity": "one nonempty ordered finite list of uniquely labelled closed rational intervals",
+    "arguments": "[(opaque source-identity, exact lower rational, exact upper rational)] where lower<=upper; no float; labels pairwise distinct",
+    "result": "SAT: exact [L,U] plus first-attaining lower and upper source identities; OR UNSAT: lexicographically earliest pair of source indices (i,j), i<j, whose closed intervals are disjoint, plus exact ordered bound values and source identities demonstrating lower>upper",
+    "law": "Let L=max(all lo), U=min(all hi). When L<=U, return SAT with [L,U]; on equal extrema select the first input index for each boundary witness. When L>U, find lexicographically least (i,j), i<j, with hi_i<lo_j or hi_j<lo_i; return UNSAT and two original source indices, with lower-bound value strictly greater than upper-bound value. Empty input and invalid/imprecise rationals reject. Endpoint touching counts SAT singleton, never UNSAT.",
+    "positive_witnesses": [
+      {
+        "case": "overlap",
+        "entries": [
+          [
+            "a",
+            "0",
+            "4"
+          ],
+          [
+            "b",
+            "2",
+            "6"
+          ]
+        ],
+        "expected": "SAT [2,4], lower from b upper from a"
+      },
+      {
+        "case": "touch",
+        "entries": [
+          [
+            "a",
+            "0",
+            "2"
+          ],
+          [
+            "b",
+            "2",
+            "4"
+          ]
+        ],
+        "expected": "SAT [2,2] singleton"
+      },
+      {
+        "case": "simple conflict",
+        "entries": [
+          [
+            "a",
+            "0",
+            "1"
+          ],
+          [
+            "b",
+            "2",
+            "3"
+          ]
+        ],
+        "expected": "UNSAT earliest pair a,b, lower=2 upper=1"
+      },
+      {
+        "case": "source tie",
+        "entries": [
+          [
+            "a",
+            "1",
+            "3"
+          ],
+          [
+            "b",
+            "1",
+            "3"
+          ]
+        ],
+        "expected": "SAT [1,3] witness a on both extrema"
+      },
+      {
+        "case": "earliest pair vs maxima",
+        "entries": [
+          [
+            "a",
+            "0",
+            "4"
+          ],
+          [
+            "b",
+            "5",
+            "9"
+          ],
+          [
+            "c",
+            "-100",
+            "100"
+          ],
+          [
+            "d",
+            "20",
+            "30"
+          ]
+        ],
+        "expected": "UNSAT earliest pair a,b despite later stronger extremes"
+      }
+    ],
+    "falsifiers": [
+      "Touching [0,2] and [2,3] wrongly declared UNSAT",
+      "Collapsing [0,1] and [2,3] into a nonempty hull [0,3] rather than contradiction",
+      "Returning extremal conflicting pair (b,d) instead of earliest (a,b) when both exist",
+      "Returning only Boolean false without two source IDs and strict exact inequality witness",
+      "Using floats or accepting lo>hi, duplicate labels, empty constraint sets"
+    ],
+    "neighbors": [
+      "D6 INTERSECTION",
+      "D8 RATIONAL",
+      "D8 RATIONALIZE",
+      "D10 JTMS-STATE-SUBST",
+      "D10 PROVE-RULE",
+      "D10 PROVE-GOAL-STATE"
+    ],
+    "difference_from_D6": "D6 INTERSECTION is general set intersection; this proposal's total observable contract additionally supplies canonical exact two-source minimal inconsistency certificate and deterministic stable source attribution on tight SAT bounds. Could still be a derived library procedure; owner selection required.",
+    "expressibility_gap": "Deterministic evidence-carrying bounded-interval constraint algebra under exact Q is not equal by spelling alone to D6 INTERSECTION; algebra is composable so root status unproved.",
+    "unblock_fanout": [
+      "sensor tolerance contradiction",
+      "analog ADC ratio proof",
+      "multiple telescope measurements intersection",
+      "frequency and clock uncertainty",
+      "grammatical constraint diagnostics",
+      "symbolic epistemic rules"
+    ]
+  },
+  "holds": [
+    {
+      "name": "EXACT-INTERVAL-HULL",
+      "status": "HOLD-DERIVABLE",
+      "reason": "Union of disjoint intervals is not one interval; hull loses gaps and cannot replace conjunction, likely ordinary min/max derived."
+    },
+    {
+      "name": "INTERVAL-AFFINE-MAP",
+      "status": "HOLD-DERIVABLE",
+      "reason": "Under exact rational a*x+b, negative a swaps endpoint order and sources; check as library consequence of basic arithmetic."
+    },
+    {
+      "name": "DECORATED-INTERVAL",
+      "status": "HOLD-DONOR-BOUNDARY",
+      "reason": "IEEE 1788 decorations and undefined operations carry additional validity semantics, cannot treat host floating behavior as exact rational primitive."
+    }
+  ],
+  "guards": [
+    "One global D10 10-bit research stream; no automatic coordinate, no resident ratification.",
+    "Name-absence is not behavior dedup; no D1-D9 changes.",
+    "No sensor I/O, FPGA wires, CI release authority, D2 control or T5 modifications.",
+    "No canonical inventory selection or ledger changes: competing writers own serialized growth, pass owner review and source-tested proposal intake first."
+  ]
+}
