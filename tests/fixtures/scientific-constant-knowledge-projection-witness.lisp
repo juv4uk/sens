@@ -38,14 +38,13 @@
         ((00100010
            observation
            (00000001 (7 t (1))))
-         (1)
          (00000001
            (scientific-constant-knowledge-projection-witness
              (status pass))))
-        ((00100010
+        ((00100010 (00100010
            observation
            (00000001 (7 t (1))))
-         (0)
+           (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
          (00100111
            (00000001 scientific-constant-knowledge-projection-witness)
            (00000001 (status fail))
