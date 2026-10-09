@@ -18,32 +18,19 @@ pub(crate) enum SidRouteKind {
     SpecialForm,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) struct SidRoute {
-    pub sid: Sens8,
-    pub kind: SidRouteKind,
-}
-
-/// Mechanical route metadata for the historical seven slots that currently
-/// need special evaluator handling. The rows are keyed only by Sens8.
-pub(crate) const SID_ROUTES: [SidRoute; 7] = [
-    SidRoute { sid: crate::sens!(00000001), kind: SidRouteKind::SpecialForm },
-    SidRoute { sid: crate::sens!(00000010), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000011), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000100), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000101), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000110), kind: SidRouteKind::ValueCall },
-    SidRoute { sid: crate::sens!(00000111), kind: SidRouteKind::SpecialForm },
-];
-
+/// Сумісний transport не містить власної таблиці семантичних ролей.
+/// Координата береться лише з чинної ратифікованої драбини D3.
 pub(crate) fn route_kind_for_sid(sid: Sens8) -> Option<SidRouteKind> {
-    let index = sid.packed_byte().checked_sub(1)? as usize;
-    let row = SID_ROUTES.get(index)?;
-    debug_assert_eq!(
-        row.sid, sid,
-        "SID route rows must stay aligned with 00000001..00000111"
-    );
-    Some(row.kind)
+    let CoreDomainIdentity::D3(word) =
+        semantic_registry::compatibility_d3_route_from_ratified_domains(sid)?
+    else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b001 | 0b110 => Some(SidRouteKind::SpecialForm),
+        0b010 | 0b011 | 0b100 | 0b101 | 0b111 => Some(SidRouteKind::ValueCall),
+        _ => None,
+    }
 }
 
 /// Optional source/UI routing only. The returned value is the function SID;
