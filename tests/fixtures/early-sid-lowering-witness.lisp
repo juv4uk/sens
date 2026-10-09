@@ -20,7 +20,7 @@
               ((00100010 (00000101 first-field) (00000001 sid))
                (00000001 yes))
               ((not? (00100010 (00000101 first-field) (00000001 sid)))
-               (00000001 no)))))))))
+               (00000001 no))))))))))
 
 (00001001 early-sid-lower
   (00001000 (registry surface arguments contract)
