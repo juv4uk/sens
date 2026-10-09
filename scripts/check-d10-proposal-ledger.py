@@ -139,9 +139,9 @@ def self_test() -> None:
     assert not validate(header + row), "правильний синтетичний запис має пройти"
     source_only = valid.copy()
     source_only[9] = "NO-MIGRATION-BLOCK"
-    assert not validate(header + "\\t".join(source_only) + "\\n"), "донор без міграційного BLOCK має пройти"
+    assert not validate(header + "\t".join(source_only) + "\n"), "донор без міграційного BLOCK має пройти"
     source_only[9] = "BLOCK-UNKNOWN"
-    assert validate(header + "\\t".join(source_only) + "\\n"), "нечесна невідомість BLOCK не допускається"
+    assert validate(header + "\t".join(source_only) + "\n"), "нечесна невідомість BLOCK не допускається"
     tests = (
         (11, "1"),
         (10, "admitted"),
