@@ -578,17 +578,16 @@
 (00001001 x86-encode-setcc-r8
   (00001000 (condition-code register)
     (10011100 ((code (x86-reg-code register)))
-      ; two-part `((> code 3) REX ...)` mis-branched once exact-Q made
-      ; false comparisons answer 0 (which is truthy): REX was emitted for
-      ; every register. E1 (#216): explicit expected-result domains.
+      ; Exact-D1 predicate selects REX; structural default is the
+      ; explicit D1 true witness, never legacy (query expected result).
       (00000111
-        ((00011011 code 3) 1
+        ((00011011 code 3)
          (00100111
            (x86-encode-rex 0 0 0 (x86-high1 code))
            15
            (00001100 144 condition-code)
            (x86-encode-modrm 3 0 (x86-low3 code))))
-        ((00011011 code 3) 0
+        ((00000010 (00000001 ()))
          (00100111
            15
            (00001100 144 condition-code)
@@ -1203,12 +1202,14 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (00000111
-      ((00000010 instructions) () (00000001 ()))
-      ((00000010 instructions) (1) (00000001 ()))
-      (t
-        (00101001
-          (00000101 instructions)
-          (x86-encode-program (00000110 instructions)))))))
+      ; Stop precisely on empty structure. ATOM would also match any
+      ; non-list datum and is not a valid instruction-stream terminator.
+      ((00000011 instructions (00000001 ()))
+       (00000001 ()))
+      ((00000010 (00000001 ()))
+       (00101001
+         (00000101 instructions)
+         (x86-encode-program (00000110 instructions)))))))
 
 ; #2372 reusable VEX3 XMM register law.
 ; byte1 = C4; byte2 = ~R ~X ~B m-mmmm; byte3 = W ~vvvv L pp.
