@@ -1,0 +1,38 @@
+name: Current Rust semantic tests after retirement
+
+on:
+  push:
+    branches:
+      - cleanup/5140-retired-rust-logic-20261009
+  pull_request:
+    paths:
+      - "crates/sens/tests/mccarthy.rs"
+      - "crates/sens/tests/meta_eval.rs"
+      - "crates/sens/tests/world.rs"
+      - "crates/sens/tests/semantic_coordinate_law_axis.rs"
+      - "crates/sens/tests/semantic_coordinate_matrix_845.rs"
+      - "scripts/test-current-semantic-slice.sh"
+      - ".github/workflows/current-rust-tests-after-retirement.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  current-rust-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Compile and execute retained Rust tests, including current D1/D3 guards
+        run: |
+          cargo test -p sens \
+            --test mccarthy \
+            --test meta_eval \
+            --test world \
+            --test d3_empty_control \
+            -- --test-threads=1
+      - name: Refuse to execute removed legacy test targets
+        run: |
+          ! grep -Eq '^[[:space:]]*--test[[:space:]]+(semantic_coordinate_matrix_845|semantic_coordinate_law_axis|structural_observation_contract)([[:space:]]|$)' scripts/test-current-semantic-slice.sh
