@@ -328,9 +328,11 @@ mod tests {
     }
 
     #[test]
-    fn packed_word_reader_executes_real_non_utf8_bytes_without_text_parser() {
+    fn packed_word_reader_parses_real_non_utf8_bytes_without_text_parser() {
         // Physical ten-bit stream: D2 OPEN (10), D3 QUOTE (001),
         // D3 EMPTY (000), D2 CLOSE (01). Last six physical pad bits are zero.
+        // This Rust test proves byte decoding and exact AST structure only;
+        // the language result law belongs to the independent Lisp-owned witness.
         let packed = crate::PackedBitstream::from_parts(
             vec![0b1000_1000, 0b0100_0000],
             10,
@@ -340,15 +342,11 @@ mod tests {
             .expect("D2 parses directly from packed binary");
         assert_eq!(forms.len(), 1);
         let ExprKind::List(ref call) = forms[0].kind else {
-            panic!("expected executable D2-framed form");
+            panic!("expected D2-framed form");
         };
         assert_eq!(call.len(), 2);
         assert_eq!((domain(&call[0]).width(), domain(&call[0]).packed_bits()), (3, 1));
         assert!(matches!(call[1].kind, ExprKind::List(ref items) if items.is_empty()));
-
-        let result = crate::eval_parsed_expressions(&forms, &mut crate::Session::default())
-            .expect("exact D3 QUOTE executes without text source");
-        assert_eq!(result.value, crate::Value::Nil);
     }
 
     #[test]
