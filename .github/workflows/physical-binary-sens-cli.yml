@@ -290,7 +290,9 @@ jobs:
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
             examples/binary/d3-primitives-program.bits \
-            examples/binary/d3-cond-program.bits \
+            examples/binary/d3-cond-program.sens \
+            examples/binary/d3-cond-program.lisp \
+            examples/binary/d3-cond-program \
             examples/binary/d5-label-recursion.bits \
             examples/binary/d5-label-copy.bits \
             examples/binary/d5-label-map.bits \
