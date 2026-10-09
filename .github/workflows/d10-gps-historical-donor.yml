@@ -1,0 +1,22 @@
+name: D10 1958 GPS symbolic AI donor
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-gps-means-ends-historical-research-20261009.json'
+      - 'scripts/check_d10_gps_means_ends_history.py'
+      - 'tests/oracles/d10_gps_means_ends_swi.pl'
+      - 'docs/research/d10-gps-1958-means-ends.uk.md'
+      - '.github/workflows/d10-gps-historical-donor.yml'
+  workflow_dispatch:
+jobs:
+  independent-symbolic-ai-donor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit 3 historical laws, five HOLD and ten anti-forgery controls
+        run: python3 scripts/check_d10_gps_means_ends_history.py
+      - name: Install independent Prolog runner
+        run: sudo apt-get update -qq && sudo apt-get install -y swi-prolog-nox
+      - name: Run actual 17-witness Prolog oracle
+        run: python3 scripts/check_d10_gps_means_ends_history.py --real-prolog
