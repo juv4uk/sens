@@ -49,6 +49,6 @@ fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
 
     assert_eq!(
         rendered,
-        "((same 00000010) yes no (1) (1) (1) (1) ())"
+        "((same 00000010) yes no 1 1 1 1 ())"
     );
 }
