@@ -59,7 +59,6 @@ pub(crate) fn evaluate_domain_cond(
         // Reject old explicit-result clauses *before* evaluating their query:
         // evaluating a malformed clause would produce observable side effects.
         if parts.len() != 2 {
-            eprintln!("SENS_COND_DIAG fields={} clause={:?}", parts.len(), clause);
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
                 "D3:110 COND requires exactly (test expression); three-part compatibility is forbidden",

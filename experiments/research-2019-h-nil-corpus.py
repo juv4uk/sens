@@ -136,7 +136,7 @@ def scan_active_lisp() -> tuple[list[tuple[Path, Token]], list[tuple[Path, Token
 
 
 def route_evidence() -> tuple[bool, bool]:
-    """Inspect the historical metadata and the language-owned separation law.
+    """Inspect the historical metadata and the current exact-domain separation law.
 
     The retired Rust SID_ROUTES table is neither a source of language meaning
     nor a required fixture. Its absence must not cause this archaeology audit
@@ -151,9 +151,9 @@ def route_evidence() -> tuple[bool, bool]:
     )
 
     contract_separates_ground = (
-        "function 00000000 is not the empty-list value" in contract.lower()
-        and "() is represented as a structural empty value outside the function space"
+        "core.d3 000 structural empty is not historical exact-eight-bit 00000000"
         in contract.lower()
+        and "is not predicatebit 0 or number zero" in contract.lower()
     )
 
     return zero_in_mechanism_rows, contract_separates_ground
@@ -188,7 +188,7 @@ def main() -> int:
             "current zero Function8 has mechanism metadata; H-NIL snapshot needs semantic reclassification"
         )
     if not separated:
-        failures.append("Contract 10 no longer explicitly separates () from Function8 zero")
+        failures.append("Current domain contract no longer distinguishes D3 empty from historical Function8 zero and D1:0")
 
     if failures:
         for failure in failures:
