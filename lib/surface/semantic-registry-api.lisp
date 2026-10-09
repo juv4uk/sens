@@ -42,9 +42,9 @@
 (00001001 semantic-registry-row-namespaces
   (00001000 (surfaces)
     (00000111
-      ((00000010 surfaces)
+      ((00000010 surfaces) ()
        (00000001 ()))
-      ((semantic-registry-not-d1 (00000010 surfaces))
+      ((00000010 surfaces) (0)
        (00000100
          (00000101 (00000101 surfaces))
          (semantic-registry-row-namespaces
@@ -66,13 +66,13 @@
 (00001001 semantic-registry-find-surface
   (00001000 (namespace surfaces)
     (00000111
-      ((00000010 surfaces)
+      ((00000010 surfaces) ()
        (00000001 ()))
-      ((semantic-registry-not-d1 (00000010 surfaces))
+      ((00000010 surfaces) (0)
        (00000111
-         ((00000011 namespace (00000101 (00000101 surfaces)))
+         ((00000011 namespace (00000101 (00000101 surfaces))) (1)
           (00000101 surfaces))
-         ((semantic-registry-not-d1 (00000011 namespace (00000101 (00000101 surfaces))))
+         ((00000011 namespace (00000101 (00000101 surfaces))) (0)
           (semantic-registry-find-surface namespace (00000110 surfaces))))))))
 
 (00001001 semantic-registry-surface-name
@@ -90,9 +90,9 @@
 (00001001 semantic-registry-find-row
   (00001000 (sens-ref rows)
     (00000111
-      ((00000010 rows)
+      ((00000010 rows) ()
        (00000001 ()))
-      ((semantic-registry-not-d1 (00000010 rows))
+      ((00000010 rows) (0)
        (00000111
          ((00100010 sens-ref (semantic-registry-row-id (00000101 rows)))
           (00000101 rows))
@@ -102,9 +102,9 @@
 (00001001 semantic-registry-find-id-in-namespaces
   (00001000 (name row namespaces)
     (00000111
-      ((00000010 namespaces)
+      ((00000010 namespaces) ()
        (00000001 ()))
-      ((semantic-registry-not-d1 (00000010 namespaces))
+      ((00000010 namespaces) (0)
        (10011100 ((candidate
                (semantic-registry-surface-name
                  (00000101 namespaces)
@@ -121,9 +121,9 @@
 (00001001 semantic-registry-id-for-surface
   (00001000 (name rows)
     (00000111
-      ((00000010 rows)
+      ((00000010 rows) ()
        (00000001 ()))
-      ((semantic-registry-not-d1 (00000010 rows))
+      ((00000010 rows) (0)
        (10011100 ((sens-ref
                (semantic-registry-find-id-in-namespaces
                  name
