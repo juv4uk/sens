@@ -24,13 +24,13 @@
 (00001001 science-proper-list?
   (00001000 (x)
     (00000111
-      ((00000010 x) () (00000111
-         ((00000011 x (00000001 ())) t)
-         (t (00000001 ()))))
-      ((00000010 x) (1) (00000111
-         ((00000011 x (00000001 ())) t)
-         (t (00000001 ()))))
-      (t (science-proper-list? (00000110 x))))))
+      ; Pair cells recurse through CDR; never pass a compound value to EQ.
+      ((00000010 x) ()
+       (science-proper-list? (00000110 x)))
+      ; EQ is atom-only. This branch runs only when X itself is an atom.
+      ((00000010 x) (1)
+       (00000011 x (00000001 ())))
+      (t (00000001 ())))))
 
 (00001001 science-sixth
   (00001000 (values)
