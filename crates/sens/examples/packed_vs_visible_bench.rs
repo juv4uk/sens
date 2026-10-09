@@ -145,7 +145,7 @@ fn main() {
         ("quote-empty-64", "10 001 00 000 01", 64),
         ("quote-empty-256", "10 001 00 000 01", 256),
         ("d7-data-64", "10 1000001 00 1000010 01", 64),
-        ("w9-data-64", "100000001 00 00000001", 64),
+        ("w9-data-64", "10 100000001 00 00000001 01", 64),
     ];
     for (name, source, count) in cases {
         if let Err(error) = benchmark(name, source, count, samples) {
