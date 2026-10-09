@@ -75,6 +75,9 @@ def verify(inv,src,his,state,low,ledger,doc):
         assert r["surface_uk"]==s["surface_uk"] and r["surface_ukr"]==s["surface_ukr"]
         assert r["semantic_name"] not in lower
         assert r["positive_witnesses"] and r["falsifiers"]
+        assert s["positive_witnesses"] and s["falsifiers"]
+        assert r["positive_witnesses"] == s["positive_witnesses"]
+        assert r["falsifiers"] == s["falsifiers"]
         assert r["source_path"]==str(SRC.relative_to(ROOT))
         l=ledgerrows[-2+idx]
         assert l["proposal_id"]=="D10P-"+str(7+idx).zfill(4)
