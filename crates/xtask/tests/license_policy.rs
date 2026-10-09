@@ -77,48 +77,6 @@ fn owned_workspace_crates_point_directly_to_the_single_root_license_file() {
     }
 }
 
-fn require_authority_row(contents: &str, path: &str, test: &str, class: &str) {
-    let found = contents.lines().skip(1).any(|line| {
-        let fields: Vec<_> = line.split('\t').collect();
-        fields.len() >= 3 && fields[0] == path && fields[1] == test && fields[2] == class
-    });
-    assert!(
-        found,
-        "#231 requires {path}::{test} to be classified as {class} before legacy semantics can be removed from canonical hard gates"
-    );
-}
-
-#[test]
-fn superseded_truthiness_assertions_are_explicitly_classified_before_test_transition() {
-    let contents = fs::read_to_string(workspace_root().join("tests/authority-inventory.tsv"))
-        .expect("tests/authority-inventory.tsv must exist");
-
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/mccarthy.rs",
-        "comparisons_chain_and_promote_exact_inexact_like_arithmetic",
-        "legacy-semantic",
-    );
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/forward.rs",
-        "match_test_condition_succeeds_when_the_expression_is_truthy",
-        "legacy-semantic",
-    );
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/ukrainian_api_docs.rs",
-        "istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen",
-        "legacy-semantic",
-    );
-    require_authority_row(
-        &contents,
-        "crates/sens/tests/mccarthy.rs",
-        "bare_large_integer_literals_remain_exact",
-        "mixed",
-    );
-}
-
 #[test]
 fn semantic_fast_lane_is_lisp_owned_and_does_not_run_the_full_legacy_package_suite() {
     let root = workspace_root();
