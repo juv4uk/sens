@@ -11,6 +11,8 @@ LEDGER = ROOT / "knowledge/d10-historical-coverage-gap-audit-v1.json"
 INVENTORY = ROOT / "knowledge/d10-v1-semantic-inventory.json"
 FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
 DIALECT = ROOT / "docs/DIALECT-COMPARISON.md"
+CLOS_REVIEW = ROOT / "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+CLOS_PROMOTABLE = {"FIND-METHOD", "REMOVE-METHOD", "CHANGE-CLASS"}
 
 def verify(ledger, inv, foundation, dialect):
     assert ledger["schema"] == "d10-historical-coverage-gap-audit/v1"
@@ -19,6 +21,9 @@ def verify(ledger, inv, foundation, dialect):
     assert len(inv["rows"]) == inv["accounting"]["selected_semantic_candidates"]
     assert inv["accounting"]["ratified_d10_residents"] == 0
     selected = {r["semantic_name"].upper() for r in inv["rows"]}
+    by_name = {r["semantic_name"].upper(): r for r in inv["rows"]}
+    source_review = json.loads(CLOS_REVIEW.read_text(encoding="utf-8"))
+    source_rows = {r["historical_name"].upper(): r for r in source_review["rows"]}
     lower = {str(n).upper() for domain in foundation["domains"].values()
              for n in domain.get("residents", {}).values()}
     assert len(selected) == len(inv["rows"])
@@ -34,7 +39,23 @@ def verify(ledger, inv, foundation, dialect):
         assert name in dialect, "historical omission lost from in-repo appendix"
     for r in ledger["exact_name_absent_research"]:
         name = r["historical_spelling"].upper()
-        assert name not in selected | lower, f"exact name now exists: review {name}"
+        assert name not in lower, f"ratified lower-domain collision: {name}"
+        if name in selected:
+            # 2026-10-09 snapshot was an absence audit. Only a separate,
+            # explicitly source-proved candidate may later supersede its HOLD.
+            live = by_name[name]
+            donor = source_rows.get(name)
+            assert name in CLOS_PROMOTABLE and r["status"] == "HOLD-D10-SEMANTIC-DEDUP", (
+                f"historical HOLD without independent source admission: {name}")
+            assert donor is not None and donor["triage_status"] == "REVIEW-SEMANTIC-CANDIDATE"
+            assert live.get("source_path") == str(CLOS_REVIEW.relative_to(ROOT))
+            assert live.get("primary_url") == donor["historical_source"]
+            assert live.get("source_class") == "HISTORICAL-CLOS-ROOT-REVIEW"
+            assert live.get("status") == "SELECTED-RESEARCH-CANDIDATE"
+            assert live.get("proposal_status") == "pending-owner-review"
+            assert live.get("coordinate") is None and live.get("coordinate_basis") == "UNPLACED"
+            assert live.get("ratified_resident") is False
+            assert live.get("behavior") and live.get("positive_witnesses") and live.get("falsifiers")
         assert r["status"].startswith("HOLD-")
         assert r["exact_name_in_d1_d10"] is False
         assert r["semantically_novel"] is None
