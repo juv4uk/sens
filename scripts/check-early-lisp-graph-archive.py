@@ -366,11 +366,16 @@ def main():
         except (ValueError, KeyError, IndexError, TypeError, AssertionError):
             # Rejection is the expected result for unrecorded growth.
             pass
-        mutated, mutant_history = _synthetic_transition(d10)
-        mutated["rows"][0]["behavior"] = "mutated historical law"
-        mutant_history["transitions"][0]["resulting_inventory_blob_sha"] = git_blob(mutated)
         try:
-            historical_d10_view(mutated, git_blob(d10), mutant_history)
+            baseline_for_test = historical_d10_view(
+                d10, d["current_authority_snapshot"]["d10_inventory_blob_sha"], history
+            )
+            mutated, mutant_history = _synthetic_transition(baseline_for_test)
+            mutated["rows"][0]["behavior"] = "mutated historical law"
+            mutant_history["transitions"][0]["resulting_inventory_blob_sha"] = git_blob(mutated)
+            historical_d10_view(
+                mutated, d["current_authority_snapshot"]["d10_inventory_blob_sha"], mutant_history
+            )
             failures.append("old-row-mutation-control")
         except (ValueError, KeyError, IndexError, TypeError, AssertionError):
             pass
