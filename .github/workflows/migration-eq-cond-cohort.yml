@@ -1,0 +1,30 @@
+name: migration-eq-cond-cohort
+
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/migration-eq-cond-cohort/**'
+      - 'tests/test_migration_eq_cond_cohort.py'
+      - 'crates/sens/tests/migration_eq_cond_cohort.rs'
+      - '.github/workflows/migration-eq-cond-cohort.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/fixtures/migration-eq-cond-cohort/**'
+      - 'tests/test_migration_eq_cond_cohort.py'
+      - 'crates/sens/tests/migration_eq_cond_cohort.rs'
+      - '.github/workflows/migration-eq-cond-cohort.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Three-pass exact migration and physical T5 parity
+        run: python3 -m unittest discover -s tests -p 'test_migration_eq_cond_cohort.py' -v
+      - name: Current exact D1 EQ -> D3 COND oracle on physical T5
+        run: cargo test -p sens --test migration_eq_cond_cohort
