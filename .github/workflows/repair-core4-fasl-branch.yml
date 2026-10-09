@@ -1,0 +1,31 @@
+name: Temporary Core4 FASL exact-source repair witness
+on:
+  push:
+    branches:
+      - fix/core4-fasl-exact-word-ci-20261010
+    paths:
+      - .github/workflows/repair-core4-fasl-branch.yml
+permissions:
+  contents: read
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sens-core4-fasl
+      - name: Rebuild canonical Core4 binary and verify strict freshness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${RUNNER_ENVIRONMENT:-}" = github-hosted
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+          sha256sum lib/core4.lisp lib/core4.lisp.fasl
+          printf '%s\n' FASL_BASE64_BEGIN
+          base64 --wrap=0 lib/core4.lisp.fasl
+          printf '\n%s\n' FASL_BASE64_END
