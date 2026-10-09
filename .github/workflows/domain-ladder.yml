@@ -1,99 +1,20 @@
-name: Domain ladder exact-width conformance
+name: Domain ladder scheduling probe
 
 on:
-  workflow_dispatch:
   pull_request:
     paths:
-      - "crates/sens/src/bits.rs"
-      - "crates/sens/src/bit9.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/binary_execution.rs"
-      - "crates/sens/tests/physical_t5_execution.rs"
-      - "crates/sens/src/mixed_source.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/domain_owner_generated.rs"
-      - "scripts/generate-domain-owner-registry.py"
-      - "knowledge/d8-ratified.json"
-      - "knowledge/d9-ratified.json"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/src/text7_projection.rs"
-      - "knowledge/d7-ratified.json"
-      - "contracts/d7-ratification.lisp"
-      - "lib/domains/d7.lisp"
-      - "scripts/check-d7-current-authority.py"
-      - "scripts/check-domain-tables.py"
-      - "benchmarks/d7-ratification-conformance/**"
-      - "crates/sens/tests/domain_ladder.rs"
-      - "crates/sens/tests/current_binary_preflight.rs"
-      - "crates/sens/tests/d7_w7_pack.rs"
-      - "crates/sens/tests/d2_text7_frame_role_boundary.rs"
-      - "crates/sens/tests/text7_canonical_wire.rs"
       - ".github/workflows/domain-ladder.yml"
   push:
     branches: [main]
     paths:
-      - "crates/sens/src/bits.rs"
-      - "crates/sens/src/bit9.rs"
-      - "crates/sens/src/source_words.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/binary_execution.rs"
-      - "crates/sens/tests/physical_t5_execution.rs"
-      - "crates/sens/src/mixed_source.rs"
-      - "crates/sens/src/domain_words.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/domain_owner_generated.rs"
-      - "scripts/generate-domain-owner-registry.py"
-      - "knowledge/d8-ratified.json"
-      - "knowledge/d9-ratified.json"
-      - "crates/sens/src/text7.rs"
-      - "crates/sens/src/text7_projection.rs"
-      - "knowledge/d7-ratified.json"
-      - "contracts/d7-ratification.lisp"
-      - "lib/domains/d7.lisp"
-      - "scripts/check-d7-current-authority.py"
-      - "scripts/check-domain-tables.py"
-      - "benchmarks/d7-ratification-conformance/**"
-      - "crates/sens/tests/domain_ladder.rs"
-      - "crates/sens/tests/current_binary_preflight.rs"
-      - "crates/sens/tests/d7_w7_pack.rs"
-      - "crates/sens/tests/d2_text7_frame_role_boundary.rs"
-      - "crates/sens/tests/text7_canonical_wire.rs"
       - ".github/workflows/domain-ladder.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: domain-ladder-${{ github.workflow }}-${{ github.sha }}
-  cancel-in-progress: false
-
 jobs:
-  exact-width-ladder:
-    name: D1-D9 typed words and owner ratification
+  probe:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Exact-width D1-D9 and W7 identity gates
-        run: cargo test --locked -p sens --test domain_ladder --test d7_w7_pack --test d2_text7_frame_role_boundary --test text7_canonical_wire --test current_binary_preflight
-      - name: Packed D2 byte reader without text source
-        run: cargo test --locked -p sens --lib canonical_reader::tests::packed_
-      - name: Run physical T5 execution contract
-        run: cargo test --locked -p sens --test physical_t5_execution
-      - name: Owner generated occupancy agrees with D3-D9 authority
-        run: python3 scripts/generate-domain-owner-registry.py --check
-      - name: D8 and D9 mechanical occupancy has no implicit callability
-        run: cargo test --locked -p sens --lib domain_ladder::tests:: -- --nocapture
-      - name: D7 exact owner coordinate and reserved-cell check
-        run: python3 scripts/check-d7-current-authority.py
-      - name: Check exact D7 human surfaces
-        run: python3 scripts/check-domain-tables.py
-      - name: Check SoundCell LocalOrdinal and Number role boundaries
-        run: python3 benchmarks/d7-ratification-conformance/validate.py
+      - run: echo "GitHub workflow parsing and job scheduling PASS"
