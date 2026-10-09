@@ -88,7 +88,7 @@
        (00000111
          ((00100010 sens-ref (semantic-registry-row-id (00000101 rows)))
           (00000101 rows))
-         ((00100001 (00100010 sens-ref (semantic-registry-row-id (00000101 rows))))
+         ((00100010 (00100010 sens-ref (semantic-registry-row-id (00000101 rows))) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
           (semantic-registry-find-row sens-ref (00000110 rows))))))))
 
 (00001001 semantic-registry-find-id-in-namespaces
@@ -104,7 +104,7 @@
          (00000111
            ((00100010 name candidate)
             (semantic-registry-row-id row))
-           ((00100001 (00100010 name candidate))
+           ((00100010 (00100010 name candidate) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
             (semantic-registry-find-id-in-namespaces
               name
               row
