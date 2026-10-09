@@ -24,8 +24,6 @@ on:
       - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/i5_6400_machine_profile.rs"
-      - "crates/sens/tests/semantic_coordinate_join_2.rs"
-      - "crates/sens/tests/semantic_coordinate_join.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
@@ -59,8 +57,6 @@ on:
       - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
       - "crates/sens/tests/machine_capability_axis.rs"
       - "crates/sens/tests/i5_6400_machine_profile.rs"
-      - "crates/sens/tests/semantic_coordinate_join_2.rs"
-      - "crates/sens/tests/semantic_coordinate_join.rs"
       - "crates/sens/tests/machine_noninterference_contract.rs"
       - "crates/sens/tests/machine_lowering_boundary.rs"
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
@@ -95,13 +91,13 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Exact-domain CPU bridge
         run: |
+          cargo test --locked -p sens --test native_first_exact_domain -- --nocapture
           cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
           cargo test -p sens --test machine_effect_add_projection -- --nocapture
           cargo test -p sens --test machine_effect_d5_arithmetic_projection -- --nocapture
           cargo test -p sens --test machine_effect_explicit_outputs -- --nocapture
           cargo test -p sens --test machine_semantic_effect_lowering -- --nocapture
           # Exact lowered DomainCall data must select native CAR(CONS ...) without spelling/SID authority.
-          cargo test -p sens --test native_first_exact_domain -- --nocapture
           cargo test -p sens --test machine_exact_d3_structural -- --nocapture
           cargo test -p sens --test machine_exact_d3_eq_cond -- --nocapture
           cargo test -p sens --test machine_exact_d5_arithmetic -- --nocapture
@@ -110,8 +106,9 @@ jobs:
           cargo test -p sens --test machine_exact_d5_zerop -- --nocapture
           cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
           cargo test -p sens --test machine_capability_axis -- --nocapture
-          cargo test -p sens --test semantic_coordinate_join -- --nocapture
-          cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
+          # The retired semantic_coordinate_join* integration files are absent
+          # from the current tree; do not request non-existent Cargo targets.
+          # The surviving noninterference witness remains a hard gate.
           cargo test -p sens --test machine_noninterference_contract -- --nocapture
       - name: Derived machine coverage inputs
         run: python3 scripts/generate-encoder-coverage-input.py --check
