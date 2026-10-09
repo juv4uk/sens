@@ -110,7 +110,7 @@ assert (d1[1].width, d1[1].bits) != (d3[1].width, d3[1].bits)
 # Physical .sens execution must stay on the packed-byte path, not a text projection.
 cli_source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
 route_start = cli_source.index("fn eval_physical_t5(")
-route_end = cli_source.index("\\nfn main()", route_start)
+route_end = cli_source.index("\nfn main()", route_start)
 physical_route = cli_source[route_start:route_end]
 assert "sens::decode_ternary_words(bytes)" in physical_route
 assert "sens::pack_binary_source_words(&words)" in physical_route
