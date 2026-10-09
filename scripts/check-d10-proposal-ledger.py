@@ -97,7 +97,6 @@ def selection_trace_errors(content: str, inventory: dict, baseline: dict, histor
     transitions = history.get("transitions", [])
     prior = initial
     expected_previous_sha = baseline.get("origin_inventory_git_blob")
-    selected_now: set[str] = set()
     for t in transitions:
         if t.get("previous_inventory_blob_sha") != expected_previous_sha:
             errors.append("SHA-ланцюг: попередня подія не збігається з історичним результатом")
@@ -115,7 +114,6 @@ def selection_trace_errors(content: str, inventory: dict, baseline: dict, histor
             errors.append("неявний ріст, координата або ратифікація у research-переході")
         for row in added:
             name = row.get("semantic_name", "").upper()
-            selected_now.add(name)
             ent = ledger_by_name.get(name)
             if not ent:
                 errors.append(f"{name}: SELECTED без запису в proposal-ledger")
@@ -141,10 +139,10 @@ def selection_trace_errors(content: str, inventory: dict, baseline: dict, histor
         expected_previous_sha = next_sha
     if prior != len(rows):
         errors.append(f"виявлено {len(rows)-prior} неврахованих selection-рядків у D10")
-    for ent in ledger:
-        name = ent["semantic_name"].strip().upper()
-        if ent["blocked_source"] == "NOT-A-MIGRATION-BLOCK" and name not in selected_now:
-            errors.append(f"{name}: маркер без реального selection-запису; pending donor мусить мати source")
+    # Напрямок обов'язку є тільки selected -> ledger. Дослідницька заявка
+    # за історичним джерелом може існувати ДО selection та без міграційного
+    # BLOCK. Інакше канал pending-review стає недоступним для CLHS/MOP/SRFI.
+    # Головна validate() окремо вимагає source-pin, дедуп і ratified=0.
     return errors
 
 
