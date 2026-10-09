@@ -9,6 +9,7 @@ import argparse
 import copy
 import json
 from pathlib import Path
+from d10_historical_snapshot_compat import historic_view
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "knowledge/d10-historical-primary-selected-20261009.json"
@@ -30,6 +31,7 @@ def load(path):
 
 def check(ledger, inv, state, foundation, arch):
     rows = ledger["rows"]
+    assert len(historic_view(inv, ledger["source_foundation"]["d10_prior_blob"])["rows"]) == 625
     assert ledger["status"] == "SELECTED-RESEARCH-UNRATIFIED"
     assert len(rows) == 4
     assert [r["semantic_name"] for r in rows] == list(NAMES)
@@ -82,7 +84,7 @@ def check(ledger, inv, state, foundation, arch):
         assert r["exact_existing_D10_duplicate"] is False
         assert r["behavior"] and r["falsifier"] and len(r["positive_witnesses"]) >= 2
         assert r["surface_uk"] and r["surface_ukr"]
-        assert r["owner"] and "D2 control" in r["owner"]
+        assert r["owner"] and "D10" in r["owner"] and not r["owner"].startswith("D2-EXCLUSIVE")
         assert r["provenance"] and r["source_class"] == cur["source_class"]
     assert "D10 selected              629/1024" in arch
     assert "unplaced                  373" in arch
