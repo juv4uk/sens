@@ -75,6 +75,29 @@ jobs:
             grep -q 'physical T5/D2 rejected' "$RUNNER_TEMP/sens-binary/${invalid}.stderr"
           done
 
+      - name: Human Lisp text can never impersonate physical .sens
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-binary"
+          printf '%s\n' '(quote ())' > "$RUNNER_TEMP/sens-binary/human-lisp.sens"
+          if target/debug/sens "$RUNNER_TEMP/sens-binary/human-lisp.sens" \
+              > "$RUNNER_TEMP/sens-binary/human-lisp.stdout" \
+              2> "$RUNNER_TEMP/sens-binary/human-lisp.stderr"; then
+            echo "ERROR: executable textual Lisp passed as packed binary T5" >&2
+            exit 1
+          fi
+          test ! -s "$RUNNER_TEMP/sens-binary/human-lisp.stdout"
+          grep -Eq 'physical T5|exact binary reader|current SENS execution' \
+            "$RUNNER_TEMP/sens-binary/human-lisp.stderr"
+          if target/debug/sens --core=4 tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+              > "$RUNNER_TEMP/sens-binary/forbidden-core4.stdout" \
+              2> "$RUNNER_TEMP/sens-binary/forbidden-core4.stderr"; then
+            echo "ERROR: physical T5 silently inherited Core4" >&2
+            exit 1
+          fi
+          test ! -s "$RUNNER_TEMP/sens-binary/forbidden-core4.stdout"
+
       - name: Immutable per-commit transport and execution evidence
         if: always()
         shell: bash
