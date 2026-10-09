@@ -276,19 +276,24 @@
            (00100111
              (00100111 (00000001 constant-value)
                    name
-                   (scientific-constant-value constant))
+                   (scientific-constant-value constant)))
+           (00100111
              (00100111 (00000001 constant-unit)
                    name
-                   (scientific-constant-unit constant))
+                   (scientific-constant-unit constant)))
+           (00100111
              (00100111 (00000001 constant-status)
                    name
-                   (scientific-constant-status constant))
+                   (scientific-constant-status constant)))
+           (00100111
              (00100111 (00000001 constant-kind)
                    name
-                   (scientific-constant-kind constant))
+                   (scientific-constant-kind constant)))
+           (00100111
              (00100111 (00000001 constant-system)
                    name
-                   (scientific-constant-system constant))
+                   (scientific-constant-system constant)))
+           (00100111
              (00100111 (00000001 constant-source)
                    name
                    (scientific-constant-source constant)))))))))
