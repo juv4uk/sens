@@ -9,3 +9,9 @@ surface_callable_nil_sid	smuggling_test	fail_if_required	reintroduces operator N
 nil_equals_predicate_0	smuggling_test	fail	collapses D1 with ground data
 code_reassignment_000	out_of_scope	forbidden_here	no production map change
 wsm_blind	dependency	pending	juv4uk/wsm#12 after freeze
+current_corpus_nil_heads	witness	pass	0 callable NIL/nil heads in active lib Lisp
+current_corpus_zero8_heads	witness	pass	0 executable 00000000 heads outside projection metadata
+current_corpus_zero8_tokens	witness	pass	0 non-metadata 00000000 tokens in active lib Lisp
+current_runtime_zero8_route	witness	pass	no evaluator SID route or mechanism row; does not reserve slot forever
+contract_ground_separation	witness	pass	structural () is distinct from current Function8 00000000
+epistemic_update	status	bounded_witness	H-NIL survives current corpus; global status remains conjecture and bija3 remains premise

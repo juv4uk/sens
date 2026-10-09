@@ -1,0 +1,30 @@
+name: H-NIL corpus witness
+
+on:
+  pull_request:
+    paths:
+      - "lib/**"
+      - "language-contract.lisp"
+      - "crates/sens/src/eval/canon.rs"
+      - "experiments/research-2019-h-nil-corpus.py"
+      - "docs/research/2019-alt-basis-h-nil.*"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/h-nil-corpus-witness.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "language-contract.lisp"
+      - "crates/sens/src/eval/canon.rs"
+      - "experiments/research-2019-h-nil-corpus.py"
+      - "docs/research/2019-alt-basis-h-nil.*"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/h-nil-corpus-witness.yml"
+
+jobs:
+  witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: H-NIL current-corpus kill test
+        run: python3 experiments/research-2019-h-nil-corpus.py

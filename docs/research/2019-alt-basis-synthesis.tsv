@@ -1,5 +1,5 @@
 probe	seed	capability	eliminable	best_fit	packaging_open	status_lock	pr
-H-NIL	000	ground_value	maybe	() as data not operator	yes	premise	#2082
+H-NIL	000	ground_value	bounded_current_corpus_witness	() as data not operator; global conjecture remains	yes	premise	#2082 + current corpus witness
 H-QUOTE	001	evaluation_control	no	capability distinct; seed vs phase	yes	premise	#2085
 H-ATOM	010	type_predicate	no	unary partition ≠ EQ	opcode / pair?	premise	this
 H-EQ	011	identity_predicate	no	leaf sameness required	domain extent	premise	#2086
