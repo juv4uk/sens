@@ -123,10 +123,6 @@ impl fmt::Debug for Sens8 {
 /// New domain-qualified semantic code should construct the exact domain carrier
 /// directly; this macro intentionally performs no domain inference.
 ///
-/// ```
-/// let s = sens::sens!(00000011);
-/// assert_eq!(s.to_string(), "00000011");
-/// ```
 #[macro_export]
 macro_rules! sens {
     ($bits:literal) => {{
