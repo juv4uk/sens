@@ -11,16 +11,20 @@
 ; `(value "...")` / `(error "Kind")` envelope, but it must not invent the
 ; expected answer.
 
+; Witness-record selection belongs here, not in the historical D5 ASSOC
+; implementation. All source rows are finite ordinary (key . value) alists.
+; The first explicit check observes structural EMPTY, never D1:0 as NIL.
+; The next step uses exact D1 predicate control from EQUAL? to pick a key;
+; no old numeric/list predicate answer is required to match a quoted datum.
 (00001001 witness-field
   (00001000 (key witness)
     (00000111
       ((00000010 witness) () (00000001 ()))
-      ((00000010 witness) (0)
+      (t
        (00000111
-         ((00000011 key (00000101 (00000101 witness))) (1)
+         ((00100010 key (00000101 (00000101 witness)))
           (00000110 (00000101 witness)))
-         ((00000011 key (00000101 (00000101 witness))) (0)
-          (witness-field key (00000110 witness))))))))
+         (t (witness-field key (00000110 witness))))))))
 
 (00001001 witness-malformed-result
   (00001000 (reason actual)
