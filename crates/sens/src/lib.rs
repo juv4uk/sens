@@ -193,8 +193,9 @@ pub use ternary_transport::{
     TernaryTransportAccounting, TernaryTransportError,
 };
 pub use source_packing::{
-    append_binary_source_word, pack_binary_source_tokens, packed_transport_accounting,
-    semantic_source_bits, unpack_binary_source_words, PackedTransportAccounting,
+    append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
+    packed_transport_accounting, semantic_source_bits, unpack_binary_source_words,
+    PackedTransportAccounting,
 };
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{
