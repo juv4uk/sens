@@ -120,7 +120,7 @@ class BoundedUkTripletTests(unittest.TestCase):
         # Дві окремі D2-форми; жодного D2 SPACE між ними не додаємо.
         # QUOTE(EMPTY) і QUOTE(D1 NO) вже окремо доведені.
         words = "10 001 00 000 01 10 001 00 0 01".split()
-        uk = "(як-є ())\\n(як-є ні)\\n".replace("\\n", "\n")
+        uk = "(як-є ())\n(як-є ні)\n"
         self.assertEqual(mod.canonical_uk_from_words(words), uk)
         self.assertEqual(mod.project_current_uk(uk), words)
         self.lisp.write_bytes(uk.encode("utf-8"))
