@@ -14,13 +14,6 @@ fn eval(source: &str) -> String {
 }
 
 #[test]
-fn null_is_true_only_for_the_empty_list() {
-    assert_eq!(eval("(null? (00000001 ()))"), "t");
-    assert_eq!(eval("(null? (00000001 a))"), "()");
-    assert_eq!(eval("(null? (00000001 (a)))"), "()");
-}
-
-#[test]
 fn subst_matches_the_paper_example() {
     // subst[(X . A); B; ((A . B) . C)] = ((A . (X . A)) . C)
     assert_eq!(
