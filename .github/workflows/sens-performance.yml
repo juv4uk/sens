@@ -26,8 +26,6 @@ on:
       - "crates/sens/examples/byte_pack_bench.rs"
       - "crates/sens/examples/domain12345678_bench.rs"
       - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
-  schedule:
-    - cron: "20 4 * * *"
   workflow_dispatch:
   schedule:
     # Нічний фіксований контроль у період нижчого CI-навантаження (UTC).
