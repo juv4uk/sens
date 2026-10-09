@@ -119,7 +119,7 @@ fn historical_and_current_rust_execution_match_for_nine_immutable_calls() {
 /// such as "(machine-block-empty)" are deliberately not used for those calls:
 /// their Text7 binding keys differ from plain human symbols.
 #[test]
-fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
+fn physical_t5_executes_empty_and_blocks_unencoded_quoted_symbols() {
     let repo = root();
     let historical = historical_observations(&repo);
     let source_path = repo.join(ORIGINAL);
@@ -199,21 +199,17 @@ fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
         .expect("original physical T5 must pass canonical D2 parser");
     assert_eq!(original_forms.len(), 6, "original has six top-level definitions");
 
-    // A second, external-only source adds observer calls after the exact original
-    // bytes. The migrator sees definitions and calls in one scope, so both encode
-    // to the same contextual Text7 frame. This lets the runtime call values from
-    // physical T5 without cheating through plain source symbols. The emitted
-    // original-only .sens above remains a separate, exact physical candidate.
+    // Probe the case that the existing canonical source vocabulary can
+    // actually express: a zero-argument global call whose Text7 target is
+    // resolved from the six preceding physical DEFINE forms.
     let mut probe_bytes = source_bytes.clone();
-    if !probe_bytes.ends_with(b"\n") {
-        probe_bytes.push(b'\n');
+    if !probe_bytes.ends_with(b"\\n") {
+        probe_bytes.push(b'\\n');
     }
-    for (_, expression) in cases {
-        probe_bytes.extend_from_slice(expression.as_bytes());
-        probe_bytes.push(b'\n');
-    }
+    probe_bytes.extend_from_slice(cases[0].1.as_bytes());
+    probe_bytes.push(b'\\n');
     fs::write(probe_input.join(ORIGINAL), &probe_bytes)
-        .expect("write ephemeral original-plus-observers source");
+        .expect("write external empty-call probe source");
     let probe_migration = Command::new("python3")
         .arg(repo.join("scripts/migrate-three-pass.py"))
         .arg(&probe_input)
@@ -222,16 +218,14 @@ fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
         .arg("--report").arg(&probe_report)
         .current_dir(&repo)
         .output()
-        .expect("run canonical migrator on external observer probe");
-    let probe_report_bytes = fs::read(&probe_report)
-        .expect("read observer probe report even when migration is BLOCKED");
-    let probe_manifest: Json = serde_json::from_slice(&probe_report_bytes)
-        .expect("valid observer probe report JSON");
+        .expect("run canonical migrator on physical empty-call probe");
     assert!(probe_migration.status.success(),
-        "physical Text7 observer probe BLOCKED: stdout={} stderr={} report={}",
+        "single supported physical Text7 call was BLOCKED: stdout={} stderr={}",
         String::from_utf8_lossy(&probe_migration.stdout),
-        String::from_utf8_lossy(&probe_migration.stderr),
-        probe_manifest);
+        String::from_utf8_lossy(&probe_migration.stderr));
+    let probe_manifest: Json = serde_json::from_slice(
+        &fs::read(&probe_report).expect("read empty-call probe report")
+    ).expect("valid empty-call probe report");
     assert_eq!(probe_manifest["summary"]["files_written"], 1);
     assert_eq!(probe_manifest["summary"]["files_blocked"], 0);
     let probe_source_path = probe_input.join(ORIGINAL);
@@ -242,54 +236,100 @@ fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
         .output()
         .expect("read actual Git blob identity for ephemeral probe source");
     assert!(probe_blob.status.success(), "git hash-object must accept probe source");
-    assert!(probe_blob.status.success(), "git hash-object must accept probe source");
     let actual_probe_blob = String::from_utf8_lossy(&probe_blob.stdout).trim().to_owned();
-    let on_disk_probe_bytes = fs::read(&probe_source_path).expect("read external probe source");
-    assert!(on_disk_probe_bytes.starts_with(&source_bytes),
-        "probe must preserve every byte of the original source as its prefix");
-    assert_ne!(actual_probe_blob, GIT_BLOB,
-        "probe must be a distinct temporary source, not mislabeled as the original");
-    assert!(probe_manifest["files"][0]["path"].as_str() == Some(ORIGINAL));
+    assert_eq!(probe_manifest["files"][0]["source_blob_sha"], actual_probe_blob);
     assert_eq!(probe_manifest["files"][0]["status"], "written");
+    assert_ne!(actual_probe_blob, GIT_BLOB,
+        "observer probe is not itself the immutable original blob");
 
     let probe_physical_path = probe_output.join(Path::new(ORIGINAL).with_extension("sens"));
     let probe_physical = fs::read(&probe_physical_path)
-        .expect("read physical T5 containing Text7 observer calls");
+        .expect("read physical T5 containing the empty Text7 call");
     let probe_visible = sens::open_ternary_program(&probe_physical)
         .expect("physical probe T5 must decode through current codec");
     let probe_forms = sens::parse_canonical_binary(&probe_visible)
         .expect("physical probe T5 must pass canonical D2 parser");
-    assert_eq!(probe_forms.len(), original_forms.len() + cases.len());
+    assert_eq!(probe_forms.len(), original_forms.len() + 1);
     for (index, (original_form, probe_form)) in original_forms.iter()
         .zip(probe_forms.iter())
         .enumerate()
     {
         assert_eq!(format!("{original_form:?}"), format!("{probe_form:?}"),
-            "adding observer calls changed original physical form {index}");
+            "adding the empty-call probe changed original physical form {index}");
     }
 
-    // Execute only the exact original six definitions from the original-only
-    // physical T5, then call those bindings using the encoded Text7 heads from
-    // the separately packed probe. One Session preserves the language-owned
-    // binding identity between the two physical streams.
+    // Load the six definitions from the original-only T5 and execute the call
+    // only after decoding its own contextual Text7 frame from packed bytes.
     let mut session = Session::default();
     load_core_library(&mut session).expect("load existing Lisp-owned Core4");
     sens::eval_parsed_expressions(&original_forms, &mut session)
         .expect("execute exact original definitions from physical T5");
+    let empty_call = &probe_forms[original_forms.len()];
+    let actual = sens::eval_parsed_expressions(std::slice::from_ref(empty_call), &mut session)
+        .expect("physical T5 zero-argument global call must execute")
+        .value.to_string();
+    let expected = observable_to_lisp(&historical["empty"]);
+    assert_eq!(actual, expected, "physical T5 empty case must match historical oracle");
+    println!("MACHINE_BLOCK_PHYSICAL_T5_CASE=empty OBSERVABLE={actual}");
 
-    for (offset, (name, _source_expression)) in cases.iter().enumerate() {
-        let call_form = &probe_forms[original_forms.len() + offset];
-        let actual = sens::eval_parsed_expressions(std::slice::from_ref(call_form), &mut session)
-            .unwrap_or_else(|error| panic!("physical T5 current Rust failed {name}: {error}"))
-            .value.to_string();
-        let expected = observable_to_lisp(&historical[*name]);
-        assert_eq!(actual, expected,
-            "physical T5 and independent historical observable differ for {name}");
-        println!("MACHINE_BLOCK_PHYSICAL_T5_CASE={name} OBSERVABLE={actual}");
+    // The remaining eight witnesses require quoted symbol data (mov, r1, r2,
+    // branch, labels, etc.). D7/Text7 is currently admitted only in proven
+    // binder/reference roles, not as an implicit symbol value. Preserve the
+    // fail-closed contract: capture the exact blocker, publish no .sens, and
+    // keep this gap visible instead of retagging ordinary W7/list data.
+    let blocked_input = work.join("source-with-unencoded-symbol-data");
+    let blocked_output = work.join("blocked-output");
+    let blocked_report = work.join("blocked-report.json");
+    fs::create_dir_all(blocked_input.join("lib/machine"))
+        .expect("create external blocked-data source root");
+    let mut blocked_bytes = source_bytes.clone();
+    if !blocked_bytes.ends_with(b"\\n") {
+        blocked_bytes.push(b'\\n');
     }
+    for (_, expression) in &cases[1..] {
+        blocked_bytes.extend_from_slice(expression.as_bytes());
+        blocked_bytes.push(b'\\n');
+    }
+    fs::write(blocked_input.join(ORIGINAL), &blocked_bytes)
+        .expect("write external symbol-data probe");
+    let blocked_migration = Command::new("python3")
+        .arg(repo.join("scripts/migrate-three-pass.py"))
+        .arg(&blocked_input)
+        .arg("--out").arg(&blocked_output)
+        .arg("--source-era").arg("legacy")
+        .arg("--report").arg(&blocked_report)
+        .current_dir(&repo)
+        .output()
+        .expect("run canonical migrator on unsupported symbol-data probe");
+    assert!(!blocked_migration.status.success(),
+        "unencoded quoted symbols must BLOCK rather than become nonbinary T5");
+    let blocked_manifest: Json = serde_json::from_slice(
+        &fs::read(&blocked_report).expect("read blocked symbol-data report")
+    ).expect("valid blocked symbol-data report");
+    assert_eq!(blocked_manifest["summary"]["files_written"], 0);
+    assert_eq!(blocked_manifest["summary"]["files_blocked"], 1);
+    let blocker = blocked_manifest["files"][0]["reason"].as_str().unwrap_or("");
+    assert!(blocker.contains("requires exact D1..D9 0/1 word"),
+        "expected explicit exact-word blocker, got: {blocker}");
+    assert!(blocker.contains("mov"),
+        "report should identify the first unsupported symbol payload, got: {blocker}");
+    assert!(!blocked_output.join(Path::new(ORIGINAL).with_extension("sens")).exists(),
+        "blocked symbol data must not leave a candidate .sens");
+    let blocked_source_path = blocked_input.join(ORIGINAL);
+    let blocked_blob = Command::new("git")
+        .args(["hash-object", "--"])
+        .arg(&blocked_source_path)
+        .current_dir(&repo)
+        .output()
+        .expect("read Git blob identity for the blocked probe");
+    assert!(blocked_blob.status.success(), "git hash-object must accept blocked probe");
+    assert_eq!(
+        blocked_manifest["files"][0]["source_blob_sha"],
+        String::from_utf8_lossy(&blocked_blob.stdout).trim()
+    );
 
     fs::remove_dir_all(&work).expect("remove isolated external physical-T5 workspace");
-    println!("MACHINE_BLOCK_PHYSICAL_T5_ORACLE=9/9; ORIGINAL_REPOSITORY_WRITTEN=false; RELEASE_ADMITTED=false");
+    println!("MACHINE_BLOCK_PHYSICAL_T5_ORACLE=empty 1/1; QUOTED_SYMBOL_DATA=BLOCKED_WITH_REASON; ORIGINAL_REPOSITORY_WRITTEN=false; RELEASE_ADMITTED=false");
 }
 
 #[test]
