@@ -1,0 +1,85 @@
+name: D10 first-order symbolic anti-unification source oracles
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-first-order-lgg-research-v1.json'
+      - 'scripts/research_d10_first_order_lgg.py'
+      - 'tests/test_research_d10_first_order_lgg.py'
+      - 'tests/oracles/d10_first_order_lgg.pl'
+      - 'lib/reason.lisp'
+      - 'knowledge/d10-ai-interest-proposal-v1.json'
+      - '.github/workflows/d10-first-order-lgg.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-first-order-lgg-research-v1.json'
+      - 'scripts/research_d10_first_order_lgg.py'
+      - 'tests/test_research_d10_first_order_lgg.py'
+      - 'tests/oracles/d10_first_order_lgg.pl'
+      - 'lib/reason.lisp'
+      - 'knowledge/d10-ai-interest-proposal-v1.json'
+      - '.github/workflows/d10-first-order-lgg.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  two-independent-symbolic-oracles:
+    name: Source pins, Python finite terms and real SWI-Prolog witness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install actual independent SWI-Prolog
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends swi-prolog-nox
+          swipl --version
+      - name: Source-authenticated D10 HOLD and exhaustive independent logic oracles
+        env:
+          D10_REQUIRE_SWIPL: '1'
+        run: python3 -m unittest discover -s tests -p 'test_research_d10_first_order_lgg.py' -v
+      - name: Prove direct Python and SWI-Prolog read-only CLI parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/d10-lgg-input.json" <<'PY'
+          import json,sys
+          a=lambda x:{"a":x}
+          f=lambda h,*args:{"f":h,"args":list(args)}
+          rows=[
+            {"left":f("pair",a("a"),a("a")), "right":f("pair",a("b"),a("b"))},
+            {"left":f("pair",a("a"),a("b")), "right":f("pair",a("b"),a("a"))},
+            {"left":f("observation",a("star"),f("band",a("radio"))),
+             "right":f("observation",a("star"),f("band",a("optical")))}
+          ]
+          with open(sys.argv[1],"w",encoding="utf-8") as out:
+            json.dump(rows,out,ensure_ascii=False)
+          PY
+          python3 scripts/research_d10_first_order_lgg.py \
+            --cases "$RUNNER_TEMP/d10-lgg-input.json" > "$RUNNER_TEMP/d10-lgg-python.json"
+          swipl -q -s tests/oracles/d10_first_order_lgg.pl -- \
+            "$RUNNER_TEMP/d10-lgg-input.json" > "$RUNNER_TEMP/d10-lgg-prolog.json"
+          python3 - "$RUNNER_TEMP/d10-lgg-python.json" "$RUNNER_TEMP/d10-lgg-prolog.json" <<'PY'
+          import json,sys
+          a,b=[json.load(open(p,encoding="utf-8")) for p in sys.argv[1:]]
+          assert a==b,(a,b)
+          assert a[0]["generalizer"]["args"]==[{"hole":"V0"},{"hole":"V0"}]
+          assert a[1]["generalizer"]["args"]==[{"hole":"V0"},{"hole":"V1"}]
+          print("D10_RESEARCH_ONLY independent_2_oracles=PASS selected_change=0 ratified=0 coordinates=0 physical_sens=0")
+          PY
+      - name: Preserve study witnesses, not selected or executable artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d10-first-order-anti-unify-source-oracles
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/d10-lgg-input.json
+            ${{ runner.temp }}/d10-lgg-python.json
+            ${{ runner.temp }}/d10-lgg-prolog.json
