@@ -1,0 +1,31 @@
+name: D10 symbolic AI ATMS and STRIPS historical research
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-historical-atms-strips-law-intake-20261009.json
+      - tests/test_d10_historical_ai_foundations.py
+      - .github/workflows/d10-historical-atms-strips.yml
+      - knowledge/d10-proposal-ledger.tsv
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-historical-atms-strips-law-intake-20261009.json
+      - tests/test_d10_historical_ai_foundations.py
+      - .github/workflows/d10-historical-atms-strips.yml
+
+permissions:
+  contents: read
+
+jobs:
+  historical-oracles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify ATMS minimal contexts and STRIPS exact regression truth tables
+        run: python3 tests/test_d10_historical_ai_foundations.py
+      - name: Verify pending source-backed D10 proposal ledger
+        run: |
+          python3 scripts/check-d10-proposal-ledger.py --self-test
+          python3 scripts/check-d10-proposal-ledger.py
