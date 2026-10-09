@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - knowledge/d10-clhs-streams-census-20261009.json
+      - knowledge/d10-clhs-streams-sbcl-oracle-20261009.json
+      - tests/oracles/d10-clhs-streams.sbcl
       - docs/research/D10-CLHS-STREAMS-CENSUS.uk.md
       - scripts/check_d10_clhs_streams_census.py
       - .github/workflows/d10-clhs-streams-census.yml
@@ -12,6 +14,8 @@ on:
       - main
     paths:
       - knowledge/d10-clhs-streams-census-20261009.json
+      - knowledge/d10-clhs-streams-sbcl-oracle-20261009.json
+      - tests/oracles/d10-clhs-streams.sbcl
       - scripts/check_d10_clhs_streams_census.py
       - .github/workflows/d10-clhs-streams-census.yml
 
