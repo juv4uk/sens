@@ -43,5 +43,5 @@ jobs:
       - name: Probe lexical LET and map behavior without weakening Canon
         run: cargo test -p sens --test canon_let_ephemeral_diagnostic -- --nocapture
       - name: Execute full Canon V2 Lisp-owned witness (no skips)
-        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+        run: cargo test -p sens --test canon_d1_migration_cohort -- --nocapture
 # Diagnostic probe pass v2: compare historical ATOM (0) against exact EQUAL transport
