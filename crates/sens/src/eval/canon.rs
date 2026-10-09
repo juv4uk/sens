@@ -431,11 +431,6 @@ pub(crate) fn invoke_domain_identity(
         return canonicalize_domain_result(identity, value, span);
     }
 
-    if let Some(result) = super::d5_predicates::invoke(identity, args, span) {
-        let value = result?;
-        return canonicalize_domain_result(identity, value, span);
-    }
-
     if let Some(result) = super::d6_arithmetic::invoke(identity, args, environment, span) {
         return result;
     }
