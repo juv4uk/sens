@@ -151,7 +151,8 @@ fn oracle_check_file_is_agent_friendly_and_side_effect_free() {
 
 #[test]
 fn oracle_check_valid_file_returns_zero_without_evaluating_it() {
-    let path = std::env::temp_dir().join("sens-oracle-check-valid.sens");
+    // Agent syntax preflight is a textual-compatibility tool, not a .sens/T5 reader.
+    let path = std::env::temp_dir().join("sens-oracle-check-valid.lisp");
     // Unknown symbol would fail evaluation, but syntax-only preflight must
     // accept it. This proves the command does not silently become eval.
     std::fs::write(&path, "(not-defined-here 1)").expect("should write fixture");
@@ -274,32 +275,74 @@ fn running_a_source_file_prints_its_result() {
     assert_eq!(stdout.trim(), "3");
 }
 
-/// Smoke test: supported SENS aliases (.sens/.сенс) and the three existing Latin source
-/// extensions all execute the same program identically. .lisp stays canonical.
-/// No parser semantics change — only filename-surface acceptance.
+/// Historical human-source extensions remain compatibility inputs only.
+/// A physical .sens file must never be a textual alias of these extensions.
 #[test]
-fn sens_and_existing_source_extensions_run_identically() {
+fn textual_compatibility_extensions_do_not_claim_sens_binary_identity() {
     let dir = std::env::temp_dir();
     let code = "(+ 1 2)";
-    let mut results = Vec::new();
 
-    for ext in [".sens", ".wsm", ".my", ".lisp", ".сенс"] {
+    for ext in [".wsm", ".my", ".lisp", ".сенс"] {
         let path = dir.join(format!("my-lisp-cli-test-ext{ext}"));
-        std::fs::write(&path, code).expect("should write temp file");
+        std::fs::write(&path, code).expect("should write compatibility source");
 
         let output = legacy_bin().arg(&path).output().expect("binary should run");
         let _ = std::fs::remove_file(&path);
 
-        assert!(output.status.success(), "{ext} should succeed");
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        results.push((ext, stdout.trim().to_string()));
+        assert!(
+            output.status.success(),
+            "{ext}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "3", "{ext}");
     }
+}
 
-    assert_eq!(results[0].1, "3", ".sens output");
-    assert_eq!(results[1].1, "3", ".wsm output");
-    assert_eq!(results[2].1, "3", ".my output");
-    assert_eq!(results[3].1, "3", ".lisp output");
-    assert_eq!(results[4].1, "3", ".сенс output");
+/// The active CLI consumes real physical T5 bytes, not a Lisp UTF-8 file
+/// renamed to .sens. Both routes are checked through the compiled CLI.
+#[test]
+fn sens_binary_executes_physical_t5_without_a_human_name_parser() {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+    );
+    let bytes = std::fs::read(path).expect("committed physical T5 fixture");
+    assert!(!bytes.is_empty());
+    // The physical carrier is a sequence of packed bytes, never the
+    // displayed zero/one source with spaces.
+    assert_ne!(bytes, b"10 001 00 10 01 01");
+
+    let output = sens().arg(path).output().expect("canonical SENS CLI");
+    assert!(
+        output.status.success(),
+        "physical T5 rejected: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "()");
+
+    // No hidden Core4/human-compatibility interpretation is allowed for T5.
+    let flagged = sens()
+        .arg("--core=4")
+        .arg(path)
+        .output()
+        .expect("physical T5 request with a flag");
+    assert!(!flagged.status.success());
+}
+
+#[test]
+fn sens_binary_rejects_text_disguised_as_physical_t5() {
+    let path = std::env::temp_dir().join("sens-cli-physical-no-text-alias.sens");
+    std::fs::write(&path, b"(quote ())").expect("write deliberate textual counterfeit");
+    let output = sens().arg(&path).output().expect("canonical SENS CLI");
+    let _ = std::fs::remove_file(&path);
+    assert!(!output.status.success(), "textual .sens was executed as Lisp");
+    let diagnostic = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        diagnostic.contains("physical T5")
+            || diagnostic.contains("exact binary reader")
+            || diagnostic.contains("current SENS execution"),
+        "missing physical-binary rejection diagnostic: {diagnostic}"
+    );
 }
 
 #[test]
