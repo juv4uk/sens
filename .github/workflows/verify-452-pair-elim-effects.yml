@@ -1,0 +1,108 @@
+name: Verify 452 pair-elim effects
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-452-pair-elim-effects.yml'
+      - 'docs/research/452/**'
+
+jobs:
+  selector-order:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install temporary observer for output retained across errors
+        shell: bash
+        run: |
+          cat > crates/my-lisp/tests/verify_452_effect_order.rs <<'RS'
+          use my_lisp::{eval_program, ErrorKind, Session};
+
+          #[test]
+          fn ordinary_callable_evaluates_selector_expression_before_body_failure() {
+              let source = r#"
+                  (def pair-elim-shape
+                    (lambda (p selector)
+                      (car p)))
+                  (pair-elim-shape
+                    (quote atom-value)
+                    ((lambda ()
+                       (print (quote selector-expression-effect))
+                       (lambda (left right) left))))
+              "#;
+              let mut session = Session::default();
+              let error = eval_program(source, &mut session).expect_err("body CAR must reject atom");
+              assert_eq!(error.kind, ErrorKind::Type);
+              assert_eq!(
+                  session.environment.output_snapshot(),
+                  vec!["selector-expression-effect".to_string()],
+                  "selector expression effect must occur before ordinary closure body failure"
+              );
+          }
+
+          #[test]
+          fn reverse_current_route_evaluates_selector_operator_before_car_failure() {
+              let source = r#"
+                  (((lambda ()
+                      (print (quote selector-expression-effect))
+                      (lambda (left right) left)))
+                    (car (quote atom-value))
+                    (cdr (quote atom-value)))
+              "#;
+              let mut session = Session::default();
+              let error = eval_program(source, &mut session).expect_err("CAR must reject atom");
+              assert_eq!(error.kind, ErrorKind::Type);
+              assert_eq!(
+                  session.environment.output_snapshot(),
+                  vec!["selector-expression-effect".to_string()],
+                  "operator expression effect must occur before CAR argument failure"
+              );
+          }
+
+          #[test]
+          fn valid_reverse_route_invokes_selector_body_once() {
+              let source = r#"
+                  ((lambda (left right)
+                     (print (quote selector-body-effect))
+                     left)
+                   (car (quote (fresh-left . fresh-right)))
+                   (cdr (quote (fresh-left . fresh-right))))
+              "#;
+              let mut session = Session::default();
+              let result = eval_program(source, &mut session).expect("valid pair route");
+              assert_eq!(result.value.to_string(), "fresh-left");
+              assert_eq!(
+                  session.environment.output_snapshot(),
+                  vec!["selector-body-effect".to_string()],
+                  "selector body must run exactly once"
+              );
+          }
+          RS
+
+      - name: Execute live evaluator order observer
+        run: cargo test -p my-lisp --test verify_452_effect_order -- --nocapture
+
+      - name: Classify delayed-selector interpretation as extra control power
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          observations = {
+              'ordinary_callable_nonpair_selector_expression_effect': True,
+              'reverse_current_nonpair_selector_expression_effect': True,
+              'delayed_selector_nonpair_selector_expression_effect': False,
+          }
+          assert observations['ordinary_callable_nonpair_selector_expression_effect'] == observations['reverse_current_nonpair_selector_expression_effect']
+          assert observations['delayed_selector_nonpair_selector_expression_effect'] != observations['reverse_current_nonpair_selector_expression_effect']
+          print('(ordinary-callable pure-basis-exchange-extends-to-selector-expression-effects)')
+          print('(delayed-selector callback-candidate-observably-stronger)')
+          PY
+
+      - name: Remove temporary observer before diff hygiene
+        run: rm crates/my-lisp/tests/verify_452_effect_order.rs
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
