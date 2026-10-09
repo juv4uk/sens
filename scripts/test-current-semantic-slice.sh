@@ -16,14 +16,29 @@ cargo test -p sens \
 
 
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
-# but it is intentionally not executed by the current semantic slice. Contract
-# 11.8 assigns W8 to exact D8 identity; Sens8/Sid8 remains migration/provenance only.
-# #291: quantity semantics live in Lisp. The shell observes only the named
-# pass envelope; expected scientific quantities and relations stay in the
-# Lisp witness itself. No replacement Rust observer is introduced.
-quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
-if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-  printf 'exact quantity Lisp witness failed: %s\n' "$quantity_status" >&2
+# but is intentionally not executed by the current semantic slice.
+#
+# #291 legacy quantity witness: KEEP its original Lisp and mathematical records as
+# provenance, but do not execute it in the exact-domain lane yet. Its named-call
+# path still requires retired 8-bit/function-name dispatch and fails closed at
+# D4:0100 (no admitted value-call mechanism). Do not weaken that law to keep an
+# old fixture green. Quantity arithmetic remains BLOCKED pending a real canonical
+# Ukrainian->physical-T5 migration and independent quantity oracle parity.
+#
+# Replace only this invalid current-lane dependency with an admitted physical
+# T5 D1/D3 control witness. This is a binary execution/round-trip smoke, NOT a
+# claim that the quantity arithmetic witness passed.
+cond_sens="tests/fixtures/migration-d1-cond-cohort/branch.sens"
+cond_view="tests/fixtures/migration-d1-cond-cohort/branch"
+actual_cond_view="$(cargo run --quiet -p sens-cli --bin sens-trit -- open "$cond_sens")"
+expected_cond_view="$(cat "$cond_view")"
+if [[ "$actual_cond_view" != "$expected_cond_view" ]]; then
+  printf 'physical D1/D3 T5 view mismatch: %s\\n' "$actual_cond_view" >&2
+  exit 1
+fi
+binary_cond_status="$(cargo run --quiet -p sens-cli --bin sens -- "$cond_sens")"
+if [[ -z "$binary_cond_status" ]]; then
+  printf 'physical D1/D3 T5 program returned an empty process result\\n' >&2
   exit 1
 fi
 
