@@ -58,6 +58,7 @@ class CongruenceHobbyResearch(unittest.TestCase):
 
     def test_fail_closed_manifest_mutations(self):
         raw = json.loads(m.DOSSIER.read_text())
+        original_read_text = Path.read_text
         cases = [
             ("ratified", True), ("selected", True), ("coordinate", "0000000001"),
             ("semantic_name", "MODULO"), ("source_era", "legacy-sid8")
@@ -66,11 +67,10 @@ class CongruenceHobbyResearch(unittest.TestCase):
             clone = json.loads(json.dumps(raw))
             clone["proposal"][key] = value
             with patch.object(m.Path, "read_text", autospec=True) as reader:
-                real = m.DOSSIER.read_text
                 def synthetic(instance, *args, **kwargs):
                     if instance == m.DOSSIER:
                         return json.dumps(clone)
-                    return real(*args, **kwargs)
+                    return original_read_text(instance, *args, **kwargs)
                 reader.side_effect = synthetic
                 with self.subTest(key=key), self.assertRaises(AssertionError):
                     m.validate_dossier()
