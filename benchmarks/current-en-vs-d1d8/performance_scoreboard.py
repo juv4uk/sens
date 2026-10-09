@@ -149,7 +149,70 @@ def physical_hot_report(path: Path) -> tuple[list[str], dict]:
         f"samples per phase: {environment.get('samples', 'unknown')}.",
         "",
     ]
-    return out, {"environment": environment, "cases": results}
+    # Compare the *same* binary source and T5 bytes through the historical
+    # allocation-heavy encoder versus the current streaming encoder.
+    # Measurements are on one runner/SHA and are not an overall-language win.
+    encoder_cases = []
+    has_any_encoder_phase = any(
+        ("t5_encode_two_pass" in phases or "t5_encode_streaming" in phases)
+        for phases in by_count.values()
+    )
+    if has_any_encoder_phase:
+        out.extend([
+            "## Physical T5 encoding · measured two-pass versus streaming",
+            "",
+            "Both lanes start with identical exact-domain words, produce the "
+            "same physical T5 bytes and run on the same CPU. The ratio "
+            "two-pass / streaming above 1 means the streaming encoder won "
+            "this specific workload; below 1 means it lost.",
+            "",
+            "| D3 QUOTE forms | Physical T5 bytes | Two-pass p50 ns | "
+            "Streaming p50 ns | Two-pass / streaming | Streaming p95 ns | "
+            "Paired series |",
+            "|---:|---:|---:|---:|---:|---:|---:|",
+        ])
+        for n, phases in sorted(by_count.items()):
+            needed = {"t5_encode_two_pass", "t5_encode_streaming"}
+            if not needed.issubset(phases):
+                raise ValueError(
+                    f"{n} forms lacks paired T5 encoding phases: "
+                    f"{sorted(needed - set(phases))}"
+                )
+            two_pass = phases["t5_encode_two_pass"]
+            streaming = phases["t5_encode_streaming"]
+            if two_pass["samples"] != streaming["samples"]:
+                raise ValueError(f"{n} forms has unequal encoding series counts")
+            if two_pass["physical_sha256"] != streaming["physical_sha256"]:
+                raise ValueError(f"{n} forms encoding compared different T5 bytes")
+            if two_pass["observable"] != streaming["observable"]:
+                raise ValueError(f"{n} forms encoder results differ")
+            baseline = two_pass["median_ns_op"]
+            current = streaming["median_ns_op"]
+            ratio = baseline / current
+            result = {
+                "forms": n,
+                "physical_bytes": streaming["physical_bytes"],
+                "two_pass_median_ns": baseline,
+                "streaming_median_ns": current,
+                "streaming_p95_ns": streaming["p95_ns_op"],
+                "two_pass_over_streaming": ratio,
+                "paired_series": streaming["samples"],
+                "physical_sha256": streaming["physical_sha256"],
+            }
+            encoder_cases.append(result)
+            out.append(
+                f"| {n} | {result['physical_bytes']} | {baseline:,} | "
+                f"{current:,} | {ratio:.3f}x | "
+                f"{streaming['p95_ns_op']:,} | {streaming['samples']} |"
+            )
+        out.extend([
+            "",
+            "Measured encoder ratio is an implementation-local T5 packing "
+            "comparison, not a claim about interpreter throughput. "
+            "Incorrect byte parity blocks timing upstream.",
+            "",
+        ])
+    return out, {"environment": environment, "cases": results, "encoding": encoder_cases}
 
 
 def pack_report(path: Path) -> tuple[list[str], dict]:
