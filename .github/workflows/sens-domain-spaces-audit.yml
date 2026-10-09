@@ -1,0 +1,38 @@
+name: sens-domain-spaces-audit
+
+on:
+  pull_request:
+    paths:
+      - "scripts/check-sens-domain-spaces.py"
+      - "tests/test_sens_domain_spaces.py"
+      - ".github/workflows/sens-domain-spaces-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/check-sens-domain-spaces.py"
+      - "tests/test_sens_domain_spaces.py"
+      - ".github/workflows/sens-domain-spaces-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-domain-spaces:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test word boundaries without rejoining binary words
+        run: python3 -m unittest tests/test_sens_domain_spaces.py -v
+      - name: Explain the current physical-storage blocker
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' '10 001 00 000 01' > "${RUNNER_TEMP}/sample.sens"
+          python3 scripts/check-sens-domain-spaces.py "${RUNNER_TEMP}/sample.sens"
+          if python3 scripts/check-sens-domain-spaces.py "${RUNNER_TEMP}/sample.sens" --require-physical-exact; then
+            echo "ERROR: ASCII domain boundaries were incorrectly reported as physically bit-exact"
+            exit 1
+          else
+            echo "PASS: physical bit-exact remains blocked, not misrepresented as success"
+          fi
