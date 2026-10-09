@@ -1,0 +1,74 @@
+name: Core-Math independent Rust demand replay
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/core-math-demand-rust/**"
+      - ".github/workflows/core-math-demand-rust.yml"
+      - "benchmarks/core-math-demand-derivation/**"
+      - "benchmarks/core-math-autonomous-closure/**"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/core-math-demand-rust/**"
+      - ".github/workflows/core-math-demand-rust.yml"
+  workflow_dispatch:
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build Python demand oracle independently
+        run: |
+          rm -rf /tmp/core-math-demand-python
+          python3 benchmarks/core-math-demand-derivation/run.py             --out /tmp/core-math-demand-python
+
+      - name: Run standalone Rust demand executor
+        run: |
+          rm -rf /tmp/core-math-demand-rust
+          cargo run --quiet             --manifest-path benchmarks/core-math-demand-rust/Cargo.toml             -- --out /tmp/core-math-demand-rust
+
+      - name: Compare independent request results
+        run: |
+          python3 - <<'PY'
+          import csv
+
+          with open("/tmp/core-math-demand-python/request-results.tsv", encoding="utf-8") as fh:
+              py = {r["request_id"]: r for r in csv.DictReader(fh, delimiter="\t")}
+          with open("/tmp/core-math-demand-rust/rust-results.tsv", encoding="utf-8") as fh:
+              rs = {r["request_id"]: r for r in csv.DictReader(fh, delimiter="\t")}
+
+          assert py.keys() == rs.keys() == {"r1", "r2", "r3"}
+          fields = ["identity", "depth", "arity", "signature_sha256", "undefined_cases"]
+          for request_id in sorted(py):
+              for field in fields:
+                  assert py[request_id][field] == rs[request_id][field], (
+                      request_id, field, py[request_id][field], rs[request_id][field]
+                  )
+          print("PYTHON-RUST-DEMAND-PARITY=PASS")
+          print("REQUESTS=r1,r2,r3")
+          PY
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Independent Rust demand replay — #2483"
+            echo
+            echo "- Python demand oracle and standalone Rust replay use the same neutral spec + certificates."
+            echo "- Rust invokes no Python/SENS/Core semantic engine."
+            echo "- Identity/depth/arity/signature/undefined parity is checked dynamically."
+            echo "- No generated identity is hard-coded into Rust."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-math-demand-rust
+          path: |
+            /tmp/core-math-demand-python/
+            /tmp/core-math-demand-rust/
+          retention-days: 14

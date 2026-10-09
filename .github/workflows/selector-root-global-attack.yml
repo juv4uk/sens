@@ -1,0 +1,41 @@
+name: Selector root global attack research
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research-2409-selector-root-global-attack.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/selector-root-global-attack.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/research-2409-selector-root-global-attack.py"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/selector-root-global-attack.yml"
+  workflow_dispatch:
+
+jobs:
+  phase-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run no-observer selector-root attack
+        run: |
+          rm -rf /tmp/selector-root-global-attack
+          python3 scripts/research-2409-selector-root-global-attack.py \
+            --max-depth 4 \
+            --state-cap 4000 \
+            --out /tmp/selector-root-global-attack
+      - name: Publish report
+        if: always()
+        run: |
+          if test -f /tmp/selector-root-global-attack/report.md; then
+            cat /tmp/selector-root-global-attack/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selector-root-global-attack
+          path: /tmp/selector-root-global-attack/
+          retention-days: 14
