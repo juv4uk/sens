@@ -81,7 +81,7 @@ class OwnerLaws(unittest.TestCase):
         self.assertIn(("L5", "BLOCK"), verdicts(found))
 
     def test_l5_quoted_archaeology_is_data_not_execution(self):
-        _, found = apply("'(structural-kind ()))")
+        _, found = apply("'(structural-kind ())")
         self.assertEqual(found, [])
 
     def test_l6_old_three_part_cond_blocks(self):
