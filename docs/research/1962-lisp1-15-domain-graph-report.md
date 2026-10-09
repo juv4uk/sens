@@ -12,30 +12,35 @@ D3 = QUOTE / COND / LAMBDA / LABEL
 mūla4 = ATOM / EQ / CAR / CDR / CONS
 ```
 
-Вона **більше не є current hypothesis**. Власник помітив сильнішу
-структуру: наш старий `() + McCarthy-7` уже утворює рівно повний
-3-бітний простір.
+Вона **більше не є current hypothesis**. Важливе виправлення цього звіту:
+пізніше тут помилково повторили стару перестановку імен. Поточне канонічне
+джерело — `lib/domains/d3.lisp`; його ратифікована карта:
 
 ```text
 000  ()
 001  QUOTE
 010  ATOM
-011  EQ
-100  CONS
-101  CAR
-110  CDR
-111  COND
+011  CDR
+100  CAR
+101  EQ
+110  COND
+111  CONS
 ```
 
-Тобто:
+Це рівно один ground-value і сім конститутивних операцій:
 
 ```text
 1 ground + 7 constitutive operations = 8 = 2^3
 ```
 
+Раніше наведена в цьому звіті перестановка
+`011 EQ / 100 CONS / 101 CAR / 110 CDR / 111 COND` є
+**застарілим дослідницьким артефактом, не D3-авторитетом**. Жодна
+канонічна таблиця не змінюється заради узгодження старого документа.
+
 Старі перші вісім 8-бітних записів
 `00000000..00000111` у цьому research трактуються лише як
-zero-padded projection цього зерна, а не як доказ плоскої
+zero-padded projection історичного зерна, а не як доказ плоскої
 256-функціональної ontology.
 
 ## Гіпотеза prefix-графа
@@ -63,41 +68,37 @@ children(p)  = p0, p1
 
 Це перший сильний позитивний witness.
 
-Беремо:
+Ортогональна до dependency-схеми selector-гілка спирається на
+два **поточні D3 residents**, не на старі номери:
 
 ```text
-0 -> A -> CAR
-1 -> D -> CDR
+100 -> CAR
+011 -> CDR
 ```
 
-І два seed-вузли:
+У чинних D4/D5 таблицях продовження selector-сім'ї узгоджується з цими батьками:
 
 ```text
-101 -> CAR
-110 -> CDR
+1000   CAAR
+1001   CADR
+0110   CDAR
+0111   CDDR
+
+10000  CAAAR
+10001  CAADR
+10010  CADAR
+10011  CADDR
+
+01100  CDAAR
+01101  CDADR
+01110  CDDAR
+01111  CDDDR
 ```
 
-Тоді кожен доданий біт **буквально додає ще один selector**:
-
-```text
-1010   CAAR
-1011   CADR
-1100   CDAR
-1101   CDDR
-
-10100  CAAAR
-10101  CAADR
-10110  CADAR
-10111  CADDR
-
-11000  CDAAR
-11001  CDADR
-11010  CDDAR
-11011  CDDDR
-```
-
-Тут prefix relation має реальний compositional meaning, а не лише
-адресне сусідство.
+Тут кожен доданий біт вибирає A- або D-проєкцію всередині попереднього
+selector. Це compositional meaning, а не дозвіл переприсвоювати координати:
+перевіряти його треба проти канонічних `lib/domains/d3.lisp`,
+`lib/domains/d4.lisp` і `lib/domains/d5.lisp`.
 
 Для selector subtree на ширині `n >= 3`:
 
@@ -194,11 +195,11 @@ prefix edge --[typed evidence]--> semantic relation
 000 ()     -> NULL?                         medium; multi-root dependency
 001 QUOTE  -> LAMBDA / LABEL?               medium; representation/binding family
 010 ATOM   -> type predicates?              open
-011 EQ     -> EQUAL / MEMBER?               medium; equality/search family
-100 CONS   -> LIST / APPEND?                medium-to-strong construction family
-101 CAR    -> CAAR / CADR                   PROVEN prefix composition
-110 CDR    -> CDAR / CDDR                   PROVEN prefix composition
-111 COND   -> AND / OR / NOT / implication  historical derivability; binary placement open
+011 CDR    -> CDAR / CDDR                   PROVEN selector composition
+100 CAR    -> CAAR / CADR                   PROVEN selector composition
+101 EQ     -> EQUAL / MEMBER?               medium; equality/search family
+110 COND   -> AND / OR / NOT / implication  historical derivability; binary placement open
+111 CONS   -> LIST / APPEND?                medium-to-strong construction family
 ```
 
 Головне правило: **не заповнювати порожній child лише заради симетрії**.
