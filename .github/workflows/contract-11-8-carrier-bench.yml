@@ -1,8 +1,8 @@
 name: Contract 11.8 carrier replay
 
 # Fresh workflow identity for #4136. Benchmark semantics are owned by #4129/#4132.
-# Current semantic authority is D1-D9; current main materializes W1-W8 only.
-# D9 remains explicit BLOCKED-CARRIER until #4038/#4044 lands.
+# Current semantic authority is D1-D9; main materializes W1-W9 exactly.
+# W9's u16 carrier cost is measured without inventing D9 callability.
 
 on:
   workflow_dispatch:
