@@ -1,0 +1,46 @@
+name: Regenerate current Core4 FASL snapshot
+
+on:
+  push:
+    branches:
+      - fix/core4-fasl-current-main-20261009
+    paths:
+      - 'lib/core4.lisp'
+      - 'lib/core4.lisp.fasl'
+      - '.github/workflows/regenerate-core4-fasl-current.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: core4-fasl-current-main
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/core4-fasl-current-main-20261009
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate derived FASL from current canonical source
+        run: cargo run --locked --release --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Verify source/FASL invariant
+        run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Check patch hygiene
+        run: git diff --check
+      - name: Commit generated binary only when changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- lib/core4.lisp.fasl; then
+            echo "Core4 FASL already matches source."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- lib/core4.lisp.fasl
+          git commit -m "chore(fasl): regenerate Core4 snapshot from current source"
+          git push origin HEAD:refs/heads/fix/core4-fasl-current-main-20261009
