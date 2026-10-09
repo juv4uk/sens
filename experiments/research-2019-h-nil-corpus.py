@@ -144,7 +144,7 @@ def contract_has_ground_separation(contract: str) -> bool:
     Відсутність чи зміна нормативного поля завершується fail-closed.
     """
     match = re.search(
-        r'(?m)^[ \\t]*\\(structural-empty-non-alias\\s*\\.\\s*"(?P<law>(?:\\\\.|[^"\\\\])*)"\\s*\\)',
+        r'(?m)^[ \t]*\(structural-empty-non-alias\s*\.\s*"(?P<law>(?:\\.|[^"\\])*)"\s*\)',
         contract,
     )
     if match is None:
