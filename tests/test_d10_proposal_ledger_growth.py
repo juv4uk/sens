@@ -80,7 +80,10 @@ class SelectionLedgerTrace(unittest.TestCase):
 
     def test_proposal_precedes_selection_without_forged_migration_block(self):
         lines=self.content.splitlines()
-        fields=lines[-1].split("\t")
+        # A negative control needs a specific historical selected row;
+        # later pending donors may legally extend the TSV after it.
+        fields=next(row.split("\t") for row in lines[1:]
+                    if row.split("\t")[3] == "DPB")
         fields[0]="D10P-9999"
         fields[1]="окремий-донор"
         fields[2]="незалежний-дослідний-донор"
