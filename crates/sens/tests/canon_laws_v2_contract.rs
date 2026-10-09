@@ -119,7 +119,7 @@ fn executable_canon_speaks_layered_answer_semantics() {
                     eprintln!(
                         "#229 probe {label}: {:?}",
                         eval_program(&probe, &mut session)
-                            .map(|value| value.value.to_string())
+                            .map(|value| format!("value={:?}, display={}", value.value, value.value))
                             .map_err(|e| format!("{:?}: {}", e.kind, e))
                     );
                 }
