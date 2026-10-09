@@ -35,7 +35,12 @@ jobs:
     timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
-      - name: Перевірити D10 intake та негативні контролі
-        run: python3 scripts/check-d10-proposal-ledger.py --self-test
-      - name: Перевірити контракти зростання й 10 негативних випадків
-        run: python3 -m unittest discover -s tests -p test_d10_proposal_ledger_growth.py -v
+        with:
+          fetch-depth: 0
+      - name: Перевірити D10 intake, append-only та нові selection-переходи
+        env:
+          D10_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          python3 scripts/check-d10-proposal-ledger.py --self-test
+          python3 -m unittest discover -s tests -p test_d10_proposal_ledger_growth.py -v
+          python3 scripts/check-d10-proposal-ledger.py --base-ref "$D10_BASE_REF"
