@@ -60,7 +60,7 @@ pub fn parse_canonical_packed_words(
         // `unpack_binary_source_words` has already checked the complete
         // schedule for overflow, valid widths and total payload length.
         bit_offset += word.width();
-        let end = bit_offset / 8 + usize::from(bit_offset % 8 != 0);
+        let end = bit_offset / 8 + usize::from(!bit_offset.is_multiple_of(8));
         tokens.push(BinarySourceToken {
             word,
             span: Span { start, end },
