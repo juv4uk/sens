@@ -81,7 +81,10 @@ class HistoricalSelectionEvolution(unittest.TestCase):
             "behavior": old["observable_law"], "positive_witnesses": [old["positive_witness"]],
             "falsifiers": [old["falsifier"]],
         })
-        with self.assertRaises(AssertionError):
+        inv["accounting"]["selected_semantic_candidates"] += 1
+        inv["accounting"]["unplaced_selected_candidates"] += 1
+        inv["accounting"]["remaining_semantic_inventory"] -= 1
+        with self.assertRaisesRegex(AssertionError, "Promoted historical HOLD"):
             slot_history.verify(self.slots, self.foundation, inv)
 
     def test_method_transition_only_for_review_semantics(self):
@@ -107,7 +110,7 @@ class HistoricalSelectionEvolution(unittest.TestCase):
             "behavior": old["observable_law"], "positive_witnesses": [old["positive_witness"]],
             "falsifiers": [old["falsifier"]],
         })
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, "untraced or unauthorized historical promotion"):
             method_history.verify(self.methods, self.foundation, inv)
 
 
