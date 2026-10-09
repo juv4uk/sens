@@ -1,0 +1,39 @@
+name: Historical branch merge census (read-only)
+
+on:
+  pull_request:
+    paths:
+      - "scripts/audit_branch_merges.py"
+      - "tests/test_audit_branch_merges.py"
+      - ".github/workflows/historical-branch-census.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-branch-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify merge-census classification on an isolated real Git repo
+        run: python3 -m unittest discover -s tests -p 'test_audit_branch_merges.py' -v
+      - name: Fetch remote branch heads without changing main
+        run: git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Classify full historical branch list against current main
+        run: python3 scripts/audit_branch_merges.py --main-ref origin/main --output artifacts/historical-branch-merge-census.json
+      - name: Upload evidence only
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-branch-merge-census
+          path: artifacts/historical-branch-merge-census.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Audit conclusion
+        run: |
+          echo "### Read-only branch census" >> "$GITHUB_STEP_SUMMARY"
+          echo "Git tree mergeability is not semantic or CI admission." >> "$GITHUB_STEP_SUMMARY"
+          echo "No main ref was changed; no merge was attempted." >> "$GITHUB_STEP_SUMMARY"
