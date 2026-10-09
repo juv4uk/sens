@@ -1,0 +1,96 @@
+# Verification-only / never merge. Replayed after parent checker parse repair.
+name: Verify 432 CAR CDR research
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-432-car-cdr-research.yml'
+      - 'docs/research/432/**'
+      - 'docs/superpowers/plans/2026-09-18-car-cdr-bounded-search.md'
+
+jobs:
+  research-probes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: verify-432-car-cdr-research
+
+      - name: Church-pair CAR route is genuinely RED
+        shell: bash
+        run: |
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/432/church-pair-car-red.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
+            echo 'Expected Church-pair CAR probe to fail, but it succeeded.' >&2
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -Eqi 'not callable|ne mozhna vyklykaty|nicht aufrufbar|expression is not callable'
+
+      - name: Church-pair CDR route is genuinely RED
+        shell: bash
+        run: |
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/432/church-pair-cdr-red.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
+            echo 'Expected Church-pair CDR probe to fail, but it succeeded.' >&2
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -Eqi 'not callable|ne mozhna vyklykaty|nicht aufrufbar|expression is not callable'
+
+      - name: EQ cannot inspect pair operands
+        shell: bash
+        run: |
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/432/eq-pair-red.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
+            echo 'Expected EQ-on-pair probe to fail, but it succeeded.' >&2
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -Eqi 'eq expects two atoms|eq ochikuie dva atomy|eq erwartet zwei Atome'
+
+      - name: Fresh-atom fixed point excludes projection capability
+        shell: bash
+        run: |
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/432/fresh-atom-fixed-point.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            echo "Fixed-point checker exited nonzero: $status" >&2
+            exit "$status"
+          fi
+          printf '%s\n' "$output" | grep -Fq 'relative-no-projection-capability'
+          printf '%s\n' "$output" | grep -Fq '(fresh-top-level no)'
+
+      - name: Concrete lower-basis runtime assumptions agree
+        shell: bash
+        run: |
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/432/lower-basis-runtime-witness.lisp 2>&1)
+          printf '%s\n' "$output"
+          printf '%s\n' "$output" | grep -Fq '(car-head-mutation-kind pair-observed pair-observed)'
+          printf '%s\n' "$output" | grep -Fq '(cdr-tail-mutation-kind pair-observed pair-observed)'
+          printf '%s\n' "$output" | grep -Fq '(cons-wrapper-kind pair-observed pair-observed)'
+          count=$(printf '%s\n' "$output" | grep -o '(structural-relation same)' | wc -l)
+          if [ "$count" -lt 4 ]; then
+            echo "Expected at least four structural-relation same observations, got $count" >&2
+            exit 1
+          fi
+
+      - name: Verification-only child has no whitespace errors
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
