@@ -34,6 +34,14 @@ class HistoricalLisp15ReconciliationTests(unittest.TestCase):
             MODULE.verify(review, load("knowledge/d1-d9-foundation.json"),
                           load("knowledge/d10-v1-semantic-inventory.json"))
 
+    def test_existing_mapatoms_is_deduplicated_and_obarray_remains_hold(self):
+        review = load("knowledge/d10-historical-lisp15-reconciliation-20261009.json")
+        row = next(x for x in review["rows"] if x["review_id"] == "L15-31")
+        self.assertIn("MAPATOMS", [x["name"] for x in row["exact_selected_d10_name_matches"]])
+        self.assertEqual(row["exact_name_residuals"], ["OBARRAY", "OBLIST"])
+        MODULE.verify(review, load("knowledge/d1-d9-foundation.json"),
+                      load("knowledge/d10-v1-semantic-inventory.json"))
+
     def test_requires_explicit_obarray_hypothesis(self):
         review = load("knowledge/d10-historical-lisp15-reconciliation-20261009.json")
         review["rows"] = review["rows"][:-1]
