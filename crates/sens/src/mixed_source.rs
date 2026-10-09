@@ -673,3 +673,4 @@ mod tests {
                 if identity.width() == 5 && identity.packed_bits() == 0
         ));
     }
+}
