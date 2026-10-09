@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse, copy, itertools, json
 from fractions import Fraction as F
 from pathlib import Path
-from check_d10_selection_transition_history import verify_history
+from check_d10_selection_transition_history import verify_history, TransitionFailure
 ROOT=Path(__file__).resolve().parents[1]
 P=ROOT/"knowledge/d10-clock-radio-math-selection-20261009.json"
 I=ROOT/"knowledge/d10-v1-semantic-inventory.json"
@@ -125,7 +125,7 @@ def adverse(p,i,s,f,h,doc):
         pp,ii,ss,hh=(copy.deepcopy(x) for x in (p,i,s,h))
         change(pp,ii,ss,hh)
         try:check(pp,ii,ss,f,hh,doc)
-        except (AssertionError,ValueError):return
+        except (AssertionError, ValueError, TransitionFailure):return
         raise AssertionError("adversarial metadata mutation not rejected")
     reject(lambda p,i,s,h:i["rows"][-1].__setitem__("coordinate","1111111111"))
     reject(lambda p,i,s,h:i["rows"][-1].__setitem__("ratified_resident",True))
