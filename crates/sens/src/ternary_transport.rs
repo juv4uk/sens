@@ -9,7 +9,10 @@
 //! Жодного D7-пробілу чи нового D10-резидента тут немає.
 //! Number D24+ ще не допускається до цього механічного носія.
 
-use crate::{parse_binary_source_words, BinarySourceWord};
+use crate::{
+    parse_binary_source_words, BinarySourceWord,
+    Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TernaryTransportError {
@@ -81,6 +84,44 @@ pub fn encode_ternary_words(
     Ok(encoded)
 }
 
+/// Lift a bit payload into the exact-width word carrier.
+/// This is a mechanical width operation only; it assigns no resident meaning.
+fn typed_binary_word(
+    width: usize,
+    payload: u16,
+) -> Result<BinarySourceWord, TernaryTransportError> {
+    Ok(match width {
+        1 => BinarySourceWord::W1(
+            Bit1::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        2 => BinarySourceWord::W2(
+            Bit2::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        3 => BinarySourceWord::W3(
+            Bit3::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        4 => BinarySourceWord::W4(
+            Bit4::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        5 => BinarySourceWord::W5(
+            Bit5::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        6 => BinarySourceWord::W6(
+            Bit6::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        7 => BinarySourceWord::W7(
+            Bit7::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        8 => BinarySourceWord::W8(
+            Bit8::new(payload as u8).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        9 => BinarySourceWord::W9(
+            Bit9::new(payload).ok_or(TernaryTransportError::UnsupportedDomainWidth)?,
+        ),
+        _ => return Err(TernaryTransportError::UnsupportedDomainWidth),
+    })
+}
+
 /// Читає ФІЗИЧНІ байти, відновлює трити, розбиває на слова
 /// лише за цифрою 2, а потім отримує точні типи D1..D9.
 /// Доказом безпомилковості носія є канонічний повторний encode.
@@ -119,33 +160,33 @@ pub fn decode_ternary_words(
         return Err(TernaryTransportError::EmptyDomainWord);
     }
 
-    let mut parts = Vec::<String>::new();
-    let mut current = String::new();
+    let mut words = Vec::<BinarySourceWord>::new();
+    let mut current_value = 0u16;
+    let mut current_width = 0usize;
     for digit in trits {
         match digit {
             0 | 1 => {
-                current.push(char::from(b'0' + digit));
-                if current.len() > 9 {
+                current_value = (current_value << 1) | u16::from(digit);
+                current_width += 1;
+                if current_width > 9 {
                     return Err(TernaryTransportError::UnsupportedDomainWidth);
                 }
             }
             2 => {
-                if current.is_empty() {
+                if current_width == 0 {
                     return Err(TernaryTransportError::EmptyDomainWord);
                 }
-                parts.push(std::mem::take(&mut current));
+                words.push(typed_binary_word(current_width, current_value)?);
+                current_value = 0;
+                current_width = 0;
             }
             _ => unreachable!(),
         }
     }
-    if current.is_empty() {
+    if current_width == 0 {
         return Err(TernaryTransportError::EmptyDomainWord);
     }
-    parts.push(current);
-    let visible = parts.join(" ");
-    let tokens = parse_binary_source_words(&visible)
-        .map_err(|_| TernaryTransportError::UnsupportedDomainWidth)?;
-    let words: Vec<_> = tokens.into_iter().map(|token| token.word).collect();
+    words.push(typed_binary_word(current_width, current_value)?);
     // Зайвий байт, неоднозначний або неканонічний хвіст — відмова.
     if encode_ternary_words(&words)? != data {
         return Err(TernaryTransportError::NoncanonicalEncoding);
