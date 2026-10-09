@@ -34,6 +34,7 @@ pub use special_forms::{exact_arity, json::parse_json};
 
 use crate::{parse, Environment, ErrorKind, Expr, ExprKind, LanguageError, Session, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
+use crate::canonical_reader::text7_binding_key;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EvalResult {
