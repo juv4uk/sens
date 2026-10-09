@@ -20,10 +20,25 @@ def verify(p,f,i):
     selected={r["semantic_name"].upper() for r in i["rows"]}
     names=[r["historical_name"].upper() for r in p["rows"]]
     assert len(names) == len(set(names)) == 8
-    assert not set(names).intersection(lower|selected), "Historical proposal collides with current admitted/selected domain"
+    assert not set(names).intersection(lower), "Historical name collides with ratified D1-D9"
+    by_name = {r["semantic_name"].upper(): r for r in i["rows"]}
+    assert len(by_name) == len(i["rows"]), "Duplicate current D10 name"
     assert sum(r["triage"] == "REVIEW-SEMANTIC-CANDIDATE" for r in p["rows"]) == 4
     for r in p["rows"]:
         assert r["triage"] in ALLOWED
+        live = by_name.get(r["historical_name"].upper())
+        if live is not None:
+            # A later explicitly selected D10 research candidate may reference
+            # this immutable historical proposal. HOLD rows cannot be promoted.
+            assert r["triage"] == "REVIEW-SEMANTIC-CANDIDATE", "Promoted historical HOLD"
+            assert live.get("source_path") == str(P.relative_to(ROOT)), "Untraced promotion"
+            assert live.get("primary_url") == r["primary_url"], "Historical source mismatch"
+            assert live.get("source_class") == "HISTORICAL-CLOS-ROOT-REVIEW"
+            assert live.get("status") == "SELECTED-RESEARCH-CANDIDATE"
+            assert live.get("proposal_status") == "pending-owner-review"
+            assert live.get("coordinate") is None and live.get("coordinate_basis") == "UNPLACED"
+            assert live.get("ratified_resident") is False
+            assert live.get("behavior") and live.get("positive_witnesses") and live.get("falsifiers")
         assert r["coordinate"] is None
         assert r["selected_in_d10"] is False and r["ratified"] is False and r["physical_t5_authorized"] is False
         for field in ("surface_uk", "surface_ukr", "observable_law", "positive_witness", "falsifier", "conceptual_neighbors", "ownership_question"):
