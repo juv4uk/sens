@@ -72,7 +72,15 @@ jobs:
               exit 1
             fi
             test ! -s "$RUNNER_TEMP/sens-binary/${invalid}.stdout"
-            grep -q 'physical T5/D2 rejected' "$RUNNER_TEMP/sens-binary/${invalid}.stderr"
+            case "$invalid" in
+              illegal-base3)
+                expected='physical T5 transport rejected'
+                ;;
+              stray-close)
+                expected='exact packed binary reader rejected: unexpected D2 close word 01'
+                ;;
+            esac
+            grep -Fq "$expected" "$RUNNER_TEMP/sens-binary/${invalid}.stderr"
           done
 
       - name: Human Lisp text can never impersonate physical .sens
