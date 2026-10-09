@@ -72,6 +72,24 @@ assert d["role_counts"]=={
     "admitted_text_punctuation":7,
 }
 
+
+# Each ledger row independently agrees with the ratified occupancy map.
+# In particular, unresolved pinned coordinates cannot become residents
+# through a second copy of the table.
+ledger_rows=d["rows"]
+assert len(ledger_rows)==d["capacity"]==128, "incomplete D7 ledger"
+ledger_coords=[row["coordinate"] for row in ledger_rows]
+assert ledger_coords==[f"{i:07b}" for i in range(128)], "D7 ledger coordinate order/coverage drift"
+for row in ledger_rows:
+    bits=row["coordinate"]
+    if bits in d["residents"]:
+        assert row["status"]=="OWNER-RATIFIED", f"D7:{bits} lost owner admission"
+        assert row["report_name"]==d["residents"][bits], f"D7:{bits} ratified role mismatch"
+    else:
+        assert bits in d["reserved_coordinates"], f"D7:{bits} unexpectedly unallocated"
+        assert row["status"]=="OWNER-RESERVED-PINNED", f"D7:{bits} pinned reservation lost"
+        assert row["report_name"] is None, f"D7:{bits} reserved role was minted"
+
 overlay_rows=[r for r in d["rows"] if r.get("baseline_residency")=="reserved" and r["status"]=="OWNER-RATIFIED"]
 assert len(overlay_rows)==19
 assert sum(r["semantic_role"]=="text-digit" for r in overlay_rows)==10
@@ -150,7 +168,7 @@ surface=(root/"lib/domains/d7.lisp").read_text(encoding="utf-8")
 surface_rows=re.findall(r"^  \(([01]{7}) (.+)\)$",surface,flags=re.MULTILINE)
 assert len(surface_rows)==d["occupancy"]==126, "D7 projection row count drift"
 coordinates=[bits for bits,_ in surface_rows]
-assert len(set(coordinates))==len(coordinates), "duplicate D7 coordinate"
+assert coordinates==sorted(set(coordinates)), "D7 surface coordinates must be unique and sorted"
 assert set(coordinates)==set(d["residents"]), "D7 surface/resident map drift"
 assert set(coordinates).isdisjoint(d["reserved_coordinates"]), "reserved D7 coordinates were allocated"
 expected_columns=("ук","укр","san","en","LISP","sym")
@@ -162,6 +180,11 @@ for bits,body in surface_rows:
     en=re.search(r"\(en ([^()]*)\)",body)
     assert en is not None and en.group(1)==d["residents"][bits], f"D7:{bits} role projection drift"
     assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
+    if en.group(1).startswith("text.digit."):
+        glyph=re.search(r"\(sym ([0-9])\)$",body)
+        assert glyph is not None and glyph.group(1)==en.group(1).rsplit(".",1)[1], (
+            f"D7:{bits} text digit glyph drifted from ratified digit identity"
+        )
 
 print("D7-SURFACE-ROWS: PASS residents=126 reserved=2 no-Rust-law")
 
