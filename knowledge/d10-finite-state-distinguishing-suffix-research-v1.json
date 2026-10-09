@@ -1,1 +1,183 @@
-{"schema":"d10-state-distinguishing-suffix-research/v1","status":"RESEARCH-HOLD-NOT-SELECTED","width":"D10","coordinate":null,"ratified":false}
+{
+  "schema": "d10-state-distinguishing-suffix-research/v1",
+  "status": "RESEARCH-HOLD-NOT-SELECTED",
+  "candidate": {
+    "semantic_name": "FINITE-STATE-SHORTEST-DISTINGUISHER",
+    "surface_uk": "різне-продовження",
+    "surface_ukr": "найкоротший-бітовий-свідок-розрізнення-станів",
+    "width": "D10",
+    "selected": false,
+    "coordinate": null,
+    "ratified": false,
+    "law": "Shortest, then 0-first lexicographically least suffix distinguishing acceptance of p and q in a total deterministic D1-binary automaton; empty witness differs from no witness",
+    "owner_review": "HOLD: Core vs derived graph search"
+  },
+  "witnesses": [
+    {
+      "transitions": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "accepting": [
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": ""
+      }
+    },
+    {
+      "transitions": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "accepting": [
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 0,
+      "expected": {
+        "status": "EQUIVALENT",
+        "word": null
+      }
+    },
+    {
+      "transitions": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "accepting": [
+        0,
+        0
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "EQUIVALENT",
+        "word": null
+      }
+    },
+    {
+      "transitions": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "accepting": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": "0"
+      }
+    },
+    {
+      "transitions": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "accepting": [
+        0,
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": "1"
+      }
+    },
+    {
+      "transitions": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ]
+      ],
+      "accepting": [
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "p": 0,
+      "q": 1,
+      "expected": {
+        "status": "DISTINGUISHED",
+        "word": "01"
+      }
+    }
+  ],
+  "independent_external_runtime_oracle": "NOT_EXECUTED",
+  "D1_D9_behavioral_dedup": "REVIEW_REQUIRED",
+  "physical_sens_files_created": 0,
+  "original_executable_migrations_admitted": 0
+}
