@@ -66,19 +66,20 @@
 (00001001 height-of
   (00001000 (n)
     (00000111
-      ((00000011 n (00000001 ())) 0)
-      ((00000010 n) 0)
-      ((00100010 (00000010 n) (00000001 (0))) (node-height n))
+      ((00100010 n (00000001 ())) 0)
       ((00100010
-         (00000010 n)
+         (00100010 n (00000001 ()))
          (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
        (node-height n)))))
 
 (00001001 max2
   (00001000 (a b)
     (00000111
-      ((00011010 a b) 1 b)
-      ((00011010 a b) 0 a))))
+      ((00011010 a b) b)
+      ((00100010
+         (00011010 a b)
+         (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       a))))
 
 ; Rebuilds a node with a recomputed height from its (possibly new)
 ; children — every insert/rotation goes through this, never hand-tracks
