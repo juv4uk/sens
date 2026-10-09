@@ -1,0 +1,18 @@
+name: D10 historical CLOS slot-state proposal guard
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-clos-slot-state-historical-review-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check_d10_clos_slot_state_history.py'
+      - '.github/workflows/d10-clos-slot-state-review.yml'
+  workflow_dispatch:
+jobs:
+  historical-research-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert no invented D10 selection, D2 control, or coordinates
+        run: python3 scripts/check_d10_clos_slot_state_history.py --self-test
