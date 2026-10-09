@@ -1,0 +1,41 @@
+name: Temporary Core4 let-star FASL regeneration
+
+on:
+  push:
+    branches:
+      - fix/time-cond-contract-118-mainline-v2-20261009
+    paths:
+      - lib/core4.lisp
+      - .github/workflows/core4-letstar-fasl-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/time-cond-contract-118-mainline-v2-20261009
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Generate authentic Core4 FASL from source
+        run: cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Verify source/FASL freshness
+        run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Commit generated binary to repair branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "FASL unchanged"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(fasl): regenerate Core4 snapshot for strict let-star COND'
+          git push origin HEAD:refs/heads/fix/time-cond-contract-118-mainline-v2-20261009
