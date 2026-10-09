@@ -1,0 +1,22 @@
+name: Verify post-truth-sentinel focused targets
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  focused-target:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [unify, advice_corpus, knowledge, forward, unification_outcome_contract]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run focused target
+        run: cargo test -p my-lisp --test ${{ matrix.test }}

@@ -1,0 +1,34 @@
+name: Verify individual unify laws
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  unify-law:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - identical_atoms_unify_with_an_unchanged_substitution
+          - different_atoms_fail_to_unify
+          - a_variable_unifies_with_and_resolves_to_an_atom
+          - structural_unification_extracts_a_binding_from_a_compound_term
+          - structural_mismatch_fails
+          - chained_variable_bindings_resolve_transitively
+          - unifying_a_variable_with_itself_creates_no_binding
+          - apply_subst_resolves_every_variable_in_a_compound_query
+          - var_predicate_does_not_crash_on_a_nested_compound_subterm
+          - occurs_check_prevents_infinite_structures
+          - thread_conjunction_finds_every_combination_satisfying_all_conditions
+          - thread_conjunction_returns_no_results_when_a_condition_cannot_be_satisfied
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run one unify law
+        run: cargo test -p my-lisp --test unify "${{ matrix.test }}" -- --exact --nocapture

@@ -1,0 +1,30 @@
+name: Diagnose unify target
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-unify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Capture unify failure
+        shell: bash
+        run: |
+          set +e
+          cargo test -p my-lisp --test unify -- --nocapture > /tmp/unify.log 2>&1
+          status=$?
+          cat /tmp/unify.log
+          {
+            echo '### `unify` diagnostic'
+            echo '```text'
+            tail -n 160 /tmp/unify.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
