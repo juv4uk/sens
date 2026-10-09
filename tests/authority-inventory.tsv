@@ -10,17 +10,17 @@ crates/my-lisp/tests/content_store_authority.rs	content_store_mechanism_keeps_de
 crates/my-lisp/tests/mccarthy.rs	division_is_an_exact_reduced_rational	semantic-authority	exact-arithmetic	tests/fixtures/conformance.lisp	pending
 crates/my-lisp/tests/mccarthy.rs	division_by_zero_has_the_contract_3_named_error	semantic-authority	named-error	tests/fixtures/conformance.lisp	pending
 crates/my-lisp/tests/mccarthy.rs	comparison_with_no_arguments_is_an_arity_error	semantic-authority	named-error	tests/fixtures/conformance.lisp	pending
-crates/sens/tests/mccarthy.rs	comparisons_chain_and_promote_exact_inexact_like_arithmetic	legacy-semantic	old comparison -> t/() truth sentinel	#216 exact-ℚ Lisp witness with 0/1|1/1; preserve comparison mechanics separately	transition
-crates/sens/tests/mccarthy.rs	bare_large_integer_literals_remain_exact	mixed	exact-large-integer + old eq->t assertion	split exact-number evidence from #218 structural eq result contract	transition
+crates/sens/tests/mccarthy.rs	comparisons_chain_and_promote_exact_inexact_like_arithmetic	legacy-semantic	old comparison -> t/() truth sentinel	retired; replacement coverage is numeric_comparisons_return_exact_predicate_bits plus Lisp-owned witnesses	retired
+crates/sens/tests/mccarthy.rs	bare_large_integer_literals_remain_exact	mechanism	exact-large-integer parsing and arithmetic	retain numeric coverage independently of predicate-result representation	retained
 crates/my-lisp/tests/mccarthy.rs	read_parses_text_into_data_without_evaluating_it	semantic-authority	reader-semantics	future Lisp witness row	pending
 crates/my-lisp/tests/mccarthy.rs	read_rejects_non_string_arguments_and_multi_expression_input	semantic-authority	reader-errors	future Lisp witness rows	pending
 crates/my-lisp/tests/mccarthy.rs	print_appends_to_output_and_returns_its_argument	mixed	value+output semantics	split semantic witness from transcript mechanism	pending
 crates/my-lisp/tests/mccarthy.rs	tail_recursion_uses_constant_rust_stack	mechanism	stack-safety	remain host-owned	retained
-crates/sens/tests/forward.rs	match_test_condition_succeeds_when_the_expression_is_truthy	legacy-semantic	generic truthiness in rule condition	#217 explicit control + #219 reasoning-result witness	transition
-crates/sens/tests/ukrainian_api_docs.rs	istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen	legacy-semantic	universal t/() truth aliases	#220 truth-sentinel retirement + explicit compatibility decision	transition
-crates/my-lisp/tests/ukrainian_api_docs.rs	novi_predykatni_nazvy_i_stari_aliasy_vykonuiutsia_odnakovo	mixed	peer-surface equivalence + t/() predicate results	preserve surface identity; move result semantics to #218/#219 Lisp witnesses	transition
+crates/sens/tests/forward.rs	match_test_condition_succeeds_when_the_expression_is_truthy	legacy-semantic	generic truthiness in rule condition	#217 explicit control + #219 reasoning-result witness	retired
+crates/sens/tests/ukrainian_api_docs.rs	istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen	legacy-semantic	universal t/() truth aliases	#220 truth-sentinel retirement + explicit compatibility decision	retired
+crates/sens/tests/ukrainian_api_docs.rs	novi_predykatni_nazvy_i_stari_aliasy_vykonuiutsia_odnakovo	observer	peer-surface equivalence without t/() result sentinel	preserve alias identity; Lisp-owned witnesses own result semantics	retained
 crates/my-lisp/tests/canon_language_authority.rs	ukrainian_keyboard_symbols_execute_the_same_canon	observer	peer-canon-symbolic-surface	tests/fixtures/canon-laws-v2-witness.lisp + lib/canon.lisp	migrated
-crates/my-lisp/tests/canon_adversarial.rs	cond_surface_stops_at_the_first_true_clause	mixed	short-circuit/evaluation order + old t branch sentinel	#217/#229 preserve short-circuit with explicit control result	transition
+crates/sens/tests/canon_adversarial.rs	cond_surface_stops_at_the_first_true_clause	observer	short-circuit and evaluation order	preserve explicit-control short-circuit witness without old truth-sentinel assumptions	retained
 crates/my-lisp/tests/rivnopravnist_mov.rs	peer arithmetic surface evaluation assertion	semantic-authority	peer-surface-equivalence	semantic registry + Lisp witness	pending
 tests/fixtures/authority-guard/forbidden-semantic.rs	host_authored_semantic_expectation_is_forbidden	semantic-authority	guard-negative-fixture	Lisp-owned witness corpus	fixture
 tests/fixtures/authority-guard/allowed-mechanism.rs	host_mechanism_assertion_is_allowed	mechanism	guard-positive-fixture	remain host-owned	fixture
