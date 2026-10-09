@@ -25,4 +25,4 @@ jobs:
       - name: Check exact D1-D10 names, source and HOLD-only disposition
         run: python3 scripts/check_d10_crossdomain_math_signal.py
       - name: Verify finite convolution and phase unwrap exact arithmetic
-        run: python3 -m unittest -v tests/test_d10_crossdomain_math_laws.py
+        run: python3 -m unittest discover -s tests -p test_d10_crossdomain_math_laws.py -v
