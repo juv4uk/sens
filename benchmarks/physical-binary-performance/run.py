@@ -105,6 +105,14 @@ def main() -> None:
     if args.cachegrind and not shutil.which("valgrind"):
         raise RuntimeError("requested Cachegrind but valgrind is not installed")
 
+    # Прив'язуємо фізичні вимірювання до справжніх байтів обох CLI.
+    binary_sha256 = {
+        "sens": sha256(Path(sens).read_bytes()),
+        "sens-trit": sha256(Path(trit).read_bytes()),
+    }
+    codec_sha256 = sha256((ROOT / "scripts" / "sens_t5_codec.py").read_bytes())
+    benchmark_sha256 = sha256(Path(__file__).read_bytes())
+
     args.out.mkdir(parents=True, exist_ok=True)
     commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
@@ -203,6 +211,13 @@ def main() -> None:
             flush=True,
         )
 
+    # Програму не можна непомітно змінити посеред одного набору замірів.
+    if binary_sha256 != {
+        "sens": sha256(Path(sens).read_bytes()),
+        "sens-trit": sha256(Path(trit).read_bytes()),
+    }:
+        raise RuntimeError("benchmark executable changed during measurements")
+
     with (args.out / "raw.tsv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(
             handle, fieldnames=list(raw_rows[0]), delimiter="\t", lineterminator="\n"
@@ -213,6 +228,15 @@ def main() -> None:
         "schema": "sens-physical-binary-performance/v1",
         "commit_sha": commit,
         "utc": datetime.now(timezone.utc).isoformat(),
+        "executable_sha256": binary_sha256,
+        "benchmark_sha256": benchmark_sha256,
+        "t5_codec_sha256": codec_sha256,
+        "github_hosted_provenance": {
+            "runner_name": os.getenv("RUNNER_NAME", "local"),
+            "runner_environment": os.getenv("RUNNER_ENVIRONMENT", "unknown"),
+            "workflow_run_id": os.getenv("GITHUB_RUN_ID"),
+            "workflow_attempt": os.getenv("GITHUB_RUN_ATTEMPT"),
+        },
         "measurement": "first preflight invocation and process-per-call wall latency after warmups; OS cache state uncontrolled",
         "in_process_warm_execution_measured": False,
         "cross_machine_relative_rank_admissible": False,
@@ -234,6 +258,9 @@ def main() -> None:
         "# Фізична двійкова SENS — вимірювання часу й щільності",
         "",
         f"Commit: `{commit}`; runner CPU: {cpu_model()}",
+        "",
+        f"CLI SHA256: sens=`{binary_sha256['sens']}`; sens-trit=`{binary_sha256['sens-trit']}`.",
+        f"Codec SHA256: `{codec_sha256}`; benchmark SHA256: `{benchmark_sha256}`.",
         "",
         "| Програма | Шлях | Медіана, мс | p95, мс | Перший preflight, мс | I refs |",
         "|---|---|---:|---:|---:|---:|",
