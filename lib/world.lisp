@@ -83,19 +83,11 @@
 
 (00001001 world-module-known?
   (00001000 (world module-name)
-    (00000111
-      ((00000010 (world-module-events world module-name)) () (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
-      ((00000010 (world-module-events world module-name)) (1) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
-      ((00000010 (world-module-events world module-name)) (0) (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left))))))
-
-
+    (00000100 (00000010 (world-module-events world module-name)))))
 
 (00001001 world-module-missing?
   (00001000 (world module-name)
-    (00000111
-      ((00000010 (world-module-events world module-name)) () (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left)))
-      ((00000010 (world-module-events world module-name)) (1) (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left)))
-      ((00000010 (world-module-events world module-name)) (0) (00100010 (00000001 d1-no-left) (00000001 d1-no-right))))))
+    (00000010 (world-module-events world module-name))))
 
 (00001001 world-clauses
   (00001000 (world module-name)

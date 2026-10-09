@@ -8,7 +8,7 @@ on:
       - "crates/sens/tests/canon_laws_v2_contract.rs"
       - "crates/sens/tests/content_store_authority.rs"
   push:
-    branches: [main]
+    branches: [main, "diag/content-store-current-cond-span-20261009"]
     paths:
       - "tests/fixtures/witness-runner.lisp"
       - "tests/fixtures/content-store-authority-witness.lisp"

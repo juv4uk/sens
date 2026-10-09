@@ -34,6 +34,38 @@ fn content_store_semantic_relations_are_owned_by_lisp_witness() {
     )
     .expect("Lisp-owned content-store witness must load");
 
+    let probes = [
+        ("no-helper-on-yes", "(content-store-no? (00100010 (00000001 same) (00000001 same)))"),
+        ("no-helper-on-no", "(content-store-no? (00100010 (00000001 left) (00000001 right)))"),
+        ("root-relation", r#"(00100010
+            (fs-serialize-root (car (fs-write (fs-empty) "code" (quote (lambda (x) x)))))
+            (fs-serialize-root (car (fs-write (fs-empty) "code" (quote (lambda (x) x))))))"#),
+        ("object-relation", r#"(00100010
+            (fs-serialize-object (quote (lambda (x) x)))
+            (fs-serialize-object (quote (lambda (x) x))))"#),
+        ("projection-relations", r#"(10011101
+          ((direct (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat)))))
+           (retold (world-tell
+             (world-retract
+               (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat))))
+               (00000001 zoo) (00000001 ((has-fur cat))))
+             (00000001 zoo) (00000001 ((has-fur cat)))))
+          (00100111
+            (world-clauses direct (00000001 zoo))
+            (world-clauses retold (00000001 zoo))
+            (00100010 (world-clauses direct (00000001 zoo))
+                      (world-clauses retold (00000001 zoo)))
+            (content-store-no?
+              (00100010 (world-clauses direct (00000001 zoo))
+                        (world-clauses retold (00000001 zoo))))))"#)
+    ];
+    for (label, probe) in probes {
+        let result = eval_program(probe, &mut session)
+            .map(|value| format!("value={:?}; display={}", value.value, value.value))
+            .map_err(|error| format!("{:?}: {}", error.kind, error));
+        eprintln!("CONTENT-STORE-RESULT: {label} => {result:?}");
+    }
+
     eprintln!("CONTENT-STORE-PROBE: witness observe BEGIN");
     let verdict = observe(&mut session, "(content-store-authority-witness)");
     eprintln!("CONTENT-STORE-PROBE: witness observe END => {verdict}");

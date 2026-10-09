@@ -1,0 +1,24 @@
+name: D10 hobby clock radio exact math laws
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-clock-radio-math-selection-20261009.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - 'scripts/check_d10_hobby_clock_radio_selection.py'
+      - '.github/workflows/d10-hobby-clock-radio-selection.yml'
+  workflow_dispatch:
+jobs:
+  clock-radio-laws:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify monotonic 630->634 research selection and exact source models
+        run: python3 scripts/check_d10_hobby_clock_radio_selection.py --self-test
+      - name: Verify all prior D10 transitions
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Ensure no test mutates checked-in source
+        run: git diff --exit-code
