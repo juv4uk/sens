@@ -1,4 +1,5 @@
 ; Experimental immutable filesystem-shaped store for WSM.
+; Temporary CI probe companion: test logs isolate root-package serialization layers.
 ; This is a model of file objects and roots, not a disk driver or POSIX FS.
 ;
 ; Експериментальне незмінне сховище у формі файлової системи для WSM.
