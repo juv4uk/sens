@@ -20,7 +20,7 @@ fn lambda_text7_parameter_round_trips_as_a_value_reference() {
     let name = text7_frame(&[0x41, 0x42]);
     // ((lambda (<AB>) <AB>) 1)
     let source = format!(
-        "10 10 0010 00 {name} 01 00 {name} 01 01 00 1 01"
+        "10 10 0010 00 10 {name} 01 00 {name} 01 00 1 01"
     );
     let expressions = parse_canonical_binary(&source).expect("contextual lambda parses");
     let mut session = sens::Session::default();
