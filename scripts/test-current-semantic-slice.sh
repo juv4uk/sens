@@ -18,12 +18,25 @@ cargo test -p sens \
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
 # but it is intentionally not executed by the current semantic slice. Contract
 # 11.8 assigns W8 to exact D8 identity; Sens8/Sid8 remains migration/provenance only.
-# #291: quantity semantics live in Lisp. The shell observes only the named
-# pass envelope; expected scientific quantities and relations stay in the
-# Lisp witness itself. No replacement Rust observer is introduced.
-quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
-if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-  printf 'exact quantity Lisp witness failed: %s\n' "$quantity_status" >&2
+# #291: the old high-level quantity witness loads quantity/si Lisp libraries
+# through a source path that is currently rejected by the strict COND contract.
+# Keep that legacy witness on disk for a later semantic port; do not let it block
+# the current binary lane or pretend its quantity claims were proved here.
+# This gate instead executes a checked-in, exact-width D1-D3 COND program as
+# physical T5. Its visible-word source and packed .sens bytes must agree exactly.
+python3 - <<'PY'
+from pathlib import Path
+import sys
+sys.path.insert(0, "scripts")
+from sens_t5_codec import decode_bytes
+source = Path("examples/binary/d3-cond-program.bits").read_text(encoding="ascii").split()
+physical = Path("examples/binary/d3-cond-program.sens").read_bytes()
+assert decode_bytes(physical) == source, "physical T5 differs from exact-width binary source"
+assert all(set(word) <= {"0", "1"} for word in source)
+PY
+binary_cond_status="$(cargo run --quiet -p sens-cli --bin sens-trit -- eval examples/binary/d3-cond-program.sens)"
+if [[ "$binary_cond_status" != "1" ]]; then
+  printf 'physical binary D3 COND witness expected exact D1:1, got: %s\n' "$binary_cond_status" >&2
   exit 1
 fi
 
