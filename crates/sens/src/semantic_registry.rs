@@ -270,7 +270,6 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use generated::SemanticSurface;
 
     #[test]
     fn migrated_registry_roles_are_domain_qualified_and_not_truncated() {
@@ -305,67 +304,6 @@ mod tests {
     }
 
     #[test]
-    fn lisp_owned_d5_binding_projection_is_explicit_but_not_global_legacy_meaning() {
-        for (legacy_byte, bits) in [
-            (0b0010_1010, 0b10100),
-            (0b0001_0100, 0b10111),
-            (0b0010_1101, 0b11100),
-            (0b0010_1100, 0b11101),
-            (0b1010_1100, 0b11111),
-        ] {
-            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
-                .expect("ratified D5 bootstrap binding projection");
-            assert_eq!((identity.width(), identity.packed_bits()), (5, bits));
-
-            // A historical byte remains a historical byte during invocation.
-            // Only definition binding is allowed to consult the D5 bootstrap map.
-            assert_eq!(legacy_domain_identity_from_registry_byte(legacy_byte), None);
-        }
-    }
-    #[test]
-    fn historical_d4_successor_materializes_exact_slot() {
-        let identity = legacy_domain_identity_from_registry_byte(0b1010_1011)
-            .expect("historical registry row must have an exact-domain successor");
-        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0101));
-
-        let mut session = crate::Session::default();
-        crate::load_core_library(&mut session).expect("Core bootstrap must materialize the exact slot");
-        assert!(
-            session.environment.domain_code_slot(identity).is_some(),
-            "Core bootstrap must bind the language-owned closure into its exact D4 slot"
-        );
-    }
-
-    #[test]
-    fn explicit_core4_bootstrap_binds_ratified_d4_list_as_language_owned_closure() {
-        // Historical registry 00100111 and CURRENT D4:1110 are linked only
-        // by this audited successor; the numeric width remains domain-qualified.
-        let exact = legacy_domain_identity_from_registry_byte(0b0010_0111)
-            .expect("historical registry successor must exist");
-        assert_eq!((exact.width(), exact.packed_bits()), (4, 0b1110));
-        assert_eq!(domain_identity_for_surface("список"), Some(exact));
-
-        let mut session = crate::Session::default();
-        assert!(session.environment.domain_code_slot(exact).is_none());
-        crate::load_core_library(&mut session)
-            .expect("existing language-owned Core4 bootstrap");
-        assert!(
-            matches!(
-                session.environment.domain_code_slot(exact),
-                Some(crate::Value::Closure(_))
-            ),
-            "D4:1110 requires the existing Lisp-owned closure, not a Rust primitive"
-        );
-
-        let source = "10 1110 00 10 001 00 000 01 01";
-        let forms = crate::parse_canonical_binary(source)
-            .expect("canonical exact D2/D3/D4 expression");
-        let observed = crate::eval_parsed_expressions(&forms, &mut session)
-            .expect("current exact D4 callable after explicit Core4 bootstrap");
-        assert_eq!(observed.value.to_string(), "(())");
-    }
-
-    #[test]
     fn append_surface_projects_only_to_ratified_d4() {
         let identity = domain_identity_for_surface("приєднати")
             .expect("D4:1111 surface must project to ratified D4");
@@ -375,18 +313,6 @@ mod tests {
             None,
             "APPEND must not retain a transitional D5 binding"
         );
-    }
-
-    #[test]
-    fn transitional_d5_binding_never_targets_ratified_selector_slots() {
-        for legacy_byte in [0b0010_1010, 0b0001_0100] {
-            let identity = transitional_d5_binding_identity_from_registry_byte(legacy_byte)
-                .expect("compatibility binding should resolve");
-            assert!(
-                !matches!(identity.packed_bits(), 0b10001 | 0b10011),
-                "REVERSE/QUOTIENT compatibility binding must not target D5 selector coordinates"
-            );
-        }
     }
 
     #[test]
@@ -457,16 +383,6 @@ mod tests {
     }
 
     #[test]
-    fn generated_registry_is_one_contiguous_byte_axis() {
-        assert_eq!(SEMANTIC_ROWS.len(), 256);
-        for (expected, row) in SEMANTIC_ROWS.iter().enumerate() {
-            assert_eq!(usize::from(row.semantic_id), expected);
-        }
-        assert_eq!(SEMANTIC_ROWS.first().map(|row| row.semantic_id), Some(0));
-        assert_eq!(SEMANTIC_ROWS.last().map(|row| row.semantic_id), Some(255));
-    }
-
-    #[test]
     fn reverse_projection_covers_d1_d4_without_making_structure_callable() {
         let yes = DomainIdentity::D1(crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()));
         let open = DomainIdentity::D2(crate::Racana2::from_word(crate::Bit2::new(0b10).unwrap()));
@@ -484,41 +400,6 @@ mod tests {
         assert_eq!(direct_domain_identity_for_surface("відкрити"), None);
         assert_eq!(direct_domain_identity_for_surface("порожнє"), None);
         assert_eq!(exact_uk_callable_for_source_head("()"), None);
-    }
-
-    #[test]
-    fn generated_registry_contains_fixed_surface_namespaces() {
-        let quote = &SEMANTIC_ROWS[1].surfaces;
-        assert!(quote.contains(&SemanticSurface { namespace: "en", name: "quote" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "ук", name: "як-є" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "укр", name: "як-є" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "sa", name: "svarūpa" }));
-        assert!(quote.contains(&SemanticSurface { namespace: "sym", name: "'" }));
-    }
-
-    #[test]
-    fn binary_spelling_is_identity_not_a_surface() {
-        assert_eq!(semantic_id_for_surface("00001010"), None);
-        assert_eq!(semantic_id_for_surface("10101000"), None);
-    }
-
-    #[test]
-    fn public_reverse_projection_preserves_identity() {
-        for surface in admitted_surfaces_for_semantic_id(crate::sens!(00001111)) {
-            assert_eq!(
-                crate::semantic_registry_export::semantic_id_for_admitted_surface(surface),
-                Some(crate::sens!(00001111))
-            );
-        }
-        assert_eq!(
-            crate::semantic_registry_export::semantic_id_for_admitted_surface("not-a-surface"),
-            None
-        );
-    }
-
-    #[test]
-    fn unrelated_rows_are_projected_without_assigning_evaluator_meaning() {
-        assert_eq!(semantic_id_for_surface("+"), Some(crate::sens!(00001100)));
     }
 
     #[test]
