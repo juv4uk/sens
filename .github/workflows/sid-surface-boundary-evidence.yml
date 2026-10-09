@@ -1,0 +1,28 @@
+name: SID surface boundary evidence
+
+on:
+  pull_request:
+    paths:
+      - crates/my-lisp/examples/sid_surface_boundary_benchmark.rs
+      - .github/workflows/sid-surface-boundary-evidence.yml
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sid-surface-boundary-evidence
+      - name: Run release benchmark
+        env:
+          SID_BENCH_SAMPLES: "7"
+          SID_BENCH_ITERATIONS: "30000"
+          SID_RESOLUTION_ITERATIONS: "500000"
+        run: |
+          cargo run --release -p my-lisp --example sid_surface_boundary_benchmark 2>&1 | tee sid-boundary-results.txt
+      - name: Show evidence lines
+        if: always()
+        run: grep '^SID_BOUNDARY' sid-boundary-results.txt || true
