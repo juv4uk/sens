@@ -129,6 +129,30 @@ class OwnerLaws(unittest.TestCase):
                 self.assertEqual(len(data["typed_word_sha256"]), 64)
                 self.assertEqual(len(data["physical_sha256"]), 64)
 
+    def test_complete_existing_emitter_projection_and_oracle_digests(self):
+        with tempfile.TemporaryDirectory() as dirname:
+            src = Path(dirname) / "source.lisp"
+            src.write_text("(110 (t (001 ())))", encoding="utf-8")
+            cmd = [sys.executable, str(PATH), str(src)]
+            staged = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+            self.assertEqual(staged.returncode, 4, staged.stdout + staged.stderr)
+            data = __import__("json").loads(staged.stdout)
+            self.assertEqual(data["status"], "STAGED-REVIEW", staged.stdout)
+            self.assertTrue(data["exact_domain_projection"])
+            self.assertEqual(len(data["typed_word_sha256"]), 64)
+            self.assertEqual(len(data["physical_sha256"]), 64)
+            pinned = subprocess.run(
+                cmd + ["--oracle-typed-sha256", data["typed_word_sha256"],
+                       "--oracle-physical-sha256", data["physical_sha256"]],
+                capture_output=True, text=True, cwd=ROOT,
+            )
+            self.assertEqual(pinned.returncode, 0, pinned.stdout + pinned.stderr)
+            self.assertEqual(
+                __import__("json").loads(pinned.stdout)["status"],
+                "STAGED-ORACLE-MATCH",
+            )
+
+
     def test_digests_cannot_override_semantic_block(self):
         with tempfile.TemporaryDirectory() as dirname:
             src = Path(dirname) / "unknown.lisp"
