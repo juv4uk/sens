@@ -32,6 +32,8 @@ jobs:
         run: cargo run --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
       - name: Verify canonical source-FASL relationship
         run: cargo test -p sens --test core_fasl_freshness -- --nocapture
+      - name: Isolate D1 LET* frontend after migration (temporary debug)
+        run: cargo test -p sens --test letstar_ephemeral_debug -- --nocapture
       - name: Verify Lisp-owned content-store authority unmodified
         run: cargo test -p sens --test content_store_authority -- --nocapture
       - name: Verify Canon V2 unmodified
