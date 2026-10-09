@@ -13,8 +13,8 @@ def load(p): return json.loads(p.read_text(encoding="utf-8"))
 def sha(p):
     if p == D10:
         return pinned_inventory_git_blob(p)
- rel=str(p.relative_to(ROOT))
- return subprocess.run(["git","rev-parse",f"HEAD:{rel}"],cwd=ROOT,check=True,capture_output=True,text=True).stdout.strip()
+    rel=str(p.relative_to(ROOT))
+    return subprocess.run(["git","rev-parse",f"HEAD:{rel}"],cwd=ROOT,check=True,capture_output=True,text=True).stdout.strip()
 def norm(v):
  s=str(v).strip().upper().replace("()","EMPTY-LIST")
  return re.sub(r"[^A-Z0-9?!+*/<>=.-]","",s)
