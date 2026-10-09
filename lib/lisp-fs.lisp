@@ -158,7 +158,7 @@
        (1)
        (00100111 (00000001 rejected) (00000001 address-mismatch)))
       ((00100001 (knowledge-proper-list? (fs-package-field (00000001 bindings) package)))
-       (00100010 (00000001 d1-no-left) (00000001 d1-no-right))
+       (1)
        (00100111 (00000001 rejected) (00000001 invalid-bindings)))
       ((00100001 (knowledge-proper-list? (fs-package-field (00000001 objects) package)))
        (1)
