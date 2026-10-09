@@ -1,0 +1,262 @@
+{
+  "schema": "d10-floyd-hoare-finite-inductiveness/v1",
+  "date": "2026-10-09",
+  "decision": "RESEARCH-PENDING-PEER-NOT-SELECTED",
+  "authority": [
+    "#4013",
+    "#4162",
+    "#4463",
+    "#4896",
+    "#4977"
+  ],
+  "snapshot": {
+    "selected": 635,
+    "capacity": 1024,
+    "ratified": 0,
+    "inventory_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "histories": [
+    {
+      "person": "Alan Turing",
+      "year": 1949,
+      "work": "Checking a Large Routine",
+      "source": "https://turingarchive.kings.cam.ac.uk/browse-publications-lectures-and-talks",
+      "claim": "Early explicit practice of reasoning about the correctness of program routines."
+    },
+    {
+      "person": "Robert W. Floyd",
+      "year": 1967,
+      "work": "Assigning Meanings to Programs",
+      "source": "https://doi.org/10.1090/psapm/019/0235771",
+      "claim": "Attach logical assertions to control-flow edges and verify local correctness conditions that ensure global safety."
+    },
+    {
+      "person": "C. A. R. Hoare",
+      "year": 1969,
+      "work": "An Axiomatic Basis for Computer Programming",
+      "source": "https://doi.org/10.1145/363235.363259",
+      "claim": "Logical proof rules for program properties; a verified finite invariant is a small mechanical proof instance."
+    }
+  ],
+  "candidate": {
+    "stable_id": "d10.historical-program-verification.finite-inductive-safety-witness.20261009",
+    "semantic_name": "FINITE-INDUCTIVE-SAFETY-WITNESS",
+    "surface_uk": "самозбережність",
+    "surface_ukr": "свідок-індуктивності-станів",
+    "surface_en": "finite-inductive-safety-witness",
+    "proposal_id": "D10P-0914",
+    "relation_class": "FINITE-STATE-INVARIANT-PROOF-CERTIFICATE",
+    "width": 10,
+    "coordinate": null,
+    "ratified_resident": false,
+    "selection_status": "PENDING-REVIEW",
+    "arguments": "(states:finite ordered identities, initials:set of these states, invariant:set of these states, transitions:set of ordered edges among these states). Complete explicit finite transition relation: every possible transition must be included.",
+    "behavior": "Return either {valid: YES} exactly when initials subset invariant AND for every transition (s,t) whose source s is inside invariant, t is also inside invariant; or return {valid:NO, reason: INITIAL-OUTSIDE, witness: smallest initial state outside invariant}; else {valid:NO, reason: ESCAPING-EDGE, witness: lexicographically smallest (s,t) with s inside invariant and t outside}. State IDs sorted by exact code-point order only for deterministic evidence. This is an inductive proof certificate, not a general reachability result, no program execution and no proof of termination.",
+    "epistemic_boundary": "An inductive invariant suffices to prove all reachable states safe under a complete transition graph, but may fail even when all actually reachable states are safe due to an unreachable state inside I with an escaping edge. All concrete source states must be known and fully enumerated: missing transitions invalidate any extrapolation to real CPU/FPGA. The oracle validates the provided finite model only.",
+    "positives": [
+      {
+        "states": [
+          "idle",
+          "busy"
+        ],
+        "initial": [
+          "idle"
+        ],
+        "invariant": [
+          "idle",
+          "busy"
+        ],
+        "edges": [
+          [
+            "idle",
+            "busy"
+          ],
+          [
+            "busy",
+            "idle"
+          ]
+        ],
+        "expected": {
+          "valid": true
+        }
+      },
+      {
+        "states": [
+          "idle",
+          "bad"
+        ],
+        "initial": [
+          "idle"
+        ],
+        "invariant": [
+          "idle"
+        ],
+        "edges": [
+          [
+            "idle",
+            "bad"
+          ]
+        ],
+        "expected": {
+          "valid": false,
+          "reason": "ESCAPING-EDGE",
+          "witness": [
+            "idle",
+            "bad"
+          ]
+        }
+      },
+      {
+        "states": [
+          "idle",
+          "bad"
+        ],
+        "initial": [
+          "bad"
+        ],
+        "invariant": [
+          "idle"
+        ],
+        "edges": [],
+        "expected": {
+          "valid": false,
+          "reason": "INITIAL-OUTSIDE",
+          "witness": "bad"
+        }
+      },
+      {
+        "states": [
+          "safe",
+          "unreachable",
+          "bad"
+        ],
+        "initial": [
+          "safe"
+        ],
+        "invariant": [
+          "safe",
+          "unreachable"
+        ],
+        "edges": [
+          [
+            "unreachable",
+            "bad"
+          ]
+        ],
+        "expected": {
+          "valid": false,
+          "reason": "ESCAPING-EDGE",
+          "witness": [
+            "unreachable",
+            "bad"
+          ]
+        }
+      },
+      {
+        "states": [
+          "safe",
+          "outside"
+        ],
+        "initial": [],
+        "invariant": [],
+        "edges": [
+          [
+            "outside",
+            "safe"
+          ]
+        ],
+        "expected": {
+          "valid": true
+        }
+      },
+      {
+        "states": [
+          "A",
+          "B"
+        ],
+        "initial": [
+          "A"
+        ],
+        "invariant": [
+          "A"
+        ],
+        "edges": [
+          [
+            "B",
+            "A"
+          ]
+        ],
+        "expected": {
+          "valid": true
+        }
+      }
+    ],
+    "falsifiers": [
+      "Reject as invalid an invariant that contains an unreachable state with an escaping edge: reachable safety does not imply inductiveness.",
+      "Return the wrong smallest violating state/edge when multiple witnesses exist.",
+      "Ignore an initial state outside the invariant.",
+      "Treat lack of termination evidence as a termination proof.",
+      "Accept an edge referencing a state outside the explicitly declared finite state universe.",
+      "Claim this single finite instance proves the behavior of a real MCU/scheduler/FPGA without complete state modeling."
+    ],
+    "dedup_neighbors": {
+      "d1_d9": "Ratified D1–D9 has predicates, equality, finite data and control semantics, but exact named finite inductiveness certificate not found at snapshot; complete behavior comparison remains pending.",
+      "d10": [
+        "PROVE-RULE",
+        "PROVE-GOAL-STATE",
+        "ADVICE-CONFLICT-PROOF",
+        "KNOWLEDGE-GOAL-VALID?",
+        "MY-BUILD-DEPENDENCY-GRAPH"
+      ],
+      "research": [
+        "#4958 ATMS label join",
+        "#4986 STRIPS goal regression",
+        "#4965 abduction",
+        "#4976 finite constraint local support",
+        "#4974 argument labelling"
+      ],
+      "core_vs_library": "This can be implemented using finite set comparisons, but it is a distinct language-visible certificate relation, not merely an optimization/index or hardware opcode. DERIVABLE is not automatic EXCLUDE, but owner must decide if a 10-bit resident is justified."
+    },
+    "hobbies": [
+      "SENS language interpreter semantic safeguards",
+      "WSM-OS-Lisp finite-state scheduler invariants",
+      "FPGA finite transition-machine checking",
+      "ESP32 measurement pipeline safety",
+      "chess legal state transitions",
+      "symbolic AI explainable proofs"
+    ]
+  },
+  "derived_or_hold": [
+    {
+      "name": "REACHABLE-STATES-FIXPOINT",
+      "status": "HOLD-SEPARATE-SEMANTIC-ROOT",
+      "reason": "Computing actual reachable states is a different graph fixed-point law from checking an inductive superset; needs oracle/dedup."
+    },
+    {
+      "name": "PROGRAM-TERMINATES?",
+      "status": "HOLD-UNPROVEN",
+      "reason": "Inductive safety does not establish eventual termination or progress."
+    },
+    {
+      "name": "HOARE-TRIPLE-GENERAL",
+      "status": "HOLD-D2-EFFECT-MODEL",
+      "reason": "General effectful language evaluation requires proven D2/D3 semantics and/or actual binary runtime oracle."
+    },
+    {
+      "name": "FLOATING-POINT-REACHABILITY",
+      "status": "HOLD-HOST-SUBSTRATE",
+      "reason": "Source model is exact finite identities; no host clock, hardware nondeterminism, numeric tolerance inferred."
+    }
+  ],
+  "test_claim": {
+    "proof": "Independent bounded Python exhaustive graph enumeration and reachable-state crosschecks, 11 fail-closed mutations; native SENS interpreter not executed.",
+    "peer_runtime": "Needs independent Scheme/Prolog/SMT donor before selected admission."
+  },
+  "impact": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0,
+    "d2_control_delta": 0
+  }
+}
