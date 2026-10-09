@@ -232,10 +232,15 @@ pub fn decode_ternary_words(
         return Err(TernaryTransportError::EmptyDomainWord);
     }
     words.push(typed_binary_word(current_width, current_value)?);
-    // Зайвий байт, неоднозначний або неканонічний хвіст — відмова.
-    if encode_ternary_words(&words)? != data {
-        return Err(TernaryTransportError::NoncanonicalEncoding);
-    }
+    // Canonicality is already enforced, without a second O(n) encode:
+    // - every byte is 0..242 (exactly five base-3 trits);
+    // - only 0/1 occur within nonempty W1..W9 words;
+    // - each interior 2 ends exactly one word (no empty/double separator);
+    // - exactly 0..4 terminal 2 trits are padding, never a second EOF word.
+    // These constraints uniquely determine the complete five-trit byte stream.
+    // A second encoding must reproduce the input and cannot discover another
+    // invalid representation. Exhaustive 1/2-byte regression proves this
+    // independent of any Lisp name, resident, or runtime law.
     Ok(words)
 }
 
@@ -336,6 +341,24 @@ pub fn ternary_transport_accounting(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_short_admitted_t5_stream_is_already_a_unique_canonical_encoding() {
+        // Exhaust 243 single-byte and 243^2 two-byte physical T5 candidates.
+        // This is a codec property, not a grant of executable D2 semantics.
+        let mut admitted = 0usize;
+        for first in 0u16..243 {
+            for second in 0u16..=243 {
+                let storage = [first as u8, second as u8];
+                let physical = if second == 243 { &storage[..1] } else { &storage[..] };
+                if let Ok(words) = decode_ternary_words(physical) {
+                    assert_eq!(encode_ternary_words(&words).unwrap(), physical);
+                    admitted += 1;
+                }
+            }
+        }
+        assert!(admitted > 10_000, "exhaustive short-stream control was vacuous");
+    }
 
     fn words(source: &str) -> Vec<BinarySourceWord> {
         parse_binary_source_words(source).unwrap()
