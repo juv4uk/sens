@@ -24,3 +24,10 @@
 - `crates/sens/tests/sens_foundation.rs` (`478074548c8e1602057a7c0029ce0f5e3324e0ab`): знято тести, які називали Sens8 канонічною семантичною ідентичністю.
 - `crates/sens/tests/semantic_coordinate_law_axis.rs` (`3c79982fde7b3bf37a8de3f3a8547bbdfe4a0aa4`): знято застарілий observer 8-бітного Function8 як доменного авторитету.
 - `.github/workflows/834-semantic-coordinate-targeted.yml` (`a9699d8da7cb2c7cd4ad1ade67a152756715f090`): застарілий CI target `semantic_coordinate_law_axis`; workflow підлягає вилученню, бо інакше гарантовано викличе неіснуючий тест.
+
+
+### 2026-10-09: Content Store — знято Rust-обгортку старої COND-семантики
+
+- `crates/sens/tests/content_store_authority.rs`, вихідний Git blob `0955eb39dbdc54743155f310ae99aa8da5724512`: видалено **лише** `content_store_semantic_relations_are_owned_by_lisp_witness`.
+- Причина: `tests/fixtures/content-store-authority-witness.lisp` містить тричленні клаузи `COND (query expected result)` старого семантичного контракту; власник ратифікував L1: **точний D1 PredicateBit, двочленний COND, вичерпання — структурне `()`**. Rust-вимога, щоб цей retired witness повертав `(content-store-authority-witness (status pass) ...)`, не є чинною гарантією.
+- Збережено `content_store_mechanism_keeps_deterministic_images_and_distinct_history_entries` (серіалізація та кількість записів). Архівну Lisp-фікстуру не переписано й не видалено; її семантичне оновлення можливе лише через reader → L1–L7 → exact-domain emitter → незалежний оракул.
