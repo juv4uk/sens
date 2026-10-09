@@ -22,5 +22,5 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Assert original content-store semantic and deterministic history laws
         run: cargo test -p sens --test content_store_authority -- --nocapture
-      - name: Assert Canon V2 unchanged
-        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
+      - name: Assert current D3 COND and D1 PredicateBit contract
+        run: cargo test -p sens --test d3_empty_control -- --nocapture
