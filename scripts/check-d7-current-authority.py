@@ -71,5 +71,28 @@ assert "D7  owner-ratified 126/128" in current
 assert "D8  full compact 256/256" in current
 assert "D9  full compact 512/512" in current
 
+# The human-readable D7 table must be a lossless projection of the
+# Lisp-ratified coordinate ledger, never a second independently invented map.
+# No Rust table of phonemes/roles/callability is introduced here.
+import re
+
+surface=(root/"lib/domains/d7.lisp").read_text(encoding="utf-8")
+surface_rows=re.findall(r"^  \(([01]{7}) (.+)\)$",surface,flags=re.MULTILINE)
+assert len(surface_rows)==d["occupancy"]==126, "D7 projection row count drift"
+coordinates=[bits for bits,_ in surface_rows]
+assert len(set(coordinates))==len(coordinates), "duplicate D7 coordinate"
+assert set(coordinates)==set(d["residents"]), "D7 surface/resident map drift"
+assert set(coordinates).isdisjoint(d["reserved_coordinates"]), "reserved D7 coordinates were allocated"
+expected_columns=("ук","укр","san","en","LISP","sym")
+for bits,body in surface_rows:
+    for name in expected_columns:
+        assert body.count(f"({name} ")==1, f"D7:{bits} missing or duplicated {name}"
+    labels=re.findall(r"\((ук|укр|san|en|LISP|sym) ",body)
+    assert tuple(labels)==expected_columns, f"D7:{bits} surface column order changed"
+    en=re.search(r"\(en ([^()]*)\)",body)
+    assert en is not None and en.group(1)==d["residents"][bits], f"D7:{bits} role projection drift"
+    assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
+
+print("D7-SURFACE-ROWS: PASS residents=126 reserved=2 no-Rust-law")
 print("D7-CURRENT-AUTHORITY: PASS")
 print("occupancy=126/128 baseline=107 shiva-overlays=19 reserved-pinned=2 candidate-D=NOT-RATIFIED")
