@@ -8,6 +8,13 @@ on:
       - lib/core.lisp
       - lib/core4.lisp
       - .github/workflows/canon-map-d1-gh-probe.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - lib/core.lisp
+      - lib/core4.lisp
+      - .github/workflows/canon-map-d1-gh-probe.yml
 
 permissions:
   contents: write
