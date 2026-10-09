@@ -1,5 +1,5 @@
 //! Measure the mechanical owner-coordinate lookup, not any language law.
-//! D8/D9 full-width admission is generated from owner-ratified source maps.
+//! D8/D9 full-width admission is generated from owner-ratified source maps.\n//! D1/D2 and research D10 have no owner-occupancy projection: zero is not a function.
 
 use sens::domain_ladder::DomainCoordinate;
 use std::{env, hint::black_box, time::Instant};
@@ -29,7 +29,12 @@ fn main() {
 
     println!("domain\tcapacity\tsamples\titerations\tresident_per_cycle\tp50_ns_per_lookup\tp95_ns_per_lookup");
     for (width, capacity, residents) in [
-        (3u8, 8u16, 7usize),
+        (1u8, 2u16, 0usize),
+        (2, 4, 0),
+        (3, 8, 7),
+        (4, 16, 14),
+        (5, 32, 32),
+        (6, 64, 64),
         (7, 128, 126),
         (8, 256, 256),
         (9, 512, 512),
