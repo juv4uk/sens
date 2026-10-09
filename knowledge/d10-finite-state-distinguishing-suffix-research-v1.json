@@ -228,5 +228,15 @@
   "canonical_inventory_modified": false,
   "selected_delta": 0,
   "coordinates_assigned": 0,
-  "ratified": 0
+  "ratified": 0,
+  "own_repo_executable_donor": {
+    "repository": "juv4uk/sens",
+    "commit": "1c23e77fa3ce1857529b03106f96c0ed8e19a1c9",
+    "source_path": "scripts/research-2034-selector-transducer.py",
+    "file_git_blob_sha1": "ed6dbaaa1aabaa575d3b378e3f3631c288c9008e",
+    "source_lines": "23-53,93-125",
+    "donor_oracle": "minimize_dfa (partition refinement on 6 real selector machine states)",
+    "proposed_cross_check": "all 36 ordered real donor state-pairs; equality by owner partition iff no distinguishing suffix",
+    "limitations": "Recognizes acceptance language only, does not prove emitted transducer outputs or typed-graph semantic identity."
+  }
 }
