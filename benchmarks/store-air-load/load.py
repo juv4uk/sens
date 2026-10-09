@@ -28,11 +28,11 @@ REPEAT_LADDER = (1, 10, 100)
 CORE_MODES = ("session", "bytes", "decode", "parse", "macro", "core")
 CANDIDATES = {
     "canonical-packed": "canonical-d1d8",
-    "text-surface": "english-surface",
+    "text-surface": "ukrainian-surface",
 }
 SOURCE_KEYS = {
     "canonical-packed": "canonical_source",
-    "text-surface": "english_source",
+    "text-surface": "ukrainian_source",
 }
 IREF_RE = re.compile(r"I\s+refs:\s*([\d,]+)")
 
@@ -106,7 +106,7 @@ def load_fixtures(path: Path) -> dict[str, dict[str, object]]:
 
 
 def write_source(tmp: Path, fixture_id: str, representation: str, source: str) -> Path:
-    suffix = "canonical" if representation == "canonical-packed" else "english"
+    suffix = "canonical" if representation == "canonical-packed" else "ukrainian"
     path = tmp / f"{fixture_id}.{suffix}.lisp"
     path.write_text(source, encoding="utf-8")
     return path

@@ -1,6 +1,6 @@
 {
   "schema": "sens-store-air-load-fixtures/v1",
-  "purpose": "Фікстури STORE -> AIR -> LOAD: механічні exact-width controls та семантично звірені English/canonical пари.",
+  "purpose": "Фікстури STORE -> AIR -> LOAD: механічні exact-width controls та семантично звірені Ukrainian/canonical пари.",
   "fixtures": [
     {
       "id": "seven-bit-mechanical",
@@ -43,7 +43,7 @@
     {
       "id": "d3-quote-empty",
       "kind": "paired-program",
-      "english_source": "(quote ())",
+      "ukrainian_source": "(як-є ())",
       "canonical_source": "10 001 00 10 01 01",
       "expected_value": "()",
       "expected_output": "",
@@ -52,7 +52,7 @@
     {
       "id": "d3-car-empty",
       "kind": "paired-program",
-      "english_source": "(car (quote (())))",
+      "ukrainian_source": "(перше (як-є (())))",
       "canonical_source": "10 100 00 10 001 00 10 10 01 01 01 01",
       "expected_value": "()",
       "expected_output": "",

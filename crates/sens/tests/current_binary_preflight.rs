@@ -2,7 +2,10 @@
 //! binary width and payload, never a human spelling or historical SID8.
 //! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-use sens::{parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind};
+use sens::{
+    eval_parsed_expressions, parse_canonical_binary, wire_decode_program, wire_encode_program,
+    Expr, ExprKind, Session, Value,
+};
 
 fn binary_trace(expression: &Expr) -> String {
     match &expression.kind {
@@ -111,4 +114,28 @@ fn human_names_and_nonbinary_tokens_never_enter_canonical_source() {
     for source in ["(001)", "car", "CONS", "010xyz", "2", "10 001"] {
         assert!(parse_canonical_binary(source).is_err(), "{source}");
     }
+}
+
+#[test]
+fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
+    let source = include_str!("../../../examples/binary-language/current-cond-reference.lisp");
+    let words = source.split_whitespace().collect::<Vec<_>>();
+    assert!(!words.is_empty());
+    assert!(
+        words.iter().all(|word| {
+            word.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+        }),
+        "the reference file must contain only visible binary words and whitespace"
+    );
+    assert!(
+        words.iter().all(|word| (1..=4).contains(&word.len())),
+        "the current COND reference must not contain legacy W8/W9 identities"
+    );
+
+    let expressions = parse_canonical_binary(source).expect("current D3 COND binary source");
+    assert_eq!(expressions.len(), 1);
+    let result = eval_parsed_expressions(&expressions, &mut Session::default())
+        .expect("two-field COND must execute with exact D1 predicate results");
+    assert!(matches!(result.value, Value::Nil));
+    assert!(result.output.is_empty());
 }

@@ -121,30 +121,48 @@
                 (science-source/1 bipm-si-brochure-9 2019))))
           (00000001 ()))))))
 
+
+; Structural equality for this witness, expressed using only callable D1-D4 laws.
+; EQ is reached only after both values are proven to be atoms.
+(00001001 exact-quantity-value-equal?
+  (00001000 (left right)
+    (за-умовою
+      ((порожнє? left) (порожнє? right))
+      ((порожнє? right) ні)
+      ((атом? left)
+       (за-умовою
+         ((атом? right) (тотожне? left right))
+         ((хибне? (атом? right)) ні)))
+      ((атом? right) ні)
+      ((exact-quantity-value-equal? (перше left) (перше right))
+       (exact-quantity-value-equal? (решта left) (решта right)))
+      ((хибне? (exact-quantity-value-equal? (перше left) (перше right))) ні))))
 (00001001 exact-quantity-arithmetic-check
   (00001000 (rows)
-    (00000111
-      ((00000010 rows) ()
+    (за-умовою
+      ((порожнє? rows)
        (00000001 (exact-quantity-arithmetic-witness (status pass))))
-      ((00000010 rows) (1)
+      ((атом? rows)
        (00100111
          (00000001 exact-quantity-arithmetic-witness)
          (00100111 (00000001 status) (00000001 fail))
          (00100111 (00000001 case) (00000001 malformed-row-tail))
          (00100111 (00000001 actual) rows)))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
-            (exact-quantity-arithmetic-check (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
-            (00100111
-              (00000001 exact-quantity-arithmetic-witness)
-              (00100111 (00000001 status) (00000001 fail))
-              (00100111 (00000001 case) (00000101 row))
-              (00100111 (00000001 actual) (00101111 row))
-              (00100111 (00000001 expected) (00110000 row))))))))))
-
+      ((хибне? (атом? rows))
+       (за-умовою
+         ((exact-quantity-value-equal? (перше (решта (перше rows)))
+                     (перше (решта (решта (перше rows)))))
+          (exact-quantity-arithmetic-check (решта rows)))
+         ((хибне? (exact-quantity-value-equal? (перше (решта (перше rows)))
+                             (перше (решта (решта (перше rows))))))
+          (00100111
+            (00000001 exact-quantity-arithmetic-witness)
+            (00100111 (00000001 status) (00000001 fail))
+            (00100111 (00000001 case) (перше (перше rows)))
+            (00100111 (00000001 actual)
+                      (перше (решта (перше rows))))
+            (00100111 (00000001 expected)
+                      (перше (решта (решта (перше rows))))))))))))
 (00001001 exact-quantity-arithmetic-witness
   (00001000 ()
     (exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))))

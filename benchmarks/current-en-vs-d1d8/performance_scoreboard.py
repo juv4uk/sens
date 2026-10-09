@@ -41,17 +41,17 @@ def cpu_report(path: Path) -> tuple[list[str], dict]:
             nanos = nanos / count
         pairs[(row["workload"], row["phase"])][row["candidate"]].append(float(nanos))
     out = [
-        "## Canonical bits vs English surface · same SENS executable",
+        "## Canonical bits vs Ukrainian surface · same SENS executable",
         "",
         "Measured phase time is inside the helper, excluding process startup. "
         "For repeated execution it is divided by the recorded invocation count.",
         "",
-        "| Workload | Phase | English median (ns/op) | Binary median (ns/op) | English / binary | Paired samples |",
+        "| Workload | Phase | Ukrainian median (ns/op) | Binary median (ns/op) | Ukrainian / binary | Paired samples |",
         "|---|---|---:|---:|---:|---:|",
     ]
     summaries = []
     for (workload, phase), candidates in sorted(pairs.items()):
-        en = candidates.get("english-surface", [])
+        en = candidates.get("ukrainian-surface", [])
         bi = candidates.get("canonical-d1d8", [])
         if len(en) != len(bi) or len(en) < 3:
             raise ValueError(f"unpaired or undersampled measurement: {workload}/{phase}")
@@ -60,12 +60,12 @@ def cpu_report(path: Path) -> tuple[list[str], dict]:
         show = f"{ratio:.3f}x" if ratio is not None else "n/a"
         out.append(f"| {workload} | {phase} | {a:.1f} | {b:.1f} | {show} | {len(en)} |")
         summaries.append({
-            "workload": workload, "phase": phase, "english_median_ns": a,
-            "binary_median_ns": b, "english_over_binary": ratio, "samples_per_lane": len(en),
+            "workload": workload, "phase": phase, "ukrainian_median_ns": a,
+            "binary_median_ns": b, "ukrainian_over_binary": ratio, "samples_per_lane": len(en),
         })
     out += [
         "",
-        "> An English/binary ratio above 1 means the binary lane measured faster "
+        "> A Ukrainian/binary ratio above 1 means the binary lane measured faster "
         "for that phase on this runner. These two small D3 smoke programs "
         "cannot establish a general SENS-vs-Lisp or SENS-vs-Python win.",
         "",
