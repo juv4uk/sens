@@ -29,4 +29,4 @@ jobs:
       - name: Check D7 ratified source coordinates
         run: python3 scripts/check-d7-current-authority.py
       - name: Execute physical-binary-only program and fail-closed negatives
-        run: cargo test --locked -p sens --test binary_program_e2e -- --nocapture
+        run: cargo test --locked -p sens --test binary_program_e2e --test text7_contextual_binding -- --nocapture
