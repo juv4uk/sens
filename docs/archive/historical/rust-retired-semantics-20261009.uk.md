@@ -8,6 +8,8 @@
 | `crates/sens/tests/content_store_authority.rs` | `content_store_semantic_relations_are_owned_by_lisp_witness` | Історичний Lisp witness спирався на старий спосіб спостереження семантичних відношень і на поточному runtime повертав `()` замість старого pass envelope; це не доказ помилки нового D1/D3 | `content_store_mechanism_keeps_deterministic_images_and_distinct_history_entries` збережено; семантичний witness потребує **окремого переписування за каноном**, не фальшивого PASS |
 | `crates/sens/tests/d3_empty_control.rs` | `historical_truthiness_rows_cannot_reenter_current_tier1_authority` | Тест активного Rust-сьюту перевіряв історичні fixtures `truthiness` і їхню класифікацію, а не поведінку поточного exact-domain керування | `structural_empty_is_not_an_exact_d3_cond_predicate`, `non_d1_values_fail_closed_as_cond_tests` та інші поточні D1/D3 інваріанти збережено |
 
+| `crates/sens/tests/decimal_comma_authority.rs` | `decimal_comma_semantics_are_owned_by_lisp_witness` | Ненормалізована Lisp-фікстура застосовує застарілий тричленний COND та падає з `UnsatisfiedConditional` | Нові поточні parser-only перевірки `decimal_comma_reader_preserves_exact_rational_identity` і `comma_inside_non_numeric_tokens_remains_symbol_data` зберігають граматику без старого control oracle |
+
 ## Межа змін
 
 - **Не** вилучено runtime-код, `language-contract.lisp`, чинні D1/D2/D3/D4–D10 закони, правила fail-closed, тести правильної логіки.
