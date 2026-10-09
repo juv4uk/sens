@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'knowledge/d10-maling-symbolic-differentiation-1959-v1.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
       - 'docs/research/d10-maling-symbolic-differentiation-1959.uk.md'
       - 'scripts/check_d10_maling_symbolic_differentiation.py'
       - 'tests/test_d10_maling_symbolic_differentiation.py'
