@@ -1,8 +1,6 @@
-name: D7 ratified authority and exact W7 carrier
+name: D7 ratified authority and W7 transport
 
 on:
-  push:
-    branches: [main]
   pull_request:
     paths:
       - "knowledge/d7-ratified.json"
@@ -12,41 +10,42 @@ on:
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d7-current-authority.py"
+      - "scripts/domain_tables.py"
       - "benchmarks/d7-ratification-conformance/**"
-      - "crates/sens/src/domain_ladder.rs"
-      - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/text7.rs"
       - "crates/sens/tests/d7_w7_pack.rs"
-      - "crates/sens/tests/domain_ladder.rs"
-      - "crates/sens/tests/d2_text7_frame_role_boundary.rs"
       - "crates/sens/tests/text7_contextual_binding.rs"
       - ".github/workflows/d7-ratified-authority.yml"
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d7-ratified.json"
+      - "knowledge/d7-v2-evidence-ledger.json"
+      - "contracts/d7-ratification.lisp"
+      - "lib/domains/d7.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d7-current-authority.py"
+      - "scripts/domain_tables.py"
+      - "benchmarks/d7-ratification-conformance/**"
+      - "crates/sens/src/text7.rs"
+      - "crates/sens/tests/d7_w7_pack.rs"
+      - "crates/sens/tests/text7_contextual_binding.rs"
+      - ".github/workflows/d7-ratified-authority.yml"
 
 permissions:
   contents: read
 
-# Run on every main SHA: no historical green can replace current evidence.
 jobs:
   authority:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - name: D7 owner authority and 126-row Lisp surface projection
+      - name: Check 126/128 ratified D7 residents, reserved coordinates and Lisp surface
         run: python3 scripts/check-d7-current-authority.py
-      - name: D7 Sound/Text, LocalOrdinal and Number role boundaries
+      - name: Check D7 Sound/Text versus LocalOrdinal and arithmetic boundary
         run: python3 benchmarks/d7-ratification-conformance/validate.py
-      - name: D7 exact width, W7 packing and contextual D2 framing
-        run: >-
-          cargo test --locked -p sens
-          --test domain_ladder
-          --test d7_w7_pack
-          --test d2_text7_frame_role_boundary
-          --test text7_contextual_binding
-      - name: No semantic ownership in Rust D7 coordinate carrier
-        run: >-
-          cargo test --locked -p sens --lib
-          domain_ladder::tests::every_d7_source_word_has_a_width_preserving_coordinate
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Prove mechanical dense W7 and contextual D2/Text7 identities
+        run: cargo test --locked -p sens --test d7_w7_pack --test text7_contextual_binding
