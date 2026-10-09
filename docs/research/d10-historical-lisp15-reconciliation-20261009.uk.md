@@ -10,7 +10,7 @@
 
 - Усі 30 родин збережено з первинним/історичним походженням і окремою поточною класифікацією.
 - Знайдені збіги включають D8 `RPLACA/RPLACD`, `ERRORSET/ERROR`, `READ`, `VECTOR`, `VECTOR-REF`, `VECTOR-SET!`, `SPECIAL`, `GET`, `GETPROP/PUTPROP`; а в дослідницькому D10 уже є `INTERN`, `REMOB`, `REMPROP`, `SASSOC`, `SEARCH`. Тому історичні назви не слід подавати повторно як незалежні пропозиції.
-- Найближча додаткова **питальна гіпотеза** — `MAPATOMS/OBARRAY`: MacLisp описує множинні symbol tables, символи з однаковим print-name у різних tables і операцію обходу таблиці без залежності клієнта від її hash-bucket layout. Треба перевірити, чи це незалежний portable law, чи лише спосіб огляду реалізаційного symbol registry. Це HOLD, не selected.
+- **`MAPATOMS` уже є в обраному D10** (донор #4042, MacLisp Reference Manual, printed p. 2-95): повторну пропозицію знято. Залишок — лише **`OBARRAY/OBLIST` multi-table state**: чи має вибір/ідентичність таблиці й ізоляція символів з однаковими print-name у різних таблицях окремий переносимий закон понад `INTERN`, `REMOB`, `MAPATOMS`, `COPYSYMBOL`, `NEW-SYMBOL`. Це HOLD, не selected.
 - `APVAL/CSET/CSETQ/FLAG/REMPROP` слід мінімізувати до вже наявних property-list/value-cell семантик; `SPECIAL` вже є в канонічному D8; `MAP`, `MAPLIST`, `EQUAL`, `GENSYM`, `READ` та vector/array family вже мають lower-domain/selected matches або derivation hypotheses. Debugging, I/O, compiler and memory controls — не Core resident автоматично.
 
 ## Первинні джерела
@@ -22,7 +22,7 @@
 
 ## Єдина пропозиція, яку варто дослідити далі
 
-`MAPATOMS/OBARRAY`: дві позитивні проби та один falsifier записані в JSON. До будь-якого оформлення через єдиний D10 proposal workflow потрібні точні callback return/error/early-exit умови, adversarial oracle проти `INTERN/REMOB/COPYSYMBOL/NEW-SYMBOL/READTABLE`, і висновок owner щодо Core-власності. Немає порядку обходу, координати, resident, ratification чи T5-авторизації.
+`MAPATOMS` не є новою пропозицією: воно вже selected D10. Далі дослідити тільки multi-obarray isolation/identity: дві позитивні проби і falsifier у JSON. До будь-якого окремого OBARRAY proposal потрібні точні обсервації поточної таблиці, життя таблиці, символів з однаковими іменами, та adversarial oracle проти `INTERN/REMOB/MAPATOMS/COPYSYMBOL/NEW-SYMBOL/READTABLE`. Немає координати, resident, ratification чи T5-авторизації.
 
 ## Лічильники
 
