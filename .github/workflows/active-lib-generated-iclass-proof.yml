@@ -26,11 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Verify exact 1176-row generated-data role, syntax tampering rejection, real active source inclusion
+      - name: Verify generated data boundary AND exact parser-backed active executable source
         run: |
-          cargo test -q -p sens-cli --test active_lib_sens_completion -- --skip active_authored_lib_has_no_parser_convertible_surface_heads
+          cargo test -q -p sens-cli --test active_lib_sens_completion
       - name: Explain separate unfinished semantic migration
         shell: bash
         run: |
           echo 'Data-only classification never counts as a migrated executable.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Compiler nucleus and native-first remain in the real executable migration gate.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Compiler nucleus and native-first remain in the real executable migration gate; all five active-source tests ran.' >> "$GITHUB_STEP_SUMMARY"
