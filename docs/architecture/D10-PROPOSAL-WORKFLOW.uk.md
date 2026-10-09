@@ -21,10 +21,18 @@
 | `donor_provenance` | `owner/repo@COMMIT:path:line` для **реального** донора |
 | `dedup_check` | `D1-D9@COMMIT=NO-MATCH;D10@COMMIT=NO-MATCH`; заявник перевіряє обидві частини проти поточного стану |
 | `ownership_test` | `UNIVERSAL-BORDER: ...` з доказовим поясненням незалежності від субстрату |
-| `blocked_source` | `owner/repo@COMMIT:path:line` заблокованого джерела |
+| `blocked_source` | `owner/repo@COMMIT:path:line` реального BLOCK або `NO-MIGRATION-BLOCK` для словникового дослідження без зафіксованої зупинки міграції. Ніколи не вигадувати блокер. |
 | `status`, `ratified` | Завжди `pending-review` та `0` у цьому реєстрі |
 
 Журнал перевіряє лише схему, мітки стану, відсутність пустих полів і дублікатів **усередині журналу**. Сам по собі він НЕ підтверджує якість дедуплікації або закон; ці докази перевіряє рецензент.
+
+## Обов'язковий зв'язок ledger ↔ вибраний D10
+
+**Чинне машинне правило CI:** `scripts/check_d10_proposal_growth_gate.py` перевіряє `base → head` для кожного PR, що додає `knowledge/d10-v1-semantic-inventory.json`. Кожне **нове selected semantic_name** мусить мати існуючий або доданий в цьому PR **валідний** рядок `knowledge/d10-proposal-ledger.tsv`. Інакше CI повертає BLOCK. Старі selected rows та раніше записані ledger entries не можна редагувати/видаляти; нові строки додаються наприкінці. Додатково запускається `scripts/check_d10_selection_transition_history.py` для immutable 625-бази та git-blob SHA переходів. `pending-review` не означає `ratified` чи executable SENS.
+
+**Борг архіву:** головна гілка вже містить п'ять дійсно selected research meanings `625→627→630` без рядків proposal ledger. Їхня історія є в `knowledge/d10-selection-transition-history.json`, а список чесно незаповнених пропозицій — у `knowledge/d10-ledger-backfill-audit-v1.json`. Backfill робиться окремим audit-PR *лише після* повного provenance/dedup, без фальшивих source SHA або уявного міграційного BLOCK. Нове правило не переписує цей історичний стан і не додає координат.
+
+**Конституція tooling:** [D10-GUARD-GROWTH-DOCTRINE.uk.md](D10-GUARD-GROWTH-DOCTRINE.uk.md) — fail-closed перевірка зобов'язана мати доказовий append/extend маршрут замість вічної заборони на ріст.
 
 ## Як перевірити відсутність дубля
 
