@@ -16,6 +16,14 @@
 | Lisp / Prolog / OS | композиція функцій, точні алгебраїчні контракти | не додавати ще одну синтаксичну систему поза D2 |
 | Космічна гра та Canon EOS | фільтрування зображень, періодичні координати | графіка, камери та фізика гри у своїх пакетах |
 
+## Перевірено власні репозиторії — не лише загальні захоплення
+
+- **[spanda](https://github.com/juv4uk/spanda/blob/master/README.md)**, Git blob `d339363e03798941280d7394fb6b24a76ff43dd3`: задум синхронізованих осциляторів із **точними дробами p/q** та інтеграцією FPGA↔SENS. Це справжня мотивація до раціональної фазової семантики, але поки не готовий виконавець PHASE-UNWRAP.
+- **[radio-log канал SENS](https://github.com/juv4uk/radio-log/blob/main/src/lib/sens-radio/channel-lab.ts)**, `7d8c70691dc19f0c3d7121d8945529dd2b2335e7`, та **[тести](https://github.com/juv4uk/radio-log/blob/main/tests/sens-radio-channel-lab.test.mjs)**, `2f55b701d4974b161ddaa1af3314db5e4694081a`: реальні frequency-offset, зміна частоти дискретизації, AWGN та перевірки **точної ідентичності** SENS-пакета. Signal-processing / resampling — корисні бібліотечні донори, не привід міняти D2 чи T5.
+- **[my-lisp-panini](https://github.com/juv4uk/my-lisp-panini/blob/master/panini/machine/siva-sutras.lisp)**, `c64a17bac208d028fec0c070d91aab32ed81b3e3`: реальна функція `resolve-pratyahara` та похідна належність звуку. Це вже враховано в Panini research; без дублювання D10 назв.
+
+У `knowledge/d10-crossdomain-math-signal-research-v1.json` ці файли збережені з точними Git blob SHA. Це **source evidence для застосувань**, не незалежна перевірка того, що нові двійкові резиденти потрібні.
+
 ## Точні дослідні закони
 
 ### 1. FINITE-CONVOLUTION — скінченна-згортка
