@@ -252,7 +252,7 @@ pub fn render_ternary_words_vertical(words: &[BinarySourceWord]) -> String {
 pub fn render_ternary_words_spaced(words: &[BinarySourceWord]) -> String {
     // Лише механічний перегляд: біти слова і його початкова ширина.
     // Не створюємо тимчасовий Vec<String> чи String для кожного слова.
-    let capacity: usize = words.iter().map(BinarySourceWord::width).sum::<usize>()
+    let capacity: usize = words.iter().map(|word| word.width()).sum::<usize>()
         + words.len().saturating_sub(1);
     let mut visible = String::with_capacity(capacity);
     for (index, word) in words.iter().enumerate() {
