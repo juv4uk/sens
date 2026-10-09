@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = (
     "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",
     "tests/fixtures/migration-multiform-cohort-main/two-forms.sens",
+    "examples/binary/d3-cond-program.sens",
 )
 LANES = ("sens-exec", "sens-trit-eval", "sens-trit-open")
 
