@@ -1,0 +1,14 @@
+metric	value	evidence
+main_sha	0f5d324dbe4682a68329e28f113127a82c8a6366	GitHub main
+registry_exact_sens_rows	256	lib/surface/semantic-registry.lisp structural count
+generated_function_table_rows	255	lib/generated/function-table.lisp structural count
+rust_primitive_table_entries	13	crates/sens/src/eval/canon.rs PRIMITIVE_TABLE assignments
+named_source_call_baseline	25832	crates/sens/tests/data/non-sens-code-baseline.tsv source rows sum
+runtime_non_sens_surface_baseline	326	crates/sens/tests/data/non-sens-code-baseline.tsv runtime rows sum
+proptest_search_hits	0	GitHub code search on current main
+quickcheck_search_hits	0	GitHub code search on current main
+cargo_fuzz_search_hits	0	GitHub code search on current main
+cranelift_search_hits	0	GitHub code search on current main
+sens_bench_workflow	present	.github/workflows/sens-bench.yml
+division_00001111_route	division_on_values	crates/sens/src/eval/canon.rs
+tailcall_expr_clone	present	crates/sens/src/eval/closures.rs
