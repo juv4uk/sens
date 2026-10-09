@@ -1,0 +1,137 @@
+name: Verify 470 ATOM lower basis
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-470-atom-basis.yml'
+      - 'docs/research/470/**'
+
+jobs:
+  atom-basis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install temporary ATOM basis observer
+        shell: bash
+        run: |
+          cat > crates/my-lisp/tests/verify_470_atom_basis.rs <<'RS'
+          use my_lisp::{eval_program, ErrorKind, Session};
+
+          fn value(source: &str) -> String {
+              eval_program(source, &mut Session::default())
+                  .expect(source)
+                  .value
+                  .to_string()
+          }
+
+          fn error_kind(source: &str) -> ErrorKind {
+              eval_program(source, &mut Session::default())
+                  .expect_err(source)
+                  .kind
+          }
+
+          #[test]
+          fn current_atom_target_is_total_over_all_three_structural_classes() {
+              assert_eq!(
+                  value("(atom (quote ()))"),
+                  "(structural-kind empty-list)"
+              );
+              assert_eq!(
+                  value("(atom (quote radio))"),
+                  "(structural-kind atom)"
+              );
+              assert_eq!(
+                  value("(atom (quote (radio . antenna)))"),
+                  "(structural-kind pair)"
+              );
+          }
+
+          #[test]
+          fn eq_against_canon_zero_is_partial_exactly_at_pair_boundary() {
+              assert_eq!(
+                  value("(eq (quote ()) (quote ()))"),
+                  "(identity-relation same)"
+              );
+              assert_eq!(
+                  value("(eq (quote radio) (quote ()))"),
+                  "(identity-relation distinct)"
+              );
+              assert_eq!(
+                  error_kind("(eq (quote (radio . antenna)) (quote ()))"),
+                  ErrorKind::Type
+              );
+          }
+
+          #[test]
+          fn projection_success_route_is_partial_exactly_at_nonpair_boundary() {
+              let route_pair = r#"
+                  ((lambda (x)
+                     ((lambda (ignored)
+                        (quote (structural-kind pair)))
+                      (car x)))
+                   (quote (radio . antenna)))
+              "#;
+              let route_atom = r#"
+                  ((lambda (x)
+                     ((lambda (ignored)
+                        (quote (structural-kind pair)))
+                      (car x)))
+                   (quote radio))
+              "#;
+              let route_empty = r#"
+                  ((lambda (x)
+                     ((lambda (ignored)
+                        (quote (structural-kind pair)))
+                      (car x)))
+                   (quote ()))
+              "#;
+
+              assert_eq!(value(route_pair), "(structural-kind pair)");
+              assert_eq!(error_kind(route_atom), ErrorKind::Type);
+              assert_eq!(error_kind(route_empty), ErrorKind::Type);
+          }
+
+          #[test]
+          fn eq_first_composition_aborts_before_cond_can_classify_a_pair() {
+              let source = r#"
+                  ((lambda (x)
+                     (cond
+                       ((eq x (quote ()))
+                        (identity-relation same)
+                        (quote (structural-kind empty-list)))
+                       ((eq x (quote ()))
+                        (identity-relation distinct)
+                        (quote (structural-kind atom)))))
+                   (quote (radio . antenna)))
+              "#;
+
+              assert_eq!(error_kind(source), ErrorKind::Type);
+          }
+
+          #[test]
+          fn projection_first_composition_aborts_before_nonpair_fallback_can_run() {
+              let source = r#"
+                  ((lambda (x)
+                     ((lambda (ignored)
+                        (quote (structural-kind pair)))
+                      (car x)))
+                   (quote radio))
+              "#;
+
+              assert_eq!(error_kind(source), ErrorKind::Type);
+          }
+          RS
+
+      - name: Execute ATOM lower-basis probes
+        run: cargo test -p my-lisp --test verify_470_atom_basis -- --nocapture
+
+      - name: Remove temporary observer
+        run: rm crates/my-lisp/tests/verify_470_atom_basis.rs
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
