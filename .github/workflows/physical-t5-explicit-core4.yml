@@ -1,26 +1,57 @@
 name: Physical T5 explicit Core4 oracle
 on:
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/tests/physical_core4_sequence_cli.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/lib.rs"
+      - "lib/core4.lisp"
+      - "lib/core4.lisp.fasl"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+      - ".github/workflows/physical-t5-explicit-core4.yml"
   pull_request:
     paths:
       - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/tests/physical_core4_sequence_cli.rs"
       - "crates/sens/src/eval/**"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/lib.rs"
+      - "lib/core4.lisp"
+      - "lib/core4.lisp.fasl"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
       - ".github/workflows/physical-t5-explicit-core4.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+# Preserve per-commit binary execution evidence even while main moves.
+concurrency:
+  group: physical-t5-cli-${{ github.sha }}-${{ github.event_name }}
+  cancel-in-progress: false
+
 jobs:
   explicit-core4-eval:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
       CARGO_BUILD_JOBS: "1"
       RUST_TEST_THREADS: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Physical T5 bare-vs-explicit Core4 oracle and existing T5 safety
-        run: cargo test -p sens-cli --bin sens-trit -- --nocapture
-      - name: Immutable source and physical T5 artifacts
+      - name: Binary .sens transport, exact D2 admission and pure evaluator
+        run: cargo test --locked -p sens-cli --bin sens-trit -- --nocapture
+      - name: Public physical .sens CLI explicit Core4 with fail-closed admission
+        run: cargo test --locked -p sens-cli --test physical_core4_sequence_cli -- --nocapture
+      - name: Preserve immutable physical T5 source and companion artifacts
         run: |
           git diff --exit-code
           git diff --cached --exit-code
