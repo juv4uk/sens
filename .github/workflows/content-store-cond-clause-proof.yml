@@ -20,6 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Diagnose exact lexical D1 relations (temporary)
+        run: cargo test -p sens --test content_store_cond_scope_probe -- --nocapture
       - name: Assert original content-store semantic and deterministic history laws
         run: cargo test -p sens --test content_store_authority -- --nocapture
       - name: Assert Canon V2 unchanged
