@@ -48,7 +48,7 @@ fn error(output: &Output) -> String {
 }
 
 #[test]
-fn public_core4_bootstrap_enables_ratified_list_but_not_implicit_eval() {
+fn public_ratified_d4_list_is_available_with_and_without_explicit_core4() {
     // D4:1110 LIST(D3:001 QUOTE(D3:000 EMPTY)).
     let physical = PhysicalT5::from_exact("10 1110 00 10 001 00 000 01 01");
     let opened = physical.cli("open");
@@ -56,8 +56,10 @@ fn public_core4_bootstrap_enables_ratified_list_but_not_implicit_eval() {
     assert_eq!(observed(&opened).trim(), "10 1110 00 10 001 00 000 01 01");
 
     let bare = physical.cli("eval");
-    assert!(!bare.status.success(), "bare eval must not implicitly bootstrap Core4");
-    assert!(error(&bare).contains("1110"), "unexpected bare LIST error: {}", error(&bare));
+    // D4:1110 LIST is now an admitted compact-derived value mechanism:
+    // bare eval may use it without ever bootstrapping the Core4 library.
+    assert!(bare.status.success(), "admitted D4 LIST: {}", error(&bare));
+    assert_eq!(observed(&bare).trim(), "(())");
 
     let bootstrapped = physical.cli("eval-core4");
     assert!(bootstrapped.status.success(), "{}", error(&bootstrapped));
@@ -65,13 +67,16 @@ fn public_core4_bootstrap_enables_ratified_list_but_not_implicit_eval() {
 }
 
 #[test]
-fn public_core4_append_uses_existing_lisp_owned_sequence_law() {
+fn public_ratified_d4_append_agrees_with_explicit_core4() {
     // APPEND (LIST (QUOTE ())) (LIST (QUOTE ()))
     let exact =
         "10 1111 00 10 1110 00 10 001 00 000 01 01 00 10 1110 00 10 001 00 000 01 01 01";
     let physical = PhysicalT5::from_exact(exact);
     let bare = physical.cli("eval");
-    assert!(!bare.status.success(), "bare eval must not auto-enable D4 APPEND");
+    // D4:1111 APPEND is also a direct ratified value-call mechanism.
+    // Success here must not be confused with implicit Core4 bootstrap.
+    assert!(bare.status.success(), "admitted D4 APPEND: {}", error(&bare));
+    assert_eq!(observed(&bare).trim(), "(() ())");
     let current = physical.cli("eval-core4");
     assert!(current.status.success(), "{}", error(&current));
     assert_eq!(observed(&current).trim(), "(() ())");
