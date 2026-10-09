@@ -25,13 +25,19 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_guard_t5_triplet_delta.py' -v
       - name: Only changed/new T5 physical files and view require exact parity
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           MANUAL_BASE: ${{ inputs.base_sha }}
         shell: bash
         run: |
           set -euo pipefail
-          BASE="$BASE_SHA"
-          if [ -z "$BASE" ]; then BASE="$MANUAL_BASE"; fi
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            # Use the current target tip, not the PR-creation snapshot in base.sha.
+            # This is an immutable SHA for this run and excludes pre-existing T5 debt.
+            git fetch --no-tags origin "$GITHUB_BASE_REF"
+            BASE="$(git rev-parse FETCH_HEAD)"
+          else
+            BASE="$MANUAL_BASE"
+          fi
+          echo "T5 delta baseline: $BASE"
           if [[ ! "$BASE" =~ ^[0-9a-f]{40}$ ]]; then
             echo "BLOCK: missing immutable base SHA"; exit 2
           fi

@@ -1,0 +1,39 @@
+name: Framing A-S confirmation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/framing-as-confirm.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pinned framing benchmark
+        uses: actions/checkout@v4
+        with:
+          ref: 77d2edb0620c2c162f5c7e63386bc36113e9d0ef
+          fetch-depth: 1
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+          rustc --version
+
+      - name: Run pinned 3-sample A-S confirmation
+        run: |
+          python3 benchmarks/framing-decode/run.py             --samples 3             --iterations 20000             --codecs a,s             --wrappers raw,container             --widths 3,8,16,65             --out "$RUNNER_TEMP/framing-as-confirm"             --source-sha 77d2edb0620c2c162f5c7e63386bc36113e9d0ef
+
+      - name: Upload raw confirmation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: framing-as-confirm-77d2edb
+          path: |
+            ${{ runner.temp }}/framing-as-confirm/instructions.tsv
+            ${{ runner.temp }}/framing-as-confirm/environment.json

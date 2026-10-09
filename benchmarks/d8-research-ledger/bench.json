@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d8-research-ledger",
+  "wing": "D8 orientation research",
+  "roles": [
+    "RESEARCH"
+  ],
+  "question": "What D8 research families and candidate footprints were covered by the pre-ratification research program?",
+  "claim": "Consolidates research coverage accounting only; it is not D8 occupancy authority and does not retroactively gain strength from later ratification.",
+  "witness": [
+    "run.py",
+    "../../docs/research/3673-d8-research-ledger.md",
+    "../../docs/research/3673-d8-research-ledger.uk.md"
+  ],
+  "status": "RESEARCH-UNRATIFIED",
+  "generation": "unknown",
+  "axis": "d8/research-accounting",
+  "reproduce": "python3 benchmarks/d8-research-ledger/run.py --out /tmp/d8-research-ledger"
+}

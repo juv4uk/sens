@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Двійковий pipeline: кожен крок має лише спостерігати вже наявний закон
+# або перевіряти похідну проекцію. Жоден крок не створює semantic authority.
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+run() {
+  printf '\n==> %s\n' "$*"
+  "$@"
+}
+
+# F−1/F0: нейтральний binary carrier та exact bounded word identity.
+run python3 scripts/research-2106-binary-substrate.py
+run python3 scripts/research-2077-binary-word-law.py
+
+# Ratified D3/bīja3: authority -> checked structural projection.
+run python3 scripts/check-bija3-current-authority.py
+run python3 scripts/generate-bija3-l1-l5-structure.py --check
+
+# Current exact-width D1–D9 human projections.
+run python3 scripts/check-domain-tables.py
+
+# Binary-domain task governance: schema, witness, falsifier and status discipline.
+run python3 scripts/check-binary-domain-format.py --self-test
+
+# One-way valve: host u8/Sid8 must not become semantic identity again.
+run bash scripts/sid-binary-identity-guard.sh
+
+
+# Explicit negative controls required by #4268.
+run python3 - <<'PY'
+import importlib.util
+from pathlib import Path
+
+ROOT = Path.cwd()
+SCRIPTS = ROOT / "scripts"
+
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+word_law = load(
+    "research_2077_binary_word_law",
+    SCRIPTS / "research-2077-binary-word-law.py",
+)
+substrate = load(
+    "research_2106_binary_substrate",
+    SCRIPTS / "research-2106-binary-substrate.py",
+)
+domain_tables = load("domain_tables", SCRIPTS / "domain_tables.py")
+BinaryWord = word_law.BinaryWord
+
+# Leading-zero collapse must remain impossible.
+assert BinaryWord("1") != BinaryWord("01")
+assert BinaryWord("01") != BinaryWord("001")
+assert len({BinaryWord("1"), BinaryWord("01"), BinaryWord("001")}) == 3
+
+# Width/domain participates in identity even when numeric payload agrees.
+assert int("1", 2) == int("001", 2)
+assert BinaryWord("1") != BinaryWord("001")
+assert (1, "1") != (3, "001")
+
+# A raw bit delimiter collides with unrestricted payload.
+assert substrate.test_raw_delimiter_impossibility(max_delim_width=6) > 0
+internal = BinaryWord("101001001")
+assert "00" in internal.bits and internal.bits != "00"
+
+# Valid width alone does not imply semantic admission. Use the live
+# ratified D7 table rather than a synthetic subset: Contract 11.8 admits
+# 126/128 D7 coordinates, leaving exactly two owner-reserved/unadmitted words.
+d7_rows = domain_tables.read_domain_table(ROOT / "lib/domains/d7.lisp")
+admitted_d7 = {BinaryWord(row.bits) for row in d7_rows}
+all_d7 = {BinaryWord(f"{n:07b}") for n in range(128)}
+missing_d7 = all_d7 - admitted_d7
+assert len(admitted_d7) == 126
+assert len(missing_d7) == 2
+unknown_same_width = next(iter(missing_d7))
+assert unknown_same_width.width == 7
+assert unknown_same_width not in admitted_d7
+
+# Current domain tables retain exact D1/D2/D3 widths.
+d1 = domain_tables.read_domain_table(ROOT / "lib/domains/d1.lisp")
+d2 = domain_tables.read_domain_table(ROOT / "lib/domains/d2.lisp")
+d3 = domain_tables.read_domain_table(ROOT / "lib/domains/d3.lisp")
+assert [r.bits for r in d1] == ["0", "1"]
+assert [r.bits for r in d2] == ["00", "01", "10", "11"]
+assert [r.bits for r in d3] == [f"{n:03b}" for n in range(8)]
+assert (d1[1].width, d1[1].bits) != (d3[1].width, d3[1].bits)
+
+print("BINARY-LANGUAGE-NEGATIVE-CONTROLS: PASS")
+print("leading-zero collapse: blocked")
+print("width/domain confusion: blocked")
+print("raw delimiter collision: blocked")
+print("semantic admission from width alone: blocked")
+print("exact D1/D2/D3 widths: preserved")
+PY
+
+printf '\nBINARY-LANGUAGE-PIPELINE: PASS\n'

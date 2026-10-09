@@ -179,6 +179,15 @@ fn arithmetic_promotes_exact_integers_and_preserves_inexact_numbers() {
 }
 
 #[test]
+fn numeric_comparisons_return_exact_predicate_bits() {
+    assert_eq!(eval("(< 2 3)").as_predicate_bit(), Some(true));
+    assert_eq!(eval("(< 3 2)").as_predicate_bit(), Some(false));
+    assert_eq!(eval("(> 3 2)").as_predicate_bit(), Some(true));
+    assert_eq!(eval("(= 3 3)").as_predicate_bit(), Some(true));
+    assert_eq!(eval("(= 3 4)").as_predicate_bit(), Some(false));
+}
+
+#[test]
 fn comparison_with_no_arguments_is_an_arity_error() {
     let error = eval_program("(<)", &mut Session::default()).unwrap_err();
     assert_eq!(error.kind, ErrorKind::Arity);

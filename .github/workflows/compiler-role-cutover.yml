@@ -58,6 +58,19 @@ jobs:
       RUST_TEST_THREADS: "1"
     steps:
       - uses: actions/checkout@v5
+      - name: Default SENS core has no runtime dependencies
+        run: |
+          if awk '
+            /^\[dependencies\]$/ { in_deps=1; next }
+            /^\[/ { in_deps=0 }
+            in_deps && $0 !~ /^[[:space:]]*($|#)/ { found=1 }
+            END { exit found ? 1 : 0 }
+          ' crates/sens/Cargo.toml; then
+            echo "default sens core dependency set is empty"
+          else
+            echo "default sens core gained a runtime dependency" >&2
+            exit 1
+          fi
       - name: D4 bootstrap projection must match ratified authority
         run: python3 scripts/generate-d4-bootstrap-compiler-structure.py --check
       - name: Production path must not import Rust role oracle

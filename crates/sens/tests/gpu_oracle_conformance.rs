@@ -1,4 +1,4 @@
-//! CPU-oracle observation corpus for the D3 operations that sens#3801 lists as
+//! Integration-test CPU-oracle observation corpus for the D3 operations that sens#3801 lists as
 //! GPU-admission candidates (sens#3766, sens#3561).
 //!
 //! Every fixture records what the CPU reference evaluator actually returns, and
@@ -8,7 +8,7 @@
 //! law is ratified. The values here are the CPU side of a future
 //! "CPU digest == GPU digest" gate, nothing more.
 
-use crate::{eval_program, Session};
+use sens::{eval_program, Session};
 
 /// Constant by design: no fixture in this module is GPU-executable.
 pub const GPU_STATUS: &str = "blocked-mechanism";

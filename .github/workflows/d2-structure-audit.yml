@@ -1,0 +1,39 @@
+name: D2 structure audit
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d2-structure-audit.json"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/translate-domain-program.py"
+      - "scripts/check-d2-structure-audit.py"
+      - ".github/workflows/d2-structure-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d2-structure-audit.json"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/source_packing.rs"
+      - "crates/sens/src/binary_framing.rs"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/translate-domain-program.py"
+      - "scripts/check-d2-structure-audit.py"
+      - ".github/workflows/d2-structure-audit.yml"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      - name: Verify D2-only structure ownership
+        run: python3 scripts/check-d2-structure-audit.py

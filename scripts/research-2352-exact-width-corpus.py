@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""#2352 exact-width admitted corpus projection.
+"""#2352 historical pre-bīja3 exact-width corpus donor.
 
-Research projection from owner-ratified issue authority:
-- #2151 / #2170 for D1-D4;
-- #2175 / merged #2329 for generated D5 selectors.
+IMPORTANT: the hard-coded D3/D4/D5 model in this file predates the ratified
+bīja3 A map (#3202), the later D4 clean-room reset (#3225), and the D5+ selector
+collision boundary (#3209). It is retained only to reproduce historical
+62-row evidence while #2352 is rewritten from the full owner inputs.
+
+Normal current-authority generation MUST NOT use this script.
 
 This script intentionally does not read lib/surface/semantic-registry.lisp.
 That registry remains a compatibility/surface mechanism during the exact-width
-migration and must not become authority for this projection.
+migration and must not become authority for the replacement projection.
 """
 
 from __future__ import annotations
@@ -234,7 +237,19 @@ def main() -> int:
     mode.add_argument("--check", action="store_true")
     ap.add_argument("--target-dir", type=Path, default=Path("knowledge"))
     ap.add_argument("--out", type=Path)
+    ap.add_argument(
+        "--historical-pre-bija3",
+        action="store_true",
+        help="explicitly reproduce the stale pre-#3202 62-row donor projection",
+    )
     args = ap.parse_args()
+
+    if not args.historical_pre_bija3:
+        raise SystemExit(
+            "refusing stale #2352 projection as current authority: "
+            "this generator hard-codes superseded pre-bīja3 / legacy-derived D3/D4/D5 coordinates; "
+            "use --historical-pre-bija3 only for provenance reproduction"
+        )
 
     if args.write:
         write_outputs(args.target_dir)

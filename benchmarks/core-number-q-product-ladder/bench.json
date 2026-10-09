@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "core-number-q-product-ladder",
+  "wing": "Core-Math / Core Number",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does the candidate Q(2w)=normalize(signed Z(w), positive U(w)) law produce lawful exact rational tiers D48Q and D96Q?",
+  "claim": "Research-only exact-rational product-width witness; it does not constitute Core owner ratification.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "unknown",
+  "axis": "core-number/q-product-width",
+  "reproduce": "python3 benchmarks/core-number-q-product-ladder/run.py --out /tmp/core-number-q-product-ladder"
+}

@@ -6,7 +6,7 @@ use wsm_datalog_kernel::{Atom, Database, Evaluator, Program, Rule, Term, Value};
 use wsm_native_result_types::{
     FourKernelObservation, ProducerSlot, ProvenanceEdge, ProvenanceEdgeType,
 };
-use wsm_prolog_kernel::{
+use wsm_prolog_kernel::{LegacyAbiSemanticId,
     decode_canonical_atom_list, PrologKernel, PrologQuery, PrologRequest,
 };
 
@@ -96,7 +96,7 @@ fn real_prolog_lisp_projection_real_datalog_preserves_domains() {
         .execute(
             prolog_fixture(),
             &PrologRequest::new(
-                INVOKE_ID,
+                LegacyAbiSemanticId(INVOKE_ID),
                 PrologQuery::new("ancestor(alice, X)", "X"),
             ),
         )

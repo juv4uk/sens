@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sens-benchmark-manifest/v1",
+  "title": "SENS benchmark laboratory manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "stand",
+    "wing",
+    "roles",
+    "question",
+    "claim",
+    "witness",
+    "status",
+    "generation",
+    "axis",
+    "reproduce"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sens-benchmark-manifest/v1"
+    },
+    "stand": {
+      "type": "string",
+      "minLength": 1
+    },
+    "wing": {
+      "type": "string",
+      "minLength": 1
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "MEASUREMENT",
+          "CONFORMANCE",
+          "FALSIFIER",
+          "RESEARCH"
+        ]
+      }
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "witness": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "axis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reproduce": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

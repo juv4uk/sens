@@ -345,24 +345,24 @@ impl FourKernelObservation {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wsm_clips_kernel::SemanticId as ClipsSemanticId;
-    use wsm_common_lisp_kernel::SemanticId as CommonLispSemanticId;
-    use wsm_prolog_kernel::SemanticId as PrologSemanticId;
+    use wsm_clips_kernel::LegacyAbiSemanticId as ClipsLegacyAbiSemanticId;
+    use wsm_common_lisp_kernel::LegacyAbiSemanticId as CommonLispLegacyAbiSemanticId;
+    use wsm_prolog_kernel::LegacyAbiSemanticId as PrologLegacyAbiSemanticId;
 
     #[test]
     fn artifact_preserves_four_concrete_producer_types() {
         let observation = FourKernelObservation::new(
             CommonLispResult {
-                semantic_id: CommonLispSemanticId(5),
+                semantic_id: CommonLispLegacyAbiSemanticId(5),
                 stdout: b"LEFT\n".to_vec(),
                 stderr: Vec::new(),
             },
             PrologExecutionResult {
-                semantic_id: PrologSemanticId(3),
+                semantic_id: PrologLegacyAbiSemanticId(3),
                 stdout: b"[bob,dave,carol]\n".to_vec(),
                 stderr: Vec::new(),
             },
-            ClipsExecutionResult::new(Some(ClipsSemanticId(6)), 1, 1, 2),
+            ClipsExecutionResult::new(Some(ClipsLegacyAbiSemanticId(6)), 1, 1, 2),
             Database::new(),
         );
 

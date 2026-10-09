@@ -1,0 +1,115 @@
+<!--
+  WiX v4+ manifest for the SENS CLI Windows installer.
+  Built by .github/workflows/release.yml with ProductVersion and BinDir.
+  Installs sens.exe as the primary CLI and my-lisp.exe as the compatibility
+  surface from the same sens-cli build. The historical UpgradeCode is
+  deliberately retained so l0.42+ upgrades the earlier my-lisp-branded MSI.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package
+      Name="sens"
+      Manufacturer="Waldemar Sydiy M"
+      Version="$(var.ProductVersion)"
+      Scope="perMachine"
+      UpgradeCode="7C3A9E52-4B6D-4E8A-9F1D-2A5C8B7E6F41"
+      Compressed="yes"
+      Language="1033">
+
+    <MajorUpgrade
+        DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="ARPPRODUCTICON" Value="SensIcon" />
+    <Icon Id="SensIcon" SourceFile="packaging/windows/icon.ico" />
+
+    <Feature Id="Main" Level="1">
+      <ComponentRef Id="SensExeComponent" />
+      <ComponentRef Id="LegacyExeComponent" />
+      <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLDIR" Name="sens">
+        <Component Id="SensExeComponent" Guid="5E421D9C-62CA-4EA6-8F62-1AB69B0B10A7">
+          <File Id="SensExe"
+                Source="$(var.BinDir)\sens.exe"
+                Name="sens.exe"
+                KeyPath="yes"
+                Checksum="yes" />
+          <Environment Id="PATHENV"
+                       Name="PATH"
+                       Value="[INSTALLDIR]"
+                       Permanent="no"
+                       Part="last"
+                       Action="set"
+                       System="yes" />
+          <RemoveFolder Id="RemoveInstallDir" On="uninstall" />
+        </Component>
+
+        <!-- Compatibility executable remains installed intentionally. -->
+        <Component Id="LegacyExeComponent" Guid="E4E63255-DF9F-4072-A66D-41C27C1C6A56">
+          <File Id="MyLispExe"
+                Source="$(var.BinDir)\my-lisp.exe"
+                Name="my-lisp.exe"
+                KeyPath="yes"
+                Checksum="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcut"
+                 Guid="C38A979D-E73D-4D83-B48D-E8939E957B6E">
+        <Shortcut Id="SensDesktopShortcut"
+                  Name="sens"
+                  Description="SENS CLI interpreter"
+                  Target="[INSTALLDIR]sens.exe"
+                  WorkingDirectory="INSTALLDIR"
+                  Icon="SensIcon" />
+        <RemoveFolder Id="RemoveDesktopFolder" On="uninstall" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\WaldemarSydiyM\sens"
+                       Name="desktop-shortcut"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="StartMenuDir" Name="sens">
+        <Component Id="StartMenuShortcut"
+                   Guid="09F80FA5-02A8-4A15-BF9D-C12C6E6AC849">
+          <Shortcut Id="SensStartMenuShortcut"
+                    Name="sens"
+                    Description="SENS CLI interpreter"
+                    Target="[INSTALLDIR]sens.exe"
+                    WorkingDirectory="INSTALLDIR"
+                    Icon="SensIcon" />
+          <RemoveFolder Id="RemoveStartMenuDir" On="uninstall" />
+          <RegistryValue Root="HKCU"
+                         Key="Software\WaldemarSydiyM\sens"
+                         Name="startmenu-shortcut"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <CustomAction Id="InstallExecutionIslands"
+                  FileRef="SensExe"
+                  ExeCommand="install --profile four-kernel"
+                  Execute="deferred"
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="InstallExecutionIslands" After="InstallFiles" Condition="NOT Installed" />
+    </InstallExecuteSequence>
+
+  </Package>
+
+</Wix>

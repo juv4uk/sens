@@ -1,4 +1,4 @@
-name: Exact-width admitted corpus research
+name: Historical pre-bīja3 exact-width corpus donor
 
 on:
   pull_request:
@@ -23,16 +23,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  projection:
+  historical-projection:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
 
-      - name: Check exact-width authority projection
+      - name: Reproduce historical pre-bīja3 projection
         run: |
           rm -rf /tmp/exact-width-admitted-corpus
           python3 scripts/research-2352-exact-width-corpus.py \
+            --historical-pre-bija3 \
             --check \
             --target-dir knowledge \
             --out /tmp/exact-width-admitted-corpus
@@ -44,7 +45,7 @@ jobs:
           import json
           from pathlib import Path
           p = Path("/tmp/exact-width-admitted-corpus/summary.json")
-          print("## Exact-width admitted corpus — #2352")
+          print("## Historical pre-bīja3 exact-width corpus donor — #2352")
           print()
           if not p.exists():
               print("summary missing")
@@ -59,12 +60,12 @@ jobs:
               print(f"- D5 generated selectors: {s['d5_generated_selector_count']}")
               print(f"- D5 non-selector admitted: {s['d5_nonselector_admitted_count']}")
               print()
-              print("Projection-only: semantic-registry.lisp is deliberately not an input.")
+              print("HISTORICAL ONLY: this 62-row projection is superseded by #3202/#3225/#3209 and must not be used as current authority.")
           PY
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: exact-width-admitted-corpus
+          name: historical-pre-bija3-exact-width-admitted-corpus
           path: /tmp/exact-width-admitted-corpus/
           retention-days: 14
