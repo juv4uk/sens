@@ -41,32 +41,15 @@ fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
     .expect("early SID witness must load");
 
     let registry_source = include_str!("../../../lib/surface/semantic-registry.lisp");
-    let probe = format!(concat!(
-        "(10011100 ((reg (semantic-registry-read-source {registry_source:?}))) ",
-        "(10011100 ((a (semantic-registry-id-in reg (00000001 atom?))) ",
-        "(b (semantic-registry-id-in reg (00000001 атом?))) ",
-        "(c (semantic-registry-id-in reg (00000001 aṇu))) ",
-        "(d (semantic-registry-id-in reg (00000001 .?)))) ",
-        "(00100111 a b c d (00100010 a a) (00100010 a b) ",
-        "(00100010 b c) (00100010 c d))))"
-    ), registry_source = registry_source);
-    eprintln!("D1 SID registry DEBUG: {:?}", eval_program(&probe, &mut session)
-        .map(|v| v.value.to_string()).map_err(|e| format!("{e}")));
-
-    let row_probe = format!(
-        "(10011100 ((r (semantic-registry-read-source {registry_source:?}))) (10011100 ((row (00000101 (00000110 (00000110 r))))) (00100111 (semantic-registry-row-surfaces row) (semantic-registry-surface-name (00000001 en) row) (semantic-registry-surface-name (00000001 ук) row) (semantic-registry-surface-name (00000001 укр) row) (semantic-registry-surface-name (00000001 sa) row) (semantic-registry-surface-name (00000001 sym) row) (00100010 (00000001 атом?) (semantic-registry-surface-name (00000001 ук) row)))))"
-    );
-    eprintln!("ATOMROW DEBUG: {:?}", eval_program(&row_probe, &mut session)
-        .map(|v| v.value.to_string()).map_err(|e| format!("{e}")));
-
     let program = format!("(early-sid-lowering-witness {registry_source:?})");
     let rendered = eval_program(&program, &mut session)
         .expect("early SID lowering witness must execute")
         .value
         .to_string();
 
+    // EQUAL now returns exact D1 PredicateBit, printed as 1/0 (not legacy lists).
     assert_eq!(
         rendered,
-        "((same 00000010) yes no (1) (1) (1) (1) ())"
+        "((same 00000010) yes no 1 1 1 1 ())"
     );
 }
