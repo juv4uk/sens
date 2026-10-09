@@ -5,10 +5,10 @@
 ; Python scripting surface, and tooling should be written directly in
 ; my-lisp/wsm rather than migrated later.
 ;
-; Semantic authority remains lib/surface/semantic-registry.lisp — this script
-; only projects it, the same "projection, not a second source of truth"
-; discipline scripts/build-constitution.lisp already uses for
-; my-lisp-constitution.lisp. Reads the registry as ordinary my-lisp data
+; This script renders the historical flat registry only as a migration/review
+; projection. Canonical language authority is exact domain identity + admitted
+; law. Row count and legacy eight-bit position are not language invariants.
+; Reads the historical surface registry as ordinary my-lisp data
 ; (read-file/read-all), not text/regex — the registry is already valid
 ; my-lisp source, so no foreign parser is needed.
 ;
@@ -36,9 +36,8 @@
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
 (00001001 registry-form (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
 (00001001 registry-rows registry-form)
-; Every exact 8-bit row is a SENS function identity, including 00000000.
-; Empty human surfaces or an absent machine mechanism stay empty; projection
-; completeness must never invent meaning and must never alias 00000000 to ().
+; Historical rows are retained only for migration/provenance consumers.
+; Their eight-bit coordinates do not create canonical language identity.
 (00001001 entries registry-rows)
 
 ; Processor realization projection. Its rows never create an identity: they
@@ -177,41 +176,8 @@
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
         (t (00111010 "identity:" (sid-bits sid)))))))
 
-; #1469 invariant: this generated review projection is total over the exact
-; SENS function space. This validates projection shape only; it assigns no
-; surface, law, or callable mechanism to an otherwise empty registry row.
-(00001001 validate-complete-function-space
-  (00001000 (rows)
-    (00000111
-      ((00100010 (00101000 rows) 256)
-       (1)
-       (00000111
-         ((00100010 (00000101 (00000101 rows)) (00000001 00000000))
-          (1)
-          (00000111
-            ((00100010 (00000101 (00000101 (00101010 rows))) (00000001 11111111))
-             (1)
-             t)
-            (t
-             (00101111
-               (00100111
-                 (01001000 "function-table invariant failed: last row must be 11111111")
-                 (00000101 (00000001 ())))))))
-         (t
-          (00101111
-            (00100111
-              (01001000 "function-table invariant failed: first row must be 00000000")
-              (00000101 (00000001 ())))))))
-      (t
-       (00101111
-         (00100111
-           (01001000
-             (str+
-               "function-table invariant failed: expected 256 rows, got "
-               (01000110 (00101000 rows))))
-           (00000101 (00000001 ()))))))))
-
-(00001001 function-space-valid (validate-complete-function-space entries))
+; Historical projection intentionally has no 256-row completeness law.
+; Exact domains grow under their own widths, occupancy maps, and admitted laws.
 
 ; --- string-join with newline, since core.lisp has none yet. Accumulator-
 ; based (not "car + recurse-in-argument-position"), matching core.lisp's own
@@ -270,12 +236,13 @@
 (00001001 wsm-header
   (00100111
     "; GENERATED — DO NOT EDIT BY HAND"
-    "; Authority: lib/surface/semantic-registry.lisp"
-    "; Generator: scripts/generate-function-table.lisp (ECO-CANON-1 / my-lisp#75)"
-    "; Schema ft/2: (sid-bitstring formal ук укр en sa sym authority)"
+    "; HISTORICAL MIGRATION PROJECTION — NOT SEMANTIC AUTHORITY"
+    "; Donor: lib/surface/semantic-registry.lisp"
+    "; Generator: scripts/generate-function-table.lisp"
+    "; Schema ft/2: (legacy-bitstring formal ук укр en sa sym projection)"
     "; ук = current Ukrainian; укр = full Ukrainian peer surface"
     "; Display order for humans: ук → укр → English → Sanskrit"
-    "; authority = my-lisp (semantic)"
+    "; projection = historical/migration review only"
     ""
     "(ft/2"))
 
@@ -288,7 +255,7 @@
   (00100111
     "# Function table (generated projection)"
     ""
-    "**Authority:** `lib/surface/semantic-registry.lisp` — projection only, not a second source of truth."
+    "**Status:** historical migration projection. Canonical identity comes from exact domains and admitted laws, not this flat table."
     ""
     "**Machine projection:** `lib/machine/intel-core-i5-6400.lisp` — physical execution paths only; it does not create language meaning."
     ""
@@ -316,7 +283,7 @@
           (str+
             "function-table: "
             (01000110 (00101000 entries))
-            " exact SENS rows written"))))))
+            " historical projection rows written"))))))
 
 (00001001 check-projections
   (00001000 ()
@@ -332,7 +299,7 @@
               (str+
                 "function-table: "
                 (01000110 (00101000 entries))
-                " exact SENS rows current")))
+                " historical projection rows current")))
            (t
             (00101111
               (00100111

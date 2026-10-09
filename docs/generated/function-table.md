@@ -1,6 +1,6 @@
 # Function table (generated projection)
 
-**Authority:** `lib/surface/semantic-registry.lisp` — projection only, not a second source of truth.
+**Status:** historical migration projection. Canonical identity comes from exact domains and admitted laws, not this flat table.
 
 **Machine projection:** `lib/machine/intel-core-i5-6400.lisp` — physical execution paths only; it does not create language meaning.
 
