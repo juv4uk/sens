@@ -4,7 +4,7 @@
 
 use sens::{
     decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
-    parse_canonical_binary, Expr, ExprKind,
+    parse_canonical_binary, syntax::{Expr, ExprKind},
 };
 
 const BINARY_PROGRAM: &str =
@@ -106,7 +106,7 @@ fn exact_width_payloads_remain_distinct_across_d1_d3_d7_and_d9() {
 
 #[test]
 fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
-    for source in ["01", "11"] {
+    for source in ["01", "10"] {
         // Bypass only the D2 grammar gate: encode these exact-width words
         // directly into physical T5 so the decoder sees valid transport but
         // structurally invalid program input.
