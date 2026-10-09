@@ -84,7 +84,11 @@ class GapSnapshotTransition(unittest.TestCase):
                     "coordinate": None, "coordinate_basis": "UNPLACED",
                     "ratified_resident": False,
                 })
-                self.assert_invalid(inv)
+                inv["accounting"]["selected_semantic_candidates"] += 1
+                inv["accounting"]["unplaced_selected_candidates"] += 1
+                inv["accounting"]["remaining_semantic_inventory"] -= 1
+                with self.assertRaisesRegex(AssertionError, "historical HOLD without independent source admission"):
+                    audit.verify(self.ledger, inv, self.foundation, self.dialect)
 
 if __name__ == "__main__":
     unittest.main()
