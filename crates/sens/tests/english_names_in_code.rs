@@ -197,7 +197,7 @@ fn rust_nonsemantic_data_kind(
     // match arm; an ordinary Rust `"eval"` elsewhere remains ratchet debt.
     if rel == "crates/sens-cli/src/bin/sens-trit.rs"
         && literal == "eval"
-        && line_text.trim() == "\"eval\" => {"
+        && line_text.trim() == "\"eval\" | \"eval-core4\" => {"
     {
         return Some("rust-cli-surface");
     }
@@ -609,7 +609,7 @@ fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
     let source = fs::read_to_string(repo_root().join(relative))
         .expect("read exact real CLI");
     let arms: Vec<_> = source.lines()
-        .filter(|line| line.trim() == "\"eval\" => {")
+        .filter(|line| line.trim() == "\"eval\" | \"eval-core4\" => {")
         .collect();
     assert_eq!(arms.len(), 1, "the reviewed CLI dispatch shape must not drift");
     assert!(english_names().contains("eval"), "keep the real semantic name scanned");
@@ -621,6 +621,7 @@ fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
     for (path, line) in [
         (relative, "let function_name = \"eval\";"),
         (relative, "\"eval\" => execute_host_command(),"),
+        (relative, "\"eval\" => {"),
         ("crates/sens/src/eval/mod.rs", "\"eval\" => {"),
         ("crates/sens-cli/src/bin/other.rs", "\"eval\" => {"),
     ] {

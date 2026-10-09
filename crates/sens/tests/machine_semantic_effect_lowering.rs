@@ -97,6 +97,21 @@ fn current_foundation_runtime_identity_and_effect_router_agree() {
 }
 
 #[test]
+fn effect_guard_uses_exact_d1_predicates_at_each_stage() {
+    let mut session = lowering_session();
+    for source in [
+        "(machine-effect-exact-integer? 2)",
+        "(machine-effect-within-inclusive-integer-range? 2 0 4294967295)",
+        "(machine-effect-u32-carrier? 2)",
+        "(machine-effect-bounded-u64-add 2 3)",
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("target-neutral effect stage {source}: {error}"));
+        eprintln!("STAGE {source} => {}", result.value);
+    }
+}
+
+#[test]
 fn exact_d5_arithmetic_selects_only_admitted_target_neutral_effects() {
     let mut session = lowering_session();
     let cases = [
