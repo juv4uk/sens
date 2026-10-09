@@ -221,13 +221,7 @@ pub fn open_ternary_program(data: &[u8]) -> Result<String, TernaryTransportError
 pub(crate) fn parse_t5_domain_words(
     words: &[BinarySourceWord],
 ) -> Result<Vec<crate::Expr>, crate::LanguageError> {
-    let bit_count = words.iter().map(|word| word.width()).sum::<usize>();
-    let mut packer = crate::BitPacker::with_capacity_bits(bit_count);
-    let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
-    for word in words.iter().copied() {
-        crate::append_binary_source_word(&mut packer, word);
-    }
-    crate::parse_canonical_packed_words(&packer.finish(), &widths)
+    crate::parse_canonical_word_sequence(words)
 }
 
 /// Поки що адаптер приймає видиму точну двійкову проєкцію D1..D9,
