@@ -37,3 +37,18 @@ digest alone is not proof of meaning.
 CI: `.github/workflows/binary-program-e2e.yml` checks structural/T5 transport. `.github/workflows/physical-binary-sens-cli.yml` executes the D3 and D5 specimens through both physical CLIs. The workflow runs on every
 `main` push, on relevant PRs, and on manual dispatch, using **GitHub-hosted
 Ubuntu**. It does not cancel itself when other agents advance `main`.
+
+## Physical executable D3 COND
+
+`d3-cond-program.sens` is the committed **31-byte T5 byte stream** of
+`d3-cond-program.bits`; it is not a text file carrying a .sens suffix.
+The existing canonical codec, physical CLI and Rust runtime prove exact word
+round-trip and execute strict D3:110 COND with D1:0 skip / D1:1 select. This
+program returns exact D1:1. It does **not** claim to replace SI quantity
+calculations or prove historical English-Lisp parity.
+
+The physical performance runner measures this real file via both SENS CLI
+entry points, with output parity and SHA-bound actual medians/p95. Obsolete
+English identity benchmark workflows were retired, while their scripts and
+historical results remain available for research; they must not be relabeled
+as passing current-domain parity.
