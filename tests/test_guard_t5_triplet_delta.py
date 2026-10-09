@@ -89,6 +89,33 @@ class IncrementalTripletGate(unittest.TestCase):
         self.assertEqual(result["files"][0]["view_sha256"],
                          result["files"][0]["view_sha256"])
 
+    def test_new_exact_binary_triplet_uses_typed_source_not_uk_translation(self):
+        # A current binary .lisp source is already exact-width bits, not a
+        # Ukrainian surface form to be reinterpreted by the UK translator.
+        bits = ["10", "001", "00", "000", "01"]
+        stem = self.root / "exact-binary"
+        stem.with_suffix(".lisp").write_text(" ".join(bits) + "\n", encoding="ascii")
+        stem.with_suffix(".sens").write_bytes(encode_words(bits))
+        stem.write_bytes((" ".join(bits) + "\n").encode("ascii"))
+        self.commit("new exact binary triple")
+        result = self.scan()
+        self.assertEqual(result["status"], "DELTA_PHYSICAL_VIEW_ONLY_UK_PENDING")
+        row = result["files"][0]
+        self.assertEqual(row["status"], "PHYSICAL_VIEW_PASS_UK_ORACLE_PENDING")
+        self.assertEqual(row["bounded_uk_source_roundtrip"], "NOT_APPLICABLE_EXACT_BIT_SOURCE")
+        self.assertEqual(row["exact_binary_source_identity"], "PASS_TYPED_WORD_IDENTITY_NOT_ORACLE")
+        self.assertEqual(row["uk_oracle"], "NOT_VERIFIED")
+        self.assertEqual(result["summary"]["release_admitted"], 0)
+
+        # A source-only edit to different exact words MUST block; the
+        # physical/view roundtrip cannot conceal the changed program.
+        self.base = self.cmd("rev-parse", "HEAD").strip()
+        stem.with_suffix(".lisp").write_text("10 001 00 001 01\n", encoding="ascii")
+        self.commit("source-only exact binary drift")
+        failed = self.scan()
+        self.assertEqual(failed["status"], "BLOCKED")
+        self.assertEqual(failed["summary"]["changed_blocked"], 1)
+
     def test_existing_binary_modified_without_matching_view_is_rejected(self):
         old = self.root / "old"
         old.write_bytes(VIEW)

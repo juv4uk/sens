@@ -109,39 +109,50 @@ def inspect(root: Path, *, base: str) -> dict:
             # changes the actual human Ukrainian source of a paired program.
             # Reuse the EXISTING ratified bounded uk adapter. Unsupported
             # D4/Text7/binders/aliases or source drift must fail closed.
+            source_evidence = "NOT_CHECKED_SOURCE_UNCHANGED"
+            exact_binary_evidence = "NOT_CHECKED"
             if name in source_changed:
-                stem = (root / name).with_suffix("")
-                try:
-                    proof = verify_bounded_uk(
-                        stem.with_suffix(".lisp"),
-                        stem.with_suffix(".sens"),
-                        stem,
-                    )
-                except (ProjectionBlocked, OSError, ValueError) as exc:
-                    rows.append({
-                        "sens": name,
-                        "status": "BLOCKED",
-                        "reason": "UK_SOURCE_DELTA: " + str(exc)[:320],
-                        "view_status": "PHYSICAL_VIEW_PASS",
-                        "uk_oracle": "NOT_VERIFIED",
-                    })
-                    continue
-                if not proof.get("canonical_uk_roundtrip"):
-                    rows.append({
-                        "sens": name, "status": "BLOCKED",
-                        "reason": "UK_SOURCE_DELTA: bounded canonical witness missing",
-                    })
-                    continue
+                # A real exact-bit .lisp projection is NOT a Ukrainian surface
+                # program. The existing pair auditor already parsed the bit
+                # widths, matched every typed word to the physical T5 bytes,
+                # and verified the canonical extensionless view above.
+                # Never pass it through the bounded Ukrainian word translator:
+                # that would invent a second, incompatible source grammar.
+                if entry.get("source_status") == "EXACT_BINARY_SOURCE":
+                    source_evidence = "NOT_APPLICABLE_EXACT_BIT_SOURCE"
+                    exact_binary_evidence = "PASS_TYPED_WORD_IDENTITY_NOT_ORACLE"
+                else:
+                    stem = (root / name).with_suffix("")
+                    try:
+                        proof = verify_bounded_uk(
+                            stem.with_suffix(".lisp"),
+                            stem.with_suffix(".sens"),
+                            stem,
+                        )
+                    except (ProjectionBlocked, OSError, ValueError) as exc:
+                        rows.append({
+                            "sens": name,
+                            "status": "BLOCKED",
+                            "reason": "UK_SOURCE_DELTA: " + str(exc)[:320],
+                            "view_status": "PHYSICAL_VIEW_PASS",
+                            "uk_oracle": "NOT_VERIFIED",
+                        })
+                        continue
+                    if not proof.get("canonical_uk_roundtrip"):
+                        rows.append({
+                            "sens": name, "status": "BLOCKED",
+                            "reason": "UK_SOURCE_DELTA: bounded canonical witness missing",
+                        })
+                        continue
+                    source_evidence = "PASS_NOT_RUNTIME_ORACLE"
             rows.append({
                 "sens": name, "status": "PHYSICAL_VIEW_PASS_UK_ORACLE_PENDING",
                 "source_sha256": entry["source_sha256"],
                 "physical_sha256": entry["physical_sha256"],
                 "typed_word_sha256": entry["typed_word_sha256"],
                 "view_sha256": entry["view_sha256"],
-                "bounded_uk_source_roundtrip": (
-                    "PASS_NOT_RUNTIME_ORACLE" if name in source_changed
-                    else "NOT_CHECKED_SOURCE_UNCHANGED"
-                ),
+                "bounded_uk_source_roundtrip": source_evidence,
+                "exact_binary_source_identity": exact_binary_evidence,
                 "uk_oracle": "NOT_VERIFIED", "release_admitted": False,
             })
     blocked = sum(row["status"] == "BLOCKED" for row in rows)
