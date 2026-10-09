@@ -1,0 +1,27 @@
+name: Owner-ratified L1-L7 migration AST preflight
+on:
+  push:
+    branches:
+      - migration/l1-l7-owner-law-20261009
+    paths:
+      - scripts/legacy-l1-l7-preflight.py
+      - tests/test_legacy_l1_l7_preflight.py
+      - .github/workflows/migration-l1-l7-preflight.yml
+  pull_request:
+    paths:
+      - scripts/legacy-l1-l7-preflight.py
+      - tests/test_legacy_l1_l7_preflight.py
+      - .github/workflows/migration-l1-l7-preflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ast-fail-closed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Existing reader and L1-L7 negative/positive preflight cases
+        run: python3 -m unittest discover -s tests -p 'test_legacy_l1_l7_preflight.py' -v
