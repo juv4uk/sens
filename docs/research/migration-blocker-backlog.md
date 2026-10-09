@@ -49,6 +49,9 @@ source-text observer parity, **1/1 bounded physical T5 observer**.
 Це **value/data identity** у D2/D7/QUOTE, а не новий машинний opcode і
 не автоматичний D10-resident. Поведінка під питанням:
 quoted symbol `mov` ≠ текстовий рядок `"mov"` ≠ виконуваний binder `mov`;
+у чинному ратифікованому D9 уже є `110101100` (`SYMBOL?`) і
+`010111100` (`CANON-LAW-QUOTE-SUPPRESSES-EVALUATION`), але жоден із цих
+двох сам по собі **не доводить спосіб відновлення symbol-value із T5**;
 вкладена D2-структура повинна зберігатися, а конструктори
 `MAKNAM`/`IMPLODE`/`INTERN` та інші вже відібрані кандидати D10 мають
 пройти exact semantic duplicate audit. Координація: #4799, #4650, #4463, #4013.
