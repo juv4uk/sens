@@ -65,8 +65,8 @@ fn physical_d3_cond_uses_exact_two_field_clauses_without_text_execution() {
         "physical bytes must preserve exact binary word widths");
     let result = eval_t5_program(COND_T5, &mut Session::default())
         .expect("exact D1-predicate COND must execute from physical bytes");
-    assert!(matches!(result.value, Value::Nil),
-        "all selected structural-empty outcomes remain structural empty");
+    assert_eq!(result.value.as_predicate_bit(), Some(true),
+        "first clause skips on D1:0; second selects an exact D1:1 result");
     assert!(result.output.is_empty());
 }
 
