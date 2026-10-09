@@ -575,10 +575,7 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     // originates in the generated, domain-qualified Lisp definition bindings
     // above; the SID slot is merely a temporary alias for unmigrated callers.
     if let Some(identity) = direct_d5_binding {
-        if super::necessary_forms::identity_for_domain_identity(identity).is_some()
-            || domain_primitive(identity).is_some()
-            || super::d5_arithmetic::has_mechanism(identity)
-        {
+        if super::necessary_forms::identity_for_domain_identity(identity).is_some() {
             return;
         }
         environment.bind_code_slot_once(sid, value.clone());
