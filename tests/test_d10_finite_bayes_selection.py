@@ -31,7 +31,6 @@ class FiniteBayesSelectionTests(unittest.TestCase):
         live_count = len(self.inv["rows"])
         self.assertEqual(result["historical_bayes_selected"], 635)
         self.assertEqual(result["live_selected"], live_count)
-        self.assertEqual(result["unplaced"], result["unplaced"] if "unplaced" in result else live_count - 256)
         self.assertEqual(result["live_unplaced"], live_count - 256)
         self.assertEqual(result["live_remaining"], 1024 - live_count)
         self.assertEqual(result["ratified"], 0)
