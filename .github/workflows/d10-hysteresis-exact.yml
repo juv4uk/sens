@@ -1,0 +1,45 @@
+name: D10 hysteresis exact state law
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-hysteretic-boolean-source-law-20261009.json
+      - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-proposal-ledger.tsv
+      - knowledge/d10-selection-transition-history.json
+      - knowledge/d10-fill-v1-state.json
+      - docs/architecture/ARCHIPELAGO-V1.uk.md
+      - tests/test_d10_hysteretic_boolean.py
+      - tests/oracles/d10_hysteresis_chez.ss
+      - .github/workflows/d10-hysteresis-exact.yml
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-hysteretic-boolean-source-law-20261009.json
+      - tests/test_d10_hysteretic_boolean.py
+      - tests/oracles/d10_hysteresis_chez.ss
+      - .github/workflows/d10-hysteresis-exact.yml
+
+permissions:
+  contents: read
+
+jobs:
+  exact-math-and-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact rational law and nine negative mutation controls
+        run: python3 tests/test_d10_hysteretic_boolean.py
+      - name: Verify append-only transition history
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Verify proposal ledger and prior SHA provenance
+        run: |
+          python3 scripts/check-d10-proposal-ledger.py --self-test
+          python3 scripts/check-d10-proposal-ledger.py
+      - name: Install independent Chez Scheme oracle
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq chezscheme
+      - name: Cross-check threshold law on Chez Scheme real runtime
+        run: scheme --script tests/oracles/d10_hysteresis_chez.ss
