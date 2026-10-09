@@ -27,9 +27,8 @@ on:
       - "crates/sens/examples/domain12345678_bench.rs"
       - "benchmarks/domain12345678/**"
 
-concurrency:
-  group: domain12345678-bench-${{ github.ref }}
-  cancel-in-progress: true
+# Pinned-SHA Cachegrind measurements must not be cancelled by the push storm.
+# Path-scoped triggers already limit measurements to changed carrier code.
 
 jobs:
   bench:
