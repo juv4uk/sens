@@ -1,0 +1,55 @@
+name: D10 finite-state shortest distinguishing suffix research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-finite-state-distinguishing-suffix-research-v1.json'
+      - 'scripts/check_d10_state_distinguishing_suffix.py'
+      - 'tests/test_d10_state_distinguishing_suffix.py'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - '.github/workflows/d10-state-distinguishing-suffix.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-finite-state-distinguishing-suffix-research-v1.json'
+      - 'scripts/check_d10_state_distinguishing_suffix.py'
+      - 'tests/test_d10_state_distinguishing_suffix.py'
+      - '.github/workflows/d10-state-distinguishing-suffix.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-binary-counterexample-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independent product, refinement and exhaustive suffix tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_state_distinguishing_suffix.py' -v
+      - name: Exact bounded research evidence, no new slot or release admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_state_distinguishing_suffix.py | tee "$RUNNER_TEMP/state-witness-evidence.json"
+          python3 - "$RUNNER_TEMP/state-witness-evidence.json" <<'PY'
+          import json,sys
+          e=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert e['status']=='RESEARCH-VALIDATED-HOLD-NOT-SELECTED'
+          assert e['exact_exhaustive_2_state_cases']==256
+          assert e['exact_exhaustive_3_state_seeded_cases']==128
+          assert e['named_witness_cases']==6
+          assert e['selected_delta']==0 and e['coordinates_assigned']==0
+          assert e['ratified']==0 and e['physical_sens_files_created']==0
+          assert e['original_executable_migrations_admitted']==0
+          assert e['independent_external_runtime_oracle']=='NOT_EXECUTED'
+          assert e['D1_D9_behavioral_dedup']=='REVIEW_REQUIRED'
+          PY
+      - name: Retain source-stamped nonadmission evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d10-state-shortest-word-hold-evidence
+          path: ${{ runner.temp }}/state-witness-evidence.json
+          if-no-files-found: warn
