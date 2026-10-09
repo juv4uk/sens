@@ -138,13 +138,19 @@ fn physical_t5_request(args: &[String]) -> Option<Result<&str, &'static str>> {
 /// Neither human spellings nor an eight-bit compatibility reader participate.
 /// An explicit binary file never gains ambient host capabilities or Core4.
 fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
-    let binary = sens::open_ternary_program(bytes)
-        .map_err(|err| format!("physical T5/D2 rejected: {err:?}"))?;
-    let forms = sens::parse_canonical_binary(&binary)
-        .map_err(|err| format!("exact binary reader rejected: {}", err.render(&binary)))?;
+    // Decode physical T5 into exact-width domain words, then pack and parse
+    // their bits directly. The runtime must never build a visible 0/1 source
+    // string merely to feed the canonical binary reader.
+    let words = sens::decode_ternary_words(bytes)
+        .map_err(|err| format!("physical T5 transport rejected: {err:?}"))?;
+    let widths: Vec<usize> = words.iter().map(|word| word.width()).collect();
+    let packed = sens::pack_binary_source_words(&words);
+    let forms = sens::parse_canonical_packed_words(&packed, &widths)
+        .map_err(|err| format!("exact packed binary reader rejected: {err}"))?;
+
     let mut pure = Session::default();
     eval_parsed_expressions(&forms, &mut pure)
-        .map_err(|err| format!("current SENS execution rejected: {}", err.render(&binary)))
+        .map_err(|err| format!("current SENS execution rejected: {err}"))
 }
 
 fn main() {
