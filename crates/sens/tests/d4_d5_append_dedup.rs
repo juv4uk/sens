@@ -74,7 +74,6 @@ fn ratified_d4_append_owns_append_while_d5_10000_is_caaar() {
         .expect_err("D4 must reject improper left spine");
     run_surface("(append (quote (a . b)) (quote (c)))")
         .expect_err("surface must reject improper left spine");
-
 }
 
 #[test]
