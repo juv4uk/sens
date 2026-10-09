@@ -45,7 +45,7 @@ fn eval_meta_program(program_source: &str, probe_source: &str) -> String {
 }
 
 #[test]
-fn self_evaluates_numbers_and_symbols_not_bound_in_env() {
+fn self_evaluates_number_without_legacy_t_symbol() {
     assert_eq!(eval_meta("42", "(quote ())"), "42");
 }
 
