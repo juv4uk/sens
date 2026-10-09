@@ -1,0 +1,94 @@
+name: Safe branch sweep triage (read-only / fail-closed)
+
+on:
+  push:
+    branches:
+      - triage/5131-full-ledger-gate-20261009
+      - safe-branch-sweep-20261009
+    paths:
+      - scripts/build_branch_sweep_triage.py
+      - tests/test_branch_sweep_triage.py
+      - docs/merge/branch-sweep-overrides-20261009.json
+      - .github/workflows/branch-sweep-triage.yml
+  pull_request:
+    branches:
+      - safe-branch-sweep-20261009
+    paths:
+      - scripts/build_branch_sweep_triage.py
+      - tests/test_branch_sweep_triage.py
+      - docs/merge/branch-sweep-overrides-20261009.json
+      - .github/workflows/branch-sweep-triage.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census-and-catalog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assert triage and existing census rules
+        run: |
+          python3 tests/test_branch_sweep_triage.py -v
+          python3 -m unittest discover -s tests -p 'test_audit_branch_merges.py' -v
+      - name: Fetch all branch references (read-only)
+        run: git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Full historical census against current main
+        run: |
+          python3 scripts/audit_branch_merges.py \
+            --main-ref origin/main \
+            --output artifacts/historical-branch-merge-census.json
+      - name: Generate complete verdict catalog
+        run: |
+          python3 scripts/build_branch_sweep_triage.py \
+            --census artifacts/historical-branch-merge-census.json \
+            --overrides docs/merge/branch-sweep-overrides-20261009.json \
+            --output artifacts/branch-sweep-triage-20261009.json
+      - name: Upload run artifacts for issue 5131
+        uses: actions/upload-artifact@v4
+        with:
+          name: safe-branch-sweep-triage-20261009
+          path: |
+            artifacts/historical-branch-merge-census.json
+            artifacts/branch-sweep-triage-20261009.json
+            artifacts/branch-sweep-triage-20261009.tsv
+          if-no-files-found: error
+          retention-days: 30
+      - name: Summarize source coverage
+        run: |
+          python3 - <<'PY'
+          import json, os
+          x = json.load(open("artifacts/branch-sweep-triage-20261009.json"))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("# Safe sweep inventory — no main write\n\n")
+              for key in ("base_sha", "branches_count", "candidate_count",
+                          "candidate_verdict_counts", "semantic_risk_open",
+                          "ready_for_final_review", "main_merge_authorized"):
+                  f.write(f"- **{key}:** {x[key]}\n")
+              f.write("\nFull rows in uploaded JSON/TSV. Owner ledger: #5131, queue: #5041.\n")
+          PY
+
+  sweep-main-admission:
+    # Intentionally RED until every eligible ref has a proved, allowed verdict.
+    # Keep the read-only catalog job separate so evidence can be uploaded.
+    needs: census-and-catalog
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: safe-branch-sweep-triage-20261009
+          path: artifacts
+      - name: Block missing reviews and conflict candidates
+        run: |
+          python3 - <<'PY'
+          import json
+          x = json.load(open("artifacts/branch-sweep-triage-20261009.json"))
+          assert x["ready_for_final_review"], (
+              "NO SWEEP MERGE: unresolved HOLD/CONFLICT candidates: " +
+              str(x["candidate_verdict_counts"]))
+          print("Catalog complete; independent full CI and single-writer approval still required.")
+          PY
