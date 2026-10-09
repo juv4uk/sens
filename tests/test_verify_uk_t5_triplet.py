@@ -68,6 +68,7 @@ class BoundedUkTripletTests(unittest.TestCase):
         self.assertEqual(mod.canonical_uk_from_words(["0"]), "ні\n")
         self.assertEqual(mod.canonical_uk_from_words(["1"]), "так\n")
         self.assertEqual(mod.canonical_uk_from_words(["000"]), "()\n")
+        self.assertEqual(mod.canonical_uk_from_words(["0", "00", "1"]), "ні\nтак\n")
         for word in (["00"], ["01"], ["10"], ["11"], ["00000000"]):
             with self.subTest(word=word):
                 with self.assertRaises(mod.ProjectionBlocked):
@@ -253,7 +254,7 @@ class BoundedUkTripletTests(unittest.TestCase):
             ["10", "110", "00", "0000011", "01"],         # Text7 unknown
             ["10", "110", "00", "01010", "01"],           # D5 number/other
             ["10", "100", "00", "1", "00", "0", "01"],       # CAR arity
-            ["0", "00", "1"],                             # multiple roots
+            ["0", "00", "00", "1"],                       # подвійний D2 SPACE між формами
             ["10", "1", "00", "1", "01"],                 # raw predicate call
         ):
             with self.subTest(words=invalid_words):
