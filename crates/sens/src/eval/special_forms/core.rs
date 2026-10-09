@@ -108,25 +108,20 @@ pub(crate) fn evaluate_domain_cond(
                 clause.span,
             ));
         };
-        // Support both 2-part (test expression) and 3-part (test expected expression) clauses
-        if parts.len() == 2 {
-            let value = evaluate(&parts[0], environment)?;
-            match exact_d3_cond_control(&value, parts[0].span)? {
-                ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
-                ExactD3CondControl::SkipNo => {}
-            }
-        } else if parts.len() == 3 {
-            let value = evaluate(&parts[0], environment)?;
-            let expected = quoted(&parts[1])?;
-            if value == expected {
-                return evaluate_step(&parts[2], environment);
-            }
-        } else {
+        // Contract 11.8: canonical D3 COND has exactly two fields.
+        // Reject old explicit-result clauses *before* evaluating their query:
+        // evaluating a malformed clause would produce observable side effects.
+        if parts.len() != 2 {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "D3:110 COND expects (test expression) or (test expected expression) clauses",
+                "D3:110 COND requires exactly (test expression); three-part compatibility is forbidden",
                 clause.span,
             ));
+        }
+        let value = evaluate(&parts[0], environment)?;
+        match exact_d3_cond_control(&value, parts[0].span)? {
+            ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
+            ExactD3CondControl::SkipNo => {}
         }
     }
 
