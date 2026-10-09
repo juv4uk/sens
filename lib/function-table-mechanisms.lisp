@@ -30,9 +30,9 @@
     (00001100 prolog bounded-exact-add)
     (00001100 clips bounded-exact-add)
     (00001100 datalog bounded-exact-add))
-  ; #1422 — profile selection precedes host mechanism lookup.
+  ; #1422/#2375 — explicit mechanism-lab admission precedes host lookup.
   ; This row admits only a mechanical registered-host route for the already
-  ; existing SENS function 10101000 under Core3. It defines no kernel syntax,
-  ; surface spelling, result law, or host availability.
-  (profile-routes
-    (core3 10101000 registered-host-mechanism)))
+  ; existing SENS function 10101000 while the mechanism lab is enabled. It
+  ; defines no language Core, kernel syntax, result law, or host availability.
+  (lab-routes
+    (10101000 registered-host-mechanism)))

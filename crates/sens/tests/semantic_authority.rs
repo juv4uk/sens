@@ -16,8 +16,8 @@ use std::fs;
 use std::path::PathBuf;
 
 use sens::{
-    eval_program, load_core2_library, load_core3_library, load_core_library, parse, Environment,
-    ErrorKind, Exactness, Expr, ExprKind, Session, Value,
+    eval_program, load_core_library, load_mechanism_lab_library, parse, Exactness, Expr, ExprKind,
+    Session, Value,
 };
 
 const RUNNER: &str = include_str!("../../../tests/fixtures/semantic/runner.lisp");
@@ -289,34 +289,12 @@ fn native_semantic_witnesses_agree_with_the_lisp_corpus() {
     assert_corpus_holds(&mut session, "native");
 }
 
-/// Core2 cannot host the semantic protocol YET, and that is a measured fact,
-/// not a guess: the Core2 profile admits no callable mechanism for `equal?`
-/// (`00100010`), so the runner does not even load there. This test pins the
-/// blocker so it cannot be forgotten: when Core2 gains the mechanism, this
-/// test FAILS and the profile has to be promoted to a real corpus check.
 #[test]
-fn core2_blocker_is_measured_not_assumed() {
-    let mut session = Session {
-        environment: Environment::root(),
-    };
-    load_core2_library(&mut session).expect("core2 library");
-    let source =
-        fs::read_to_string(repo_file("tests/fixtures/semantic/runner.lisp")).expect("runner.lisp");
-    let error = eval_program(&source, &mut session)
-        .expect_err("Core2 admits 00100010 now: promote this profile to a real corpus check");
-    assert_eq!(error.kind, ErrorKind::Type, "unexpected Core2 blocker: {error}");
-    assert!(
-        error.message.contains("no admitted callable mechanism: 00100010"),
-        "unexpected Core2 blocker: {error}"
-    );
-}
-
-#[test]
-fn core3_semantic_witnesses_agree_with_the_lisp_corpus() {
+fn mechanism_lab_uses_the_same_lisp_semantic_corpus() {
     let mut session = Session::default();
-    load_core3_library(&mut session).expect("core3 library");
+    load_mechanism_lab_library(&mut session).expect("mechanism lab");
     load_runner(&mut session);
-    assert_corpus_holds(&mut session, "core3");
+    assert_corpus_holds(&mut session, "mechanism-lab");
 }
 
 /// The corpus must stay a corpus: every row states a law and names the issue

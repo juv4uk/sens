@@ -59,68 +59,12 @@ fn extract_repl_surface(args: Vec<String>) -> Result<(Vec<String>, repl::ReplSur
     Ok((output, surface))
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum CliCore {
-    Core3,
-    Core4,
-}
-
-fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String> {
-    let mut output = Vec::with_capacity(args.len());
-    let mut input = args.into_iter();
-    let Some(program) = input.next() else {
-        return Ok((output, CliCore::Core4));
-    };
-    output.push(program);
-    let mut input = input.peekable();
-    let mut core = CliCore::Core4;
-    let mut seen = false;
-
-    while let Some(arg) = input.next() {
-        let core_value = if arg == "--core" {
-            Some(
-                input
-                    .next()
-                    .ok_or_else(|| "--core requires 3|4".to_string())?,
-            )
-        } else {
-            arg.strip_prefix("--core=").map(str::to_string)
-        };
-
-        if let Some(value) = core_value {
-            if seen {
-                return Err("--core may be specified only once".to_string());
-            }
-            core = match value.as_str() {
-                "3" => CliCore::Core3,
-                "4" => CliCore::Core4,
-                _ => return Err(format!("unknown Core profile: {value}; expected 3|4")),
-            };
-            seen = true;
-        } else {
-            output.push(arg);
-        }
-    }
-
-    Ok((output, core))
-}
-
-fn bootstrap_core(
-    session: &mut Session,
-    core: CliCore,
-) -> Result<sens::EvalResult, sens::LanguageError> {
-    match core {
-        CliCore::Core3 => sens::load_core3_library(session),
-        CliCore::Core4 => sens::load_core_library(session),
-    }
-}
-
 fn main() {
     // The CLI is a trusted local Lisp-machine surface: install the OS
     // capability layer (filesystem, process execution, TCP). The semantic
     // core itself ships none.
     sens_host::install();
-    // Availability only; Core3×10101000 admission remains SENS-owned.
+    // Availability only; mechanism-lab × 10101000 admission remains SENS-owned.
     island_invoke::install();
     let args: Vec<String> = env::args().collect();
     let allowed = allowed_processes(&args);
@@ -129,13 +73,19 @@ fn main() {
         .into_iter()
         .filter(|arg| !arg.starts_with("--allow-process=") && arg != "--protocol=sexpr")
         .collect();
-    let (args, cli_core) = match extract_cli_core(args) {
-        Ok(parsed) => parsed,
-        Err(error) => {
-            eprintln!("sens: {error}");
-            process::exit(2);
-        }
-    };
+    if args.iter().any(|arg| arg == "--core" || arg.starts_with("--core=")) {
+        eprintln!("sens: --core was removed; SENS has one Core");
+        process::exit(2);
+    }
+    let mechanism_lab = args.iter().any(|arg| arg == "--lab=mechanism");
+    if args.iter().any(|arg| arg == "--lab" || (arg.starts_with("--lab=") && arg != "--lab=mechanism")) {
+        eprintln!("sens: --lab supports only --lab=mechanism");
+        process::exit(2);
+    }
+    let args: Vec<String> = args
+        .into_iter()
+        .filter(|arg| arg != "--lab=mechanism")
+        .collect();
     let (args, repl_surface) = match extract_repl_surface(args) {
         Ok(parsed) => parsed,
         Err(error) => {
@@ -175,20 +125,22 @@ fn main() {
         environment: Environment::root(),
     };
 
-    // Канонічний Core4 bootstrap і FASL fallback належать одному loader-у:
-    // CLI не повинен виконувати Core4 в обхід loader-owned selected profile.
+    // One active Core: every normal CLI/REPL session loads lib/core.lisp.
+    // Mechanism laboratories are explicit tools, not language profiles.
     const CORE_SRC: &str = sens::CORE_LIBRARY_SOURCE;
     if !sens::core_library_fasl_is_current() {
         eprintln!(
             "warning: lib/core.lisp.fasl is stale against lib/core.lisp; run gen-fasl to regenerate"
         );
     }
-    if let Err(e) = bootstrap_core(&mut session, cli_core) {
-        let label = match cli_core {
-            CliCore::Core3 => "Core3",
-            CliCore::Core4 => "Core4",
-        };
-        eprintln!("Error loading bootstrap {label}: {}", e.render(CORE_SRC));
+    let bootstrap = if mechanism_lab {
+        sens::load_mechanism_lab_library(&mut session)
+    } else {
+        sens::load_core_library(&mut session)
+    };
+    if let Err(e) = bootstrap {
+        let label = if mechanism_lab { "mechanism lab" } else { "Core" };
+        eprintln!("Error loading {label}: {}", e.render(CORE_SRC));
         process::exit(1);
     }
 
@@ -298,7 +250,7 @@ fn main() {
             println!("  -V, --version               Print version information");
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
-            println!("  --core=3|4                    Explicitly select Core3 laboratory or default Core4 before evaluation");
+            println!("  --lab=mechanism              Explicitly enable the mechanism laboratory; does not select a Core");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
             );
@@ -533,54 +485,3 @@ fn main() {
     }
 }
 
-
-#[cfg(test)]
-mod core_profile_bootstrap_tests {
-    use super::*;
-
-    #[test]
-    fn cli_core_selector_defaults_to_core4_and_accepts_only_3_or_4() {
-        let (args, core) =
-            extract_cli_core(vec!["sens".to_string()]).expect("default selector");
-        assert_eq!(args, vec!["sens"]);
-        assert_eq!(core, CliCore::Core4);
-
-        let (args, core) = extract_cli_core(vec![
-            "sens".to_string(),
-            "--core=3".to_string(),
-            "program.lisp".to_string(),
-        ])
-        .expect("explicit Core3 selector");
-        assert_eq!(args, vec!["sens", "program.lisp"]);
-        assert_eq!(core, CliCore::Core3);
-
-        assert!(extract_cli_core(vec!["sens".to_string(), "--core=2".to_string()]).is_err());
-        assert!(extract_cli_core(vec![
-            "sens".to_string(),
-            "--core=3".to_string(),
-            "--core=4".to_string(),
-        ])
-        .is_err());
-    }
-
-    #[test]
-    fn cli_core_bootstrap_uses_only_canonical_profile_loaders() {
-        let mut core4 = Session {
-            environment: Environment::root(),
-        };
-        bootstrap_core(&mut core4, CliCore::Core4).expect("CLI Core4 bootstrap must succeed");
-        assert_eq!(
-            core4.environment.selected_core_profile(),
-            Some(sens::CoreProfile::Core4)
-        );
-
-        let mut core3 = Session {
-            environment: Environment::root(),
-        };
-        bootstrap_core(&mut core3, CliCore::Core3).expect("CLI Core3 bootstrap must succeed");
-        assert_eq!(
-            core3.environment.selected_core_profile(),
-            Some(sens::CoreProfile::Core3)
-        );
-    }
-}

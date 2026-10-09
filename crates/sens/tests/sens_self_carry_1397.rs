@@ -13,12 +13,6 @@ fn eval_value(session: &mut Session, source: &str) -> Value {
 #[test]
 fn exact_function_carries_itself_across_two_language_stages() {
     let mut session = Session::default();
-    assert_eq!(
-        session.environment.selected_core_profile(),
-        None,
-        "свідок не повинен залежати від завантажувача профілю Core"
-    );
-
     // Стадія A — exact-SENS тотожне замикання. Жодне поверхневе ім'я функції
     // не бере участі в перенесенні: на вхід і вихід проходить сама функція
     // 00000101.
@@ -34,11 +28,6 @@ fn exact_function_carries_itself_across_two_language_stages() {
     );
     assert_eq!(result, Value::Symbol("alpha".into()));
 
-    assert_eq!(
-        session.environment.selected_core_profile(),
-        None,
-        "виконання перенесеної exact-функції не повинно неявно вибирати Core"
-    );
 }
 
 fn poison_surfaces_for(session: &mut Session, function: Sens8) -> usize {
