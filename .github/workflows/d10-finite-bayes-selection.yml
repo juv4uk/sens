@@ -9,6 +9,7 @@ on:
       - 'knowledge/d10-proposal-ledger.tsv'
       - 'knowledge/d1-d9-foundation.json'
       - 'scripts/check_d10_selection_transition_history.py'
+      - 'scripts/check_d10_gray_word_selection.py'
       - 'scripts/check_d10_finite_bayes_update.py'
       - 'scripts/check_d10_finite_bayes_selection.py'
       - 'tests/test_d10_finite_bayes_selection.py'
@@ -24,6 +25,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify the immutable 625-based append-only history
         run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Verify Gray historical snapshot remains valid after this append
+        run: python3 scripts/check_d10_gray_word_selection.py --self-test
       - name: Verify selected Bayesian row and reject authority leakage
         run: python3 scripts/check_d10_finite_bayes_selection.py --self-test
       - name: Re-run the independent exact-rational Bayes oracle
