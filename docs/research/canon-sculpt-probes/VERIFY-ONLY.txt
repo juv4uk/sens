@@ -1,0 +1,2 @@
+VERIFICATION-ONLY / NEVER MERGE
+This child branch exists only to execute #419 research probes in GitHub Actions.

@@ -1,0 +1,57 @@
+name: Verify 419 Canon sculpture research
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-419-canon-sculpt-research.yml'
+      - 'docs/research/canon-sculpt-audit.lisp'
+      - 'docs/research/canon-sculpt-structural-basis.lisp'
+      - 'docs/research/canon-sculpt-probes/**'
+      - 'docs/superpowers/plans/2026-09-18-canon-sculpt-audit.md'
+
+jobs:
+  research-probes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: verify-419-canon-sculpt-research
+
+      - name: Quote ordinary-function route is genuinely RED
+        shell: bash
+        run: |
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
+            echo 'Expected quote ordinary-function probe to fail, but it succeeded.' >&2
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -Eqi 'UnknownSymbol|unknown symbol|nevidomyi symvol|unbekanntes Symbol'
+
+      - name: Ordinary eager application cannot skip an unused branch
+        shell: bash
+        run: |
+          set +e
+          output=$(cargo run -q -p my-lisp-cli --bin my-lisp -- docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
+            echo 'Expected selective-evaluation ordinary-function probe to fail, but it succeeded.' >&2
+            exit 1
+          fi
+          printf '%s\n' "$output" | grep -Eqi 'UnknownSymbol|unknown symbol|nevidomyi symvol|unbekanntes Symbol'
+
+      - name: Canonical explicit-result cond witness remains green
+        run: cargo test -p my-lisp --test control_dispatch_contract -- --nocapture
+
+      - name: Verification-only child has no whitespace errors
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
