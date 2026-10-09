@@ -53,18 +53,18 @@
 
 ### LEXICAL-SHADOWING
 
-- **MY-PARAMS-BIND-NAME?** — Check whether a formal parameter list binds a candidate name including dotted rest position  (`lib/meta-eval.lisp:1033`)
-- **MY-FORM-REFERENCES-NAME?** — Detect a reference to an identifier in a Lisp source form while excluding quoted data and nested lambda shadows  (`lib/meta-eval.lisp:1055`)
+- **MY-PARAMS-BIND-NAME?** — Check whether a formal parameter list binds a candidate name including dotted rest position  (`lib/meta-eval.lisp:1030`)
+- **MY-FORM-REFERENCES-NAME?** — Detect a reference to an identifier in a Lisp source form while excluding quoted data and nested lambda shadows  (`lib/meta-eval.lisp:1052`)
 
 ### DEFINITION-GRAPH
 
-- **MY-SELECT-DEFS-BY-NAMES** — Retain a source-ordered subset of lambda definitions named by a finite group of identifiers  (`lib/meta-eval.lisp:1180`)
-- **MY-REMOVE-DEFS-BY-NAMES** — Return remaining lambda-definition forms after excluding all forms whose defined name belongs to a chosen component  (`lib/meta-eval.lisp:1190`)
+- **MY-SELECT-DEFS-BY-NAMES** — Retain a source-ordered subset of lambda definitions named by a finite group of identifiers  (`lib/meta-eval.lisp:1177`)
+- **MY-REMOVE-DEFS-BY-NAMES** — Return remaining lambda-definition forms after excluding all forms whose defined name belongs to a chosen component  (`lib/meta-eval.lisp:1187`)
 
 ### CLOSURE-GROUP
 
-- **MY-GROUP-CLOSURE-FROM-DEF** — Construct a finite group-recursive closure from one definition, member group and captured lexical environment  (`lib/meta-eval.lisp:724`)
-- **MY-BUILD-GROUP-ENV** — Reconstruct group member closure bindings around the captured environment at application time without relying on cyclic host references  (`lib/meta-eval.lisp:752`)
+- **MY-GROUP-CLOSURE-FROM-DEF** — Construct a finite group-recursive closure from one definition, member group and captured lexical environment  (`lib/meta-eval.lisp:721`)
+- **MY-BUILD-GROUP-ENV** — Reconstruct group member closure bindings around the captured environment at application time without relying on cyclic host references  (`lib/meta-eval.lisp:733`)
 
 ### LOGIC-SCOPING
 
