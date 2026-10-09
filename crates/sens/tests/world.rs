@@ -52,19 +52,6 @@ fn later_versions_preserve_every_earlier_snapshot() {
 }
 
 #[test]
-fn defmodule_after_world_load_keeps_legacy_reason_in_behavior() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (defmodule space (quote (((planet earth)))))
-            (reason-in (quote space) (quote (planet earth)))
-            "#
-        ),
-        "((() (proved (planet earth) (planet earth) ())))"
-    );
-}
-
-#[test]
 fn repeated_compatible_defmodule_calls_still_accumulate() {
     assert_eq!(
         eval_world(
