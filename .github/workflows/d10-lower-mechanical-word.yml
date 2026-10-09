@@ -1,0 +1,39 @@
+name: D10 lower mechanical binary word oracle
+on:
+  push:
+    paths:
+      - 'knowledge/d10-lower-mechanical-word-research-v1.json'
+      - 'knowledge/d10-user-interests-semantics-triage-v1.json'
+      - 'scripts/check_d10_lower_mechanical_word.py'
+      - 'tests/test_d10_lower_mechanical_word.py'
+      - 'tests/d10_lower_mechanical_word_chez.ss'
+      - 'docs/research/d10-lower-mechanical-word.uk.md'
+      - '.github/workflows/d10-lower-mechanical-word.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-lower-mechanical-word-research-v1.json'
+      - 'knowledge/d10-user-interests-semantics-triage-v1.json'
+      - 'scripts/check_d10_lower_mechanical_word.py'
+      - 'tests/test_d10_lower_mechanical_word.py'
+      - 'tests/d10_lower_mechanical_word_chez.ss'
+      - 'docs/research/d10-lower-mechanical-word.uk.md'
+      - '.github/workflows/d10-lower-mechanical-word.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+jobs:
+  exact-mathematical-word:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Research provenance, immutable status and negative controls
+        run: python3 scripts/check_d10_lower_mechanical_word.py --self-test
+      - name: Exact rational bounded mechanical words
+        run: python3 -m unittest discover -s tests -p test_d10_lower_mechanical_word.py -v
+      - name: Install independent Chez Scheme R6RS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chezscheme
+      - name: Execute actual independent R6RS oracle
+        run: scheme --script tests/d10_lower_mechanical_word_chez.ss
