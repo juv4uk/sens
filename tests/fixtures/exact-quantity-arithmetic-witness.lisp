@@ -8,6 +8,7 @@
 ; than ratifying the validators' historical t/() implementation detail:
 ; a valid SI constant projects exactly, while a record whose NAME is a string
 ; does not project at all.
+; The four EQUAL outcomes below expect exact D1 YES, never legacy list (1).
 
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
@@ -43,7 +44,7 @@
                   (dimension/1 kilogram 1)
                   (dimension/1 metre 2)
                   (dimension/1 second -2)))))
-          (00000001 (1)))
+          (00100010 (00000001 expected-d1-yes) (00000001 expected-d1-yes)))
         (00100111
           (00000001 speed-times-second-distance-shape)
           (00100010
@@ -52,7 +53,7 @@
               (quantity/1
                 299792458
                 (unit/1 (dimension/1 metre 1)))))
-          (00000001 (1)))
+          (00100010 (00000001 expected-d1-yes) (00000001 expected-d1-yes)))
         (00100111
           (00000001 recovered-speed-shape)
           (00100010
@@ -63,11 +64,11 @@
                 (unit/1
                   (dimension/1 metre 1)
                   (dimension/1 second -1)))))
-          (00000001 (1)))
+          (00100010 (00000001 expected-d1-yes) (00000001 expected-d1-yes)))
         (00100111
           (00000001 quotient-inverse)
           (00100010 recovered speed)
-          (00000001 (1)))
+          (00100010 (00000001 expected-d1-yes) (00000001 expected-d1-yes)))
         (00100111
           (00000001 si-numeric-views-match-authoritative-records)
           (00100111
@@ -135,9 +136,11 @@
       ((00000010 rows) (0)
        (10011100 ((row (00000101 rows)))
          (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
+           ((00100010 (00101111 row) (00110000 row))
             (exact-quantity-arithmetic-check (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
+           ((00100010
+              (00100010 (00101111 row) (00110000 row))
+              (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
             (00100111
               (00000001 exact-quantity-arithmetic-witness)
               (00100111 (00000001 status) (00000001 fail))
