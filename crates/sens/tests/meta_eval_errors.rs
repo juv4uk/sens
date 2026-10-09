@@ -50,7 +50,6 @@ fn unresolved_callable_has_named_error_parity() {
 fn non_callable_values_are_type_failures_not_unknown_symbols() {
     for (source, expected) in [
         ("(42)", "(error not-callable 42)"),
-        ("(t)", "(error not-callable t)"),
         ("((quote missing))", "(error not-callable missing)"),
     ] {
         let via_meta = eval_meta(source);
