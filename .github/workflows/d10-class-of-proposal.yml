@@ -1,0 +1,24 @@
+name: D10 CLASS-OF proposal gate
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-class-of-proposal-v1.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-clos-slot-observation-v1.json'
+      - 'scripts/check_d10_class_of_proposal.py'
+      - '.github/workflows/d10-class-of-proposal.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  proposal-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify provenance, current dedup and no-admission controls
+        run: python3 scripts/check_d10_class_of_proposal.py --self-test
+      - name: Verify proposal is not canonical inventory
+        run: git diff --exit-code -- knowledge/d10-v1-semantic-inventory.json knowledge/d1-d9-foundation.json
