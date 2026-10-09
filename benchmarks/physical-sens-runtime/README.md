@@ -30,3 +30,26 @@ python3 benchmarks/physical-sens-runtime/run.py \
 Спільний runner має фонове навантаження, тому окремі p50/p95 — свідчення,
 не жорстка регресійна межа. Немає доказу переваги над Python як
 повноцінною мовою без окремого спільного алгоритмічного workload.
+
+## Гарячі фази — без вартості запуску процесу
+
+```bash
+cargo build --locked --release -p sens --example physical_sens_hot_bench
+python3 benchmarks/physical-sens-runtime/hot.py \
+  --binary target/release/examples/physical_sens_hot_bench \
+  --out /tmp/sens-physical-bench --samples 11 --work-budget 65536
+```
+
+Цей експеримент **окремий від cold startup**. Він вимірює чотири фази
+одного процесу: `t5_open_d2`, `d2_parse`, `eval_from_ast` та
+`eval_lowered`. Для кожного розміру — 11 незалежних серій з
+однаковим бюджетом сумарно оброблених форм; результат кожної серії
+записано в `hot-raw.tsv`, агрегати в `hot-results.json`, середовище
+в `hot-environment.json`, таблицю в `hot-report.md`.
+
+`eval_from_ast` включає lowering кожного виклику, а
+`eval_lowered` працює зі зниженим представленням і повторно
+використовує сесію. Попередня перевірка тотожності результатів
+не входить у замір; числові бенчмарки не ратифікують нових законів.
+Варіюється кількість незалежних форм D3 QUOTE, а не алгоритмічна складність.
+
