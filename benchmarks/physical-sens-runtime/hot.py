@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_open_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
+PHASES = {"t5_open_d2", "t5_direct_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -144,6 +144,23 @@ def main() -> int:
         lines.append(f"| {row['forms']} | {row['phase']} | {median:,} | {row['p95_ns_op']:,} | {forms_per_second:,.0f} |")
     # Same already-admitted forms; compare the two isolated D2 reader
     # mechanisms at each size, never conflate either with end-to-end T5.
+    lines.extend(["", "## Full physical T5 to D2: binary words vs visible projection", "",
+                  "| Форми | T5 + видима проєкція, p50 ns | T5 + прямий D2, p50 ns | Visible / direct |",
+                  "|---:|---:|---:|---:|"])
+    for count in sizes:
+        by_phase = {row["phase"]: row for row in measures if row["forms"] == count}
+        text_ns = by_phase["t5_open_d2"]["median_ns_op"]
+        direct_ns = by_phase["t5_direct_d2"]["median_ns_op"]
+        ratio = f"{text_ns / direct_ns:.3f}x" if direct_ns else "undefined"
+        lines.append(f"| {count} | {text_ns:,} | {direct_ns:,} | {ratio} |")
+    lines.extend([
+        "",
+        "Обидві фази починаються з тих самих фізичних байтів T5. "
+        "t5_open_d2 перевіряє структуру D2 й повертає видимі слова; "
+        "t5_direct_d2 декодує трити, упаковує payload і розбирає D2 без тексту.",
+        "Це порівняння читання/проєкції, а не швидкості повного eval або завантаження файлу.",
+        "",
+    ])
     lines.extend(["", "## Dense payload vs visible 0/1 D2 parser (same forms)", "",
                   "| Форми | Видимий D2, p50 ns | Щільний D2 + готові межі слів, p50 ns | Visible / packed |",
                   "|---:|---:|---:|---:|"])

@@ -3,13 +3,13 @@
 //! T5/D2/нижчі механізми і порівнює їхні спостережувані результати.
 
 use sens::{
-    eval_lowered_expressions, eval_parsed_expressions, lower_program,
+    decode_ternary_words, eval_lowered_expressions, eval_parsed_expressions, lower_program,
     open_ternary_program, parse_canonical_binary, parse_canonical_packed_words,
-    parse_binary_source_words, pack_binary_source_tokens, Session,
+    parse_binary_source_words, pack_binary_source_tokens, pack_binary_source_words, Session,
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
-const PHASES: &[&str] = &["t5_open_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"];
+const PHASES: &[&str] = &["t5_open_d2", "t5_direct_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"];
 
 fn median_ns(mut xs: Vec<u128>) -> (u128, u128, u128) {
     xs.sort_unstable();
@@ -58,6 +58,15 @@ fn main() {
     let packed_parsed = parse_canonical_packed_words(&dense, &widths)
         .expect("direct dense D2 reader");
     assert_eq!(packed_parsed.len(), forms);
+    // Direct physical T5 bytes to exact D2 words, without making a string.
+    // The T5 separator trits supply the word boundaries; no independent
+    // width discovery, new parser or human semantic name table is involved.
+    let t5_words = decode_ternary_words(&physical).expect("raw physical T5 words");
+    let t5_widths = t5_words.iter().map(|word| word.width()).collect::<Vec<_>>();
+    let t5_dense = pack_binary_source_words(&t5_words);
+    let t5_parsed = parse_canonical_packed_words(&t5_dense, &t5_widths)
+        .expect("direct physical T5 into D2");
+    assert_eq!(t5_parsed.len(), forms, "direct T5 form count drift");
     let lowered = lower_program(&parsed);
     let mut session = Session::default();
 
@@ -70,6 +79,9 @@ fn main() {
     let packed_observable = eval_parsed_expressions(&packed_parsed, &mut session)
         .expect("direct packed-word D2 execution");
     assert_eq!(ast_observable, packed_observable, "visible/packed D2 observable mismatch");
+    let t5_observable = eval_parsed_expressions(&t5_parsed, &mut session)
+        .expect("direct T5 D2 execution");
+    assert_eq!(ast_observable, t5_observable, "physical T5 direct D2 observable mismatch");
     let stable = ast_observable.value.to_string();
     black_box(&stable);
 
@@ -77,6 +89,15 @@ fn main() {
         let observations = match phase {
             "t5_open_d2" => measure(
                 || { black_box(open_ternary_program(black_box(&physical)).expect("T5/D2")); },
+                count, samples,
+            ),
+            "t5_direct_d2" => measure(
+                || {
+                    let words = decode_ternary_words(black_box(&physical)).expect("T5 bytes");
+                    let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
+                    let bits = pack_binary_source_words(&words);
+                    black_box(parse_canonical_packed_words(&bits, &widths).expect("direct T5/D2"));
+                },
                 count, samples,
             ),
             "d2_parse" => measure(
