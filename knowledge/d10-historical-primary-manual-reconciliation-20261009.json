@@ -1,0 +1,506 @@
+{
+  "schema": "d10-historical-primary-manual-branch-reconciliation/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-ONLY-NO-RESIDENTS",
+  "owner_rule": "#4013 #4182 #4463; D2 alone owns control; positive manual evidence never authorizes D10 address",
+  "snapshot": {
+    "lower_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_git_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "lower_domains": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8",
+      "D9"
+    ],
+    "d10_selected": 625,
+    "d10_ratified": 0
+  },
+  "branches_inspected": [
+    "research/2344-historical-ledger",
+    "research/2258-function-funarg-historical",
+    "research/2678-historical-unplaced-handoff",
+    "research/2718-d1-d6-historical-gap-audit",
+    "feat/d8-historical-full-occupancy",
+    "research/d9-overflow-review-v1"
+  ],
+  "historical_ledger_2344": {
+    "count": 19,
+    "already_lower_exact": 17,
+    "rows": [
+      {
+        "historical_name": "LABEL",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D5:00100",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "FUNCTION",
+        "old_status": "HISTORICAL-MECHANISM",
+        "lower_current": "D5:00001",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "FUNARG",
+        "old_status": "HISTORICAL-MECHANISM",
+        "lower_current": null,
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "EVALQUOTE",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D5:00000",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "APPEND",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D4:1111",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "PAIR",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D8:11111101",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "PAIRLIS",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D5:11110",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "ASSOC",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D5:11100",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "SUBST",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D5:11111",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "SUBLIS",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D6:001010",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "MAPLIST",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D6:000101",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "SET",
+        "old_status": "NEW-OBSERVABLE-CAPABILITY",
+        "lower_current": "D5:00110",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "SETQ",
+        "old_status": "NEW-OBSERVABLE-CAPABILITY",
+        "lower_current": "D5:00111",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "PROG",
+        "old_status": "COMPOSITE",
+        "lower_current": "D5:00101",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "GO",
+        "old_status": "DERIVED-D1-D4",
+        "lower_current": "D5:11000",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "RETURN",
+        "old_status": "NEW-OBSERVABLE-CAPABILITY",
+        "lower_current": "D5:11001",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "FEXPR",
+        "old_status": "RAW+ENV-TWO-CAPABILITIES",
+        "lower_current": "D5:00010",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "FSUBR",
+        "old_status": "RAW+ENV-TWO-CAPABILITIES",
+        "lower_current": "D8:11111000",
+        "current_d10_selected": false
+      },
+      {
+        "historical_name": "TRANSFORMER",
+        "old_status": "FORM-TRANSFORMER-PROTOCOL",
+        "lower_current": null,
+        "current_d10_selected": false
+      }
+    ],
+    "explicit_semantic_neighbor_exceptions": [
+      {
+        "name": "TRANSFORMER",
+        "existing": "D8 TRANSFORMER/HART-MACRO",
+        "reason": "different surface, same tracked Hart macro protocol; preserve protocol-stage comparison"
+      },
+      {
+        "name": "FUNARG",
+        "existing": "D5 FUNCTION / D4 LAMBDA",
+        "reason": "old ledger classifies historical closure representation adapter, not a new independent capability"
+      }
+    ]
+  },
+  "d9_overflow_leftover_exact_names": [
+    "THE",
+    "GENERATE-EXPANSION",
+    "BACKQUANTIZE",
+    "COUNT-LEADING-ZEROS",
+    "TABLESPACE",
+    "COLLECTION"
+  ],
+  "already_selected_d10_do_not_readd": [
+    "SASSOC",
+    "SASSQ",
+    "REARRAY",
+    "MAKE-ARRAY",
+    "ARRAYDIMS",
+    "REF-CELL",
+    "DEREF",
+    "LDB",
+    "MASK-FIELD",
+    "COMPILE-FILE"
+  ],
+  "proposals": [
+    {
+      "review_id": "HIST-20261009-01",
+      "historical_name": "ARRAY-DISPLACEMENT",
+      "source_era": "ANSI Common Lisp 1994",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html",
+      "source_section": "Function ARRAY-DISPLACEMENT",
+      "priority": "P0",
+      "triage": "D10-PROPOSAL-REVIEW",
+      "observable_claim": "query displaced-to array and nonnegative offset as two values; a displaced view shares elements with the backing array",
+      "positive_witness_spec": "make array A; make B displaced to A at offset 1; write B[0], require A[1] changed; query B -> (A,1)",
+      "falsifier_spec": "B is instead an independent copy so mutation does not reach A; or returns an unrelated backing array",
+      "nearby_existing": [
+        "D10 MAKE-ARRAY",
+        "D10 REARRAY",
+        "D8 AREF",
+        "D8 VALUES"
+      ],
+      "proposed_owner": "CORE-VIEW-ALIASING-REVIEW",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-02",
+      "historical_name": "ADJUST-ARRAY",
+      "source_era": "ANSI Common Lisp 1994",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_adjust-array.html",
+      "source_section": "Function ADJUST-ARRAY",
+      "priority": "P0",
+      "triage": "HOLD-OVERLAP-D10-REARRAY",
+      "observable_claim": "change array dimensions, preserve bounded original entries as specified, optional adjustable identity and displacement/re-aliasing; do not infer universal in-place behavior",
+      "positive_witness_spec": "adjust explicitly adjustable 2x3 array to 4x6; original known positions retain elements; new shape and distinct/improper alias cases checked",
+      "falsifier_spec": "reshape always destroys old contents or always returns same object even when not adjustable",
+      "nearby_existing": [
+        "D10 REARRAY",
+        "D10 MAKE-ARRAY",
+        "D10 ARRAYDIMS",
+        "D9 ROW-MAJOR-AREF"
+      ],
+      "proposed_owner": "CORE-ARRAY-LAW-REVIEW",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-03",
+      "historical_name": "DPB",
+      "source_era": "ZetaLisp Lisp Machine Manual 1984",
+      "source_url": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+      "source_section": "7.9 Byte Manipulation Functions — DPB",
+      "priority": "P0",
+      "triage": "D10-PROPOSAL-REVIEW",
+      "observable_claim": "deposit low bits of value in specified contiguous target integer bit-field, preserving all target bits outside that field",
+      "positive_witness_spec": "for byte-field [position p,width w], show LDB(field, DPB(v,field,x)) equals low_w_bits(v), unchanged exterior bits of x",
+      "falsifier_spec": "source bits overwrite upper/lower bits outside chosen field, or do not mask value to w bits",
+      "nearby_existing": [
+        "D10 LDB",
+        "D10 MASK-FIELD",
+        "D8 LOGBITP",
+        "D8 ARITHMETIC-SHIFT"
+      ],
+      "proposed_owner": "CORE-TYPED-BIT-FIELD-REVIEW",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-04",
+      "historical_name": "LOCF",
+      "source_era": "ZetaLisp Lisp Machine Manual 1984",
+      "source_url": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+      "source_section": "3.2.2 locf / 13 Locatives",
+      "priority": "P1",
+      "triage": "HOLD-MECHANISM-VS-SEMANTICS",
+      "observable_claim": "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)",
+      "positive_witness_spec": "obtain reference to array element, update through reference, observe same original element changes; require lifetime/alias safety model",
+      "falsifier_spec": "reference points to a detached copy, or lets invalid pointer escape lifetime boundary",
+      "nearby_existing": [
+        "D10 REF-CELL",
+        "D10 DEREF",
+        "D10 RESET-REF!",
+        "D10 SWAP-REF!",
+        "D4 BIND"
+      ],
+      "proposed_owner": "D2-LANGUAGE-FORM-AND-CORE-REFERENCE-REVIEW",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-05",
+      "historical_name": "MULTIPLE-VALUE-PROG1",
+      "source_era": "ANSI Common Lisp 1994",
+      "source_url": "https://metaspec.dev/s_multiple-value-prog1.html",
+      "source_section": "Special Operator MULTIPLE-VALUE-PROG1",
+      "priority": "P1",
+      "triage": "HOLD-D2-CONTROL",
+      "observable_claim": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
+      "positive_witness_spec": "first expression yields (a,b); later expression changes state and yields c; overall result still (a,b) and effect occurred",
+      "falsifier_spec": "only primary a retained or final c replaces first values",
+      "nearby_existing": [
+        "D8 PROG1",
+        "D8 VALUES",
+        "D8 MULTIPLE-VALUE-BIND",
+        "D10 CALL-WITH-VALUES"
+      ],
+      "proposed_owner": "D2-EXCLUSIVE-CONTROL",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-06",
+      "historical_name": "MAKNUM",
+      "source_era": "MacLisp Reference Manual 17 Dec 1975",
+      "source_url": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "source_section": "printed p. 2-28; PDF p. 61",
+      "priority": "P2",
+      "triage": "HOLD-SUBSTRATE-IDENTITY",
+      "observable_claim": "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee",
+      "positive_witness_spec": "two distinct EQ-nonidentical cons cells map to different live ids; identical object maps to same live id",
+      "falsifier_spec": "structural equality alone forces same identity id; id asserted stable after serialization/restart",
+      "nearby_existing": [
+        "D3 EQ",
+        "D10 REF-CELL",
+        "D10 SXHASH"
+      ],
+      "proposed_owner": "ISLAND-MECHANISM-FIRST",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-07",
+      "historical_name": "MUNKAM",
+      "source_era": "MacLisp Reference Manual 17 Dec 1975",
+      "source_url": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "source_section": "printed p. 2-28; PDF p. 61",
+      "priority": "P2",
+      "triage": "HOLD-SUBSTRATE-IDENTITY",
+      "observable_claim": "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract",
+      "positive_witness_spec": "for a live x, MUNKAM(MAKNUM(x)) is EQ to x",
+      "falsifier_spec": "accept arbitrary forged handle as a valid object or claim stable cross-process object restoration",
+      "nearby_existing": [
+        "D3 EQ",
+        "D10 REF-CELL",
+        "MAKNUM"
+      ],
+      "proposed_owner": "ISLAND-MECHANISM-FIRST",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-08",
+      "historical_name": "THE",
+      "source_era": "ANSI Common Lisp 1994",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html",
+      "source_section": "Special Operator THE",
+      "priority": "P1",
+      "triage": "HOLD-D2-TYPE-CONTROL",
+      "observable_claim": "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check",
+      "positive_witness_spec": "correctly typed two-result expression returns the same two values with declaration in place",
+      "falsifier_spec": "wrongly claim THE necessarily throws runtime type error for a violated declaration",
+      "nearby_existing": [
+        "D9 DEFTYPE",
+        "D10 TYPEP",
+        "D10 CHECK-TYPE",
+        "D8 VALUES"
+      ],
+      "proposed_owner": "D2-EXCLUSIVE-CONTROL",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-09",
+      "historical_name": "COUNT-LEADING-ZEROS",
+      "source_era": "D8 historical research; Lisp Machine related numeric chapter",
+      "source_url": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+      "source_section": "7.8 Logical Operations; INTEGER-LENGTH is attested, exact old function name requires primary verification",
+      "priority": "P2",
+      "triage": "HOLD-D8-DERIVABILITY",
+      "observable_claim": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
+      "positive_witness_spec": "CLZ(0,W)=W; CLZ(1,W)=W-1; CLZ(highest_bit,W)=0",
+      "falsifier_spec": "one unbounded integer without width is silently assumed to have a universal number of leading zeros",
+      "nearby_existing": [
+        "D8 INTEGER-LENGTH",
+        "D8 ARITHMETIC-SHIFT",
+        "D10 LDB"
+      ],
+      "proposed_owner": "CORE-MATH-OR-TYPED-WORD-ISLAND",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-10",
+      "historical_name": "TABLESPACE",
+      "source_era": "old D8/D9 #2934 claim MacLisp",
+      "source_url": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+      "source_section": "no TABLESPACE occurrence verified in retrieved 1975 manual",
+      "priority": "P3",
+      "triage": "HOLD-UNVERIFIED-SOURCE",
+      "observable_claim": "claimed allocated hash table capacity distinct from number of stored entries; standard/portable behavior unproven",
+      "positive_witness_spec": "find primary definition differentiating capacity n from count k; require n>=k if applicable",
+      "falsifier_spec": "merely relabel count as capacity or invent a new Core law without source",
+      "nearby_existing": [
+        "D10 HASH-TABLE-COUNT",
+        "D10 MAKE-HASH-TABLE"
+      ],
+      "proposed_owner": "SUBSTRATE-BOUNDARY-REVIEW",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-11",
+      "historical_name": "GENERATE-EXPANSION",
+      "source_era": "old D8/D9 #2934 claim Common Lisp",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html",
+      "source_section": "no independently verified authoritative definition of this historical exact name",
+      "priority": "P3",
+      "triage": "HOLD-UNVERIFIED-SOURCE",
+      "observable_claim": "claimed macro's own expansion function; lacks primary definition and stage-specific behavior",
+      "positive_witness_spec": "locate authoritative manual page and distinguish from single-step expansion or macro-function lookup",
+      "falsifier_spec": "mere alias of MACROEXPAND-1 given a new coordinate",
+      "nearby_existing": [
+        "D6 MACROEXPAND-1",
+        "D6 MACROEXPAND",
+        "D9 MACRO-FUNCTION"
+      ],
+      "proposed_owner": "D2-EXCLUSIVE-CONTROL",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-12",
+      "historical_name": "BACKQUANTIZE",
+      "source_era": "old D8/D9 #2934 claimed Common Lisp",
+      "source_url": "https://www.softwarepreservation.org/projects/LISP/lisp15_family.html",
+      "source_section": "exact name not verified in primary manual; possible mistaken historical label",
+      "priority": "P3",
+      "triage": "HOLD-UNVERIFIED-SOURCE",
+      "observable_claim": "claimed splicing macro behavior; not source-attested by this audit",
+      "positive_witness_spec": "find exact historical original spelling, syntax and evaluation phase in a primary document",
+      "falsifier_spec": "misread BACKQUOTE or UNQUOTE-SPLICING as independently named BACKQUANTIZE",
+      "nearby_existing": [
+        "D6 MACROEXPAND",
+        "D8 TRANSFORMER/HART-MACRO"
+      ],
+      "proposed_owner": "D2-EXCLUSIVE-CONTROL",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    },
+    {
+      "review_id": "HIST-20261009-13",
+      "historical_name": "COLLECTION",
+      "source_era": "old D8/D9 #2934 claimed Common Lisp",
+      "source_url": "https://www.softwarepreservation.org/projects/LISP/lisp15_family.html",
+      "source_section": "no specific primary manual function and behavior verified",
+      "priority": "P3",
+      "triage": "HOLD-UNVERIFIED-SOURCE",
+      "observable_claim": "generic 'collect elements' lacks operation/ordering/multiplicity contract",
+      "positive_witness_spec": "identify donor implementation/manual and provide order/duplicates/identity behavior before proposing",
+      "falsifier_spec": "assert any traversal helper is a novel Core semantic primitive",
+      "nearby_existing": [
+        "D6 MAP",
+        "D6 REDUCE",
+        "D9 MAP->LIST",
+        "D10 MAP-VALUES"
+      ],
+      "proposed_owner": "PACKAGE-UNTIL-PROVED",
+      "exact_in_lower": false,
+      "exact_in_d10_selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "selected_d10": false
+    }
+  ],
+  "accounting": {
+    "history_2344_rows": 19,
+    "history_2344_exact_lower": 17,
+    "history_d8_overflow_unrepresented": 6,
+    "proposals": 13,
+    "auto_selected_d10": 0,
+    "auto_ratified": 0,
+    "auto_coordinates": 0
+  },
+  "warnings": [
+    "Exact spelling absence never proves novel semantic behavior",
+    "Old historical D8 coordinates are not current semantic addresses",
+    "D10 REARRAY and SASSOC/SASSQ already exist, do not add twice",
+    "MacLisp TABLESPACE and alleged BACKQUANTIZE/COLLECTION/GENERATE-EXPANSION lack primary-source validation",
+    "No independent runtime oracle tests performed in this audit"
+  ]
+}
