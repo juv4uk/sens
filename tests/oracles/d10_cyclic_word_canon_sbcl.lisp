@@ -93,6 +93,6 @@
 
 (handler-case (suite)
   (error (condition)
-    " (format *error-output* "D10 CYCLIC WORD real SBCL donor FAIL ~A~%"
+    (format *error-output* "D10 CYCLIC WORD real SBCL donor FAIL ~A~%"
             condition)
     (sb-ext:exit :code 1)))
