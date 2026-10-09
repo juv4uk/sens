@@ -41,28 +41,25 @@
 (00001001 narrate-outcome-authority-check-rows
   (00001000 (rows)
     (00000111
-      ((00000010 rows) ()
+      ((00000011 rows (00000001 ()))
        (00000001 (narrate-outcome-authority-witness (status pass))))
-      ((00000010 rows) (1)
+      ((00000010 rows)
        (00100111
          (00000001 narrate-outcome-authority-witness)
          (00000001 (status fail))
          (00000001 (law malformed-row-tail))
          (00100111 (00000001 actual) rows)))
-      ((00000010 rows) (0)
+      ((00000011 0 0)
        (10011100 ((row (00000101 rows)))
          (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
+           ((00100010 (00101111 row) (00110000 row))
             (narrate-outcome-authority-check-rows (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
+           ((00000011 0 0)
             (00100111
               (00000001 narrate-outcome-authority-witness)
-              (00000001 (status fail))
               (00100111 (00000001 law) (00000101 row))
               (00100111 (00000001 expected) (00110000 row))
-              (00100111 (00000001 actual) (00101111 row))))))))))
-
-(00001001 narrate-outcome-authority-check
+              (00100111 (00000001 actual) (00101111 row)))))))))))(00001001 narrate-outcome-authority-check
   (00001000 ()
     (narrate-outcome-authority-check-rows
       (narrate-outcome-authority-rows))))
