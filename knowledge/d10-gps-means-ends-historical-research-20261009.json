@@ -1,0 +1,145 @@
+{
+  "schema": "d10-early-symbolic-ai-gps-difference-links/v1",
+  "status": "HISTORICAL-RESEARCH-HOLD-NO-SELECTION",
+  "date": "2026-10-09",
+  "claim": "Early AI: General Problem Solver 1958/59 means–ends table of connections; distinct from D9 JTMS, D10 SEARCH, 1971 STRIPS goal regression.",
+  "historic_source": {
+    "title": "Report on a General Problem-Solving Program",
+    "authors": [
+      "Allen Newell",
+      "J. C. Shaw",
+      "Herbert A. Simon"
+    ],
+    "report": "RAND P-1584, December 30, 1958; revised February 1959; IFIP 1959",
+    "url": "https://home.mis.u-picardie.fr/~furst/docs/Newell_Simon_General_Problem_Solving_1959.pdf",
+    "primary_pages": [
+      10,
+      11
+    ],
+    "primary_claim": "GPS has transform-object, apply-operator, and reduce-difference goals; method 3 chooses an operator relevant to a difference then attempts method 2 for its prerequisites.",
+    "reconstruction_warning": "Boolean finite add/del sets and executable witness are the project's modern formal reconstruction for tests; not an exact IPL/GPS historical binary trace."
+  },
+  "domain": "D10",
+  "core_review": "Pending owner semantic-vs-library, D1-D9 behavioral dedup, other independent donor portability",
+  "research": [
+    {
+      "semantic_name": "GPS-FINITE-STATE-DIFFERENCES",
+      "uk": "різниці-стану-й-цілі",
+      "ukr": "відмінності-стану-від-мети",
+      "status": "REVIEW-DERIVABLE",
+      "law": "For finite Boolean universe U, state S and desired full-state G, compute missing = G\\S and unwanted = S\\G; both are disjoint and their union is the symmetric difference; reject atoms not in U.",
+      "witnesses": [
+        "U=[battery,power,signal], S=[power], G=[power,signal] => missing=[signal], unwanted=[].",
+        "S=[noise,signal], G=[signal] => missing=[], unwanted=[noise]."
+      ],
+      "falsifiers": [
+        "Comparing only positive goals hides unwanted true atoms when complete target states are declared.",
+        "Returning atoms not in U or counting duplicated atoms as new differences."
+      ],
+      "nearest_existing": [
+        "D9 PROVE-GOAL",
+        "D9 WORLD-CLAUSES",
+        "D10 SEARCH"
+      ],
+      "complexity": "Can be composed from finite-set differences; no proof for independent machine opcode."
+    },
+    {
+      "semantic_name": "GPS-OPERATOR-DIFFERENCE-WITNESS",
+      "uk": "свідок-впливу-оператора-на-різницю",
+      "ukr": "зв’язок-оператора-з-відмінністю",
+      "status": "REVIEW-DERIVABLE",
+      "law": "For finite operator O with additive effects A, deleting effects D, and missing M=G\\S/unwanted W=S\\G, return positive witnesses A∩M and negative witnesses D∩W. Mark 'relevant to current difference' iff either witness is nonempty. Relevance is only an effect-based heuristic, not proof of executability, progress, or planning completeness.",
+      "witnesses": [
+        "S=[battery],G=[battery,signal],O adds signal => positive witness signal.",
+        "S=[noise,signal],G=[signal],O deletes noise => negative witness noise.",
+        "Adding signal but also deleting battery may be relevant yet fail to reduce distance to a goal requiring both."
+      ],
+      "falsifiers": [
+        "Declaring an operator irrelevant when it removes an unwanted atom.",
+        "Claiming selected operator always strictly reduces total goal difference or proves reachability."
+      ],
+      "nearest_existing": [
+        "D9 FIRE-RULE",
+        "D9 PROVE-GOAL",
+        "D10 SEARCH",
+        "STRIPS 1971 regression research PR #4986"
+      ],
+      "complexity": "Intersection of effects and difference is computable; novelty is an explicit stable historical search-heuristic witness, not a new D2 control form."
+    },
+    {
+      "semantic_name": "GPS-OPERATOR-PRECONDITION-SUBGOALS",
+      "uk": "передумови-оператора-як-підцілі",
+      "ukr": "невиконані-вимоги-оператора",
+      "status": "REVIEW-DERIVABLE",
+      "law": "For an operator relevant under the preceding witness, return unmet preconditions P\\S. If empty the operator is applicable, otherwise it is not yet applicable and the missing preconditions are diagnostic subgoals. Never execute a blocked operator, return 'blocked' as its prospective successor.",
+      "witnesses": [
+        "Operator adds signal but requires battery while state lacks battery => relevance yes; missing precondition battery; application blocked.",
+        "If all operator preconditions are present then one successor is (S\\D)∪A, regardless whether that successor is closer to G."
+      ],
+      "falsifiers": [
+        "Execute operator while at least one precondition is false.",
+        "Conflate a relevant operator with a successful or complete plan."
+      ],
+      "nearest_existing": [
+        "D9 FIRE-RULE",
+        "D9 PROVE-GOAL",
+        "1971 STRIPS goal regression #4986"
+      ],
+      "complexity": "A diagnostically valuable derived relation; not identical to full STRIPS regression or D2 evaluator."
+    }
+  ],
+  "hold_hypotheses": [
+    {
+      "label": "GPS-GOAL-STACK",
+      "status": "HOLD-D2-CONTROL",
+      "reason": "recursive strategy, not a new core semantic resident without formal admissibility"
+    },
+    {
+      "label": "GPS-DIFFERENCE-PRIORITY",
+      "status": "HOLD-DOMAIN-HEURISTIC",
+      "reason": "original GPS ranks differences by domain-defined difficulty, no universal order"
+    },
+    {
+      "label": "GPS-COMPLETE-PLAN",
+      "status": "HOLD-UNSUPPORTED",
+      "reason": "one-step operator relevance is not sound-and-complete plan search"
+    },
+    {
+      "label": "IPL-LIST-MEMORY-ACCESS",
+      "status": "HOLD-DERIVABLE",
+      "reason": "historical list structure already D3–D9 / substrate"
+    },
+    {
+      "label": "GPS-OPERATOR-APPLY",
+      "status": "HOLD-LOWER-DOMAIN",
+      "reason": "D9 already has execution/goal inference, not duplicating"
+    }
+  ],
+  "prior_semantic_boundary": {
+    "ratified_foundation": "D1–D9 user-ratified; D9 contains UNIFY, PROVE-GOAL, FIRE-RULE, JTMS and evidence support.",
+    "d10_selected_count_at_claim": 635,
+    "d10_ratified": 0,
+    "unselected": true,
+    "ledger_appended": false,
+    "binary_coordinate": null,
+    "numeric_width_semantics": "single 10-bit D10 namespace; no allocations",
+    "owner_review": "Do not move these names to SELECTED until independent behavioral distinction and source-law review. Research-only primary-source witness is not executable SENS parity."
+  },
+  "test_oracle": "tests/oracles/d10_gps_means_ends_swi.pl",
+  "guard": "scripts/check_d10_gps_means_ends_history.py",
+  "neighbors": [
+    "#4977 symbolic AI",
+    " #4988 IPL 1956 Logic Theorist",
+    " #4986 STRIPS goal regression",
+    " #4990 circumscription",
+    " #4958 ATMS",
+    " #4965 abductive minimal explanation"
+  ],
+  "applications_as_motivations": [
+    "Advice Taker and symbolic knowledge repair",
+    "Panini rule preference",
+    "SDR diagnostic operator selection",
+    "FPGA sequencing",
+    "astronomical calibration plan"
+  ]
+}
