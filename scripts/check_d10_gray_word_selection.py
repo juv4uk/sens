@@ -79,7 +79,12 @@ def verify(inv,src,his,state,low,ledger,doc):
         assert r["positive_witnesses"] == s["positive_witnesses"]
         assert r["falsifiers"] == s["falsifiers"]
         assert r["source_path"]==str(SRC.relative_to(ROOT))
-        l=ledgerrows[-2+idx]
+        # Bind historical selection to its immutable proposal identity.
+        # Append-only pending proposals may follow the two Gray rows.
+        matches=[row for row in ledgerrows
+                 if row["proposal_id"]=="D10P-"+str(9+idx).zfill(4)]
+        assert len(matches)==1, "missing or duplicate historical Gray proposal"
+        l=matches[0]
         assert l["proposal_id"]=="D10P-"+str(9+idx).zfill(4)
         assert l["semantic_name"]==r["semantic_name"]
         assert l["ratified"]=="0" and l["status"]=="pending-review"
