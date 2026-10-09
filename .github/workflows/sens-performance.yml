@@ -18,11 +18,11 @@ on:
 permissions:
   contents: read
 
-# Рій часто оновлює main. Не множимо дорогі виміри на старих SHA:
-# залишаємо останній коміт + ручний стабільний replay.
+# Не перериваємо вже запущений pinned-SHA вимір під час шторму push.
+# GitHub concurrency лишає один running та найновіший pending workflow.
 concurrency:
   group: sens-performance-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   t5-reference:
