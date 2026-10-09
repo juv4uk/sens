@@ -192,44 +192,47 @@ def add_owner_reviewed_source_scope(next_report: dict, census: dict) -> dict:
     """
     summary = census.get("summary")
     blocked = census.get("blocked_sources")
-    mechanical = census.get("mechanical_candidates")
-    if (not isinstance(summary, dict) or not isinstance(blocked, list)
-            or not isinstance(mechanical, list)):
+    if not isinstance(summary, dict) or not isinstance(blocked, list):
         raise TriageError("canonical source-scope original ledger unavailable")
-    if (len(blocked) != summary.get("blocked")
-            or len(mechanical) != summary.get("mechanical_candidates")
-            or len(blocked) + len(mechanical) != summary.get("scanned")
-            or summary.get("original_unpaired_sources_scanned") != summary.get("scanned")):
-        raise TriageError("canonical source-scope original count disagreement")
+    if len(blocked) != summary.get("blocked"):
+        raise TriageError("canonical source-scope blocked count disagreement")
     if census.get("source_era") != "auto" or (
         summary.get("physical_outputs_created") != 0
         or summary.get("original_unpaired_executables_migrated_by_this_tool") != 0
     ):
         raise TriageError("source-kind authority must be no-write source-era auto")
-    # An immutable archived file can become *mechanically* representable
-    # after a newly audited historical successor is linked. It remains DATA,
-    # never an executable admission. Do not lose it merely because its first
-    # status moved from BLOCKED to CANDIDATE_NOT_ADMITTED.
+    # A lawful successor may make a *frozen archive* mechanically T5-ready.
+    # The canonical candidate census counts source kind across all unpaired
+    # originals, NOT just its first-blocker subset. Join BOTH statuses here,
+    # retaining the source Git pin and no-semantic-admission invariant.
+    candidates = census.get("mechanical_candidates", [])
+    if not isinstance(candidates, list) or len(candidates) != summary.get(
+            "mechanical_candidates", 0):
+        raise TriageError("canonical unpaired candidate total changed")
+    if ("scanned" in summary and
+            summary["scanned"] != len(blocked) + len(candidates)):
+        raise TriageError("canonical total includes lost/duplicated originals")
     by_path: dict[str, dict] = {}
-    for expected_status, rows in (
-            ("BLOCKED", blocked), ("CANDIDATE_NOT_ADMITTED", mechanical)):
-        for row in rows:
-            if not isinstance(row, dict):
-                raise TriageError("canonical source row is malformed")
-            path = row.get("path")
-            sha = row.get("source_git_blob_sha")
-            scope = row.get("source_scope")
-            if not isinstance(path, str) or path in by_path:
-                raise TriageError("duplicate/malformed canonical source scope")
-            if (row.get("status") != expected_status
-                    or row.get("same_stem_sens_already_exists") is not False
-                    or row.get("independent_semantic_oracle_passed") is not False
-                    or row.get("source_is_executable_proven") is not False
-                    or not isinstance(sha, str)
-                    or not re.fullmatch(r"[0-9a-f]{40}", sha)
-                    or scope not in SOURCE_KINDS):
-                raise TriageError("unapproved original SHA, semantic admission or source scope")
-            by_path[path] = row
+    for row, required_status in (
+            *((entry, "BLOCKED") for entry in blocked),
+            *((entry, "CANDIDATE_NOT_ADMITTED") for entry in candidates),
+    ):
+        if not isinstance(row, dict):
+            raise TriageError("canonical source row is malformed")
+        path = row.get("path")
+        sha = row.get("source_git_blob_sha")
+        scope = row.get("source_scope")
+        if not isinstance(path, str) or path in by_path:
+            raise TriageError("duplicate/malformed canonical source scope")
+        if (row.get("status") != required_status
+                or row.get("same_stem_sens_already_exists") is not False
+                or row.get("independent_semantic_oracle_passed") is not False
+                or row.get("source_is_executable_proven") is not False
+                or not isinstance(sha, str)
+                or not re.fullmatch(r"[0-9a-f]{40}", sha)
+                or scope not in SOURCE_KINDS):
+            raise TriageError("unapproved original SHA, semantic admission or source scope")
+        by_path[path] = row
     # Reviewed DATA entries must have independent source-specific owner
     # records in the canonical manifest overlay, not just a forged row label.
     reviewed = census.get("reviewed_nonprogram_sources")
