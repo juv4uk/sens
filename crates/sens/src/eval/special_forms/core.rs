@@ -61,7 +61,7 @@ pub(crate) fn evaluate_domain_cond(
         if parts.len() != 2 {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "D3:110 COND requires exactly (test expression); three-part compatibility is forbidden",
+                format!("D3:110 COND requires exactly (test expression); three-part compatibility is forbidden; rejected clause AST: {:?}", clause.kind),
                 clause.span,
             ));
         }

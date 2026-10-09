@@ -150,10 +150,15 @@ def route_evidence() -> tuple[bool, bool]:
         token.text == ZERO8 for token in call_heads(mechanism_tokens)
     )
 
+    contract_lower = contract.lower()
+    # Contract 11.8 supersedes the historical flat-Function8 wording. Check
+    # its current normative invariant rather than requiring retired phrasing.
     contract_separates_ground = (
-        "function 00000000 is not the empty-list value" in contract.lower()
-        and "() is represented as a structural empty value outside the function space"
-        in contract.lower()
+        "(structural-empty-non-alias" in contract_lower
+        and "structural empty is not historical exact-eight-bit 00000000"
+        in contract_lower
+        and "not predicatebit 0 or number zero" in contract_lower
+        and "function8" in contract_lower
     )
 
     return zero_in_mechanism_rows, contract_separates_ground
