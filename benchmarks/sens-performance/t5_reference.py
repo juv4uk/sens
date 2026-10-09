@@ -124,7 +124,7 @@ def main() -> int:
     lines = [
         "# SENS physical T5 reference benchmark",
         "",
-        f"SHA: \`{environment['git_sha']}\` · CPU: {environment['cpu']}",
+        f"SHA: `{environment['git_sha']}` · CPU: {environment['cpu']}",
         "",
         "| Corpus | Words | T5 bytes | ASCII-view bytes | T5/view | Encode µs | Decode µs |",
         "|---|---:|---:|---:|---:|---:|---:|",
