@@ -35,6 +35,16 @@
       "id": "CLHS-RESTART",
       "url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
       "notes": "Lexical restarts, condition association and explicit invocation; later standard"
+    },
+    {
+      "id": "CLHS-METHOD-PRECEDENCE",
+      "url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-2.html",
+      "notes": "Sorting applicable methods by class precedence lists and explicit argument-precedence-order"
+    },
+    {
+      "id": "CLHS-FIND-RESTART",
+      "url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_find-restart.html",
+      "notes": "Searches current dynamic environment; optional condition filtering; innermost applicable named restart wins"
     }
   ],
   "excluded": [
@@ -77,10 +87,10 @@
       "semantic_name": "APPLICABLE-METHODS",
       "surface_uk": "застосовні-методи",
       "surface_ukr": "методи-які-можна-застосувати",
-      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-3.html",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-2.html",
       "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
-      "semantic_law": "Given explicit method signatures and argument type evidence, derive the deterministic ordered list of applicable methods; never invoke one",
-      "falsifier": "Two equally-specific incomparable methods must yield explicit ambiguity unless a ratified precedence law disambiguates",
+      "semantic_law": "Given explicit method descriptors, argument specializers/type evidence, class precedence lists and the generic function's argument-precedence-order, return the deterministic most-specific-first ordered list of applicable methods without invoking any method. Use the ratified precedence rules; registration order is not a semantic tie-breaker, and do not invent ambiguity when class/argument precedence resolves the order.",
+      "falsifier": "Hold method identities, applicability, class precedence lists and argument-precedence-order fixed while permuting registration order: the query order must remain identical. Include a two-argument case where the first argument's specializer ranking conflicts with the second so an explicit argument-precedence-order determines the winner. Assert no method body or side effect runs during the query. Any ambiguity claim when that precedence law orders the methods is a failed witness.",
       "triage_status": "SEMANTIC-CANDIDATE",
       "distinct_from_existing": "DEFMETHOD and DEFGENERIC already selected: distinguish query/ordering from definition",
       "ratified_resident": false,
@@ -124,8 +134,8 @@
       "surface_ukr": "утворити-підсумковий-метод",
       "source_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_define-me_-combination.html",
       "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
-      "semantic_law": "Construct an effective-method plan with before, primary, after and around method roles in a specified precedence order",
-      "falsifier": "Same method set with different registration order must yield identical effective plan when precedence is fully specified",
+      "semantic_law": "Construct, without invoking methods, a normalized effective-method plan from applicable methods using standard combination order: around methods most-specific-first; before methods most-specific-first; primary methods most-specific-first; after methods least-specific-first. Include a defined fail-closed outcome when the standard combination requires a primary method but none applies.",
+      "falsifier": "For the same method set, qualifiers, specializers, class precedence lists and argument-precedence-order, permutations of registration order must yield the same normalized plan. Verify the reversed order of after methods, most-specific-first order for before/primary/around, and the missing-primary failure. Plan construction itself must not execute method bodies.",
       "triage_status": "SEMANTIC-CANDIDATE",
       "distinct_from_existing": "Compare existing DEFGENERIC/DEFMETHOD and ordinary CONS/LIST as representation, not equivalent precedence semantics",
       "ratified_resident": false,
@@ -167,10 +177,10 @@
       "semantic_name": "FIND-RESTART",
       "surface_uk": "знайти-відновлення",
       "surface_ukr": "знайти-доступний-шлях-відновлення",
-      "source_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
+      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_find-restart.html",
       "historical_provenance": "Source is the historical design reference, NOT an existing SENS implementation",
-      "semantic_law": "Resolve a restart by stable identity in an explicit scope/condition association; return presence or a typed descriptor without executing",
-      "falsifier": "An out-of-scope restart must fail lookup and never be invoked, with quote/data and source identity preserved",
+      "semantic_law": "Purely find a named restart in the current dynamic environment; when a condition is supplied, include restarts explicitly associated with that condition and restarts associated with no condition, excluding those associated only with other conditions. For duplicate names, return the innermost (most recently established) applicable restart. Return the restart descriptor or NIL/absence; never invoke it.",
+      "falsifier": "Positive: an inner same-name restart shadows the outer; an unassociated restart remains findable when a condition is supplied; a restart associated only with a different condition is excluded. Negative: once its dynamic extent ends, the restart is absent. The query must not transfer control or mutate state. A merely lexical lookup or a query that invokes the restart fails.",
       "triage_status": "SEMANTIC-CANDIDATE",
       "distinct_from_existing": "Not equal to already-selected historical UNDO/INTERLISP-HISTORY-REPLAY, which concern historical state",
       "ratified_resident": false,
