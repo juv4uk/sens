@@ -1,0 +1,24 @@
+name: Verify 333 proven-byte read-file
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/profile-proven-byte-readfile-candidate.lisp'
+      - '.github/workflows/verify-333-proven-byte-readfile.yml'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: verify-333-proven-byte-readfile
+      - name: Build my-lisp CLI
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Measure proven-byte read-file candidate
+        run: |
+          /usr/bin/time -f 'proven_byte_profile_wall_seconds=%e' \
+            ./target/debug/my-lisp scripts/profile-proven-byte-readfile-candidate.lisp
