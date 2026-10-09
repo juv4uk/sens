@@ -1,0 +1,90 @@
+name: T5 decoder paired same-runner A/B
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/ternary_transport.rs"
+      - "benchmarks/physical-sens-runtime/paired_decoder.py"
+      - ".github/workflows/t5-decoder-paired-ab.yml"
+
+permissions:
+  contents: read
+
+# Stable SHA-specific evidence; never cancel a running A/B for a later push.
+concurrency:
+  group: t5-decoder-ab-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: Same CPU baseline vs no-trit-buffer T5
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout exact PR head and its history
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          path: candidate
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Pin pre-change merge base for identical-code comparison
+        id: revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C candidate fetch origin main
+          BASE_SHA="$(git -C candidate merge-base origin/main HEAD)"
+          CANDIDATE_SHA="$(git -C candidate rev-parse HEAD)"
+          git -C candidate worktree add --detach ../baseline "$BASE_SHA"
+          echo "baseline=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "candidate=$CANDIDATE_SHA" >> "$GITHUB_OUTPUT"
+          echo "Baseline: $BASE_SHA"
+          echo "Candidate: $CANDIDATE_SHA"
+
+      - name: Build unmodified baseline release hot benchmark
+        run: cargo build --locked --release --manifest-path baseline/Cargo.toml -p sens --example physical_sens_hot_bench
+
+      - name: Build candidate release hot benchmark
+        run: cargo build --locked --release --manifest-path candidate/Cargo.toml -p sens --example physical_sens_hot_bench
+
+      - name: Prove exact transport parity for all 65,792 files up to two bytes
+        run: |
+          cargo test --locked --manifest-path candidate/Cargo.toml -p sens --lib \
+            optimized_t5_matches_independent_full_trit_oracle_on_all_one_and_two_byte_files \
+            -- --nocapture
+
+      - name: Measure interleaved same-CPU T5 decoder phases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 candidate/benchmarks/physical-sens-runtime/paired_decoder.py \
+            --baseline baseline/target/release/examples/physical_sens_hot_bench \
+            --candidate candidate/target/release/examples/physical_sens_hot_bench \
+            --baseline-sha "${{ steps.revisions.outputs.baseline }}" \
+            --candidate-sha "${{ steps.revisions.outputs.candidate }}" \
+            --rounds 4 --samples 9 --work-budget 65536 \
+            --out "$RUNNER_TEMP/t5-decoder-ab"
+
+      - name: Publish measured verdict without an invented win
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/t5-decoder-ab/report.md"; then
+            cat "$RUNNER_TEMP/t5-decoder-ab/report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "A/B incomplete: no performance claim." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Preserve raw interleaved timing and pinned binary hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t5-decoder-ab-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/t5-decoder-ab/
+          if-no-files-found: warn
+          retention-days: 14

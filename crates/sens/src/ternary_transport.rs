@@ -134,63 +134,82 @@ pub fn decode_ternary_words(
     if data.len() > MAX_FILE_BYTES {
         return Err(TernaryTransportError::TransportTooLarge);
     }
-    let mut trits = Vec::with_capacity(data.len() * TRITS_PER_BYTE);
-    for byte in data.iter().copied() {
-        if byte >= 243 {
-            return Err(TernaryTransportError::InvalidPhysicalByte);
-        }
+    // Preserve the original rejection priority: an impossible physical byte
+    // is rejected before inspecting padding or individual source words.
+    if data.iter().any(|&byte| byte >= 243) {
+        return Err(TernaryTransportError::InvalidPhysicalByte);
+    }
+
+    // Count trailing pad trits from the least-significant base-3 digit of
+    // each final byte. EOF is the only endpoint: no semantic EOS token.
+    // This avoids a 5 * physical_bytes temporary trit allocation.
+    let mut tail = 0usize;
+    'padding: for &byte in data.iter().rev() {
         let mut value = byte;
-        let mut digits = [0u8; TRITS_PER_BYTE];
-        for digit in digits.iter_mut().rev() {
-            *digit = value % 3;
+        for _ in 0..TRITS_PER_BYTE {
+            if value % 3 != 2 {
+                break 'padding;
+            }
+            tail += 1;
             value /= 3;
         }
-        trits.extend_from_slice(&digits);
     }
-    // Не слід шукати EOS=22: межу файла вже дає кількість байтів.
-    // Після останнього слова може бути тільки 0..4 trit-2 як padding.
-    // У самих словах допустимі лише 0 та 1, тому фізичний хвіст
-    // однозначно відділяється від останнього слова.
-    let tail = trits.iter().rev().take_while(|digit| **digit == 2).count();
     if tail >= TRITS_PER_BYTE {
         return Err(TernaryTransportError::InvalidTail);
     }
-    trits.truncate(trits.len() - tail);
-    if trits.is_empty() {
+    let payload_trits = data.len() * TRITS_PER_BYTE - tail;
+    if payload_trits == 0 {
         return Err(TernaryTransportError::EmptyDomainWord);
     }
 
     let mut words = Vec::<BinarySourceWord>::new();
     let mut current_value = 0u16;
     let mut current_width = 0usize;
-    for digit in trits {
-        match digit {
-            0 | 1 => {
-                current_value = (current_value << 1) | u16::from(digit);
-                current_width += 1;
-                if current_width > 9 {
-                    return Err(TernaryTransportError::UnsupportedDomainWidth);
-                }
+    let mut seen = 0usize;
+    'payload: for &byte in data {
+        // One five-trit byte at a time; only five stack bytes are needed.
+        let mut value = byte;
+        let mut digits = [0u8; TRITS_PER_BYTE];
+        for digit in digits.iter_mut().rev() {
+            *digit = value % 3;
+            value /= 3;
+        }
+        for digit in digits {
+            if seen == payload_trits {
+                break 'payload;
             }
-            2 => {
-                if current_width == 0 {
-                    return Err(TernaryTransportError::EmptyDomainWord);
+            seen += 1;
+            match digit {
+                0 | 1 => {
+                    current_value = (current_value << 1) | u16::from(digit);
+                    current_width += 1;
+                    if current_width > 9 {
+                        return Err(TernaryTransportError::UnsupportedDomainWidth);
+                    }
                 }
-                words.push(typed_binary_word(current_width, current_value)?);
-                current_value = 0;
-                current_width = 0;
+                2 => {
+                    if current_width == 0 {
+                        return Err(TernaryTransportError::EmptyDomainWord);
+                    }
+                    words.push(typed_binary_word(current_width, current_value)?);
+                    current_value = 0;
+                    current_width = 0;
+                }
+                _ => unreachable!(),
             }
-            _ => unreachable!(),
         }
     }
+    debug_assert_eq!(seen, payload_trits);
     if current_width == 0 {
         return Err(TernaryTransportError::EmptyDomainWord);
     }
     words.push(typed_binary_word(current_width, current_value)?);
-    // Зайвий байт, неоднозначний або неканонічний хвіст — відмова.
-    if encode_ternary_words(&words)? != data {
-        return Err(TernaryTransportError::NoncanonicalEncoding);
-    }
+    // A T5 physical byte maps uniquely to five base-3 digits (0..242).
+    // Admission above proves: 0/1 payloads of exact width 1..9, exactly
+    // one separating 2 between nonempty words, and only 0..4 trailing 2s.
+    // Those conditions uniquely reconstruct the original T5 bytes.
+    // Re-encoding the whole word stream only allocates a second full trit
+    // vector and cannot strengthen canonicality after these checks.
     Ok(words)
 }
 
@@ -280,6 +299,90 @@ mod tests {
     fn words(source: &str) -> Vec<BinarySourceWord> {
         parse_binary_source_words(source).unwrap()
             .into_iter().map(|token| token.word).collect()
+    }
+
+    // Mechanical reference only: full-trit materialization/re-encode from the
+    // previous T5 implementation, NOT historical language/SID semantics.
+    // Exhaustive short-stream comparison proves rejection codes and all
+    // admitted typed words are unchanged by the optimized byte reader.
+    fn reference_decode(data: &[u8]) -> Result<Vec<BinarySourceWord>, TernaryTransportError> {
+        if data.is_empty() {
+            return Err(TernaryTransportError::EmptyProgram);
+        }
+        if data.len() > MAX_FILE_BYTES {
+            return Err(TernaryTransportError::TransportTooLarge);
+        }
+        let mut trits = Vec::with_capacity(data.len() * TRITS_PER_BYTE);
+        for byte in data.iter().copied() {
+            if byte >= 243 {
+                return Err(TernaryTransportError::InvalidPhysicalByte);
+            }
+            let mut value = byte;
+            let mut digits = [0u8; TRITS_PER_BYTE];
+            for digit in digits.iter_mut().rev() {
+                *digit = value % 3;
+                value /= 3;
+            }
+            trits.extend_from_slice(&digits);
+        }
+        let tail = trits.iter().rev().take_while(|digit| **digit == 2).count();
+        if tail >= TRITS_PER_BYTE {
+            return Err(TernaryTransportError::InvalidTail);
+        }
+        trits.truncate(trits.len() - tail);
+        if trits.is_empty() {
+            return Err(TernaryTransportError::EmptyDomainWord);
+        }
+        let mut words = Vec::new();
+        let (mut width, mut bits) = (0usize, 0u16);
+        for digit in trits {
+            match digit {
+                0 | 1 => {
+                    bits = (bits << 1) | u16::from(digit);
+                    width += 1;
+                    if width > 9 {
+                        return Err(TernaryTransportError::UnsupportedDomainWidth);
+                    }
+                }
+                2 => {
+                    if width == 0 {
+                        return Err(TernaryTransportError::EmptyDomainWord);
+                    }
+                    words.push(typed_binary_word(width, bits)?);
+                    width = 0;
+                    bits = 0;
+                }
+                _ => unreachable!(),
+            }
+        }
+        if width == 0 {
+            return Err(TernaryTransportError::EmptyDomainWord);
+        }
+        words.push(typed_binary_word(width, bits)?);
+        if encode_ternary_words(&words)? != data {
+            return Err(TernaryTransportError::NoncanonicalEncoding);
+        }
+        Ok(words)
+    }
+
+    #[test]
+    fn optimized_t5_matches_independent_full_trit_oracle_on_all_one_and_two_byte_files() {
+        assert_eq!(decode_ternary_words(&[]), reference_decode(&[]));
+        for first in u8::MIN..=u8::MAX {
+            assert_eq!(
+                decode_ternary_words(&[first]),
+                reference_decode(&[first]),
+                "single byte {first:02x}"
+            );
+            for second in u8::MIN..=u8::MAX {
+                let file = [first, second];
+                assert_eq!(
+                    decode_ternary_words(&file),
+                    reference_decode(&file),
+                    "two physical bytes {first:02x} {second:02x}"
+                );
+            }
+        }
     }
 
     #[test]
