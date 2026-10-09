@@ -101,12 +101,16 @@ class WordParser:
         return result
 
     def parse_program(self):
-        # Кожна форма завершується власним D2 CLOSE або є одним точним словом.
-        # Додаткове D2 SPACE між верхньорівневими формами НЕ є роздільником.
+        # Чинний ук-конвертер ставить D2:00 МІЖ верхньорівневими формами.
+        # Точно один структурний маркер, не трит 2 і не текстовий пробіл.
         if not self.words:
             raise ProjectionBlocked("empty exact-word program")
-        forms = []
+        forms = [self.term()]
         while self.index < len(self.words):
+            if self.take() != "00":
+                raise ProjectionBlocked("sequential top-level forms require D2 00")
+            if self.index == len(self.words):
+                raise ProjectionBlocked("dangling top-level D2 separator")
             forms.append(self.term())
         return tuple(forms)
 
