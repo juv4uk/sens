@@ -1012,7 +1012,8 @@ def normalize_l1_l7(forms, resolver: Resolver):
                     proved = test.tok.text in ("0", "1")
                 elif isinstance(test, ListNode) and test.tail is None and test.items and isinstance(test.items[0], Atom):
                     proved = (_decision_identity(test.items[0], resolver) in _D1_TEST_HEADS
-                              and test.items[0].tok.text not in scope)
+                              and test.items[0].tok.text not in scope
+                              and test.items[0].tok.text not in resolver.global_binding_words)
                 else:
                     proved = False
                 if not proved:
