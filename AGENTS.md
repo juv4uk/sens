@@ -310,3 +310,8 @@ Guard decision semantics are Lisp-owned. The Rust boundary validates the exact `
 For NLP tasks on the documented WSL setup, the historical prepared environment is `/home/agents/GitHub/FlagEmbedding/.venv/bin/python`; prepared indexes/config live under `/home/agents/GitHub/vault-semantic-mcp/`. Treat these absolute paths as environment-specific operational notes, not semantic authority; verify they still exist before depending on them.
 
 Semantic classification / embeddings are hypothesis generators, not authority. Candidate clauses still pass through validation/advice/reasoning rather than being written directly into knowledge state.
+
+
+## Нові функції під час міграції .lisp → .sens (D10, #4463)
+
+Якщо міграція або Core1 упирається в **невідому функцію**, спершу **BLOCK** без створення `.sens`: не додавати локальну заглушку, не переозначувати D1–D9. Перед пропозицією в **дослідницький, нератифікований D10** виконати donor provenance, dedup D1–D9 + D10 та перевірку незалежного від субстрату закону межі. Єдиний журнал: `knowledge/d10-proposal-ledger.tsv`; інструкція: `docs/architecture/D10-PROPOSAL-WORKFLOW.uk.md`; перевірка: `python3 scripts/check-d10-proposal-ledger.py --self-test`. Запис `pending-review` НЕ розблоковує джерело: тільки власник може ратифікувати нову семантику. Не дублювати зміст у AGENTS — дивитися інструкцію.
