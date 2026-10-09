@@ -21,6 +21,10 @@ REF = r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{7,40}:[^:\t\n]+:[1-9][0-9]*(?:-
 DEDUP = re.compile(
     r"D1-D9@[0-9a-f]{7,40}=NO-MATCH;D10@[0-9a-f]{7,40}=NO-MATCH\Z"
 )
+# UNKNOWN is never certified as a no-match: research may precede behavioral proof.
+DEDUP_PENDING = re.compile(
+    r"D1-D9@[0-9a-f]{7,40}=PENDING;D10@[0-9a-f]{7,40}=PENDING\Z"
+)
 PROVENANCE = re.compile(REF + r"\Z")
 ID = re.compile(r"D10P-[0-9]{4,}\Z")
 
@@ -62,8 +66,9 @@ def validate(content: str) -> list[str]:
             errors.append(f"{lineno}: donor_provenance потребує owner/repo@COMMIT:path:line")
         if row["blocked_source"] != "NOT-A-MIGRATION-BLOCK" and not PROVENANCE.fullmatch(row["blocked_source"]):
             errors.append(f"{lineno}: blocked_source потребує owner/repo@COMMIT:path:line або точний маркер NOT-A-MIGRATION-BLOCK")
-        if not DEDUP.fullmatch(row["dedup_check"]):
-            errors.append(f"{lineno}: dedup_check потребує окремих D1-D9 та D10 SHA")
+        if not (DEDUP.fullmatch(row["dedup_check"]) or
+                DEDUP_PENDING.fullmatch(row["dedup_check"])):
+            errors.append(f"{lineno}: dedup_check потребує окремих D1-D9 та D10 SHA із узгодженим NO-MATCH або PENDING")
         if not row["ownership_test"].startswith("UNIVERSAL-BORDER: ") or len(row["ownership_test"]) < 32:
             errors.append(f"{lineno}: потрібен аргументований UNIVERSAL-BORDER")
         if row["status"] != "pending-review" or row["ratified"] != "0":
@@ -221,6 +226,11 @@ def self_test() -> None:
     research = valid.copy()
     research[9] = "NOT-A-MIGRATION-BLOCK"
     assert not validate(header + "\t".join(research) + "\n"), "source research marker requires later selection trace"
+    research[7] = f"D1-D9@{sha}=PENDING;D10@{sha}=PENDING"
+    assert not validate(header + "\t".join(research) + "\n"), "truthful pending dedup must be allowed before selection"
+    mixed = research.copy()
+    mixed[7] = f"D1-D9@{sha}=NO-MATCH;D10@{sha}=PENDING"
+    assert validate(header + "\t".join(mixed) + "\n"), "mixed proof status must fail closed"
 
     tests = (
         (11, "1"),
