@@ -13,6 +13,10 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_d10_historical_admission_batch1 import check_growth
 
 ROOT = Path(__file__).resolve().parents[1]
 REVIEW = ROOT / "knowledge/d10-historical-lisp15-reconciliation-20261009.json"
@@ -225,6 +229,10 @@ def verify(
         raise ValueError("live remaining accounting drift")
     if live_accounting["ratified_d10_residents"] != 0:
         raise ValueError("live D10 ratified residents must stay zero")
+    try:
+        check_growth(inventory)
+    except AssertionError as error:
+        raise ValueError("monotonic D10 growth gate failed: " + str(error)) from error
 
     if len({row.get("review_id") for row in rows}) != len(rows):
         raise ValueError("duplicate review_id")
