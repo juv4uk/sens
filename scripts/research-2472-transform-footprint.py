@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """#2472 — transformation-footprint audit for Phase-D countermodels.
 
-Research-only. This script classifies *how far* each D1-D4 source
-transformation must rewrite program interfaces. It does not allocate an
-identity and does not by itself decide DERIVED vs NEW.
+Research-only archaeology: GO/RETURN evidence comes from an archived,
+non-executable Rust research snapshot, never a current semantic test.
+The live SETQ input is retained. This classifies transformation footprint,
+not current D1-D9 authority or an allocated identity.
 """
 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CONTROL = ROOT / "crates" / "sens" / "tests" / "post_d4_control_derivation.rs"
+CONTROL = ROOT / "docs" / "archive" / "historical" / "retired-rust-tests" / "post_d4_control_derivation.rs.txt"
 SETQ = ROOT / "crates" / "sens" / "tests" / "post_d4_setq_state_passing.rs"
 
 
