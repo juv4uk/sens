@@ -1,0 +1,40 @@
+{
+  "schema": "d10-cyclic-word-research/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": [
+    "#4013",
+    "#4463"
+  ],
+  "date": "2026-10-09",
+  "baseline": {
+    "selected": 634,
+    "inventory_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "proposal": {
+    "stable_id": "d10.words.cyclic-minimum-rotation.20261009",
+    "semantic_name": "CYCLIC-LEAST-ROTATION",
+    "uk": "найменший-циклічний-зсув",
+    "ukr": "канонічний-оберт-двійкового-слова",
+    "behavior": "Return the lexicographically least left rotation of a finite D1 bit word together with the smallest attaining shift index; empty maps to (empty,0). Preserve exact length, leading zeros and 0<1 ordering.",
+    "witnesses": [
+      "1100 -> (0011,2)",
+      "1010 -> (0101,1)",
+      "0101 -> (0101,0)",
+      "empty -> (empty,0)"
+    ],
+    "falsifiers": [
+      "1010 -> 01 is primitive root, not cyclic normal form",
+      "1010 -> (0101,3) violates minimal tie shift"
+    ],
+    "core_review": "D8 ROTATE, D8 CANONICALIZE, D10 PRIMITIVE-BINARY-WORD-ROOT are neighbors, not claimed semantic equalities; derived-versus-Core needs owner review.",
+    "coordinate": null,
+    "ratified": false
+  },
+  "primary": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+  "donor_evidence": [
+    "juv4uk/radio-log/src/lib/sens-radio/channel-lab.ts@7d8c70691dc19f0c3d7121d8945529dd2b2335e7",
+    "juv4uk/WSM-24/README.md@d81f58bd42e2fe2c9613f2b721010dc53596e160"
+  ],
+  "note": "Donor relevance is motivation, not claimed existing implementation of the new law. No T5 admission. Lyndon factorization remains separate HOLD."
+}
