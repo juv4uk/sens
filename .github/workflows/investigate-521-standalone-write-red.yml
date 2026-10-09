@@ -1,0 +1,46 @@
+name: Investigate 521 standalone write RED
+
+on:
+  push:
+    branches:
+      - investigate/521-standalone-write-red
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolate-standalone-write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build release CLI
+        run: cargo build --release -p my-lisp-cli --bin my-lisp
+      - name: Generate identical 81791-char control and write witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(head -c 81791 </dev/zero | tr '\0' 'A')"
+          control="$RUNNER_TEMP/standalone-write-control.lisp"
+          witness="$RUNNER_TEMP/standalone-write-521.lisp"
+          output="$RUNNER_TEMP/standalone-write-521.txt"
+          printf '"%s"\n' "$payload" > "$control"
+          printf '(write-file "%s" "%s")\n' "$output" "$payload" > "$witness"
+          printf 'control=%s\nwitness=%s\noutput=%s\n' "$control" "$witness" "$output" >> "$GITHUB_ENV"
+      - name: Control — parse and evaluate the same large literal
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/release/my-lisp "$control" >/dev/null
+      - name: RED probe — standalone Lisp-owned write-file
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/release/my-lisp "$witness" >/dev/null
+      - name: Verify exact output size
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(wc -c < "$output")" -eq 81791
