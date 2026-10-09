@@ -59,8 +59,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         if baseline != candidate {
             return Err(format!("exact binary output mismatch for {copies} copies").into());
         }
-        let physical = sens::encode_ternary_words(&words)?;
-        let roundtrip = sens::decode_ternary_words(&physical)?;
+        let physical = sens::encode_ternary_words(&words).map_err(|e| format!("T5 encode: {e:?}"))?;
+        let roundtrip = sens::decode_ternary_words(&physical).map_err(|e| format!("T5 decode: {e:?}"))?;
         if roundtrip != words {
             return Err(format!("packed T5 roundtrip mismatch for {copies} copies").into());
         }
