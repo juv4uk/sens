@@ -1,10 +1,9 @@
 //! Iai-Callgrind measures Callgrind instruction refs, never wall-clock latency.
 use iai_callgrind::{library_benchmark, library_benchmark_group};
-use sens_measurement_triad::{scan_d3_owner_residency, verify_d3_owner_projection};
+use sens_measurement_triad::scan_d3_owner_residency;
 
 #[library_benchmark]
 fn d3_owner_lookup_1024() -> usize {
-    verify_d3_owner_projection();
     std::hint::black_box(scan_d3_owner_residency(1_024))
 }
 
