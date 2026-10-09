@@ -63,7 +63,7 @@ fn verify(words: &[BinarySourceWord]) -> (usize, usize, u64) {
     let mut checksum = 0u64;
     for (index, &w) in words.iter().enumerate() {
         let decoded = read_dynamic(&packed, offsets[index], w.width());
-        assert_eq!(decoded, w.packed_bits());
+        assert_eq!(u16::from(decoded), w.packed_bits());
         checksum = checksum
             .wrapping_add(decoded as u64)
             .wrapping_add(w.width() as u64);
