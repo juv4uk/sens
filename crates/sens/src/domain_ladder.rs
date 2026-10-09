@@ -40,11 +40,14 @@ impl DomainCoordinate {
 
     /// Pure occupancy projection from owner-ratified domain sources.
     ///
-    /// Only D3–D7 have entries in the current generated owner-coordinate
-    /// projection. None means "not projected", never "unratified".
-    /// Some(true) grants a resident coordinate, never executable callability
-    /// or an inferred Sound7/Text7/ordinal role.
+    /// D3–D7 are a generated coordinate subset. D8/D9 have independent,
+    /// exhaustively-validated full-width owner ratification certificates.
+    /// D1/D2 structural/predicate roles and D10 research stay unprojected.
+    /// Some(true) proves occupancy, never a callable mechanism or human name.
     pub fn owner_residency(self) -> Option<bool> {
+        if crate::domain_owner_generated::DOMAIN_OWNER_FULL_WIDTHS.contains(&self.width) {
+            return Some(true);
+        }
         if !(3..=7).contains(&self.width) {
             return None;
         }
@@ -102,12 +105,31 @@ mod tests {
         );
         assert_eq!(
             DomainCoordinate::new(8, 0b0100001).unwrap().owner_residency(),
-            None
+            Some(true),
+            "D8 is separately owner-ratified, not inherited from D7"
         );
         assert_eq!(
             DomainCoordinate::new(10, 0b0100001).unwrap().owner_residency(),
             None
         );
+    }
+
+    #[test]
+    fn d8_d9_all_coordinates_are_owner_residents_without_becoming_executable() {
+        for (width, population) in [(8u8, 256u16), (9u8, 512u16)] {
+            for bits in 0..population {
+                let resident = DomainCoordinate::new(width, bits).unwrap();
+                assert_eq!(resident.owner_residency(), Some(true));
+                assert_ne!(resident, DomainCoordinate::new(10, bits).unwrap());
+            }
+        }
+        for bits in [0, 1, 255, 511, 1023] {
+            assert_eq!(
+                DomainCoordinate::new(10, bits).unwrap().owner_residency(),
+                None,
+                "D10 research coordinates are not ratified residents"
+            );
+        }
     }
 
     #[test]
