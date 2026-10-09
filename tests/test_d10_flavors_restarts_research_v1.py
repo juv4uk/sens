@@ -30,6 +30,46 @@ class D10FlavorsRestartsResearch(unittest.TestCase):
         self.assertEqual(result["original_executable_t5_migrations"],
                          "NOT_ATTESTED_BY_RESEARCH")
 
+
+    def test_method_query_uses_standard_precedence_not_registration_order(self):
+        row = next(row for row in self.ledger["rows"]
+                   if row["proposal_id"] == "D10-FR-001")
+        self.assertIn("argument-precedence-order", row["semantic_law"])
+        self.assertIn("registration order", row["falsifier"])
+        self.assertIn("without invoking", row["semantic_law"])
+        self.assertIn(
+            "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-2.html",
+            row["source_url"],
+        )
+        self.assertNotIn(
+            "must yield explicit ambiguity", row["falsifier"]
+        )
+
+    def test_find_restart_is_dynamic_query_and_never_control_transfer(self):
+        row = next(row for row in self.ledger["rows"]
+                   if row["proposal_id"] == "D10-FR-007")
+        self.assertIn("current dynamic environment", row["semantic_law"])
+        self.assertIn("innermost", row["semantic_law"])
+        self.assertIn("never invoke", row["semantic_law"])
+        self.assertIn("dynamic extent ends", row["falsifier"])
+        self.assertIn(
+            "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_find-restart.html",
+            row["source_url"],
+        )
+
+    def test_standard_method_combination_plan_is_observational_and_ordered(self):
+        row = next(row for row in self.ledger["rows"]
+                   if row["proposal_id"] == "D10-FR-004")
+        for phrase in (
+            "around methods most-specific-first",
+            "before methods most-specific-first",
+            "primary methods most-specific-first",
+            "after methods least-specific-first",
+        ):
+            self.assertIn(phrase, row["semantic_law"])
+        self.assertIn("without invoking methods", row["semantic_law"])
+        self.assertIn("missing-primary failure", row["falsifier"])
+
     def test_invented_coordinate_or_physical_admission_blocks(self):
         for edit in (
             {"coordinate": "0000000000"},
