@@ -9,26 +9,35 @@
   (00001000 (request)
     (00000111
       ((00000010 request)
+       ()
        (00000001 no))
-      ((semantic-registry-not-d1 (00000010 request))
+      ((00000010 request)
+       (0)
        (10011100 ((first-field (00000101 request)))
          (00000111
            ((00000010 first-field)
-            (00000001 no))
-           ((semantic-registry-not-d1 (00000010 first-field))
+            (0)
             (00000111
               ((00100010 (00000101 first-field) (00000001 sid))
                (00000001 yes))
-              ((semantic-registry-not-d1 (00100010 (00000101 first-field) (00000001 sid)))
-               (00000001 no))))))))))
+              ((00100010 (00100010 (00000101 first-field) (00000001 sid)) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+               (00000001 no))))
+           ((00000010 first-field)
+            (1)
+            (00000001 no))
+           ((00000010 first-field)
+            ()
+            (00000001 no))))))))
 
 (00001001 early-sid-lower
   (00001000 (registry surface arguments contract)
     (10011100 ((sid (semantic-registry-id-in registry surface)))
       (00000111
-        ((00100010 sid (00000001 ()))
+        ((00000010 sid)
+         ()
          (00000001 rejected))
-        ((semantic-registry-not-d1 (00100010 sid (00000001 ())))
+        ((00000010 sid)
+         (1)
          (00100111
            (00000100 (00000001 sid) sid)
            (00000100 (00000001 arguments) arguments)
@@ -47,11 +56,11 @@
             (00000111
               ((00100010 c d)
                (00100111 (00000001 same) a))
-              ((semantic-registry-not-d1 (00100010 c d))
+              ((00100010 (00100010 c d) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
                (00000001 distinct))))
-           ((semantic-registry-not-d1 (00100010 b c))
+           ((00100010 (00100010 b c) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
             (00000001 distinct))))
-        ((semantic-registry-not-d1 (00100010 a b))
+        ((00100010 (00100010 a b) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
          (00000001 distinct))))))
 
 (00001001 early-sid-lowering-witness
