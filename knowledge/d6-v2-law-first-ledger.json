@@ -14,8 +14,8 @@
     "capacity": 64,
     "proved_selectors": 16,
     "coordinate_anchored_candidates": 16,
-    "unplaced_law_anchors": 4,
-    "law_covered_semantics": 36,
+    "unplaced_law_anchors": 7,
+    "law_covered_semantics": 39,
     "coordinate_unknown": 32
   },
   "review_first": [
@@ -1016,5 +1016,14 @@
       ],
       "placement": "UNPLACED"
     }
+  ],
+  "unplaced_law_semantics": [
+    "LENGTH",
+    "LENGTH-ONTO",
+    "MIN-LIST",
+    "MAX-LIST",
+    "NTH",
+    "MAPLIST",
+    "SUBLIS"
   ]
 }
