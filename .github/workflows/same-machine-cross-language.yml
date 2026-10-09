@@ -1,0 +1,62 @@
+name: Same-machine SENS cross-language benchmark
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/cross-language/current_sens.py"
+      - "benchmarks/cross-language/external_controls.py"
+      - "benchmarks/cross-language/join_current_ratios.py"
+      - "crates/sens/examples/current_exact_domain_bench.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - ".github/workflows/same-machine-cross-language.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: same-machine-cross-language-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install external runtimes and Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.4 racket sbcl valgrind
+          python3 --version
+          lua5.4 -v
+          racket --version
+          sbcl --version
+          rustc --version
+          valgrind --version
+
+      - name: Build current SENS runner before measurement
+        run: cargo build -p sens --release --example current_exact_domain_bench
+
+      - name: Run external controls
+        run: |
+          rm -rf /tmp/cross-language-paired
+          mkdir -p /tmp/cross-language-paired/external /tmp/cross-language-paired/sens /tmp/cross-language-paired/join
+          python3 benchmarks/cross-language/external_controls.py --lua lua5.4 --racket racket --sbcl sbcl --rustc rustc --reps 3 --out /tmp/cross-language-paired/external
+
+      - name: Run current exact-domain SENS
+        run: |
+          python3 benchmarks/cross-language/current_sens.py --runner target/release/examples/current_exact_domain_bench --reps 3 --out /tmp/cross-language-paired/sens
+
+      - name: Join paired ratios
+        run: |
+          python3 benchmarks/cross-language/join_current_ratios.py --external /tmp/cross-language-paired/external/external-full.tsv --sens /tmp/cross-language-paired/sens/sens-exact-full.tsv --out /tmp/cross-language-paired/join
+          cat /tmp/cross-language-paired/join/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: same-machine-sens-cross-language
+          path: /tmp/cross-language-paired
