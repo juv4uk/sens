@@ -25,8 +25,8 @@ class D10RawNotResidents(unittest.TestCase):
     def test_102_raw_definitions_are_source_pinned_and_never_selected(self):
         result = mod.validate(*evidence())
         self.assertEqual(result["raw_definitions_checked"], 102)
+        self.assertEqual(result["selected_authority_unchanged"], evidence()[3]["target"]["selected_semantic_candidates"])
         self.assertGreaterEqual(result["selected_authority_unchanged"], 625)
-        self.assertEqual(result["selected_authority_unchanged"], len(evidence()[2]["rows"]))
         self.assertEqual(result["ratified_residents"], 0)
         self.assertEqual(result["newly_selected_from_raw_harvest"], 0)
         self.assertEqual(result["exact_name_duplicates_with_selected"], 15)
