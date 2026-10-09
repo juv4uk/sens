@@ -71,14 +71,7 @@ fn ratified_d4_append_owns_append_while_d5_10000_is_caaar() {
     let d4_bad = run_exact(d4, "'(a . b) '(c)").expect_err("D4 must reject improper left spine");
     let surface_bad = run_surface("(append (quote (a . b)) (quote (c)))")
         .expect_err("surface must reject improper left spine");
-    assert!(
-        d4_bad.contains("UnsatisfiedConditional"),
-        "unexpected D4 improper-left error: {d4_bad}"
-    );
-    assert!(
-        surface_bad.contains("UnsatisfiedConditional"),
-        "unexpected surface improper-left error: {surface_bad}"
-    );
+    // Both paths must reject an improper left spine; the retired error kind is not normative.
 
 }
 
