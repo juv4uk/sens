@@ -49,7 +49,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Binary .sens transport, exact D2 admission and pure evaluator
         run: cargo test --locked -p sens-cli --bin sens-trit -- --nocapture
-      - name: Public physical .sens CLI: explicit Core4, no implicit grant, corruption rejected
+      - name: Public physical .sens CLI explicit Core4 with fail-closed admission
         run: cargo test --locked -p sens-cli --test physical_core4_sequence_cli -- --nocapture
       - name: Preserve immutable physical T5 source and companion artifacts
         run: |
