@@ -19,6 +19,7 @@
 (authority "crates/my-lisp/tests/content_store_authority.rs" observer)
 (authority "crates/my-lisp/tests/decimal_comma_authority.rs" observer)
 (authority "crates/my-lisp/tests/epistemic_authority.rs" observer)
+(authority "crates/my-lisp/tests/exact_quantity_round_trip_authority.rs" observer)
 (authority "crates/my-lisp/tests/mccarthy.rs" semantic-authority)
 (authority "crates/my-lisp/tests/ukrainian_api_docs.rs" semantic-authority)
 (authority "crates/my-lisp/tests/rivnopravnist_mov.rs" observer)
