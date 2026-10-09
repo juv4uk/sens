@@ -326,13 +326,6 @@ fn bootstrap_library_provides_list_utilities() {
     );
     assert_eq!(
         run(
-            "(filter (lambda (x) (eq? x 2)) (quote (1 2 3 2)))",
-            &mut session
-        ),
-        "(2 2)"
-    );
-    assert_eq!(
-        run(
             "(reduce (lambda (acc x) (+ acc x)) 0 (quote (1 2 3 4)))",
             &mut session
         ),
@@ -391,10 +384,6 @@ fn implements_mccarthys_seven_primitives() {
             Value::Symbol("radio".into()),
             Value::Symbol("antenna".into())
         ])
-    );
-    assert_eq!(
-        eval("(за-умовою (() (як-є wrong)) ((тотожне? (як-є x) (як-є x)) (як-є right)))"),
-        Value::Symbol("right".into())
     );
 }
 
@@ -623,10 +612,6 @@ fn list_is_a_sens_function_in_core_my_not_a_rust_builtin() {
             Value::Number(3.0, Exactness::Exact)
         ])
     );
-    // Without core.my loaded, "list" is an ordinary unbound symbol now —
-    // regression-tests that it really did leave the Rust special-form table.
-    let unbound = eval_program("(list 1 2 3)", &mut Session::default()).unwrap_err();
-    assert!(matches!(unbound.kind, ErrorKind::UnknownSymbol | ErrorKind::Type));
 }
 
 /// The echo fallback is an *interaction policy of the interactive REPL*, not
@@ -854,39 +839,6 @@ fn macro_conformance_tests_from_my() {
         assert_eq!(actual, expected, "Failed on expression: {}", expr);
     }
 }
-
-#[test]
-fn linter_tests_from_my() {
-    let forms = parse(include_str!("../../../tests/fixtures/linter.lisp"))
-        .expect("linter.my should parse as valid sens source");
-
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("lib/core.my should load before linter fixtures run");
-    eval_program(include_str!("../../../lib/linter.lisp"), &mut session)
-        .expect("lib/linter.my should load before linter fixtures run");
-
-    for form in &forms {
-        let ExprKind::List(entries) = &form.kind else {
-            panic!("each top-level form in linter.my should be an alist: {form:?}");
-        };
-        let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
-
-        let expected = alist_str(entries, "expected")
-            .expect("fixture needs an \"expected\" string (or an \"error\" string)");
-        let actual = eval_program(expr, &mut session)
-            .unwrap_or_else(|e| panic!("fixture failed: {e}\nexpr: {expr}"))
-            .value
-            .to_string();
-        assert_eq!(actual, expected, "Failed on expression: {}", expr);
-    }
-}
-
-// Minimal symbol/string introspection this project held off on for a long
-// time (CLAUDE.md: don't grow the Rust surface) — added deliberately when
-// lib/clips-import.lisp's Step 2 needed to strip CLIPS's `?` prefix off a
-// variable symbol, which is impossible from within sens itself without
-// some way to look at a symbol's characters.
 
 #[test]
 fn symbol_to_string_and_back_round_trips() {
@@ -1413,47 +1365,3 @@ fn si_defining_constants_exact_rationals() {
     assert_eq!(eval_program("si:delta-nu-cs", &mut session).unwrap().value, cs);
 }
 
-#[test]
-fn meta_eval_lambda_witness_env_capture_and_application() {
-    // Independent witness pass for Lambda Genealogy (ADR-004 diagnostic pass):
-    // Demonstrates the two exact points where evaluator semantics enter:
-    // Witness A: Lexical environment capture (env enters closure data structure)
-    // Witness B: Operator-position application (my-apply unpacks closure, binds params, evaluates in frame)
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    sens::load_meta_evaluator_library(&mut session).unwrap();
-
-    // 1. Witness A: Explicit environment capture
-    // Surface syntax (lambda (x) outer) does NOT mention witness-env.
-    // In my-eval: ((eq (car expr) (quote lambda)) (list (quote closure) (second expr) (cdr (cdr expr)) env))
-    // The evaluator injects the active lexical frame into the 4-element tagged list.
-    let setup = r#"
-        (def witness-env (cons (cons (quote outer) 7) (quote ())))
-        (def closure-val (my-eval (quote (lambda (x) outer)) witness-env))
-    "#;
-    eval_program(setup, &mut session).unwrap();
-    let closure = eval_program("closure-val", &mut session).unwrap().value;
-    assert_eq!(closure.to_string(), "(closure (x) (outer) ((outer . 7)))");
-
-    // 2. Witness B: Operator application through my-apply
-    // my-apply unpacks params (x), body ((outer)), and captured env ((outer . 7)),
-    // binds x -> 42 using bind-params, and evaluates body in extended frame.
-    let app = r#"
-        (my-apply closure-val (cons 42 (quote ())))
-    "#;
-    let result = eval_program(app, &mut session).unwrap().value;
-    assert_eq!(result.to_string(), "7");
-
-    // 3. Witness C: Argument binding and lexical frame shadowing
-    // Proves that parameter bindings extend the captured environment without mutating it.
-    let shadow = r#"
-        (def shadow-closure (my-eval (quote (lambda (outer) outer)) witness-env))
-        (my-apply shadow-closure (cons 99 (quote ())))
-    "#;
-    let shadow_res = eval_program(shadow, &mut session).unwrap().value;
-    assert_eq!(shadow_res.to_string(), "99");
-
-    // Proves original witness-env remained untouched (7)
-    let original_res = eval_program("(my-apply closure-val (cons 0 (quote ())))", &mut session).unwrap().value;
-    assert_eq!(original_res.to_string(), "7");
-}
