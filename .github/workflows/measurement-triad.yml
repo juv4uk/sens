@@ -47,8 +47,7 @@ jobs:
         run: cd "$RUNNER_TEMP" && cargo bench --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml" --benches --no-run
 
   instruction-probe:
-    name: Explicit Callgrind capture (manual, no noisy default regression gate)
-    if: github.event_name == 'workflow_dispatch'
+    name: Callgrind I-refs capture (not a cross-environment regression gate)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -81,5 +80,40 @@ jobs:
           path: |
             ${{ runner.temp }}/sens-iai-callgrind.log
             ${{ runner.temp }}/sens-iai-environment.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+  wall-time-probe:
+    name: Criterion raw hosted wall-time (informational only)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run Criterion; do not infer a portable speedup from hosted CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          cargo test --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml"
+          cargo bench --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml" --bench wall_time_lane | tee "$RUNNER_TEMP/sens-criterion.log"
+          {
+            echo "SHA=$GITHUB_SHA"
+            rustc --version
+            uname -a
+            grep -m1 'model name' /proc/cpuinfo || true
+            cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || true
+          } > "$RUNNER_TEMP/sens-criterion-environment.txt"
+      - name: Preserve informational wall-time evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sens-measurement-triad-criterion-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/sens-criterion.log
+            ${{ runner.temp }}/sens-criterion-environment.txt
+            benchmarks/measurement-triad/target/criterion/**/raw.csv
+            benchmarks/measurement-triad/target/criterion/**/estimates.json
+            benchmarks/measurement-triad/target/criterion/**/sample.json
           if-no-files-found: warn
           retention-days: 14
