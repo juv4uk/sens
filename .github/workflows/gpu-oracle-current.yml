@@ -5,12 +5,16 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/gpu_oracle.rs"
+      - "crates/sens/Cargo.toml"
+      - "crates/sens/src/lib.rs"
       - "benchmarks/gpu-oracle-current/**"
       - ".github/workflows/gpu-oracle-current.yml"
   push:
     branches: [main]
     paths:
       - "crates/sens/src/gpu_oracle.rs"
+      - "crates/sens/Cargo.toml"
+      - "crates/sens/src/lib.rs"
       - "benchmarks/gpu-oracle-current/**"
       - ".github/workflows/gpu-oracle-current.yml"
 
@@ -31,4 +35,4 @@ jobs:
       - name: Validate machine-readable blocked artifact
         run: python3 -m json.tool benchmarks/gpu-oracle-current/blocked-gpu-admission.json >/dev/null
       - name: Run GPU oracle unit tests
-        run: cargo test -p sens --lib gpu_oracle::tests -- --nocapture --test-threads=1
+        run: cargo test -p sens --lib --features legacy-evidence-schemas gpu_oracle::tests -- --nocapture --test-threads=1
