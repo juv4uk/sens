@@ -73,6 +73,18 @@ def check_doc(doc):
 def self_test():
     doc=json.loads(DOC.read_text())
     check_doc(doc)
+    inventory=json.loads((ROOT / 'knowledge/d10-v1-semantic-inventory.json').read_text())
+    foundation=json.loads((ROOT / 'knowledge/d1-d9-foundation.json').read_text())
+    root=doc['owner_directive_4991']
+    lower_names={str(name).upper() for dom in foundation['domains'].values()
+                 for name in dom['residents'].values()}
+    assert NAME not in lower_names, 'D1-D9 exact collision'
+    selected=[r for r in inventory['rows'] if r['semantic_name'].upper()==NAME]
+    assert len(selected)<=1, 'D10 duplicate identity'
+    if selected:
+        assert selected[0]['stable_id']==root['stable_id']
+        assert selected[0]['behavior']==root['behavior']
+        assert selected[0]['coordinate'] is None and selected[0]['ratified_resident'] is False
     checks=0
     pairsets=[frozenset(p for j,p in enumerate(product((0,1),repeat=2)) if (mask>>j)&1)
               for mask in range(16)]
