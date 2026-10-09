@@ -1,0 +1,42 @@
+name: Regenerate Core4 FASL for D4 language-owned closure repair
+
+on:
+  push:
+    branches:
+      - fix/d4-lisp-authority-current-main-20261009
+    paths:
+      - "lib/core4.lisp"
+      - ".github/workflows/regenerate-core4-fasl-5213.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-core4-snapshot:
+    name: Generate and verify derived Core4 FASL
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate FASL from canonical Core4 source
+        run: cargo run --locked --release --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Verify exact source/FASL freshness
+        run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Check patch hygiene
+        run: git diff --check
+      - name: Commit generated artifact to this repair branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "FASL already current"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(fasl): regenerate after D4 Lisp binding repair'
+          git push origin HEAD:refs/heads/fix/d4-lisp-authority-current-main-20261009
