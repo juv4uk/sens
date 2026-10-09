@@ -261,5 +261,39 @@
     "ratified_added": 0,
     "oracle_source": "tests/test_d10_crossdomain_math_laws.py",
     "owner_gate": "#4013, #4463; exclusive canonical selection writer required; derivability and donor admissibility remain OPEN"
-  }
+  },
+  "owned_repo_donors": [
+    {
+      "repo": "juv4uk/spanda",
+      "file": "README.md",
+      "blob": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "url": "https://github.com/juv4uk/spanda/blob/master/README.md",
+      "relevance": "Exact rational Clojure ↔ SENS ↔ FPGA oscillator/physical computation; no floating-point as normative identity. Motivates exact rational phase law and arithmetic reproducibility; this README is a project plan, not a phase-unwrap implementation.",
+      "disposition": "FIRST-PARTY-CROSSDOMAIN-NONPROOF"
+    },
+    {
+      "repo": "juv4uk/radio-log",
+      "file": "src/lib/sens-radio/channel-lab.ts",
+      "blob": "7d8c70691dc19f0c3d7121d8945529dd2b2335e7",
+      "url": "https://github.com/juv4uk/radio-log/blob/main/src/lib/sens-radio/channel-lab.ts",
+      "relevance": "Actual SENS radio laboratory: frequency offset, sample-rate scale, channel evidence, aligned BFSK decoding, linear resampling; the application motivates signal semantics but its channel-impairment mechanisms are not D10 primitives.",
+      "disposition": "FIRST-PARTY-APPLICATION-CROSSDOMAIN"
+    },
+    {
+      "repo": "juv4uk/radio-log",
+      "file": "tests/sens-radio-channel-lab.test.mjs",
+      "blob": "2f55b701d4974b161ddaa1af3314db5e4694081a",
+      "url": "https://github.com/juv4uk/radio-log/blob/main/tests/sens-radio-channel-lab.test.mjs",
+      "relevance": "Actual tests distinguish exact SENS frame/payload identity from noisy channel conditions and sample-rate-drift unlocking; prevents treating partial signal recovery as exact language meaning.",
+      "disposition": "FIRST-PARTY-TEST-WITNESS-NOT-D10-PROOF"
+    },
+    {
+      "repo": "juv4uk/my-lisp-panini",
+      "file": "panini/machine/siva-sutras.lisp",
+      "blob": "c64a17bac208d028fec0c070d91aab32ed81b3e3",
+      "url": "https://github.com/juv4uk/my-lisp-panini/blob/master/panini/machine/siva-sutras.lisp",
+      "relevance": "Actual Sanskrit pratyahara expansion and membership semantics; these donor identities already occur in D10's Panini source research, so do not mint duplicates. Demonstrates rules as data.",
+      "disposition": "EXISTING-PANINI-DONOR-DEDUPE"
+    }
+  ]
 }
