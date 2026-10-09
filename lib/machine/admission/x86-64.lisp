@@ -237,16 +237,18 @@
 
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
-    ; Exact-Q comparisons answer 1 (так) / 0 (ні), and 0 is truthy -- so a
-    ; bare `and` over comparison results (the pre-exact-Q idiom) admitted
-    ; every operand, overflowing disp8/imm slots. E1 (#216): explicit
-    ; expected-result domains.
+    ; #3711: the exact-order family is D1. Consume >= / <= directly as
+    ; two-part predicate control; never compare D1 with Number 1/0.
+    ; Constant D1 YES/NO are constructed by exact <, matching #1826.
     (00000111
-      ((00011110 value lower) 1
-        (00000111
-          ((00011101 value upper) 1 t)
-          ((00011101 value upper) 0 (00000001 ()))))
-      ((00011110 value lower) 0 (00000001 ())))))
+      ((00011110 value lower)
+       (00000111
+         ((00011101 value upper)
+          (00011010 0 1))
+         ((00011010 0 1)
+          (00011010 1 0))))
+      ((00011010 0 1)
+       (00011010 1 0)))))
 
 (00001001 x86-admission-disp8?
   (00001000 (value)
