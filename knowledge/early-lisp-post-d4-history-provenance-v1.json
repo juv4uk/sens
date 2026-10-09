@@ -1,0 +1,847 @@
+{
+  "schema": "early-lisp-post-d4-history-provenance/v1",
+  "status": "HISTORICAL-INGEST-PROVENANCE-ONLY",
+  "purpose": "Preserve the early Lisp historical ingest ledger as evidence while distinguishing old analyses from current ratified D1-D9 and selected D10 authority.",
+  "source": {
+    "original_ledger": "docs/research/2344-post-d4-historical-ledger.json",
+    "original_branch": "research/2344-historical-ledger",
+    "original_issue": "#2344",
+    "primary_sources": [
+      {
+        "title": "J. McCarthy, Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I (1960)",
+        "url": "https://www.cs.cmu.edu/~crary/819-f09/McCarthy60.pdf"
+      },
+      {
+        "title": "LISP 1.5 Programmer's Manual (1962)",
+        "url": "https://www.bitsavers.org/pdf/mit/rle_lisp/McCarthy_LISP_1.5_Programmers_Manual_2ed_1985.pdf"
+      },
+      {
+        "title": "Timothy P. Hart, MACRO Definitions for LISP, AI Memo 57 (October 1963)",
+        "url": "https://softwarepreservation.org/projects/LISP/lisp15_family.html"
+      }
+    ]
+  },
+  "current_authority_snapshot": {
+    "d1_d9_foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "d10_selected": 625,
+    "d10_ratified": 0
+  },
+  "original_snapshot": {
+    "schema": "historical-ingest-ledger/2",
+    "authority": "historical-evidence-ledger-not-language-semantic-authority",
+    "phase": "HISTORICAL-INGEST",
+    "principle": "history is the dataset; structural laws and SENS placement follow only after ingest",
+    "historical_rows": 19,
+    "rule": "Historical classification fields have been preserved as past claims only, not current admission/placement authority."
+  },
+  "current_exact_name_dedup": {
+    "rule": "Normalized exact-name overlap is a navigation signal only; absence is not novelty and overlap is not behavior proof.",
+    "families_with_d1_d9_exact_name_overlap": 17,
+    "families_with_selected_d10_exact_name_overlap": 0,
+    "families_with_both_overlap_types": 0,
+    "families_with_no_exact_name_overlap_to_either": 2,
+    "families_with_any_overlap": 17
+  },
+  "invariants": [
+    "All 19 historical rows are preserved, but their original classification stays in original_snapshot only.",
+    "No historical binary_object is promoted to a current coordinate.",
+    "Every row keeps selected_d10_candidate=false, coordinate=null, ratified=false.",
+    "Old classifications such as NEW-OBSERVABLE-CAPABILITY are research claims, not current D10 decisions.",
+    "Current D1-D9 foundation and selected D10 inventory are the only exact-name comparison baselines.",
+    "Exact-name absence does not prove a semantic gap; ownership and falsifiable behavioral dedup are still required."
+  ],
+  "rows": [
+    {
+      "history_id": "early-lisp-01",
+      "historical_operation": "LABEL",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 Part I; #2234/#2238",
+      "historical_presence": "yes",
+      "historical_behavior": "local recursive function expression with self reference",
+      "historical_dependencies": [
+        "LAMBDA",
+        "application/evaluation"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "a104f9d7ca23a84df48e5f35329fb34c347314e1",
+      "original_phase": "A",
+      "original_issue": 2234,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "fixed-point/self-application recursion",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "LABEL history is preserved even though the observable recursion capability is locally derivable from D4."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "00100",
+          "semantic_name": "LABEL"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-02",
+      "historical_operation": "FUNCTION",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 Programmer's Manual; #2235/#2259",
+      "historical_presence": "yes",
+      "historical_behavior": "closure/function-value representation wrapper",
+      "historical_dependencies": [
+        "LAMBDA",
+        "closure representation"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "6a7ee0099066cf9469151813be04d456b037cb00",
+      "original_phase": "A",
+      "original_issue": 2235,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-historical-mechanism",
+        "later_structural_classification": "closure representation adapter",
+        "later_sens_classification": "HISTORICAL-MECHANISM",
+        "notes": "Current D4 LAMBDA already owns first-class closure behavior."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "00001",
+          "semantic_name": "FUNCTION"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-03",
+      "historical_operation": "FUNARG",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 Programmer's Manual; #2235/#2259",
+      "historical_presence": "yes",
+      "historical_behavior": "function plus captured environment representation/application",
+      "historical_dependencies": [
+        "LAMBDA",
+        "captured environment",
+        "APPLY"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "6a7ee0099066cf9469151813be04d456b037cb00",
+      "original_phase": "A",
+      "original_issue": 2235,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-historical-mechanism",
+        "later_structural_classification": "captured-environment closure adapter",
+        "later_sens_classification": "HISTORICAL-MECHANISM",
+        "notes": "Historical representation is retained in the record; no new SENS resident follows."
+      },
+      "current_d1_d9_exact_name_matches": [],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "NO-EXACT-NAME-OVERLAP; NEED OWNERSHIP + BEHAVIORAL DEDUP; NO AUTOMATIC D10",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-04",
+      "historical_operation": "EVALQUOTE",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 Programmer's Manual; #2279/#2282",
+      "historical_presence": "yes",
+      "historical_behavior": "top-level ordinary function plus already-valued argument-list entry point",
+      "historical_dependencies": [
+        "EVAL",
+        "APPLY",
+        "QUOTE/value list"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "163c30d96d66ea0098304a6b341f257d1ee86278",
+      "original_phase": "B",
+      "original_issue": 2279,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "composition of evaluator and applicator",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "Later FEXPR/FSUBR Appendix-B exception is intentionally excluded from ordinary EVALQUOTE derivation."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "00000",
+          "semantic_name": "EVALQUOTE"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-05",
+      "historical_operation": "APPEND",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2347/#2371",
+      "historical_presence": "yes",
+      "historical_behavior": "list concatenation preserving right tail",
+      "historical_dependencies": [
+        "CONS",
+        "CAR",
+        "CDR",
+        "COND",
+        "recursion"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "e2bd9b84650820fe84acd127c2588f034a54ad3a",
+      "original_phase": "C",
+      "original_issue": 2347,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "ordinary structural recursion",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "No CONS-family child is earned merely by historical naming."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D4",
+          "coordinate": "1111",
+          "semantic_name": "APPEND"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-06",
+      "historical_operation": "PAIR",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; grouped Phase-C evidence #2286/#2300",
+      "historical_presence": "yes",
+      "historical_behavior": "pair corresponding structural elements",
+      "historical_dependencies": [
+        "CONS",
+        "CAR",
+        "CDR",
+        "COND",
+        "recursion"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "2bf549d1693f678de6d1ce0e85444fccca00c569",
+      "original_phase": "C",
+      "original_issue": 2286,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "ordinary pair/list structural recursion",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "Recorded with the PAIR/PAIRLIS Phase-C structural family; no separate resident is inferred."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D8",
+          "coordinate": "11111101",
+          "semantic_name": "PAIR"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-07",
+      "historical_operation": "PAIRLIS",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 lineage; #2286/#2300",
+      "historical_presence": "yes",
+      "historical_behavior": "pair parameter/value lists onto an environment tail preserving historical order",
+      "historical_dependencies": [
+        "CONS",
+        "CAR",
+        "CDR",
+        "COND",
+        "environment tail"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "2bf549d1693f678de6d1ce0e85444fccca00c569",
+      "original_phase": "C",
+      "original_issue": 2286,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "structural recursion distinct from current BIND ordering",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "PAIRLIS != current BIND ordering, but the historical recurrence is still ordinary structure recursion."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "11110",
+          "semantic_name": "PAIRLIS"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-08",
+      "historical_operation": "ASSOC",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2285/#2296",
+      "historical_presence": "yes",
+      "historical_behavior": "first-match association-list search",
+      "historical_dependencies": [
+        "CAR",
+        "CDR",
+        "COND",
+        "equality",
+        "recursion"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "81b50d3331e19bc79c310987c75b6d36175b9f8f",
+      "original_phase": "C",
+      "original_issue": 2285,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "generic structural recursion; D4 LOOKUP not required",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "Broader alist domain than environment LOOKUP does not create irreducibility."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "11100",
+          "semantic_name": "ASSOC"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-09",
+      "historical_operation": "SUBST",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2348/#2386",
+      "historical_presence": "yes",
+      "historical_behavior": "recursive structural substitution",
+      "historical_dependencies": [
+        "structure",
+        "equality",
+        "recursion"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "9b5841ad7beffda412d77942f81d83018a9b3f25",
+      "original_phase": "C",
+      "original_issue": 2348,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "tree recursion",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "Independent Phase-C witness; no resident required."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "11111",
+          "semantic_name": "SUBST"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-10",
+      "historical_operation": "SUBLIS",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 lineage; #2348/#2386",
+      "historical_presence": "yes",
+      "historical_behavior": "association-driven recursive substitution",
+      "historical_dependencies": [
+        "ASSOC-like search",
+        "structure",
+        "recursion"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "9b5841ad7beffda412d77942f81d83018a9b3f25",
+      "original_phase": "C",
+      "original_issue": 2348,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "tree recursion plus derived association search",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "Historical row retained despite derivability."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D6",
+          "coordinate": "001010",
+          "semantic_name": "SUBLIS"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-11",
+      "historical_operation": "MAPLIST",
+      "historical_era": "Lisp-I-1960",
+      "first_attested_lineage": "McCarthy-1960",
+      "source_provenance": "McCarthy 1960 lineage; #2349/#2387",
+      "historical_presence": "yes",
+      "historical_behavior": "apply a first-class callable to successive list tails",
+      "historical_dependencies": [
+        "LAMBDA/application",
+        "CAR/CDR",
+        "CONS",
+        "recursion"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "ff326671920c9d813e10bdb2efa0a773c156c0cf",
+      "original_phase": "C",
+      "original_issue": 2349,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "ordinary higher-order list recursion",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "No new higher-order resident beyond existing closure/application semantics."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D6",
+          "coordinate": "000101",
+          "semantic_name": "MAPLIST"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-12",
+      "historical_operation": "SET",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 SET/SETQ lineage; #2442",
+      "historical_presence": "yes",
+      "historical_behavior": "update an already-existing shared binding/location",
+      "historical_dependencies": [
+        "binding lookup",
+        "shared location",
+        "evaluation"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "original_phase": "D",
+      "original_issue": 2442,
+      "original_snapshot": {
+        "current_domain_candidate": "unresolved",
+        "binary_object": "unplaced",
+        "placement_status": "unplaced-new-capability",
+        "later_structural_classification": "shared-location update; globally compilable to explicit store",
+        "later_sens_classification": "NEW-OBSERVABLE-CAPABILITY",
+        "notes": "SET versus SETQ target syntax is not itself the new root; the surviving delta is shared-location update."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "00110",
+          "semantic_name": "SET"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-13",
+      "historical_operation": "SETQ",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 SET/SETQ lineage; #2441/#2442",
+      "historical_presence": "yes",
+      "historical_behavior": "quoted-target interface to shared-location update",
+      "historical_dependencies": [
+        "shared-location update",
+        "binding lookup"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "original_phase": "D",
+      "original_issue": 2442,
+      "original_snapshot": {
+        "current_domain_candidate": "unresolved",
+        "binary_object": "unplaced",
+        "placement_status": "unplaced-new-capability",
+        "later_structural_classification": "surface variant over shared-location update core",
+        "later_sens_classification": "NEW-OBSERVABLE-CAPABILITY",
+        "notes": "SET and SETQ share one surviving semantic core; two historical names do not imply two new binary roots."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "00111",
+          "semantic_name": "SETQ"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-14",
+      "historical_operation": "PROG",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 PROG feature; #2315/#2438/#2439",
+      "historical_presence": "yes",
+      "historical_behavior": "control container with labels/GO and dynamically scoped RETURN target",
+      "historical_dependencies": [
+        "GO",
+        "RETURN",
+        "local values"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "original_phase": "D",
+      "original_issue": 2315,
+      "original_snapshot": {
+        "current_domain_candidate": "unresolved",
+        "binary_object": "unplaced",
+        "placement_status": "unplaced-composite",
+        "later_structural_classification": "composite: local finite-state GO plus non-local RETURN",
+        "later_sens_classification": "COMPOSITE",
+        "notes": "PROG as a historical container is not promoted to a primitive; surviving semantic pressure is in RETURN, while GO derives locally."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "00101",
+          "semantic_name": "PROG"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-15",
+      "historical_operation": "GO",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 PROG feature; #2438",
+      "historical_presence": "yes",
+      "historical_behavior": "intra-PROG label-directed transfer",
+      "historical_dependencies": [
+        "PROG labels",
+        "state transition"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "original_phase": "D",
+      "original_issue": 2438,
+      "original_snapshot": {
+        "current_domain_candidate": "D1-D4",
+        "binary_object": "unplaced",
+        "placement_status": "not-required-derived",
+        "later_structural_classification": "finite-state dispatcher plus tail recursion",
+        "later_sens_classification": "DERIVED-D1-D4",
+        "notes": "The state remains inside the rewritten PROG region; unrelated external protocols remain unchanged."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "11000",
+          "semantic_name": "GO"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-16",
+      "historical_operation": "RETURN",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5",
+      "source_provenance": "LISP 1.5 PROG feature; #2439",
+      "historical_presence": "yes",
+      "historical_behavior": "exit the most-recent active PROG across an ordinary call boundary",
+      "historical_dependencies": [
+        "active PROG context",
+        "non-local control transfer"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": false,
+        "explicit_caller_env": false,
+        "result_reeval": false
+      },
+      "evidence_sha": "786921915b70d3bfe89611ad239345adeb365890",
+      "original_phase": "D",
+      "original_issue": 2439,
+      "original_snapshot": {
+        "current_domain_candidate": "unresolved",
+        "binary_object": "unplaced",
+        "placement_status": "unplaced-new-capability",
+        "later_structural_classification": "non-local exit; globally compilable by CPS but not locally derivable",
+        "later_sens_classification": "NEW-OBSERVABLE-CAPABILITY",
+        "notes": "Whole-call-graph CPS proves compilability, not local semantic derivation under #2468."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "11001",
+          "semantic_name": "RETURN"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-17",
+      "historical_operation": "FEXPR",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5 Appendix-B",
+      "source_provenance": "LISP 1.5 Programmer's Manual Appendix B pp.70-71; #2522/#2530",
+      "historical_presence": "yes",
+      "historical_behavior": "receive raw operand forms plus explicit caller a-list and return a direct value",
+      "historical_dependencies": [
+        "raw form data",
+        "caller environment",
+        "APPLY/EVAL special-call path"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": true,
+        "explicit_caller_env": true,
+        "result_reeval": false
+      },
+      "evidence_sha": "3166bdee2cf21758bcc5cc6ae7a6d9a117aa3c1f",
+      "original_phase": "E",
+      "original_issue": 2343,
+      "original_snapshot": {
+        "current_domain_candidate": "unresolved",
+        "binary_object": "unplaced",
+        "placement_status": "unplaced-two-axis-capability",
+        "later_structural_classification": "independent operand-mode and caller-environment axes; direct-value result",
+        "later_sens_classification": "RAW+ENV-TWO-CAPABILITIES",
+        "notes": "No property-list tag or human spelling counts as semantic authority."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D5",
+          "coordinate": "00010",
+          "semantic_name": "FEXPR"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-18",
+      "historical_operation": "FSUBR",
+      "historical_era": "Lisp-1.5-1962",
+      "first_attested_lineage": "Lisp-1.5 Appendix-B",
+      "source_provenance": "LISP 1.5 Programmer's Manual Appendix B pp.70-71; #2522/#2530",
+      "historical_presence": "yes",
+      "historical_behavior": "subroutine special-call protocol with raw operands and explicit caller a-list",
+      "historical_dependencies": [
+        "raw form data",
+        "caller environment",
+        "special-call path"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": true,
+        "explicit_caller_env": true,
+        "result_reeval": false
+      },
+      "evidence_sha": "3166bdee2cf21758bcc5cc6ae7a6d9a117aa3c1f",
+      "original_phase": "E",
+      "original_issue": 2343,
+      "original_snapshot": {
+        "current_domain_candidate": "unresolved",
+        "binary_object": "unplaced",
+        "placement_status": "unplaced-two-axis-capability",
+        "later_structural_classification": "independent operand-mode and caller-environment axes; direct-value result",
+        "later_sens_classification": "RAW+ENV-TWO-CAPABILITIES",
+        "notes": "Historical mechanism differs from current SENS transformer on caller-env input and result protocol."
+      },
+      "current_d1_d9_exact_name_matches": [
+        {
+          "domain": "D8",
+          "coordinate": "11111000",
+          "semantic_name": "FSUBR"
+        }
+      ],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "EXACT-NAME-OVERLAP-D1-D9; RE-VERIFY BEHAVIOR, NOT A NEW SLOT",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "history_id": "early-lisp-19",
+      "historical_operation": "TRANSFORMER",
+      "historical_era": "Lisp-1.5-postmanual-1963",
+      "first_attested_lineage": "Hart AI Memo 57, October 1963",
+      "source_provenance": "docs/research/2557-hart-macro-protocol.md; Hart AIM-57; CHM LISP 1.5 family archive",
+      "historical_presence": "yes",
+      "historical_behavior": "full raw macro form is passed to a one-argument expander whose returned form replaces the original form during DEFINE expansion",
+      "historical_dependencies": [
+        "DEFINE",
+        "raw form data",
+        "list/form construction",
+        "subsequent processing of replacement form"
+      ],
+      "historical_protocol_axes": {
+        "raw_operands": true,
+        "explicit_caller_env": false,
+        "result_reeval": true
+      },
+      "evidence_sha": "8884d6f34263578e622a38f50eff07d8f9695cb5",
+      "original_phase": "F",
+      "original_issue": 2557,
+      "original_snapshot": {
+        "current_domain_candidate": "unresolved",
+        "binary_object": "unplaced",
+        "placement_status": "unplaced-transformer-protocol",
+        "later_structural_classification": "protocol-aligned with current SENS TRANSFORMER on raw-form/caller-env/result-re-eval axes; mechanism staging boundary may differ",
+        "later_sens_classification": "FORM-TRANSFORMER-PROTOCOL",
+        "notes": "Historical presence/protocol resolved from Hart 1963. No width or coordinate follows; placement remains for later STRUCTURAL-DISCOVERY/SENS-DERIVATION."
+      },
+      "current_d1_d9_exact_name_matches": [],
+      "current_d10_exact_name_matches": [],
+      "current_review_status": "NO-EXACT-NAME-OVERLAP; NEED OWNERSHIP + BEHAVIORAL DEDUP; NO AUTOMATIC D10",
+      "selected_d10_candidate": false,
+      "coordinate": null,
+      "ratified": false
+    }
+  ]
+}
