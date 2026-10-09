@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 634,
+    "selected_semantic_candidates": 635,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 378,
-    "remaining_semantic_inventory": 390,
+    "unplaced_selected_candidates": 379,
+    "remaining_semantic_inventory": 389,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13557,6 +13557,114 @@
       "coordinate_basis": "UNPLACED",
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.finite-bayes-update-exact.20261009",
+      "semantic_name": "FINITE-BAYES-UPDATE-EXACT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "CROSS-DOMAIN-EXACT-BAYESIAN-UPDATE-20261009",
+      "relation_class": "FINITE-HYPOTHESIS-POSTERIOR-UPDATE",
+      "surface_uk": "оновити-ймовірності",
+      "surface_ukr": "байєсівське-оновлення-скінченних-гіпотез",
+      "arity": "(prior-vector, likelihood-vector) -> (posterior-vector, evidence-normalizer)",
+      "argument_shape": "Two nonempty equal-length ordered vectors of exact rational probabilities in [0,1]; prior entries sum exactly to 1.",
+      "behavior": "For a finite ordered hypothesis set with prior p_i and likelihood l_i, compute Z = sum_i(p_i*l_i). If Z>0 return the original-order exact posterior vector (p_i*l_i/Z) and exact evidence normalizer Z. If Z=0, or inputs are malformed/inexact/out of range, signal an explicit invalid/undefined-update condition; do not silently renormalize the prior or coerce floats.",
+      "positive_witnesses": [
+        {
+          "p": [
+            "1/2",
+            "1/2"
+          ],
+          "l": [
+            "3/4",
+            "1/4"
+          ],
+          "posterior": [
+            "3/4",
+            "1/4"
+          ],
+          "z": "1/2"
+        },
+        {
+          "p": [
+            "1/3",
+            "2/3"
+          ],
+          "l": [
+            "1/2",
+            "1/4"
+          ],
+          "posterior": [
+            "1/2",
+            "1/2"
+          ],
+          "z": "1/3"
+        },
+        {
+          "p": [
+            "1/4",
+            "1/4",
+            "1/2"
+          ],
+          "l": [
+            "1",
+            "0",
+            "1/2"
+          ],
+          "posterior": [
+            "1/2",
+            "0",
+            "1/2"
+          ],
+          "z": "1/2"
+        }
+      ],
+      "falsifiers": [
+        "zero evidence cannot be normalized",
+        "prior cannot be silently renormalized",
+        "no float or boolean coercion",
+        "index order and zero entries persist",
+        "posterior sum is exactly one"
+      ],
+      "minimality": "The source law is exact and independently tested. An implementation can be composed from exact multiply/sum/normalize operations, so this selection does not claim irreducible Core minimality; owner review must decide whether the named finite update plus evidence-normalizer result is a D10 resident or a derived exact-math library operation.",
+      "derivability_review": "PENDING-OWNER-REVIEW: likely expressible as map/multiply + sum + divide; exact behavior and explicit zero-evidence failure are retained for semantic review.",
+      "source_path": "knowledge/d10-finite-bayes-update-research-v1.json",
+      "primary_url": "https://plato.stanford.edu/entries/epistemology-bayesian/",
+      "source_section": "Finite Bayes theorem for a finite hypothesis set; posterior_i = prior_i * likelihood_i / sum_j(prior_j * likelihood_j), with nonzero evidence denominator.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4956",
+        "https://plato.stanford.edu/entries/epistemology-bayesian/",
+        "knowledge/d10-finite-bayes-update-research-v1.json",
+        "independent integer-weight/common-denominator oracle"
+      ],
+      "motivation": [
+        "astronomy and astrophysics",
+        "SDR and radio model identification",
+        "exact rational analog computation",
+        "Prolog and Advice Taker epistemology",
+        "chess and symbolic decision modeling"
+      ],
+      "dedup": {
+        "exact_D1_D9_duplicate": false,
+        "exact_existing_D10_duplicate": false,
+        "D1_D9_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_D10_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+        "prior_D10_selected": 634,
+        "verified_exact_name_scan": true,
+        "behavior_level_dedup": "Distinct named law candidate; compositional derivation remains a review question, not hidden."
+      },
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -13595,6 +13703,7 @@
     "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
     "knowledge/d10-hobby-exact-measurement-intake-v1.json",
     "knowledge/d10-primitive-binary-word-root-v1.json",
-    "knowledge/d10-gray-reflected-binary-research-v1.json"
+    "knowledge/d10-gray-reflected-binary-research-v1.json",
+    "knowledge/d10-finite-bayes-update-research-v1.json"
   ]
 }
