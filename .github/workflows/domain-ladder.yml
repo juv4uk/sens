@@ -1,4 +1,4 @@
-name: Domain ladder exact-width verification
+name: domain-ladder-mechanics
 
 on:
   pull_request:
@@ -64,19 +64,10 @@ on:
       - "crates/sens/tests/d2_text7_frame_role_boundary.rs"
       - "crates/sens/tests/text7_canonical_wire.rs"
       - ".github/workflows/domain-ladder.yml"
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-concurrency:
-  group: domain-ladder-${{ github.ref }}
-  cancel-in-progress: false
 
 jobs:
   exact-width-ladder:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -89,7 +80,8 @@ jobs:
       - name: Generated D3-D9 occupancy comes only from owner-ratified maps
         run: python3 scripts/generate-domain-owner-registry.py --check
       - name: Check physical D8/D9 occupancy without executable semantic admission
-        run: cargo test --locked -p sens --lib domain_ladder::tests:: -- --nocapture
+        run: >-
+          cargo test --locked -p sens --lib domain_ladder::tests:: -- --nocapture
       - name: Verify owner-ratified D7 coordinates and two reserved cells
         run: python3 scripts/check-d7-current-authority.py
       - name: Verify D7 table surfaces agree with ratified coordinates
