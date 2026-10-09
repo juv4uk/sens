@@ -205,6 +205,36 @@
         "scripts/check_d10_gf2_selection_transition.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.hist.primary.batch2.after.gf2.20261009",
+      "authority": "#4013 #4463 user-directed D10 historical selection after 636-row GF2/main",
+      "evidence": [
+        "#4839",
+        "#4841",
+        "#4872",
+        "#4886",
+        "knowledge/d10-historical-primary-admission-batch2-v1.json"
+      ],
+      "previous_inventory_blob_sha": "292ef3086114ad0dfe71776c831c2a31b39352a8",
+      "resulting_inventory_blob_sha": "0a675284a7838e5f6e9ba4702655e120ac92f122",
+      "added_stable_ids": [
+        "d10.hist.primary.20261009.deposit-field",
+        "d10.hist.primary.20261009.hashtable-entries"
+      ],
+      "appended_sources": [
+        "knowledge/d10-historical-primary-admission-batch2-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 636,
+      "resulting_selected": 638,
+      "decision": "research selection only; no opcodes, all unplaced; owner ratification pending",
+      "tests": [
+        "scripts/check_d10_historical_second_tranche.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }

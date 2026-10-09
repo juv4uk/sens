@@ -1,0 +1,157 @@
+{
+  "schema": "d10-historical-primary-admission-batch2/v1",
+  "date": "2026-10-09",
+  "status": "SELECTED-RESEARCH-UNPLACED-NOT-RATIFIED",
+  "authority": "owner-directed #4013 #4463; D2 owns control",
+  "historical_donors": [
+    "#4839 R6RS",
+    "CLHS DEPOSIT-FIELD",
+    "#4865 source witness"
+  ],
+  "base": {
+    "commit_sha": "461329b1f79995700d10d0bdd7d389ee2e0eaacb",
+    "d10_git_blob": "292ef3086114ad0dfe71776c831c2a31b39352a8",
+    "original_selected": 636,
+    "original_ratified": 0,
+    "original_last_names": [
+      "FINITE-BAYES-UPDATE-EXACT",
+      "BINARY-LFSR-MINIMAL-RECURRENCE"
+    ]
+  },
+  "new_selected": 638,
+  "added_selected": 2,
+  "coordinate_added": 0,
+  "ratified_added": 0,
+  "rows": [
+    {
+      "semantic_name": "DEPOSIT-FIELD",
+      "surface_uk": "вписати-вирівняне-поле",
+      "surface_ukr": "впис-вир-пл",
+      "relation_class": "BIT-FIELD-UPDATE-ALGEBRA",
+      "behavior": "Replace target bits [p,p+s) with the bits from the SAME POSITIONS of newbyte; outside bits stay from target. Unlike DPB, newbyte is position-aligned, not right-justified.",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_deposit-field.html",
+      "primary_section": "ANSI CLHS: Function DEPOSIT-FIELD; Notes, LOGBITP bit-selection equality",
+      "historical_source": "Common Lisp bit-field primitives",
+      "arguments": [
+        "newbyte integer position-aligned",
+        "bytespec (size s, position p)",
+        "integer target"
+      ],
+      "results": [
+        "one result integer"
+      ],
+      "positive_witnesses": [
+        {
+          "input": [
+            7,
+            2,
+            1,
+            0
+          ],
+          "result": 6
+        },
+        {
+          "input": [
+            -1,
+            4,
+            0,
+            0
+          ],
+          "result": 15
+        },
+        {
+          "input": [
+            10,
+            2,
+            1,
+            0
+          ],
+          "result": 2
+        }
+      ],
+      "falsifier": "newbyte=10,s=2,p=1,target=0 returns 4 (DPB's right-justified semantics) rather than 2.",
+      "neighbors": [
+        "D10 LDB",
+        "D10 MASK-FIELD",
+        "new D10 DPB"
+      ],
+      "distinction": "DPB reads the low s bits of its newbyte then shifts to position p; DEPOSIT-FIELD keeps source position p unchanged.",
+      "owner": "SENS single D10 semantic arithmetic; no new D2 control",
+      "stable_id": "d10.hist.primary.20261009.deposit-field",
+      "proposal_status": "pending-owner-ratification",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "source_class": "HISTORICAL-PRIMARY-TRANCHE2-20261009",
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "exact_D1_D9_duplicate": false,
+      "exact_existing_D10_duplicate": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4839",
+        "#4841",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_deposit-field.html"
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-ENTRIES",
+      "surface_uk": "пари-хеш-таблиці",
+      "surface_ukr": "пар-хеш",
+      "relation_class": "HASH-TABLE-PAIR-PROJECTION",
+      "behavior": "Return two values: vector of all keys and vector of their corresponding values aligned by index; ordering is unspecified but the correspondence is preserved.",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "primary_section": "R6RS Standard Libraries 2007 §13.3 Inspection, HASHTABLE-ENTRIES, plus published R6RS errata",
+      "historical_source": "R6RS Scheme (2007)",
+      "arguments": [
+        "mutable-or-immutable hashtable"
+      ],
+      "results": [
+        "keys vector",
+        "values vector"
+      ],
+      "positive_witnesses": [
+        {
+          "input": "{a:1,b:2}",
+          "result": "two vectors, same length, aligned pairs exactly {(a,1),(b,2)} in any order"
+        },
+        {
+          "input": "empty hashtable",
+          "result": "two zero-length vectors"
+        }
+      ],
+      "falsifier": "Keys and values independently shuffled so pair correspondence is lost, duplicate a key, or claim insertion order is guaranteed.",
+      "neighbors": [
+        "D10 MAKE-HASH-TABLE",
+        "D10 GETHASH",
+        "D10 HASH-TABLE-COUNT",
+        "D8 VALUES",
+        "D10 CALL-WITH-VALUES"
+      ],
+      "distinction": "Single paired observation from one state, not two unrelated unordered reads and not simple GETHASH lookup.",
+      "owner": "SENS D10 observation/data; no new D2 control",
+      "stable_id": "d10.hist.primary.20261009.hashtable-entries",
+      "proposal_status": "pending-owner-ratification",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "source_class": "HISTORICAL-PRIMARY-TRANCHE2-20261009",
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "exact_D1_D9_duplicate": false,
+      "exact_existing_D10_duplicate": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4839",
+        "#4841",
+        "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+      ]
+    }
+  ]
+}
