@@ -78,13 +78,39 @@ class SelectionLedgerTrace(unittest.TestCase):
         inv["rows"][0]["semantic_name"]="SURPRISE-RENAME"
         self.assertTrue(guard.selection_trace_errors(self.content,inv,self.baseline,self.history))
 
-    def test_research_backfill_marker_cannot_be_used_by_unselected_donor(self):
-        lines=self.content.splitlines()
-        fields=lines[-1].split("\t")
-        fields[0]="D10P-9999"
-        fields[3]="UNSELECTED-RANDOM"
-        bad=self.content+"\t".join(fields)+"\n"
-        self.assertTrue(guard.selection_trace_errors(bad,self.inventory,self.baseline,self.history))
+    def test_pending_source_research_can_precede_selection(self):
+        # Реальна черга proposal -> owner review -> selection: не змушувати
+        # агента вигадувати BLOCK або додавати resident до журналу.
+        lines = self.content.splitlines()
+        fields = lines[-1].split("\t")
+        fields[0] = "D10P-9999"
+        fields[1] = "дослідити-потік"
+        fields[2] = "дослідити-потік-донор"
+        fields[3] = "UNSELECTED-DONOR-LAW"
+        fields[4] = "Окрема дослідницька семантика з первинним джерелом і фальсифікатором."
+        pending = self.content + "\t".join(fields) + "\n"
+        self.assertEqual([], guard.validate(pending))
+        self.assertEqual([], guard.selection_trace_errors(
+            pending, self.inventory, self.baseline, self.history))
+        # Саме selected без наявної заявки залишається забороненим.
+        inv = copy.deepcopy(self.inventory)
+        new = copy.deepcopy(inv["rows"][-1])
+        new["stable_id"] = "new-invalid-without-proposal"
+        new["semantic_name"] = "UNREGISTERED-SELECTED"
+        inv["rows"].append(new)
+        self.assertTrue(guard.selection_trace_errors(
+            pending, inv, self.baseline, self.history))
+
+    def test_forged_source_only_marker_is_rejected(self):
+        lines = self.content.splitlines()
+        fields = lines[-1].split("\t")
+        fields[0] = "D10P-9998"
+        fields[1] = "перевірити-підробку"
+        fields[2] = "перевірити-підроблене-джерело"
+        fields[3] = "UNSELECTED-INVALID-SOURCE"
+        fields[6] = "NOT-A-REAL-COMMIT"
+        bad = self.content + "\t".join(fields) + "\n"
+        self.assertTrue(guard.validate(bad))
 
     def test_migration_block_may_still_provide_true_source(self):
         records=self.content.splitlines()
