@@ -7,7 +7,7 @@
 //! Equal packed payloads in different domains remain different identities:
 //! D3 `001` is not D4 `0001`.
 
-use crate::{Bija3, CoreD4, CoreD5, CoreD6};
+use crate::{Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6};
 use std::fmt;
 
 /// Exact domain-qualified identity for the current Core operation domains.
@@ -69,6 +69,34 @@ impl CoreDomainIdentity {
             Self::D6(value) => value.word().packed_bits(),
         }
     }
+
+    /// Lift only exact Core operation-domain source words into canonical identity.
+    ///
+    /// D1 predicates, D2 structure, D7 sound/ordinals and legacy W8 are
+    /// deliberately rejected: width alone never promotes those domains into
+    /// this Core operation-identity carrier.
+    pub const fn from_source_word(source: BinarySourceWord) -> Option<Self> {
+        match source {
+            BinarySourceWord::W3(word) => Some(Self::D3(Bija3::from_word(word))),
+            BinarySourceWord::W4(word) => Some(Self::D4(CoreD4::from_word(word))),
+            BinarySourceWord::W5(word) => Some(Self::D5(CoreD5::from_word(word))),
+            BinarySourceWord::W6(word) => Some(Self::D6(CoreD6::from_word(word))),
+            BinarySourceWord::W1(_)
+            | BinarySourceWord::W2(_)
+            | BinarySourceWord::W7(_)
+            | BinarySourceWord::W8(_) => None,
+        }
+    }
+
+    /// Lossless exact-width source projection for canonical Core identity.
+    pub const fn source_word(self) -> BinarySourceWord {
+        match self {
+            Self::D3(value) => BinarySourceWord::W3(value.word()),
+            Self::D4(value) => BinarySourceWord::W4(value.word()),
+            Self::D5(value) => BinarySourceWord::W5(value.word()),
+            Self::D6(value) => BinarySourceWord::W6(value.word()),
+        }
+    }
 }
 
 impl From<Bija3> for CoreDomainIdentity {
@@ -99,6 +127,44 @@ impl From<CoreD6> for CoreDomainIdentity {
 mod tests {
     use super::*;
     use crate::{Bit3, Bit4, Bit5, Bit6};
+
+    #[test]
+    fn source_word_bridge_preserves_exact_domain() {
+        for raw in 0..=7 {
+            let source = BinarySourceWord::W3(Bit3::new(raw).unwrap());
+            let id = CoreDomainIdentity::from_source_word(source).unwrap();
+            assert_eq!(id.source_word(), source);
+        }
+        for raw in 0..=15 {
+            let source = BinarySourceWord::W4(Bit4::new(raw).unwrap());
+            let id = CoreDomainIdentity::from_source_word(source).unwrap();
+            assert_eq!(id.source_word(), source);
+        }
+        for raw in 0..=31 {
+            let source = BinarySourceWord::W5(Bit5::new(raw).unwrap());
+            let id = CoreDomainIdentity::from_source_word(source).unwrap();
+            assert_eq!(id.source_word(), source);
+        }
+        for raw in 0..=63 {
+            let source = BinarySourceWord::W6(Bit6::new(raw).unwrap());
+            let id = CoreDomainIdentity::from_source_word(source).unwrap();
+            assert_eq!(id.source_word(), source);
+        }
+    }
+
+    #[test]
+    fn source_word_bridge_rejects_non_core_identity_widths() {
+        use crate::{Bit1, Bit2, Bit7, Bit8};
+
+        for source in [
+            BinarySourceWord::W1(Bit1::new(0).unwrap()),
+            BinarySourceWord::W2(Bit2::new(0).unwrap()),
+            BinarySourceWord::W7(Bit7::new(0).unwrap()),
+            BinarySourceWord::W8(Bit8::new(0).unwrap()),
+        ] {
+            assert!(CoreDomainIdentity::from_source_word(source).is_none());
+        }
+    }
 
     #[test]
     fn equal_packed_payloads_in_different_domains_are_distinct_identities() {
