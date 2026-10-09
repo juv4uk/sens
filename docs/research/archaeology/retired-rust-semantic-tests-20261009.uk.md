@@ -41,3 +41,16 @@
 | `crates/sens/tests/world.rs` | `e60b04f091950f278a580ed7df69796b06af5d73` | `defmodule_after_world_load_keeps_legacy_reason_in_behavior` | Rust-oracle, який закріплював historical `reason-in` proof-shape. Інші тести реального world snapshot, transaction atomicity, history, query та interface механіки залишені. |
 
 Жоден production evaluator чи source library не змінюється. Не прибирати захисні тести `D1:1/0`, `D3:000`, wrong-domain/non-two-part `COND`.
+
+## Очищення legacy SID8 Rust-тестів — другий прохід
+
+Вилучено лише активні Rust-перевірки, які намагалися зробити історичний восьмибітний SID, `Value::truth(t/NIL)` або 256-резидентний legacy-реєстр поточною семантичною владою. Для кожного джерела оригінал зберігається в Git-історії.
+
+| Файл | Джерело (blob SHA) | Що вилучено |
+|---|---|---|
+| `crates/sens/tests/mccarthy.rs` | `30669582aa5d9e17203d33df14ec8ffecc500c0d` | `native_binary_value_round_trips_through_eval_and_print`, `string_less_than_orders_strings_lexicographically` — старий SID8 value та truth sentinel |
+| `crates/sens/tests/semantic_registry_lisp.rs` | перевіряти через історію коміту `53711460` | чотири жорстко прив'язані до 256 восьмибітних семантичних рядків тести |
+| `crates/sens/tests/member_named_vs_sid_cost_1278.rs` | `a27ac5218ad1bf4ff64a5fde7d1f07d9eb8df461` | old named-vs-SID8 equality semantics і benchmark |
+| `crates/sens/tests/mccarthy_1960_functions.rs` | `675b8cd3dc936ce4443842a1680ec4f1beac9d20` | historical forms із executable 8-бітними слотами замість чинних координат D1–D10 |
+
+Поточні тести D1/D3/PredicateBit та fail-closed правила залишено. Цей реєстр суто історичний, не є нормативним тестовим corpus.
