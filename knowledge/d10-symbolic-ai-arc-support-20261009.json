@@ -1,0 +1,247 @@
+{
+  "schema": "d10-symbolic-ai-binary-support-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-ONLY-UNSELECTED",
+  "domain": "D10",
+  "width_bits": 10,
+  "current_at_claim": {
+    "selected": 634,
+    "capacity": 1024,
+    "ratified": 0,
+    "repository": "juv4uk/sens",
+    "inventory_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3"
+  },
+  "primary_sources": [
+    {
+      "class": "HISTORICAL-ALGORITHM-ORIGIN",
+      "source": "Alan K. Mackworth, Consistency in Networks of Relations, Artificial Intelligence 8(1) 99-118, 1977",
+      "doi": "10.1016/0004-3702(77)90007-8",
+      "url": "https://www.sciencedirect.com/science/article/pii/0004370277900078",
+      "scope": "Arc consistency and local removal of unsupported values are historical motivations; the selected law is the finite binary relation support projection, NOT all of AC-3 graph scheduling"
+    },
+    {
+      "class": "REAL-EXECUTABLE-CLP-FD-DONOR",
+      "name": "SWI-Prolog library(clpfd): tuples_in/2",
+      "repository": "SWI-Prolog/swipl-devel",
+      "commit": "6333852cd94c69a120f03f270e0d6c9e2eca72a3",
+      "blob_sha": "9c56b75d7185bace2558a1d4d32d606ea878b8ae",
+      "source_pointer": "SWI-Prolog/swipl-devel@6333852cd94c69a120f03f270e0d6c9e2eca72a3:library/clp/clpfd.pl:4074-4145",
+      "url": "https://github.com/SWI-Prolog/swipl-devel/blob/6333852cd94c69a120f03f270e0d6c9e2eca72a3/library/clp/clpfd.pl#L4074-L4145",
+      "doc": "https://www.swi-prolog.org/man/clpfd.html",
+      "note": "Real Prolog CLPFD table relation solver, independent of proposed Python reference; no claim Prolog is semantic authority for SENS."
+    }
+  ],
+  "candidate": {
+    "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+    "surface_uk": "відсіяти-без-опори",
+    "surface_ukr": "звузити-два-домени-за-відношенням",
+    "arity": 3,
+    "input_contract": "(Dx, Dy, R) each finite canonical sorted unique lists of exact integers; R is finite lexicographically sorted unique list of [x,y] exact-int pairs. Dx,Dy may be empty and R may be empty. Input violation produces ERROR, never silently reorders or coerces.",
+    "result_contract": "Let M={ (x,y) in R : x in Dx and y in Dy }. When M is empty return NO-SUPPORT (not a set of newly invented values). Otherwise return SUPPORTED(sorted unique projection_x(M), sorted unique projection_y(M)). No pair outside R is certified, and supported value in each output has an existential compatible value in the other output. Returns no witness to a globally satisfiable larger constraint network.",
+    "witnesses": [
+      {
+        "dx": [
+          1,
+          2,
+          3
+        ],
+        "dy": [
+          4,
+          5
+        ],
+        "allowed": [
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            5
+          ]
+        ],
+        "out": {
+          "status": "SUPPORTED",
+          "left": [
+            1,
+            3
+          ],
+          "right": [
+            4,
+            5
+          ]
+        }
+      },
+      {
+        "dx": [
+          1,
+          2
+        ],
+        "dy": [
+          3,
+          4
+        ],
+        "allowed": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "out": {
+          "status": "SUPPORTED",
+          "left": [
+            1,
+            2
+          ],
+          "right": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "dx": [
+          1,
+          2
+        ],
+        "dy": [
+          3
+        ],
+        "allowed": [
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            5
+          ]
+        ],
+        "out": {
+          "status": "NO-SUPPORT",
+          "left": [],
+          "right": []
+        }
+      },
+      {
+        "dx": [
+          2
+        ],
+        "dy": [
+          3
+        ],
+        "allowed": [
+          [
+            2,
+            3
+          ]
+        ],
+        "out": {
+          "status": "SUPPORTED",
+          "left": [
+            2
+          ],
+          "right": [
+            3
+          ]
+        }
+      },
+      {
+        "dx": [],
+        "dy": [
+          1
+        ],
+        "allowed": [
+          [
+            0,
+            1
+          ]
+        ],
+        "out": {
+          "status": "NO-SUPPORT",
+          "left": [],
+          "right": []
+        }
+      }
+    ],
+    "falsifiers": [
+      "A value x with no R-related y in the current Dy must be removed; keeping x violates sound support pruning.",
+      "Arbitrary Cartesian product of output domains is NOT guaranteed to be contained in R; do not claim universal pair compatibility or global CSP solution.",
+      "When all allowed pairs are removed, return named NO-SUPPORT rather than SUCCESS(empty,empty), avoiding contradictory proof status.",
+      "Monotonicity: reducing either input domain cannot invent any supported output; repeated projection must be idempotent.",
+      "Reject unsorted/duplicate finite lists, float/boolean values, non-pair relation members: no silent coercion into semantic identity."
+    ],
+    "invariants": [
+      "extensive-contraction: supported domains subset corresponding input domains",
+      "local-arc-support: every retained value has at least one partner in original relation",
+      "idempotence of support projection on same relation",
+      "symmetry under swapping variables and transposing relation",
+      "monotonicity with respect to restricting input domains",
+      "when R has no compatible tuples, NO-SUPPORT"
+    ],
+    "ownership": "HOLD-CORE-VS-DERIVED-CLP-LIBRARY",
+    "dedup": "PENDING-FULL-D1-D9-AND-D10-BEHAVIOR",
+    "nearby_ratified": [
+      "D9 UNIFY",
+      "D9 FIRE-RULES-JTMS-MULTI",
+      "D9 EXPLAIN-PROOF",
+      "D9 PROVE-GOALS"
+    ],
+    "nearby_research": [
+      "D10 PROVE-RULE",
+      "PR #4965 minimal abduction",
+      "PR #4970 and #4971 Plotkin anti-unification",
+      "PR #4958 ATMS",
+      "D10 FINITE-BAYES-UPDATE-EXACT pending"
+    ],
+    "type_warning": "Pure finite pairwise support projection. Not D2 branching/syntax, a CLP solver, arc-consistency closure of arbitrary graphs, database join identity, Forth native stack action, CUDA/FPGA instruction or trained/neural AI.",
+    "candidate_only": {
+      "selected": false,
+      "ratified": false,
+      "coordinate": null,
+      "physical_sens": false,
+      "owner_review_required": true
+    }
+  },
+  "hobby_connections": [
+    {
+      "domain": "symbolic AI / Advice Taker",
+      "application": "reduce candidate actions and world state labels before expensive proof search"
+    },
+    {
+      "domain": "Prolog/CLIPS",
+      "application": "finite table constraints before labels/goal resolution, unlike D9 UNIFY"
+    },
+    {
+      "domain": "Panini/phonemic grammar",
+      "application": "filter pairs of compatible phonetic/grammatical feature values; D7 phonemes remain lower authority"
+    },
+    {
+      "domain": "astronomy and chronometry",
+      "application": "compatibility filtering of finite observation windows and instrument modes, not runtime scheduling"
+    },
+    {
+      "domain": "radio/FPGA",
+      "application": "filter legal symbol ↔ state or channel ↔ register assignment tables with exact integers, not device protocol"
+    }
+  ],
+  "experiments": {
+    "implementation": "tests/test_d10_ai_arc_support.py",
+    "real_donor": "tests/oracles/d10_clpfd_arc_support.pl",
+    "fixed_comparisons": "canonical 3-value binary domain relation enumeration + Prolog fixture parity",
+    "oracle_status": "NOT-RUN",
+    "release_status": "NONE"
+  },
+  "accounting": {
+    "new_selected": 0,
+    "new_coordinates": 0,
+    "new_ratified": 0
+  }
+}
