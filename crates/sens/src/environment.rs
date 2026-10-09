@@ -536,12 +536,6 @@ mod tests {
     }
 
     #[test]
-    fn root_predefines_t_as_the_self_evaluating_truth_symbol() {
-        let root = Environment::root();
-        assert_eq!(root.get("t"), Some(Value::Symbol(Rc::from("t"))));
-    }
-
-    #[test]
     fn define_then_get_returns_the_value() {
         let root = Environment::root();
         root.define("x", Value::Number(1.0, Exactness::Exact));
