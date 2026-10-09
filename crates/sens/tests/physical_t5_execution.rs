@@ -10,6 +10,32 @@ const QUOTE_T5: &[u8] =
 const MULTIFORM_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
 
+
+const STRICT_D1_COND_T5: &[u8] =
+    include_bytes!("../../../tests/fixtures/migration-d1-cond-true/true.sens");
+const STRICT_D1_COND_VIEW: &str =
+    include_str!("../../../tests/fixtures/migration-d1-cond-true/true");
+
+#[test]
+fn physical_current_d3_cond_is_true_exact_d1_not_legacy_truthiness() {
+    // 10(open) 110(COND) 00(separate) 10(open) 1(test)
+    // 00(separate) 1(value) 01(close clause) 01(close COND).
+    let words = decode_ternary_program(STRICT_D1_COND_T5)
+        .expect("physical SENS .sens must contain canonical exact-width T5");
+    let visible = sens::render_ternary_words_spaced(&words);
+    assert_eq!(visible, STRICT_D1_COND_VIEW.trim_end());
+    assert_eq!(
+        sens::encode_binary_projection_ternary(STRICT_D1_COND_VIEW).unwrap(),
+        STRICT_D1_COND_T5
+    );
+    assert_eq!(STRICT_D1_COND_T5, &[0x67, 0x38, 0x68, 0x17, 0x2e]);
+
+    let result = eval_t5_program(STRICT_D1_COND_T5, &mut Session::default())
+        .expect("D3 COND must execute directly from physical binary");
+    assert_eq!(result.value.as_predicate_bit(), Some(true));
+    assert!(result.output.is_empty());
+}
+
 #[test]
 fn physical_quote_executes_directly_in_a_fresh_binary_session() {
     let result = eval_t5_program(QUOTE_T5, &mut Session::default())
