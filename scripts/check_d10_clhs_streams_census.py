@@ -66,6 +66,7 @@ def validate(document: dict) -> dict:
     require(tally.get("kind") == counts, "kind tally mismatch")
     require(tally.get("D9_exact_name_collisions") == d9hits, "D9 spelling tally changed")
     require(tally.get("D10_exact_name_collisions") == d10hits, "D10 spelling tally changed")
+    require(document.get("oracle_witness_count") == 3, "donor oracle witness tally")
     roots = document.get("root_reviews", [])
     require(len(roots) == 3 and len({r.get("root_claim") for r in roots}) == 3,
             "root review count")
@@ -77,9 +78,23 @@ def validate(document: dict) -> dict:
         require(len(root.get("positive_witnesses", [])) >= 2 and
                 root.get("falsifier"), "insufficient falsifiers/positives")
         require(root.get("decision", "").startswith("HOLD-"), "premature selection")
-        require(root.get("oracle_status") == "NOT-RUN", "false oracle claim")
+        require(root.get("oracle_status") == "SBCL-PRIMARY-DONOR-WITNESS-PASS",
+                "missing independent Common Lisp donor runtime")
+        require(root.get("oracle_evidence") ==
+                "knowledge/d10-clhs-streams-sbcl-oracle-20261009.json",
+                "missing source-pinned oracle evidence")
         require(root.get("coordinate") is None and root.get("ratified") is False
                 and root.get("selected") is False, "invented coordinate/resident")
+    proof = json.loads((ROOT / "knowledge/d10-clhs-streams-sbcl-oracle-20261009.json").read_text(encoding="utf-8"))
+    require(proof.get("schema") == "d10-clhs-streams-sbcl-donor-oracle/v1", "oracle evidence schema")
+    require(proof.get("status") == "EXECUTED-DONOR-PARITY-WITNESSES-NO-SENS-PARITY", "SENS parity forged")
+    require(proof.get("executed_commit_sha") == "653f7696b02fb6ea51162c562355ff6518220e3b", "witness SHA drift")
+    require(proof.get("observed_implementation") == "SBCL 2.2.9.debian", "real donor version drift")
+    require(proof.get("summary_stdout") == "D10-CLHS-STREAMS-DONOR: PASS 3/3", "oracle stdout")
+    require([x.get("root") for x in proof.get("stdout_witnesses", [])] ==
+            [r.get("root_claim") for r in roots], "root/oracle mismatch")
+    require(proof.get("new_selected") == 0 and proof.get("ratified") == 0 and
+            proof.get("new_coordinates") == 0, "oracle cannot ratify/assign code")
     return {"dictionary_name_kind_entries": len(rows),
             "deep_review_hold": len(roots), "new_selected": 0,
             "ratified": 0}
@@ -97,7 +112,7 @@ def self_test(doc: dict) -> None:
         ("edit tally", lambda d: d["counts"].update(total_name_kind_entries=71)),
         ("claim full lower dedup", lambda d: d["rows"][0].update(lower_D1_D8_semantic_dedup="NO-MATCH")),
         ("erase falsifier", lambda d: d["root_reviews"][0].update(falsifier="")),
-        ("fake live oracle", lambda d: d["root_reviews"][1].update(oracle_status="SBCL-PASS")),
+        ("fake live oracle", lambda d: d["root_reviews"][1].update(oracle_status="FAKE-PASS")),
     ]
     for label, change in mutations:
         altered = copy.deepcopy(doc)
