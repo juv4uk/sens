@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "axiom-corpus-function-description",
+  "wing": "Exact D5 mathematical function identity research",
+  "roles": [
+    "RESEARCH",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can an exact D5 name-erased one-tuple observation distinguish four binary functions once 2 is derived from the primitive seed 1?",
+  "claim": "Bounded exact-Q test using admitted D5 function bits; no new primitive or domain coordinate, no independent semantic ratification.",
+  "witness": [
+    "../../crates/sens/tests/axiom_corpus_function_description.rs"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "historic #3458 replay 2026-10-09",
+  "axis": "D5/name-erased-functional-distinguishability",
+  "reproduce": "cargo test -p sens --test axiom_corpus_function_description -- --nocapture"
+}
