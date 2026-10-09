@@ -90,6 +90,10 @@ jobs:
         shell: bash
         run: bash scripts/test-domain-paradigm-one-way-guard.sh
 
+      - name: Binary language pipeline
+        shell: bash
+        run: bash scripts/test-binary-language-pipeline.sh
+
       - name: Exact-width paradigm legacy-dependency ratchet
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
