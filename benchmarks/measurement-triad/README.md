@@ -11,7 +11,7 @@
 sudo apt-get install valgrind
 export SENS_ROOT="$(pwd)"
 cargo install --locked --version 0.16.1 iai-callgrind-runner
-( cd /tmp && cargo bench --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \\
+( cd /tmp && cargo bench --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \
   --bench instruction_lane )
 ```
 
@@ -25,7 +25,7 @@ Iai порівнює Callgrind інструкції, тоді як наявні 
 ## 2. Час (Criterion)
 
 ```sh
-( cd /tmp && cargo bench --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \\
+( cd /tmp && cargo bench --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \
   --bench wall_time_lane )
 ```
 
