@@ -1,0 +1,29 @@
+name: lisp-paren-balance
+
+# Static syntax guard: every .lisp file under lib/ must be paren-balanced.
+# Catches the #4375 class of defect (a projection form committed with an
+# unclosed list) at push time, instead of via a late, unnamed `exit code 1`
+# inside a large gate step. Hosted runner: no CUDA/hardware needed.
+
+on:
+  push:
+    paths:
+      - "lib/**/*.lisp"
+      - "scripts/check-lisp-paren-balance.py"
+      - ".github/workflows/lisp-paren-balance.yml"
+  pull_request:
+    paths:
+      - "lib/**/*.lisp"
+      - "scripts/check-lisp-paren-balance.py"
+      - ".github/workflows/lisp-paren-balance.yml"
+  workflow_dispatch:
+
+jobs:
+  guard:
+    name: Lisp paren balance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Lisp paren balance (lib/)
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib
