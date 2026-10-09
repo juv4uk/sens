@@ -56,5 +56,42 @@ class GroundSeparationContractTests(unittest.TestCase):
         ))
 
 
+    def test_current_ratified_domain_coordinates(self):
+        import json
+        foundation = json.loads(
+            (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+        )
+        self.assertTrue(audit.foundation_has_ground_separation(foundation))
+
+    def test_wrong_width_or_zero_identity_fails_closed(self):
+        self.assertFalse(audit.foundation_has_ground_separation({
+            "status": "owner-ratified", "domains": {
+                "D3": {"width": 8, "residents": {"000": "EMPTY"}},
+                "D8": {"width": 8, "residents": {"00000000": "CODE-CHAR"}},
+            }
+        }))
+        self.assertFalse(audit.foundation_has_ground_separation({
+            "status": "owner-ratified", "domains": {
+                "D3": {"width": 3, "residents": {"000": "EMPTY"}},
+                "D8": {"width": 8, "residents": {"00000000": "NIL"}},
+            }
+        }))
+
+    def test_missing_pins_cannot_count_as_proof(self):
+        self.assertFalse(audit.foundation_has_ground_separation({"status": "owner-ratified"}))
+        self.assertFalse(audit.foundation_has_ground_separation({
+            "status": "unratified", "domains": {
+                "D3": {"width": 3, "residents": {"000": "EMPTY"}},
+                "D8": {"width": 8, "residents": {"00000000": "CODE-CHAR"}},
+            }
+        }))
+
+    def test_d8_coordinate_table_not_executable_source(self):
+        self.assertIn(Path("lib/domains/d8.lisp"), audit.METADATA_LISP)
+        self.assertNotIn(Path("lib/machine/encoding/x86-64.lisp"), audit.METADATA_LISP)
+        heads = audit.call_heads(audit.tokenize_lisp("(00000000 1)"))
+        self.assertEqual([h.text for h in heads], ["00000000"])
+
+
 if __name__ == "__main__":
     unittest.main()
