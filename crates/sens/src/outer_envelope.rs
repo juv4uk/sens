@@ -37,7 +37,7 @@ pub enum OuterEnvelopeError {
     UnexpectedEnd { bit: usize },
     ReservedExtension { bit: usize },
     LengthOverflow { bit: usize },
-    InvalidDomain { width: usize, payload: u8 },
+    InvalidDomain { width: usize, payload: u16 },
     InvalidNumber { bit: usize },
     InvalidText { bit: usize },
     NonCanonicalContainer,
@@ -150,7 +150,7 @@ fn decode_record(cursor: &mut BitCursor<'_>) -> Result<OuterRecord, OuterEnvelop
         let payload = cursor.read_u8(width)?;
         return domain_from_parts(width, payload)
             .map(OuterRecord::D)
-            .ok_or(OuterEnvelopeError::InvalidDomain { width, payload });
+            .ok_or(OuterEnvelopeError::InvalidDomain { width, payload: u16::from(payload) });
     }
 
     // 1110 -> D8
@@ -159,7 +159,7 @@ fn decode_record(cursor: &mut BitCursor<'_>) -> Result<OuterRecord, OuterEnvelop
         let payload = cursor.read_u8(width)?;
         return domain_from_parts(width, payload)
             .map(OuterRecord::D)
-            .ok_or(OuterEnvelopeError::InvalidDomain { width, payload });
+            .ok_or(OuterEnvelopeError::InvalidDomain { width, payload: u16::from(payload) });
     }
 
     // 11110 -> N

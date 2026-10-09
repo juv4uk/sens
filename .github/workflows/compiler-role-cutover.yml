@@ -13,6 +13,7 @@ on:
       - "crates/sens/src/compiler_role.rs"
       - "crates/sens/src/compiler_language.rs"
       - "crates/sens/src/gpu_execution_packet.rs"
+      - "crates/sens/src/outer_envelope.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
@@ -40,6 +41,7 @@ on:
       - "crates/sens/src/compiler_role.rs"
       - "crates/sens/src/compiler_language.rs"
       - "crates/sens/src/gpu_execution_packet.rs"
+      - "crates/sens/src/outer_envelope.rs"
       - "crates/sens/tests/compiler_role_cutover.rs"
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
@@ -60,17 +62,16 @@ jobs:
       - uses: actions/checkout@v5
       - name: Default SENS core has no runtime dependencies
         run: |
-          if awk '
-            /^\[dependencies\]$/ { in_deps=1; next }
-            /^\[/ { in_deps=0 }
-            in_deps && $0 !~ /^[[:space:]]*($|#)/ { found=1 }
-            END { exit found ? 1 : 0 }
-          ' crates/sens/Cargo.toml; then
-            echo "default sens core dependency set is empty"
-          else
-            echo "default sens core gained a runtime dependency" >&2
+          tree="$(cargo tree -p sens --no-default-features -e normal --prefix none)"
+          lines="$(printf '%s\n' "$tree" | wc -l)"
+          test "$lines" -eq 1 || {
+            echo "default sens core acquired runtime dependencies" >&2
+            printf '%s\n' "$tree" >&2
             exit 1
-          fi
+          }
+          cargo check -p sens --lib --no-default-features
+      - name: Opt-in evidence-schema adapters remain buildable
+        run: cargo test -p sens --lib --features legacy-evidence-schemas
       - name: D4 bootstrap projection must match ratified authority
         run: python3 scripts/generate-d4-bootstrap-compiler-structure.py --check
       - name: Production path must not import Rust role oracle

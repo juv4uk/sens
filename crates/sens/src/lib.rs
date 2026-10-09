@@ -13,17 +13,25 @@ mod bit9;
 mod binary_number;
 mod bits;
 mod canonical_reader;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod compilation_artifact;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod compilation_artifact_producer;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod conformance_oracle;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod fixpoint_checkpoint;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod gpu_admission;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod gpu_oracle;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod program_compiler;
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;
 mod compiler_language;
+#[cfg(feature = "legacy-evidence-schemas")]
 pub mod selfhost_lineage;
 mod domain_words;
 mod domain_identity;
@@ -170,6 +178,7 @@ pub use compiler_language::{
     verify_compiler_program_artifact_from_sens, CompilerProgramBootstrapBundle,
     CompilerSemanticInput, VerifiedCompilerProgramArtifact, VerifiedCompilerProgramRequest,
 };
+#[cfg(feature = "legacy-evidence-schemas")]
 pub use gpu_admission::{GpuAdmission, GpuAdmissionInventory};
 pub use domain_identity::{CoreDomainIdentity, DomainIdentity};
 pub use domain_words::{Bija3, CoreD4, CoreD5, CoreD6, SoundD7, CoreD8, CoreD9, PredicateBit, Racana2};
