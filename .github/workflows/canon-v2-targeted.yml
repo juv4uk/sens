@@ -15,5 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Generate exact current Core4 FASL and print encoded blob for review
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --release --locked -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          echo 'SENS_FASL_BEGIN'
+          base64 -w0 lib/core4.lisp.fasl
+          echo
+          echo 'SENS_FASL_END'
       - name: Exact Canon witness regression
         run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
