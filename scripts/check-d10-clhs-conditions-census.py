@@ -96,7 +96,7 @@ def validate(census: dict, inventory: dict, foundation: dict) -> list[str]:
                 errors.append(f"row {i}: proposed law cannot be a nameless mechanism")
             if len(row.get("two_positive_witnesses", [])) < 2 or not row.get("falsifier"):
                 errors.append(f"row {i}: missing positive and falsifier witnesses")
-            if row.get("d10_proposal_id") != "D10P-0070":
+            if row.get("d10_proposal_id") != "D10P-4896":
                 errors.append(f"row {i}: untracked proposal id")
         if row.get("name_collision_is_not_behavior_proof") is not True:
             errors.append(f"row {i}: name collision overclaims behavior proof")
