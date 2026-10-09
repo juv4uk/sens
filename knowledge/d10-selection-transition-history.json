@@ -1,0 +1,67 @@
+{
+  "schema": "d10-selection-transition-history/v1",
+  "status": "RESEARCH-ONLY-NO-RATIFICATION",
+  "baseline": {
+    "inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "selected_count": 625,
+    "selector_coordinates": 256,
+    "ratified_d10_residents": 0
+  },
+  "transitions": [
+    {
+      "id": "d10.hist.primary.batch1.20261009",
+      "authority": "#4013 #4463 #4878 research first admission, owner-directed",
+      "evidence": [
+        "#4841",
+        "#4878"
+      ],
+      "previous_inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+      "resulting_inventory_blob_sha": "5a8cf8e81edecf9ffdeb313152c0e146f4df80bb",
+      "added_stable_ids": [
+        "d10.hist.primary.dpb.20261009",
+        "d10.hist.primary.array-displacement.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-historical-primary-admission-batch1-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 625,
+      "resulting_selected": 627,
+      "decision": "research selection; coordinate=null; owner ratification remains pending",
+      "tests": [
+        "scripts/check_d10_historical_admission_batch1.py"
+      ]
+    },
+    {
+      "id": "d10.clos.roots.20261009",
+      "authority": "#4013 #4463 owner-directed research filling",
+      "evidence": [
+        "#4842",
+        "#4843"
+      ],
+      "previous_inventory_blob_sha": "5a8cf8e81edecf9ffdeb313152c0e146f4df80bb",
+      "resulting_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+      "added_stable_ids": [
+        "d10.clos.slot-boundp.v1",
+        "d10.clos.slot-makunbound.v1",
+        "d10.clos.remove-method.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 627,
+      "resulting_selected": 630,
+      "decision": "research selection; coordinate=null; owner ratification remains pending",
+      "tests": [
+        "scripts/check_d10_clos_roots_selection.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
+    }
+  ]
+}

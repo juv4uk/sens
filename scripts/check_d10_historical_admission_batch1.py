@@ -79,9 +79,9 @@ def check(inv, batch, state, source, doc):
     assert state["target"]["unplaced_selected_candidates"] == len(inv["rows"])-256
     assert state["target"]["law_forced_coordinates"] == 256
     assert state["target"]["ratified_residents"] == 0
-    assert "D10 selected              627/1024" in doc
-    assert "unplaced                  371" in doc
-    assert "remaining                 397" in doc
+    assert f"D10 selected              {len(inv['rows'])}/1024" in doc
+    assert f"unplaced                  {len(inv['rows'])-256}" in doc
+    assert f"remaining                 {1024-len(inv['rows'])}" in doc
     return True
 
 def model_dpb(newbyte, width, offset, target):

@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 627,
+    "selected_semantic_candidates": 630,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 371,
-    "remaining_semantic_inventory": 397,
+    "unplaced_selected_candidates": 374,
+    "remaining_semantic_inventory": 394,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13245,6 +13245,123 @@
       "coordinate_basis": "UNPLACED",
       "ratified_resident": false,
       "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.clos.slot-boundp.v1",
+      "semantic_name": "SLOT-BOUNDP",
+      "surface_uk": "зв’язана-комірка?",
+      "surface_ukr": "має-значення-комірка?",
+      "relation_class": "CLOS-SLOT-STATE-OBSERVATION",
+      "behavior": "Return D1 YES iff an existing named instance slot is bound, including when its stored value is EMPTY/NIL; a declared-but-unbound slot is NO. A nonexistent slot is a distinct SLOT-MISSING case, not an ordinary NO.",
+      "arity": "(instance,slot-name)->D1 predicate or declared missing-slot condition",
+      "positive_witnesses": [
+        "Declared slot a without an initform: SLOT-BOUNDP(obj,a)=NO while SLOT-EXISTS-P(obj,a)=YES.",
+        "After assigning NIL to slot a, SLOT-BOUNDP(obj,a)=YES; slot a still exists."
+      ],
+      "falsifiers": [
+        "Treating bound NIL as unbound.",
+        "Conflating nonexistent slot with a declared unbound slot."
+      ],
+      "minimality": "Distinct from ratified D8 BOUNDP (symbol value binding), and from selected D10 SLOT-VALUE (may invoke unbound condition); slot-boundness is observable independently of slot-value read.",
+      "unblock_fanout": [
+        "CLOS slot initialization",
+        "class migration witness"
+      ],
+      "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-boundp.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4843",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "ANSI CLHS SLOT-BOUNDP"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-ROOT-REVIEW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clos.slot-makunbound.v1",
+      "semantic_name": "SLOT-MAKUNBOUND",
+      "surface_uk": "розв’язати-комірку",
+      "surface_ukr": "зняти-значення-комірки",
+      "relation_class": "CLOS-SLOT-STATE-TRANSITION",
+      "behavior": "Change a named existing instance slot into the unbound state and return the SAME instance while retaining the slot's existence, class identity and all unrelated slots; setting it to NIL is not equivalent.",
+      "arity": "(instance,slot-name)->same instance or declared missing-slot condition",
+      "positive_witnesses": [
+        "For slots a=3 and b=4, unbind a; SLOT-BOUNDP(a)=NO and SLOT-VALUE(b)=4.",
+        "The returned instance is EQ-identical to the input and slot a still exists; binding a to NIL afterwards makes SLOT-BOUNDP(a)=YES."
+      ],
+      "falsifiers": [
+        "Implement as writing NIL, so slot is still bound.",
+        "Delete slot a, allocate a replacement instance or modify unrelated slot b."
+      ],
+      "minimality": "No D8 RPLACA/RPLACD/VECTOR-SET! operation creates a distinguishable declared-unbound slot; D10 selected MAKUNBOUND concerns symbol bindings, not instance slots.",
+      "unblock_fanout": [
+        "CLOS object lifecycle",
+        "schema migration"
+      ],
+      "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-makunbound.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4843",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "ANSI CLHS SLOT-MAKUNBOUND"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-ROOT-REVIEW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clos.remove-method.v1",
+      "semantic_name": "REMOVE-METHOD",
+      "surface_uk": "вилучити-метод",
+      "surface_ukr": "прибрати-метод-з-узагальненої-функції",
+      "relation_class": "CLOS-GENERIC-METHOD-STATE-TRANSITION",
+      "behavior": "Remove one identified method object from one generic function, keeping the generic function and all other methods intact; removing an absent method MUST NOT signal an error and returns the generic function.",
+      "arity": "(generic-function,method-object)->generic-function",
+      "positive_witnesses": [
+        "With methods A and B in generic G, removing A leaves B applicable in G.",
+        "Removing A again returns G with no error and no loss of B."
+      ],
+      "falsifiers": [
+        "Delete the whole generic function or remove B while removing A.",
+        "Error on an absent method or select method only by a print-name string."
+      ],
+      "minimality": "Different from selected D10 DEFMETHOD (definition) and ratified D9 REMD/FS-UNBIND (named definition unlink); exact method membership update is a separate observable state law.",
+      "unblock_fanout": [
+        "runtime generic method mutation",
+        "Lisp-machine method inspection"
+      ],
+      "source_path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+      "primary_url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_rm_met.htm",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4842",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+        "ANSI CLHS REMOVE-METHOD"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-ROOT-REVIEW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
     }
   ],
   "parent_domain": {
@@ -13278,6 +13395,8 @@
     "knowledge/d10-lisp-machine-evaluator-harvest-v1.json",
     "knowledge/d10-interlisp-psl-history-harvest-v1.json",
     "knowledge/d10-selfhost-reason-harvest-v1.json",
-    "knowledge/d10-historical-primary-admission-batch1-v1.json"
+    "knowledge/d10-historical-primary-admission-batch1-v1.json",
+    "knowledge/d10-clos-slot-state-historical-review-v1.json",
+    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
   ]
 }
