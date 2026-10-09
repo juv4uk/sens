@@ -59,9 +59,10 @@
               (actual (00101111 row))
               (expected (00110000 row)))
          (00000111
-           ((00100010 actual expected) (1)
+           ((00100010 actual expected)
             (machine-register-width-check (00000110 rows)))
-           ((00100010 actual expected) (0)
+           ((00100010 (00100010 actual expected)
+     (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
             (00100111
               (00000001 machine-register-width-witness)
               (00000001 (status fail))

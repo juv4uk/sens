@@ -669,10 +669,9 @@
               (00000111
                 ((my-result-fail? test-result) test-result)
                 ((00100010 (my-result-value test-result) (00101111 clause))
-                 (1)
                  (my-eval-result (00110000 clause) env-ref))
-                ((00100010 (my-result-value test-result) (00101111 clause))
-                 (0)
+                ((00100010 (00100010 (my-result-value test-result) (00101111 clause))
+                             (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
                  (my-eval-cond-result-mode
                    (00000110 clauses) env-ref migration-compatibility?)))))
            ; Historical two-part clauses remain migration-only, mirroring the

@@ -13,7 +13,6 @@
   ((00011100 bare-sid-sum surface-sum) 1
    (00000111
      ((00100010 (01001100 00000000) "00000000")
-      (1)
       (00000001 (bare-sid-literal-witness (status pass))))
      (t t
       (00000001 (bare-sid-literal-witness

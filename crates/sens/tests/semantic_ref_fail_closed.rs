@@ -47,6 +47,7 @@ fn early_sid_lowering_resolves_peer_surfaces_before_backend_entry() {
         .value
         .to_string();
 
+    // EQUAL now returns exact D1 PredicateBit, printed as 1/0 (not legacy lists).
     assert_eq!(
         rendered,
         "((same 00000010) yes no 1 1 1 1 ())"
