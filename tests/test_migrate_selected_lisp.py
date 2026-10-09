@@ -95,7 +95,7 @@ class SelectedOriginalT5(unittest.TestCase):
 
     def test_pinned_original_not_fake_new_file(self):
         self.assertEqual(source_blob(SOURCE), "407685130e53a0129b8d1b86e8e20b36270965ba")
-        self.assertEqual(self.orig.decode(), "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ()))\n")
+        self.assertEqual(self.orig.decode(), "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n")
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
 
     def test_bad_blob_blocks_even_before_conversion(self):
