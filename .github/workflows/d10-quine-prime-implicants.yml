@@ -1,0 +1,26 @@
+name: D10 Quine 1952 prime implicant historical oracle
+
+on:
+  push:
+    paths:
+      - 'knowledge/d10-quine-prime-implicants-20261009.json'
+      - 'tests/test_d10_quine_prime_implicants.py'
+      - '.github/workflows/d10-quine-prime-implicants.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-quine-prime-implicants-20261009.json'
+      - 'tests/test_d10_quine_prime_implicants.py'
+      - '.github/workflows/d10-quine-prime-implicants.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-cube-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exhaustive ON DC OFF boolean tables and negative controls
+        run: python3 -m unittest discover -s tests -p 'test_d10_quine_prime_implicants.py' -v
