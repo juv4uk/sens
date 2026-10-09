@@ -1,0 +1,47 @@
+name: Verify 507 whole encoder CML RED
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-507-encoder-cml-red.yml'
+      - 'docs/superpowers/plans/2026-09-18-compiled-encoder-bootstrap*'
+
+jobs:
+  encoder-cml-red:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout my-lisp
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Checkout pinned CML
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/cml
+          ref: d12db3370180c4d155e21a61ab788d63e02010e9
+          path: _cml
+          submodules: recursive
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Move pinned CML outside my-lisp Cargo workspace
+        shell: bash
+        run: |
+          rm -rf /tmp/cml-pinned
+          cp -a _cml /tmp/cml-pinned
+
+      - name: Execute whole upstream encoder and require fail-closed RED
+        shell: bash
+        run: |
+          set +e
+          output="$(cd /tmp/cml-pinned && cargo run --quiet --bin cml -- x86-elf "$GITHUB_WORKSPACE/lib/machine/encoding/x86-64.lisp" /tmp/my-lisp-encoder 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          echo "CML_ENCODER_EXIT_STATUS=$status"
+          test "$status" -ne 0
+
+      - name: Child diff hygiene
+        run: git diff --check HEAD^ HEAD
