@@ -116,6 +116,56 @@ class BoundedUkTripletTests(unittest.TestCase):
                 self.assertEqual(mod.decode_bytes(physical), words)
         self.assertEqual(mod.uk_surface(3)["000"], "()")
 
+    def test_two_sequential_proved_d3_forms_preserve_uk_t5_and_view(self):
+        # Дві окремі D2-форми; жодного D2 SPACE між ними не додаємо.
+        # QUOTE(EMPTY) і QUOTE(D1 NO) вже окремо доведені.
+        words = "10 001 00 000 01 10 001 00 0 01".split()
+        uk = "(як-є ())\\n(як-є ні)\\n".replace("\\n", "\n")
+        self.assertEqual(mod.canonical_uk_from_words(words), uk)
+        self.assertEqual(mod.project_current_uk(uk), words)
+        self.lisp.write_bytes(uk.encode("utf-8"))
+        physical = mod.encode_words(words)
+        self.sens.write_bytes(physical)
+        self.view.write_bytes((" ".join(words) + "\n").encode("ascii"))
+        original = (self.lisp.read_bytes(), self.sens.read_bytes(), self.view.read_bytes())
+        proof = self.verify()
+        self.assertEqual(proof["typed_word_count"], len(words))
+        self.assertTrue(proof["canonical_uk_roundtrip"])
+        self.assertTrue(proof["canonical_view_roundtrip"])
+        self.assertFalse(proof["runtime_oracle_admitted_by_this_audit"])
+        self.assertEqual(proof["old_originals_migrated_by_this_audit"], 0)
+        self.assertEqual((self.lisp.read_bytes(), self.sens.read_bytes(),
+                          self.view.read_bytes()), original)
+
+    def test_sequential_forms_do_not_grant_unproved_d7_or_broken_d2(self):
+        valid = "10 001 00 000 01".split()
+        unproved = [
+            "10 001 00 101 01".split(),  # невідомий quoted D3 datum
+            "10 001 00 1100000 01".split(),  # без Text7-квоти
+            "10 111 00 000 01".split(),  # неправильна арність CONS
+            ["00", "10", "001", "00", "000", "01"],  # зайвий D2 SPACE між формами
+            ["01"],  # непарна дужка після першої форми
+        ]
+        for second in unproved:
+            with self.subTest(second=second), self.assertRaises(mod.ProjectionBlocked):
+                mod.canonical_uk_from_words(valid + second)
+
+    def test_sequential_forms_need_exact_one_lf_per_uk_form(self):
+        words = "10 001 00 000 01 10 001 00 0 01".split()
+        canonical = mod.canonical_uk_from_words(words)
+        self.lisp.write_bytes(canonical.encode("utf-8"))
+        self.sens.write_bytes(mod.encode_words(words))
+        self.view.write_bytes((" ".join(words) + "\n").encode("ascii"))
+        self.assertTrue(self.verify()["canonical_uk_roundtrip"])
+        for altered in (canonical.replace("\n", " ", 1),
+                        canonical.replace("\n", "\n\n", 1),
+                        canonical.replace("\n", "\r\n", 1),
+                        canonical[:-1]):
+            with self.subTest(altered=repr(altered)):
+                self.lisp.write_bytes(altered.encode("utf-8"))
+                with self.assertRaises(mod.ProjectionBlocked):
+                    self.verify()
+
     def test_quote_rejects_structural_data_without_a_proven_d7_law(self):
         for words in (
             ["10", "001", "00", "10", "000", "01", "01"],
