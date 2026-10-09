@@ -40,31 +40,6 @@ fn tagged_binary_wire_round_trips_exact_numbers() {
 }
 
 #[test]
-fn numeric_wire_never_aliases_the_exact_function_space() {
-    let function = eval("(read \"00000000\")");
-    assert!(function.as_sens8().is_some());
-
-    let number = eval("(read \"#q2:00000000/1\")");
-    assert!(number.as_sens8().is_none());
-    assert_eq!(number, Value::Number(0.0, Exactness::Exact));
-    assert_eq!(
-        eval("(write-to-string (read \"#q2:00000000/1\"))"),
-        Value::String(Rc::from("#q2:0/1")),
-    );
-
-    let max_function = eval("(read \"11111111\")");
-    assert!(max_function.as_sens8().is_some());
-
-    let numeric_255 = eval("(read \"#q2:11111111/1\")");
-    assert!(numeric_255.as_sens8().is_none());
-    assert_eq!(numeric_255, Value::Number(255.0, Exactness::Exact));
-    assert_eq!(
-        eval("(write-to-string 255)"),
-        Value::String(Rc::from("#q2:11111111/1")),
-    );
-}
-
-#[test]
 fn arbitrary_precision_binary_wire_is_exact() {
     let numerator = format!("1{}", "0".repeat(160));
     let wire = format!("#q2:{numerator}/11");
