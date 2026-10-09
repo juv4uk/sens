@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - knowledge/d10-symbolic-ai-arc-support-20261009.json
+      - knowledge/d10-symbolic-ai-clp-oracle-evidence-v1.json
       - docs/research/D10-SYMBOLIC-AI-BINARY-SUPPORT.uk.md
       - tests/test_d10_ai_arc_support.py
       - tests/oracles/d10_clpfd_arc_support.pl
@@ -13,6 +14,7 @@ on:
       - main
     paths:
       - knowledge/d10-symbolic-ai-arc-support-20261009.json
+      - knowledge/d10-symbolic-ai-clp-oracle-evidence-v1.json
       - tests/test_d10_ai_arc_support.py
       - tests/oracles/d10_clpfd_arc_support.pl
       - .github/workflows/d10-symbolic-ai-arc-support.yml
