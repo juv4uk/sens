@@ -205,6 +205,31 @@
         "scripts/check_d10_gf2_selection_transition.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.symbolicai.mackworth77.arc-consistency.20261009",
+      "authority": "#4991 existing owner directive D10; #4013 exclusive one-agent symbolic-AI research selection; #4902 selected→ledger gate",
+      "evidence": [
+        "Alan K. Mackworth, Consistency in Networks of Relations (1977), DOI 10.1016/0004-3702(77)90007-8",
+        "knowledge/d10-ai-interest-proposal-v1.json",
+        "tests/test_d10_arc_consistency_4991.py",
+        "tests/oracles/d10_arc_consistency_4991.pl",
+        "GitHub Actions 37912438465: SWI-Prolog + Python PASS"
+      ],
+      "previous_inventory_blob_sha": "292ef3086114ad0dfe71776c831c2a31b39352a8",
+      "resulting_inventory_blob_sha": "0ed6bfa943168253d6bdba659de7fc841a1bdd24",
+      "added_stable_ids": [
+        "d10.symbolicai.mackworth77.arc-consistency-fixpoint.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-ai-interest-proposal-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 636,
+      "resulting_selected": 637,
+      "decision": "SELECTED-RESEARCH; owner Core-vs-Library pending, coordinate=null, no D2/T5"
     }
   ]
 }
