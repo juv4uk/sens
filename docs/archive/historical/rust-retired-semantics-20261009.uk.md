@@ -10,7 +10,7 @@
 
 | `crates/sens/tests/decimal_comma_authority.rs` | `decimal_comma_semantics_are_owned_by_lisp_witness` | Ненормалізована Lisp-фікстура застосовує застарілий тричленний COND та падає з `UnsatisfiedConditional` | Нові поточні parser-only перевірки `decimal_comma_reader_preserves_exact_rational_identity` і `comma_inside_non_numeric_tokens_remains_symbol_data` зберігають граматику без старого control oracle |
 
-| `crates/sens/tests/epistemic.rs` | 11 позитивних/аксесорних тестів `observation/claim/evidence/intent`, включно з `intent_capabilities_satisfied_is_true_when_all_requirements_present` | Спиралися на старі `t`/`()` та тричленні/неявні `COND` у реалізації Lisp; 11 із 35 падали у Hosted CI | **24** решта перевірок залишено, включно з `supporting_evidence_record_is_not_implicit_cond_truth`. Позитивна канонічна semantics/accessor parity — **BLOCK до L1–L7 та незалежного оракула** |
+| `crates/sens/tests/epistemic.rs` | **28 із 35** тестів предикатів/аксесорів `source-ref?`, `observation?`, `claim?`, `evidence?`, `intent?`, `intent-capabilities-satisfied?` | 11 падали на старих `t`/`()`/спадковому `COND`; ще 17 негативних `()` перевірок проходили, але так само закріплювали retired NIL-as-false замість exact D1 PredicateBit | **7** тестів залишено: 4 конструктори структурних даних, 2 структурні відсутності evidence та `supporting_evidence_record_is_not_implicit_cond_truth`. Канонічна предикатна семантика й accessors — **BLOCK до L1–L7 та незалежного оракула** |
 
 ## Межа змін
 
