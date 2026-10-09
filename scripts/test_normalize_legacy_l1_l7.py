@@ -53,6 +53,17 @@ class OwnerDecision(unittest.TestCase):
         self.assertEqual(rows[0]["rule"], "L4")
         self.assertEqual(rows[0]["status"], "BLOCK")
 
+    def test_l4_reads_real_owner_ratified_d8_table(self):
+        codes = mod.d8_helpers()
+        self.assertEqual(codes.get("equal?"), "11110111")
+        self.assertNotIn("null", codes)
+
+    def test_actual_emitter_typed_roundtrip(self):
+        projection, digest, physical = mod.project("(110 (1 000))")
+        self.assertTrue(projection.strip())
+        self.assertEqual(len(digest), 64)
+        self.assertEqual(len(physical), 64)
+
     def test_l5_retirement_requires_archaeology(self):
         src = "(structural-kind a)"
         normalized, rows = self.run_case(src)
