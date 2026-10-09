@@ -882,7 +882,6 @@ fn linter_tests_from_my() {
     }
 }
 
-// Simple LCG for property tests
 // Minimal symbol/string introspection this project held off on for a long
 // time (CLAUDE.md: don't grow the Rust surface) — added deliberately when
 // lib/clips-import.lisp's Step 2 needed to strip CLIPS's `?` prefix off a
@@ -1315,9 +1314,9 @@ fn eval_core(source: &str) -> Value {
 
 #[test]
 fn string_less_than_orders_strings_lexicographically() {
-    assert_eq!(eval_core(r#"(string<? "a" "b")"#), Value::truth(true));
-    assert_eq!(eval_core(r#"(string<? "b" "a")"#), Value::truth(false));
-    assert_eq!(eval_core(r#"(string<? "a" "a")"#), Value::truth(false));
+    assert_eq!(eval_core(r#"(string<? "a" "b")"#).as_predicate_bit(), Some(true));
+    assert_eq!(eval_core(r#"(string<? "b" "a")"#).as_predicate_bit(), Some(false));
+    assert_eq!(eval_core(r#"(string<? "a" "a")"#).as_predicate_bit(), Some(false));
 }
 
 #[test]
