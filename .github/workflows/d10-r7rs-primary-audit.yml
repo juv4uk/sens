@@ -1,0 +1,20 @@
+name: D10 R7RS primary manual bounded history audit
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-r7rs-primary-manual-slice-v1.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'scripts/check_d10_r7rs_primary_slice.py'
+      - '.github/workflows/d10-r7rs-primary-audit.yml'
+  workflow_dispatch:
+jobs:
+  historical-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Historical source and negative guards
+        run: python3 scripts/check_d10_r7rs_primary_slice.py --self-test
+      - name: Working tree remains unchanged
+        run: git diff --exit-code
