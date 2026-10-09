@@ -14,12 +14,11 @@
       ((00100010
          (native-first-plan expression)
          (00100111 (00000001 evaluator-fallback) expression))
-       (1)
        (00000001 pass))
-      ((00100010
+      ((00100010 (00100010
          (native-first-plan expression)
          (00100111 (00000001 evaluator-fallback) expression))
-       (0)
+       (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
        (00000001 fail)))))
 
 (00100111
