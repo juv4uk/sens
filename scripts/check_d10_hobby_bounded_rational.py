@@ -148,14 +148,16 @@ def test_model():
 def self_test(inv, state, foundation, intake):
     selected=verify(inv,state,foundation,intake)
     corpus=test_model()
+    # Guard mutations must target the historical Spanda identity, not the
+    # physical tail of a growing D10 registry. New D10 append is legitimate.
     mutants=[
        ("change old semantic",lambda i,s,d: i["rows"][5].update({"behavior":"forged"})),
-       ("duplicate new ID",lambda i,s,d: i["rows"].append(copy.deepcopy(i["rows"][-1]))),
-       ("invent coordinate",lambda i,s,d: i["rows"][-1].update({"coordinate":"0000000000"})),
-       ("ratify",lambda i,s,d: i["rows"][-1].update({"ratified_resident":True})),
+       ("duplicate new ID",lambda i,s,d: i["rows"].append(copy.deepcopy(next(r for r in i["rows"] if r["stable_id"] == STABLE)))),
+       ("invent coordinate",lambda i,s,d: next(r for r in i["rows"] if r["stable_id"] == STABLE).update({"coordinate":"0000000000"})),
+       ("ratify",lambda i,s,d: next(r for r in i["rows"] if r["stable_id"] == STABLE).update({"ratified_resident":True})),
        ("change source SHA",lambda i,s,d: d["origin"].update({"donor_blob_sha":"0"*40})),
        ("erase falsifiers",lambda i,s,d: d["selected"][0].update({"falsifiers":[]})),
-       ("forge T5 permission",lambda i,s,d: i["rows"][-1].update({"physical_t5_authorized":True})),
+       ("forge T5 permission",lambda i,s,d: next(r for r in i["rows"] if r["stable_id"] == STABLE).update({"physical_t5_authorized":True})),
        ("wrong total",lambda i,s,d: s["target"].update({"remaining_semantic_candidates":-1})),
     ]
     # The changed-old-semantic row is rejected by transition-history checker;
