@@ -12,8 +12,9 @@
 (00000111
   ((00011100 bare-sid-sum surface-sum) 1
    (00000111
+     ; Exact D1 EQUAL produces a one-bit predicate, not legacy list (1).
+     ; Select directly on D1:1; retain the negative fail envelope below.
      ((00100010 (01001100 00000000) "00000000")
-      (1)
       (00000001 (bare-sid-literal-witness (status pass))))
      (t t
       (00000001 (bare-sid-literal-witness
