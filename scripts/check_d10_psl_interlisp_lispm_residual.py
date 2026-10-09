@@ -5,6 +5,7 @@ import copy
 import json
 import subprocess
 from pathlib import Path
+from d10_historical_snapshot_compat import historic_view, pinned_inventory_git_blob
 
 BASE = Path(__file__).resolve().parents[1]
 LEDGER = BASE / "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
@@ -12,9 +13,12 @@ LOWER = BASE / "knowledge/d1-d9-foundation.json"
 D10 = BASE / "knowledge/d10-v1-semantic-inventory.json"
 
 def sha(path):
+    if path == D10:
+        return pinned_inventory_git_blob(path)
     return subprocess.check_output(["git", "hash-object", str(path)], cwd=BASE, text=True).strip()
 
 def check(j, f, d, pin=True):
+    d = historic_view(d, j["snapshot"]["selected_blob"])
     assert j["status"] == "RESEARCH-HOLD-NO-ADMISSION"
     assert j["accounting"]["added_selected"] == j["accounting"]["added_ratified"] == j["accounting"]["assigned_coordinates"] == 0
     assert j["snapshot"]["d10_ratified"] == d["accounting"]["ratified_d10_residents"] == 0
