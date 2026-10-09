@@ -13,8 +13,8 @@
 (00001001 machine-effect-current-domain-key?
   (00001000 (width bits expected-width expected-bits)
     (00000111
-      ((00011100 width expected-width)
-       (00011100 bits expected-bits))
+      ((00000011 width expected-width)
+       (00000011 bits expected-bits))
       ((00000010 (00000001 ())) (00000001 ())))))
 
 ; Current bounded arithmetic mappings. Exact D5 identity remains upstream
