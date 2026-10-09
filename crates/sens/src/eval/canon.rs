@@ -571,33 +571,16 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     let Some(sid) = semantic_registry::admitted_semantic_id_for_surface(name) else {
         return;
     };
-    // #3070 transitional bootstrap.
-    //
-    // Canonical storage/routing is the exact D5 slot. The historical code slot
-    // is only a mechanism alias to the SAME Value/Rc so recursive legacy Core
-    // bodies keep their old shallow dispatch path while source migration is
-    // incomplete. It does not mint a second semantic identity, and #3062
-    // removes this alias when exact-domain source/registry routing is complete.
-    if let Some(identity) =
-        semantic_registry::transitional_d5_binding_identity_from_registry_byte(sid.packed_byte())
-    {
-        if super::necessary_forms::identity_for_domain_identity(identity).is_some() {
+    // No byte-to-domain lookup is permitted here. The only D5 identity
+    // originates in the generated, domain-qualified Lisp definition bindings
+    // above; the SID slot is merely a temporary alias for unmigrated callers.
+    if let Some(identity) = direct_d5_binding {
+        if super::necessary_forms::identity_for_domain_identity(identity).is_some()
+            || domain_primitive(identity).is_some()
+            || super::d5_arithmetic::has_mechanism(identity)
+        {
             return;
         }
-
-        if let Some(direct_identity) = direct_d5_binding {
-            assert_eq!(
-                direct_identity, identity,
-                "D5 definition binding projection disagrees with compatibility binding for {name}"
-            );
-        } else if domain_primitive(identity).is_none()
-            && !super::d5_arithmetic::has_mechanism(identity)
-        {
-            environment.bind_domain_code_slot_once(identity, value.clone());
-        }
-
-        // Temporary compatibility alias for still-unmigrated callers.
-        // It supplies no semantic identity and may disappear independently.
         environment.bind_code_slot_once(sid, value.clone());
         return;
     }
