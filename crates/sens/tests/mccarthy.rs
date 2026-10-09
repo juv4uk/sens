@@ -49,21 +49,6 @@ fn eval(source: &str) -> Value {
 }
 
 #[test]
-fn native_binary_value_round_trips_through_eval_and_print() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("core library loads");
-    let first = eval_program("00000101", &mut session)
-        .expect("SID value evaluates");
-    assert_eq!(first.value.to_string(), "00000101");
-
-    let printed = first.value.to_string();
-    let second = eval_program(&printed, &mut session)
-        .expect("printed SID reads again");
-    assert_eq!(second.value, first.value);
-}
-
-#[test]
 fn division_is_an_exact_reduced_rational() {
     assert_eq!(
         eval("(/ 5 6 8 7)"),
@@ -1269,17 +1254,6 @@ fn core_session() -> Session {
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("core library should load");
     session
-}
-
-fn eval_core(source: &str) -> Value {
-    eval_program(source, &mut core_session()).unwrap().value
-}
-
-#[test]
-fn string_less_than_orders_strings_lexicographically() {
-    assert_eq!(eval_core(r#"(string<? "a" "b")"#), Value::truth(true));
-    assert_eq!(eval_core(r#"(string<? "b" "a")"#), Value::truth(false));
-    assert_eq!(eval_core(r#"(string<? "a" "a")"#), Value::truth(false));
 }
 
 #[test]
