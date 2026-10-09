@@ -158,5 +158,3 @@ decrement_power([Name-Exponent|Rest], Target, Reduced, FoundExponent) :-
 decrement_power([Pair|Rest], Target, [Pair|Reduced], Exponent) :-
     decrement_power(Rest, Target, Reduced, Exponent).
 
-:- initialization(main, main).
-main :- run.
