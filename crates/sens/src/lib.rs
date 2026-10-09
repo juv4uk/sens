@@ -37,6 +37,7 @@ mod semantic_registry;
 mod source_words;
 mod source_packing;
 mod ternary_transport;
+mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
@@ -200,6 +201,8 @@ pub use text7_projection::{
     encode_text7, render_text7, Text7Layout, Text7ProjectionError, TEXT7_LAYOUT_SHA256,
     TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
 };
+
+pub use binary_execution::{eval_t5_program, T5ExecutionError};
 
 pub use eval::exact_arity;
 pub use eval::parse_json;
