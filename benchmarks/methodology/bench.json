@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "methodology",
+  "wing": "Measured-performance methodology / wall-time",
+  "roles": [
+    "MEASUREMENT",
+    "FALSIFIER"
+  ],
+  "question": "On one exact GitHub-hosted runner, do randomly balanced A/B subprocess calls retain byte-identical output, reproducible pair ordering, and a conservatively labeled exploratory uncertainty interval?",
+  "claim": "SHA-bound same-host physical workload timing only; A/A is a noise-floor negative control. Session/bootstrap CI is exploratory, not formal multi-build Kalibera-Jones evidence and never a CI speedup gate. No independent semantics or instruction counts.",
+  "witness": [
+    "README.md",
+    "paired_wall.py",
+    "tests/test_paired_wall.py"
+  ],
+  "status": "EXPLORATORY-PAIRED-WALL",
+  "generation": "2026-10-09 Contract 11.8; GitHub-hosted only",
+  "axis": "statistics/paired-randomized-wall-session-bootstrap",
+  "reproduce": "python3 -m unittest discover -s benchmarks/methodology/tests -p 'test_*.py' -v"
+}
