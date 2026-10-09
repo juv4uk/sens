@@ -223,13 +223,15 @@ fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
         .current_dir(&repo)
         .output()
         .expect("run canonical migrator on external observer probe");
+    let probe_report_bytes = fs::read(&probe_report)
+        .expect("read observer probe report even when migration is BLOCKED");
+    let probe_manifest: Json = serde_json::from_slice(&probe_report_bytes)
+        .expect("valid observer probe report JSON");
     assert!(probe_migration.status.success(),
-        "physical Text7 observer probe BLOCKED: stdout={} stderr={}",
+        "physical Text7 observer probe BLOCKED: stdout={} stderr={} report={}",
         String::from_utf8_lossy(&probe_migration.stdout),
-        String::from_utf8_lossy(&probe_migration.stderr));
-    let probe_manifest: Json = serde_json::from_slice(
-        &fs::read(&probe_report).expect("read observer probe report")
-    ).expect("valid observer probe report");
+        String::from_utf8_lossy(&probe_migration.stderr),
+        probe_manifest);
     assert_eq!(probe_manifest["summary"]["files_written"], 1);
     assert_eq!(probe_manifest["summary"]["files_blocked"], 0);
     let probe_source_path = probe_input.join(ORIGINAL);
