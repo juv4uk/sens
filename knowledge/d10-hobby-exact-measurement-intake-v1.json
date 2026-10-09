@@ -160,6 +160,51 @@
       "decision": "MECHANISM-ONLY",
       "reason": "FPGA hardware encoding and 8x16 switch-matrix transport are mechanisms, distinct from rational identity.",
       "source": "README.md@d339363e03798941280d7394fb6b24a76ff43dd3"
+    },
+    {
+      "interest": "chess / game-tree algorithms",
+      "repo": "juv4uk/chess-lisp-zero",
+      "candidate": "STABLE-ARGMAX-STATE-SUCCESSOR",
+      "decision": "HOLD-DERIVABLE-LIBRARY",
+      "reason": "lib/search.lisp selects the first maximal-scored successor by a strict > comparison, preserving deterministic tie order, and minimax depth recursion. This is an observable deterministic fold/search law but appears derivable from D6 ordering + enumerating successors, not a justified new Core D10 resident.",
+      "source": "lib/search.lisp@a2186134e82e27a946ccaaa0b11471131b9efa1e",
+      "positive_witness": "Two equal scored legal successors A then B must select A; reversing their order may select B. Counterexample: unstable hash iteration destroys tie reproducibility."
+    },
+    {
+      "interest": "chess / pure transition plus reject safety",
+      "repo": "juv4uk/chess-lisp-zero",
+      "candidate": "VALIDATED-STATE-TRANSITION-NO-MUTATION",
+      "decision": "HOLD-STATE-LAW-REVIEW",
+      "reason": "WASM smoke witnesses initial 20 moves, deterministic E2E4 resulting FEN and rejection of illegal A1-H8 without changing terminal state. State preservation on invalid input is a strong language-level boundary candidate, but existing selected D10 UNDO and APPLY-JOURNAL-EVENT plus user D2 control must be deduped before any slot.",
+      "source": "tools/wasm-chess-smoke.mjs@c351113fa6197faa2c7e82751d0657a3377d619e",
+      "positive_witness": "Apply a valid state transition => new position; reject invalid transition => previous state unchanged; no invented state. Falsifier: partial board mutation on error."
+    },
+    {
+      "interest": "epistemology / Sanskrit philology / formal research claims",
+      "repo": "juv4uk/shiva-sutras",
+      "candidate": "REPRODUCIBILITY-IS-NOT-AUTHENTICITY",
+      "decision": "HOLD-EXISTING-EPISTEMIC-CLAIM-SYSTEM",
+      "reason": "A source can be byte-reproducible yet have uncertain historical attribution. Explicitly treat repeatable processing as distinct from source-authenticity proof; D10 already has MAKE-CLAIM, MAKE-EVIDENCE, EVIDENCE-SOURCE-REF, NATIVE-OBSERVATION, so this likely is a law/invariant on epistemic records rather than a new opcode.",
+      "source": "RESEARCH_MAP.md@763bf48a7ff890ca6947707f16d98bea605f97c1",
+      "positive_witness": "Identical bytes in repeated retrievals do not automatically imply verified attribution. Falsifier: promoting source to AUTHENTIC solely because hashes match."
+    },
+    {
+      "interest": "self-improving editor / Emacs and live Lisp laboratory",
+      "repo": "juv4uk/my-idea",
+      "candidate": "LIVE-DEFINITION-REPLACE",
+      "decision": "HOLD-EXISTING-D8-D10-OR-D2",
+      "reason": "Self-extending Lisp inside a persistent REPL is a core user goal, but named definition replacement overlaps existing D8 definitions and D10 COPYD/UNDO plus D2 evaluator control. Needs a proof distinct from ordinary DEFINE and generic method transitions before admission.",
+      "source": "README.md@858cf81cf46b27036a783ece10d82e9ac8ac7837",
+      "positive_witness": "Redefine function F while REPL stays live, future calls take new definition, rollback semantics explicit. Falsifier: evaluator unexpectedly retains stale definition."
+    },
+    {
+      "interest": "bare-metal Lisp machine / UEFI and x86-64 assembly",
+      "repo": "juv4uk/wsm-os-lisp",
+      "candidate": "BOOT-ARTIFACT-PARITY-WITNESS",
+      "decision": "HOLD-MECHANISM-AND-OBSERVATION",
+      "reason": "Boot, QEMU-versus-hardware parity, driver ABI and ASM instructions remain machine execution substrate. Can use source-pinned epistemic evidence objects already in D10, but no new D10 opcode merely because a CPU/device needs an operation.",
+      "source": "README.md@5a2a15b76cf5d0006c09d4edbbde50a4f7f094ac",
+      "positive_witness": "Same pinned binary artifact observed under QEMU and native must have distinct observation classes; QEMU success does not prove physical boot."
     }
   ]
 }
