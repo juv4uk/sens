@@ -427,8 +427,8 @@
 (00001001 спарувати
   (00001000 (keys values tail)
     (00000111
-      ((00000010 keys) () tail)
-      ((00000010 keys) 
+      ((00000010 keys) tail)
+      ((00000010 (00000001 ())) 
        (00000100
          (00000100 (00000101 keys) (00000101 values))
          (спарувати (00000110 keys) (00000110 values) tail))))))
@@ -437,8 +437,8 @@
 
 (00001010 let* (bindings body)
   (00000111
-    ((00000010 bindings) () body)
-    ((00000010 bindings) 
+    ((00000010 bindings) body)
+    ((00000010 (00000001 ())) 
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
