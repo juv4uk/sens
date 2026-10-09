@@ -1,0 +1,37 @@
+name: Replay axiom-basis proof and index
+
+on:
+  push:
+    branches:
+      - replay/research-3426-axiom-basis-current-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  proof-and-index:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay/research-3426-axiom-basis-current-20261009
+          persist-credentials: true
+      - name: Reproduce exact rational seed and SI dependency witness
+        run: python3 benchmarks/axiom-basis-minimality/probe.py > "$RUNNER_TEMP/axiom-basis-report.json"
+      - name: Rebuild current benchmark index from manifests
+        run: |
+          python3 scripts/benchmark_registry.py
+          python3 scripts/benchmark_registry.py --check
+      - name: Save generated index to replay branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- benchmarks/README.md
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs(bench): regenerate index for historical axiom-basis proof'
+          git push origin HEAD:refs/heads/replay/research-3426-axiom-basis-current-20261009
