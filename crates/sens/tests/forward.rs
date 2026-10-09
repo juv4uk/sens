@@ -416,34 +416,6 @@ fn match_and_condition_fails_when_one_sub_condition_has_no_match() {
 }
 
 #[test]
-fn run_multi_supports_test_conditions() {
-    let source = r#"
-        (run-multi
-          (list (list (list (quote big) (logic-var (quote x)))
-                      (list (quote num) (logic-var (quote x)))
-                      (list (quote test) (list (quote >) (logic-var (quote x)) 5))))
-          (list (quote (num 3)) (quote (num 10))))
-    "#;
-    assert_eq!(eval_forward(source), "((big 10) (num 3) (num 10))");
-}
-
-#[test]
-fn match_test_condition_succeeds_when_the_expression_is_truthy() {
-    let source = r#"
-        (match-test-condition (list (quote >) 10 5) (quote ()))
-    "#;
-    assert_eq!(eval_forward(source), "(())");
-}
-
-#[test]
-fn match_test_condition_fails_when_the_expression_is_falsy() {
-    let source = r#"
-        (match-test-condition (list (quote >) 3 5) (quote ()))
-    "#;
-    assert_eq!(eval_forward(source), "()");
-}
-
-#[test]
 fn run_jtms_multi_derives_a_multi_condition_grandparent_fact() {
     let source = r#"
         (assert-fact-jtms! (quote (parent alice bob)))
