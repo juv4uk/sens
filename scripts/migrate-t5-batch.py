@@ -125,7 +125,8 @@ def run(args: argparse.Namespace) -> dict:
         target = out / destination
         row = {"path": rel.as_posix(), "output": destination.as_posix()}
         resolver = mig.Resolver(legacy, my, upper, source_era=source_era,
-                                admitted_d8=admitted_d8)
+                                admitted_d8=admitted_d8,
+                                strict_decisions=args.decision_table == "l1-l7")
         readable = ""  # never inherit another source on per-file error
         try:
             assert_no_links(repo, rel)
@@ -151,13 +152,14 @@ def run(args: argparse.Namespace) -> dict:
                 "typed_word_sha256": mig.typed_sha256(words),
                 "passes": dict(resolver.counts),
                 "source_era": source_era,
+                "decision_table": args.decision_table,
             })
             if args.write:
                 staged.append((rel, destination, original, packed, row))
         except (mig.MigrationError, mig.SensT5Error, UnicodeError,
                 ValueError, OSError) as exc:
             row.update({"status": "blocked", "reason": str(exc),
-                        "passes": dict(resolver.counts), "source_era": source_era})
+                        "passes": dict(resolver.counts), "source_era": source_era, "decision_table": args.decision_table})
             tok = getattr(exc, "tok", None)
             if tok is not None:
                 row["token"] = tok.text
@@ -211,6 +213,7 @@ def run(args: argparse.Namespace) -> dict:
         "authority": {"foundation_sha256": digest(INPUTS["foundation"].read_bytes()),
                       "codec": "physical-T5-5-trits-per-byte",
                       "source_era": source_era,
+                      "decision_table": args.decision_table,
                       "w8_policy": "auto blocks ambiguity; legacy and current require explicit choice"},
         "summary": {"files_seen": len(ledger), "files_admitted": admitted,
                     "files_written": written,
@@ -242,6 +245,8 @@ def main() -> int:
     parser.add_argument("--source-era", choices=("auto", "legacy", "current"),
                         default="auto",
                         help="auto FAILS on ambiguous W8; choose legacy/current only with provenance")
+    parser.add_argument("--decision-table", choices=("legacy", "l1-l7"),
+                        default="legacy", help="L1-L7 strict normalization; existing parser only")
     parser.add_argument("--write", action="store_true",
                         help="opt in to creating new physical .sens; never overwrite")
     args = parser.parse_args()
