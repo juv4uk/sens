@@ -41,7 +41,7 @@ Ubuntu**. It does not cancel itself when other agents advance `main`.
 ## Physical executable D3 COND
 
 `d3-cond-program.sens` is the **sole committed executable authority** for
-this D3 COND specimen: **31 real packed T5 bytes**. The old human-readable
+this D3 COND specimen: **29 real packed T5 bytes**. The old human-readable
 `.bits` source was removed after conversion. `sens-trit open` can derive a
 read-only bit projection from these bytes without creating a second source authority.
 The existing canonical codec, physical CLI and Rust runtime prove exact word

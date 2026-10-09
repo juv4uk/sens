@@ -209,7 +209,7 @@ fn committed_physical_d3_cond_file_executes_exact_predicate_without_legacy_names
     // Physical bytes, not a text .lisp renamed to .sens.
     let words = decode_ternary_program(D3_COND_PHYSICAL)
         .expect("checked-in T5 must pass physical and exact D2 admission");
-    assert_eq!(D3_COND_PHYSICAL.len(), 31, "no one-byte-per-bit pseudo-binary transport");
+    assert_eq!(D3_COND_PHYSICAL.len(), 29, "no one-byte-per-bit pseudo-binary transport");
     let visible = open_ternary_program(D3_COND_PHYSICAL).unwrap();
     let expected = encode_binary_projection_ternary(&visible)
         .expect("canonical D2 roundtrip of physical words");

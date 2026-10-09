@@ -35,11 +35,11 @@ from sens_t5_codec import decode_bytes, encode_words
 
 physical = Path("examples/binary/d3-cond-program.sens").read_bytes()
 words = decode_bytes(physical)
-assert len(physical) == 31, "physical T5 size drift"
-assert len(words) == 49 and sum(map(len, words)) == 105, "exact-width D1/D3 workload drift"
+assert len(physical) == 29, "physical T5 size drift"
+assert len(words) == 43 and sum(map(len, words)) == 99, "exact-width D1/D3 workload drift"
 assert encode_words(words) == physical, "noncanonical packed T5"
 assert hashlib.sha256(physical).hexdigest() == (
-    "b93b49223f5c845a4ae86392c463b59699470faeb4c8ac3cf06982bc2cb232df"
+    "4b22702f12809eeb1b05c1dd7cf122d9c405dff194c133557f619cfb8d0abf24"
 ), "ratified physical D3 COND payload changed"
 PY
 binary_status="$(cargo run --quiet -p sens-cli --bin sens-trit -- eval examples/binary/d3-cond-program.sens)"

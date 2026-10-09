@@ -12,12 +12,12 @@ quantity research file remains in the repository for the existing
 fully ratified scientific-law migration. This is *not* deletion of SI laws.
 
 **Replacement (distinct claim):**
-`examples/binary/d3-cond-program.sens` is a physical 31-byte T5 program.
+`examples/binary/d3-cond-program.sens` is a physical 29-byte T5 program.
 It proves exact D2 word-boundary admission and D3:110 COND choosing between
 exact D1:0 and D1:1 branches. This proves **no** scientific quantity arithmetic
 and **no** equivalence with the legacy fixture. The accompanying checked binary
 SHA-256 is
-`b93b49223f5c845a4ae86392c463b59699470faeb4c8ac3cf06982bc2cb232df`.
+`4b22702f12809eeb1b05c1dd7cf122d9c405dff194c133557f619cfb8d0abf24`.
 
 **Admissible reinstatement of quantity evidence:** translate *each* quantity
 row into ratified binary-domain operations, define exact D7 bindings without
