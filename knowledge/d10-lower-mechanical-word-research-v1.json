@@ -1,0 +1,173 @@
+{
+  "schema": "d10-binary-mechanical-word-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-OWNER-REVIEW-NOT-SELECTED",
+  "purpose": "One universal mathematical word law across music, SDR, astronomy, FPGA clock ratios and phonemic metrical patterns; no device driver or D2 language control.",
+  "baseline": {
+    "canonical_d10_git_blob": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "canonical_d10_selected": 630,
+    "foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_ratified": 0
+  },
+  "owner_claim": {
+    "issue": "#4013",
+    "comment": "6076188746",
+    "canonical_inventory_editor": "serial D10 integration only",
+    "selection_authority": "owner review required",
+    "source_class": "EXACT-MATHEMATICAL-SPECIFICATION"
+  },
+  "source": [
+    {
+      "kind": "REFERENCE-CONTRACT",
+      "name": "Lower mechanical word",
+      "url": "https://passagemath.org/docs/10.8/html/en/reference/combinat/sage/combinat/words/word_generators.html",
+      "section": "LowerMechanicalWord alpha rho alphabet",
+      "claim": "s[i]=floor((i+1)*alpha+rho)-floor(i*alpha+rho), alpha in [0,1]"
+    },
+    {
+      "kind": "APPLICATION-WITNESS-NO-PRIMITIVE",
+      "name": "Author SENS radio channel laboratory",
+      "repository": "juv4uk/radio-log",
+      "path": "src/lib/sens-radio/channel-lab.ts",
+      "git_blob_sha": "7d8c70691dc19f0c3d7121d8945529dd2b2335e7",
+      "claim": "Frequency offset, sample-rate scaling, aligned bit timing are observed in real SENS radio tests; this does NOT prove a new universal opcode."
+    },
+    {
+      "kind": "APPLICATION-WITNESS-NO-PRIMITIVE",
+      "name": "Author Spanda exact p/q analog FPGA vision",
+      "repository": "juv4uk/spanda",
+      "path": "README.md",
+      "git_blob_sha": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "claim": "Exact rational clock and oscillator design supports discrete p/q word pacing; design intent is not actual SENS runtime parity."
+    }
+  ],
+  "candidates": [
+    {
+      "proposal_key": "D10M-001",
+      "semantic_name": "LOWER-MECHANICAL-WORD",
+      "surface_uk": "рівномірне-двійкове-слово",
+      "surface_ukr": "згенерувати-нижнє-механічне-слово",
+      "status": "SOURCE-PROVED-OWNER-REVIEW",
+      "selected_in_canonical_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "arity": 3,
+      "signature": "(positive_integer_period_n, event_count_k_in_[0,n], rational_phase_rho_in_[0,1)) -> finite D1 bit sequence length n",
+      "law": "For i=0..n−1 output D1 bit floor((i+1)*k/n + rho)-floor(i*k/n + rho). No floating-point approximation, no implicit hardware clock, and no two-valued T5 code.",
+      "invariants": [
+        "Exactly n bits, each 0 or 1",
+        "Exactly k ones for any 0≤rho<1",
+        "For every prefix of length m, number of ones is floor(m*k/n+rho)-floor(rho)",
+        "For every contiguous pair of subwords of equal length, one-count discrepancy is at most one (balanced)",
+        "Every full period repeats; periodic output is not a physical timing guarantee"
+      ],
+      "witnesses": [
+        {
+          "input": {
+            "n": 8,
+            "k": 3,
+            "rho": "0"
+          },
+          "bits": "00100101"
+        },
+        {
+          "input": {
+            "n": 8,
+            "k": 3,
+            "rho": "1/2"
+          },
+          "bits": "01010010"
+        },
+        {
+          "input": {
+            "n": 8,
+            "k": 5,
+            "rho": "0"
+          },
+          "bits": "01011011"
+        },
+        {
+          "input": {
+            "n": 12,
+            "k": 4,
+            "rho": "0"
+          },
+          "bits": "001001001001"
+        },
+        {
+          "input": {
+            "n": 5,
+            "k": 2,
+            "rho": "1/3"
+          },
+          "bits": "01001"
+        },
+        {
+          "input": {
+            "n": 4,
+            "k": 4,
+            "rho": "0"
+          },
+          "bits": "1111"
+        },
+        {
+          "input": {
+            "n": 3,
+            "k": 0,
+            "rho": "0"
+          },
+          "bits": "000"
+        }
+      ],
+      "falsifiers": [
+        "An 8-step, 3-event output with adjacent long clumps (e.g. 11100000) breaks balanced prefix behavior",
+        "An off-by-one period that returns k−1 or k+1 events is incorrect",
+        "A floating accumulator whose rounding changes the binary word at exact rational ties violates identity",
+        "A rotation of a word may be a useful musical variant but does not in general satisfy the same rho=0 identity"
+      ],
+      "near_existing": [
+        "D1 YES/NO",
+        "D9 GCD",
+        "D8 DIVMOD",
+        "D10 MODULO",
+        "D10 selected sequence/vector constructors"
+      ],
+      "possible_library_derivation": "Can be built from integer floor, exact rationals and sequence iteration; derived does not imply excluded, but primitive importance needs explicit owner finding.",
+      "independent_root_challenge": "Determine if a separately named universal binary word has an observable contract and cross-substrate benefit beyond existing exact arithmetic and fold. Exact-name absence is only prefilter.",
+      "target_interfaces": [
+        "Bitstream/clock-divider simulation (not CPU instruction)",
+        "exact experiment cadence",
+        "Euclidean music/rhythm",
+        "SDR sparse pulse slots",
+        "FPGA rational rate scheduling",
+        "text prosody/meter as abstract binary weight pattern"
+      ],
+      "hold_related": [
+        {
+          "name": "EUCLIDEAN-RHYTHM",
+          "reason": "Rotation/presentation of the mechanical word can be a library function; no automatic new root"
+        },
+        {
+          "name": "CLOCK-ENABLE-PULSE",
+          "reason": "Hardware tick/clock ISR and timing are substrate mechanisms"
+        },
+        {
+          "name": "BRESENHAM-ERROR-STATE",
+          "reason": "One implementation of same mathematical word law, not a second D10 meaning"
+        }
+      ]
+    }
+  ],
+  "admission": {
+    "d10_count_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0,
+    "prohibited_conflations": [
+      "A music performance or actual hardware clock does not provide language D10 semantics",
+      "Not same as source encoding of physical .sens",
+      "Exact bit sequence meaning is distinct from timing/transport and D2 markers"
+    ],
+    "next_step": "Independent Scheme oracle, exact Python differential+adversarial tests, current semantic dedup, owner decision, then one serialized inventory+ledger+history append PR"
+  }
+}
