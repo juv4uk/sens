@@ -1,0 +1,26 @@
+name: D10 symbolic AI first-order antiunification
+
+on:
+  push:
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunification-20261009.json'
+      - 'tests/test_d10_symbolic_ai_antiunify.py'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunification-20261009.json'
+      - 'tests/test_d10_symbolic_ai_antiunify.py'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finite-ground-term-lgg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити свідки і найточніше узагальнення символьних термів
+        run: python3 -m unittest discover -s tests -p 'test_d10_symbolic_ai_antiunify.py' -v
