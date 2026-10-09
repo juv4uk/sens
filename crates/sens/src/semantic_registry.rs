@@ -232,3 +232,28 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
     surfaces.sort_unstable();
     surfaces
 }
+
+#[cfg(test)]
+mod exact_d5_binding_projection_tests {
+    use super::*;
+
+    #[test]
+    fn every_generated_d5_definition_uses_its_exact_domain_word() {
+        for row in D5_DEFINITION_BINDINGS {
+            let identity = d5_binding_identity_for_definition(row.name)
+                .expect("generated Lisp-owned D5 binding must resolve");
+            assert_eq!(
+                identity,
+                CoreDomainIdentity::D5(CoreD5::from_word(
+                    Bit5::new(row.bits).expect("generated D5 bit width")
+                )),
+                "the canonical D5 identity must come from the generated ladder row"
+            );
+        }
+    }
+
+    #[test]
+    fn unknown_definition_does_not_gain_a_d5_coordinate() {
+        assert_eq!(d5_binding_identity_for_definition("__unknown_d5_binding__"), None);
+    }
+}
