@@ -1,0 +1,44 @@
+name: D5 replay rebuild benchmark index on GH-hosted
+
+on:
+  push:
+    branches:
+      - replay/research-d5-functions-current-after5107-20261009
+    paths:
+      - .github/workflows/d5-replay-index-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: d5-replay-index-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: replay/research-d5-functions-current-after5107-20261009
+          persist-credentials: true
+      - name: Generate and verify current benchmark registry
+        run: |
+          python3 scripts/benchmark_registry.py
+          python3 scripts/benchmark_registry.py --check
+      - name: Commit generated index ONLY to integration branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- benchmarks/README.md
+          if git diff --cached --quiet; then
+            echo "No generated index changes"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs(bench): index D5 function name-erasure witness'
+          git push origin HEAD:refs/heads/replay/research-d5-functions-current-after5107-20261009
