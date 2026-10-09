@@ -59,37 +59,6 @@ fn make_intent_builds_the_canonical_shape() {
     );
 }
 
-// --- source-ref? ------------------------------------------------------
-
-
-
-
-
-// --- observation? -------------------------------------------------------
-
-
-
-
-
-
-// --- claim? ---------------------------------------------------------
-
-
-
-
-
-
-// --- evidence? --------------------------------------------------------
-
-
-
-
-
-// --- intent? ----------------------------------------------------------
-
-
-
-
 // --- accessors --------------------------------------------------------
 
 #[test]
@@ -181,13 +150,8 @@ fn intent_accessors_extract_the_bare_values() {
 }
 
 // --- supporting-evidence -------------------------------------------------
-// Renamed from evidence-supports? (owner-directed audit, 2026-09-02):
-// once every check passes, the function is already holding the matched
-// `evidence` record, so it returns that record instead of a bare `t` --
-// a retrieval function, not a predicate, per the audit's own three-way
-// split (structural predicate / classification / retrieval). `()` on
-// no match is unchanged, but control requires an explicit D1 predicate;
-// the returned evidence record must never be treated as implicit truth.
+// Retrieval returns evidence data or structural (); no result is implicit
+// D1 truth. Exact-D1 control must be explicit (enforced below).
 
 #[test]
 fn supporting_evidence_is_nil_when_outcome_is_not_supports() {
@@ -239,9 +203,3 @@ fn supporting_evidence_record_is_not_implicit_cond_truth() {
     );
 }
 
-// --- intent-capabilities-satisfied? -------------------------------------
-
-
-
-
-// --- canonical round trip: read(write-to-string(value)) = value --------
