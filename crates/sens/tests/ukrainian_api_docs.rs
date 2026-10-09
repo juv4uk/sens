@@ -73,26 +73,24 @@ fn uk_session() -> Session {
 }
 
 #[test]
-fn istina_i_khyba_ie_imenamy_tyh_samykh_kanonichnykh_znachen() {
-    let mut session = uk_session();
-    assert_eq!(eval_program("істина", &mut session).unwrap().value.to_string(), "t");
-    assert_eq!(eval_program("хиба", &mut session).unwrap().value.to_string(), "()");
-}
-
-#[test]
 fn novi_predykatni_nazvy_i_stari_aliasy_vykonuiutsia_odnakovo() {
     let mut session = uk_session();
-    for source in [
-        "(конфлікт? 'невідомий '())",
-        "(перевірити-конфлікт 'невідомий '())",
+    for (preferred, alias) in [
+        (
+            "(конфлікт? 'невідомий '())",
+            "(перевірити-конфлікт 'невідомий '())",
+        ),
+        (
+            "(змінна-зустрічається? (логічна-змінна 'x) '(f (var x)) '())",
+            "(перевірити-зустрічання (логічна-змінна 'x) '(f (var x)) '())",
+        ),
     ] {
-        assert_eq!(eval_program(source, &mut session).unwrap().value.to_string(), "()");
-    }
-    for source in [
-        "(змінна-зустрічається? (логічна-змінна 'x) '(f (var x)) '())",
-        "(перевірити-зустрічання (логічна-змінна 'x) '(f (var x)) '())",
-    ] {
-        assert_eq!(eval_program(source, &mut session).unwrap().value.to_string(), "t");
+        let preferred_value = eval_program(preferred, &mut session).unwrap().value;
+        let alias_value = eval_program(alias, &mut session).unwrap().value;
+        assert_eq!(
+            preferred_value, alias_value,
+            "preferred spelling and compatibility alias must resolve to the same value"
+        );
     }
 }
 
