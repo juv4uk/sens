@@ -7,11 +7,13 @@
     "CONFORMANCE",
     "FALSIFIER"
   ],
-  "question": "How fast do packed physical bits vs visible D2 words reach the same evaluated D1/D3 result, with warm and fresh sessions, beyond ingest alone?",
-  "claim": "Paired release-mode ingest and parse-lower-execute timings on the exact same D2/domain corpus, oracle checked before timing; warm sessions and fresh Sessions reported separately alongside execute-only baseline. Does not include independent width-metadata cost, process startup, core bootstrap, file IO, or cross-language performance.",
+  "question": "What are the measured costs of binary ingestion, warm/fresh evaluation, new-process startup, bare Session initialization and Lisp-owned Core4 bootstrap on one hosted CPU?",
+  "claim": "Measures paired exact-D2 ingest and parse-lower-execute, plus separately timed fresh OS processes, bare Session, D3 executable and Lisp-owned Core4 bootstrap when available. Preserves raw samples and blocked evidence. Does not measure truly cold page cache, complete file framing/width metadata, process memory or cross-language winners.",
   "witness": [
     "crates/sens/examples/packed_vs_visible_bench.rs",
     "crates/sens/examples/packed_vs_visible_runtime.rs",
+    "crates/sens/examples/sens_cold_start_probe.rs",
+    "cold_start.py",
     "README.md",
     ".github/workflows/packed-vs-visible-bench.yml"
   ],

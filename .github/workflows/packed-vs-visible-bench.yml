@@ -5,6 +5,7 @@ on:
     paths:
       - "crates/sens/examples/packed_vs_visible_bench.rs"
       - "crates/sens/examples/packed_vs_visible_runtime.rs"
+      - "crates/sens/examples/sens_cold_start_probe.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/source_packing.rs"
       - "benchmarks/packed-vs-visible/**"
@@ -14,6 +15,7 @@ on:
     paths:
       - "crates/sens/examples/packed_vs_visible_bench.rs"
       - "crates/sens/examples/packed_vs_visible_runtime.rs"
+      - "crates/sens/examples/sens_cold_start_probe.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/source_packing.rs"
       - "benchmarks/packed-vs-visible/**"
@@ -37,7 +39,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Build release benchmark executable
-        run: cargo build --locked --release -p sens --example packed_vs_visible_bench --example packed_vs_visible_runtime
+        run: cargo build --locked --release -p sens --example packed_vs_visible_bench --example packed_vs_visible_runtime --example sens_cold_start_probe
 
       - name: Record hosted hardware and Rust toolchain
         run: |
@@ -148,6 +150,14 @@ jobs:
           print(report)
           PY
           cat artifacts/performance/runtime-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Measure actual new-process, bare Session and Lisp-owned Core4 startup
+        run: |
+          python3 benchmarks/packed-vs-visible/cold_start.py \
+            --probe target/release/examples/sens_cold_start_probe \
+            --samples 11 --warmup 2 \
+            --out artifacts/performance/cold-start.json
+          cat artifacts/performance/cold-start-summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload full raw sample evidence and CPU provenance
         if: always()
