@@ -28,3 +28,7 @@ jobs:
         run: cargo test --locked -p sens --test physical_t5_execution
       - name: Generated D3-D9 occupancy comes only from owner-ratified maps
         run: python3 scripts/generate-domain-owner-registry.py --check
+      - name: Check physical D8/D9 occupancy without executable semantic admission
+        run: cargo test --locked -p sens --lib domain_ladder::tests:: -- --nocapture
+      - name: Verify owner-ratified D7 coordinates and two reserved cells
+        run: python3 scripts/check-d7-current-authority.py
