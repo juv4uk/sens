@@ -142,7 +142,7 @@ jobs:
           assert isinstance(deltas['production_loader_gap_i_refs'], int)
           PY
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: contract-11-8-core-bootstrap-internal
           path: /tmp/core-bootstrap-3648

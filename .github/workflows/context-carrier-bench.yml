@@ -24,7 +24,7 @@ jobs:
             --smoke --reps 3 \
             --out /tmp/context-carrier/results
       - name: Upload raw evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: context-carrier-benchmark

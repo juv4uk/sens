@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Test polarity, source preservation and fail-closed staging
         run: python3 scripts/test_cond_modernize.py
       - name: Audit active library parse completeness (read-only)

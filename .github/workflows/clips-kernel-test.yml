@@ -22,7 +22,7 @@ jobs:
   default-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Prove default build does not require CLIPS
         run: cargo test -p wsm-clips-kernel --no-default-features --lib
