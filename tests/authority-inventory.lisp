@@ -97,7 +97,6 @@
 (authority "crates/my-lisp/tests/world.rs" observer)
 (authority "crates/my-lisp/tests/sens_foundation.rs" observer)
 (authority "crates/my-lisp-cli/tests/cli.rs" observer)
-(authority "crates/sens/tests/sens_smoke.rs" observer)
 (authority "crates/my-lisp/tests/canon_adversarial.rs" observer)
 (authority "crates/my-lisp/tests/semantic_form_identity.rs" observer)
 (authority "crates/my-lisp/tests/ukr_acceptance.rs" observer)
