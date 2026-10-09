@@ -1,0 +1,26 @@
+[package]
+name = "sens-measurement-triad"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Independent benchmark workspace: do not alter the SENS production dependency graph.
+[workspace]
+
+[dependencies]
+sens = { path = "../../crates/sens" }
+
+[dev-dependencies]
+iai-callgrind = "=0.16.1"
+criterion = "=0.8.2"
+
+[profile.bench]
+debug = true
+
+[[bench]]
+name = "instruction_lane"
+harness = false
+
+[[bench]]
+name = "wall_time_lane"
+harness = false

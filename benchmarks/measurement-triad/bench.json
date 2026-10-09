@@ -1,0 +1,24 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "measurement-triad",
+  "wing": "SENS measurement methodology",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can exact-domain SENS mechanisms be measured with separate instruction, wall-time and paired confidence-interval evidence?",
+  "claim": "D3 owner-occupancy mechanism only. I-refs are not latency; shared CI timings are informational; synthetic statistical fixtures are not performance evidence. No new language semantic authority.",
+  "witness": [
+    "README.md",
+    "src/lib.rs",
+    "benches/instruction_lane.rs",
+    "benches/wall_time_lane.rs",
+    "verdict.py",
+    "test_verdict.py"
+  ],
+  "status": "IMPLEMENTATION-PILOT-NO-PERFORMANCE-CLAIM",
+  "generation": "Contract 11.8 exact domain, issue #5227",
+  "axis": "measurement/instructions-walltime-statistical-verdict",
+  "reproduce": "python3 -m unittest discover -s benchmarks/measurement-triad -p 'test_*.py' && cargo test --manifest-path benchmarks/measurement-triad/Cargo.toml"
+}
