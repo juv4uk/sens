@@ -1,0 +1,43 @@
+{
+  "schema": "d10-mitchell-version-space-research-v1/v1",
+  "semantic_name": "CANONICAL-VERSION-SPACE-BOUNDARIES",
+  "surface_uk": "межі-простору-версій",
+  "surface_ukr": "знайти-усі-сумісні-правила-та-їхні-межі",
+  "date": "2026-10-09",
+  "status": "HOLD-CORE-VS-LIBRARY-UNRATIFIED",
+  "owner_issues": ["#4013", "#4463", "#4182"],
+  "research_lanes_not_duplicated": ["STRIPS-GOAL-REGRESSION", "GROUND-TERM-LEAST-GENERAL-GENERALIZATION", "ATMS-CONSISTENT-LABEL-JOIN", "FINITE-BAYES-UPDATE-EXACT"],
+  "primary_source_title": "Version Spaces: A Candidate Elimination Approach to Rule Learning, T. M. Mitchell, IJCAI 1977 pp. 305-310",
+  "primary_source_url": "https://www.ijcai.org/proceedings/1977-1",
+  "original_paper_url": "https://www.ijcai.org/Proceedings/77-1/Papers/048.pdf",
+  "implementation_scope": "Finite explicit categorical attributes, positive/negative ground labeled examples, axis-aligned conjunctions with per-field wildcard, and distinct bottom hypothesis; bounded research oracle, not runtime",
+  "arity": 2,
+  "signature": "(finite-list of nonempty categorical attribute domains, finite-list of (ground-instance,bool-label)) -> tagged {status,S,G,version_space}",
+  "law": "V={h in H | all h(x_i)==label_i}; S=minimal elements of V and G=maximal elements under inclusion of extension sets; each h in V lies between some s in S and g in G. Distinct result for contradictory source labels and empty representable hypothesis class.",
+  "positive_examples": [
+    "No observations: S={bottom}, G={all-wildcard}, V=whole H including bottom",
+    "One positive example makes exact observation minimal S, all-wildcard maximal G",
+    "Negative example excludes covering general hypotheses and may split G into incomparable members",
+    "Repeated positive/negative label on same instance yields explicit CONTRADICTORY-OBSERVATIONS"
+  ],
+  "falsifiers": [
+    "If S,G reconstruct even one inconsistent hypothesis, boundary law fails",
+    "If S,G omit any consistent hypothesis, completeness fails",
+    "If ordering or duplicate examples change V, rule-learning semantics fails",
+    "If negative-only training is treated as one false value instead of constraints, G antichain fails",
+    "If unrepresentable XOR diagonal is assigned a hypothesis by guess, fail",
+    "If D1 Boolean label is replaced by empty-list truthiness or inexact category, fail"
+  ],
+  "relation_to_existing": "D9 UNIFY and D10 LGG concern term substitutions; version-space learning retains ALL consistent hypotheses under both positive and negative observational evidence. D1-D9/D10 exact-name negative is not proof of independent Core law: implementable as existing set/filter/order combinators, owner may classify derived library only.",
+  "derivability_verdict": "PENDING-OWNER-REVIEW",
+  "proposed_10_bit_meaning_only": true,
+  "selected_in_canonical_inventory": false,
+  "coordinate": null,
+  "ratified_resident": false,
+  "physical_t5_authorized": false,
+  "D2_control_authority_unchanged": true,
+  "source_era": "MITCHELL-1977",
+  "backend_runtime_oracle": "Python exhaustive finite research model; SENS native execution NOT ATTESTED",
+  "limitations": "No noisy labels, continuous attributes, predicate terms, higher-order induction, unbounded machine learning, or admission to physical SENS",
+  "first_review_question": "Is retaining maximal S/G boundary representation a separately language-visible law or a fully derivable library combinator in the current D1-D9/D10 algebra?"
+}
