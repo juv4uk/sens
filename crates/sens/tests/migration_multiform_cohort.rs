@@ -4,11 +4,16 @@ use sens::{decode_ternary_program, encode_binary_projection_ternary, open_ternar
 
 const T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort/two-forms.sens");
+const SOURCE: &str =
+    include_str!("../../../tests/fixtures/migration-multiform-cohort/two-forms.lisp");
 const PROJECTION: &str =
     "10 001 00 000 01 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01";
 
 #[test]
 fn physical_two_form_source_retains_d2_boundary_and_roundtrips() {
+    // Provenance linkage only: this test checks the source is the expected
+    // two-form input; it does not assert a Rust language result for either form.
+    assert_eq!(SOURCE.lines().count(), 2);
     assert_eq!(
         T5,
         [
