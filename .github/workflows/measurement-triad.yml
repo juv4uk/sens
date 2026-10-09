@@ -42,9 +42,9 @@ jobs:
         with:
           workspaces: benchmarks/measurement-triad
       - name: Test the actual D3 owner projection mechanism
-        run: cargo test --manifest-path benchmarks/measurement-triad/Cargo.toml
+        run: cd "$RUNNER_TEMP" && cargo test --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml"
       - name: Compile both benchmarking harnesses without claiming speed
-        run: cargo bench --manifest-path benchmarks/measurement-triad/Cargo.toml --benches --no-run
+        run: cd "$RUNNER_TEMP" && cargo bench --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml" --benches --no-run
 
   instruction-probe:
     name: Explicit Callgrind capture (manual, no noisy default regression gate)
@@ -63,8 +63,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --manifest-path benchmarks/measurement-triad/Cargo.toml
-          cargo bench --manifest-path benchmarks/measurement-triad/Cargo.toml --bench instruction_lane | tee "$RUNNER_TEMP/sens-iai-callgrind.log"
+          cd "$RUNNER_TEMP"
+          cargo bench --manifest-path "$GITHUB_WORKSPACE/benchmarks/measurement-triad/Cargo.toml" --bench instruction_lane | tee "$RUNNER_TEMP/sens-iai-callgrind.log"
           {
             echo "SHA=$GITHUB_SHA"
             rustc --version
