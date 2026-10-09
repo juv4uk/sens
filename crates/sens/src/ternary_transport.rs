@@ -134,53 +134,68 @@ pub fn decode_ternary_words(
     if data.len() > MAX_FILE_BYTES {
         return Err(TernaryTransportError::TransportTooLarge);
     }
-    let mut trits = Vec::with_capacity(data.len() * TRITS_PER_BYTE);
-    for byte in data.iter().copied() {
-        if byte >= 243 {
-            return Err(TernaryTransportError::InvalidPhysicalByte);
-        }
-        let mut value = byte;
-        let mut digits = [0u8; TRITS_PER_BYTE];
-        for digit in digits.iter_mut().rev() {
-            *digit = value % 3;
-            value /= 3;
-        }
-        trits.extend_from_slice(&digits);
+    // Check every physical byte before parsing. This preserves InvalidPhysicalByte
+    // precedence even when an earlier digit sequence has malformed grammar.
+    if data.iter().any(|byte| *byte >= 243) {
+        return Err(TernaryTransportError::InvalidPhysicalByte);
     }
-    // Не слід шукати EOS=22: межу файла вже дає кількість байтів.
-    // Після останнього слова може бути тільки 0..4 trit-2 як padding.
-    // У самих словах допустимі лише 0 та 1, тому фізичний хвіст
-    // однозначно відділяється від останнього слова.
-    let tail = trits.iter().rev().take_while(|digit| **digit == 2).count();
+
+    // Count terminal padding directly from base-3 byte digits, backwards.
+    // No proportional intermediate allocation of 5 * data.len() trits.
+    let mut tail = 0usize;
+    'padding: for mut byte in data.iter().rev().copied() {
+        for _ in 0..TRITS_PER_BYTE {
+            if byte % 3 != 2 {
+                break 'padding;
+            }
+            tail += 1;
+            byte /= 3;
+        }
+    }
     if tail >= TRITS_PER_BYTE {
         return Err(TernaryTransportError::InvalidTail);
     }
-    trits.truncate(trits.len() - tail);
-    if trits.is_empty() {
+    let useful_trits = data.len() * TRITS_PER_BYTE - tail;
+    if useful_trits == 0 {
         return Err(TernaryTransportError::EmptyDomainWord);
     }
 
     let mut words = Vec::<BinarySourceWord>::new();
     let mut current_value = 0u16;
     let mut current_width = 0usize;
-    for digit in trits {
-        match digit {
-            0 | 1 => {
-                current_value = (current_value << 1) | u16::from(digit);
-                current_width += 1;
-                if current_width > 9 {
-                    return Err(TernaryTransportError::UnsupportedDomainWidth);
-                }
+    let mut consumed = 0usize;
+    for mut byte in data.iter().copied() {
+        if consumed == useful_trits {
+            break;
+        }
+        let mut digits = [0u8; TRITS_PER_BYTE];
+        for digit in digits.iter_mut().rev() {
+            *digit = byte % 3;
+            byte /= 3;
+        }
+        for digit in digits {
+            if consumed == useful_trits {
+                break;
             }
-            2 => {
-                if current_width == 0 {
-                    return Err(TernaryTransportError::EmptyDomainWord);
+            consumed += 1;
+            match digit {
+                0 | 1 => {
+                    current_value = (current_value << 1) | u16::from(digit);
+                    current_width += 1;
+                    if current_width > 9 {
+                        return Err(TernaryTransportError::UnsupportedDomainWidth);
+                    }
                 }
-                words.push(typed_binary_word(current_width, current_value)?);
-                current_value = 0;
-                current_width = 0;
+                2 => {
+                    if current_width == 0 {
+                        return Err(TernaryTransportError::EmptyDomainWord);
+                    }
+                    words.push(typed_binary_word(current_width, current_value)?);
+                    current_value = 0;
+                    current_width = 0;
+                }
+                _ => unreachable!(),
             }
-            _ => unreachable!(),
         }
     }
     if current_width == 0 {
