@@ -169,6 +169,8 @@ def run(args: argparse.Namespace) -> dict:
                 }
             # L5 source removal is separately reviewed and preserved in
             # archaeology; the migration pass never deletes historical input.
+            if str(exc).startswith("L7 BLOCK"):
+                row["unparseable"] = True
             if str(exc).startswith("L5 BLOCK"):
                 row["archaeology"] = {
                     "status": "REVIEW", "policy": "retired executable corpus",
@@ -234,6 +236,8 @@ def run(args: argparse.Namespace) -> dict:
                     "files_would_write": candidates,
                     "files_blocked": blocked},
         "files": ledger,
+        "unparseable_paths": sorted(row["path"] for row in ledger
+                                    if row.get("unparseable")),
     }
     report.parent.mkdir(parents=True, exist_ok=True)
     stage = report.with_name(report.name + ".tmp")
