@@ -89,6 +89,8 @@ class SelectionLedgerTrace(unittest.TestCase):
         fields[2]="незалежний-дослідний-донор"
         fields[3]="UNSELECTED-RANDOM"
         fields[4]="Research source law not selected until independent review"
+        # Source-only proposals cannot assert unreviewed semantic no-match evidence.
+        fields[7]=fields[7].replace("=NO-MATCH", "=PENDING")
         donor=self.content+"\t".join(fields)+"\n"
         self.assertEqual([],guard.validate(donor))
         self.assertEqual([],guard.selection_trace_errors(donor,self.inventory,self.baseline,self.history))
@@ -103,6 +105,28 @@ class SelectionLedgerTrace(unittest.TestCase):
             bad=self.content+"\t".join(wrong)+"\n"
             with self.subTest(field=index):
                 self.assertTrue(guard.validate(bad), "unverified proposal must be rejected")
+
+    def test_selected_cannot_use_unknown_dedup(self):
+        # A D10 research selection requires the pre-transition NO-MATCH
+        # at the real archived D10 SHA, not merely a pending promise.
+        lines = self.content.splitlines()
+        fields = lines[1].split("\t")
+        fields[7] = fields[7].replace("=NO-MATCH", "=PENDING")
+        proposed = "\n".join([lines[0], "\t".join(fields)] + lines[2:]) + "\n"
+        self.assertEqual([], guard.validate(proposed))
+        self.assertTrue(guard.selection_trace_errors(
+            proposed, self.inventory, self.baseline, self.history))
+
+    def test_mixed_or_unpinned_dedup_is_rejected(self):
+        lines = self.content.splitlines()
+        fields = lines[1].split("\t")
+        for malformed in ("D1-D9@abc1234=PENDING;D10@abc1234=NO-MATCH",
+                          "D1-D9@bad=PENDING;D10@bad=PENDING",
+                          "PENDING"):
+            changed = fields.copy()
+            changed[7] = malformed
+            data = "\n".join([lines[0], "\t".join(changed)] + lines[2:]) + "\n"
+            self.assertTrue(guard.validate(data))
 
     def test_migration_block_may_still_provide_true_source(self):
         records=self.content.splitlines()
