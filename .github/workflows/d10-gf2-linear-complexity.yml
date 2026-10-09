@@ -1,0 +1,26 @@
+name: D10 GF2 finite-word linear complexity research
+
+on:
+  push:
+    paths:
+      - 'knowledge/d10-gf2-linear-complexity-research-20261009.json'
+      - 'tests/test_d10_gf2_linear_complexity.py'
+      - '.github/workflows/d10-gf2-linear-complexity.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-gf2-linear-complexity-research-20261009.json'
+      - 'tests/test_d10_gf2_linear_complexity.py'
+      - '.github/workflows/d10-gf2-linear-complexity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  two-independent-oracles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити 2047 точних бітових слів і непризначений статус D10
+        run: python3 -m unittest discover -s tests -p 'test_d10_gf2_linear_complexity.py' -v
