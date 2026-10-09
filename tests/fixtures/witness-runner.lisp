@@ -13,11 +13,14 @@
 
 (00001001 witness-field
   (00001000 (key witness)
-    (10011100 ((entry (00101101 key witness)))
-      (00000111
-        ((00000010 entry) () (00000001 ()))
-        ((00000010 entry) (1) (00000001 ()))
-        ((00000010 entry) (0) (00000110 entry))))))
+    (00000111
+      ((00000010 witness) () (00000001 ()))
+      ((00000010 witness) (0)
+       (00000111
+         ((00000011 key (00000101 (00000101 witness))) (1)
+          (00000110 (00000101 witness)))
+         ((00000011 key (00000101 (00000101 witness))) (0)
+          (witness-field key (00000110 witness))))))))
 
 (00001001 witness-malformed-result
   (00001000 (reason actual)
