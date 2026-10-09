@@ -1,0 +1,370 @@
+{
+  "schema": "d10-historical-symbolic-ai-foundations/v1",
+  "date": "2026-10-09",
+  "status": "SOURCE-GROUNDED-PENDING-REVIEW-UNSELECTED",
+  "authority": [
+    "#4013",
+    "#4162",
+    "#4463",
+    "#4896"
+  ],
+  "snapshot": {
+    "inventory_git_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "d1_d9_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "selected": 634,
+    "capacity": 1024,
+    "remaining": 390,
+    "ratified": 0
+  },
+  "background": [
+    {
+      "name": "McCarthy Advice Taker",
+      "date": "1959",
+      "source": "https://logic.stanford.edu/logicprogramming/readings/mccarthy.pdf",
+      "historical_claim": "Declarative knowledge and premises should support systematic deductions. Proposal motivates planning and justification semantics, not SENS D2 control."
+    },
+    {
+      "name": "Newell, Shaw, Simon General Problem Solver",
+      "date": "1957-1960",
+      "source": "https://www.nationalacademies.org/read/5737/chapter/11",
+      "historical_claim": "Means-ends analysis selects operators to reduce differences between current situation and goal."
+    },
+    {
+      "name": "Fikes & Nilsson STRIPS",
+      "date": "1971",
+      "source": "https://doi.org/10.1016/0004-3702(71)90010-5",
+      "historical_claim": "Operators and theorem proving transform world models toward goals."
+    },
+    {
+      "name": "Doyle truth maintenance",
+      "date": "1979",
+      "source": "https://doi.org/10.1016/0004-3702(79)90008-0",
+      "historical_claim": "Maintain explicit justifications and explain/revise beliefs."
+    },
+    {
+      "name": "de Kleer assumption-based truth maintenance",
+      "date": "1986",
+      "source": "https://doi.org/10.1016/0004-3702(86)90080-9",
+      "historical_claim": "Multiple assumption contexts are supported simultaneously; labels collect minimal consistent assumption environments."
+    }
+  ],
+  "review_scope": {
+    "existing_d10_behavioral_neighbors": [
+      "JTMS-MAKE-STATE",
+      "JTMS-STATE-USED",
+      "MATCH-CONDITIONS-JTMS",
+      "PROVE-RULE",
+      "PROVE-GOAL-STATE",
+      "CHECK-CONFLICT",
+      "ADVICE-CONFLICT-PROOF",
+      "MAKE-EVIDENCE",
+      "KNOWLEDGE-GOAL-VALID?"
+    ],
+    "existing_research_neighbors": [
+      "knowledge/d10-ai-interest-proposal-v1.json (38 generic candidate names)",
+      "knowledge/d10-symbolic-ai-antiunification-research-v1.json (ground LGG, HOLD)",
+      "knowledge/d10-prolog-constraint-hobbies-research-v1.json (SWI unification, HOLD)",
+      "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json"
+    ],
+    "name_check": "Neither ATMS-MINIMAL-SUPPORT-LABEL nor STRIPS-GOAL-REGRESSION occurs as exact selected name in pinned 634-row D10; exact name does not prove independent semantics.",
+    "policy": "One universal D10 10-bit semantic stream; no new syntax, English identifiers or physical code, no D2 non-local control, no ledger coordinate assignment. Host Python and Chez oracles are research-only observations. Proposals require peer behavior-dedup, owner Core-vs-library judgement, then separately coordinated selected append/ratification."
+  },
+  "candidates": [
+    {
+      "stable_id": "d10.historical-ai.atms-minimal-support-label.20261009",
+      "semantic_name": "ATMS-MINIMAL-SUPPORT-LABEL",
+      "surface_uk": "опори",
+      "surface_ukr": "мінімальні-узгоджені-опори",
+      "surface_sa": "",
+      "surface_en": "atms-minimal-support-label",
+      "source_class": "DE-KLEER-ATMS-1986",
+      "relation_class": "PURE-FINITE-PROVENANCE-ANTICHAIN",
+      "width": 10,
+      "coordinate": null,
+      "ratified_resident": false,
+      "decision": "PENDING-REVIEW-NOT-SELECTED",
+      "proposal_id": "D10P-0912",
+      "input": "A finite sequence of antecedent labels; each label is a finite sequence of finite sets of assumption identities (each set a possible minimal support), and a finite set of forbidden assumption sets called nogoods.",
+      "behavior": "For each choice of one support set from each antecedent label, union the chosen sets. Reject any union containing any nogood as a subset. Drop every surviving support that has a strict subset among surviving supports, remove duplicates and return a deterministic canonical sequence ordered by cardinality then assumption identity. If no antecedents, empty union is the sole support unless empty nogood forbids all. If any antecedent label is empty, return empty label. This operation does not infer facts and does not admit arbitrary inconsistent worlds.",
+      "positives": [
+        {
+          "antecedent_labels": [
+            [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ]
+            ],
+            [
+              [
+                "C"
+              ],
+              [
+                "D"
+              ]
+            ]
+          ],
+          "nogoods": [
+            [
+              "B",
+              "C"
+            ]
+          ],
+          "expected": [
+            [
+              "A",
+              "C"
+            ],
+            [
+              "A",
+              "D"
+            ],
+            [
+              "B",
+              "D"
+            ]
+          ]
+        },
+        {
+          "antecedent_labels": [
+            [
+              [
+                "A"
+              ],
+              [
+                "A",
+                "B"
+              ]
+            ],
+            [
+              [
+                "A"
+              ]
+            ]
+          ],
+          "nogoods": [],
+          "expected": [
+            [
+              "A"
+            ]
+          ]
+        },
+        {
+          "antecedent_labels": [],
+          "nogoods": [],
+          "expected": [
+            []
+          ]
+        },
+        {
+          "antecedent_labels": [
+            []
+          ],
+          "nogoods": [],
+          "expected": []
+        },
+        {
+          "antecedent_labels": [
+            [
+              [
+                "A"
+              ],
+              [
+                "B"
+              ]
+            ]
+          ],
+          "nogoods": [
+            []
+          ],
+          "expected": []
+        }
+      ],
+      "falsifiers": [
+        "Keeping a superset support when a smaller consistent support exists.",
+        "Keeping any support containing a nogood subset.",
+        "Treating two disjoint alternative supports as one conjunction.",
+        "Returning an empty answer for zero antecedents when the empty environment is consistent."
+      ],
+      "sources": [
+        {
+          "source": "de Kleer, An assumption-based TMS (1986)",
+          "url": "https://doi.org/10.1016/0004-3702(86)90080-9"
+        },
+        {
+          "source": "de Kleer, Problem solving with the ATMS",
+          "url": "https://doi.org/10.1016/0004-3702(86)90082-2"
+        },
+        {
+          "source": "Logtalk ATMS library: label is antichain, minimal nogood",
+          "url": "https://logtalk3.readthedocs.io/en/latest/libraries/atms.html"
+        }
+      ],
+      "dedup": "Existing JTMS has a matching-state used-fact set; a single used support does NOT establish the ATMS label algebra of alternative minimal contexts. Set inclusion and finite product may make this implementable in self-hosted library. Requires distinct semantics review before consuming a 10-bit code.",
+      "epistemic_limit": "Do not infer that a support label alone proves semantic truth. Soundness of justifications is assumed from the caller; this relation only joins/prunes existing support labels.",
+      "hobby_links": [
+        "Advice Taker reasoning",
+        "fault diagnosis in electronic circuits",
+        "astronomy measurement source provenance",
+        "Panini competing derivations",
+        "chess hypothesis trees"
+      ]
+    },
+    {
+      "stable_id": "d10.historical-ai.strips-goal-regression.20261009",
+      "semantic_name": "STRIPS-GOAL-REGRESSION",
+      "surface_uk": "передумови",
+      "surface_ukr": "відкотити-ціль-через-дію",
+      "surface_sa": "",
+      "surface_en": "strips-goal-regression",
+      "source_class": "FIKES-NILSSON-STRIPS-1971",
+      "relation_class": "PURE-FINITE-GOAL-PREIMAGE",
+      "width": 10,
+      "coordinate": null,
+      "ratified_resident": false,
+      "decision": "PENDING-REVIEW-NOT-SELECTED",
+      "proposal_id": "D10P-0913",
+      "input": "Finite sets G (positive ground goal atoms), P (preconditions), A (unconditional add effects) and D (unconditional delete effects), with A∩D empty. The action is applicable in a world S precisely when P subset-of S and produces S'=(S\\D)∪A.",
+      "behavior": "If A intersects D reject the invalid action schema. If (G\\A) intersects D, return explicit INCONSISTENT-ACTION-FOR-GOAL: the action unavoidably deletes a required goal atom without re-adding it. Otherwise return the finite preceding goal set (G\\A) ∪ P, the weakest positive conjunction sufficient for this action to establish the post-goal. No action execution or search is performed, and this contract does not require that A intersect G (irrelevant actions are allowed).",
+      "positives": [
+        {
+          "goal": [
+            "at-b"
+          ],
+          "pre": [
+            "at-a",
+            "bridge-clear"
+          ],
+          "add": [
+            "at-b"
+          ],
+          "del": [
+            "at-a"
+          ],
+          "expected": [
+            "at-a",
+            "bridge-clear"
+          ]
+        },
+        {
+          "goal": [
+            "has-power",
+            "lamp-on"
+          ],
+          "pre": [
+            "has-power"
+          ],
+          "add": [
+            "lamp-on"
+          ],
+          "del": [],
+          "expected": [
+            "has-power"
+          ]
+        },
+        {
+          "goal": [
+            "goal"
+          ],
+          "pre": [],
+          "add": [
+            "goal"
+          ],
+          "del": [],
+          "expected": []
+        },
+        {
+          "goal": [
+            "goal"
+          ],
+          "pre": [
+            "prepared"
+          ],
+          "add": [],
+          "del": [],
+          "expected": [
+            "goal",
+            "prepared"
+          ]
+        },
+        {
+          "goal": [
+            "goal"
+          ],
+          "pre": [],
+          "add": [],
+          "del": [
+            "goal"
+          ],
+          "error": "INCONSISTENT-ACTION-FOR-GOAL"
+        }
+      ],
+      "falsifiers": [
+        "Regression ignores a required precondition even though the action may not fire.",
+        "Regression requires goals already added by the action, although irrelevant actions can preserve goals.",
+        "An action that deletes an unsupplied goal is accepted as reaching that goal.",
+        "Forward progression of states is confused with backward regression of goals."
+      ],
+      "sources": [
+        {
+          "source": "Fikes & Nilsson, STRIPS (1971)",
+          "url": "https://doi.org/10.1016/0004-3702(71)90010-5"
+        },
+        {
+          "source": "ANU PDDL writing guide: STRIPS preconditions and add/delete effects",
+          "url": "https://users.cecs.anu.edu.au/~patrik/pddlman/writing.html"
+        }
+      ],
+      "dedup": "Existing PROVE-GOAL-STATE proves a logical goal given a substitution; it is not automatically the preimage of a state-transition operator. General finite set algebra may derive this relation and needs Core-vs-library proof.",
+      "epistemic_limit": "Only unconditional positive ground STRIPS operators; no negated goals, conditional effects, incomplete state, uncertainty, numeric action costs or scheduling.",
+      "hobby_links": [
+        "McCarthy Advice Taker",
+        "chess plan execution",
+        "robotics with ESP32",
+        "SENS-OS rule-directed computation",
+        "fault response in SDR receive pipelines"
+      ]
+    }
+  ],
+  "holds": [
+    {
+      "candidate": "ATMS-CONTEXT-BELIEVES?",
+      "status": "DERIVED",
+      "reason": "A consistent context C supports a node iff there exists e in its minimal label such that e subset-of C; context consistency must also be separately checked."
+    },
+    {
+      "candidate": "ATMS-MINIMAL-NOGOOD-CUTSET",
+      "status": "HOLD-SEPARATE-PROOF",
+      "reason": "Minimal hitting sets of nogoods produce repair assumptions, but require a separate dualization/oracle and can be exponentially large."
+    },
+    {
+      "candidate": "GPS-DIFFERENCE-REDUCING-OPERATOR",
+      "status": "HOLD-HEURISTIC-SEMANTICS",
+      "reason": "Means-ends operator choice needs an explicit difference metric and strategy; not an unconditional mathematical law."
+    },
+    {
+      "candidate": "PLANNER-ASSERT/RETRACT-BACKTRACK",
+      "status": "HOLD-D2-CONTROL",
+      "reason": "Historically interesting pattern-directed execution cannot mint a new nonlocal D2 control effect."
+    },
+    {
+      "candidate": "DENDRAL-EXPLANATION-TREE",
+      "status": "HOLD-SOURCE-DEDUP",
+      "reason": "Proof tree and evidence/provenance already exist in lower/current D10; must establish distinct behavior."
+    }
+  ],
+  "tests": {
+    "expected": "Exact finite-set truth-table against independent state progression, ATMS context-support equivalence, deterministic strict-subset antichain tests; fail-closed dossier mutations.",
+    "native_SENS_runtime": "NOT-RUN",
+    "native_oracle_requirement": "Before selected promotion compare with self-hosted binary interpreter; script is a host-language research oracle only."
+  },
+  "impact": {
+    "d10_selected_delta": 0,
+    "d10_coordinate_delta": 0,
+    "d10_ratified_delta": 0,
+    "d2_control_delta": 0,
+    "existing_ledger_preservation": true
+  }
+}
