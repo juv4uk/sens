@@ -10,7 +10,7 @@
   "entries": [
     {
       "path": "tests/fixtures/canon-laws-v2-witness.lisp",
-      "git_blob_sha1": "5ea5586f8d82e98dc983080213abbc6ee87447f3"
+      "git_blob_sha1": "d9dffe7dad19285968ec2120413daacb30c2552d"
     },
     {
       "path": "tests/fixtures/canon-zero-v2.lisp",
