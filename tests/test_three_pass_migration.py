@@ -83,6 +83,23 @@ class ThreePassMigrationTests(unittest.TestCase):
         )
         self.assertEqual(resolver.counts["pass4-text7-global"],1)
 
+    def test_owner_uk_define_and_lambda_have_same_candidate_wire_as_exact_heads(self):
+        # Owner's .lisp is Ukrainian; its exact D4 identities belong to T5.
+        # The only source-text identity here is a proven, explicitly defined
+        # global and its bound local parameter, never an inferred W8 callable.
+        ukrainian="(визначити foo (функція (x) x))\n(foo так)\n"
+        exact="(0011 foo (0010 (x) x))\n(foo 1)\n"
+        uk_words,uk_resolver=self.migrate(ukrainian,source_era="auto")
+        exact_words,_=self.migrate(exact,source_era="auto")
+        self.assertEqual(uk_words,exact_words)
+        self.assertIn("10 0011 00",uk_words)
+        self.assertIn("10 0010 00",uk_words)
+        self.assertEqual(uk_resolver.counts["pass4-text7-global"],1)
+        self.assertTrue(all(1 <= len(w) <= 9 and set(w) <= {"0","1"}
+                            for w in uk_words.split()))
+        self.assertNotIn("foo",uk_words)
+        self.assertNotIn("x",uk_words)
+
     def test_unproven_global_name_stays_fail_closed(self):
         resolver=mod.Resolver(self.legacy,self.my,self.upper,source_era="legacy")
         out=mod.migrate_file("(00001001 foo ())\n(bar)\n",resolver,self.text7)

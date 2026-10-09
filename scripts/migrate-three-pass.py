@@ -640,7 +640,7 @@ def collect_global_bindings(forms):
         if not isinstance(form,ListNode) or form.tail is not None or len(form.items)<2:
             continue
         head=form.items[0]
-        if not isinstance(head,Atom) or head.tok.text not in {"00001001","0011","define","def"}:
+        if not isinstance(head,Atom) or head.tok.text not in {"00001001","0011","визначити","define","def"}:
             continue
         target=form.items[1]
         if isinstance(target,Atom):
