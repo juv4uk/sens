@@ -121,3 +121,24 @@ loader cost; scheduling and output capture vary. Bare session cost is distinct
 from Core4 bootstrap, and these measurements do not give permission to
 change the Lisp-owned language laws or assert that a speed result is
 an architecture ratification.
+
+## Explicit binary-only Session: removing eager macro bootstrap
+
+`Session::bare()` constructs `Environment::root()` without evaluating
+`lib/macro.lisp`. This is an **opt-in mechanical execution entrypoint** for
+already-admitted exact-domain programs that do not require language macros.
+`Session::default()` **still** loads the Lisp-owned macro library for existing
+embedders. Call `load_macro_library(&mut bare)` before a program needing
+macros; `load_core_library(&mut bare)` performs the full Core4 bootstrap
+(including its macro stage) exactly once.
+
+The new-process probe separates `bare-session` from `session`,
+`bare-d3` from `d3`, and `bare-core` from `core`. The old cases
+remain intact for a direct same-run comparison. Code executes the same
+ratified D3 QUOTE and refuses a non-structural-empty result. The bare path
+does not add, infer or replace semantics of any domain.
+
+**Important:** these ratios compare different explicit bootstrap contracts.
+They are not evidence that standard `Session::default()` was wrong or can
+silently change, nor are they direct evidence of faster *Lisp Core4* execution
+unless the separate Core4 bootstrap mode also measures faster.
