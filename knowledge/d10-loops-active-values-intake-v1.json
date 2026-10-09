@@ -118,7 +118,28 @@
     {
       "historical_name": "ReplaceActiveValue",
       "status": "HOLD-DERIVABILITY",
-      "reason": "Replacing one nested active value is not yet shown distinct from locating a stored cell plus normal update."
+      "reason": "Replacing one nested active value is not yet shown distinct from locating a stored cell plus normal update.",
+      "source_section": "The LOOPS Manual 5.5, printed page 28 (PDF page 32)",
+      "positive_witness": "Replace the innermost active value by identity without destroying its outer wrapper; an absent target must signal a defined error.",
+      "falsifier": "Flattening/destroying all outer wrappers, or silently replacing a different nested node, is not equivalent."
+    },
+    {
+      "historical_name": "COPY-ON-FIRST-PUT-DEFAULT",
+      "status": "HOLD-SEMANTIC-REVIEW",
+      "source_section": "The LOOPS Manual §5.3, printed page 26 (PDF page 30)",
+      "observable_law": "On first PUT to instance variable with active-value class default, clone active-value wrapper for that instance (sharing referenced immutable contents but private localState); #Shared marker permits shared instance of wrapper when user asserts no wrapper-local mutation.",
+      "positive_witness": "Two instances with same class default: first PUT allocates distinct outer wrapper for instance A; unrelated B retains class default. For #Shared, both see identical wrapper object.",
+      "falsifier": "Default instance receives mutated localState of another independent instance, or #Shared unexpectedly creates a distinct wrapper.",
+      "nearby_existing": [
+        "D10 DEFCLASS",
+        "D10 SLOT-VALUE",
+        "D10 ACTIVE-VALUE-PUT"
+      ],
+      "coordinate": null,
+      "selected_in_d10": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "why_not_selected": "Derivability of class-default copy-on-first-write from existing DEFCLASS/SLOT-VALUE and explicit copy/alias algebra not yet proved."
     }
   ],
   "evidence_limit": "A bounded executable Python reference model is a consistency witness of this reading of the manual, NOT an independent historical LOOPS implementation oracle. No runtime or T5 execution claim."
