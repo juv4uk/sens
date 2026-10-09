@@ -1,0 +1,34 @@
+name: D10 reflected Gray binary word oracle and selection
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-gray-reflected-binary-research-v1.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - 'scripts/check_d10_gray_word_selection.py'
+      - 'tests/d10_gray_word_r6rs.ss'
+      - '.github/workflows/d10-gray-word-selection.yml'
+  workflow_dispatch:
+jobs:
+  gray-real-donor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check bit-word selection witnesses and source pins
+        run: python3 scripts/check_d10_gray_word_selection.py --self-test
+      - name: Check selected transition history
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Check proposal ledger
+        run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - name: Install real Scheme reference runtime
+        run: sudo apt-get update -qq && sudo apt-get install -y chezscheme
+      - name: Run genuine R6RS Gray-code donor oracle
+        run: scheme --script tests/d10_gray_word_r6rs.ss
+      - name: Verify no mutation
+        run: git diff --exit-code
