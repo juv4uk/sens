@@ -588,3 +588,85 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
     }
     environment.bind_code_slot_once(sid, value.clone());
 }
+
+
+#[cfg(test)]
+mod exact_domain_primitive_tests {
+    use super::*;
+
+    fn d3(bits: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(bits).expect("D3 word"),
+        ))
+    }
+
+    #[test]
+    fn d3_primitive_mechanisms_return_exact_domain_values() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+
+        for (value, expected) in [
+            (Value::Nil, true),
+            (Value::list([Value::Number(7.0, crate::Exactness::Exact)]), false),
+        ] {
+            let result = invoke_domain_primitive(d3(0b010), &[value], &environment, span)
+                .expect("D3 ATOM admitted")
+                .expect("D3 ATOM executes");
+            assert_eq!(result.as_predicate_bit(), Some(expected));
+        }
+
+        let number = Value::Number(7.0, crate::Exactness::Exact);
+        let equality = invoke_domain_primitive(
+            d3(0b101),
+            &[number.clone(), number.clone()],
+            &environment,
+            span,
+        )
+        .expect("D3 EQ admitted")
+        .expect("D3 EQ executes");
+        assert_eq!(equality.as_predicate_bit(), Some(true));
+
+        let pair = invoke_domain_primitive(
+            d3(0b111),
+            &[number.clone(), Value::Nil],
+            &environment,
+            span,
+        )
+        .expect("D3 CONS admitted")
+        .expect("D3 CONS executes");
+        assert_eq!(pair, Value::list([number]));
+    }
+
+    #[test]
+    fn domain_primitive_arity_diagnostic_carries_domain_not_historical_sid() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+        let identity = d3(0b010);
+        let error = invoke_domain_primitive(identity, &[], &environment, span)
+            .expect("D3 ATOM admitted")
+            .expect_err("arity mismatch must fail");
+        assert_eq!(error.kind, ErrorKind::Arity);
+        assert!(error.message.contains(&identity.to_string()));
+        assert!(!error.message.contains("00000010"));
+    }
+
+    #[test]
+    fn d8_equal_is_exact_and_never_borrows_d3_identity() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+        let d8_equal = CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b1111_0111).expect("D8 EQUAL word"),
+        ));
+        let value = Value::list([Value::Number(1.0, crate::Exactness::Exact)]);
+        let equal = invoke_domain_primitive(
+            d8_equal,
+            &[value.clone(), value],
+            &environment,
+            span,
+        )
+        .expect("ratified D8 EQUAL admitted")
+        .expect("D8 EQUAL executes");
+        assert_eq!(equal.as_predicate_bit(), Some(true));
+        assert!(invoke_domain_primitive(d3(0b001), &[], &environment, span).is_none());
+    }
+}
