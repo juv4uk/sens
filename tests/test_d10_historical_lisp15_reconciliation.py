@@ -112,7 +112,7 @@ class HistoricalLisp15ReconciliationTests(unittest.TestCase):
             MODULE.verify(self.review, self.foundation, current, history)
 
     def test_rejects_coordinate_or_ratification_in_transition(self):
-        current, history = synthetic_transition(self.inventory)
+        current, history = synthetic_transition(self.inventory, self.history)
         current["rows"][-1]["coordinate"] = "1111111111"
         history["transitions"][0]["resulting_inventory_blob_sha"] = MODULE.git_blob(current)
         with self.assertRaises(ValueError):
