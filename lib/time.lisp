@@ -54,7 +54,7 @@
          (00110000 observation)))
       ((00000010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-unix-time-observation)))))
-
+)
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
 ; the raw Unix observation above.
@@ -80,14 +80,14 @@
     (or
       (00011100 mode 4)
       (00011100 mode 5)))
-
+)
 
 (00001001 internet-time-stratum-valid?
   (00001000 (stratum)
     (and
       (00011011 stratum 0)
       (00011010 stratum 16)))
-
+)
 
 (00001001 internet-time-fields->observation
   (00001000 (host mode stratum ntp-seconds fraction)
@@ -108,7 +108,7 @@
           (00100111 (00000001 rejected) (00000001 invalid-response))))
       ((00000010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-response)))))
-
+)))
 
 ; Adapter for the raw host boundary. The host returns either:
 ;   (ntp-fields host mode stratum ntp-seconds fraction)
@@ -125,7 +125,7 @@
          (00000101 (00000110 (00000110 (00000110 (00000110 raw)))))
          (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 raw))))))))
       ((00000010 (00000001 ())) raw)))
-
+)
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
 ; query mechanism under the deliberately mechanical name `ntp-query-raw`.
@@ -146,7 +146,7 @@
            (00110000 observation)
            (00000101 (00000110 (00000110 (00000110 observation))))))
       ((00000010 (00000001 ())) observation)))
-
+))
 
 ; Nanoseconds are the one monotonic host observation. Milliseconds are only a
 ; coarser language-level view, so derive them instead of requiring a second
@@ -197,7 +197,7 @@
        (00100111 (00000001 detected) etc-timezone-value (00000001 etc-timezone)))
       ((00000010 (00000001 ()))
        (00100111 (00000001 unknown) (00000001 host-declaration-unavailable)))))
-
+)
 
 ; Adapt the mechanism-only host observation to public timezone meaning.
 (00001001 timezone-raw->observation
@@ -209,7 +209,7 @@
          (00110000 raw)))
       ((00000010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-timezone-observation)))))
-
+)
 
 (00001001 timezone-detect
   (00001000 ()
@@ -231,7 +231,7 @@
             (00100111 (00000001 timezone) name offset-seconds))))
       ((00000010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-name)))))
-
+))
 
 (00001001 timezone-name
   (00001000 (config)
