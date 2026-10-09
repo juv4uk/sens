@@ -687,7 +687,7 @@
       ((00011100 current (00000101 remaining))
        (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
       ((00000010 (00000001 ()))
-       (00011010 1 0)))))
+       (00000010 (00000001 (00000000)))))))
 
 (00001001 nonincreasing-from?
   (00001000 (current remaining)
@@ -699,7 +699,7 @@
       ((00011100 current (00000101 remaining))
        (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
       ((00000010 (00000001 ()))
-       (00011010 1 0)))))
+       (00000010 (00000001 (00000000)))))))
 
 (00001001 <=
   (00001000 (first . remaining)
