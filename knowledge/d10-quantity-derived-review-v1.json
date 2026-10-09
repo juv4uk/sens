@@ -1,0 +1,108 @@
+{
+  "schema": "sens-d10-quantity-derived-review/v1",
+  "status": "RESEARCH-UNRATIFIED-HOLD",
+  "owner_issues": [
+    "#4013",
+    "#4463",
+    "#4162"
+  ],
+  "intent": "Deduplicate domain-qualified language-visible scientific quantity operations against already selected D10 laws before any candidate promotion. A Lisp function definition is not automatically a new 10-bit resident.",
+  "snapshot": {
+    "selected_baseline": 625,
+    "remaining_baseline": 399,
+    "ratified_residents": 0,
+    "existing_semantic_inventory_mutated": false
+  },
+  "donors": [
+    {
+      "path": "lib/quantity.lisp",
+      "git_blob_sha1": "548bfc4092e8809a373d5397c6eafa884ac5ccef",
+      "role": "Lisp-owned finite quantity and dimension algebra"
+    },
+    {
+      "path": "lib/si.lisp",
+      "git_blob_sha1": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+      "role": "Seven exact BIPM SI defining constant records are DATA, not seven callable residents"
+    },
+    {
+      "path": "lib/translation.lisp",
+      "git_blob_sha1": "6c3118daba896c64255efbb93c926a58d2f19829",
+      "role": "Versioned translation/review protocol already substantially selected in D10"
+    }
+  ],
+  "selected_duplicates_verified_in_main": [
+    "SCIENCE-ADD-DIMENSION",
+    "SCIENCE-MERGE-DIMENSIONS",
+    "SCIENCE-NEGATE-DIMENSIONS",
+    "TRANSLATION-ENVELOPE-VALID?",
+    "TRANSLATION-REVIEW-CANDIDATE"
+  ],
+  "review_rows": [
+    {
+      "candidate": "UNIT-PRODUCT",
+      "source_path": "lib/quantity.lisp",
+      "line": 169,
+      "surface_uk": "добуток-одиниць",
+      "status": "HOLD-DERIVED-COMPOSITION",
+      "semantic_law": "construct new immutable unit by adding the exponent collections from two valid unit records",
+      "derivable_from": [
+        "SCIENCE-MERGE-DIMENSIONS"
+      ],
+      "falsifier": "metre^1 multiplied by metre^-1 yields dimensionless; result must not alter either source unit",
+      "distinct_new_meaning_unproven": true
+    },
+    {
+      "candidate": "UNIT-QUOTIENT",
+      "source_path": "lib/quantity.lisp",
+      "line": 176,
+      "surface_uk": "частка-одиниць",
+      "status": "HOLD-DERIVED-COMPOSITION",
+      "semantic_law": "construct a unit by merging left exponents with sign-negated right exponents",
+      "derivable_from": [
+        "SCIENCE-MERGE-DIMENSIONS",
+        "SCIENCE-NEGATE-DIMENSIONS"
+      ],
+      "falsifier": "(metre/second)*second yields metre dimensions; wrong unit schema must BLOCK, not silently use NIL",
+      "distinct_new_meaning_unproven": true
+    },
+    {
+      "candidate": "QUANTITY-PRODUCT",
+      "source_path": "lib/quantity.lisp",
+      "line": 183,
+      "surface_uk": "добуток-величин",
+      "status": "HOLD-DERIVED-COMPOSITION",
+      "semantic_law": "multiply exact numeric values then compose associated dimensions; preserve typed quantity result rather than bare scalar",
+      "derivable_from": [
+        "UNIT-PRODUCT",
+        "ratified exact numeric product"
+      ],
+      "falsifier": "(2 metres)*(3 seconds) yields numeric six with metre*second dimensions and does not mutate operands",
+      "distinct_new_meaning_unproven": true
+    },
+    {
+      "candidate": "QUANTITY-QUOTIENT",
+      "source_path": "lib/quantity.lisp",
+      "line": 189,
+      "surface_uk": "частка-величин",
+      "status": "HOLD-DERIVED-COMPOSITION",
+      "semantic_law": "divide exact numeric values then compose left unit with reciprocal right unit, preserving quantity type",
+      "derivable_from": [
+        "UNIT-QUOTIENT",
+        "ratified exact numeric quotient"
+      ],
+      "falsifier": "(6 metre*second)/(3 second) yields numeric two metres; division by zero must retain existing numeric error law",
+      "distinct_new_meaning_unproven": true
+    }
+  ],
+  "anti_junk_drawer_rules": {
+    "d2_sole_language_structure_authority": true,
+    "language_control_from_d10_forbidden": true,
+    "historical_source_8_bit_has_no_d10_coordinate_authority": true,
+    "candidate_promoted_without_irreducibility_oracle": false,
+    "no_new_ten_bit_coordinates": true,
+    "no_physical_sens_publication": true,
+    "require_owner_approval": true,
+    "require_observable_positive_and_negative_witness": true
+  },
+  "conclusion": "All four operations already compose existing Lisp-owned arithmetic/dimension laws. HOLD until a concrete independent observer demonstrates irreducible, substrate-independent behavior absent from D1-D9 and 625 already selected D10 meanings. Preserve all 625/1024 inventory numbers."
+}
