@@ -24,7 +24,7 @@ from pathlib import Path
 CONTRACT_VERSION = "11.8"
 SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
 REPEAT_LADDER = (1, 10, 100)
-CANDIDATES = ("english-surface", "canonical-d1d8")
+CANDIDATES = ("ukrainian-surface", "canonical-d1d8")
 IREF_RE = re.compile(r"I\s+refs:\s*([\d,]+)")
 CONTRACT_RE = re.compile(
     r"\(\(major\s+\.\s+#d(?P<major>[0-9]+)\)\s+\(minor\s+\.\s+(?P<minor>[0-9]+)\)"
@@ -125,7 +125,7 @@ def load_ready_workloads(path: Path) -> list[dict[str, object]]:
 
 
 def source_for(workload: dict[str, object], candidate: str) -> str:
-    key = "english_source" if candidate == "english-surface" else "canonical_source"
+    key = "ukrainian_source" if candidate == "ukrainian-surface" else "canonical_source"
     value = workload.get(key)
     if not isinstance(value, str) or not value:
         raise ValueError(f"{workload.get('id')}: missing {key}")
@@ -154,10 +154,10 @@ def preflight(
             "output": decode_hex(fields["OUTPUT_HEX"]),
         }
 
-    left = observed["english-surface"]
+    left = observed["ukrainian-surface"]
     right = observed["canonical-d1d8"]
     if left != right:
-        raise ValueError(f"{wid}: paired semantic preflight mismatch: {observed!r}")
+        raise ValueError(f"{wid}: paired Ukrainian/canonical semantic preflight mismatch: {observed!r}")
 
     expected_value = workload.get("expected_value")
     expected_output = workload.get("expected_output")

@@ -1,4 +1,4 @@
-# English surface vs canonical D1-D8 — historical/current-transition CPU lane
+# Ukrainian surface vs canonical D1-D8 — historical/current-transition CPU lane
 
 > **Authority notice:** the directory name and D1–D8 scope are preserved for
 > provenance. Current language authority is Contract 11.8 / D1–D9. This harness
@@ -13,7 +13,7 @@ This directory is the CPU evidence lane for #3088 / #3113.
 Its job is deliberately narrow:
 
 ```text
-English surface
+Ukrainian surface
   -> parse
   -> lower
   -> DomainIdentity
@@ -91,7 +91,7 @@ and hashes that exact executable into every evidence row.
 Current phase names follow the #3116 evidence schema:
 
 - `session` — fresh `Session` plus current Core load;
-- `ingest` — English parse or canonical decode;
+- `ingest` — Ukrainian parse or canonical decode;
 - `lower` — semantic lowering only;
 - `execute` — execute already-lowered expressions in a prepared session;
 - `full` — session + ingest + lower + execute;
@@ -107,7 +107,7 @@ therefore must not be confused with the internal phase timer.
 
 It does **not** publish:
 
-- an English-vs-binary ratio;
+- an Ukrainian-vs-binary ratio;
 - a winner;
 - a weighted score;
 - Cachegrind phase I-refs;
