@@ -77,8 +77,11 @@
 (00001001 max2
   (00001000 (a b)
     (00000111
-      ((00011010 a b) 1 b)
-      ((00011010 a b) 0 a))))
+      ((00011010 a b) b)
+      ((00100010
+         (00011010 a b)
+         (00000010 (00000001 (x))))
+       a))))
 
 ; Rebuilds a node with a recomputed height from its (possibly new)
 ; children — every insert/rotation goes through this, never hand-tracks
