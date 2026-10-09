@@ -239,18 +239,48 @@ pub fn decode_ternary_words(
     Ok(words)
 }
 
+/// Write exact-width bits directly into one destination buffer.
+///
+/// Surface projection only: a D1 `1`, D2 `01`, and D3 `001`
+/// must retain different widths even when their numeric payload is equal.
+/// No per-word `String`, `Vec<String>`, decimal ID, or semantic lookup.
+#[inline]
+fn append_visible_binary_word(out: &mut String, word: BinarySourceWord) {
+    let bits = word.packed_bits();
+    for shift in (0..word.width()).rev() {
+        out.push(if (bits >> shift) & 1 == 0 { '0' } else { '1' });
+    }
+}
+
 /// Вертикальний вигляд — тільки для людини, newline не є
 /// тритом і не записується в сам .sens файл.
+/// One allocation for the output string rather than one per domain word.
 pub fn render_ternary_words_vertical(words: &[BinarySourceWord]) -> String {
-    words.iter().map(|word| format!("{word}\n")).collect()
+    let capacity: usize = words.iter().map(|word| word.width() + 1).sum();
+    let mut output = String::with_capacity(capacity);
+    for word in words {
+        append_visible_binary_word(&mut output, *word);
+        output.push('\n');
+    }
+    output
 }
 
 /// Звичайне людське представлення фізичного .sens: транспортний трит 2
 /// перетворюється тільки на пробіл МІЖ словами. Кінцевий
 /// padding ніколи не потрапляє у відкритий для людини текст.
 /// Це НЕ фізичний вміст файла: не записувати цей рядок у .sens.
+/// The decoded exact-width words are rendered into one preallocated buffer.
 pub fn render_ternary_words_spaced(words: &[BinarySourceWord]) -> String {
-    words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")
+    let capacity: usize = words.iter().map(|word| word.width()).sum::<usize>()
+        + words.len().saturating_sub(1);
+    let mut output = String::with_capacity(capacity);
+    for (index, word) in words.iter().enumerate() {
+        if index != 0 {
+            output.push(' ');
+        }
+        append_visible_binary_word(&mut output, *word);
+    }
+    output
 }
 
 /// Відкрити .sens у вигляді вихідних двійкових слів, розділених
@@ -342,6 +372,24 @@ mod tests {
         assert_eq!(measure.encoded_trits, 16);
         assert_eq!(measure.tail_trits, 4);
         assert_eq!(measure.physical_bits, 32);
+    }
+
+    #[test]
+    fn visible_renderers_match_the_independent_display_for_every_width_and_payload() {
+        for width in 1..=9 {
+            for value in 0..(1usize << width) {
+                let source = format!("{value:0width$b}");
+                let typed = words(&source);
+                assert_eq!(render_ternary_words_spaced(&typed), source);
+                assert_eq!(render_ternary_words_vertical(&typed), format!("{source}\n"));
+            }
+        }
+        let mixed = words("1 01 001 0001 00001 000001 0000001 00000001 000000001");
+        let baseline = mixed.iter().map(ToString::to_string).collect::<Vec<_>>();
+        assert_eq!(render_ternary_words_spaced(&mixed), baseline.join(" "));
+        assert_eq!(render_ternary_words_vertical(&mixed), format!("{}\n", baseline.join("\n")));
+        assert!(render_ternary_words_spaced(&[]).is_empty());
+        assert!(render_ternary_words_vertical(&[]).is_empty());
     }
 
     #[test]
