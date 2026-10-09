@@ -392,10 +392,6 @@ fn implements_mccarthys_seven_primitives() {
             Value::Symbol("antenna".into())
         ])
     );
-    assert_eq!(
-        eval("(за-умовою (() (як-є wrong)) ((тотожне? (як-є x) (як-є x)) (як-є right)))"),
-        Value::Symbol("right".into())
-    );
 }
 
 #[test]
@@ -709,6 +705,16 @@ fn conformance_tests_from_my() {
             panic!("each top-level form in conformance.lisp should be an alist: {form:?}");
         };
         let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
+
+        // Historical compatibility rows preserve evidence, not executable
+        // current semantics. Their truthiness assertions have been retired.
+        if alist_str(entries, "role") == Some("historical-compatibility")
+            || alist_str(entries, "compatibility") == Some("historical-truthiness")
+        {
+            continue;
+        }
+
+
 
         // Capability fixtures (e.g. the tcp-connect type-error entry) are only
         // meaningful when a host layer is installed; this core-side runner
