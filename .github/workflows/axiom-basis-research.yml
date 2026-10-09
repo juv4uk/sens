@@ -1,0 +1,28 @@
+name: Axiom basis research oracle
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/axiom-basis-minimality/**"
+      - "benchmarks/README.md"
+      - ".github/workflows/axiom-basis-research.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/axiom-basis-minimality/**"
+      - ".github/workflows/axiom-basis-research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduce exact D5 bounded-rational closure and SI dependency evidence
+        run: python3 benchmarks/axiom-basis-minimality/probe.py > "$RUNNER_TEMP/axiom-basis.json"
+      - name: Verify generated benchmark index is reproducible
+        run: python3 scripts/benchmark_registry.py --check
