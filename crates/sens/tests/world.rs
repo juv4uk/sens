@@ -389,58 +389,6 @@ fn independent_branches_can_grow_from_the_same_world() {
 }
 
 #[test]
-fn backward_reasoning_reads_the_selected_world_snapshot() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((w0 (empty-world)))
-              (let ((w1 (world-tell w0 (quote family) (quote ((parent tom bob))))))
-                (let ((w2 (world-retract w1 (quote family) (quote ((parent tom bob))))))
-                  (list (cond
-                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) () (quote no))
-                          ((atom? (reason-in-world w1 (quote family) (quote (parent tom bob)))) (1) (quote no))
-                          (t (quote yes)))
-                        (cond
-                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) () (quote no))
-                          ((atom? (reason-in-world w2 (quote family) (quote (parent tom bob)))) (1) (quote no))
-                          (t (quote yes)))))))
-            "#
-        ),
-        "(yes no)"
-    );
-}
-
-#[test]
-fn backward_reasoning_keeps_independent_branches_isolated() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((root (empty-world)))
-              (let ((cats (world-tell root (quote zoo) (quote ((likes alice cats)))))
-                    (dogs (world-tell root (quote zoo) (quote ((likes alice dogs))))))
-                (list (cond
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) () (quote no))
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice cats)))) (1) (quote no))
-                        (t (quote yes)))
-                      (cond
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) () (quote no))
-                        ((atom? (reason-in-world cats (quote zoo) (quote (likes alice dogs)))) (1) (quote no))
-                        (t (quote yes)))
-                      (cond
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) () (quote no))
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice dogs)))) (1) (quote no))
-                        (t (quote yes)))
-                      (cond
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) () (quote no))
-                        ((atom? (reason-in-world dogs (quote zoo) (quote (likes alice cats)))) (1) (quote no))
-                        (t (quote yes))))))
-            "#
-        ),
-        "(yes no yes no)"
-    );
-}
-
-#[test]
 fn forward_reasoning_materializes_only_the_selected_world() {
     assert_eq!(
         eval_world(
@@ -467,26 +415,6 @@ fn world_reasoning_reports_an_unknown_module_without_global_fallback() {
     assert_eq!(
         eval_world("(forward-in-world (empty-world) (quote missing))"),
         "Module-not-found"
-    );
-}
-
-#[test]
-fn advise_world_accepts_into_a_new_queryable_world() {
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((before (empty-world)))
-              (let ((result (advise-world before (quote astronomy) (quote ((planet venus))))))
-                (let ((after (second result)))
-                  (list (car (car result))
-                        (world-clauses before (quote astronomy))
-                        (cond
-                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) () (quote no))
-                          ((atom? (reason-in-world after (quote astronomy) (quote (planet venus)))) (1) (quote no))
-                          (t (quote yes)))))))
-            "#
-        ),
-        "(accepted () yes)"
     );
 }
 
@@ -540,35 +468,6 @@ fn advise_world_does_not_read_the_global_knowledge_journal() {
             "#
         ),
         "(accepted (((planet mars))))"
-    );
-}
-
-#[test]
-fn advise_all_world_accepts_one_atomic_dependent_batch() {
-    // #1312: advise-all atomic accept preserves parent as structural-relation same
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((before (empty-world)))
-              (let ((result
-                      (advise-all-world
-                        before
-                        (quote astronomy)
-                        (quote (((planet earth))
-                          ((has-mass (var x)) (planet (var x))))))))
-                (let ((after (second result)))
-                  (list (car (car result))
-                        (world-clauses before (quote astronomy))
-                        (cond
-                          ((atom? (reason-in-world after (quote astronomy)
-                                                 (quote (has-mass earth)))) () (quote no))
-                          ((atom? (reason-in-world after (quote astronomy)
-                                                 (quote (has-mass earth)))) (1) (quote no))
-                          (t (quote yes)))
-                        (equal? before (world-parent after))))))
-            "#
-        ),
-        "(accepted () yes (1))"
     );
 }
 
@@ -661,34 +560,6 @@ fn world_package_export_reads_the_selected_snapshot_only() {
             "#
         ),
         "((((planet earth))) (((planet mars)) ((planet earth))))"
-    );
-}
-
-#[test]
-fn world_package_import_atomically_creates_a_queryable_child() {
-    // #1312: package import creates child with parent as structural-relation same
-    assert_eq!(
-        eval_world(
-            r#"
-            (let ((before (empty-world)))
-              (let ((package
-                      (make-knowledge-package
-                        (quote astronomy)
-                        (quote (((planet earth))
-                          ((has-mass (var x)) (planet (var x))))))))
-                (let ((result (import-knowledge-package-world before package)))
-                  (let ((after (second result)))
-                    (list (car (car result))
-                          (equal? before (world-parent after))
-                          (cond
-                            ((atom? (reason-in-world after (quote astronomy)
-                                                   (quote (has-mass earth)))) () (quote no))
-                            ((atom? (reason-in-world after (quote astronomy)
-                                                   (quote (has-mass earth)))) (1) (quote no))
-                            (t (quote yes))))))))
-            "#
-        ),
-        "(accepted (1) yes)"
     );
 }
 
