@@ -138,9 +138,10 @@ def guard(proposal, ledger_text, inventory, foundation):
     row = matching[0]
     assert row[3] == EXPECTED_NAME and row[5] == "D10"
     assert row[1] == proposal["surface_uk"] and row[2] == proposal["surface_ukr"]
-    assert "10.1016/0004-3702(80)90011-9" in row[6]
-    assert "SEMANTIC-REVIEW-PENDING" in row[7]
-    assert "CORE-VS-LIBRARY-HOLD" in row[8]
+    assert row[6] == ("juv4uk/sens@9e79f08935dd9d92c23047a4b2b89b10a76ea32f:docs/mccarthy-machine-map.md:89")
+    assert row[7] == (f"D1-D9@{proposal['snapshot']['foundation_blob']}=NO-MATCH;"
+                      f"D10@{proposal['snapshot']['d10_inventory_blob_at_review']}=NO-MATCH")
+    assert row[8].startswith("UNIVERSAL-BORDER: ") and "Core-vs-library HOLD" in row[8]
     assert row[9:] == ["NOT-A-MIGRATION-BLOCK","pending-review","0"]
     assert len(proposal["nearby_existing"]["D9"]) >= 3
     return True
