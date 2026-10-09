@@ -137,4 +137,4 @@ pub(super) const D7_DISPLAY_ROWS: &[D7DisplayRow] = &[
     D7DisplayRow { bits: 0b1111101, uk: "крапка-з-комою", sa: "lekha-ardha-virāma" },
     D7DisplayRow { bits: 0b1111110, uk: "решітка", sa: "lekha-saṅkhyā-cihna" },
     D7DisplayRow { bits: 0b1111111, uk: "равлик", sa: "lekha-sthāna-cihna" },
-]
+];
