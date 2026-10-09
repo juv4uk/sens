@@ -3,6 +3,7 @@
 from __future__ import annotations
 import copy,json,re,subprocess,sys
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth, read as read_growth, BASE as GROWTH_BASE
 ROOT=Path(__file__).resolve().parents[1]
 ART=ROOT/"knowledge/early-lisp-graph-historical-evidence-v1.json"
 FOUND=ROOT/"knowledge/d1-d9-foundation.json"
@@ -31,7 +32,11 @@ def validate(d,f,d10,d3):
  if d.get("status")!="RESEARCH-ARCHIVE-NOT-CANONICAL-SEMANTIC-AUTHORITY": errors.append("status must remain archive-only")
  snap=d.get("current_authority_snapshot",{})
  for key,path in (("d1_d9_foundation_blob_sha",FOUND),("d10_inventory_blob_sha",D10),("d3_table_blob_sha",D3)):
-  if snap.get(key)!=sha(path): errors.append("stale authority hash: "+key)
+  if key == "d10_inventory_blob_sha":
+   if snap.get(key) != read_growth(GROWTH_BASE)["origin_inventory_git_blob"]: errors.append("historical D10 origin hash drift")
+   try: check_growth(d10)
+   except AssertionError: errors.append("current D10 mutated preserved historical 625 laws")
+  elif snap.get(key)!=sha(path): errors.append("stale authority hash: "+key)
  if d.get("current_d3_crosswalk")!=expected_crosswalk(): errors.append("D3 crosswalk mismatch")
  if d.get("current_d3_crosswalk")!=expected_crosswalk(): return errors
  for code,name in [("000","()"),("001","QUOTE"),("010","ATOM"),("011","CDR"),("100","CAR"),("101","EQ"),("110","COND"),("111","CONS")]:

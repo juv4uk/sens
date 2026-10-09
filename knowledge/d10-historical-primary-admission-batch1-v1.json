@@ -1,0 +1,93 @@
+{
+  "schema": "d10-historical-primary-admission-batch1/v1",
+  "date": "2026-10-09",
+  "status": "SELECTED-RESEARCH-UNPLACED-NOT-RATIFIED",
+  "authority": "#4013 / #4463 / user instruction to begin D10 filling",
+  "frozen_base_git_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+  "original_selected": 625,
+  "added_selected": 2,
+  "new_selected": 627,
+  "ratified_added": 0,
+  "coordinate_added": 0,
+  "source_research": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+  "rows": [
+    {
+      "stable_id": "d10.hist.primary.dpb.20261009",
+      "semantic_name": "DPB",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-PRIMARY-LAW-TRANCHE-20261009",
+      "relation_class": "EXACT-INTEGER-BIT-FIELD-REPLACEMENT",
+      "behavior": "Given integer newbyte and a bit-field (width,offset) and an integer target, replace only the specified target bits with the low width bits of newbyte; width zero preserves target.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4841",
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json:HIST-20261009-03",
+        "https://tumbleweed.nu/r/lm-3/uv/chinual.html"
+      ],
+      "surface_uk": "вкласти-біти",
+      "surface_ukr": "замінити-бітове-поле-цілого",
+      "arity": 3,
+      "argument_shape": "(integer,byte-specifier,integer) -> integer",
+      "positive_witnesses": [
+        "DPB(1,BYTE(1,10),0)=1024",
+        "DPB(-2,BYTE(2,10),0)=2048"
+      ],
+      "falsifier_spec": "A zero-width byte always leaves the target unchanged; bit positions outside field may never change.",
+      "dedup_check": "No currently selected DPB; LDB/MASK-FIELD extract/observe rather than replace target fields.",
+      "nearby_existing": [
+        "D10 LDB",
+        "D10 MASK-FIELD",
+        "D8 LOGBITP",
+        "D8 ARITHMETIC-SHIFT"
+      ],
+      "source_section": "7.9 Byte Manipulation Functions — DPB",
+      "primary_url": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+      "owner_question": "CORE-TYPED-BIT-FIELD-REVIEW",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hist.primary.array-displacement.20261009",
+      "semantic_name": "ARRAY-DISPLACEMENT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-PRIMARY-LAW-TRANCHE-20261009",
+      "relation_class": "ARRAY-VIEW-ALIAS-INTROSPECTION",
+      "behavior": "Return exactly two values (direct backing-array, offset) for explicitly displaced array; for ordinary non-displaced array return (NIL,0), and view shares actual element storage.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4841",
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json:HIST-20261009-01",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html"
+      ],
+      "surface_uk": "основа-зсув-масиву",
+      "surface_ukr": "отримати-масив-основу-й-зсув",
+      "arity": 1,
+      "argument_shape": "(array) -> two values (array-or-NIL,nonnegative-offset)",
+      "positive_witnesses": [
+        "Displace B onto A at offset 1: ARRAY-DISPLACEMENT(B)=(A,1)",
+        "Write B[0]=7 then read A[1]=7"
+      ],
+      "falsifier_spec": "Copying rather than aliasing, or returning transitive root rather than immediate backing array, violates the law.",
+      "dedup_check": "Distinct from MAKE-ARRAY/REARRAY/AREF and VALUES: no selected name returns view origin and offset.",
+      "nearby_existing": [
+        "D10 MAKE-ARRAY",
+        "D10 REARRAY",
+        "D8 AREF",
+        "D8 VALUES"
+      ],
+      "source_section": "Function ARRAY-DISPLACEMENT",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html",
+      "owner_question": "CORE-VIEW-ALIASING-REVIEW",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    }
+  ]
+}

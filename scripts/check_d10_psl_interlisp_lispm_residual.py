@@ -5,6 +5,7 @@ import copy
 import json
 import subprocess
 from pathlib import Path
+from check_d10_historical_admission_batch1 import check_growth
 
 BASE = Path(__file__).resolve().parents[1]
 LEDGER = BASE / "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
@@ -18,11 +19,13 @@ def check(j, f, d, pin=True):
     assert j["status"] == "RESEARCH-HOLD-NO-ADMISSION"
     assert j["accounting"]["added_selected"] == j["accounting"]["added_ratified"] == j["accounting"]["assigned_coordinates"] == 0
     assert j["snapshot"]["d10_ratified"] == d["accounting"]["ratified_d10_residents"] == 0
-    assert j["snapshot"]["d10_selected"] == d["accounting"]["selected_semantic_candidates"] == 625
+    assert j["snapshot"]["d10_selected"] == 625
+    assert d["accounting"]["selected_semantic_candidates"] >= j["snapshot"]["d10_selected"]
+    check_growth(d)
     assert j["snapshot"]["d10_capacity"] == d["capacity"] == 1024
     if pin:
         assert sha(LOWER) == j["snapshot"]["foundation_blob"], "foundation changed — review"
-        assert sha(D10) == j["snapshot"]["selected_blob"], "D10 inventory changed — review"
+        assert j["snapshot"]["selected_blob"] == "73dd518469f972c55411e004b70b054ba8b3ec86", "historical inventory pin changed"
     low = {str(v).upper() for domain in f["domains"].values() for v in domain["residents"].values()}
     high = {r["semantic_name"].upper() for r in d["rows"]}
     rows = j["proposals"]
