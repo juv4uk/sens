@@ -1,0 +1,19 @@
+name: Canon V2 targeted witness regression
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/tests/canon_laws_v2_contract.rs'
+      - 'tests/fixtures/witness-runner.lisp'
+      - 'tests/fixtures/canon-laws-v2-witness.lisp'
+      - 'lib/canon.lisp'
+      - '.github/workflows/canon-v2-targeted.yml'
+  workflow_dispatch:
+jobs:
+  canon-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact Canon witness regression
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
