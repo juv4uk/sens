@@ -36,6 +36,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
+      - name: Require GitHub-hosted CUDA device
+        run: |
+          test "${RUNNER_ENVIRONMENT:-}" = github-hosted || { echo "::error::Local runner forbidden"; exit 1; }
+          command -v nvidia-smi >/dev/null 2>&1 || { echo "::error::Hosted GPU larger runner required for parity"; exit 1; }
+          nvidia-smi
+
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Current GPU oracle fixtures match the CPU evaluator
@@ -43,7 +49,7 @@ jobs:
 
   gpu-worker-parity:
     # Лише GPU-runner: ніколи не падаємо назад на CPU-runner.
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       CML_GPU_WORKER_SOCKET: /run/cml-gpu-worker/worker.sock
