@@ -23,10 +23,10 @@ ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "lib/machine/encoding/admitted-iclass-index.lisp"
 PROJECTION = ROOT / "lib/machine/encoding/admission-iclass-projection.lisp"
 
-# current rows use the exact D8 record head; archived snapshots used the
+# The generated pinned index is a data projection, not executable Lisp.
+# Current rows use the exact D8 record head; archived snapshots used the
 # explicit pair tag. Accept both data-record envelopes without treating
 # either head as callable semantic authority.
-# The generated pinned index is a data projection, not executable Lisp.
 PAIR_RE = re.compile(r'^\s*\((?:pair|00101110)\s+([^\s()]+)\s+"([^"]+)"\)\s*$')
 PARTIAL_RE = re.compile(
     r'^\s*\(partial\s+([^\s()]+)\s+"([^"]+)"\s+\(heads\s+([^)]*)\)\)\s*$'
