@@ -250,7 +250,21 @@ pub fn render_ternary_words_vertical(words: &[BinarySourceWord]) -> String {
 /// padding ніколи не потрапляє у відкритий для людини текст.
 /// Це НЕ фізичний вміст файла: не записувати цей рядок у .sens.
 pub fn render_ternary_words_spaced(words: &[BinarySourceWord]) -> String {
-    words.iter().map(ToString::to_string).collect::<Vec<_>>().join(" ")
+    // Exact widths and payloads are already carried by BinarySourceWord.
+    // The visible string is a projection only: allocate one buffer, not a
+    // String per domain word plus a second Vec for joining them.
+    let bits = words.iter().map(BinarySourceWord::width).sum::<usize>();
+    let mut visible = String::with_capacity(bits + words.len().saturating_sub(1));
+    for (index, word) in words.iter().enumerate() {
+        if index != 0 {
+            visible.push(' ');
+        }
+        let payload = word.packed_bits();
+        for shift in (0..word.width()).rev() {
+            visible.push(if (payload >> shift) & 1 == 1 { '1' } else { '0' });
+        }
+    }
+    visible
 }
 
 /// Відкрити .sens у вигляді вихідних двійкових слів, розділених
