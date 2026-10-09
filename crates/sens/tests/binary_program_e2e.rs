@@ -198,3 +198,24 @@ fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
     valid.push(242u8);
     assert!(decode_ternary_program(&valid).is_err(), "noncanonical trailer must fail closed");
 }
+
+
+#[test]
+fn tracked_d3_cond_is_a_real_physical_t5_file_with_exact_byte_parity() {
+    const PHYSICAL: &[u8] =
+        include_bytes!("../../../examples/binary/d3-cond-program.sens");
+    // A physical .sens file contains 5-trit packed bytes, not printable bit text.
+    let from_source = encode_binary_projection_ternary(D3_COND_PROGRAM)
+        .expect("ratified D2/D3 binary source must encode canonically");
+    assert_eq!(PHYSICAL, from_source.as_slice(), "tracked T5 bytes drifted");
+
+    let expected = D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" ");
+    let opened = open_ternary_program(PHYSICAL).expect("real T5 must reopen");
+    assert_eq!(opened, expected, "exact-width D3 source must survive T5");
+    assert_eq!(encode_binary_projection_ternary(&opened).unwrap(), PHYSICAL);
+
+    // A second all-padding physical byte must not silently become source.
+    let mut corrupt = PHYSICAL.to_vec();
+    corrupt.push(0xf2);
+    assert!(decode_ternary_program(&corrupt).is_err(), "fail closed on extra tail");
+}
