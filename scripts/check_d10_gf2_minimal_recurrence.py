@@ -95,7 +95,13 @@ def metadata(dossier, lower, upper):
     lower_names = {str(v).upper() for d in lower["domains"].values() for v in d["residents"].values()}
     upper_names = {r["semantic_name"].upper() for r in upper["rows"]}
     assert dossier["candidate"]["semantic_name"] not in lower_names
-    assert dossier["candidate"]["semantic_name"] not in upper_names
+    if dossier["candidate"]["semantic_name"] in upper_names:
+        current = next(r for r in upper["rows"] if r["semantic_name"] == dossier["candidate"]["semantic_name"])
+        assert current["source_path"] == "knowledge/d10-gf2-minimal-recurrence-research-v1.json"
+        assert current["source_class"] == "GF2-FINITE-RECURRENCE-HOBBY-20261009"
+        assert current["coordinate"] is None and current["ratified_resident"] is False
+        assert current["status"] == "SELECTED-RESEARCH-CANDIDATE"
+        assert current["surface_uk"] == dossier["candidate"]["surface_uk"]
     # A recent selection by another agent MUST make this check fail.
     assert "PRIMITIVE-BINARY-WORD-ROOT" in upper_names
     assert "GRAY-ENCODE-WORD" in upper_names
