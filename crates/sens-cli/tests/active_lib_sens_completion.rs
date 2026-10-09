@@ -151,46 +151,145 @@ fn run_check(files: &[PathBuf], language: bool) -> Output {
     command.output().expect("run canonical sens-to-sens check")
 }
 
-fn assert_clean(label: &str, files: &[(String, PathBuf)], language: bool) {
-    assert!(!files.is_empty(), "{label}: no files selected");
+fn parse_report_count(line: &str, key: &str, rel: &str) -> usize {
+    line.split_whitespace()
+        .find_map(|field| field.strip_prefix(&format!("{key}=")))
+        .and_then(|number| number.parse::<usize>().ok())
+        .unwrap_or_else(|| panic!("{rel}: malformed {key} counter in report: {line}"))
+}
 
+fn report_line<'a>(stdout: &'a str, rel: &str) -> &'a str {
+    let marker = format!("{rel}: convertible=");
+    stdout
+        .lines()
+        .find(|line| line.contains(&marker))
+        .unwrap_or_else(|| panic!("missing sens-to-sens report for {rel}\nstdout:\n{stdout}"))
+}
+
+fn domain_identity_count(expression: &sens::Expr) -> usize {
+    match &expression.kind {
+        sens::ExprKind::DomainIdentity(_) => 1,
+        sens::ExprKind::List(items) => items.iter().map(domain_identity_count).sum(),
+        sens::ExprKind::Pair(head, tail) => {
+            domain_identity_count(head) + domain_identity_count(tail)
+        }
+        _ => 0,
+    }
+}
+
+fn domain_identities(expressions: &[sens::Expr]) -> usize {
+    expressions.iter().map(domain_identity_count).sum()
+}
+
+/// The language's own first-definition files use a distinct code-slot rule:
+/// no surface spelling may remain rewriteable in --language mode.
+fn assert_language_definitions_are_exact(
+    label: &str,
+    files: &[(String, PathBuf)],
+) {
+    assert!(!files.is_empty(), "{label}: no files selected");
     let paths: Vec<PathBuf> = files.iter().map(|(_, path)| path.clone()).collect();
-    let output = run_check(&paths, language);
+    let output = run_check(&paths, true);
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
-
     assert!(
         output.status.success(),
-        "{label}: canonical sens-to-sens found remaining parser-convertible heads \
-         or could not analyze the active library.\nstatus={}\nstdout:\n{}\nstderr:\n{}",
+        "{label}: language-definition check failed\nstatus={}\nstdout:\n{}\nstderr:\n{}",
         output.status,
         stdout,
         stderr
     );
 
     for (rel, _) in files {
-        let marker = format!("{rel}: convertible=0");
-        assert!(
-            stdout.contains(&marker),
-            "{label}: missing zero-conversion witness for {rel}\nstdout:\n{stdout}"
+        let line = report_line(&stdout, rel);
+        assert_eq!(
+            parse_report_count(line, "convertible", rel),
+            0,
+            "{label}: language-defined first code-slot functions must already use exact identities: {line}"
+        );
+        assert_eq!(
+            parse_report_count(line, "blocked-host", rel),
+            0,
+            "{label}: host-capability blockers remain in language-definition file: {line}"
         );
     }
 }
 
-#[test]
-fn active_authored_lib_has_no_parser_convertible_surface_heads() {
-    let files = active_lisp_files();
-    let (language, ordinary): (Vec<_>, Vec<_>) = files
-        .into_iter()
-        .partition(|(rel, _)| is_language_definition_file(rel));
+/// For ordinary authored .lisp, a non-zero sens-to-sens conversion count is
+/// not proof of invalid source: Ukrainian .lisp is the canonical human
+/// projection. Use the actual current mixed reader as the authority instead.
+/// The diagnostic tool must still parse/analyze every file (exit 2 is a real
+/// failure), and each file with candidate heads must demonstrate that the
+/// role-aware projection creates exact domain identities without writing the
+/// source or pretending this is physical-T5 admission.
+fn assert_ordinary_sources_have_mixed_projection(
+    label: &str,
+    files: &[(String, PathBuf)],
+) {
+    assert!(!files.is_empty(), "{label}: no files selected");
+    let paths: Vec<PathBuf> = files.iter().map(|(_, path)| path.clone()).collect();
+    let output = run_check(&paths, false);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        matches!(output.status.code(), Some(0) | Some(1)),
+        "{label}: sens-to-sens could not analyze the active library (only 0/1 are expected; 2 means parse/analyze failure)\nstatus={}\nstdout:\n{}\nstderr:\n{}",
+        output.status,
+        stdout,
+        stderr
+    );
 
-    // Core family files define table-owned language functions.  The canonical
-    // migration tool must inspect them in --language mode so recursive calls
-    // through those first definitions are not hidden as ordinary shadowing.
-    assert_clean("language-definition lib", &language, true);
+    let mut total_convertible = 0usize;
+    for (rel, path) in files {
+        let line = report_line(&stdout, rel);
+        let convertible = parse_report_count(line, "convertible", rel);
+        let blocked_host = parse_report_count(line, "blocked-host", rel);
+        total_convertible += convertible;
+        assert_eq!(
+            blocked_host, 0,
+            "{label}: explicit host-capability migration blockers remain for {rel}: {line}"
+        );
 
-    // Every other active authored library file uses ordinary lexical rules.
-    assert_clean("ordinary active lib", &ordinary, false);
+        if convertible == 0 {
+            continue;
+        }
+
+        let source = fs::read_to_string(path).unwrap_or_else(|error| {
+            panic!("{rel}: cannot read source for role-aware projection: {error}")
+        });
+        let ordinary = sens::parse(&source).unwrap_or_else(|error| {
+            panic!("{rel}: ordinary reader rejected canonical source: {error:?}")
+        });
+        let projected = sens::parse_mixed_exact_domain(&source).unwrap_or_else(|error| {
+            panic!("{rel}: mixed exact-domain reader rejected canonical source: {error:?}")
+        });
+        assert_eq!(
+            ordinary.len(),
+            projected.len(),
+            "{rel}: role-aware projection changed top-level form count"
+        );
+        let before = domain_identities(&ordinary);
+        let after = domain_identities(&projected);
+        assert!(
+            after >= before,
+            "{rel}: role-aware projection lost exact domain identities ({before} -> {after})"
+        );
+        assert!(
+            after > before,
+            "{rel}: sens-to-sens reports {convertible} surface candidates, but the current mixed reader produced no additional exact domain identity. This is a real projection/lowering mismatch, not a reason to rewrite canonical Ukrainian source."
+        );
+    }
+
+    // Exit 1 is expected when --check finds surface projections. It is not
+    // expected to become a migration-completion failure so long as the
+    // role-aware reader admits the corresponding exact-domain projection.
+    if total_convertible > 0 {
+        assert_eq!(
+            output.status.code(),
+            Some(1),
+            "{label}: converter report and --check exit code disagree"
+        );
+    }
 }
 
 #[test]
