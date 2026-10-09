@@ -9,6 +9,7 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/src/bin/sens-to-sens.rs"
       - "crates/sens/tests/english_names_in_code.rs"
+      - "crates/sens/tests/post_d4_return_parenthood.rs"
       - "crates/sens-cli/src/bin/sens-to-sens.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   push:
@@ -20,6 +21,7 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/src/bin/sens-to-sens.rs"
       - "crates/sens/tests/english_names_in_code.rs"
+      - "crates/sens/tests/post_d4_return_parenthood.rs"
       - "crates/sens-cli/src/bin/sens-to-sens.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   workflow_dispatch:
